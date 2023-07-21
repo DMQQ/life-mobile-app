@@ -1,12 +1,25 @@
-import { Dimensions } from 'react-native';
+import { Dimensions } from "react-native";
 
-const width = Dimensions.get('window').width;
-const height = Dimensions.get('window').height;
+const window = Dimensions.get("window");
+
+const screen = Dimensions.get("screen");
+
+const spacingTypes = {
+  xs: 4,
+  sm: 8,
+  md: 16,
+  lg: 24,
+  xl: 32,
+  xxl: 40,
+};
 
 export default {
-  window: {
-    width,
-    height,
-  },
-  isSmallDevice: width < 375,
+  window,
+  screen,
+
+  spacing: (s: keyof typeof spacingTypes) => spacingTypes[s],
+
+  padding: 10,
+
+  isSmallDevice: screen.width < 375,
 };
