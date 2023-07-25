@@ -29,6 +29,11 @@ export const userSlice = createSlice({
       state.isLoading = false;
       state.token = "";
     },
+
+    notSigned(state) {
+      state.isAuthenticated = false;
+      state.isLoading = false;
+    },
   },
 });
 

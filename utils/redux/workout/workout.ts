@@ -14,6 +14,10 @@ export const workoutSlice = createSlice({
 
     selectedExercise: {} as Exercise,
 
+    title: "",
+
+    description: "",
+
     options: {
       rest: 120, // 2 min
       prepareTime: 2, // 2s
@@ -22,7 +26,16 @@ export const workoutSlice = createSlice({
   reducers: {
     start(
       state,
-      { payload }: { payload: { workoutId: string; exercises: Exercise[] } }
+      {
+        payload,
+      }: {
+        payload: {
+          workoutId: string;
+          exercises: Exercise[];
+          title: string;
+          description: string;
+        };
+      }
     ) {
       state.workoutId = payload.workoutId;
       state.activeExerciseIndex = 0;
@@ -32,6 +45,9 @@ export const workoutSlice = createSlice({
         isSkipped: false,
         isFinished: false,
       }));
+
+      state.title = payload.title;
+      state.description = payload.description;
 
       state.currentExercise = state.exercises[state.activeExerciseIndex];
     },

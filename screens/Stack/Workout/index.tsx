@@ -20,7 +20,11 @@ export default function WorkoutScreens() {
         },
       }}
     >
-      <Stack.Screen name="Workouts" component={Workouts} />
+      <Stack.Screen
+        name="Workouts"
+        component={Workouts}
+        options={{ headerShown: false }}
+      />
       <Stack.Screen name="Workout" component={Workout} />
       <Stack.Screen name="Exercise" component={ExerciseScreen} />
       <Stack.Screen name="WorkoutCreate" component={CreateWorkout} />

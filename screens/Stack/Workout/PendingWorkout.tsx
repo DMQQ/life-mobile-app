@@ -1,11 +1,6 @@
-import {
-  CountdownCircleTimer,
-  OnComplete,
-  TimeProps,
-} from "react-native-countdown-circle-timer";
 import Button from "../../../components/ui/Button/Button";
 import ScreenContainer from "../../../components/ui/ScreenContainer";
-import { View, StyleSheet, Text, ToastAndroid } from "react-native";
+import { View, StyleSheet, Text, ToastAndroid, Image } from "react-native";
 import Colors from "../../../constants/Colors";
 import Ripple from "react-native-material-ripple";
 import { useState, useEffect } from "react";
@@ -13,8 +8,8 @@ import { WorkoutScreenProps } from "./types";
 import { useDispatch } from "react-redux";
 import { useAppSelector } from "../../../utils/redux";
 import { workoutActions } from "../../../utils/redux/workout/workout";
-import { useFocusEffect, useIsFocused } from "@react-navigation/native";
 import ClockTimer from "./components/ClockTimer";
+import Color from "color";
 
 const styles = StyleSheet.create({
   controlsContainer: {
@@ -28,35 +23,49 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
     letterSpacing: 1,
+    marginBottom: 5,
+  },
+
+  nextButtonText: {
+    color: Colors.secondary,
+    fontWeight: "bold",
+    letterSpacing: 2,
+  },
+
+  nextExerciseContainer: {
+    padding: 5,
+    paddingHorizontal: 10,
+    flexDirection: "row",
+    backgroundColor: Color(Colors.primary).lighten(0.8).string(),
+    alignItems: "center",
+    borderRadius: 10,
   },
 });
-
-function time({ remainingTime }: TimeProps) {
-  const minutes = Math.floor(remainingTime / 60);
-  const seconds = remainingTime % 60;
-
-  return `${minutes < 10 ? "0" + minutes : minutes}:${
-    seconds < 10 ? "0" + seconds : seconds
-  }`;
-}
 
 // prettier-ignore
 const NextButton = (props: { onNext: Function; hasNext: boolean,isPending:boolean }) => (
   <Ripple
-  //  disabled={!props.hasNext}
     onPress={() => props.onNext()}
     style={{ paddingHorizontal: 10, marginRight: 10 }}
   >
     <Text
-      style={{
-        color: Colors.secondary,
-        fontWeight: "bold",
-        letterSpacing: 2,
-      }}
+      style={styles.nextButtonText}
     >
       {props.isPending ? 'SKIP' : "NEXT"}
     </Text>
   </Ripple>
+);
+
+const NextExercise = () => (
+  <View style={styles.nextExerciseContainer}>
+    <Image
+      style={{ width: 25, height: 15, marginRight: 5, borderRadius: 5 }}
+      source={{
+        uri: "https://cdn.w600.comps.canstockphoto.com/men-training-on-the-bench-press-icon-vector-clip-art_csp45589515.jpg",
+      }}
+    />
+    <Text style={{ color: Colors.text_dark }}>Bench Press</Text>
+  </View>
 );
 
 export default function PendingWorkout({
@@ -69,7 +78,6 @@ export default function PendingWorkout({
   const oneRepTime = 5; //s
   const numberOfReps = 8; // number
   const numberOfSets = 4; // number
-  const restTime = 60 * 2; // 2 minutes in ms
   const estimatedDurationTimeOfTheSet = Math.round(numberOfReps * oneRepTime); // s
 
   //const finished = currentSet > numberOfSets;
@@ -169,15 +177,13 @@ export default function PendingWorkout({
     <ScreenContainer style={{ padding: 0 }}>
       <View style={styles.controlsContainer}>
         <Text style={styles.exerciseTitle}>{exercise?.title} </Text>
-        <Text
-          style={{
-            color: "gray",
-            fontSize: 15,
-          }}
-        >
-          (next{" "}
-          {workout.exercises[workout.activeExerciseIndex + 1]?.title || "end"})
-        </Text>
+
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <NextExercise />
+          <Text style={{ marginHorizontal: 10, color: Colors.text_dark }}>
+            is next exercise
+          </Text>
+        </View>
 
         <Text style={{ color: "gray", fontSize: 16, marginTop: 10 }}>
           {exercise?.description} {exercise?.description}
@@ -243,18 +249,6 @@ export default function PendingWorkout({
           {buttonText}
         </Button>
       </View>
-
-      {/* <View style={{ flex: 1, backgroundColor: "red" }}></View> */}
-
-      {/* Display list of tips below timer */}
-
-      {/* Open drawer to insert set progress */}
-
-      {/* change amount of sets */}
-
-      {/* Change rest time */}
-
-      {/* Rename headerTitle */}
     </ScreenContainer>
   );
 }
