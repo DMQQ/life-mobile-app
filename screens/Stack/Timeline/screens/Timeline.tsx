@@ -1,15 +1,15 @@
-import ScreenContainer from "../../../components/ui/ScreenContainer";
+import ScreenContainer from "../../../../components/ui/ScreenContainer";
 import { View, Text, FlatList } from "react-native";
-import Calendar from "../../../components/Calendar/Calendar";
+import Calendar from "../../../../components/Calendar/Calendar";
 import moment from "moment";
-import timelineStyles from "./components/timeline.styles";
+import timelineStyles from "../components/timeline.styles";
 import Ripple from "react-native-material-ripple";
-import useGetTimeLineQuery from "./hooks/query/useGetTimeLineQuery";
-import Colors from "../../../constants/Colors";
+import useGetTimeLineQuery from "../hooks/query/useGetTimeLineQuery";
+import Colors from "../../../../constants/Colors";
 import { useEffect } from "react";
-import Skeleton from "../../../components/SkeletonLoader/Skeleton";
-import { TimelineScreenProps } from "./types";
-import TimelineItem from "./components/TimelineItem";
+import Skeleton from "../../../../components/SkeletonLoader/Skeleton";
+import { TimelineScreenProps } from "../types";
+import TimelineItem from "../components/TimelineItem";
 
 export default function Timeline({
   navigation,

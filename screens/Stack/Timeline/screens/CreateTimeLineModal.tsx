@@ -1,22 +1,21 @@
 import { Formik } from "formik";
-import ScreenContainer from "../../../components/ui/ScreenContainer";
-import ValidatedInput from "../../../components/ui/ValidatedInput";
+import ScreenContainer from "../../../../components/ui/ScreenContainer";
+import ValidatedInput from "../../../../components/ui/ValidatedInput";
 import { ActivityIndicator, Text } from "react-native";
-import Colors from "../../../constants/Colors";
-import Button from "../../../components/ui/Button/Button";
+import Colors from "../../../../constants/Colors";
+import Button from "../../../../components/ui/Button/Button";
 import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
-import timelineStyles from "./components/timeline.styles";
+import timelineStyles from "../components/timeline.styles";
 import moment from "moment";
 import { View } from "react-native";
 import Ripple from "react-native-material-ripple";
 import Color from "color";
-import type { TimelineScreenProps } from "./types";
-import CreateRepeatableTimeline from "./components/CreateRepeatableTimeline";
+import type { TimelineScreenProps } from "../types";
+import CreateRepeatableTimeline from "../components/CreateRepeatableTimeline";
 import { useEffect, useState } from "react";
-import useCreateTimeline from "./hooks/mutation/useCreateTimeline";
+import useCreateTimeline from "../hooks/mutation/useCreateTimeline";
 import { Feather, FontAwesome } from "@expo/vector-icons";
-import { RadioGroup } from "../../../components/ui/Radio/Radio";
-import useKeyboard from "../../../utils/hooks/useKeyboard";
+import useKeyboard from "../../../../utils/hooks/useKeyboard";
 import Animated, {
   useAnimatedStyle,
   withTiming,
@@ -28,7 +27,7 @@ export default function CreateTimeLineEventModal({
 }: TimelineScreenProps<"TimelineCreate">) {
   const isKeyboardOpen = useKeyboard();
 
-   const keyboardHideAnimation = useAnimatedStyle(
+  const keyboardHideAnimation = useAnimatedStyle(
     () => ({
       transform: [
         {

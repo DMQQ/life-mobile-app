@@ -1,25 +1,21 @@
-import { Text, Image, View, FlatList } from "react-native";
-import ScreenContainer from "../../../components/ui/ScreenContainer";
-import { ScreenProps, StackScreenProps } from "../../../types";
+import { Text, View } from "react-native";
+import ScreenContainer from "../../../../components/ui/ScreenContainer";
+import { StackScreenProps } from "../../../../types";
 import { useLayoutEffect } from "react";
-import { gql, useMutation, useQuery } from "@apollo/client";
-import useUser from "../../../utils/hooks/useUser";
-import Colors from "../../../constants/Colors";
+import { gql, useMutation } from "@apollo/client";
+import useUser from "../../../../utils/hooks/useUser";
+import Colors from "../../../../constants/Colors";
 import Color from "color";
-
-import Button from "../../../components/ui/Button/Button";
-import FileList from "./components/FileList";
+import FileList from "../components/FileList";
 import useGetTimelineById, {
   GET_TIMELINE,
-} from "./hooks/query/useGetTimelineById";
+} from "../hooks/query/useGetTimelineById";
 import Ripple from "react-native-material-ripple";
-import Layout from "../../../constants/Layout";
-import { AntDesign, EvilIcons, Feather } from "@expo/vector-icons";
-import TimelineTodos from "./components/TimelineTodos";
-import Skeleton from "../../../components/SkeletonLoader/Skeleton";
-import LoaderSkeleton from "./components/LoaderSkeleton";
-import Radio from "../../../components/ui/Radio/Radio";
-import useGoBackOnBackPress from "../../../utils/hooks/useGoBackOnBackPress";
+import Layout from "../../../../constants/Layout";
+import { AntDesign, Feather } from "@expo/vector-icons";
+import TimelineTodos from "../components/TimelineTodos";
+import LoaderSkeleton from "../components/LoaderSkeleton";
+import useGoBackOnBackPress from "../../../../utils/hooks/useGoBackOnBackPress";
 
 const COMPLETE_TIMELINE = gql`
   mutation CompleteTimeline($id: String!) {
