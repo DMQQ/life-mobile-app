@@ -9,12 +9,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     backgroundColor: Colors.primary,
     paddingTop: 15,
+    height: 100,
   },
   action_tile: {
     backgroundColor: "red",
     borderRadius: 5,
     margin: 5,
-    height: 80,
+
     justifyContent: "center",
     alignItems: "center",
     flex: 1,

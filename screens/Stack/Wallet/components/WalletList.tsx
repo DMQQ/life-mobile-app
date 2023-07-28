@@ -2,12 +2,22 @@ import BottomSheet, { BottomSheetBackdrop } from "@gorhom/bottom-sheet";
 import { Wallet } from "../../../../types";
 import WalletItem, { WalletElement } from "./WalletItem";
 import { useState, useRef, forwardRef, ReactNode } from "react";
-import { ScrollView, Text, View, VirtualizedList } from "react-native";
+import {
+  FlatList,
+  ScrollView,
+  Text,
+  View,
+  VirtualizedList,
+  NativeScrollEvent,
+} from "react-native";
 import Colors from "../../../../constants/Colors";
 import Button from "../../../../components/ui/Button/Button";
 import useDeleteActivity from "../hooks/useDeleteActivity";
 import Color from "color";
 import { EvilIcons, Feather } from "@expo/vector-icons";
+
+import Animated from "react-native-reanimated";
+import { NativeSyntheticEvent } from "react-native";
 
 export const WalletSheet = forwardRef<BottomSheet, { children: ReactNode }>(
   ({ children }, ref) => (
@@ -35,7 +45,10 @@ export const WalletSheet = forwardRef<BottomSheet, { children: ReactNode }>(
   )
 );
 
-export default function WalletList(props: { wallet: Wallet }) {
+export default function WalletList(props: {
+  wallet: Wallet;
+  onScroll: (event: NativeSyntheticEvent<NativeScrollEvent>) => void;
+}) {
   const [selected, setSelected] = useState<WalletElement | undefined>(
     undefined
   );
@@ -57,20 +70,21 @@ export default function WalletList(props: { wallet: Wallet }) {
 
   return (
     <>
-      <VirtualizedList
+      <Animated.FlatList
+        onScroll={props.onScroll}
         style={{ flex: 1 }}
         contentContainerStyle={{
           padding: 10,
         }}
-        getItemCount={(data) => data.length}
+        // getItemCount={(data) => data.length}
         data={props?.wallet?.expenses || []}
         keyExtractor={(expense: WalletElement) => expense.id}
-        getItem={(data, index) => data[index] as WalletElement}
+        // getItem={(data, index) => data[index] as WalletElement}
         renderItem={({ item }) => (
           <WalletItem
             handlePress={() => {
               setSelected(item);
-              sheet.current?.snapToIndex(0);
+              sheet.current?.expand();
             }}
             {...item}
           />
