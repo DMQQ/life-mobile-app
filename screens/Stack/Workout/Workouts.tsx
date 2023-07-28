@@ -132,7 +132,7 @@ const SearchTab = (props: { onPress: Function }) => {
             }}
           >
             <Text style={{ color: Colors.text_light }}>
-              Active workout ({title})
+              Active workout ({title.trim()})
             </Text>
           </Ripple>
         )}
@@ -152,12 +152,8 @@ const IconButton = (props: {
   delay?: number;
 }) => (
   <Animated.View
-    entering={SlideInRight.delay(props.delay || 0)
-      .springify()
-      .duration(100)}
-    exiting={SlideOutRight.delay(props.delay || 0)
-      .springify()
-      .duration(100)}
+    entering={SlideInRight.delay(props.delay || 0)}
+    exiting={SlideOutRight.delay(props.delay || 0)}
   >
     <Ripple
       onPress={() => props.onPress()}
@@ -204,8 +200,8 @@ export default function Workouts({
             backgroundColor: "rgba(0,0,0,0.5)",
           }}
         >
-          <Animated.View
-            layout={Layout}
+          <View
+            // layout={Layout}
             style={{
               zIndex: 100,
               position: "absolute",
@@ -217,27 +213,27 @@ export default function Workouts({
               icon="create"
               onPress={() => navigation.navigate("WorkoutCreate")}
               color={Colors.secondary}
-              delay={isVisible ? 100 : 300}
+              delay={isVisible ? 0 : 350}
             />
             <IconButton
               icon="search"
               onPress={() => {}}
               color={Color(Colors.secondary).darken(0.2).string()}
-              delay={200}
+              delay={100}
             />
             <IconButton
               icon="options"
               onPress={() => {}}
               color={Color(Colors.secondary).darken(0.4).string()}
-              delay={isVisible ? 300 : 100}
+              delay={isVisible ? 150 : 50}
             />
             <IconButton
               icon="close"
               onPress={() => setIsVisible(false)}
               color={Color(Colors.secondary).darken(0.6).string()}
-              delay={isVisible ? 400 : 100}
+              delay={isVisible ? 200 : 0}
             />
-          </Animated.View>
+          </View>
         </View>
       )}
     </ScreenContainer>

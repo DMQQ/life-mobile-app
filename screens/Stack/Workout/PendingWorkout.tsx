@@ -10,6 +10,7 @@ import { useAppSelector } from "../../../utils/redux";
 import { workoutActions } from "../../../utils/redux/workout/workout";
 import ClockTimer from "./components/ClockTimer";
 import Color from "color";
+import TimeKeeper from "../../../components/ui/TimeKeeper/TimeKeeper";
 
 const styles = StyleSheet.create({
   controlsContainer: {
@@ -169,8 +170,6 @@ export default function PendingWorkout({
     if (!isPlaying && currentSet < numberOfSets) return setIsPlaying(true);
 
     if (currentSet + 1 > numberOfSets) return onNextExercise();
-
-    // pause
   };
 
   return (
@@ -213,17 +212,21 @@ export default function PendingWorkout({
           style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
         >
           {isPlaying ? (
-            <ClockTimer
-              key={2}
-              onCompleted={() => {
-                setCurrentSet((set) => set + 1);
-
-                handleTogglePlay(); // Start rest
+            <View
+              style={{
+                flex: 1,
+                justifyContent: "center",
+                alignItems: "center",
               }}
-              initialSecondsLeft={estimatedDurationTimeOfTheSet}
-              circleRadius={150}
-              circleStroke={150 / 8}
-            />
+            >
+              <TimeKeeper
+                onCompleted={() => {
+                  setCurrentSet((set) => set + 1);
+
+                  handleTogglePlay(); // Start rest
+                }}
+              />
+            </View>
           ) : (
             <ClockTimer
               text="rest"
@@ -232,22 +235,24 @@ export default function PendingWorkout({
               onCompleted={() => {}}
               initialSecondsLeft={workout.options.rest}
               circleRadius={150}
-              circleStroke={150 / 8}
+              circleStroke={150 / 6}
             />
           )}
         </View>
       </View>
 
       <View style={{ paddingBottom: 10, paddingHorizontal: 10 }}>
-        <Button
-          onPress={handleActionButtonPress}
-          type="contained"
-          color="ternary"
-          style={{ width: "100%", padding: 18, borderRadius: 100 }}
-          fontStyle={{ color: "#000", fontSize: 18 }}
-        >
-          {buttonText}
-        </Button>
+        {buttonText !== "Workout running" && (
+          <Button
+            onPress={handleActionButtonPress}
+            type="contained"
+            color="ternary"
+            style={{ width: "100%", padding: 18, borderRadius: 100 }}
+            fontStyle={{ color: "#000", fontSize: 18 }}
+          >
+            {buttonText}
+          </Button>
+        )}
       </View>
     </ScreenContainer>
   );

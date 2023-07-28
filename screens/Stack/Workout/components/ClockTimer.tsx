@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
-import { View, Animated, Easing } from "react-native";
+import { Animated, Easing } from "react-native";
 import Svg, { Circle, Text } from "react-native-svg";
 import Colors from "../../../../constants/Colors";
 import Ripple from "react-native-material-ripple";
-import { interpolateColor } from "react-native-reanimated";
+import Color from "color";
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
@@ -114,7 +114,7 @@ const ClockTimer = (props: ClockTimerProps) => {
           })}
         />
         <Text
-          fontSize={25}
+          fontSize={60}
           x={"50%"}
           y={"50%"}
           textAnchor="middle"
@@ -127,11 +127,11 @@ const ClockTimer = (props: ClockTimerProps) => {
 
         {props?.text && (
           <Text
-            fontSize={25}
+            fontSize={18}
             x={"50%"}
             y={"60%"}
             textAnchor="middle"
-            fill={Colors.secondary}
+            fill={"gray"}
             fontWeight={"bold"}
             letterSpacing={0.5}
           >
