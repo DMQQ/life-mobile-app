@@ -1,9 +1,8 @@
-import { FlatList, Image, Text, View, ImageBackground } from "react-native";
+import { Image, View } from "react-native";
 import ScreenContainer from "../../components/ui/ScreenContainer";
 import Button from "../../components/ui/Button/Button";
 import { ScreenProps } from "../../types";
 import Layout from "../../constants/Layout";
-import { StatusBar } from "expo-status-bar";
 
 export default function Landing({ navigation }: ScreenProps<"Landing">) {
   return (
@@ -34,16 +33,19 @@ export default function Landing({ navigation }: ScreenProps<"Landing">) {
         }}
       >
         <Button
+          size="xl"
           type="contained"
           color="primary"
           onPress={() => navigation.navigate("Login")}
+          style={{ borderRadius: 100 }}
         >
           login
         </Button>
         <Button
+          size="xl"
           type="contained"
           color="ternary"
-          style={{ marginTop: 10 }}
+          style={{ marginTop: 10, borderRadius: 100 }}
           onPress={() => navigation.navigate("Register")}
         >
           register now

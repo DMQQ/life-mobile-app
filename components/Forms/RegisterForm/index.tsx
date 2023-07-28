@@ -68,12 +68,12 @@ export default function RegisterForm({
           />
 
           <Button
-            onPress={() => f.handleSubmit()}
             disabled={!(f.isValid && f.dirty)}
+            onPress={() => f.handleSubmit()}
+            size="xl"
             type="contained"
             color="ternary"
-            size="xl"
-            style={{ marginTop: 10 }}
+            style={{ marginTop: 10, borderRadius: 100 }}
           >
             Register now
           </Button>
