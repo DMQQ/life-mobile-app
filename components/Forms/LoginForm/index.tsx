@@ -1,12 +1,9 @@
 import ValidatedInput from "../../ui/ValidatedInput";
 import { Formik } from "formik";
 import { View } from "react-native";
-import * as Icons from "@expo/vector-icons";
 import { useState } from "react";
-import Colors from "../../../constants/Colors";
 import IconButton from "../../ui/IconButton/IconButton";
 import Button from "../../ui/Button/Button";
-import { Theme } from "../../../utils/context/ThemeContext";
 import Input from "../../ui/TextInput/TextInput";
 
 interface LoginFormProps {
@@ -62,8 +59,8 @@ export default function LoginForm({
             onPress={() => f.handleSubmit()}
             size="xl"
             type="contained"
-            color="primary"
-            style={{ marginTop: 10 }}
+            color="ternary"
+            style={{ marginTop: 10, borderRadius: 100 }}
           >
             LOGIN
           </Button>

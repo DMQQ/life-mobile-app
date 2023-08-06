@@ -54,7 +54,9 @@ export default function ExerciseTile({
               alignItems: "center",
             }}
           >
-            <Text style={{ color: "#bababa" }}>{muscleGroup}</Text>
+            <Text style={{ color: "#bababa" }} lineBreakMode="clip">
+              {muscleGroup.slice(0, 25)}
+            </Text>
 
             <View style={{ flexDirection: "row" }}>
               <Text

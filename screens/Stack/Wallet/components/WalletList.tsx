@@ -2,12 +2,28 @@ import BottomSheet, { BottomSheetBackdrop } from "@gorhom/bottom-sheet";
 import { Wallet } from "../../../../types";
 import WalletItem, { WalletElement } from "./WalletItem";
 import { useState, useRef, forwardRef, ReactNode } from "react";
-import { ScrollView, Text, View, VirtualizedList } from "react-native";
+import {
+  FlatList,
+  ScrollView,
+  Text,
+  View,
+  VirtualizedList,
+  NativeScrollEvent,
+} from "react-native";
 import Colors from "../../../../constants/Colors";
 import Button from "../../../../components/ui/Button/Button";
 import useDeleteActivity from "../hooks/useDeleteActivity";
 import Color from "color";
 import { EvilIcons, Feather } from "@expo/vector-icons";
+
+import Animated, {
+  Extrapolate,
+  SharedValue,
+  interpolate,
+  useAnimatedStyle,
+  withTiming,
+} from "react-native-reanimated";
+import { NativeSyntheticEvent } from "react-native";
 
 export const WalletSheet = forwardRef<BottomSheet, { children: ReactNode }>(
   ({ children }, ref) => (
@@ -35,7 +51,11 @@ export const WalletSheet = forwardRef<BottomSheet, { children: ReactNode }>(
   )
 );
 
-export default function WalletList(props: { wallet: Wallet }) {
+export default function WalletList(props: {
+  wallet: Wallet;
+  scrollY: SharedValue<number>;
+  onScroll: (event: NativeSyntheticEvent<NativeScrollEvent>) => void;
+}) {
   const [selected, setSelected] = useState<WalletElement | undefined>(
     undefined
   );
@@ -55,25 +75,56 @@ export default function WalletList(props: { wallet: Wallet }) {
     </Text>
   );
 
+  const AnimatedWalletItem = ({
+    item,
+    index,
+  }: {
+    index: number;
+    item: WalletElement;
+  }) => {
+    const ITEM_HEIGHT = 70;
+    const animatedStyle = useAnimatedStyle(() => ({
+      transform: [
+        {
+          scale: interpolate(
+            props.scrollY.value,
+            [
+              (index - 1) * ITEM_HEIGHT,
+              index * ITEM_HEIGHT,
+              (index + 1) * ITEM_HEIGHT,
+            ],
+            [1, 1, 0.75],
+            Extrapolate.CLAMP
+          ),
+        },
+      ],
+    }));
+    return (
+      <WalletItem
+        animatedStyle={animatedStyle}
+        handlePress={() => {
+          setSelected(item);
+          sheet.current?.expand();
+        }}
+        {...item}
+      />
+    );
+  };
+
   return (
     <>
-      <VirtualizedList
+      <Animated.FlatList
+        onScroll={props.onScroll}
         style={{ flex: 1 }}
         contentContainerStyle={{
           padding: 10,
         }}
-        getItemCount={(data) => data.length}
+        // getItemCount={(data) => data.length}
         data={props?.wallet?.expenses || []}
         keyExtractor={(expense: WalletElement) => expense.id}
-        getItem={(data, index) => data[index] as WalletElement}
-        renderItem={({ item }) => (
-          <WalletItem
-            handlePress={() => {
-              setSelected(item);
-              sheet.current?.snapToIndex(0);
-            }}
-            {...item}
-          />
+        // getItem={(data, index) => data[index] as WalletElement}
+        renderItem={({ item, index }) => (
+          <AnimatedWalletItem index={index} item={item} />
         )}
       />
 

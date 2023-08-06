@@ -1,11 +1,13 @@
-import {
-  CountdownCircleTimer,
-  OnComplete,
-  TimeProps,
-} from "react-native-countdown-circle-timer";
 import Button from "../../../components/ui/Button/Button";
 import ScreenContainer from "../../../components/ui/ScreenContainer";
-import { View, StyleSheet, Text, ToastAndroid } from "react-native";
+import {
+  View,
+  StyleSheet,
+  Text,
+  ToastAndroid,
+  Image,
+  Vibration,
+} from "react-native";
 import Colors from "../../../constants/Colors";
 import Ripple from "react-native-material-ripple";
 import { useState, useEffect } from "react";
@@ -13,8 +15,16 @@ import { WorkoutScreenProps } from "./types";
 import { useDispatch } from "react-redux";
 import { useAppSelector } from "../../../utils/redux";
 import { workoutActions } from "../../../utils/redux/workout/workout";
-import { useFocusEffect, useIsFocused } from "@react-navigation/native";
 import ClockTimer from "./components/ClockTimer";
+import Color from "color";
+import TimeKeeper from "../../../components/ui/TimeKeeper/TimeKeeper";
+import { AntDesign } from "@expo/vector-icons";
+import ExerciseProgressSheet from "./components/ExerciseProgressSheet";
+import { Exercise } from "../../../types";
+import { useIsFocused } from "@react-navigation/native";
+import Animated, { FadeInDown } from "react-native-reanimated";
+import usePlay from "./hooks/usePlay";
+import useGetExerciseProgressQuery from "./hooks/useGetExerciseProgressQuery";
 
 const styles = StyleSheet.create({
   controlsContainer: {
@@ -28,76 +38,112 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
     letterSpacing: 1,
+    marginBottom: 5,
+  },
+
+  nextButtonText: {
+    color: Colors.secondary,
+    fontWeight: "bold",
+    letterSpacing: 2,
+  },
+
+  nextExerciseContainer: {
+    padding: 5,
+    paddingHorizontal: 10,
+    flexDirection: "row",
+    backgroundColor: Color(Colors.primary).lighten(0.8).string(),
+    alignItems: "center",
+    borderRadius: 10,
+  },
+
+  addIcon: {
+    backgroundColor: Colors.secondary,
+    padding: 10,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 100,
+    width: 60,
+    height: 60,
+    flexDirection: "row",
+  },
+
+  buttonsContainer: {
+    paddingBottom: 10,
+    paddingHorizontal: 10,
+    flexDirection: "row",
+    justifyContent: "flex-end",
   },
 });
-
-function time({ remainingTime }: TimeProps) {
-  const minutes = Math.floor(remainingTime / 60);
-  const seconds = remainingTime % 60;
-
-  return `${minutes < 10 ? "0" + minutes : minutes}:${
-    seconds < 10 ? "0" + seconds : seconds
-  }`;
-}
 
 // prettier-ignore
 const NextButton = (props: { onNext: Function; hasNext: boolean,isPending:boolean }) => (
   <Ripple
-  //  disabled={!props.hasNext}
     onPress={() => props.onNext()}
     style={{ paddingHorizontal: 10, marginRight: 10 }}
   >
     <Text
-      style={{
-        color: Colors.secondary,
-        fontWeight: "bold",
-        letterSpacing: 2,
-      }}
+      style={styles.nextButtonText}
     >
       {props.isPending ? 'SKIP' : "NEXT"}
     </Text>
   </Ripple>
 );
 
+const NextExercise = (props: { title?: string }) => (
+  <View style={styles.nextExerciseContainer}>
+    <Image
+      style={{ width: 25, height: 15, marginRight: 5, borderRadius: 5 }}
+      source={{
+        uri: "https://cdn.w600.comps.canstockphoto.com/men-training-on-the-bench-press-icon-vector-clip-art_csp45589515.jpg",
+      }}
+    />
+    <Text style={{ color: Colors.text_dark }}>{props.title}</Text>
+  </View>
+);
+
 export default function PendingWorkout({
   navigation,
   route,
 }: WorkoutScreenProps<"PendingWorkout">) {
-  const [isPlaying, setIsPlaying] = useState(false);
+  const { isPlaying, play, toggle } = usePlay(route.params.delayTimerStart);
   const [currentSet, setCurrentSet] = useState(1);
-
-  const oneRepTime = 5; //s
-  const numberOfReps = 8; // number
-  const numberOfSets = 4; // number
-  const restTime = 60 * 2; // 2 minutes in ms
-  const estimatedDurationTimeOfTheSet = Math.round(numberOfReps * oneRepTime); // s
-
-  //const finished = currentSet > numberOfSets;
-  const [finished, setFinished] = useState(false);
+  // const numberOfSets = 4; // number of sets after which exercise is not marked as skipped
+  // const numberOfReps = 12;
+  const [finished, setFinished] = useState(false); // set to true if current set is greater than min-amount of sets
   const dispatch = useDispatch();
   const workout = useAppSelector((s) => s.workout);
 
   const hasNext = workout.activeExerciseIndex <= workout.exercises.length;
 
+  // const exercise = workout.exercises[workout.activeExerciseIndex]; displays current exercise from redux when you go back (screen) via system gesture
+  const exercise = workout.exercises.find(
+    (ex) => ex.exerciseId === route.params.exerciseId
+  );
+  const nextExercise = workout.exercises?.[workout.activeExerciseIndex + 1] as
+    | Exercise
+    | undefined;
+
+  const { data } = useGetExerciseProgressQuery(route.params.exerciseId);
+
+  const { sets: numberOfSets, reps: numberOfReps } = data
+    ?.exerciseProgress?.[0] || {
+    sets: 4,
+    reps: 8,
+  };
+
   function onNextExercise(skip = false) {
-    if (
-      typeof workout.exercises[workout.activeExerciseIndex + 1]?.exerciseId ===
-      "undefined"
-    )
+    if (typeof nextExercise === "undefined")
       return ToastAndroid.show(
         "You reached the end of workout",
         ToastAndroid.SHORT
-      );
+      ); // replace toast notification with WorkoutSummary screen (SOOON)
     dispatch(workoutActions.next({ skip: skip }));
     navigation.push("PendingWorkout", {
       workoutId: route.params.workoutId,
       delayTimerStart: route.params.delayTimerStart,
-      exerciseId:
-        workout.exercises[workout.activeExerciseIndex + 1]?.exerciseId,
+      exerciseId: nextExercise.exerciseId,
     });
   }
-
-  const handleTogglePlay = () => setIsPlaying((p) => !p);
 
   useEffect(() => {
     navigation.setOptions({
@@ -121,140 +167,132 @@ export default function PendingWorkout({
     if (currentSet > numberOfSets) setFinished(true);
   }, [currentSet]);
 
-  useEffect(() => {
-    const id = setTimeout(() => {
-      setIsPlaying(true);
-    }, route.params.delayTimerStart);
-
-    return () => {
-      clearTimeout(id);
-    };
-  }, [route.params.delayTimerStart]);
-
-  const exercise = workout?.exercises.find(
-    (ex) => ex.exerciseId === route.params.exerciseId
-  );
-
   const buttonText =
-    currentSet + 1 > numberOfSets
-      ? "next exercise"
+    currentSet > numberOfSets
+      ? "Next exercise"
       : !isPlaying && currentSet < numberOfSets
-      ? "Start next set and skip rest"
+      ? "Skip rest"
       : "Workout running";
 
   const handleActionButtonPress = () => {
-    if (
-      workout.exercises.findIndex(
-        (ex) => ex.exerciseId === route.params.exerciseId
-      ) +
-        1 ===
-        workout.exercises.length &&
-      currentSet + 1 > numberOfSets
-    ) {
+    Vibration.cancel();
+    if (currentSet > numberOfSets && typeof nextExercise === "undefined") {
       dispatch(workoutActions.end());
       navigation.navigate("Workout", {
         workoutId: route.params.workoutId,
       });
       return;
     }
+    if (!isPlaying && currentSet <= numberOfSets) return play();
 
-    if (!isPlaying && currentSet < numberOfSets) return setIsPlaying(true);
-
-    if (currentSet + 1 > numberOfSets) return onNextExercise();
-
-    // pause
+    if (currentSet > numberOfSets && hasNext) return onNextExercise();
   };
+
+  const onTimerCompleted = () => {
+    setCurrentSet((set) => set + 1);
+
+    toggle();
+  };
+
+  const [ex, setEx] = useState<Exercise | undefined>(undefined); // shit workaround, TO DO: forwardRef?? or leave it as it is
+
+  const isFocused = useIsFocused(); // stops timer when screen changes
 
   return (
     <ScreenContainer style={{ padding: 0 }}>
       <View style={styles.controlsContainer}>
-        <Text style={styles.exerciseTitle}>{exercise?.title} </Text>
-        <Text
-          style={{
-            color: "gray",
-            fontSize: 15,
-          }}
+        <Animated.Text
+          entering={FadeInDown.delay(50)}
+          style={styles.exerciseTitle}
         >
-          (next{" "}
-          {workout.exercises[workout.activeExerciseIndex + 1]?.title || "end"})
-        </Text>
+          {exercise?.title}
+        </Animated.Text>
 
-        <Text style={{ color: "gray", fontSize: 16, marginTop: 10 }}>
+        <Animated.View
+          entering={FadeInDown.delay(100)}
+          style={{ flexDirection: "row", alignItems: "center" }}
+        >
+          <NextExercise title={nextExercise?.title} />
+          <Animated.Text
+            entering={FadeInDown.delay(125)}
+            style={{ marginHorizontal: 10, color: Colors.text_dark }}
+          >
+            is next exercise
+          </Animated.Text>
+        </Animated.View>
+
+        <Animated.Text
+          entering={FadeInDown.delay(150)}
+          style={{ color: "gray", fontSize: 16, marginTop: 10 }}
+        >
           {exercise?.description} {exercise?.description}
-        </Text>
+        </Animated.Text>
       </View>
 
-      <View
+      <Animated.View
+        entering={FadeInDown.delay(170)}
         style={{
           flex: 2,
-          alignItems: "center",
-          padding: 5,
-          paddingHorizontal: 20,
         }}
       >
-        <Text
-          style={{
-            color: "#fff",
-            fontSize: 25,
-            fontWeight: "bold",
-            width: "100%",
-            textAlign: "left",
-          }}
-        >
-          Set {currentSet} out of {numberOfSets}
-        </Text>
-        <View
-          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-        >
+        <View style={{ flex: 2 }}>
           {isPlaying ? (
-            <ClockTimer
-              key={2}
-              onCompleted={() => {
-                setCurrentSet((set) => set + 1);
-
-                handleTogglePlay(); // Start rest
-              }}
-              initialSecondsLeft={estimatedDurationTimeOfTheSet}
-              circleRadius={150}
-              circleStroke={150 / 8}
+            <TimeKeeper
+              text={`${numberOfReps}x reps`}
+              stopTimer={!isFocused}
+              pausedOnStart={false}
+              headLineText={`Set ${currentSet} out of ${numberOfSets}`}
+              onCompleted={onTimerCompleted}
             />
           ) : (
-            <ClockTimer
-              text="rest"
-              key={1}
-              textSize={25}
-              onCompleted={() => {}}
-              initialSecondsLeft={workout.options.rest}
-              circleRadius={150}
-              circleStroke={150 / 8}
-            />
+            <View style={{ alignItems: "center" }}>
+              <ClockTimer
+                text="tap to pause"
+                key={1}
+                textSize={25}
+                onCompleted={() => {
+                  Vibration.vibrate([100, 400, 100, 400], true);
+
+                  setTimeout(Vibration.cancel, 4000);
+                }}
+                initialSecondsLeft={workout.options.rest}
+                circleRadius={150}
+                circleStroke={150 / 6}
+              />
+            </View>
           )}
         </View>
+      </Animated.View>
+
+      {/* Transform it into separate component */}
+      <View style={styles.buttonsContainer}>
+        {buttonText !== "Workout running" && (
+          <Button
+            onPress={handleActionButtonPress}
+            type="contained"
+            color="ternary"
+            style={{
+              flex: 1,
+              padding: 18,
+              borderRadius: 100,
+              marginRight: 10,
+            }}
+            fontStyle={{ color: "#000", fontSize: 18 }}
+          >
+            {buttonText}
+          </Button>
+        )}
+
+        <Ripple onPress={() => setEx(exercise)} style={styles.addIcon}>
+          <AntDesign name="plus" color={"#fff"} size={30} />
+        </Ripple>
       </View>
 
-      <View style={{ paddingBottom: 10, paddingHorizontal: 10 }}>
-        <Button
-          onPress={handleActionButtonPress}
-          type="contained"
-          color="ternary"
-          style={{ width: "100%", padding: 18, borderRadius: 100 }}
-          fontStyle={{ color: "#000", fontSize: 18 }}
-        >
-          {buttonText}
-        </Button>
-      </View>
-
-      {/* <View style={{ flex: 1, backgroundColor: "red" }}></View> */}
-
-      {/* Display list of tips below timer */}
-
-      {/* Open drawer to insert set progress */}
-
-      {/* change amount of sets */}
-
-      {/* Change rest time */}
-
-      {/* Rename headerTitle */}
+      <ExerciseProgressSheet
+        selectedExercise={ex}
+        onClearSelectedExercise={() => setEx(undefined)}
+        workoutId={workout.workoutId}
+      />
     </ScreenContainer>
   );
 }

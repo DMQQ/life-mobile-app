@@ -48,19 +48,21 @@ export default function SegmentedButtons(props: SegmentedButtonsProps) {
             flexDirection: "row",
             alignItems: "center",
             flex: 1,
-            borderRightWidth: index === props.buttons.length - 1 ? 0 : 2,
-            borderRightColor: Colors.primary_light,
-
+            // borderRightWidth: index === props.buttons.length - 1 ? 0 : 2,
+            // borderRightColor: Colors.primary_light,
+            borderRadius: 10,
             backgroundColor:
               props.value === value.value
-                ? Colors.primary
+                ? Colors.secondary
                 : Color(Colors.primary).lighten(0.5).toString(),
           }}
         >
           {value.icon}
           <Text
             style={{
-              color: Colors.secondary,
+              //  color: Colors.secondary,
+              color: "#fff",
+
               fontSize: 16,
               letterSpacing: 0.5,
               fontWeight: "bold",

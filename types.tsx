@@ -28,6 +28,8 @@ export interface StackScreenProps<
 }
 
 export type RootStackParamList = {
+  Loader?: undefined;
+
   DEFAULT: any;
 
   Root: undefined;
@@ -49,6 +51,8 @@ export type RootStackParamList = {
   ImagesPreview: { uri: string };
 
   NotesScreens: undefined;
+
+  Settings: undefined;
 };
 
 export type RootStackScreenProps<Screen extends keyof RootStackParamList> =

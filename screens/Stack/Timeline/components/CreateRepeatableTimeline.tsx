@@ -119,18 +119,6 @@ export default function CreateRepeatableTimeline({
   };
 
   return isVisible ? (
-    // <Modal
-    //   isVisible={isVisible}
-    //   animationIn="fadeInDown"
-    //   animationOut="fadeOutUp"
-    //   animationOutTiming={250}
-    //   useNativeDriverForBackdrop
-    //   backdropTransitionInTiming={200}
-    //   backdropTransitionOutTiming={300}
-    //   hideModalContentWhileAnimating
-    //   onBackdropPress={onClose}
-    //   onBackButtonPress={onClose}
-    // >
     <View style={styles.modal_container}>
       <View style={styles.title_container}>
         <Text style={styles.title}>Repeatable event options</Text>
@@ -168,16 +156,6 @@ export default function CreateRepeatableTimeline({
       <Text style={styles.suggestion_text}>
         Leaving fields blank disables repeatition
       </Text>
-
-      {/* <Button
-        callback={onClose}
-        type="contained"
-        color="primary"
-        style={styles.save_button}
-      >
-        Save and close
-      </Button> */}
     </View>
-  ) : // </Modal>
-  null;
+  ) : null;
 }

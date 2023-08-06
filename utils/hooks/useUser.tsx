@@ -12,8 +12,9 @@ export default function useUser() {
 
     if (json) {
       const user = JSON.parse(json);
-
       dispatch(userActions.loadUser({ user: user.user, token: user.token }));
+    } else {
+      dispatch(userActions.notSigned());
     }
   }
 

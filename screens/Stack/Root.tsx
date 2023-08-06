@@ -53,7 +53,7 @@ export default function Root({ navigation }: ScreenProps<"Root">) {
 
       <TodaysTimelineEvents data={data?.timelineByCurrentDate} />
 
-      <AccountActions />
+      <AccountActions navigation={navigation} />
     </ScreenContainer>
   );
 }

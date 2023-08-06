@@ -1,18 +1,15 @@
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { StyleSheet, View } from "react-native";
 import Layout from "../../constants/Layout";
-import IconButton from "../ui/IconButton/IconButton";
 import Colors from "../../constants/Colors";
-import { useEffect } from "react";
 import Ripple from "react-native-material-ripple";
-import { EvilIcons, FontAwesome5, Ionicons } from "@expo/vector-icons";
-import { ReactNode } from "react";
+import { Ionicons } from "@expo/vector-icons";
+import useKeyboard from "../../utils/hooks/useKeyboard";
 
 const styles = StyleSheet.create({
   container: {
     width: Layout.screen.width,
     padding: 5,
-    // paddingBottom: insets.bottom + 10,
     backgroundColor: Colors.primary,
     justifyContent: "space-around",
     flexDirection: "row",
@@ -59,10 +56,13 @@ export default function BottomTab({
     </Ripple>
   );
 
+  const keyboard = useKeyboard();
+
   if (
     state.routes[state.index].state?.routes
       .map((subRoute) => subRoute.name)
-      .some((v) => ["Workout", "Exercise"].includes(v))
+      .some((v) => ["Workout", "Exercise"].includes(v)) ||
+    keyboard
   )
     return null;
 

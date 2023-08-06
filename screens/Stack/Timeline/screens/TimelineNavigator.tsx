@@ -5,11 +5,11 @@ import Timeline from "./Timeline";
 import { useNavigation } from "@react-navigation/native";
 import ImagesPreview from "./ImagesPreview";
 import { useEffect } from "react";
-import type { TimelineRootStack as RootStackParamList } from "./types";
+import type { TimelineRootStack as RootStackParamList } from "../types";
 import {
   fadeInFromBottomAndScaleUp,
   horizontalAnimation,
-} from "../../../navigation/assets/screen_animations";
+} from "../../../../navigation/assets/screen_animations";
 
 const Stack = createStackNavigator<RootStackParamList>();
 

@@ -11,8 +11,11 @@ import useCreateActivity from "../hooks/useCreateActivity";
 import * as yup from "yup";
 import SegmentedButtons from "../../../../components/ui/SegmentedButtons";
 import Color from "color";
-import BottomSheet, { BottomSheetBackdrop } from "@gorhom/bottom-sheet";
-import { forwardRef, useEffect } from "react";
+import BottomSheet, {
+  BottomSheetBackdrop,
+  useBottomSheet,
+} from "@gorhom/bottom-sheet";
+import { forwardRef, useEffect, useState } from "react";
 
 const schema = yup.object().shape({
   name: yup.string().required("Name is required"),
@@ -35,35 +38,13 @@ const AddExpenseBottomSheet = forwardRef<
   BottomSheet,
   { onCompleted: Function }
 >((props, ref) => {
-  const { createExpense, called, reset } = useCreateActivity({
+  const { createExpense, reset } = useCreateActivity({
     onCompleted() {
       props.onCompleted();
     },
   });
 
-  useEffect(() => {
-    const keyboardDidShowListener = Keyboard.addListener(
-      "keyboardDidShow",
-      () => {
-        if (!called) (ref as any)?.current?.snapToIndex(2);
-      }
-    );
-    const keyboardDidHideListener = Keyboard.addListener(
-      "keyboardDidHide",
-      () => {
-        if (!called) (ref as any)?.current?.snapToIndex(1);
-      }
-    );
-
-    return () => {
-      keyboardDidHideListener.remove();
-      keyboardDidShowListener.remove();
-    };
-  }, []);
-
   const onSubmit = async (values: any, { resetForm }: any) => {
-    Keyboard.dismiss();
-
     await createExpense({
       variables: {
         amount: +values.amount,
@@ -72,16 +53,20 @@ const AddExpenseBottomSheet = forwardRef<
       },
     });
 
+    (ref as any).current?.forceClose();
+
     resetForm();
 
     reset();
-
-    (ref as any).current?.snapToIndex(0);
   };
 
   return (
     <BottomSheet
+      index={-1}
       ref={ref}
+      onClose={() => {
+        Keyboard.dismiss();
+      }}
       handleIndicatorStyle={{
         backgroundColor: Colors.secondary,
       }}
@@ -89,68 +74,88 @@ const AddExpenseBottomSheet = forwardRef<
         backgroundColor: Colors.primary,
       }}
       enablePanDownToClose
-      snapPoints={["1%", "45%", "70%"]}
-      backdropComponent={(props) => <BottomSheetBackdrop {...props} />}
+      snapPoints={["50%", "80%"]}
+      backdropComponent={(props) => (
+        <BottomSheetBackdrop
+          appearsOnIndex={0}
+          disappearsOnIndex={-1}
+          {...props}
+        />
+      )}
     >
-      <Formik
-        validationSchema={schema}
-        onSubmit={onSubmit}
-        initialValues={{
-          name: "",
-          amount: "",
-          type: "",
-        }}
-      >
-        {(f) => (
-          <View style={{ padding: 10 }}>
-            <SegmentedButtons
-              buttons={SegmentVariants}
-              onChange={(value) => f.setFieldValue("type", value)}
-              value={f.values.type}
-            />
-
-            <ValidatedInput
-              placeholder="Expense name"
-              name="name"
-              left={(props) => (
-                <Input.Icon Icon="AntDesign" name="wallet" {...props} />
-              )}
-              formik={f}
-            />
-
-            <ValidatedInput
-              placeholder="Amount [zł]"
-              name="amount"
-              left={(props) => (
-                <Input.Icon Icon="Ionicons" name="cash-outline" {...props} />
-              )}
-              keyboardType="numeric"
-              formik={f}
-            />
-
-            <Button
-              disabled={!(f.isValid && f.dirty)}
-              type="contained"
-              color="primary"
-              onPress={() => {
-                Keyboard.dismiss();
-                f.handleSubmit();
-              }}
-              style={{
-                marginTop: 20,
-                paddingVertical: 15,
-                backgroundColor: !(f.isValid && f.dirty)
-                  ? Color(Colors.secondary).alpha(0.2).string()
-                  : Colors.secondary,
-              }}
-            >
-              Create
-            </Button>
-          </View>
-        )}
-      </Formik>
+      <Form onSubmit={onSubmit} />
     </BottomSheet>
   );
 });
+
+interface FormProps {
+  onSubmit: (...val: any) => Promise<any>;
+  onSetFormHeight?: (n: number) => void;
+}
+
+const Form = (props: FormProps) => {
+  const { expand } = useBottomSheet();
+
+  return (
+    <Formik
+      validationSchema={schema}
+      onSubmit={props.onSubmit}
+      initialValues={{
+        name: "",
+        amount: "",
+        type: "",
+      }}
+    >
+      {(f) => (
+        <View style={{ padding: 10 }}>
+          <SegmentedButtons
+            buttons={SegmentVariants}
+            onChange={(value) => f.setFieldValue("type", value)}
+            value={f.values.type}
+          />
+
+          <ValidatedInput
+            placeholder="Expense name"
+            name="name"
+            left={(props) => (
+              <Input.Icon Icon="AntDesign" name="wallet" {...props} />
+            )}
+            formik={f}
+            onFocus={() => expand()}
+          />
+
+          <ValidatedInput
+            placeholder="Amount [zł]"
+            name="amount"
+            left={(props) => (
+              <Input.Icon Icon="Ionicons" name="cash-outline" {...props} />
+            )}
+            keyboardType="numeric"
+            formik={f}
+            onFocus={() => expand()}
+          />
+
+          <Button
+            disabled={!(f.isValid && f.dirty)}
+            type="contained"
+            color="primary"
+            onPress={() => {
+              f.handleSubmit();
+            }}
+            style={{
+              marginTop: 20,
+              paddingVertical: 15,
+              backgroundColor: !(f.isValid && f.dirty)
+                ? Color(Colors.secondary).alpha(0.2).string()
+                : Colors.secondary,
+            }}
+          >
+            Create
+          </Button>
+        </View>
+      )}
+    </Formik>
+  );
+};
 
 export default AddExpenseBottomSheet;

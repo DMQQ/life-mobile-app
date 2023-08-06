@@ -34,7 +34,7 @@ export default StyleSheet.create({
     fontSize: 20,
   },
   itemDescription: {
-    color: Colors.primary_lighter,
+    color: "gray",
     fontSize: 17,
     marginTop: 5,
   },
