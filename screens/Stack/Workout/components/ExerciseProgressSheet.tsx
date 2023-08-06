@@ -8,8 +8,6 @@ import { Exercise, ExerciseProgress } from "../../../../types";
 import { useEffect, useRef, useState } from "react";
 import { gql, useQuery } from "@apollo/client";
 import useUser from "../../../../utils/hooks/useUser";
-import moment from "moment";
-import Color from "color";
 import Ripple from "react-native-material-ripple";
 import { Formik } from "formik";
 import ValidatedInput from "../../../../components/ui/ValidatedInput";
@@ -17,35 +15,7 @@ import Layout from "../../../../constants/Layout";
 import Button from "../../../../components/ui/Button/Button";
 import * as yup from "yup";
 import useUpdateProgress from "../../../../components/Exercise/UpdateProgressModal/useUpdateProgress";
-
-const GetExerciseProgressQuery = gql`
-  query GetExerciseProgress($exerciseId: ID!) {
-    exerciseProgress(exerciseId: $exerciseId) {
-      exerciseProgressId
-      date
-      sets
-      reps
-      weight
-    }
-  }
-`;
-
-function useGetExerciseProgressQuery(exerciseId: string | undefined) {
-  const usr = useUser();
-
-  return useQuery(GetExerciseProgressQuery, {
-    context: {
-      headers: {
-        token: usr.token,
-      },
-    },
-    variables: {
-      exerciseId: exerciseId,
-    },
-
-    skip: exerciseId === undefined,
-  });
-}
+import useGetExerciseProgressQuery from "../hooks/useGetExerciseProgressQuery";
 
 const styles = StyleSheet.create({
   title: { color: Colors.secondary, fontWeight: "bold", fontSize: 25 },
@@ -117,6 +87,7 @@ export default function ExerciseProgressSheet(
       sheetRef.current?.expand();
     } else {
       sheetRef.current?.close();
+      setIsVisible(false); // close modal form
     }
   }, [props.selectedExercise]);
 
@@ -125,7 +96,7 @@ export default function ExerciseProgressSheet(
   const { onSubmit } = useUpdateProgress({
     exerciseId: props.selectedExercise?.exerciseId || "",
     workoutId: props.workoutId,
-    onDismiss: () => {},
+    onDismiss: () => setIsVisible(false),
   });
 
   return (
@@ -169,7 +140,7 @@ export default function ExerciseProgressSheet(
         {isVisible && (
           <CreateProgressForm
             onClose={() => setIsVisible(false)}
-            onSubmit={onSubmit}
+            onSubmit={onSubmit as any}
           />
         )}
       </View>
@@ -275,8 +246,6 @@ const CreateProgressForm = (props: {
           <Button
             onPress={() => {
               f.handleSubmit();
-              f.resetForm();
-              props.onClose();
             }}
             style={{ padding: 15, borderRadius: 100 }}
             type="contained"

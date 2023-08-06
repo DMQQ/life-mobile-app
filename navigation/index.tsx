@@ -8,17 +8,26 @@ import { RootStackParamList } from "../types";
 import Colors from "../constants/Colors";
 import Landing from "../screens/Stack/Landing";
 import useNotifications from "../utils/hooks/useNotifications";
-import TimelineScreens from "../screens/Stack/Timeline";
+import { Timeline as TimelineScreens } from "../screens/Stack/Timeline";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import BottomTab from "../components/BottomTab/BottomTab";
 import WalletScreens from "../screens/Stack/Wallet";
 import WorkoutScreens from "../screens/Stack/Workout";
 import NotesScreens from "../screens/Stack/Notes/Main";
+import ScreenContainer from "../components/ui/ScreenContainer";
+import { ActivityIndicator } from "react-native";
+import Settings from "../screens/Stack/Settings/Settings";
+
+const LoaderScreen = () => (
+  <ScreenContainer style={{ justifyContent: "center", alignItems: "center" }}>
+    <ActivityIndicator color={"white"} size={45} />
+  </ScreenContainer>
+);
 
 const Tab = createBottomTabNavigator<RootStackParamList>();
 
 export default function Navigation() {
-  const { isAuthenticated, loadUser } = useUser();
+  const { isAuthenticated, loadUser, isLoading } = useUser();
 
   const { sendTokenToServer } = useNotifications();
 
@@ -43,11 +52,14 @@ export default function Navigation() {
       }}
     >
       <Tab.Navigator
+        initialRouteName={isLoading ? "Loader" : "Root"}
         tabBar={(props) => (isAuthenticated ? <BottomTab {...props} /> : null)}
         screenOptions={{
           headerShown: false,
         }}
       >
+        {isLoading && <Tab.Screen name="Loader" component={LoaderScreen} />}
+
         {isAuthenticated ? (
           <>
             <Tab.Screen name="Root" component={Root} />
@@ -59,6 +71,8 @@ export default function Navigation() {
             <Tab.Screen name="TimelineScreens" component={TimelineScreens} />
 
             <Tab.Screen name="NotesScreens" component={NotesScreens} />
+
+            <Tab.Screen name="Settings" component={Settings} />
           </>
         ) : (
           <>

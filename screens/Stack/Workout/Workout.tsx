@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef, forwardRef } from "react";
 import ScreenContainer from "../../../components/ui/ScreenContainer";
 import ExerciseList from "../../../components/Exercise/ExerciseList/ExerciseList";
-import { View, Text } from "react-native";
+import { View, Text, ScrollView } from "react-native";
 import Button from "../../../components/ui/Button/Button";
 import { WorkoutScreenProps } from "./types";
 import ExerciseProgressSheet from "./components/ExerciseProgressSheet";
@@ -20,6 +20,7 @@ import useAddExerciseToWorkout from "./hooks/useAddExerciseToWorkout";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import useGetWorkoutQuery from "./hooks/useGetWorkoutQuery";
 import { useAppSelector } from "../../../utils/redux";
+import Input from "../../../components/ui/TextInput/TextInput";
 
 export default function Workout({
   navigation,
@@ -46,12 +47,14 @@ export default function Workout({
       workoutActions.start({
         exercises: exercises,
         workoutId: route.params.workoutId,
+        title: data?.workout?.title,
+        description: data?.workout?.description,
       })
     );
 
     navigation.navigate("PendingWorkout", {
       workoutId: route.params.workoutId,
-      delayTimerStart: 1000,
+      delayTimerStart: 0,
       exerciseId: canContinueWithOldExercise
         ? workout.exercises[workout.activeExerciseIndex].exerciseId
         : exercises[0].exerciseId,
@@ -65,11 +68,73 @@ export default function Workout({
     });
   }, [data?.workout]);
 
+  const estimatedDurationTime = () => {
+    let seconds = 0;
+
+    for (const exercise of (data?.workout?.exercises || []) as Exercise[]) {
+      seconds += (exercise?.sets || 4) * 40;
+      seconds += (exercise?.sets || 4) * 60 * 2; //to fix
+    }
+
+    return Math.floor(seconds / 60).toString();
+  };
+
   return (
     <ScreenContainer>
       <ExerciseList
         onExerciseTilePress={(exercise) => setSelectedExercise(exercise)}
         exercises={data?.workout.exercises}
+        ListHeaderComponent={
+          <View
+            style={{
+              backgroundColor: Color(Colors.primary).lighten(0.5).hex(),
+              marginBottom: 10,
+              padding: 10,
+              borderRadius: 10,
+            }}
+          >
+            <Text
+              style={{
+                color: Colors.text_light,
+                fontSize: 25,
+                fontWeight: "bold",
+              }}
+            >
+              {data?.workout?.title}
+            </Text>
+
+            <Text style={{ color: Colors.text_dark }}>
+              <Text style={{ fontWeight: "bold", fontSize: 17 }}>600</Text>{" "}
+              people used this workout
+            </Text>
+            <Text style={{ color: Colors.text_dark }}>
+              Estimated duration of {estimatedDurationTime()}
+              min with 2min rest
+            </Text>
+
+            <Text style={{ color: Colors.text_dark }}>
+              {data?.workout?.description}
+            </Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={{ marginTop: 10 }}
+            >
+              {[0, 1, 2].map((id) => (
+                <View
+                  style={{
+                    backgroundColor: Colors.primary_light,
+                    width: 120,
+                    height: 60,
+                    borderRadius: 10,
+                    marginRight: 10,
+                  }}
+                  key={id}
+                />
+              ))}
+            </ScrollView>
+          </View>
+        }
         ListFooterComponent={
           <Animated.View
             entering={FadeInDown.delay(data?.workout?.exercises.length * 75)}
@@ -87,7 +152,7 @@ export default function Workout({
         onPress={onStartWorkout}
       >
         {canContinueWithOldExercise
-          ? `resume workout on (${workout.activeExerciseIndex + 1}) exercise`
+          ? `Resume workout on (${workout.activeExerciseIndex + 1}) exercise`
           : "Start workout"}
       </Button>
 
@@ -155,6 +220,8 @@ const ExerciseBottomSheet = forwardRef<
       )}
     >
       <BottomSheetFlatList
+        ListHeaderComponentStyle={{ paddingHorizontal: 10 }}
+        ListHeaderComponent={<Input value="Search" />}
         data={allExercisesList?.exercises as Exercise[]}
         keyExtractor={(element) => element.exerciseId}
         renderItem={({ item }) => (

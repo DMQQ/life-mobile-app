@@ -4,8 +4,10 @@ import Color from "color";
 import { Text, Alert } from "react-native";
 import Button from "../ui/Button/Button";
 import useUser from "../../utils/hooks/useUser";
+import Ripple from "react-native-material-ripple";
+import { ScreenProps } from "../../types";
 
-export default function AccountActions() {
+export default function AccountActions({ navigation }: ScreenProps<"Root">) {
   const { removeUser } = useUser();
 
   const handleSignout = () => {
@@ -40,6 +42,13 @@ export default function AccountActions() {
       >
         Account Actions
       </Text>
+
+      <Ripple
+        style={{ padding: 10, paddingHorizontal: 15, marginBottom: 10 }}
+        onPress={() => navigation.navigate("Settings")}
+      >
+        <Text style={{ color: "#fff" }}>Settings</Text>
+      </Ripple>
 
       <Button
         onPress={handleSignout}

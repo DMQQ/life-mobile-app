@@ -4,6 +4,7 @@ import moment from "moment";
 import Color from "color";
 import Colors from "../../../../constants/Colors";
 import Ripple from "react-native-material-ripple";
+import Animated, { Layout } from "react-native-reanimated";
 
 export interface WalletElement {
   description: string;
@@ -84,15 +85,19 @@ function parseDateToText(date: string) {
 export default function WalletItem(
   item: WalletItemProps & {
     handlePress: Function;
+    animatedStyle: any;
   }
 ) {
   return (
-    <View
-      // layout={Layout}
-      style={{
-        marginBottom: 10,
-        position: "relative",
-      }}
+    <Animated.View
+      layout={Layout}
+      style={[
+        {
+          marginBottom: 10,
+          position: "relative",
+        },
+        item.animatedStyle,
+      ]}
     >
       <Ripple style={styles.expense_item} onPress={() => item.handlePress()}>
         <View style={{ paddingHorizontal: 5 }}>
@@ -119,6 +124,6 @@ export default function WalletItem(
           </Text>
         </View>
       </Ripple>
-    </View>
+    </Animated.View>
   );
 }
