@@ -3,33 +3,39 @@ import { useNavigation } from "@react-navigation/native";
 import { StyleSheet, View } from "react-native";
 import Ripple from "react-native-material-ripple";
 import Colors from "../../../../constants/Colors";
+import Animated, {
+  Extrapolate,
+  SharedValue,
+  interpolate,
+  useAnimatedStyle,
+} from "react-native-reanimated";
 
 const styles = StyleSheet.create({
   action_tiles: {
     flexDirection: "row",
     backgroundColor: Colors.primary,
-    paddingTop: 15,
-    height: 100,
   },
   action_tile: {
     backgroundColor: "red",
     borderRadius: 5,
-    margin: 5,
-
+    height: 80,
     justifyContent: "center",
     alignItems: "center",
     flex: 1,
+    margin: 5,
   },
 });
 
 interface ActionTilesProps {
   onAddExpense: () => void;
+  scrollY: SharedValue<number>;
 }
 
 export default function ActionTiles(props: ActionTilesProps) {
   const navigation = useNavigation<any>();
+
   return (
-    <View style={styles.action_tiles}>
+    <Animated.View style={[styles.action_tiles]}>
       <ActionTile
         onPress={props.onAddExpense}
         icon="plus"
@@ -44,7 +50,7 @@ export default function ActionTiles(props: ActionTilesProps) {
         onPress={() => navigation.navigate("Watchlist")}
       />
       <ActionTile icon="edit" color="#8b007d" text="Edit" />
-    </View>
+    </Animated.View>
   );
 }
 

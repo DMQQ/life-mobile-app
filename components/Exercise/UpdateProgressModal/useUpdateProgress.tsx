@@ -3,10 +3,10 @@ import { useAppSelector } from "../../../utils/redux";
 import UPDATE_PROGRESS, {
   UpdateProgressVariables,
 } from "../../../utils/schemas/UPDATE_PROGRESS";
-import { Workout } from "../../../types";
-import { GET_WORKOUT } from "../../../utils/schemas/GET_WORKOUT";
+import { ExerciseProgress } from "../../../types";
+import { FormikHelpers } from "formik";
 
-const parseValues = (prop: { [key: string]: string }) => {
+const parseValues = (prop: { [key: string | number | symbol]: any }) => {
   const obj: {
     [key: string]: number;
   } = {};
@@ -46,31 +46,48 @@ export default function useUpdateProgress(props: {
       props.onDismiss();
     },
 
-    refetchQueries: [
-      // {
-      //   query: GetExerciseProgressQuery,
-      //   variables: {
-      //     exerciseId: props.exerciseId,
-      //   },
-      // },
-      "GetExerciseProgress",
-    ],
+    update(cache, { data: { createExerciseProgress } }) {
+      const new_exercise_progress = {
+        ...createExerciseProgress,
+      } as ExerciseProgress;
 
-    onError(err) {
-      // console.log(JSON.stringify(err, null, 2));
+      const old_exercise_progress = cache.readQuery({
+        query: GetExerciseProgressQuery,
+        variables: { exerciseId: props.exerciseId },
+      }) as { exerciseProgress: ExerciseProgress[] };
+
+      const copy = {
+        exerciseProgress: [
+          new_exercise_progress,
+          ...old_exercise_progress.exerciseProgress,
+        ],
+      } as { exerciseProgress: ExerciseProgress[] };
+
+      cache.writeQuery({
+        data: copy,
+        query: GetExerciseProgressQuery,
+        variables: { exerciseId: props.exerciseId },
+      });
     },
+
+    onError(err) {},
   });
 
-  const onSubmit = async (results: any) => {
-    console.log(
-      workout.exercises.find((ex) => ex.exerciseId === props.exerciseId)
-    );
+  interface Input {
+    reps: string;
+    sets: string;
+    weight: string;
+  }
+
+  const onSubmit = async (results: Input, formik: FormikHelpers<Input>) => {
     await addExerciseProgress({
       variables: {
         exerciseId: props.exerciseId,
         ...parseValues(results),
       } as UpdateProgressVariables,
     });
+
+    formik.resetForm();
   };
 
   return { onSubmit };

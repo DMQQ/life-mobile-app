@@ -20,6 +20,7 @@ import useAddExerciseToWorkout from "./hooks/useAddExerciseToWorkout";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import useGetWorkoutQuery from "./hooks/useGetWorkoutQuery";
 import { useAppSelector } from "../../../utils/redux";
+import Input from "../../../components/ui/TextInput/TextInput";
 
 export default function Workout({
   navigation,
@@ -53,7 +54,7 @@ export default function Workout({
 
     navigation.navigate("PendingWorkout", {
       workoutId: route.params.workoutId,
-      delayTimerStart: 1000,
+      delayTimerStart: 0,
       exerciseId: canContinueWithOldExercise
         ? workout.exercises[workout.activeExerciseIndex].exerciseId
         : exercises[0].exerciseId,
@@ -72,7 +73,7 @@ export default function Workout({
 
     for (const exercise of (data?.workout?.exercises || []) as Exercise[]) {
       seconds += (exercise?.sets || 4) * 40;
-      seconds += (exercise?.sets || 4) * 60 * 2; // rest time in secs
+      seconds += (exercise?.sets || 4) * 60 * 2; //to fix
     }
 
     return Math.floor(seconds / 60).toString();
@@ -99,7 +100,7 @@ export default function Workout({
                 fontWeight: "bold",
               }}
             >
-              Workout name
+              {data?.workout?.title}
             </Text>
 
             <Text style={{ color: Colors.text_dark }}>
@@ -112,7 +113,7 @@ export default function Workout({
             </Text>
 
             <Text style={{ color: Colors.text_dark }}>
-              Workout made by Papi, more Papi's workouts
+              {data?.workout?.description}
             </Text>
             <ScrollView
               horizontal
@@ -151,7 +152,7 @@ export default function Workout({
         onPress={onStartWorkout}
       >
         {canContinueWithOldExercise
-          ? `resume workout on (${workout.activeExerciseIndex + 1}) exercise`
+          ? `Resume workout on (${workout.activeExerciseIndex + 1}) exercise`
           : "Start workout"}
       </Button>
 
@@ -219,6 +220,8 @@ const ExerciseBottomSheet = forwardRef<
       )}
     >
       <BottomSheetFlatList
+        ListHeaderComponentStyle={{ paddingHorizontal: 10 }}
+        ListHeaderComponent={<Input value="Search" />}
         data={allExercisesList?.exercises as Exercise[]}
         keyExtractor={(element) => element.exerciseId}
         renderItem={({ item }) => (

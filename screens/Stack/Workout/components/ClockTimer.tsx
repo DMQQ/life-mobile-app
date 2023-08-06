@@ -1,9 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Animated, Easing } from "react-native";
+import { Animated, Easing, View } from "react-native";
 import Svg, { Circle, Text } from "react-native-svg";
 import Colors from "../../../../constants/Colors";
 import Ripple from "react-native-material-ripple";
 import Color from "color";
+import Button from "../../../../components/ui/Button/Button";
+import { AntDesign } from "@expo/vector-icons";
+
+import { Text as RNText } from "react-native";
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
@@ -42,6 +46,8 @@ const ClockTimer = (props: ClockTimerProps) => {
 
   const animatedValue = useRef(new Animated.Value(circumference)).current;
 
+  const [showSettings, setShowSettings] = useState(false);
+
   useEffect(() => {
     if (isActive) {
       const interval = setInterval(() => {
@@ -55,7 +61,6 @@ const ClockTimer = (props: ClockTimerProps) => {
   useEffect(() => {
     if (timer <= 0) {
       setIsActive(false);
-      console.log("onCompleted");
       props.onCompleted();
     }
   }, [timer]);
@@ -89,57 +94,105 @@ const ClockTimer = (props: ClockTimerProps) => {
   };
 
   return (
-    <Ripple onPress={onStopTimer}>
-      <Svg width={radius * 2} height={radius * 2}>
-        <Circle
-          cx={radius}
-          cy={radius}
-          r={radius - strokeWidth / 2}
-          fill="none"
-          stroke={Colors.primary}
-          strokeWidth={strokeWidth}
-        />
-        <AnimatedCircle
-          strokeLinecap={"round"}
-          cx={radius}
-          cy={radius}
-          r={radius - strokeWidth / 2}
-          fill="none"
-          stroke={Colors.secondary}
-          strokeWidth={strokeWidth}
-          strokeDasharray={circumference}
-          strokeDashoffset={animatedValue.interpolate({
-            inputRange: [0, circumference],
-            outputRange: [circumference, 0],
-          })}
-        />
-        <Text
-          fontSize={60}
-          x={"50%"}
-          y={"50%"}
-          textAnchor="middle"
-          fill={Colors.secondary}
-          fontWeight={"bold"}
-          letterSpacing={0.5}
-        >
-          {time(timer)}
-        </Text>
-
-        {props?.text && (
+    <View>
+      <Ripple
+        onPress={onStopTimer}
+        onLongPress={() => setShowSettings((p) => !p)}
+      >
+        <Svg width={radius * 2} height={radius * 2}>
+          <Circle
+            cx={radius}
+            cy={radius}
+            r={radius - strokeWidth / 2}
+            fill="none"
+            stroke={Colors.primary}
+            strokeWidth={strokeWidth}
+          />
+          <AnimatedCircle
+            strokeLinecap={"round"}
+            cx={radius}
+            cy={radius}
+            r={radius - strokeWidth / 2}
+            fill="none"
+            stroke={Colors.secondary}
+            strokeWidth={strokeWidth}
+            strokeDasharray={circumference}
+            strokeDashoffset={animatedValue.interpolate({
+              inputRange: [0, circumference],
+              outputRange: [circumference, 0],
+            })}
+          />
           <Text
-            fontSize={18}
+            fontSize={60}
             x={"50%"}
-            y={"60%"}
+            y={"50%"}
             textAnchor="middle"
-            fill={"gray"}
+            fill={Colors.secondary}
             fontWeight={"bold"}
             letterSpacing={0.5}
           >
-            {props.text}
+            {!isActive
+              ? timer === 0
+                ? "Time's up"
+                : "Paused"
+              : `${time(timer)}`}
           </Text>
-        )}
-      </Svg>
-    </Ripple>
+
+          {props?.text && (
+            <Text
+              fontSize={18}
+              x={"50%"}
+              y={"60%"}
+              textAnchor="middle"
+              fill={"gray"}
+              fontWeight={"bold"}
+              letterSpacing={0.5}
+            >
+              {props.text}
+            </Text>
+          )}
+        </Svg>
+      </Ripple>
+      {showSettings && (
+        <View
+          style={{
+            flexDirection: "row",
+            marginTop: 10,
+            justifyContent: "center",
+          }}
+        >
+          <Button
+            type="contained"
+            style={{
+              backgroundColor: Colors.secondary,
+            }}
+          >
+            <AntDesign name="arrowdown" size={24} color="black" />
+          </Button>
+
+          <RNText
+            style={{
+              backgroundColor: Colors.secondary,
+              fontSize: 25,
+              padding: 10,
+              paddingHorizontal: 15,
+              marginHorizontal: 5,
+              borderRadius: 5,
+            }}
+          >
+            {Math.floor(props.initialSecondsLeft / 60)}
+            <RNText style={{ fontSize: 15 }}>min</RNText>
+          </RNText>
+          <Button
+            style={{
+              backgroundColor: Colors.secondary,
+            }}
+          >
+            <AntDesign name="arrowup" size={24} color="black" />
+          </Button>
+        </View>
+      )}
+    </View>
   );
 };
 

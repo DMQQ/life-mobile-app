@@ -136,9 +136,6 @@ export default function CreateTimeLineEventModal({
               formik={f}
               helperText="Event's title (not required)"
               helperStyle={{ marginLeft: 2.5 }}
-              onFocus={() => {
-                console.log("focus");
-              }}
             />
             <ValidatedInput
               numberOfLines={f.values.desc.split("\n").length}

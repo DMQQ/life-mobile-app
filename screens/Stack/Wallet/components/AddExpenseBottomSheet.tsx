@@ -62,6 +62,7 @@ const AddExpenseBottomSheet = forwardRef<
 
   return (
     <BottomSheet
+      index={-1}
       ref={ref}
       onClose={() => {
         Keyboard.dismiss();
@@ -73,7 +74,7 @@ const AddExpenseBottomSheet = forwardRef<
         backgroundColor: Colors.primary,
       }}
       enablePanDownToClose
-      snapPoints={["50%", "70%"]}
+      snapPoints={["50%", "80%"]}
       backdropComponent={(props) => (
         <BottomSheetBackdrop
           appearsOnIndex={0}

@@ -17,7 +17,7 @@ import { WalletScreens } from ".";
 import { StatusBar } from "expo-status-bar";
 import AddExpenseBottomSheet from "./components/AddExpenseBottomSheet";
 import BottomSheet from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheet/BottomSheet";
-import WalletList, { WalletSheet } from "./components/WalletList";
+import WalletList from "./components/WalletList";
 
 const styles = StyleSheet.create({
   container: {
@@ -42,6 +42,13 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     padding: 5,
     flexDirection: "row",
+  },
+
+  recentText: {
+    color: Colors.secondary,
+    fontSize: 25,
+    fontWeight: "bold",
+    marginTop: 10,
   },
 
   expense_list: {},
@@ -72,6 +79,10 @@ export default function WalletScreen({ navigation }: WalletScreens<"Wallet">) {
     fontSize: interpolate(scrollY.value, [0, 200], [60, 40], Extrapolate.CLAMP),
   }));
 
+  const animatedRecentStyle = useAnimatedStyle(() => ({
+    fontSize: interpolate(scrollY.value, [0, 200], [25, 18], Extrapolate.CLAMP),
+  }));
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <StatusBar backgroundColor={Colors.primary} />
@@ -95,6 +106,7 @@ export default function WalletScreen({ navigation }: WalletScreens<"Wallet">) {
         </Animated.View>
 
         <ActionTiles
+          scrollY={scrollY}
           onAddExpense={() => bottomSheetRef.current?.snapToIndex(0)}
         />
 
@@ -104,16 +116,9 @@ export default function WalletScreen({ navigation }: WalletScreens<"Wallet">) {
             marginBottom: 10,
           }}
         >
-          <Text
-            style={{
-              color: Colors.secondary,
-              fontSize: 25,
-              fontWeight: "bold",
-              marginTop: 10,
-            }}
-          >
+          <Animated.Text style={[styles.recentText, animatedRecentStyle]}>
             Recent expenses ({wallet?.expenses.length})
-          </Text>
+          </Animated.Text>
         </Ripple>
 
         {loading && (
@@ -137,7 +142,11 @@ export default function WalletScreen({ navigation }: WalletScreens<"Wallet">) {
         )}
       </View>
 
-      <WalletList onScroll={onAnimatedScrollHandler} wallet={data?.wallet} />
+      <WalletList
+        scrollY={scrollY}
+        onScroll={onAnimatedScrollHandler}
+        wallet={data?.wallet}
+      />
 
       <BalanceAlertEditModal
         visible={modalVisible}

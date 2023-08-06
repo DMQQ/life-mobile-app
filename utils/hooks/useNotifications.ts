@@ -33,8 +33,6 @@ export default function useNotifications() {
       projectId: require("../../app.json")?.expo?.extra?.eas?.projectId,
     });
 
-    console.log(token);
-
     return token.data;
   }
 

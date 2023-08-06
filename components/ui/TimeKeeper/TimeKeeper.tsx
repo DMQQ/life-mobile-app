@@ -25,11 +25,15 @@ interface TimeKeeperProps {
   headLineText?: string;
 
   finishButtonText?: string;
+
+  pausedOnStart?: boolean;
+
+  text: string;
 }
 
 export default function TimeKeeper(props: TimeKeeperProps) {
   const [time, setTime] = useState(0); // seconds
-  const [isStopped, setIsStopped] = useState(false);
+  const [isStopped, setIsStopped] = useState(props?.pausedOnStart || false);
 
   useEffect(() => {
     if (
@@ -72,7 +76,7 @@ export default function TimeKeeper(props: TimeKeeperProps) {
       </View>
       <View style={{ justifyContent: "center" }}>
         <Text style={{ color: "#fff", fontSize: 18, fontWeight: "bold" }}>
-          12x reps
+          {props.text}
         </Text>
       </View>
       {/* Controls */}

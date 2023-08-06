@@ -16,7 +16,13 @@ import useDeleteActivity from "../hooks/useDeleteActivity";
 import Color from "color";
 import { EvilIcons, Feather } from "@expo/vector-icons";
 
-import Animated from "react-native-reanimated";
+import Animated, {
+  Extrapolate,
+  SharedValue,
+  interpolate,
+  useAnimatedStyle,
+  withTiming,
+} from "react-native-reanimated";
 import { NativeSyntheticEvent } from "react-native";
 
 export const WalletSheet = forwardRef<BottomSheet, { children: ReactNode }>(
@@ -47,6 +53,7 @@ export const WalletSheet = forwardRef<BottomSheet, { children: ReactNode }>(
 
 export default function WalletList(props: {
   wallet: Wallet;
+  scrollY: SharedValue<number>;
   onScroll: (event: NativeSyntheticEvent<NativeScrollEvent>) => void;
 }) {
   const [selected, setSelected] = useState<WalletElement | undefined>(
@@ -68,6 +75,42 @@ export default function WalletList(props: {
     </Text>
   );
 
+  const AnimatedWalletItem = ({
+    item,
+    index,
+  }: {
+    index: number;
+    item: WalletElement;
+  }) => {
+    const ITEM_HEIGHT = 70;
+    const animatedStyle = useAnimatedStyle(() => ({
+      transform: [
+        {
+          scale: interpolate(
+            props.scrollY.value,
+            [
+              (index - 1) * ITEM_HEIGHT,
+              index * ITEM_HEIGHT,
+              (index + 1) * ITEM_HEIGHT,
+            ],
+            [1, 1, 0.75],
+            Extrapolate.CLAMP
+          ),
+        },
+      ],
+    }));
+    return (
+      <WalletItem
+        animatedStyle={animatedStyle}
+        handlePress={() => {
+          setSelected(item);
+          sheet.current?.expand();
+        }}
+        {...item}
+      />
+    );
+  };
+
   return (
     <>
       <Animated.FlatList
@@ -80,14 +123,8 @@ export default function WalletList(props: {
         data={props?.wallet?.expenses || []}
         keyExtractor={(expense: WalletElement) => expense.id}
         // getItem={(data, index) => data[index] as WalletElement}
-        renderItem={({ item }) => (
-          <WalletItem
-            handlePress={() => {
-              setSelected(item);
-              sheet.current?.expand();
-            }}
-            {...item}
-          />
+        renderItem={({ item, index }) => (
+          <AnimatedWalletItem index={index} item={item} />
         )}
       />
 
