@@ -5,6 +5,7 @@ import Colors from "../../constants/Colors";
 import Ripple from "react-native-material-ripple";
 import { Ionicons } from "@expo/vector-icons";
 import useKeyboard from "../../utils/hooks/useKeyboard";
+import Animated, { FadeInDown, FadeOutDown } from "react-native-reanimated";
 
 const styles = StyleSheet.create({
   container: {
@@ -58,16 +59,16 @@ export default function BottomTab({
 
   const keyboard = useKeyboard();
 
-  if (
-    state.routes[state.index].state?.routes
-      .map((subRoute) => subRoute.name)
-      .some((v) => ["Workout", "Exercise"].includes(v)) ||
-    keyboard
-  )
-    return null;
+  const isOpenSubScreen = (state.routes[state.index].state?.index || 0) > 0;
+
+  if (isOpenSubScreen || keyboard) return null;
 
   return (
-    <View style={[styles.container, { paddingBottom: 5 }]}>
+    <Animated.View
+      style={[styles.container, { paddingBottom: 5 }]}
+      entering={FadeInDown}
+      exiting={FadeOutDown}
+    >
       <Btn route="TimelineScreens" iconName={"calendar"} />
 
       <Btn route="NotesScreens" iconName={"clipboard"} />
@@ -77,6 +78,6 @@ export default function BottomTab({
       <Btn route="WorkoutScreens" iconName={"barbell"} />
 
       <Btn route="WalletScreens" iconName={"wallet"} />
-    </View>
+    </Animated.View>
   );
 }
