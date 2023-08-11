@@ -1,11 +1,12 @@
 import BottomSheet, {
   BottomSheetBackdrop,
+  BottomSheetBackdropProps,
   BottomSheetFlatList,
 } from "@gorhom/bottom-sheet";
 import Colors from "../../../../constants/Colors";
 import { Text, View, StyleSheet } from "react-native";
 import { Exercise, ExerciseProgress } from "../../../../types";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { gql, useQuery } from "@apollo/client";
 import useUser from "../../../../utils/hooks/useUser";
 import Ripple from "react-native-material-ripple";
@@ -16,6 +17,11 @@ import Button from "../../../../components/ui/Button/Button";
 import * as yup from "yup";
 import useUpdateProgress from "../../../../components/Exercise/UpdateProgressModal/useUpdateProgress";
 import useGetExerciseProgressQuery from "../hooks/useGetExerciseProgressQuery";
+import Animated, {
+  FadeInDown,
+  FadeInUp,
+  FadeOutDown,
+} from "react-native-reanimated";
 
 const styles = StyleSheet.create({
   title: { color: Colors.secondary, fontWeight: "bold", fontSize: 25 },
@@ -99,6 +105,18 @@ export default function ExerciseProgressSheet(
     onDismiss: () => setIsVisible(false),
   });
 
+  // fixes backdrop flickering on state change
+  const backdropComponent = useCallback(
+    (props: BottomSheetBackdropProps) => (
+      <BottomSheetBackdrop
+        appearsOnIndex={0}
+        disappearsOnIndex={-1}
+        {...props}
+      />
+    ),
+    []
+  );
+
   return (
     <BottomSheet
       onClose={() => props.onClearSelectedExercise()}
@@ -113,13 +131,7 @@ export default function ExerciseProgressSheet(
       }}
       // enableOverDrag
       enablePanDownToClose
-      backdropComponent={(props) => (
-        <BottomSheetBackdrop
-          appearsOnIndex={0}
-          disappearsOnIndex={-1}
-          {...props}
-        />
-      )}
+      backdropComponent={backdropComponent}
       style={{ padding: 10 }}
     >
       <Text style={styles.title}>{props.selectedExercise?.title}</Text>
@@ -195,7 +207,7 @@ const CreateProgressForm = (props: {
   onClose: Function;
 }) => {
   const style = {
-    width: Layout.screen.width - 20,
+    width: (Layout.screen.width - 20) / 2 - 5,
     marginLeft: 10,
   };
 
@@ -210,12 +222,14 @@ const CreateProgressForm = (props: {
       }}
     >
       {(f) => (
-        <View>
-          <View
+        <View style={{ marginTop: 10 }}>
+          <Animated.View
+            exiting={FadeOutDown.delay(100)}
+            entering={FadeInDown}
             style={{
-              //  flexDirection: "row",
-              width: Layout.screen.width - 20,
-              marginTop: 10,
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "flex-start",
             }}
           >
             <ValidatedInput
@@ -234,25 +248,37 @@ const CreateProgressForm = (props: {
               keyboardType="numeric"
               keyboardAppearance="dark"
             />
+          </Animated.View>
+          <Animated.View
+            exiting={FadeOutDown.delay(50)}
+            entering={FadeInDown.delay(50)}
+          >
             <ValidatedInput
-              style={style}
+              style={{ width: "100%" }}
               formik={f}
               name="weight"
               placeholder="Weight [kg/lbs]"
               keyboardType="numeric"
               keyboardAppearance="dark"
             />
-          </View>
-          <Button
-            onPress={() => {
-              f.handleSubmit();
-            }}
-            style={{ padding: 15, borderRadius: 100 }}
-            type="contained"
-            color="ternary"
+          </Animated.View>
+
+          <Animated.View
+            exiting={FadeOutDown.delay(0)}
+            entering={FadeInDown.delay(75)}
           >
-            Save
-          </Button>
+            <Button
+              disabled={!(f.dirty && f.isValid)}
+              onPress={() => {
+                f.handleSubmit();
+              }}
+              style={{ padding: 15, borderRadius: 100 }}
+              type="contained"
+              color="ternary"
+            >
+              Save
+            </Button>
+          </Animated.View>
         </View>
       )}
     </Formik>
