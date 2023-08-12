@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef, forwardRef } from "react";
 import ScreenContainer from "../../../components/ui/ScreenContainer";
 import ExerciseList from "../../../components/Exercise/ExerciseList/ExerciseList";
-import { View, Text, ScrollView } from "react-native";
+import { View, Text, ScrollView, StyleSheet, FlatList } from "react-native";
 import Button from "../../../components/ui/Button/Button";
 import { WorkoutScreenProps } from "./types";
 import ExerciseProgressSheet from "./components/ExerciseProgressSheet";
@@ -21,6 +21,42 @@ import Animated, { FadeInDown } from "react-native-reanimated";
 import useGetWorkoutQuery from "./hooks/useGetWorkoutQuery";
 import { useAppSelector } from "../../../utils/redux";
 import Input from "../../../components/ui/TextInput/TextInput";
+import { AntDesign } from "@expo/vector-icons";
+import Layout from "../../../constants/Layout";
+import ExerciseTile from "../../../components/Exercise/ExerciseTile/ExerciseTile";
+
+const styles = StyleSheet.create({
+  pendingText: {
+    color: Colors.secondary,
+    fontWeight: "bold",
+    fontSize: 12,
+    marginLeft: 5,
+    letterSpacing: 1,
+    lineHeight: 25,
+  },
+  titleText: {
+    color: Colors.text_light,
+    fontSize: 25,
+    fontWeight: "bold",
+  },
+  headerContainer: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    marginBottom: 5,
+  },
+  container: {
+    backgroundColor: Color(Colors.primary).lighten(0.5).hex(),
+    marginBottom: 10,
+    padding: 10,
+    borderRadius: 10,
+  },
+  listInfoText: {
+    color: Colors.secondary,
+    fontSize: 18,
+    fontWeight: "bold",
+    padding: 10,
+  },
+});
 
 export default function Workout({
   navigation,
@@ -81,80 +117,81 @@ export default function Workout({
 
   return (
     <ScreenContainer>
-      <ExerciseList
-        onExerciseTilePress={(exercise) => setSelectedExercise(exercise)}
-        exercises={data?.workout.exercises}
-        ListHeaderComponent={
-          <View
-            style={{
-              backgroundColor: Color(Colors.primary).lighten(0.5).hex(),
-              marginBottom: 10,
-              padding: 10,
-              borderRadius: 10,
-            }}
-          >
-            <Text
+      <View style={styles.container}>
+        <View style={styles.headerContainer}>
+          <Text style={styles.titleText}>{data?.workout?.title}</Text>
+
+          <Text style={styles.pendingText}>PENDING</Text>
+        </View>
+
+        <Text style={{ color: Colors.text_dark }}>
+          <Text style={{ fontWeight: "bold", fontSize: 17 }}>600</Text> people
+          used this workout
+        </Text>
+        <Text style={{ color: Colors.text_dark }}>
+          Estimated duration of {estimatedDurationTime()}
+          min with 2min rest
+        </Text>
+
+        <Text style={{ color: Colors.text_dark }}>
+          {data?.workout?.description}
+        </Text>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={{ marginTop: 10 }}
+        >
+          {[0, 1, 2].map((id) => (
+            <View
               style={{
-                color: Colors.text_light,
-                fontSize: 25,
-                fontWeight: "bold",
+                backgroundColor: Colors.primary_light,
+                width: 120,
+                height: 60,
+                borderRadius: 10,
+                marginRight: 10,
               }}
-            >
-              {data?.workout?.title}
-            </Text>
+              key={id}
+            />
+          ))}
+        </ScrollView>
+      </View>
 
-            <Text style={{ color: Colors.text_dark }}>
-              <Text style={{ fontWeight: "bold", fontSize: 17 }}>600</Text>{" "}
-              people used this workout
+      <View style={{ flex: 1 }}>
+        <ExerciseList
+          ListHeaderComponent={
+            <Text style={styles.listInfoText}>
+              All Exercises ({data?.workout?.exercises?.length})
             </Text>
-            <Text style={{ color: Colors.text_dark }}>
-              Estimated duration of {estimatedDurationTime()}
-              min with 2min rest
-            </Text>
+          }
+          onExerciseTilePress={(exercise) => setSelectedExercise(exercise)}
+          exercises={data?.workout.exercises}
+        />
+      </View>
 
-            <Text style={{ color: Colors.text_dark }}>
-              {data?.workout?.description}
-            </Text>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              style={{ marginTop: 10 }}
-            >
-              {[0, 1, 2].map((id) => (
-                <View
-                  style={{
-                    backgroundColor: Colors.primary_light,
-                    width: 120,
-                    height: 60,
-                    borderRadius: 10,
-                    marginRight: 10,
-                  }}
-                  key={id}
-                />
-              ))}
-            </ScrollView>
-          </View>
-        }
-        ListFooterComponent={
-          <Animated.View
-            entering={FadeInDown.delay(data?.workout?.exercises.length * 75)}
-          >
-            <AppendExercise onPress={() => sheetRef.current?.expand()} />
-          </Animated.View>
-        }
-      />
-
-      <Button
-        type="contained"
-        color="ternary"
-        fontStyle={{ color: "#000", fontSize: 18 }}
-        style={{ paddingVertical: 15, borderRadius: 100 }}
-        onPress={onStartWorkout}
+      <View
+        style={{
+          flexDirection: "row",
+          paddingTop: 5,
+        }}
       >
-        {canContinueWithOldExercise
-          ? `Resume workout on (${workout.activeExerciseIndex + 1}) exercise`
-          : "Start workout"}
-      </Button>
+        <Button
+          type="contained"
+          color="ternary"
+          fontStyle={{ color: "#000", fontSize: 18 }}
+          style={{
+            borderRadius: 100,
+            flex: 1,
+            marginRight: 5,
+            padding: 15,
+          }}
+          onPress={onStartWorkout}
+        >
+          {canContinueWithOldExercise
+            ? `Resume on (${workout.activeExerciseIndex + 1}) exercise`
+            : "Start workout"}
+        </Button>
+        <AppendExercise onPress={() => sheetRef.current?.expand()} />
+      </View>
 
       <ExerciseProgressSheet
         workoutId={route.params.workoutId}
@@ -172,19 +209,17 @@ export default function Workout({
 }
 
 const AppendExercise = (props: { onPress: Function }) => (
-  <View style={{ width: "100%" }}>
-    <Button
-      onPress={() => props.onPress()}
-      fontStyle={{ color: Colors.secondary, fontSize: 15 }}
-      style={{
-        backgroundColor: Color(Colors.secondary).alpha(0.1).string(),
-        borderRadius: 100,
-        paddingVertical: 15,
-      }}
-    >
-      add exercise
-    </Button>
-  </View>
+  <Button
+    onPress={() => props.onPress()}
+    fontStyle={{ color: Colors.secondary, fontSize: 15 }}
+    style={{
+      backgroundColor: Color(Colors.secondary).alpha(0.1).string(),
+      borderRadius: 100,
+      width: 55,
+    }}
+  >
+    <AntDesign name="plus" color={Colors.secondary} size={25} />
+  </Button>
 );
 
 interface ExerciseActionTileProps {

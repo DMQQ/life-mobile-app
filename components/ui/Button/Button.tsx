@@ -73,7 +73,7 @@ export default function Button({
       rippleCentered
       onPress={callback}
       disabled={disabled}
-      style={[buttonStyle, styles.button, style]}
+      style={[styles.button, buttonStyle, style]}
       {...rest}
     >
       {/* {!!badge && <Badge amount={badge} left />} */}

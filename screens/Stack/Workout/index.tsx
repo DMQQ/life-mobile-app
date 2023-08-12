@@ -8,6 +8,7 @@ import { WorkoutStackParamList } from "./types";
 import PendingWorkout from "./PendingWorkout";
 import { horizontalAnimation } from "../../../navigation/assets/screen_animations";
 import Colors from "../../../constants/Colors";
+import WorkoutSummary from "./WorkoutSummary";
 
 const Stack = createStackNavigator<WorkoutStackParamList>();
 
@@ -38,6 +39,13 @@ export default function WorkoutScreens() {
         options={{
           presentation: "modal",
           ...horizontalAnimation,
+        }}
+      />
+      <Stack.Screen
+        name="WorkoutSummary"
+        component={WorkoutSummary}
+        options={{
+          headerTitle: "Summary",
         }}
       />
     </Stack.Navigator>
