@@ -22,6 +22,8 @@ export const workoutSlice = createSlice({
     isWorkoutPending: false,
     exercises: [] as ExerciseExtended[],
 
+    skipped_exercises: [] as ExerciseExtended[],
+
     activeExerciseIndex: 0,
     currentExercise: {} as ExerciseExtended,
 
@@ -63,20 +65,22 @@ export const workoutSlice = createSlice({
         state.isWorkoutPending = false;
         return;
       }
-      if (payload.skip === undefined) payload.skip = false;
 
-      let temp = [...state.exercises];
-
-      temp[state.activeExerciseIndex] = {
+      state.exercises[state.activeExerciseIndex] = {
         ...state.exercises[state.activeExerciseIndex],
         isFinished: !payload.skip,
-        isSkipped: payload.skip,
+        isSkipped: payload.skip || false,
       };
 
-      state.activeExerciseIndex += 1;
+      if (payload.skip)
+        state.skipped_exercises = [
+          ...state.skipped_exercises,
+          state.currentExercise,
+        ];
 
-      if (!payload.skip)
-        state.currentExercise = state.exercises[state.activeExerciseIndex];
+      state.activeExerciseIndex++;
+
+      state.currentExercise = state.exercises[state.activeExerciseIndex];
     },
 
     end(state) {

@@ -3,11 +3,9 @@ import { Animated, Easing, View } from "react-native";
 import Svg, { Circle, Text } from "react-native-svg";
 import Colors from "../../../../constants/Colors";
 import Ripple from "react-native-material-ripple";
-import Color from "color";
 import Button from "../../../../components/ui/Button/Button";
 import { AntDesign } from "@expo/vector-icons";
-
-import { Text as RNText } from "react-native";
+import { useIsFocused } from "@react-navigation/native";
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
@@ -87,11 +85,23 @@ const ClockTimer = (props: ClockTimerProps) => {
     }
   };
 
-  const onReset = () => {
-    setIsActive(true);
-    setTimer(props.initialSecondsLeft);
+  const isFocused = useIsFocused();
+
+  useEffect(() => {
+    if (!isFocused) onStopTimer();
+  }, [isFocused]);
+
+  const onReset = (time = props.initialSecondsLeft) => {
+    setTimeout(() => setIsActive(true), 1000);
+    setTimer(time);
     animatedValue.setValue(circumference);
   };
+
+  function changeRestTime(action: "increment" | "decrement") {
+    const newTime = action === "increment" ? timer + 15 : timer - 15;
+
+    onReset(newTime);
+  }
 
   return (
     <View>
@@ -157,33 +167,23 @@ const ClockTimer = (props: ClockTimerProps) => {
         <View
           style={{
             flexDirection: "row",
-            marginTop: 10,
+            marginTop: 20,
             justifyContent: "center",
           }}
         >
           <Button
+            onPress={() => changeRestTime("decrement")}
             type="contained"
             style={{
               backgroundColor: Colors.secondary,
+              marginRight: 10,
             }}
           >
             <AntDesign name="arrowdown" size={24} color="black" />
           </Button>
 
-          <RNText
-            style={{
-              backgroundColor: Colors.secondary,
-              fontSize: 25,
-              padding: 10,
-              paddingHorizontal: 15,
-              marginHorizontal: 5,
-              borderRadius: 5,
-            }}
-          >
-            {Math.floor(props.initialSecondsLeft / 60)}
-            <RNText style={{ fontSize: 15 }}>min</RNText>
-          </RNText>
           <Button
+            onPress={() => changeRestTime("increment")}
             style={{
               backgroundColor: Colors.secondary,
             }}

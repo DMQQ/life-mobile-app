@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import Colors from "../../../constants/Colors";
 import Ripple from "react-native-material-ripple";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback, memo } from "react";
 import { WorkoutScreenProps } from "./types";
 import { useDispatch } from "react-redux";
 import { useAppSelector } from "../../../utils/redux";
@@ -101,7 +101,7 @@ const NextExercise = (props: { title?: string }) => (
   </View>
 );
 
-export default function PendingWorkout({
+function PendingWorkout({
   navigation,
   route,
 }: WorkoutScreenProps<"PendingWorkout">) {
@@ -116,8 +116,10 @@ export default function PendingWorkout({
   const hasNext = workout.activeExerciseIndex <= workout.exercises.length;
 
   // const exercise = workout.exercises[workout.activeExerciseIndex]; displays current exercise from redux when you go back (screen) via system gesture
-  const exercise = workout.exercises.find(
-    (ex) => ex.exerciseId === route.params.exerciseId
+  const exercise = useMemo(
+    () =>
+      workout.exercises.find((ex) => ex.exerciseId === route.params.exerciseId),
+    [route.params.exerciseId, workout.exercises]
   );
   const nextExercise = workout.exercises?.[workout.activeExerciseIndex + 1] as
     | Exercise
@@ -137,6 +139,7 @@ export default function PendingWorkout({
         "You reached the end of workout",
         ToastAndroid.SHORT
       ); // replace toast notification with WorkoutSummary screen (SOOON)
+
     dispatch(workoutActions.next({ skip: skip }));
     navigation.push("PendingWorkout", {
       workoutId: route.params.workoutId,
@@ -157,7 +160,7 @@ export default function PendingWorkout({
         <NextButton
           isPending={!finished}
           hasNext={hasNext}
-          onNext={() => onNextExercise(finished)}
+          onNext={() => onNextExercise(!finished)}
         />
       ),
     });
@@ -169,16 +172,16 @@ export default function PendingWorkout({
 
   const buttonText =
     currentSet > numberOfSets
-      ? "Next exercise"
-      : !isPlaying && currentSet < numberOfSets
+      ? "Next Exercise"
+      : !isPlaying
       ? "Skip rest"
       : "Workout running";
 
   const handleActionButtonPress = () => {
     Vibration.cancel();
     if (currentSet > numberOfSets && typeof nextExercise === "undefined") {
-      dispatch(workoutActions.end());
-      navigation.navigate("Workout", {
+      // dispatch(workoutActions.end());
+      navigation.navigate("WorkoutSummary", {
         workoutId: route.params.workoutId,
       });
       return;
@@ -252,8 +255,7 @@ export default function PendingWorkout({
                 textSize={25}
                 onCompleted={() => {
                   Vibration.vibrate([100, 400, 100, 400], true);
-
-                  setTimeout(Vibration.cancel, 4000);
+                  // setTimeout(Vibration.cancel, 4000);
                 }}
                 initialSecondsLeft={workout.options.rest}
                 circleRadius={150}
@@ -296,3 +298,5 @@ export default function PendingWorkout({
     </ScreenContainer>
   );
 }
+
+export default memo(PendingWorkout);
