@@ -5,17 +5,38 @@ import {
   View,
   ActivityIndicator,
   ToastAndroid,
+  StyleSheet,
 } from "react-native";
 import Colors from "../../../../constants/Colors";
 import Ripple from "react-native-material-ripple";
 import { useState, useRef } from "react";
-
 import * as ImagePicker from "expo-image-picker";
 import axios from "axios";
 import { useApolloClient } from "@apollo/client";
 import useGetTimelineById from "../hooks/query/useGetTimelineById";
 import { useNavigation } from "@react-navigation/native";
 import Url from "../../../../constants/Url";
+
+const styles = StyleSheet.create({
+  available: {
+    color: Colors.secondary,
+    fontSize: 19,
+    fontWeight: "bold",
+  },
+  img: {
+    width: 175,
+    height: 120,
+    marginVertical: 10,
+    borderRadius: 5,
+  },
+  uploadButton: {
+    backgroundColor: Colors.secondary,
+    borderRadius: 100,
+    padding: 5,
+    paddingHorizontal: 10,
+    flexDirection: "row",
+  },
+});
 
 interface FileListProps {
   timelineId: string;
@@ -98,16 +119,16 @@ export default function FileList({ timelineId }: FileListProps) {
     await refetch();
   }
 
+  const handleShowPreview = (item: any) =>
+    navigation.navigate("ImagesPreview", {
+      selectedImage: item.url,
+      timelineId,
+    });
+
   return (
     <View style={{ marginTop: 25 }}>
       <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-        <Text
-          style={{
-            color: Colors.secondary,
-            fontSize: 19,
-            fontWeight: "bold",
-          }}
-        >
+        <Text style={styles.available}>
           Available files ({data?.images.length})
         </Text>
         <UploadFileButton refetch={refetch} timelineId={timelineId} />
@@ -122,20 +143,10 @@ export default function FileList({ timelineId }: FileListProps) {
           <Ripple
             style={{ marginRight: 10 }}
             onLongPress={() => removePhoto(item.id)}
-            onPress={() =>
-              navigation.navigate("ImagesPreview", {
-                selectedImage: item.url,
-                timelineId,
-              })
-            }
+            onPress={handleShowPreview}
           >
             <Image
-              style={{
-                width: 175,
-                height: 120,
-                marginVertical: 10,
-                borderRadius: 5,
-              }}
+              style={styles.img}
               source={{
                 uri: Url.API + "/upload/images/" + item.url,
                 height: 120,
@@ -161,16 +172,7 @@ function UploadFileButton(props: {
   );
 
   return (
-    <Ripple
-      onPress={handleImagesSelect}
-      style={{
-        backgroundColor: Colors.secondary,
-        borderRadius: 100,
-        padding: 5,
-        paddingHorizontal: 10,
-        flexDirection: "row",
-      }}
-    >
+    <Ripple onPress={handleImagesSelect} style={styles.uploadButton}>
       {loading && (
         <ActivityIndicator
           color={Colors.primary}

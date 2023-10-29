@@ -1,8 +1,6 @@
 import { View, Text, StyleSheet } from "react-native";
-import Modal from "../../../../components/ui/Modal";
 import Input from "../../../../components/ui/TextInput/TextInput";
 import Colors from "../../../../constants/Colors";
-import Button from "../../../../components/ui/Button/Button";
 import SegmentedButtons from "../../../../components/ui/SegmentedButtons";
 import Ripple from "react-native-material-ripple";
 import Color from "color";
@@ -13,8 +11,6 @@ const styles = StyleSheet.create({
   arrow_button: {
     backgroundColor: Color(Colors.primary).lighten(0.5).hex(),
     marginBottom: 10,
-    borderWidth: 1,
-    borderColor: Colors.primary_light,
     justifyContent: "center",
     alignItems: "center",
     width: 50,

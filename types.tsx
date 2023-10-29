@@ -69,9 +69,6 @@ export interface Workout {
 }
 
 export interface Exercise {
-  sets?: number;
-  reps?: number;
-
   exerciseId: string;
   title: string;
   description: string;

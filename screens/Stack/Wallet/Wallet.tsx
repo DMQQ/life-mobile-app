@@ -33,7 +33,8 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 60,
     fontWeight: "bold",
-    color: Colors.secondary,
+    // color: Colors.secondary,
+    color: "#fff",
     letterSpacing: 1,
   },
 
@@ -45,7 +46,7 @@ const styles = StyleSheet.create({
   },
 
   recentText: {
-    color: Colors.secondary,
+    color: "#fff",
     fontSize: 25,
     fontWeight: "bold",
     marginTop: 10,
@@ -76,11 +77,22 @@ export default function WalletScreen({ navigation }: WalletScreens<"Wallet">) {
   }));
 
   const animatedBalanceStyle = useAnimatedStyle(() => ({
-    fontSize: interpolate(scrollY.value, [0, 200], [60, 40], Extrapolate.CLAMP),
+    fontSize: interpolate(scrollY.value, [0, 200], [60, 30], Extrapolate.CLAMP),
+    transform: [
+      {
+        translateX: interpolate(
+          scrollY.value,
+          [0, 200],
+          [0, -110],
+          Extrapolate.CLAMP
+        ),
+      },
+    ],
   }));
 
   const animatedRecentStyle = useAnimatedStyle(() => ({
     fontSize: interpolate(scrollY.value, [0, 200], [25, 18], Extrapolate.CLAMP),
+    opacity: interpolate(scrollY.value, [0, 200], [1, 0]),
   }));
 
   return (
@@ -100,9 +112,6 @@ export default function WalletScreen({ navigation }: WalletScreens<"Wallet">) {
               <Text style={{ color: "#ffffff97", fontSize: 20 }}>zł </Text>
             </Animated.Text>
           </Ripple>
-          <Text style={{ color: "#ffffff97", fontSize: 15, marginTop: -10 }}>
-            Total balance
-          </Text>
         </Animated.View>
 
         <ActionTiles
@@ -110,16 +119,9 @@ export default function WalletScreen({ navigation }: WalletScreens<"Wallet">) {
           onAddExpense={() => bottomSheetRef.current?.snapToIndex(0)}
         />
 
-        <Ripple
-          style={{
-            paddingHorizontal: 5,
-            marginBottom: 10,
-          }}
-        >
-          <Animated.Text style={[styles.recentText, animatedRecentStyle]}>
-            Recent expenses ({wallet?.expenses.length})
-          </Animated.Text>
-        </Ripple>
+        <Animated.Text style={[styles.recentText, animatedRecentStyle]}>
+          Recent expenses ({wallet?.expenses.length})
+        </Animated.Text>
 
         {loading && (
           <Skeleton

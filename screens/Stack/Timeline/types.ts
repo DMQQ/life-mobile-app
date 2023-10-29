@@ -5,6 +5,7 @@ export type TimelineRootStack = {
   TimelineDetails: { timelineId: string };
   TimelineCreate: { selectedDate: string };
   ImagesPreview: { selectedImage: string; timelineId: string };
+  Schedule: { selected: string };
 };
 
 export type TimelineScreenProps<Key extends keyof TimelineRootStack> =

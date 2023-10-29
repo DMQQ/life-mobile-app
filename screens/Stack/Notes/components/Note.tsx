@@ -1,5 +1,5 @@
 import Color from "color";
-import { StyleSheet, View, Text, ToastAndroid } from "react-native";
+import { StyleSheet, View, Text, ToastAndroid, Alert } from "react-native";
 import Colors from "../../../../constants/Colors";
 import Ripple from "react-native-material-ripple";
 import { useNavigation } from "@react-navigation/core";
@@ -9,6 +9,8 @@ import { BlurView } from "expo-blur"; // NOT WORKING
 import * as LocalAuthentication from "expo-local-authentication";
 import { useState } from "react";
 import Skeleton from "../../../../components/SkeletonLoader/Skeleton";
+import { useDispatch } from "react-redux";
+import { notesActions } from "../../../../utils/redux/notes/notes";
 
 const styles = StyleSheet.create({
   container: {
@@ -67,7 +69,7 @@ interface INote {
 type NoteProps = INote & {};
 
 export default function Note(props: NoteProps) {
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
 
   const [isUnlocked, setIsUnlocked] = useState(false);
 
@@ -91,7 +93,7 @@ export default function Note(props: NoteProps) {
 
   const onPress = () => {
     const navigate = () =>
-      navigation.navigate<any>("Note", {
+      navigation.navigate("Note", {
         noteId: props.noteId,
       });
 
@@ -103,8 +105,23 @@ export default function Note(props: NoteProps) {
     navigate();
   };
 
+  const dispatch = useDispatch();
+
+  const removeNote = () => {
+    Alert.alert("Remove", "", [
+      {
+        onPress: () => dispatch(notesActions.removeNote(+props.noteId)),
+        text: "Remove",
+      },
+      {
+        onPress: () => null,
+        text: "cancel",
+      },
+    ]);
+  };
+
   return (
-    <Ripple style={styles.container} onPress={onPress}>
+    <Ripple style={styles.container} onPress={onPress} onLongPress={removeNote}>
       <View style={styles.header}>
         <SharedElement id={`note.title.${props.noteId}`}>
           <View style={{ width: "100%" }}>

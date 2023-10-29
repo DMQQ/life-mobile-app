@@ -9,6 +9,7 @@ import * as LocalAuthentication from "expo-local-authentication";
 import Colors from "../../../constants/Colors";
 import Button from "../../../components/ui/Button/Button";
 import Layout from "../../../constants/Layout";
+import { useAppSelector } from "../../../utils/redux";
 
 export default function NotesScreen({ navigation }: ScreenProps<any>) {
   useLayoutEffect(() => {
@@ -16,19 +17,19 @@ export default function NotesScreen({ navigation }: ScreenProps<any>) {
       header: (props) => <SearchBar onSubmitEditing={() => {}} />,
     });
   }, []);
- 
-  //const [isAuth, setIsAuth] = useState(false);
+
+  const notes = useAppSelector((a) => a.notes);
 
   return (
     <ScreenContainer scroll>
-      {["1a", "2a", "3a", "4a", "5a", "6a"].map((id) => (
+      {notes.notes.map((n) => (
         <Note
-          key={id}
-          noteId={id}
-          secure
+          key={n.id}
+          noteId={n.id.toString()}
+          secure={n.secure}
           tasks={[]}
-          title={`Test title id: ${id}`}
-          text="Lorem ipsum dolor sit amet consectetur, adipisicing elit. Et excepturi harum iusto labore, itaque illum fuga animi quos aperiam facilis minus nulla cum dolores eos enim possimus rem inventore doloremque!"
+          title={n.content.split("\n")[0]}
+          text={n.content}
         />
       ))}
     </ScreenContainer>

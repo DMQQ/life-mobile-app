@@ -11,7 +11,7 @@ export default StyleSheet.create({
     marginLeft: 10,
   },
   eventsLeft: {
-    color: Colors.primary_lighter,
+    color: Colors.secondary,
     fontSize: 17,
     marginLeft: 10,
   },
@@ -41,9 +41,9 @@ export default StyleSheet.create({
   itemTimeLeft: { color: Colors.secondary, fontSize: 17 },
 
   eventTitle: {
-    color: Colors.secondary,
+    color: "#fff",
+    fontSize: 20,
     fontWeight: "bold",
-    fontSize: 25,
   },
   pickerStyle: {
     backgroundColor: Color(Colors.primary).lighten(0.5).string(),
@@ -55,14 +55,9 @@ export default StyleSheet.create({
     justifyContent: "space-around",
   },
   submitButton: {
-    marginTop: 15,
     paddingVertical: 15,
     backgroundColor: Colors.secondary,
     flexDirection: "row-reverse",
-
-    position: "absolute",
-    bottom: 10,
-    left: 10,
     width: Layout.screen.width - 20,
   },
   button: {

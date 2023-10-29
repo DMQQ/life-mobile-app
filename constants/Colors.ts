@@ -1,10 +1,19 @@
 import Color from "color";
 
-const secondary_candidates = ['#00C896','#F6B161','#8685EF','#1BA3B4','#FFA51A','#FF1A56','#BE15A8']
+export const secondary_candidates = [
+  "#00C896",
+  "#F6B161",
+  "#8685EF",
+  "#1BA3B4",
+  "#FFA51A",
+  "#FF1A56",
+  "#BE15A8",
+];
 
-const primary = "#0F0F0F"
-const secondary = secondary_candidates[Math.floor(Math.random() * secondary_candidates.length)]
-const ternary = '#8685EF'
+const primary = "#0F0F0F";
+const secondary =
+  secondary_candidates[Math.floor(Math.random() * secondary_candidates.length)];
+const ternary = "#8685EF";
 
 export default {
   primary: primary,
@@ -25,4 +34,11 @@ export default {
 
   text_light: "#FAF8FF",
   text_dark: "gray",
+};
+
+export const Sizing = {
+  heading: 30,
+  subHead: 22.5,
+  text: 18,
+  tooltip: 14,
 };

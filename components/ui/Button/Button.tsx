@@ -43,12 +43,12 @@ export default function Button({
   style,
   fontStyle,
   iconStyle,
-  type = "text",
-  variant = "text",
+  type = "contained",
+  variant = "ternary",
   badge,
   size = "md",
   disabled,
-  borderRadius = "sm",
+  borderRadius = "full",
   color,
   ...rest
 }: ButtonProps) {
