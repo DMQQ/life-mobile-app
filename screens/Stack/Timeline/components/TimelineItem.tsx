@@ -4,13 +4,12 @@ import moment from "moment";
 import Ripple from "react-native-material-ripple";
 import { Alert, Text, ToastAndroid, View } from "react-native";
 import timelineStyles from "./timeline.styles";
-import Colors from "../../../../constants/Colors";
 import { GetTimelineQuery } from "../hooks/query/useGetTimeLineQuery";
 
 export default function TimelineItem(
   timeline: GetTimelineQuery & { location: "timeline" | "root" }
 ) {
-  const { loading, remove } = useRemoveTimelineMutation(timeline);
+  const { remove } = useRemoveTimelineMutation(timeline);
 
   const navigation = useNavigation<any>();
 

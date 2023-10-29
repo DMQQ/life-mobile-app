@@ -10,6 +10,7 @@ import {
   fadeInFromBottomAndScaleUp,
   horizontalAnimation,
 } from "../../../../navigation/assets/screen_animations";
+import ScheduleScreen from "./Schedule";
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -25,7 +26,10 @@ export default function TimelineScreens({ route }: any) {
   }, [route.params]);
 
   return (
-    <Stack.Navigator screenOptions={{ ...fadeInFromBottomAndScaleUp }}>
+    <Stack.Navigator
+      initialRouteName="Timeline"
+      screenOptions={{ ...fadeInFromBottomAndScaleUp }}
+    >
       <Stack.Screen name="Timeline" component={Timeline} />
       <Stack.Screen name="TimelineDetails" component={TimelineDetails} />
       <Stack.Screen
@@ -40,6 +44,12 @@ export default function TimelineScreens({ route }: any) {
         }}
         name="ImagesPreview"
         component={ImagesPreview}
+      />
+
+      <Stack.Screen
+        name="Schedule"
+        component={ScheduleScreen}
+        options={{ headerShown: false }}
       />
     </Stack.Navigator>
   );

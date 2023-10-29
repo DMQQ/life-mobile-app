@@ -1,22 +1,22 @@
-import { View, Text, FlatList, TextInput } from "react-native";
-import ScreenContainer from "../../../components/ui/ScreenContainer";
+import { View, Text, FlatList, TextInput, ScrollView } from "react-native";
+import ScreenContainer from "../../../../components/ui/ScreenContainer";
 import { gql, useQuery } from "@apollo/client";
-import useUser from "../../../utils/hooks/useUser";
+import useUser from "../../../../utils/hooks/useUser";
 import Color from "color";
-import Colors from "../../../constants/Colors";
-import { Workout } from "../../../types";
+import Colors from "../../../../constants/Colors";
+import { Workout } from "../../../../types";
 import Ripple from "react-native-material-ripple";
-import { WorkoutScreenProps } from "./types";
+import { WorkoutScreenProps } from "../types";
 import { Ionicons } from "@expo/vector-icons";
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 import Animated, {
   Layout,
   SlideInRight,
   SlideOutRight,
 } from "react-native-reanimated";
 
-import L from "../../../constants/Layout";
-import { useAppSelector } from "../../../utils/redux";
+import L from "../../../../constants/Layout";
+import { useAppSelector } from "../../../../utils/redux";
 import { useNavigation } from "@react-navigation/native";
 
 const GetWorkoutsQuery = gql`
@@ -169,6 +169,63 @@ const IconButton = (props: {
   </Animated.View>
 );
 
+const Menu = ({
+  isVisible,
+  navigation,
+  setIsVisible,
+}: {
+  isVisible: boolean;
+  navigation: any;
+  setIsVisible: any;
+}) =>
+  isVisible ? (
+    <View
+      style={{
+        position: "absolute",
+        width: L.screen.width,
+        height: L.screen.height,
+        backgroundColor: "rgba(0,0,0,0.5)",
+      }}
+    >
+      <View
+        // layout={Layout}
+        style={{
+          zIndex: 100,
+          position: "absolute",
+          right: 15,
+          bottom: 120,
+        }}
+      >
+        <IconButton
+          icon="create"
+          onPress={() => navigation.navigate("WorkoutCreate")}
+          color={Colors.secondary}
+          delay={isVisible ? 0 : 350}
+        />
+        <IconButton
+          icon="search"
+          onPress={() => {}}
+          color={Color(Colors.secondary).darken(0.2).string()}
+          delay={100}
+        />
+        <IconButton
+          icon="options"
+          onPress={() => {}}
+          color={Color(Colors.secondary).darken(0.4).string()}
+          delay={isVisible ? 150 : 50}
+        />
+        <IconButton
+          icon="close"
+          onPress={() => setIsVisible(false)}
+          color={Color(Colors.secondary).darken(0.6).string()}
+          delay={isVisible ? 200 : 0}
+        />
+      </View>
+    </View>
+  ) : null;
+
+// const ScreenBox = (props:{children:ReactNode}) => <View style={{width}}></View>
+
 export default function Workouts({
   navigation,
 }: WorkoutScreenProps<"Workouts">) {
@@ -179,63 +236,33 @@ export default function Workouts({
   return (
     <ScreenContainer style={{ padding: 0 }}>
       <SearchTab onPress={() => setIsVisible((p) => !p)} />
-      <FlatList
-        contentContainerStyle={{ paddingHorizontal: 10 }}
-        ListFooterComponentStyle={{
-          marginTop: 20,
-        }}
-        data={query.data?.workouts}
-        keyExtractor={(item) => item.workoutId}
-        renderItem={({ item }) => (
-          <WorkoutTile navigation={navigation} key={item.workoutId} {...item} />
-        )}
-      />
 
-      {isVisible && (
-        <View
-          style={{
-            position: "absolute",
-            width: L.screen.width,
-            height: L.screen.height,
-            backgroundColor: "rgba(0,0,0,0.5)",
-          }}
-        >
-          <View
-            // layout={Layout}
-            style={{
-              zIndex: 100,
-              position: "absolute",
-              right: 15,
-              bottom: 120,
+      <ScrollView horizontal pagingEnabled scrollEnabled={false}>
+        <View style={{ width: L.screen.width }}>
+          <FlatList
+            contentContainerStyle={{ paddingHorizontal: 10 }}
+            ListFooterComponentStyle={{
+              marginTop: 20,
             }}
-          >
-            <IconButton
-              icon="create"
-              onPress={() => navigation.navigate("WorkoutCreate")}
-              color={Colors.secondary}
-              delay={isVisible ? 0 : 350}
-            />
-            <IconButton
-              icon="search"
-              onPress={() => {}}
-              color={Color(Colors.secondary).darken(0.2).string()}
-              delay={100}
-            />
-            <IconButton
-              icon="options"
-              onPress={() => {}}
-              color={Color(Colors.secondary).darken(0.4).string()}
-              delay={isVisible ? 150 : 50}
-            />
-            <IconButton
-              icon="close"
-              onPress={() => setIsVisible(false)}
-              color={Color(Colors.secondary).darken(0.6).string()}
-              delay={isVisible ? 200 : 0}
-            />
-          </View>
+            data={query.data?.workouts}
+            keyExtractor={(item) => item.workoutId}
+            renderItem={({ item }) => (
+              <WorkoutTile
+                navigation={navigation}
+                key={item.workoutId}
+                {...item}
+              />
+            )}
+          />
         </View>
-      )}
+        <View style={{ width: L.screen.width, backgroundColor: "#fff" }}></View>
+      </ScrollView>
+
+      <Menu
+        isVisible={isVisible}
+        navigation={navigation}
+        setIsVisible={setIsVisible}
+      />
     </ScreenContainer>
   );
 }

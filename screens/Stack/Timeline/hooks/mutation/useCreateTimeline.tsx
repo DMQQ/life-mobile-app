@@ -10,8 +10,8 @@ import { ToastAndroid } from "react-native";
 import * as Yup from "yup";
 
 const initialValues = {
-  title: "No title",
-  desc: "(no content)",
+  title: "",
+  desc: "",
   date: "",
   begin: "",
   end: "",

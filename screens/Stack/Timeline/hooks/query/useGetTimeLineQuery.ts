@@ -11,6 +11,14 @@ export interface GetTimelineQuery {
   beginTime: string;
   endTime: string;
   isCompleted: boolean;
+
+  todos: {
+    id: string;
+  }[];
+
+  images: {
+    id: string;
+  }[];
 }
 
 export const GET_TIMELINE_QUERY = gql`
@@ -27,8 +35,10 @@ export const GET_TIMELINE_QUERY = gql`
   }
 `;
 
-export default function useGetTimeLineQuery() {
-  const [selected, setSelected] = useState(moment().format("YYYY-MM-DD"));
+export default function useGetTimeLineQuery(date?: string) {
+  const [selected, setSelected] = useState(
+    date || moment().format("YYYY-MM-DD")
+  );
   const usr = useUser();
 
   const { data, loading, ...rest } = useQuery<{ timeline: GetTimelineQuery[] }>(

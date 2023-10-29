@@ -107,7 +107,7 @@ export default function WalletItem(
                 item.type === "expense" ? "arrow-bold-down" : "arrow-bold-up"
               }
               size={25}
-              color={item.type === "expense" ? Colors.error : Colors.secondary}
+              color={item.type === "expense" ? Colors.error : "lightgreen"}
             />
           </View>
         </View>

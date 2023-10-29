@@ -1,5 +1,5 @@
 import ScreenContainer from "../../../../components/ui/ScreenContainer";
-import { View, Text, FlatList } from "react-native";
+import { View, Text, FlatList, Image } from "react-native";
 import Calendar from "../../../../components/Calendar/Calendar";
 import moment from "moment";
 import timelineStyles from "../components/timeline.styles";
@@ -10,12 +10,12 @@ import { useEffect } from "react";
 import Skeleton from "../../../../components/SkeletonLoader/Skeleton";
 import { TimelineScreenProps } from "../types";
 import TimelineItem from "../components/TimelineItem";
+import { MaterialIcons } from "@expo/vector-icons";
 
 export default function Timeline({
   navigation,
 }: TimelineScreenProps<"Timeline">) {
-  const { data, selected, setSelected, loading, refetch } =
-    useGetTimeLineQuery();
+  const { data, selected, setSelected, loading } = useGetTimeLineQuery();
 
   const onDayPress = (day: { dateString: string }) =>
     setSelected(day.dateString);
@@ -34,16 +34,27 @@ export default function Timeline({
     <ScreenContainer style={{ padding: 0 }}>
       <Calendar onDayPress={onDayPress} />
 
-      <View style={{ padding: 10 }}>
+      <View
+        style={{
+          padding: 10,
+
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
         <Text style={timelineStyles.dayHeader}>
           {moment().format("YYYY-MM-DD") === selected
             ? `Today (${selected})`
             : selected}
         </Text>
-        <Text style={timelineStyles.eventsLeft}>
-          {data?.timeline === undefined ? 0 : data?.timeline.length}{" "}
-          {data?.timeline.length === 1 ? "event" : "events"}
-        </Text>
+
+        <Ripple
+          style={{ padding: 5 }}
+          onPress={() => navigation.navigate("Schedule", { selected })}
+        >
+          <MaterialIcons name="grid-view" size={24} color={Colors.secondary} />
+        </Ripple>
       </View>
 
       {loading && (
@@ -72,6 +83,7 @@ export default function Timeline({
       )}
 
       <ListContainer
+        navigation={navigation}
         onPress={navigateCreateTimelineEventModal}
         list={data?.timeline || []}
       />
@@ -79,19 +91,21 @@ export default function Timeline({
   );
 }
 
-const ListContainer = (props: { list: any[]; onPress: () => void }) => (
+const ListContainer = (props: {
+  list: any[];
+  onPress: () => void;
+  navigation: any;
+}) => (
   <View style={timelineStyles.listHeading}>
     <View style={timelineStyles.listHeadingContainer}>
       <Text style={timelineStyles.listHeadingText}>Events</Text>
+
       <Ripple style={{ padding: 10 }} onPress={() => props.onPress()}>
         <Text style={{ color: Colors.secondary, fontWeight: "bold" }}>
           CREATE EVENT
         </Text>
       </Ripple>
     </View>
-    {/* {props.list.map((timeline) => (
-      <TimelineItem key={timeline.id} {...timeline} />
-    ))} */}
 
     <FlatList
       keyExtractor={(timeline) => timeline.id}
@@ -100,11 +114,17 @@ const ListContainer = (props: { list: any[]; onPress: () => void }) => (
     />
 
     {props.list.length === 0 && (
-      <View style={{ padding: 10 }}>
-        <Text
-          style={{ color: Colors.secondary, fontWeight: "bold", fontSize: 16 }}
-        >
-          No events for this day
+      <View
+        style={{
+          padding: 10,
+
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <MaterialIcons name="event-busy" color={"#2c2c2c"} size={150} />
+        <Text style={{ color: "#2c2c2c", fontWeight: "bold", fontSize: 35 }}>
+          No events
         </Text>
       </View>
     )}

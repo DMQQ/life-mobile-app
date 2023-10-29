@@ -5,7 +5,13 @@ import { gql, useQuery } from "@apollo/client";
 import AvailableBalanceWidget from "../../components/HomeScreenWidgets/AvailableBalanceWidget";
 import TodaysTimelineEvents from "../../components/HomeScreenWidgets/TodaysTimelinEvents";
 import AccountActions from "../../components/HomeScreenWidgets/AccountActions";
-import { useEffect } from "react";
+import { ReactNode, useEffect } from "react";
+import { Text, TextProps, View, ViewProps } from "react-native";
+import Colors from "../../constants/Colors";
+import Color from "color";
+import { FontAwesome5 } from "@expo/vector-icons";
+import WorkoutWidget from "./Workout/components/WorkoutWidget";
+import { useAppSelector } from "../../utils/redux";
 
 const GET = gql`
   query GetRootView {
@@ -31,6 +37,7 @@ const GET = gql`
 
 export default function Root({ navigation }: ScreenProps<"Root">) {
   const { removeUser, token, user } = useUser();
+  const workout = useAppSelector((s) => s.workout);
 
   const { data } = useQuery(GET, {
     context: {
@@ -48,12 +55,14 @@ export default function Root({ navigation }: ScreenProps<"Root">) {
   }, [user]);
 
   return (
-    <ScreenContainer style={{ padding: 10 }}>
+    <ScreenContainer style={{ padding: 10 }} scroll>
       <AvailableBalanceWidget data={data?.wallet} />
 
       <TodaysTimelineEvents data={data?.timelineByCurrentDate} />
 
-      <AccountActions navigation={navigation} />
+      {workout.isWorkoutPending && <WorkoutWidget />}
+
+      <AccountActions navigation={navigation} route={undefined} />
     </ScreenContainer>
   );
 }

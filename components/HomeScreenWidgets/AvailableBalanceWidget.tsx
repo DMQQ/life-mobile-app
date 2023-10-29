@@ -1,6 +1,6 @@
 import Color from "color";
 import { Text, View } from "react-native";
-import Colors from "../../constants/Colors";
+import Colors, { Sizing } from "../../constants/Colors";
 import { ViewMoreButton } from "../ui/Button/Button";
 import { useNavigation } from "@react-navigation/native";
 import { Expense, Wallet } from "../../types";
@@ -45,7 +45,7 @@ export default function AvailableBalanceWidget(props: { data: Wallet }) {
           <Text
             style={{
               color: Colors.secondary,
-              fontSize: 23,
+              fontSize: Sizing.heading,
               fontWeight: "bold",
             }}
           >

@@ -1,7 +1,7 @@
-import { Formik } from "formik";
+import { useFormik } from "formik";
 import ScreenContainer from "../../../../components/ui/ScreenContainer";
 import ValidatedInput from "../../../../components/ui/ValidatedInput";
-import { ActivityIndicator, Text } from "react-native";
+import { ActivityIndicator, Text, ScrollView, StyleSheet } from "react-native";
 import Colors from "../../../../constants/Colors";
 import Button from "../../../../components/ui/Button/Button";
 import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
@@ -14,31 +14,48 @@ import type { TimelineScreenProps } from "../types";
 import CreateRepeatableTimeline from "../components/CreateRepeatableTimeline";
 import { useEffect, useState } from "react";
 import useCreateTimeline from "../hooks/mutation/useCreateTimeline";
-import { Feather, FontAwesome } from "@expo/vector-icons";
+import { AntDesign } from "@expo/vector-icons";
 import useKeyboard from "../../../../utils/hooks/useKeyboard";
-import Animated, {
-  useAnimatedStyle,
-  withTiming,
-} from "react-native-reanimated";
+import Animated, { ZoomInDown, ZoomOutDown } from "react-native-reanimated";
+import { RadioGroup } from "../../../../components/ui/Radio/Radio";
+
+const styles = StyleSheet.create({
+  header: {
+    justifyContent: "space-between",
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 10,
+  },
+  timeContainer: {
+    flexDirection: "row",
+    width: "100%",
+    backgroundColor: Color(Colors.primary).lighten(0.5).hex(),
+    borderWidth: 2,
+    borderColor: Colors.primary_light,
+    borderRadius: 5,
+    padding: 7.5,
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  timeText: {
+    color: Colors.secondary,
+    fontSize: 18,
+    textAlign: "center",
+  },
+});
+
+const radioOptions = [
+  { label: "None", value: "none" },
+  { label: "All day", value: "all-day" },
+  { label: "Repeatable", value: "repeatable" },
+  { label: "Notify before expire", value: "notify-before-expire" },
+];
 
 export default function CreateTimeLineEventModal({
   route,
   navigation,
 }: TimelineScreenProps<"TimelineCreate">) {
   const isKeyboardOpen = useKeyboard();
-
-  const keyboardHideAnimation = useAnimatedStyle(
-    () => ({
-      transform: [
-        {
-          translateY: isKeyboardOpen
-            ? withTiming(100, { duration: 50 })
-            : withTiming(0),
-        },
-      ],
-    }),
-    [isKeyboardOpen]
-  );
 
   const {
     handleSubmit,
@@ -49,14 +66,30 @@ export default function CreateTimeLineEventModal({
     selectedDate: route.params.selectedDate,
   });
 
+  const f = useFormik({
+    onSubmit: handleSubmit,
+    validationSchema: validationSchema,
+    initialValues: {
+      ...initialValues,
+      date: route.params.selectedDate,
+      begin: moment().format("HH:mm:ss"),
+      end: moment().add(1, "hours").format("HH:mm:ss"),
+      notification: "none",
+    },
+  });
+
+  const dateTimeDefaultOptions = {
+    display: "default",
+    positiveButtonLabel: "ok",
+    negativeButtonLabel: "cancel",
+    is24Hour: true,
+  } as any;
+
   const timePicker = (formik: any, type: string) => {
     DateTimePickerAndroid.open({
       value: new Date(),
-      is24Hour: true,
       mode: "time",
-      display: "default",
-      positiveButtonLabel: "ok",
-      negativeButtonLabel: "cancel",
+      ...dateTimeDefaultOptions,
 
       onChange(event, date) {
         formik.handleChange(type)(date?.toLocaleTimeString());
@@ -67,13 +100,10 @@ export default function CreateTimeLineEventModal({
   const handleOpenDatePicker = () => {
     DateTimePickerAndroid.open({
       value: moment(route.params.selectedDate).toDate(),
-      is24Hour: true,
       mode: "date",
-      display: "default",
-      positiveButtonLabel: "ok",
-      negativeButtonLabel: "cancel",
+      ...dateTimeDefaultOptions,
 
-      onChange(event, date) {
+      onChange(_, date) {
         navigation.setParams({
           selectedDate: moment(date).format("YYYY-MM-DD"),
         });
@@ -85,144 +115,130 @@ export default function CreateTimeLineEventModal({
 
   useEffect(() => {
     navigation.setOptions({
-      headerTitle: "",
-      headerStyle: {
-        backgroundColor: Colors.primary,
-      },
-      headerRight: () => (
-        <Ripple
-          onPress={() => setOptionsVisible((v) => !v)}
-          style={{ padding: 15 }}
-        >
-          <FontAwesome name="gear" size={24} color={Colors.secondary} />
-        </Ripple>
+      header: (props) => (
+        <View style={styles.header}>
+          <Ripple style={{ padding: 10 }} onPress={props.navigation.goBack}>
+            <AntDesign name="arrowleft" color="#fff" size={23} />
+          </Ripple>
+
+          <Ripple onPress={handleOpenDatePicker}>
+            <Text style={[timelineStyles.eventTitle]}>
+              {route.params.selectedDate}
+            </Text>
+          </Ripple>
+          <Ripple
+            style={{ padding: 10 }}
+            onPress={() => setOptionsVisible((p) => !p)}
+          >
+            <AntDesign name="setting" color={"#fff"} size={23} />
+          </Ripple>
+        </View>
       ),
     });
   }, [optionsVisible]);
 
   return (
     <ScreenContainer>
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
-          marginBottom: 20,
-        }}
-      >
-        <Text style={timelineStyles.eventTitle}>
-          {route.params.selectedDate}
-        </Text>
-        <Ripple onPress={() => handleOpenDatePicker()}>
-          <Feather name="edit" size={24} color={Colors.secondary} />
-        </Ripple>
-      </View>
-      <Formik
-        onSubmit={handleSubmit}
-        validationSchema={validationSchema}
-        initialValues={{
-          ...initialValues,
-          date: route.params.selectedDate,
-          begin: moment().format("HH:mm:ss"),
-          end: moment().add(1, "hours").format("HH:mm:ss"),
-          notification: "none",
-        }}
-      >
-        {(f) => (
-          <>
-            <ValidatedInput
-              placeholder="Event's title"
-              name="title"
-              formik={f}
-              helperText="Event's title (not required)"
-              helperStyle={{ marginLeft: 2.5 }}
-            />
-            <ValidatedInput
-              numberOfLines={f.values.desc.split("\n").length}
-              multiline
-              placeholder="Event's description"
-              helperText="Event's description (2000char's)"
-              name="desc"
-              formik={f}
-            />
+      <ScrollView style={{ flex: 1 }}>
+        <ValidatedInput
+          placeholder="Event's title"
+          name="title"
+          formik={f}
+          helperText="Event's title (not required)"
+          helperStyle={{ marginLeft: 2.5 }}
+        />
+        <ValidatedInput
+          numberOfLines={10}
+          multiline
+          placeholder="Event's description"
+          helperText="Event's description (2000char's)"
+          name="desc"
+          formik={f}
+          scrollEnabled
+          textAlignVertical="top"
+        />
 
-            <View
-              style={{
-                flexDirection: "row",
-                width: "100%",
-                backgroundColor: Color(Colors.primary).lighten(0.5).hex(),
-                borderWidth: 2,
-                borderColor: Colors.primary_light,
-                borderRadius: 5,
-                padding: 7.5,
-              }}
-            >
-              <Ripple
-                style={{ flex: 1, padding: 5 }}
-                onPress={() => timePicker(f, "begin")}
-              >
-                <Text style={{ color: Colors.secondary, fontSize: 18 }}>
-                  {f.values.begin.split(":").slice(0, 2).join(":")}
-                </Text>
-              </Ripple>
-              <Ripple
-                style={{ flex: 1, padding: 5 }}
-                onPress={() => timePicker(f, "end")}
-              >
-                <Text style={{ color: Colors.secondary, fontSize: 18 }}>
-                  {f.values.end.split(":").slice(0, 2).join(":")}
-                </Text>
-              </Ripple>
-            </View>
+        <View style={styles.timeContainer}>
+          <Ripple
+            style={{ flex: 1, padding: 10 }}
+            onPress={() => timePicker(f, "begin")}
+          >
+            <Text style={styles.timeText}>
+              {f.values.begin.split(":").slice(0, 2).join(":")}
+            </Text>
+          </Ripple>
 
-            <CreateRepeatableTimeline
-              onClose={() => setOptionsVisible(false)}
-              isVisible={optionsVisible}
-              formik={f}
-            />
+          <Text style={{ color: "gray", padding: 10 }}>to</Text>
 
-            {/* Uncomment when impletemented on server */}
+          <Ripple
+            style={{ flex: 1, padding: 10 }}
+            onPress={() => timePicker(f, "end")}
+          >
+            <Text style={styles.timeText}>
+              {f.values.end.split(":").slice(0, 2).join(":")}
+            </Text>
+          </Ripple>
+        </View>
 
-            {/* <RadioGroup
-              value={f.values.notification}
-              //prettier-ignore
-              options={[
-              { label: "None", value: "none" },
-              { label: "All day", value: "all-day" },
-              { label: "Repeatable", value: "repeatable" },
-              { label:'Notify before expire', value: 'notify-before-expire'}
-            ]}
-              onChange={(val) => f.setFieldValue("notification", val)}
-            /> */}
+        <CreateRepeatableTimeline
+          onClose={() => setOptionsVisible(false)}
+          isVisible={optionsVisible}
+          formik={f}
+        />
 
-            <Animated.View
-              style={[
-                { position: "absolute", bottom: 0 },
-                keyboardHideAnimation,
-              ]}
-            >
-              <Button
-                icon={
-                  isLoading ? (
-                    <ActivityIndicator
-                      style={{ marginRight: 5 }}
-                      size={18}
-                      color={"#fff"}
-                    />
-                  ) : null
-                }
-                disabled={!(f.isValid && !f.isSubmitting)}
-                type="contained"
-                callback={() => f.handleSubmit()}
-                style={timelineStyles.submitButton}
-                fontStyle={{ textTransform: "none" }}
-              >
-                Create timeline event
-              </Button>
-            </Animated.View>
-          </>
-        )}
-      </Formik>
+        <RadioGroup
+          value={f.values.notification}
+          options={radioOptions}
+          onChange={(val) => f.setFieldValue("notification", val)}
+        />
+      </ScrollView>
+
+      <SubmitButton
+        f={f}
+        isKeyboardOpen={isKeyboardOpen || false}
+        isLoading={isLoading}
+      />
     </ScreenContainer>
   );
 }
+
+interface SubmitButtonProps {
+  isKeyboardOpen: boolean;
+  isLoading: boolean;
+  f: any;
+}
+
+const SubmitButton = (props: SubmitButtonProps) =>
+  !props.isKeyboardOpen ? (
+    <Animated.View
+      entering={ZoomInDown}
+      exiting={ZoomOutDown}
+      style={{ paddingTop: 10 }}
+    >
+      <Button
+        icon={
+          props.isLoading ? (
+            <ActivityIndicator
+              style={{ marginRight: 5 }}
+              size={18}
+              color={"#fff"}
+            />
+          ) : null
+        }
+        disabled={!(props.f.isValid && !props.f.isSubmitting)}
+        type="contained"
+        callback={() => props.f.handleSubmit()}
+        style={[
+          timelineStyles.submitButton,
+          {
+            backgroundColor: !(props.f.isValid && !props.f.isSubmitting)
+              ? Color(Colors.secondary).alpha(0.1).string()
+              : Colors.secondary,
+          },
+        ]}
+        fontStyle={{ textTransform: "none", letterSpacing: 1 }}
+      >
+        CREATE EVENT
+      </Button>
+    </Animated.View>
+  ) : null;

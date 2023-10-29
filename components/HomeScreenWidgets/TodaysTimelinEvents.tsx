@@ -2,11 +2,12 @@ import { FlatList, Text, View } from "react-native";
 import useUser from "../../utils/hooks/useUser";
 import { gql, useQuery } from "@apollo/client";
 import TimelineItem from "../../screens/Stack/Timeline/components/TimelineItem";
-import Colors from "../../constants/Colors";
+import Colors, { Sizing } from "../../constants/Colors";
 import Color from "color";
 import Button from "../ui/Button/Button";
 import { useNavigation } from "@react-navigation/native";
 import Ripple from "react-native-material-ripple";
+import moment from "moment";
 
 export default function TodaysTimelineEvents(props: { data: any[] }) {
   const { removeUser, token } = useUser();
@@ -31,9 +32,13 @@ export default function TodaysTimelineEvents(props: { data: any[] }) {
         }}
       >
         <Text
-          style={{ color: Colors.secondary, fontSize: 25, fontWeight: "bold" }}
+          style={{
+            color: Colors.secondary,
+            fontSize: Sizing.heading,
+            fontWeight: "bold",
+          }}
         >
-          Today's events ({props?.data?.length})
+          Events {moment().format("MM.DD")}
         </Text>
         <Ripple
           onPress={() => navigation.navigate("TimelineScreens")}
@@ -56,18 +61,23 @@ export default function TodaysTimelineEvents(props: { data: any[] }) {
         </Ripple>
       </View>
 
-      {/* {props?.data?.map((item) => (
-        <TimelineItem location="root" key={item.id} {...item} />
-      ))} */}
+      {props?.data?.map((timeline) => (
+        <TimelineItem location="root" key={timeline.id} {...timeline} />
+      ))}
 
-      <FlatList
-        style={{ height: 150 }}
-        data={props?.data}
-        renderItem={({ item }) => (
-          <TimelineItem location="root" key={item.id} {...item} />
-        )}
-        keyExtractor={(item) => item.id}
-      />
+      {props?.data?.length === 0 && (
+        <Text
+          style={{
+            paddingVertical: 5,
+            color: "#fff",
+            fontSize: 20,
+            fontWeight: "bold",
+            textAlign: "center",
+          }}
+        >
+          No events today
+        </Text>
+      )}
     </View>
   );
 }

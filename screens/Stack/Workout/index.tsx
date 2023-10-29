@@ -1,18 +1,20 @@
 import React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
-import Workout from "./Workout";
-import CreateWorkout from "./WorkoutCreate";
-import Workouts from "./Workouts";
-import ExerciseScreen from "./Exercise";
+import Workout from "./views/Workout";
+import CreateWorkout from "./views/WorkoutCreate";
+import Workouts from "./views/Workouts";
+import ExerciseScreen from "./views/Exercise";
 import { WorkoutStackParamList } from "./types";
-import PendingWorkout from "./PendingWorkout";
+import PendingWorkout from "./views/PendingWorkout";
 import { horizontalAnimation } from "../../../navigation/assets/screen_animations";
 import Colors from "../../../constants/Colors";
-import WorkoutSummary from "./WorkoutSummary";
+import WorkoutSummary from "./views/WorkoutSummary";
+import { useAppSelector } from "../../../utils/redux";
 
 const Stack = createStackNavigator<WorkoutStackParamList>();
 
 export default function WorkoutScreens() {
+  const workout = useAppSelector((s) => s.workout);
   return (
     <Stack.Navigator
       screenOptions={{
@@ -39,6 +41,7 @@ export default function WorkoutScreens() {
         options={{
           presentation: "modal",
           ...horizontalAnimation,
+          headerShown: false,
         }}
       />
       <Stack.Screen

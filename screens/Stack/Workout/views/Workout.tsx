@@ -1,29 +1,29 @@
 import { useEffect, useState, useRef, forwardRef } from "react";
-import ScreenContainer from "../../../components/ui/ScreenContainer";
-import ExerciseList from "../../../components/Exercise/ExerciseList/ExerciseList";
+import ScreenContainer from "../../../../components/ui/ScreenContainer";
+import ExerciseList from "../../../../components/Exercise/ExerciseList/ExerciseList";
 import { View, Text, ScrollView, StyleSheet, FlatList } from "react-native";
-import Button from "../../../components/ui/Button/Button";
-import { WorkoutScreenProps } from "./types";
-import ExerciseProgressSheet from "./components/ExerciseProgressSheet";
-import { Exercise } from "../../../types";
+import Button from "../../../../components/ui/Button/Button";
+import { WorkoutScreenProps } from "../types";
+import ExerciseProgressSheet from "../components/ExerciseProgressSheet";
+import { Exercise } from "../../../../types";
 import { useDispatch } from "react-redux";
-import { workoutActions } from "../../../utils/redux/workout/workout";
+import { workoutActions } from "../../../../utils/redux/workout/workout";
 import Color from "color";
-import Colors from "../../../constants/Colors";
+import Colors from "../../../../constants/Colors";
 import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetFlatList,
   TouchableOpacity,
 } from "@gorhom/bottom-sheet";
-import { useGetAllExercises } from "./components/ExerciseList";
-import useAddExerciseToWorkout from "./hooks/useAddExerciseToWorkout";
+import { useGetAllExercises } from "../components/ExerciseList";
+import useAddExerciseToWorkout from "../hooks/useAddExerciseToWorkout";
 import Animated, { FadeInDown } from "react-native-reanimated";
-import useGetWorkoutQuery from "./hooks/useGetWorkoutQuery";
-import { useAppSelector } from "../../../utils/redux";
-import Input from "../../../components/ui/TextInput/TextInput";
+import useGetWorkoutQuery from "../hooks/useGetWorkoutQuery";
+import { useAppSelector } from "../../../../utils/redux";
+import Input from "../../../../components/ui/TextInput/TextInput";
 import { AntDesign } from "@expo/vector-icons";
-import Layout from "../../../constants/Layout";
-import ExerciseTile from "../../../components/Exercise/ExerciseTile/ExerciseTile";
+import Layout from "../../../../constants/Layout";
+import ExerciseTile from "../../../../components/Exercise/ExerciseTile/ExerciseTile";
 
 const styles = StyleSheet.create({
   pendingText: {
@@ -79,6 +79,7 @@ export default function Workout({
 
   const onStartWorkout = () => {
     if (exercises.length === 0) return;
+
     dispatch(
       workoutActions.start({
         exercises: exercises,
@@ -104,33 +105,21 @@ export default function Workout({
     });
   }, [data?.workout]);
 
-  const estimatedDurationTime = () => {
-    let seconds = 0;
-
-    for (const exercise of (data?.workout?.exercises || []) as Exercise[]) {
-      seconds += (exercise?.sets || 4) * 40;
-      seconds += (exercise?.sets || 4) * 60 * 2; //to fix
-    }
-
-    return Math.floor(seconds / 60).toString();
-  };
-
   return (
     <ScreenContainer>
       <View style={styles.container}>
         <View style={styles.headerContainer}>
           <Text style={styles.titleText}>{data?.workout?.title}</Text>
 
-          <Text style={styles.pendingText}>PENDING</Text>
+          {workout.workoutId === route.params.workoutId &&
+            workout.isWorkoutPending && (
+              <Text style={styles.pendingText}>PENDING</Text>
+            )}
         </View>
 
         <Text style={{ color: Colors.text_dark }}>
           <Text style={{ fontWeight: "bold", fontSize: 17 }}>600</Text> people
           used this workout
-        </Text>
-        <Text style={{ color: Colors.text_dark }}>
-          Estimated duration of {estimatedDurationTime()}
-          min with 2min rest
         </Text>
 
         <Text style={{ color: Colors.text_dark }}>

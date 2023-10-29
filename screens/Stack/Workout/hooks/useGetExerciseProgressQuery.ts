@@ -1,5 +1,6 @@
 import { gql, useQuery } from "@apollo/client";
 import useUser from "../../../../utils/hooks/useUser";
+import { ExerciseProgress } from "../../../../types";
 
 const GetExerciseProgressQuery = gql`
   query GetExerciseProgress($exerciseId: ID!) {
@@ -18,7 +19,7 @@ export default function useGetExerciseProgressQuery(
 ) {
   const usr = useUser();
 
-  return useQuery(GetExerciseProgressQuery, {
+  const { data } = useQuery(GetExerciseProgressQuery, {
     context: {
       headers: {
         token: usr.token,
@@ -28,6 +29,10 @@ export default function useGetExerciseProgressQuery(
       exerciseId: exerciseId,
     },
 
+    fetchPolicy: "cache-first",
+
     skip: exerciseId === undefined,
   });
+
+  return (data?.exerciseProgress || []) as ExerciseProgress[];
 }

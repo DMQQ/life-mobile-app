@@ -1,18 +1,18 @@
 import React from "react";
-import ScreenContainer from "../../../components/ui/ScreenContainer";
+import ScreenContainer from "../../../../components/ui/ScreenContainer";
 import { Formik } from "formik";
 import { gql, useMutation } from "@apollo/client";
-import useUser from "../../../utils/hooks/useUser";
-import ExercisesSelect from "../../../components/ExercisesSelectDropdown/ExercisesSelect";
-import Button from "../../../components/ui/Button/Button";
-import Colors from "../../../constants/Colors";
+import useUser from "../../../../utils/hooks/useUser";
+import ExercisesSelect from "../../../../components/ExercisesSelectDropdown/ExercisesSelect";
+import Button from "../../../../components/ui/Button/Button";
+import Colors from "../../../../constants/Colors";
 
-import TextInput from "../../../components/ui/TextInput/TextInput";
+import TextInput from "../../../../components/ui/TextInput/TextInput";
 import Color from "color";
-import { WorkoutScreenProps } from "./types";
-import SegmentedButtons from "../../../components/ui/SegmentedButtons";
-import Select from "../../../components/ui/Select/Select";
-import ValidatedInput from "../../../components/ui/ValidatedInput";
+import { WorkoutScreenProps } from "../types";
+import SegmentedButtons from "../../../../components/ui/SegmentedButtons";
+import Select from "../../../../components/ui/Select/Select";
+import ValidatedInput from "../../../../components/ui/ValidatedInput";
 
 const CREATE_WORKOUT = gql`
   mutation CreateWorkout(

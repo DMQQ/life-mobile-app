@@ -2,21 +2,13 @@ import * as Notifications from "expo-notifications";
 import { Platform, ToastAndroid } from "react-native";
 import useUser from "./useUser";
 import { gql, useMutation } from "@apollo/client";
+import Constants from "expo-constants";
 
 const NOTIFICATION_KEY = "FitnessApp:notifications";
 
 export default function useNotifications() {
   async function registerForPushNotificationsAsync() {
     let token;
-
-    if (Platform.OS === "android") {
-      await Notifications.setNotificationChannelAsync("default", {
-        name: "default",
-        importance: Notifications.AndroidImportance.MAX,
-        vibrationPattern: [0, 250, 250, 250],
-        lightColor: "#FF231F7C",
-      });
-    }
 
     const { status: existingStatus } =
       await Notifications.getPermissionsAsync();
@@ -30,8 +22,18 @@ export default function useNotifications() {
       return;
     }
     token = await Notifications.getExpoPushTokenAsync({
-      projectId: require("../../app.json")?.expo?.extra?.eas?.projectId,
+      projectId: Constants?.expoConfig?.extra?.eas?.projectId as string,
     });
+    console.log(token);
+
+    if (Platform.OS === "android") {
+      Notifications.setNotificationChannelAsync("default", {
+        name: "default",
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: "#FF231F7C",
+      });
+    }
 
     return token.data;
   }

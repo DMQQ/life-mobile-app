@@ -26,6 +26,8 @@ const images = {
 const defaultImageUri =
   "https://cdn-icons-png.flaticon.com/512/1895/1895100.png";
 
+const GAPS = 10;
+
 export default function ExerciseTile({
   image = defaultImageUri,
   muscleGroup,
@@ -34,7 +36,11 @@ export default function ExerciseTile({
   difficulty,
   description,
   ...rest
-}: Exercise & { onPress: Function; tileIndex: number }) {
+}: Exercise & {
+  onPress: Function;
+  tileIndex: number;
+  enableActionButtons?: boolean;
+}) {
   const [isVisible, setIsVisible] = useState(false);
 
   const [layout, setLayout] = useState<LayoutRectangle | undefined>();
@@ -45,7 +51,7 @@ export default function ExerciseTile({
       entering={FadeIn.delay(rest.tileIndex * 75)}
       style={{
         backgroundColor: Color(Colors.primary).lighten(0.5).hex(),
-        padding: 13,
+        padding: GAPS,
         borderRadius: 10,
         marginBottom: 10,
       }}
@@ -61,16 +67,17 @@ export default function ExerciseTile({
           style={{
             width: 40,
             height: 40,
+            margin: GAPS,
           }}
           source={{
             uri: images[title as keyof typeof images] || defaultImageUri,
           }}
         />
-        <View style={{ marginLeft: 10, flex: 1 }}>
+        <View style={{ flex: 1 }}>
           <Text
             style={{
               color: Colors.secondary,
-              fontSize: 20,
+              fontSize: 18,
               fontWeight: "bold",
               lineHeight: 25,
             }}
@@ -83,6 +90,7 @@ export default function ExerciseTile({
               flexDirection: "row",
               justifyContent: "space-between",
               alignItems: "center",
+              marginTop: GAPS / 2,
             }}
           >
             <Text style={{ color: "#bababa" }} lineBreakMode="clip">
@@ -120,7 +128,7 @@ export default function ExerciseTile({
           </View>
         </View>
       </Pressable>
-      {isVisible && (
+      {isVisible && rest.enableActionButtons && (
         <View
           style={{
             width: layout?.width,
@@ -134,6 +142,7 @@ export default function ExerciseTile({
           }}
         >
           <Button
+            onPress={() => {}}
             fontStyle={{ fontSize: 15 }}
             type="contained"
             style={{ backgroundColor: Colors.error, flex: 3, marginRight: 20 }}
