@@ -1,13 +1,12 @@
 import { View } from "react-native";
-import Colors from "../../constants/Colors";
-import Color from "color";
+import { Sizing } from "../../constants/Colors";
 import { Text, Alert } from "react-native";
 import Button from "../ui/Button/Button";
 import useUser from "../../utils/hooks/useUser";
 import Ripple from "react-native-material-ripple";
-import { ScreenProps } from "../../types";
+import { Padding, Rounded } from "../../constants/Layout";
 
-export default function AccountActions({ navigation }: ScreenProps<"Root">) {
+export default function AccountActions({ navigation }: any) {
   const { removeUser } = useUser();
 
   const handleSignout = () => {
@@ -26,25 +25,26 @@ export default function AccountActions({ navigation }: ScreenProps<"Root">) {
   return (
     <View
       style={{
-        backgroundColor: Color(Colors.primary).lighten(0.5).string(),
-        borderRadius: 10,
-        padding: 15,
+        backgroundColor: "#1BA3B4",
+        borderRadius: Rounded.xxl,
+        padding: Padding.xxl,
         marginTop: 15,
+        marginBottom: 15,
       }}
     >
       <Text
         style={{
-          color: Colors.secondary,
-          fontSize: 25,
+          color: "#fff",
+          fontSize: Sizing.heading,
           fontWeight: "bold",
           marginBottom: 10,
         }}
       >
-        Account Actions
+        Settings
       </Text>
 
       <Ripple
-        style={{ padding: 10, paddingHorizontal: 15, marginBottom: 10 }}
+        style={{ padding: 2.5, paddingHorizontal: 5, marginBottom: 10 }}
         onPress={() => navigation.navigate("Settings")}
       >
         <Text style={{ color: "#fff" }}>Settings</Text>
@@ -54,13 +54,14 @@ export default function AccountActions({ navigation }: ScreenProps<"Root">) {
         onPress={handleSignout}
         type="contained"
         fontStyle={{
-          color: Colors.secondary,
+          color: "#1BA3B4",
         }}
         style={{
-          backgroundColor: Color(Colors.secondary).alpha(0.15).string(),
+          backgroundColor: "#fff",
+          marginTop: 10,
         }}
       >
-        Signout
+        Sign out
       </Button>
     </View>
   );
