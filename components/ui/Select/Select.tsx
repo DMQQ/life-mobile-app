@@ -163,7 +163,8 @@ export default function Select({
   const flatListTransformStyle = useAnimatedStyle(() => ({
     transform: [
       {
-        translateY: withTiming(buttonHeight.value + 10, {
+        translateY: withTiming(buttonHeight.value, {
+          // buttonHeight.value + 10 to make space between selected and dropdown
           duration: 100,
         }),
       },
@@ -237,6 +238,10 @@ export default function Select({
               styles.list,
               {
                 height: maxSelectHeight || ABS_LIST_HEIGHT,
+                borderTopRightRadius: 0 /* 4 props below are optional set for testing */,
+                borderTopLeftRadius: 0,
+                left: -2,
+                top: -2,
               },
               flatListTransformStyle,
             ]}

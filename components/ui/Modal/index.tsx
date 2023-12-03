@@ -15,6 +15,8 @@ interface IModalProps extends Partial<ModalProps> {
    * hide default container
    */
   showInnerContent?: boolean;
+
+  width?: number;
 }
 
 export default function Modal({
@@ -23,6 +25,7 @@ export default function Modal({
   showInnerContent,
   animationIn,
   animationOut,
+  width,
   ...rest
 }: IModalProps) {
   return (
@@ -30,6 +33,7 @@ export default function Modal({
       animationIn={animationIn || "zoomInUp"}
       animationOut={animationOut || "zoomOutDown"}
       deviceHeight={Layout.screen.height}
+      deviceWidth={width || Layout.screen.width}
       hardwareAccelerated
       statusBarTranslucent
       {...rest}

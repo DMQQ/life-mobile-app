@@ -1,20 +1,27 @@
-import { Pressable, View } from "react-native";
+import { Modal, Pressable, View } from "react-native";
 import Layout from "../../../constants/Layout";
+import { ReactNode } from "react";
 
 export default function Overlay(props: {
   onClose: Function;
   isVisible: boolean;
+  content?: ReactNode;
 }) {
-  return props.isVisible ? (
-    <Pressable
-      onPress={() => props.onClose()}
-      style={{
-        position: "absolute",
-        width: Layout.screen.width,
-        height: Layout.screen.height,
-        zIndex: 101,
-        backgroundColor: "rgba(0,0,0,0.8)",
-      }}
-    />
-  ) : null;
+  return (
+    <Modal visible={props.isVisible} transparent>
+      <Pressable
+        onPress={() => props.onClose()}
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: Layout.screen.width,
+          height: Layout.screen.height,
+
+          backgroundColor: "rgba(0,0,0,0.5)",
+        }}
+      />
+      {props.content}
+    </Modal>
+  );
 }

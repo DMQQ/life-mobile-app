@@ -89,12 +89,13 @@ export const ViewMoreButton = (props: {
   onPress: () => any;
   text: string;
   disabled?: boolean;
+  bg?: string;
 }) => (
   <Ripple
     onPress={props.onPress}
     disabled={props.disabled}
     style={{
-      backgroundColor: Colors.secondary,
+      backgroundColor: props?.bg || Colors.secondary,
       borderRadius: 100,
       padding: 5,
       paddingHorizontal: 10,
