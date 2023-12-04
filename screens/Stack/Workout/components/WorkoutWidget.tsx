@@ -1,23 +1,41 @@
 import { View, StyleSheet, Text } from "react-native";
-import Colors from "../../../../constants/Colors";
+import Colors, { randColor } from "../../../../constants/Colors";
 import Color from "color";
 import { useAppSelector } from "../../../../utils/redux";
 import { useDispatch } from "react-redux";
-import ExerciseTile from "../../../../components/Exercise/ExerciseTile/ExerciseTile";
+import ExerciseTile, {
+  ExerciseIcon,
+} from "../../../../components/Exercise/ExerciseTile/ExerciseTile";
 import Ripple from "react-native-material-ripple";
 import { useNavigation } from "@react-navigation/native";
+import { Padding, Rounded } from "../../../../constants/Layout";
+import { AntDesign } from "@expo/vector-icons";
+
+const bg = "#FF1A56";
 
 const styles = StyleSheet.create({
   container: {
-    padding: 15,
-    borderRadius: 5,
-    backgroundColor: Color(Colors.primary).lighten(0.5).string(),
+    padding: Padding.xxl,
+    borderRadius: Rounded.xxl,
+    backgroundColor: bg,
     marginTop: 15,
   },
   title: {
-    color: Colors.secondary,
+    color: "#fff",
     fontWeight: "bold",
-    fontSize: 25,
+    fontSize: 30,
+  },
+  button: {
+    marginTop: Padding.md,
+    padding: Padding.xl,
+    backgroundColor: "#fff",
+    borderRadius: Rounded.xxl,
+  },
+  buttonText: {
+    fontWeight: "bold",
+    color: bg,
+    textAlign: "center",
+    fontSize: 18,
   },
 });
 
@@ -28,56 +46,61 @@ export default function WorkoutWidget() {
 
   const navigation = useNavigation();
 
+  const navigateWorkout = () =>
+    (navigation as any).navigate("WorkoutScreens", {
+      screen: "PendingWorkout",
+      params: {
+        workoutId: workout.workoutId,
+        delayTimerStart: 0,
+        exerciseId: workout.currentExercise.exerciseId,
+      },
+    });
+
+  const exercise = workout.currentExercise;
+
   return (
     <View style={styles.container}>
-      <View style={{ flexDirection: "column" }}>
-        <Text style={styles.title}>{capitalize(workout.title)}</Text>
+      <View style={{ flexDirection: "column", marginBottom: 10 }}>
+        <Text style={styles.title}>Active workout</Text>
         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-          <Text
-            style={{ color: "lightgreen", fontSize: 12, fontWeight: "bold" }}
-          >
-            PENDING WORKOUT
+          <Text style={{ color: "#fff", fontSize: 12, fontWeight: "bold" }}>
+            {capitalize(workout.title)}
           </Text>
-          <Text
-            style={{ color: "lightgreen", fontSize: 12, fontWeight: "bold" }}
-          >
-            {workout.activeExerciseIndex} out of {workout.exercises.length}
+          <Text style={{ color: "#fff", fontSize: 12, fontWeight: "bold" }}>
+            {workout.activeExerciseIndex + 1} out of {workout.exercises.length}
           </Text>
         </View>
       </View>
 
-      <ExerciseTile
-        tileIndex={0}
-        {...workout.currentExercise}
-        onPress={() => {}}
-      />
-
-      <Ripple
-        onPress={() =>
-          (navigation as any).navigate("WorkoutScreens", {
-            screen: "PendingWorkout",
-            params: {
-              workoutId: workout.workoutId,
-              delayTimerStart: 0,
-              exerciseId: workout.currentExercise.exerciseId,
-            },
-          })
-        }
+      <View
         style={{
-          padding: 7.5,
+          backgroundColor: "#ffffff25",
+          borderRadius: Rounded.xxl,
+          padding: Padding.md,
+          flexDirection: "row",
         }}
       >
-        <Text
-          style={{
-            fontWeight: "bold",
-            color: Colors.secondary,
-            textAlign: "center",
-            fontSize: 18,
-          }}
-        >
-          Continue workout
-        </Text>
-      </Ripple>
+        <ExerciseIcon name={exercise.title as any} />
+        <View style={{ paddingHorizontal: Padding.md, flex: 1 }}>
+          <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 18 }}>
+            {exercise.title}
+          </Text>
+          <Text style={{ color: "#fff", fontWeight: "400", fontSize: 14 }}>
+            {exercise.muscleGroup}
+          </Text>
+        </View>
+        <View style={{ justifyContent: "center" }}>
+          <Ripple
+            onPress={navigateWorkout}
+            style={{
+              borderRadius: 100,
+              marginRight: 5,
+            }}
+          >
+            <AntDesign name="play" color={"#fff"} size={45} />
+          </Ripple>
+        </View>
+      </View>
     </View>
   );
 }
