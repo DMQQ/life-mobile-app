@@ -31,7 +31,11 @@ export default function TimelineScreens({ route }: any) {
       screenOptions={{ ...fadeInFromBottomAndScaleUp }}
     >
       <Stack.Screen name="Timeline" component={Timeline} />
-      <Stack.Screen name="TimelineDetails" component={TimelineDetails} />
+      <Stack.Screen
+        name="TimelineDetails"
+        component={TimelineDetails}
+        options={{ headerShown: false }}
+      />
       <Stack.Screen
         name="TimelineCreate"
         component={CreateTimeLineEventModal}

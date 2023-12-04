@@ -86,23 +86,19 @@ const GesturedImage = (props: { uri: string }) => {
     ],
   }));
 
-  const finalGesture = Gesture.Race(handleGesture);
-
   return (
-    <ImageBackground source={src} blurRadius={20}>
-      <GestureDetector gesture={finalGesture}>
-        <Animated.Image
-          source={src}
-          style={[
-            {
-              width: Layout.screen.width,
-              height: Layout.screen.height - 80,
-            },
-            animatedStyle,
-          ]}
-          resizeMode="contain"
-        />
-      </GestureDetector>
-    </ImageBackground>
+    <GestureDetector gesture={handleGesture}>
+      <Animated.Image
+        source={src}
+        style={[
+          {
+            width: Layout.screen.width,
+            height: Layout.screen.height - 80,
+          },
+          animatedStyle,
+        ]}
+        resizeMode="contain"
+      />
+    </GestureDetector>
   );
 };

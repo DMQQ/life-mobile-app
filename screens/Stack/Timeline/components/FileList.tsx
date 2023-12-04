@@ -9,13 +9,16 @@ import {
 } from "react-native";
 import Colors from "../../../../constants/Colors";
 import Ripple from "react-native-material-ripple";
-import { useState, useRef } from "react";
+import { useState, useRef, memo } from "react";
 import * as ImagePicker from "expo-image-picker";
 import axios from "axios";
 import { useApolloClient } from "@apollo/client";
 import useGetTimelineById from "../hooks/query/useGetTimelineById";
 import { useNavigation } from "@react-navigation/native";
 import Url from "../../../../constants/Url";
+import { Ionicons } from "@expo/vector-icons";
+import Layout from "../../../../constants/Layout";
+import { IFile } from "../../../../types";
 
 const styles = StyleSheet.create({
   available: {
@@ -24,9 +27,9 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   img: {
-    width: 175,
-    height: 120,
-    marginVertical: 10,
+    width: (Layout.screen.width - 10 * 2) / 2 - 5,
+    height: 130,
+    marginVertical: 5,
     borderRadius: 5,
   },
   uploadButton: {
@@ -82,8 +85,6 @@ const useUploadFiles = (timelineId: string, refetch: () => Promise<any>) => {
 
       ToastAndroid.show(`Files uploaded (${data.length})`, ToastAndroid.SHORT);
     } catch (error) {
-      console.log(JSON.stringify(error, null, 2));
-
       ToastAndroid.show(`Couldn't upload file`, ToastAndroid.SHORT);
     } finally {
       setLoading(false);
@@ -108,11 +109,7 @@ const useUploadFiles = (timelineId: string, refetch: () => Promise<any>) => {
 export default function FileList({ timelineId }: FileListProps) {
   const navigation = useNavigation<any>();
 
-  const { data, refetch } = useGetTimelineById(timelineId, {
-    fetchPolicy: "cache-only",
-  });
-
-  const listRef = useRef<FlatList | null>();
+  const { data, refetch } = useGetTimelineById(timelineId);
 
   async function removePhoto(photoId: string) {
     await axios.delete(Url.API + "/upload/" + photoId);
@@ -125,42 +122,103 @@ export default function FileList({ timelineId }: FileListProps) {
       timelineId,
     });
 
+  const [toggleView, setToggleView] = useState(false);
+
   return (
     <View style={{ marginTop: 25 }}>
-      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-        <Text style={styles.available}>
-          Available files ({data?.images.length})
-        </Text>
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          marginBottom: 10,
+        }}
+      >
+        <Ripple onPress={() => setToggleView((p) => !p)}>
+          <Text style={styles.available}>
+            Available files ({data?.images.length})
+          </Text>
+        </Ripple>
         <UploadFileButton refetch={refetch} timelineId={timelineId} />
       </View>
-      <FlatList
-        initialNumToRender={3}
-        ref={(r) => (listRef.current = r)}
-        data={data?.images}
-        horizontal
-        keyExtractor={(el) => el.id}
-        renderItem={({ item }) => (
-          <Ripple
-            style={{ marginRight: 10 }}
-            onLongPress={() => removePhoto(item.id)}
-            onPress={handleShowPreview}
-          >
-            <Image
-              style={styles.img}
-              source={{
-                uri: Url.API + "/upload/images/" + item.url,
-                height: 120,
-                width: 175,
-                cache: "only-if-cached",
-                method: "GET",
-              }}
-            />
-          </Ripple>
-        )}
-      />
+      {toggleView ? (
+        <GridImageView
+          data={data}
+          onRemovePhoto={removePhoto}
+          onShowPreview={handleShowPreview}
+        />
+      ) : (
+        <ListImageView
+          data={data}
+          onRemovePhoto={removePhoto}
+          onShowPreview={handleShowPreview}
+        />
+      )}
     </View>
   );
 }
+
+interface ImageDisplayViewProps {
+  data: { images: IFile[] };
+  onRemovePhoto: (id: string) => Promise<any>;
+  onShowPreview: (item: IFile) => void;
+}
+
+const GridImageView = memo((props: ImageDisplayViewProps) => (
+  <View
+    style={{
+      flexDirection: "row",
+      flexWrap: "wrap",
+      justifyContent: "space-between",
+    }}
+  >
+    {props.data?.images.map((item: any) => (
+      <Ripple
+        key={item.id}
+        onLongPress={() => props.onRemovePhoto(item.id)}
+        onPress={() => {
+          props.onShowPreview(item);
+        }}
+      >
+        <Image
+          key={item.id}
+          style={styles.img}
+          source={{
+            uri: Url.API + "/upload/images/" + item.url,
+            height: 130,
+            width: 200,
+            cache: "only-if-cached",
+            method: "GET",
+          }}
+        />
+      </Ripple>
+    ))}
+  </View>
+));
+
+const ListImageView = memo((props: ImageDisplayViewProps) => (
+  <FlatList
+    initialNumToRender={3}
+    data={props.data?.images}
+    horizontal
+    keyExtractor={(el) => el.id}
+    renderItem={({ item }) => (
+      <Ripple
+        style={{ marginRight: 10 }}
+        onLongPress={() => props.onRemovePhoto(item.id)}
+        onPress={() => props.onShowPreview(item)}
+      >
+        <Image
+          style={styles.img}
+          source={{
+            uri: Url.API + "/upload/images/" + item.url,
+            height: styles.img.height,
+            width: styles.img.width,
+          }}
+        />
+      </Ripple>
+    )}
+  />
+));
 
 function UploadFileButton(props: {
   timelineId: string;
@@ -173,11 +231,18 @@ function UploadFileButton(props: {
 
   return (
     <Ripple onPress={handleImagesSelect} style={styles.uploadButton}>
-      {loading && (
+      {loading ? (
         <ActivityIndicator
           color={Colors.primary}
           style={{ marginRight: 5 }}
           size={15}
+        />
+      ) : (
+        <Ionicons
+          style={{ marginRight: 5 }}
+          name="create-outline"
+          size={16}
+          color={Colors.primary}
         />
       )}
 

@@ -2,12 +2,24 @@ import { useNavigation } from "@react-navigation/native";
 import useRemoveTimelineMutation from "../hooks/mutation/useRemoveTimelineMutation";
 import moment from "moment";
 import Ripple from "react-native-material-ripple";
-import { Alert, Text, ToastAndroid, View } from "react-native";
+import {
+  Alert,
+  StyleProp,
+  Text,
+  ToastAndroid,
+  View,
+  ViewStyle,
+} from "react-native";
 import timelineStyles from "./timeline.styles";
 import { GetTimelineQuery } from "../hooks/query/useGetTimeLineQuery";
+import Colors from "../../../../constants/Colors";
 
 export default function TimelineItem(
-  timeline: GetTimelineQuery & { location: "timeline" | "root" }
+  timeline: GetTimelineQuery & {
+    location: "timeline" | "root";
+    textColor?: string;
+    styles?: StyleProp<ViewStyle>;
+  }
 ) {
   const { remove } = useRemoveTimelineMutation(timeline);
 
@@ -52,18 +64,60 @@ export default function TimelineItem(
     <Ripple
       onLongPress={onLongPress}
       onPress={onPress}
-      style={[timelineStyles.itemContainer]}
+      style={[timelineStyles.itemContainer, timeline.styles]}
     >
       <View style={{ flex: 1 }}>
         <View style={[timelineStyles.itemContainerTitleRow]}>
-          <Text style={timelineStyles.itemTitle}>{timeline.title}</Text>
-          <Text style={timelineStyles.itemTimeLeft}>
+          <Text
+            style={[
+              timelineStyles.itemTitle,
+              { ...(timeline.textColor && { color: timeline.textColor }) },
+            ]}
+          >
+            {timeline.title}
+          </Text>
+          <Text
+            style={[
+              timelineStyles.itemTimeLeft,
+              { ...(timeline.textColor && { color: timeline.textColor }) },
+            ]}
+          >
             {start} - {end}
           </Text>
         </View>
-        <Text numberOfLines={2} style={timelineStyles.itemDescription}>
-          {timeline.description}
-        </Text>
+        <View
+          style={{
+            flexDirection: "row",
+            flexWrap: "wrap",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginTop: 5,
+          }}
+        >
+          <Text
+            numberOfLines={2}
+            style={[
+              timelineStyles.itemDescription,
+              { ...(timeline.textColor && { color: timeline.textColor }) },
+            ]}
+          >
+            {timeline.description}
+          </Text>
+          {timeline.location === "timeline" && (
+            <Text
+              style={[
+                timelineStyles.status,
+                {
+                  backgroundColor: timeline.isCompleted
+                    ? "lightgreen"
+                    : Colors.secondary,
+                },
+              ]}
+            >
+              {timeline.isCompleted ? "Finished" : "To do"}
+            </Text>
+          )}
+        </View>
       </View>
     </Ripple>
   );
