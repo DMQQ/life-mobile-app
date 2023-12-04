@@ -35,8 +35,8 @@ const styles = StyleSheet.create({
     lineHeight: 25,
   },
   titleText: {
-    color: Colors.text_light,
-    fontSize: 25,
+    color: Colors.secondary,
+    fontSize: 35,
     fontWeight: "bold",
   },
   headerContainer: {
@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   container: {
-    backgroundColor: Color(Colors.primary).lighten(0.5).hex(),
+    // backgroundColor: Color(Colors.primary).lighten(0.5).hex(),
     marginBottom: 10,
     padding: 10,
     borderRadius: 10,
@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
     color: Colors.secondary,
     fontSize: 18,
     fontWeight: "bold",
-    padding: 10,
+    marginTop: 15,
   },
 });
 
@@ -107,50 +107,44 @@ export default function Workout({
 
   return (
     <ScreenContainer>
-      <View style={styles.container}>
-        <View style={styles.headerContainer}>
-          <Text style={styles.titleText}>{data?.workout?.title}</Text>
-
-          {workout.workoutId === route.params.workoutId &&
-            workout.isWorkoutPending && (
-              <Text style={styles.pendingText}>PENDING</Text>
-            )}
-        </View>
-
-        <Text style={{ color: Colors.text_dark }}>
-          <Text style={{ fontWeight: "bold", fontSize: 17 }}>600</Text> people
-          used this workout
-        </Text>
-
-        <Text style={{ color: Colors.text_dark }}>
-          {data?.workout?.description}
-        </Text>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={{ marginTop: 10 }}
-        >
-          {[0, 1, 2].map((id) => (
-            <View
-              style={{
-                backgroundColor: Colors.primary_light,
-                width: 120,
-                height: 60,
-                borderRadius: 10,
-                marginRight: 10,
-              }}
-              key={id}
-            />
-          ))}
-        </ScrollView>
-      </View>
-
       <View style={{ flex: 1 }}>
         <ExerciseList
           ListHeaderComponent={
-            <Text style={styles.listInfoText}>
-              All Exercises ({data?.workout?.exercises?.length})
-            </Text>
+            <View style={styles.container}>
+              <View style={styles.headerContainer}>
+                <Text style={styles.titleText}>{data?.workout?.title}</Text>
+
+                {workout.workoutId === route.params.workoutId &&
+                  workout.isWorkoutPending && (
+                    <Text style={styles.pendingText}>PENDING</Text>
+                  )}
+              </View>
+
+              <Text style={{ color: Colors.text_dark }}>
+                {data?.workout?.description}
+              </Text>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={{ marginTop: 10 }}
+              >
+                {[0, 1, 2].map((id) => (
+                  <View
+                    style={{
+                      backgroundColor: Colors.primary_lighter,
+                      width: 120,
+                      height: 60,
+                      borderRadius: 10,
+                      marginRight: 10,
+                    }}
+                    key={id}
+                  />
+                ))}
+              </ScrollView>
+              <Text style={styles.listInfoText}>
+                All Exercises ({data?.workout?.exercises?.length})
+              </Text>
+            </View>
           }
           onExerciseTilePress={(exercise) => setSelectedExercise(exercise)}
           exercises={data?.workout.exercises}
