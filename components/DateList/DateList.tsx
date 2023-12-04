@@ -1,7 +1,6 @@
 import moment, { Moment } from "moment";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { View, VirtualizedList, Text } from "react-native";
-import Colors from "../../constants/Colors";
 import Date from "./Date";
 import MonthSelectList from "./MonthSelectList";
 import { createDates, createFutureDates } from "./fns";
@@ -43,15 +42,23 @@ export default function DateList({
 
   const listRef = useRef<VirtualizedList<TDate>>(null);
 
-  useEffect(() => {
-    const dt = date(today, month);
+  function onMonthChange(newMonth: string) {
+    if (newMonth === month) return;
+
+    const dt = date(today, newMonth);
     const newDates = createDates(dt);
 
     setDates(newDates);
-    const firstOfMonth = [...dt.split("-").slice(0, 2), "01"].join("-");
 
-    if (moment.months()[today.month()] !== month) setSelected(firstOfMonth);
-  }, [month]);
+    if (newMonth === moment.months()[today.month()]) {
+      setSelected(today.format("YYYY-MM-DD"));
+    } else {
+      const firstOfMonth = [...dt.split("-").slice(0, 2), "01"].join("-");
+      setSelected(firstOfMonth);
+    }
+
+    setMonth(newMonth);
+  }
 
   useLayoutEffect(() => {
     listRef.current?.scrollToItem({
@@ -73,6 +80,8 @@ export default function DateList({
     offset: (75 + 5 * 2) * index,
   });
 
+  const snapOffsets = dates.map((_, index) => (75 + 10) * index);
+
   return (
     <View>
       <Text
@@ -83,11 +92,12 @@ export default function DateList({
           fontWeight: "bold",
         }}
       >
-        {month} {today.year()}
+        {month} {moment(selectedDate).year()}
       </Text>
-      <MonthSelectList selected={month} onPress={(m) => setMonth(m)} />
+      <MonthSelectList selected={month} onPress={onMonthChange} />
       <VirtualizedList
-        style={{ padding: 5 }}
+        //  snapToOffsets={snapOffsets}
+        // style={{ padding: 5 }}
         removeClippedSubviews
         onEndReached={onEndReached}
         showsHorizontalScrollIndicator={false}
