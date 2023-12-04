@@ -111,7 +111,7 @@ export default function CreateTimeLineEventModal({
     });
   };
 
-  const [optionsVisible, setOptionsVisible] = useState(true);
+  const [optionsVisible, setOptionsVisible] = useState(false);
 
   useEffect(() => {
     navigation.setOptions({
@@ -225,13 +225,17 @@ const SubmitButton = (props: SubmitButtonProps) =>
             />
           ) : null
         }
-        disabled={!(props.f.isValid && !props.f.isSubmitting)}
+        disabled={!(props.f.isValid && !props.f.isSubmitting && props.f.dirty)}
         type="contained"
         callback={() => props.f.handleSubmit()}
         style={[
           timelineStyles.submitButton,
           {
-            backgroundColor: !(props.f.isValid && !props.f.isSubmitting)
+            backgroundColor: !(
+              props.f.isValid &&
+              !props.f.isSubmitting &&
+              props.f.dirty
+            )
               ? Color(Colors.secondary).alpha(0.1).string()
               : Colors.secondary,
           },

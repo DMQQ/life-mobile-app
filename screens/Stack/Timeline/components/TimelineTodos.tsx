@@ -111,6 +111,7 @@ export default function TimelineTodos(props: {
   const [text, setText] = React.useState("");
 
   const handleCreateTodo = async () => {
+    if (text.trim() === "") return;
     await createTodo({
       variables: {
         title: text,
@@ -142,13 +143,12 @@ export default function TimelineTodos(props: {
       {show && (
         <View style={{ marginTop: 15 }}>
           <Input
+            autoFocus
             value={text}
             setValue={setText}
             placeholder="todo's name"
             placeholderTextColor={"gray"}
-            onSubmitEditing={() => {
-              if (text.trim() !== "") handleCreateTodo();
-            }}
+            onSubmitEditing={handleCreateTodo}
           />
 
           <Button

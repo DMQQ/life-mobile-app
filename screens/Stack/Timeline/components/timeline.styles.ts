@@ -5,8 +5,8 @@ import Layout from "../../../../constants/Layout";
 
 export default StyleSheet.create({
   dayHeader: {
-    color: Colors.secondary,
-    fontSize: 20,
+    color: "#ffffffda",
+    fontSize: 17,
     fontWeight: "bold",
     marginLeft: 10,
   },
@@ -16,11 +16,10 @@ export default StyleSheet.create({
     marginLeft: 10,
   },
   itemContainer: {
-    marginVertical: 7.5,
+    marginVertical: 5,
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 10,
-    paddingHorizontal: 10,
+    padding: 10,
   },
   itemContainerTitleRow: {
     flexDirection: "row",
@@ -31,7 +30,7 @@ export default StyleSheet.create({
   itemTitle: {
     color: Colors.secondary,
     fontWeight: "bold",
-    fontSize: 20,
+    fontSize: 22,
   },
   itemDescription: {
     color: "gray",
@@ -74,23 +73,32 @@ export default StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingBottom: 10,
     borderBottomWidth: 1,
     borderBottomColor: Colors.primary_light,
-    marginBottom: 15,
+    marginVertical: 15,
   },
   listHeadingText: {
     fontWeight: "bold",
     paddingHorizontal: 5,
-    color: Colors.secondary,
-    fontSize: 25,
+    color: "#ffffffda",
+    fontSize: 22,
     marginLeft: 5,
   },
   listHeading: {
     borderRadius: 5,
-    margin: 10,
-    padding: 5,
+
+    padding: 10,
     marginVertical: 15,
-    backgroundColor: Color(Colors.primary).lighten(0.35).string(),
+    // backgroundColor: Color(Colors.primary).lighten(0.35).string(),
+  },
+  status: {
+    color: Colors.primary,
+    fontWeight: "600",
+
+    backgroundColor: Colors.secondary,
+    padding: 2.5,
+    paddingHorizontal: 10,
+    borderRadius: 100,
+    fontSize: 13,
   },
 });
