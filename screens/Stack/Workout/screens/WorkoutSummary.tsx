@@ -18,7 +18,7 @@ export default function WorkoutSummary({
   const dispatch = useDispatch();
 
   const endWorkout = () => {
-    dispatch(workoutActions.end());
+    dispatch(workoutActions.endAndClear());
     navigation.navigate("Workout", { workoutId: workout.workoutId });
   };
 

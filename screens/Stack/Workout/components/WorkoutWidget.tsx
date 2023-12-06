@@ -58,6 +58,8 @@ export default function WorkoutWidget() {
 
   const exercise = workout.currentExercise;
 
+  if (exercise === undefined) return null;
+
   return (
     <View style={styles.container}>
       <View style={{ flexDirection: "column", marginBottom: 10 }}>
@@ -80,10 +82,10 @@ export default function WorkoutWidget() {
           flexDirection: "row",
         }}
       >
-        <ExerciseIcon name={exercise.title as any} />
+        <ExerciseIcon name={exercise?.title as any} />
         <View style={{ paddingHorizontal: Padding.md, flex: 1 }}>
           <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 18 }}>
-            {exercise.title}
+            {exercise?.title}
           </Text>
           <Text style={{ color: "#fff", fontWeight: "400", fontSize: 14 }}>
             {exercise.muscleGroup}
