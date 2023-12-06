@@ -6,6 +6,7 @@ export default function Overlay(props: {
   onClose: Function;
   isVisible: boolean;
   content?: ReactNode;
+  children?: ReactNode;
 }) {
   return (
     <Modal visible={props.isVisible} transparent>
@@ -21,7 +22,7 @@ export default function Overlay(props: {
           backgroundColor: "rgba(0,0,0,0.5)",
         }}
       />
-      {props.content}
+      {props.children || props.content}
     </Modal>
   );
 }
