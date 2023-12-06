@@ -84,7 +84,7 @@ export default function useAuthForm(variant: "login" | "register") {
     email: string;
     password: string;
   }) => {
-    await onSubmit({
+    return await onSubmit({
       variables: {
         email: variables.email.trim(),
         password: variables.password.trim(),
