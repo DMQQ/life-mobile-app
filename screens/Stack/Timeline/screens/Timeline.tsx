@@ -5,11 +5,17 @@ import timelineStyles from "../components/timeline.styles";
 import Ripple from "react-native-material-ripple";
 import useGetTimeLineQuery from "../hooks/query/useGetTimeLineQuery";
 import Colors from "../../../../constants/Colors";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Skeleton from "../../../../components/SkeletonLoader/Skeleton";
 import { TimelineScreenProps } from "../types";
 import TimelineItem from "../components/TimelineItem";
-import { MaterialIcons } from "@expo/vector-icons";
+import {
+  AntDesign,
+  Feather,
+  FontAwesome,
+  FontAwesome5,
+  MaterialIcons,
+} from "@expo/vector-icons";
 import DateList from "../../../../components/DateList/DateList";
 import useUser from "../../../../utils/hooks/useUser";
 import { gql, useQuery } from "@apollo/client";
@@ -109,15 +115,28 @@ export default function Timeline({
       ? `Today (${selected})`
       : selected;
 
+  const [switchView, setSwitchView] = useState<"date-list" | "calendar">(
+    "date-list"
+  );
+
   return (
     <ScrollView>
-      {/* <Calendar onDayPress={onDayPress} /> */}
+      {switchView === "calendar" && (
+        <Calendar
+          monthData={monthData}
+          refetch={refetch}
+          onDayPress={onDayPress}
+        />
+      )}
 
-      <DateList
-        dayEvents={dayEventsSorted}
-        selectedDate={selected}
-        setSelected={setSelected}
-      />
+      {switchView === "date-list" && (
+        <DateList
+          onMenuPress={() => setSwitchView("calendar")}
+          dayEvents={dayEventsSorted}
+          selectedDate={selected}
+          setSelected={setSelected}
+        />
+      )}
 
       <View
         style={{
@@ -129,12 +148,25 @@ export default function Timeline({
       >
         <Text style={timelineStyles.dayHeader}>{displayDate}</Text>
 
-        <Ripple
-          style={{ padding: 5 }}
-          onPress={() => navigation.navigate("Schedule", { selected })}
-        >
-          <MaterialIcons name="grid-view" size={24} color={"#fff"} />
-        </Ripple>
+        <View style={{ flexDirection: "row" }}>
+          <Ripple
+            style={{ padding: 5, marginRight: 10 }}
+            onPress={() =>
+              setSwitchView((sw) =>
+                sw === "calendar" ? "date-list" : "calendar"
+              )
+            }
+          >
+            <AntDesign name="calendar" size={24} color={"#fff"} />
+          </Ripple>
+
+          <Ripple
+            style={{ padding: 5 }}
+            onPress={() => navigation.navigate("Schedule", { selected })}
+          >
+            <Feather name="list" size={24} color="#fff" />
+          </Ripple>
+        </View>
       </View>
 
       <ListContainer

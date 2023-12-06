@@ -4,21 +4,23 @@ import Colors from "../../constants/Colors";
 import { AntDesign } from "@expo/vector-icons";
 import { useState, useMemo } from "react";
 import { DateData, MarkedDates } from "react-native-calendars/src/types";
-import { gql, useQuery } from "@apollo/client";
+import { ApolloQueryResult, gql, useQuery } from "@apollo/client";
 import useUser from "../../utils/hooks/useUser";
 import { StyleSheet } from "react-native";
 
 interface CalendarProps {
   onDayPress: (day: DateData) => void;
-}
 
-const GET_MONTHLY_EVENTS = gql`
-  query GetMonthlyEvents($date: String!) {
-    timelineMonth(date: $date) {
-      date
-    }
-  }
-`;
+  monthData: { timelineMonth?: any[] };
+
+  refetch: (
+    variables?:
+      | Partial<{
+          date: string;
+        }>
+      | undefined
+  ) => Promise<ApolloQueryResult<any>>;
+}
 
 const styles = StyleSheet.create({
   calendar: {
@@ -34,18 +36,12 @@ const styles = StyleSheet.create({
   },
 });
 
-export default function Calendar({ onDayPress }: CalendarProps) {
+export default function Calendar({
+  onDayPress,
+  refetch,
+  monthData: data,
+}: CalendarProps) {
   const usr = useUser();
-
-  const { data, refetch } = useQuery(GET_MONTHLY_EVENTS, {
-    variables: { date: moment().format("YYYY-MM-DD") },
-    context: {
-      headers: {
-        authentication: usr.token,
-      },
-    },
-    onError: (err) => console.log(JSON.stringify(err, null, 2)),
-  });
 
   const onMonthChange = async (date: { dateString: string }) =>
     await refetch({
@@ -75,7 +71,7 @@ export default function Calendar({ onDayPress }: CalendarProps) {
 
     marked[selected] = {
       selected: true,
-      selectedColor: "#6186D2",
+      selectedColor: Colors.secondary,
     };
 
     return marked;

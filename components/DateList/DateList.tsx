@@ -4,6 +4,8 @@ import { View, VirtualizedList, Text } from "react-native";
 import Date from "./Date";
 import MonthSelectList from "./MonthSelectList";
 import { createDates, createFutureDates } from "./fns";
+import Ripple from "react-native-material-ripple";
+import { AntDesign, Entypo } from "@expo/vector-icons";
 
 type TDate = {
   date: string;
@@ -14,7 +16,7 @@ type TDate = {
 interface DateListProps {
   selectedDate: string;
   setSelected: React.Dispatch<React.SetStateAction<string>>;
-
+  onMenuPress: Function;
   dayEvents: {
     [key: string]: number;
   };
@@ -35,6 +37,7 @@ export default function DateList({
   selectedDate,
   setSelected,
   dayEvents,
+  onMenuPress,
 }: DateListProps) {
   const today = moment();
   const [dates, setDates] = useState<TDate[]>(createDates());
@@ -84,16 +87,34 @@ export default function DateList({
 
   return (
     <View>
-      <Text
+      <View
         style={{
-          color: "#ffffffda",
-          fontSize: 30,
-          padding: 15,
-          fontWeight: "bold",
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: 10,
         }}
       >
-        {month} {moment(selectedDate).year()}
-      </Text>
+        <Text
+          style={{
+            color: "#ffffffda",
+            fontSize: 30,
+            padding: 15,
+            fontWeight: "bold",
+          }}
+        >
+          {month} {moment(selectedDate).year()}
+        </Text>
+        {/* <Ripple
+          onPress={() => onMenuPress()}
+          style={{
+            padding: 10,
+            paddingHorizontal: 15,
+          }}
+        >
+          <Entypo name="dots-three-vertical" size={18} color={"#fff"} />
+        </Ripple> */}
+      </View>
       <MonthSelectList selected={month} onPress={onMonthChange} />
       <VirtualizedList
         //  snapToOffsets={snapOffsets}
