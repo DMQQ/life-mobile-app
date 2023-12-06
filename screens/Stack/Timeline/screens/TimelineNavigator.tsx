@@ -11,10 +11,13 @@ import {
   horizontalAnimation,
 } from "../../../../navigation/assets/screen_animations";
 import ScheduleScreen from "./Schedule";
+import type { RootStackScreenProps } from "../../../../types";
 
 const Stack = createStackNavigator<RootStackParamList>();
 
-export default function TimelineScreens({ route }: any) {
+export default function TimelineScreens({
+  route,
+}: RootStackScreenProps<"TimelineScreens">) {
   const navigation = useNavigation<any>();
 
   useEffect(() => {
