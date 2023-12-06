@@ -80,16 +80,10 @@ interface NextButtonProps {
   isPending: boolean;
 }
 
-// prettier-ignore
 const NextButton = (props: NextButtonProps) => (
-  <Ripple
-    onPress={() => props.onNext()}
-    
-  >
-    <Text
-      style={styles.nextButtonText}
-    >
-      {props.isPending ? 'SKIP' : "NEXT"}
+  <Ripple onPress={() => props.onNext()}>
+    <Text style={styles.nextButtonText}>
+      {props.isPending ? "SKIP" : "NEXT"}
     </Text>
   </Ripple>
 );
@@ -190,6 +184,7 @@ function PendingWorkout({
   const handleActionButtonPress = () => {
     Vibration.cancel();
     if (currentSet > numberOfSets && typeof nextExercise === "undefined") {
+      dispatch(workoutActions.end());
       navigation.navigate("WorkoutSummary", {
         workoutId: route.params.workoutId,
       });

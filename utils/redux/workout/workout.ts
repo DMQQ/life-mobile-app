@@ -64,6 +64,7 @@ export const workoutSlice = createSlice({
     },
 
     runSkipped(state) {
+      if (state.isWorkoutPending) return;
       state.isWorkoutPending = true;
       state.exercises = state.skipped_exercises;
       state.activeExerciseIndex = 0;
@@ -72,6 +73,8 @@ export const workoutSlice = createSlice({
     },
 
     next(state, { payload }: { payload: { skip?: boolean } }) {
+      if (!state.isWorkoutPending) return;
+
       if (state.activeExerciseIndex + 1 > state.exercises.length) {
         state.isWorkoutPending = false;
         return;
@@ -85,12 +88,12 @@ export const workoutSlice = createSlice({
 
       state.activeExerciseIndex++;
 
+      if (state.activeExerciseIndex > state.exercises.length) return;
       state.currentExercise = state.exercises[state.activeExerciseIndex];
     },
 
     saveSetTime(state, { payload }) {
-      if (typeof state.currentExercise === "undefined")
-        throw new Error("No Current exercise");
+      if (typeof state.currentExercise === "undefined") return;
 
       state.currentExercise.totalTime = [
         ...state.currentExercise.totalTime,
@@ -101,6 +104,24 @@ export const workoutSlice = createSlice({
     end(state) {
       state.isWorkoutPending = false;
       state.activeExerciseIndex = 0;
+    },
+
+    endAndClear(state) {
+      state.workoutId = "";
+      state.isWorkoutPending = false;
+      state.exercises = [];
+
+      state.total_exercises = [];
+
+      state.skipped_exercises = [];
+
+      (state.activeExerciseIndex = 0), (state.currentExercise = {} as any);
+
+      state.title = "";
+
+      state.description = "";
+
+      state.startTime = 0;
     },
   },
 });

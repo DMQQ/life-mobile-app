@@ -1,4 +1,12 @@
-import { Image, LayoutRectangle, Pressable, Text, View } from "react-native";
+import {
+  Image,
+  LayoutRectangle,
+  Pressable,
+  StyleProp,
+  Text,
+  View,
+  ViewStyle,
+} from "react-native";
 import { Exercise } from "../../../types";
 import Colors from "../../../constants/Colors";
 import Color from "color";
@@ -23,6 +31,19 @@ const images = {
   'Plank':'https://cdn-icons-png.flaticon.com/512/2647/2647643.png'
 };
 
+export const ExerciseIcon = (props: { name: keyof typeof images }) => (
+  <Image
+    style={{
+      width: 40,
+      height: 40,
+      margin: GAPS,
+    }}
+    source={{
+      uri: images[props.name] || defaultImageUri,
+    }}
+  />
+);
+
 const defaultImageUri =
   "https://cdn-icons-png.flaticon.com/512/1895/1895100.png";
 
@@ -40,6 +61,7 @@ export default function ExerciseTile({
   onPress: Function;
   tileIndex: number;
   enableActionButtons?: boolean;
+  styles?: StyleProp<ViewStyle>;
 }) {
   const [isVisible, setIsVisible] = useState(false);
 
@@ -49,12 +71,15 @@ export default function ExerciseTile({
     <Animated.View
       onLayout={(ev) => setLayout(ev.nativeEvent.layout)}
       entering={FadeIn.delay(rest.tileIndex * 75)}
-      style={{
-        backgroundColor: Color(Colors.primary).lighten(0.5).hex(),
-        padding: GAPS,
-        borderRadius: 10,
-        marginBottom: 10,
-      }}
+      style={[
+        {
+          backgroundColor: Color(Colors.primary).lighten(0.5).hex(),
+          padding: GAPS,
+          borderRadius: 10,
+          marginBottom: 10,
+        },
+        rest.styles,
+      ]}
     >
       <Pressable
         onLongPress={() => setIsVisible((p) => !p)}
@@ -63,16 +88,7 @@ export default function ExerciseTile({
           rest.onPress();
         }}
       >
-        <Image
-          style={{
-            width: 40,
-            height: 40,
-            margin: GAPS,
-          }}
-          source={{
-            uri: images[title as keyof typeof images] || defaultImageUri,
-          }}
-        />
+        <ExerciseIcon name={title as keyof typeof images} />
         <View style={{ flex: 1 }}>
           <Text
             style={{
