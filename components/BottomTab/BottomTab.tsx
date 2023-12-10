@@ -1,5 +1,5 @@
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import Layout from "../../constants/Layout";
 import Colors from "../../constants/Colors";
 import Ripple from "react-native-material-ripple";
@@ -10,8 +10,7 @@ import Animated, { FadeInDown, FadeOutDown } from "react-native-reanimated";
 const styles = StyleSheet.create({
   container: {
     width: Layout.screen.width,
-    padding: 5,
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.primary_dark,
     justifyContent: "space-around",
     flexDirection: "row",
     borderTopWidth: 1,
@@ -20,8 +19,7 @@ const styles = StyleSheet.create({
 
   button: {
     flex: 1,
-    padding: 15,
-    paddingHorizontal: 15,
+    padding: 12.5,
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 100,
@@ -52,7 +50,7 @@ export default function BottomTab({
       <Ionicons
         size={25}
         name={props.iconName}
-        color={activeRoute === props.route ? "#fff" : Colors.secondary}
+        color={activeRoute === props.route ? Colors.secondary_light_2 : "#fff"}
       />
     </Ripple>
   );

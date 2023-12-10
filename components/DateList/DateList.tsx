@@ -6,6 +6,7 @@ import MonthSelectList from "./MonthSelectList";
 import { createDates, createFutureDates } from "./fns";
 import Ripple from "react-native-material-ripple";
 import { AntDesign, Entypo } from "@expo/vector-icons";
+import Animated from "react-native-reanimated";
 
 type TDate = {
   date: string;
@@ -39,7 +40,7 @@ export default function DateList({
   dayEvents,
   onMenuPress,
 }: DateListProps) {
-  const today = moment();
+  const today = moment(selectedDate);
   const [dates, setDates] = useState<TDate[]>(createDates());
   const [month, setMonth] = useState(moment.months()[today.month()]);
 
@@ -103,17 +104,8 @@ export default function DateList({
             fontWeight: "bold",
           }}
         >
-          {month} {moment(selectedDate).year()}
+          {moment.months()[today.month()]} {moment(selectedDate).year()}
         </Text>
-        {/* <Ripple
-          onPress={() => onMenuPress()}
-          style={{
-            padding: 10,
-            paddingHorizontal: 15,
-          }}
-        >
-          <Entypo name="dots-three-vertical" size={18} color={"#fff"} />
-        </Ripple> */}
       </View>
       <MonthSelectList selected={month} onPress={onMonthChange} />
       <VirtualizedList
