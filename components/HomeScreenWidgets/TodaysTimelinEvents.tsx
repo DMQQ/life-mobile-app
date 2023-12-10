@@ -7,6 +7,7 @@ import Ripple from "react-native-material-ripple";
 import moment from "moment";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Padding, Rounded } from "../../constants/Layout";
+import Button from "../ui/Button/Button";
 
 const styles = StyleSheet.create({
   container: {
@@ -41,14 +42,11 @@ const styles = StyleSheet.create({
   },
 
   notFoundContainer: {
-    padding: 20,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
+    flexDirection: "column",
   },
 
   notFoundText: {
-    fontSize: 18,
+    fontSize: 20,
     padding: 10,
     fontWeight: "bold",
     color: "#fff",
@@ -90,9 +88,36 @@ export default function TodaysTimelineEvents(props: { data: any[] }) {
 
       {props?.data?.length === 0 && (
         <View style={styles.notFoundContainer}>
-          <MaterialIcons name="event-busy" size={35} color={"#fff"} />
+          <View
+            style={{
+              flexDirection: "row",
+              paddingVertical: 10,
+              marginBottom: 10,
+              alignItems: "center",
+            }}
+          >
+            <MaterialIcons name="event-busy" size={50} color={"#fff"} />
 
-          <Text style={styles.notFoundText}>No events</Text>
+            <Text style={styles.notFoundText}>
+              No available events ({date.format("MM.DD")})
+            </Text>
+          </View>
+
+          <Button
+            onPress={() =>
+              navigation.navigate("TimelineScreens", {
+                screen: "TimelineCreate",
+                params: {
+                  selectedDate: moment().format("YYYY-MM-DD"),
+                },
+              })
+            }
+            size="xl"
+            style={{ backgroundColor: "#fff", borderRadius: 15 }}
+            fontStyle={{ color: Colors.primary }}
+          >
+            Create event
+          </Button>
         </View>
       )}
     </View>
