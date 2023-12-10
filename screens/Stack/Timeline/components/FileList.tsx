@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import Colors from "../../../../constants/Colors";
 import Ripple from "react-native-material-ripple";
-import { useState, useRef, memo } from "react";
+import { useState, useRef, memo, useCallback } from "react";
 import * as ImagePicker from "expo-image-picker";
 import axios from "axios";
 import { useApolloClient } from "@apollo/client";
@@ -163,15 +163,9 @@ interface ImageDisplayViewProps {
   onShowPreview: (item: IFile) => void;
 }
 
-const GridImageView = memo((props: ImageDisplayViewProps) => (
-  <View
-    style={{
-      flexDirection: "row",
-      flexWrap: "wrap",
-      justifyContent: "space-between",
-    }}
-  >
-    {props.data?.images.map((item: any) => (
+const GridImageView = memo((props: ImageDisplayViewProps) => {
+  const renderImages = useCallback(
+    (item: IFile) => (
       <Ripple
         key={item.id}
         onLongPress={() => props.onRemovePhoto(item.id)}
@@ -184,16 +178,27 @@ const GridImageView = memo((props: ImageDisplayViewProps) => (
           style={styles.img}
           source={{
             uri: Url.API + "/upload/images/" + item.url,
-            height: 130,
-            width: 200,
-            cache: "only-if-cached",
-            method: "GET",
+            height: styles.img.height,
+            width: styles.img.width,
+            scale: 5,
           }}
         />
       </Ripple>
-    ))}
-  </View>
-));
+    ),
+    [props.data]
+  );
+  return (
+    <View
+      style={{
+        flexDirection: "row",
+        flexWrap: "wrap",
+        justifyContent: "space-between",
+      }}
+    >
+      {props.data?.images.map(renderImages)}
+    </View>
+  );
+});
 
 const ListImageView = memo((props: ImageDisplayViewProps) => (
   <FlatList

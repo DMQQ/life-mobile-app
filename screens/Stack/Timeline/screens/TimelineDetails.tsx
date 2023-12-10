@@ -12,7 +12,7 @@ import useGetTimelineById, {
 } from "../hooks/query/useGetTimelineById";
 import Ripple from "react-native-material-ripple";
 import Layout from "../../../../constants/Layout";
-import { AntDesign, Feather } from "@expo/vector-icons";
+import { AntDesign } from "@expo/vector-icons";
 import TimelineTodos from "../components/TimelineTodos";
 import LoaderSkeleton from "../components/LoaderSkeleton";
 import useGoBackOnBackPress from "../../../../utils/hooks/useGoBackOnBackPress";
@@ -21,7 +21,6 @@ import Animated, {
   useAnimatedScrollHandler,
   useAnimatedStyle,
   useSharedValue,
-  withSpring,
   withTiming,
   Layout as LayoutAnim,
   FadeIn,

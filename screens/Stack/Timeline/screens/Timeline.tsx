@@ -20,6 +20,8 @@ import DateList from "../../../../components/DateList/DateList";
 import useUser from "../../../../utils/hooks/useUser";
 import { gql, useQuery } from "@apollo/client";
 import Color from "color";
+import Overlay from "../../../../components/ui/Overlay/Overlay";
+import Animated, { FadeInUp, FadeOutDown } from "react-native-reanimated";
 
 const GET_MONTHLY_EVENTS = gql`
   query GetMonthlyEvents($date: String!) {
@@ -76,6 +78,8 @@ const Loader = (props: { loading: boolean }) =>
     </View>
   ) : null;
 
+const iconColor = Color(Colors.primary).lighten(4.5).hex();
+
 export default function Timeline({
   navigation,
 }: TimelineScreenProps<"Timeline">) {
@@ -119,6 +123,8 @@ export default function Timeline({
     "date-list"
   );
 
+  const [isFloatingVisible, setIsFloatingVisible] = useState(false);
+
   return (
     <ScrollView>
       {switchView === "calendar" && (
@@ -138,35 +144,50 @@ export default function Timeline({
         />
       )}
 
-      <View
-        style={{
-          padding: 10,
-          flexDirection: "row",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
+      <View style={timelineStyles.dateRow}>
         <Text style={timelineStyles.dayHeader}>{displayDate}</Text>
 
-        <View style={{ flexDirection: "row" }}>
-          <Ripple
-            style={{ padding: 5, marginRight: 10 }}
-            onPress={() =>
-              setSwitchView((sw) =>
-                sw === "calendar" ? "date-list" : "calendar"
-              )
-            }
-          >
-            <AntDesign name="calendar" size={24} color={"#fff"} />
-          </Ripple>
+        <Ripple
+          onPress={() => setIsFloatingVisible((f) => !f)}
+          style={{ paddingHorizontal: 10 }}
+        >
+          <AntDesign name="bars" color={iconColor} size={24} />
+        </Ripple>
 
-          <Ripple
-            style={{ padding: 5 }}
-            onPress={() => navigation.navigate("Schedule", { selected })}
+        <Overlay
+          isVisible={isFloatingVisible}
+          onClose={() => setIsFloatingVisible(false)}
+          opacity={0.65}
+        >
+          <Animated.View
+            entering={FadeInUp}
+            exiting={FadeOutDown}
+            style={timelineStyles.floatingContainer}
           >
-            <Feather name="list" size={24} color="#fff" />
-          </Ripple>
-        </View>
+            <Ripple
+              style={[timelineStyles.floatingButton, { marginBottom: 10 }]}
+              onPress={() =>
+                setSwitchView((sw) =>
+                  sw === "calendar" ? "date-list" : "calendar"
+                )
+              }
+            >
+              <AntDesign name="calendar" size={24} color={iconColor} />
+              <Text style={timelineStyles.floatingText}>
+                {switchView === "calendar" ? "Date list" : "Calendar"}
+              </Text>
+            </Ripple>
+
+            <Ripple
+              style={timelineStyles.floatingButton}
+              onPress={() => navigation.navigate("Schedule", { selected })}
+            >
+              <Feather name="list" size={24} color={iconColor} />
+
+              <Text style={timelineStyles.floatingText}>List</Text>
+            </Ripple>
+          </Animated.View>
+        </Overlay>
       </View>
 
       <ListContainer
