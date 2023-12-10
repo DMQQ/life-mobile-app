@@ -3,6 +3,8 @@ import Colors from "../../../../constants/Colors";
 import Color from "color";
 import Layout from "../../../../constants/Layout";
 
+const iconColor = Color(Colors.primary).lighten(4.5).hex();
+
 export default StyleSheet.create({
   dayHeader: {
     color: "#ffffffda",
@@ -88,17 +90,49 @@ export default StyleSheet.create({
     borderRadius: 5,
 
     padding: 10,
-    marginVertical: 15,
+
     // backgroundColor: Color(Colors.primary).lighten(0.35).string(),
   },
   status: {
     color: Colors.primary,
     fontWeight: "600",
-
+    marginTop: 10,
     backgroundColor: Colors.secondary,
     padding: 2.5,
     paddingHorizontal: 10,
     borderRadius: 100,
     fontSize: 13,
+  },
+
+  floatingContainer: {
+    position: "absolute",
+    backgroundColor: Colors.primary,
+    padding: 15,
+    borderRadius: 20,
+    right: 10,
+    top: 200,
+  },
+  floatingButton: {
+    padding: 10,
+    flexDirection: "row",
+    backgroundColor: Colors.primary_lighter,
+    borderRadius: 10,
+    paddingHorizontal: 15,
+  },
+
+  floatingText: {
+    color: iconColor,
+    fontSize: 18,
+    fontWeight: "bold",
+    marginLeft: 10,
+  },
+
+  dateRow: {
+    padding: 5,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    position: "relative",
+    marginTop: 10,
   },
 });

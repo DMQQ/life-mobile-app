@@ -53,7 +53,7 @@ export default function TimelineItem(
           onPress: async () => {
             await remove();
 
-            ToastAndroid.show("Timeline deleted", ToastAndroid.SHORT);
+            ToastAndroid.show("Event deleted", ToastAndroid.SHORT);
           },
         },
       ]

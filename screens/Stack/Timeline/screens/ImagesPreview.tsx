@@ -1,8 +1,8 @@
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import ScreenContainer from "../../../../components/ui/ScreenContainer";
-import { ScrollView, ImageBackground } from "react-native";
+import { InteractionManager, ScrollView } from "react-native";
 import Layout from "../../../../constants/Layout";
-import { useLayoutEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import useGetTimelineById from "../hooks/query/useGetTimelineById";
 import Animated, {
   useAnimatedStyle,
@@ -37,21 +37,7 @@ export default function ImagesPreview({ route }: any) {
     <ScreenContainer
       style={{ justifyContent: "center", alignItems: "center", padding: 0 }}
     >
-      <ScrollView
-        contentContainerStyle={{
-          justifyContent: "center",
-        }}
-        showsHorizontalScrollIndicator={false}
-        showsVerticalScrollIndicator={false}
-        ref={scrollRef}
-        style={{ flex: 1 }}
-        pagingEnabled
-        horizontal
-      >
-        {data?.images.map((el: IFile) => (
-          <GesturedImage key={el.id} uri={el.url} />
-        ))}
-      </ScrollView>
+      <GesturedImage uri={route.params.selectedImage} />
     </ScreenContainer>
   );
 }
@@ -64,13 +50,22 @@ const GesturedImage = (props: { uri: string }) => {
 
   const src = { uri: Url.API + "/upload/images/" + props.uri };
 
+  const [enableGesture, setEnableGesture] = useState(false);
+
+  useEffect(() => {
+    InteractionManager.runAfterInteractions(() => {
+      setEnableGesture(true);
+    });
+  }, []);
+
   const handleGesture = Gesture.Pinch()
     .onUpdate((event) => {
       scale.value = event.scale;
       focalX.value = event.focalX;
       focalY.value = event.focalY;
     })
-    .onEnd(() => (scale.value = withTiming(1)));
+    .onEnd(() => (scale.value = withTiming(1)))
+    .enabled(enableGesture);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [
