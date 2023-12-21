@@ -6,6 +6,7 @@ import Ripple from "react-native-material-ripple";
 import { Ionicons } from "@expo/vector-icons";
 import useKeyboard from "../../utils/hooks/useKeyboard";
 import Animated, { FadeInDown, FadeOutDown } from "react-native-reanimated";
+import { useTheme } from "../../utils/context/ThemeContext";
 
 const styles = StyleSheet.create({
   container: {
@@ -50,7 +51,7 @@ export default function BottomTab({
       <Ionicons
         size={25}
         name={props.iconName}
-        color={activeRoute === props.route ? Colors.secondary_light_2 : "#fff"}
+        color={activeRoute === props.route ? Colors.secondary_light_1 : "#fff"}
       />
     </Ripple>
   );
@@ -61,9 +62,16 @@ export default function BottomTab({
 
   if (isOpenSubScreen || keyboard) return null;
 
+  const {
+    theme: { colors },
+  } = useTheme();
+
   return (
     <Animated.View
-      style={[styles.container, { paddingBottom: 5 }]}
+      style={[
+        styles.container,
+        { paddingBottom: 5, backgroundColor: colors.primary_light },
+      ]}
       entering={FadeInDown}
       exiting={FadeOutDown}
     >

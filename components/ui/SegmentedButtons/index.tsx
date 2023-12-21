@@ -1,8 +1,8 @@
-import { View, Text } from "react-native";
+import { View, Text, StyleProp, TextStyle } from "react-native";
 import Layout from "../../../constants/Layout";
 import Colors from "../../../constants/Colors";
 import Color from "color";
-import Ripple from "react-native-material-ripple";
+import Ripple, { RippleProps } from "react-native-material-ripple";
 import { ReactNode } from "react";
 
 interface SegmentProps {
@@ -17,6 +17,9 @@ interface SegmentedButtonsProps {
   onChange: (value: string) => void;
   isError?: boolean;
   errorMessage?: string;
+
+  buttonStyle?: RippleProps["style"];
+  buttonTextStyle?: StyleProp<TextStyle>;
 }
 
 export default function SegmentedButtons(props: SegmentedButtonsProps) {
@@ -42,31 +45,36 @@ export default function SegmentedButtons(props: SegmentedButtonsProps) {
         <Ripple
           onPress={() => props.onChange(value.value)}
           key={value.value}
-          style={{
-            height: 60,
-            justifyContent: "center",
-            flexDirection: "row",
-            alignItems: "center",
-            flex: 1,
-            // borderRightWidth: index === props.buttons.length - 1 ? 0 : 2,
-            // borderRightColor: Colors.primary_light,
-            borderRadius: 10,
-            backgroundColor:
-              props.value === value.value
-                ? Colors.secondary
-                : Color(Colors.primary).lighten(0.5).toString(),
-          }}
+          style={[
+            {
+              height: 60,
+              justifyContent: "center",
+              flexDirection: "row",
+              alignItems: "center",
+              flex: 1,
+              // borderRightWidth: index === props.buttons.length - 1 ? 0 : 2,
+              // borderRightColor: Colors.primary_light,
+              borderRadius: 10,
+              backgroundColor:
+                props.value === value.value
+                  ? Colors.secondary
+                  : Color(Colors.primary).lighten(0.5).toString(),
+            },
+            props.buttonStyle,
+          ]}
         >
           {value.icon}
           <Text
-            style={{
-              //  color: Colors.secondary,
-              color: "#fff",
-
-              fontSize: 16,
-              letterSpacing: 0.5,
-              fontWeight: "bold",
-            }}
+            style={[
+              {
+                //  color: Colors.secondary,
+                color: "#fff",
+                fontSize: 16,
+                letterSpacing: 0.5,
+                fontWeight: "bold",
+              },
+              props.buttonTextStyle,
+            ]}
           >
             {value.text}
           </Text>

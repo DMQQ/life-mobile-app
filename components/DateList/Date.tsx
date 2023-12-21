@@ -5,7 +5,7 @@ import { StyleSheet, Text, View } from "react-native";
 import { Date as TDate } from "./fns";
 import moment from "moment";
 import { memo, useMemo } from "react";
-import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
+import Animated, { FadeIn, FadeOut, ZoomIn } from "react-native-reanimated";
 
 const styles = StyleSheet.create({
   container: {
@@ -68,8 +68,6 @@ export default function Date(props: DateProps) {
 
   return (
     <AnimatedRipple
-      entering={FadeIn}
-      exiting={FadeOut}
       onPress={() => props.onPress()}
       style={[styles.container, { backgroundColor: dateItemBg }]}
     >
