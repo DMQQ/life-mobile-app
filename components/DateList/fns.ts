@@ -24,11 +24,11 @@ export function createFutureDates(from: string, limit: number) {
 
 export function createPreviousDates(from: string, limit: number) {}
 
-export function createDates(startDate?: string) {
+export function createDates(startDate?: string, n: number = 5) {
   const currentDate = startDate ? moment(startDate) : moment();
 
   const previousDates = [] as Date[];
-  for (let i = 1; i <= 5; i++) {
+  for (let i = 1; i <= n; i++) {
     const previousDate = currentDate.clone().subtract(i, "days");
 
     previousDates.push({

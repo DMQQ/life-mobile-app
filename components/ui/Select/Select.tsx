@@ -12,7 +12,7 @@ import {
 import Layout from "../../../constants/Layout";
 import Colors from "../../../constants/Colors";
 import Color from "color";
-import { useState, useCallback, ReactNode } from "react";
+import { useState, useCallback, ReactNode, useLayoutEffect } from "react";
 import Ripple from "react-native-material-ripple";
 import { AntDesign } from "@expo/vector-icons";
 import Reanimated, {
@@ -58,10 +58,11 @@ interface Props<T> {
   placeholderText?: string;
 
   renderCustomSelected?: ReactNode;
+
+  onFocusChange?: (focus: boolean) => void;
 }
 
-const backgroundColor = Color(Colors.primary).lighten(0.5).hex();
-const selectedBackgroundColor = Color(Colors.secondary).darken(0.7).hex();
+const backgroundColor = Color(Colors.primary).lighten(0.25).hex();
 
 const styles = StyleSheet.create({
   list: {
@@ -132,6 +133,7 @@ export default function Select({
 
   const DefaultRenderItem = useCallback(
     ({ item, index }: { item: string; index: number }) => {
+      const isSelected = selected.includes(item);
       return (
         <Ripple
           onPress={() => addSelectedItem(item)}
@@ -143,12 +145,17 @@ export default function Select({
             justifyContent: "space-between",
             borderBottomColor:
               options.length - 1 === index ? "transparent" : Colors.secondary,
-            backgroundColor: selected.includes(item)
-              ? selectedBackgroundColor
-              : undefined,
+            backgroundColor: isSelected ? Colors.secondary : undefined,
           }}
         >
-          <Text style={{ color: Colors.secondary, fontSize: 18 }}>{item}</Text>
+          <Text
+            style={{
+              color: isSelected ? "#fff" : Colors.secondary,
+              fontSize: 18,
+            }}
+          >
+            {item}
+          </Text>
           {selected.includes(item) && (
             <AntDesign name="check" size={25} color={Colors.secondary} />
           )}
@@ -159,6 +166,7 @@ export default function Select({
   );
 
   const buttonHeight = useSharedValue<number>(0);
+  const buttonWidth = useSharedValue<number>(0);
 
   const flatListTransformStyle = useAnimatedStyle(() => ({
     transform: [
@@ -169,13 +177,19 @@ export default function Select({
         }),
       },
     ],
+    width: buttonWidth.value + styles.container.borderWidth * 2,
   }));
 
   const onLayout = ({ nativeEvent }: LayoutChangeEvent) => {
     buttonHeight.value = nativeEvent.layout.height;
+    buttonWidth.value = nativeEvent.layout.width;
   };
 
   const overlayColor = transparentOverlay ? "transparent" : "rgba(0,0,0,0.8)";
+
+  useLayoutEffect(() => {
+    rest.onFocusChange?.(isFocused);
+  }, [isFocused]);
 
   return (
     <>
@@ -199,6 +213,9 @@ export default function Select({
           {
             zIndex: isFocused ? 1000 : 100,
             borderColor: isFocused ? Colors.secondary : Colors.primary_light,
+            backgroundColor: isFocused
+              ? Colors.primary_lighter
+              : backgroundColor,
           },
           containerStyle,
         ]}
@@ -241,7 +258,7 @@ export default function Select({
                 borderTopRightRadius: 0 /* 4 props below are optional set for testing */,
                 borderTopLeftRadius: 0,
                 left: -2,
-                top: -2,
+                top: 10,
               },
               flatListTransformStyle,
             ]}

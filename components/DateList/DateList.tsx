@@ -49,13 +49,15 @@ export default function DateList({
   function onMonthChange(newMonth: string) {
     if (newMonth === month) return;
 
+    const realDate = moment();
+
     const dt = date(today, newMonth);
     const newDates = createDates(dt);
 
     setDates(newDates);
 
-    if (newMonth === moment.months()[today.month()]) {
-      setSelected(today.format("YYYY-MM-DD"));
+    if (newMonth === moment.months()[realDate.month()]) {
+      setSelected(realDate.format("YYYY-MM-DD"));
     } else {
       const firstOfMonth = [...dt.split("-").slice(0, 2), "01"].join("-");
       setSelected(firstOfMonth);

@@ -7,11 +7,14 @@ import { DateData, MarkedDates } from "react-native-calendars/src/types";
 import { ApolloQueryResult, gql, useQuery } from "@apollo/client";
 import useUser from "../../utils/hooks/useUser";
 import { StyleSheet } from "react-native";
+import { useTheme } from "@/utils/context/ThemeContext";
 
 interface CalendarProps {
   onDayPress: (day: DateData) => void;
 
   monthData: { timelineMonth?: any[] };
+
+  selected: string;
 
   refetch: (
     variables?:
@@ -39,6 +42,7 @@ const styles = StyleSheet.create({
 export default function Calendar({
   onDayPress,
   refetch,
+  selected: propSelected,
   monthData: data,
 }: CalendarProps) {
   const usr = useUser();
@@ -52,7 +56,7 @@ export default function Calendar({
     <AntDesign name={`arrow${direction}`} color={Colors.secondary} size={20} />
   );
 
-  const [selected, setSelected] = useState("");
+  const [selected, setSelected] = useState(propSelected || "");
 
   const markedDates: MarkedDates = useMemo(() => {
     const marked: MarkedDates = {};
@@ -76,6 +80,10 @@ export default function Calendar({
 
     return marked;
   }, [selected, data?.timelineMonth]);
+
+  const {
+    theme: { colors },
+  } = useTheme();
 
   return (
     <RNCalendar
