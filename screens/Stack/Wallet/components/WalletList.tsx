@@ -1,28 +1,15 @@
 import BottomSheet, { BottomSheetBackdrop } from "@gorhom/bottom-sheet";
 import { Wallet } from "../../../../types";
-import WalletItem, { WalletElement } from "./WalletItem";
-import { useState, useRef, forwardRef, ReactNode } from "react";
-import {
-  FlatList,
-  ScrollView,
-  Text,
-  View,
-  VirtualizedList,
-  NativeScrollEvent,
-} from "react-native";
+import WalletItem, { WalletElement, parseDateToText } from "./WalletItem";
+import { useState, useRef, forwardRef, ReactNode, useMemo } from "react";
+import { Text, View, NativeScrollEvent } from "react-native";
 import Colors from "../../../../constants/Colors";
 import Button from "../../../../components/ui/Button/Button";
 import useDeleteActivity from "../hooks/useDeleteActivity";
 import Color from "color";
 import { EvilIcons, Feather } from "@expo/vector-icons";
 
-import Animated, {
-  Extrapolate,
-  SharedValue,
-  interpolate,
-  useAnimatedStyle,
-  withTiming,
-} from "react-native-reanimated";
+import Animated, { SharedValue } from "react-native-reanimated";
 import { NativeSyntheticEvent } from "react-native";
 
 export const WalletSheet = forwardRef<BottomSheet, { children: ReactNode }>(
@@ -82,26 +69,9 @@ export default function WalletList(props: {
     index: number;
     item: WalletElement;
   }) => {
-    const ITEM_HEIGHT = 70;
-    const animatedStyle = useAnimatedStyle(() => ({
-      transform: [
-        {
-          scale: interpolate(
-            props.scrollY.value,
-            [
-              (index - 1) * ITEM_HEIGHT,
-              index * ITEM_HEIGHT,
-              (index + 1) * ITEM_HEIGHT,
-            ],
-            [1, 1, 0.75],
-            Extrapolate.CLAMP
-          ),
-        },
-      ],
-    }));
     return (
       <WalletItem
-        animatedStyle={animatedStyle}
+        animatedStyle={{}}
         handlePress={() => {
           setSelected(item);
           sheet.current?.expand();
@@ -111,29 +81,62 @@ export default function WalletList(props: {
     );
   };
 
+  const walletTransformed = useMemo(() => {
+    let output = new Map<string, WalletElement[]>();
+
+    for (let i = 0; i < props?.wallet?.expenses.length; i++) {
+      const curr = props.wallet.expenses[i];
+      const date = curr.date.split("T")[0];
+      let mapItem = output.get(date) || [];
+
+      if (mapItem) {
+        output.set(date, [...mapItem, curr]);
+      } else {
+        output.set(date, [curr]);
+      }
+    }
+
+    return Array.from(output, ([key, value]) => [key, value]) as [
+      string,
+      WalletElement[]
+    ][];
+  }, [props.wallet]);
+
   return (
     <>
       <Animated.FlatList
+        removeClippedSubviews
         onScroll={props.onScroll}
         style={{ flex: 1 }}
         contentContainerStyle={{
           padding: 10,
         }}
-        // getItemCount={(data) => data.length}
-        data={props?.wallet?.expenses || []}
-        keyExtractor={(expense: WalletElement) => expense.id}
-        // getItem={(data, index) => data[index] as WalletElement}
-        renderItem={({ item, index }) => (
-          <AnimatedWalletItem index={index} item={item} />
+        data={walletTransformed}
+        keyExtractor={(entity) => entity[0] as string}
+        renderItem={({ item: [date, list] }) => (
+          <View style={{ marginBottom: 10 }}>
+            <Text
+              style={{
+                color: "#fff",
+                fontWeight: "bold",
+                fontSize: 25,
+                padding: 5,
+              }}
+            >
+              {parseDateToText(date)}
+            </Text>
+            <View style={{ padding: 5 }}>
+              {list.map((item) => (
+                <AnimatedWalletItem index={0} key={item.id} item={item} />
+              ))}
+            </View>
+          </View>
         )}
       />
 
       <WalletSheet ref={sheet}>
         <View style={{ paddingHorizontal: 10, flex: 1 }}>
           <View style={{ flex: 2 }}>
-            <Text style={{ fontSize: 15, color: "rgba(255,255,255,0.2)" }}>
-              Expense name
-            </Text>
             <Txt size={45} color={Colors.secondary}>
               {selected?.description}
             </Txt>
@@ -141,11 +144,10 @@ export default function WalletList(props: {
             <Text
               style={{
                 fontSize: 15,
-                marginTop: 10,
                 color: "rgba(255,255,255,0.2)",
               }}
             >
-              Total amount, before {selected?.balanceBeforeInteraction}zł
+              Event name
             </Text>
 
             <Text
@@ -154,10 +156,21 @@ export default function WalletList(props: {
                 fontWeight: "bold",
                 color: "#fff",
                 lineHeight: 55,
+                marginTop: 15,
               }}
             >
               {selected?.type === "income" ? "+" : "-"}
               {selected?.amount}zł
+            </Text>
+
+            <Text
+              style={{
+                fontSize: 15,
+                color: "rgba(255,255,255,0.2)",
+              }}
+            >
+              Balance before transaction ({selected?.balanceBeforeInteraction}
+              zł)
             </Text>
           </View>
 
@@ -216,9 +229,10 @@ const WalletSheetActionButtonsGroup = (props: {
           flexDirection: "row-reverse",
           flex: 1,
           marginLeft: 10,
+          borderRadius: 5,
         }}
       >
-        Edit event
+        Edit
       </Button>
 
       <Button
@@ -242,9 +256,10 @@ const WalletSheetActionButtonsGroup = (props: {
           backgroundColor: Color(Colors.error).alpha(0.15).string(),
           flex: 1,
           flexDirection: "row-reverse",
+          borderRadius: 5,
         }}
       >
-        Remove event
+        Remove
       </Button>
     </View>
   );

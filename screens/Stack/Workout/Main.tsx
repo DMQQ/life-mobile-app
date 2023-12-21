@@ -1,13 +1,13 @@
 import React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
-import Workout from "./screens/Workout";
-import CreateWorkout from "./screens/WorkoutCreate";
-import Workouts from "./screens/Workouts";
-import ExerciseScreen from "./screens/Exercise";
+import Workout from "./pages/Workout";
+import CreateWorkout from "./pages/WorkoutCreate";
+import Workouts from "./pages/Workouts";
+import ExerciseScreen from "./pages/Exercise";
 import { WorkoutStackParamList } from "./types";
-import PendingWorkout from "./screens/PendingWorkout";
+import PendingWorkout from "./pages/PendingWorkout";
 import Colors from "../../../constants/Colors";
-import WorkoutSummary from "./screens/WorkoutSummary";
+import WorkoutSummary from "./pages/WorkoutSummary";
 import { fadeInFromBottomAndScaleUp } from "../../../navigation/assets/screen_animations";
 
 const Stack = createStackNavigator<WorkoutStackParamList>();
@@ -15,6 +15,7 @@ const Stack = createStackNavigator<WorkoutStackParamList>();
 export default function WorkoutScreens() {
   return (
     <Stack.Navigator
+      initialRouteName="Workouts"
       screenOptions={{
         headerStyle: {
           backgroundColor: Colors.primary,
@@ -39,7 +40,6 @@ export default function WorkoutScreens() {
         component={PendingWorkout}
         options={{
           presentation: "modal",
-          //  ...horizontalAnimation,
           headerShown: false,
         }}
       />

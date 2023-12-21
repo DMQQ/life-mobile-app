@@ -13,9 +13,11 @@ import SegmentedButtons from "../../../../components/ui/SegmentedButtons";
 import Color from "color";
 import BottomSheet, {
   BottomSheetBackdrop,
+  BottomSheetBackdropProps,
   useBottomSheet,
 } from "@gorhom/bottom-sheet";
-import { forwardRef, useEffect, useState } from "react";
+import { forwardRef, useCallback, useEffect, useState } from "react";
+import Select from "../../../../components/ui/Select/Select";
 
 const schema = yup.object().shape({
   name: yup.string().required("Name is required"),
@@ -25,11 +27,11 @@ const schema = yup.object().shape({
 
 const SegmentVariants = [
   {
-    text: "income",
+    text: "Income",
     value: "income",
   },
   {
-    text: "expense",
+    text: "Expense",
     value: "expense",
   },
 ];
@@ -60,28 +62,33 @@ const AddExpenseBottomSheet = forwardRef<
     reset();
   };
 
+  const backdropComponent = useCallback(
+    (props: BottomSheetBackdropProps) => (
+      <BottomSheetBackdrop
+        appearsOnIndex={0}
+        disappearsOnIndex={-1}
+        {...props}
+      />
+    ),
+    []
+  );
+
   return (
     <BottomSheet
       index={-1}
       ref={ref}
-      onClose={() => {
-        Keyboard.dismiss();
-      }}
+      onChange={(index) => index === -1 && Keyboard.dismiss()}
       handleIndicatorStyle={{
         backgroundColor: Colors.secondary,
+        margin: 5,
+        width: 40,
       }}
       backgroundStyle={{
         backgroundColor: Colors.primary,
       }}
       enablePanDownToClose
-      snapPoints={["50%", "80%"]}
-      backdropComponent={(props) => (
-        <BottomSheetBackdrop
-          appearsOnIndex={0}
-          disappearsOnIndex={-1}
-          {...props}
-        />
-      )}
+      snapPoints={["65%", "80%"]}
+      backdropComponent={backdropComponent}
     >
       <Form onSubmit={onSubmit} />
     </BottomSheet>
@@ -94,7 +101,7 @@ interface FormProps {
 }
 
 const Form = (props: FormProps) => {
-  const { expand } = useBottomSheet();
+  const { expand, snapToIndex } = useBottomSheet();
 
   return (
     <Formik
@@ -104,6 +111,7 @@ const Form = (props: FormProps) => {
         name: "",
         amount: "",
         type: "",
+        category: "",
       }}
     >
       {(f) => (
@@ -114,25 +122,38 @@ const Form = (props: FormProps) => {
             value={f.values.type}
           />
 
-          <ValidatedInput
-            placeholder="Expense name"
-            name="name"
-            left={(props) => (
-              <Input.Icon Icon="AntDesign" name="wallet" {...props} />
-            )}
-            formik={f}
-            onFocus={() => expand()}
-          />
+          <View style={{ marginTop: 15 }}>
+            <ValidatedInput
+              placeholder="Expense name"
+              name="name"
+              left={(props) => (
+                <Input.Icon Icon="AntDesign" name="wallet" {...props} />
+              )}
+              formik={f}
+              onFocus={() => expand()}
+            />
 
-          <ValidatedInput
-            placeholder="Amount [zł]"
-            name="amount"
-            left={(props) => (
-              <Input.Icon Icon="Ionicons" name="cash-outline" {...props} />
-            )}
-            keyboardType="numeric"
-            formik={f}
-            onFocus={() => expand()}
+            <ValidatedInput
+              placeholder="Amount [zł]"
+              name="amount"
+              left={(props) => (
+                <Input.Icon Icon="Ionicons" name="cash-outline" {...props} />
+              )}
+              keyboardType="numeric"
+              formik={f}
+              onFocus={() => expand()}
+            />
+          </View>
+
+          <Select
+            onFocusChange={(focused) => {
+              snapToIndex(focused ? 1 : 0);
+            }}
+            selected={[f.values.category]}
+            setSelected={([selected]) => f.setFieldValue("category", selected)}
+            options={["Food", "Transport", "Debt", "Night out"]}
+            transparentOverlay
+            closeOnSelect
           />
 
           <Button

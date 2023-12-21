@@ -31,8 +31,11 @@ export default function BalanceAlertEditModal({
 
   return (
     <Modal
+      useNativeDriverForBackdrop
+      useNativeDriver
       isVisible={visible}
-      animationIn={"slideInUp"}
+      animationIn={"fadeIn"}
+      animationOut={"fadeOut"}
       onBackdropPress={onClose}
       onBackButtonPress={onClose}
     >
