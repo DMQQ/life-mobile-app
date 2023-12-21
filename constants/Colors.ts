@@ -10,24 +10,30 @@ export const secondary_candidates = [
   "#BE15A8",
 ];
 
-const primary = "#0F0F0F";
-const secondary =
+const primary = "#151421"; // "#0F0F0F";
+
+const secondary = "#008CFF";
+
+export const randColor = () =>
   secondary_candidates[Math.floor(Math.random() * secondary_candidates.length)];
+
 const ternary = "#8685EF";
 
 export default {
   primary: primary,
-  primary_light: Color(primary).lighten(0.1).string(),
-  primary_lighter: Color(primary).lighten(0.2).string(),
-  // secondary: "#00A97F",
-  // secondary: "#00C896",
+  primary_light: Color(primary).lighten(0.25).string(),
+  primary_lighter: Color(primary).lighten(0.5).string(),
+
+  primary_dark: Color(primary).darken(0.25).hex(),
+  primary_darker: Color(primary).darken(0.5).hex(),
+
   secondary: secondary,
-  secondary_light_1: Color(secondary).lighten(0.1).string(),
-  secondary_light_2: Color(secondary).lighten(0.2).string(),
+  secondary_light_1: Color(secondary).lighten(0.25).string(),
+  secondary_light_2: Color(secondary).lighten(0.5).string(),
 
   ternary: ternary,
-  ternary_light_1: Color(ternary).lighten(0.1).string(),
-  ternary_light_2: Color(ternary).lighten(0.2).string(),
+  ternary_light_1: Color(ternary).lighten(0.25).string(),
+  ternary_light_2: Color(ternary).lighten(0.5).string(),
 
   error: "#f44336",
   warning: "orange",

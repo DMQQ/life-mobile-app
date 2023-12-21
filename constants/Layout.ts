@@ -13,6 +13,24 @@ const spacingTypes = {
   xxl: 40,
 };
 
+export const Padding = {
+  xs: 2.5,
+  sm: 5,
+  md: 7.5,
+  lg: 10,
+  xl: 15,
+  xxl: 20,
+};
+
+export const Rounded = {
+  xs: 5,
+  sm: 7.5,
+  md: 10,
+  lg: 10,
+  xl: 15,
+  xxl: 20,
+};
+
 export default {
   window,
   screen,
