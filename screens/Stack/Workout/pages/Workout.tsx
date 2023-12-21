@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, forwardRef } from "react";
+import { useEffect, useState, useRef, forwardRef, useCallback } from "react";
 import ScreenContainer from "../../../../components/ui/ScreenContainer";
 import ExerciseList from "../../../../components/Exercise/ExerciseList/ExerciseList";
 import { View, Text, ScrollView, StyleSheet, FlatList } from "react-native";
@@ -105,47 +105,56 @@ export default function Workout({
     });
   }, [data?.workout]);
 
+  const ExerciseHeader = useCallback(
+    () => (
+      <View style={styles.container}>
+        <View style={styles.headerContainer}>
+          <Text style={styles.titleText}>{data?.workout?.title}</Text>
+
+          {workout.workoutId === route.params.workoutId &&
+            workout.isWorkoutPending && (
+              <Text style={styles.pendingText}>PENDING</Text>
+            )}
+        </View>
+
+        <Text style={{ color: Colors.text_dark }}>
+          {data?.workout?.description}
+        </Text>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={{ marginTop: 10 }}
+        >
+          {[0, 1, 2].map((id) => (
+            <View
+              style={{
+                backgroundColor: Colors.primary_lighter,
+                width: 120,
+                height: 60,
+                borderRadius: 10,
+                marginRight: 10,
+              }}
+              key={id}
+            />
+          ))}
+        </ScrollView>
+        <Text style={styles.listInfoText}>
+          All Exercises ({data?.workout?.exercises?.length})
+        </Text>
+      </View>
+    ),
+    [data?.workout, workout.isWorkoutPending, workout.workoutId]
+  );
+
+  const workoutText = canContinueWithOldExercise
+    ? `Resume on (${workout.activeExerciseIndex + 1}) exercise`
+    : "Start workout";
+
   return (
     <ScreenContainer>
       <View style={{ flex: 1 }}>
         <ExerciseList
-          ListHeaderComponent={
-            <View style={styles.container}>
-              <View style={styles.headerContainer}>
-                <Text style={styles.titleText}>{data?.workout?.title}</Text>
-
-                {workout.workoutId === route.params.workoutId &&
-                  workout.isWorkoutPending && (
-                    <Text style={styles.pendingText}>PENDING</Text>
-                  )}
-              </View>
-
-              <Text style={{ color: Colors.text_dark }}>
-                {data?.workout?.description}
-              </Text>
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                style={{ marginTop: 10 }}
-              >
-                {[0, 1, 2].map((id) => (
-                  <View
-                    style={{
-                      backgroundColor: Colors.primary_lighter,
-                      width: 120,
-                      height: 60,
-                      borderRadius: 10,
-                      marginRight: 10,
-                    }}
-                    key={id}
-                  />
-                ))}
-              </ScrollView>
-              <Text style={styles.listInfoText}>
-                All Exercises ({data?.workout?.exercises?.length})
-              </Text>
-            </View>
-          }
+          ListHeaderComponent={ExerciseHeader}
           onExerciseTilePress={(exercise) => setSelectedExercise(exercise)}
           exercises={data?.workout.exercises}
         />
@@ -169,9 +178,7 @@ export default function Workout({
           }}
           onPress={onStartWorkout}
         >
-          {canContinueWithOldExercise
-            ? `Resume on (${workout.activeExerciseIndex + 1}) exercise`
-            : "Start workout"}
+          {workoutText}
         </Button>
         <AppendExercise onPress={() => sheetRef.current?.expand()} />
       </View>

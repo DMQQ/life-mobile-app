@@ -64,6 +64,23 @@ function useCreateWorkout(
 
     refetchQueries: ["GetWorkouts"],
 
+    // update(cache, { data: { createWorkout } }: any) {
+    //   cache.modify({
+    //     fields: {
+    //       workouts(workouts = []) {
+    //         const workoutRef = cache.writeFragment({
+    //           data: createWorkout,
+    //           fragment: CREATE_WORKOUT_FRAGMENT,
+    //         });
+
+    //         console.log(createWorkout);
+
+    //         return [workoutRef, ...workouts];
+    //       },
+    //     },
+    //   });
+    // },
+
     onCompleted,
     onError,
   });

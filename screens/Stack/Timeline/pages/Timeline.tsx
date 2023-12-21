@@ -31,25 +31,37 @@ const GET_MONTHLY_EVENTS = gql`
   }
 `;
 
-const groupDates = (dates: { date: string }[]) => {
-  const map = new Map();
+// const groupDates = (dates: { date: string }[]) => {
+//   const map = new Map();
 
-  for (let i = 0; i < dates.length; i++) {
-    const item = map.get(dates[i].date);
-    if (item) {
-      map.set(dates[i].date, item + 1);
-    } else {
-      map.set(dates[i].date, 1);
-    }
+//   for (let i = 0; i < dates.length; i++) {
+//     const item = map.get(dates[i].date);
+//     if (item) {
+//       map.set(dates[i].date, item + 1);
+//     } else {
+//       map.set(dates[i].date, 1);
+//     }
+//   }
+
+//   const res = {} as { [key: string]: number };
+
+//   map.forEach((val, key) => {
+//     res[key] = val;
+//   });
+
+//   return res;
+// };
+
+const groupDates = (dates: { date: string }[]) => {
+  const monthEvents = {} as {
+    [date: string]: number;
+  };
+
+  for (let { date } of dates) {
+    !!monthEvents[date] ? (monthEvents[date] += 1) : (monthEvents[date] = 1);
   }
 
-  const res = {} as { [key: string]: number };
-
-  map.forEach((val, key) => {
-    res[key] = val;
-  });
-
-  return res;
+  return monthEvents;
 };
 
 const Loader = (props: { loading: boolean }) =>
@@ -125,10 +137,16 @@ export default function Timeline({
 
   const [isFloatingVisible, setIsFloatingVisible] = useState(false);
 
+  const onViewToggle = () => {
+    setSwitchView((sw) => (sw === "calendar" ? "date-list" : "calendar"));
+    setIsFloatingVisible(false);
+  };
+
   return (
     <ScrollView>
       {switchView === "calendar" && (
         <Calendar
+          selected={selected}
           monthData={monthData}
           refetch={refetch}
           onDayPress={onDayPress}
@@ -166,11 +184,7 @@ export default function Timeline({
           >
             <Ripple
               style={[timelineStyles.floatingButton, { marginBottom: 10 }]}
-              onPress={() =>
-                setSwitchView((sw) =>
-                  sw === "calendar" ? "date-list" : "calendar"
-                )
-              }
+              onPress={onViewToggle}
             >
               <AntDesign name="calendar" size={24} color={iconColor} />
               <Text style={timelineStyles.floatingText}>

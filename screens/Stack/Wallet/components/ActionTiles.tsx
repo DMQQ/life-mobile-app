@@ -1,14 +1,9 @@
 import { Feather } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet } from "react-native";
 import Ripple from "react-native-material-ripple";
 import Colors from "../../../../constants/Colors";
-import Animated, {
-  Extrapolate,
-  SharedValue,
-  interpolate,
-  useAnimatedStyle,
-} from "react-native-reanimated";
+import Animated, { SharedValue } from "react-native-reanimated";
 
 const styles = StyleSheet.create({
   action_tiles: {
@@ -36,20 +31,21 @@ export default function ActionTiles(props: ActionTilesProps) {
 
   return (
     <Animated.View style={[styles.action_tiles]}>
-      <ActionTile
-        onPress={props.onAddExpense}
-        icon="plus"
-        text="add"
-        color="#2f2f2fb3"
-      />
       <ActionTile icon="bar-chart-2" color="#485dfe" text="Stats" />
       <ActionTile
         icon="list"
-        color="#2f2f2fb3"
+        color={Colors.primary_dark}
         text="List"
         onPress={() => navigation.navigate("Watchlist")}
       />
       <ActionTile icon="edit" color="#8b007d" text="Edit" />
+
+      <ActionTile
+        onPress={props.onAddExpense}
+        icon="plus"
+        text="add"
+        color={Colors.primary_darker}
+      />
     </Animated.View>
   );
 }

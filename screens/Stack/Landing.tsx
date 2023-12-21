@@ -1,10 +1,10 @@
 import { Image, View } from "react-native";
 import ScreenContainer from "../../components/ui/ScreenContainer";
 import Button from "../../components/ui/Button/Button";
-import { ScreenProps } from "../../types";
+
 import Layout from "../../constants/Layout";
 
-export default function Landing({ navigation }: ScreenProps<"Landing">) {
+export default function Landing({ navigation }: any) {
   return (
     <ScreenContainer>
       {[1, 2, 3].map((index) => (

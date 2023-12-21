@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { StyleSheet, Text, View, SafeAreaView } from "react-native";
-import useGetWallet from "./hooks/useGetWallet";
+import useGetWallet from "../hooks/useGetWallet";
 import Ripple from "react-native-material-ripple";
-import Colors from "../../../constants/Colors";
+import Colors from "../../../../constants/Colors";
 import Animated, {
   Extrapolate,
   interpolate,
@@ -10,14 +10,14 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
 } from "react-native-reanimated";
-import ActionTiles from "./components/ActionTiles";
-import BalanceAlertEditModal from "./components/BalanceAlertEditModal";
-import Skeleton from "../../../components/SkeletonLoader/Skeleton";
-import { WalletScreens } from ".";
+import ActionTiles from "../components/ActionTiles";
+import BalanceAlertEditModal from "../components/BalanceAlertEditModal";
+import Skeleton from "../../../../components/SkeletonLoader/Skeleton";
+import { WalletScreens } from "../Main";
 import { StatusBar } from "expo-status-bar";
-import AddExpenseBottomSheet from "./components/AddExpenseBottomSheet";
+import AddExpenseBottomSheet from "../components/AddExpenseBottomSheet";
 import BottomSheet from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheet/BottomSheet";
-import WalletList from "./components/WalletList";
+import WalletList from "../components/WalletList";
 
 const styles = StyleSheet.create({
   container: {
@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
   },
 
   recentText: {
-    color: "#fff",
+    color: "#7f7f7f",
     fontSize: 25,
     fontWeight: "bold",
     marginTop: 10,
@@ -77,7 +77,7 @@ export default function WalletScreen({ navigation }: WalletScreens<"Wallet">) {
   }));
 
   const animatedBalanceStyle = useAnimatedStyle(() => ({
-    fontSize: interpolate(scrollY.value, [0, 200], [60, 30], Extrapolate.CLAMP),
+    fontSize: interpolate(scrollY.value, [0, 200], [70, 30], Extrapolate.CLAMP),
     transform: [
       {
         translateX: interpolate(
@@ -90,10 +90,7 @@ export default function WalletScreen({ navigation }: WalletScreens<"Wallet">) {
     ],
   }));
 
-  const animatedRecentStyle = useAnimatedStyle(() => ({
-    fontSize: interpolate(scrollY.value, [0, 200], [25, 18], Extrapolate.CLAMP),
-    opacity: interpolate(scrollY.value, [0, 200], [1, 0]),
-  }));
+  const balance = loading ? " ..." : (wallet?.balance || 0).toFixed(2);
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -108,7 +105,7 @@ export default function WalletScreen({ navigation }: WalletScreens<"Wallet">) {
         >
           <Ripple onLongPress={() => setModalVisible((p) => !p)}>
             <Animated.Text style={[styles.title, animatedBalanceStyle]}>
-              {loading ? " ..." : (wallet?.balance || 0).toFixed(2)}
+              {balance}
               <Text style={{ color: "#ffffff97", fontSize: 20 }}>zł </Text>
             </Animated.Text>
           </Ripple>
@@ -117,11 +114,8 @@ export default function WalletScreen({ navigation }: WalletScreens<"Wallet">) {
         <ActionTiles
           scrollY={scrollY}
           onAddExpense={() => bottomSheetRef.current?.snapToIndex(0)}
+          // onAddExpense={() => navigation.navigate("CreateActivity")}
         />
-
-        <Animated.Text style={[styles.recentText, animatedRecentStyle]}>
-          Recent expenses ({wallet?.expenses.length})
-        </Animated.Text>
 
         {loading && (
           <Skeleton

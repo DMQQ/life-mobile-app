@@ -1,7 +1,7 @@
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import ScreenContainer from "../../../../components/ui/ScreenContainer";
+import ScreenContainer from "@/components/ui/ScreenContainer";
 import { InteractionManager, ScrollView } from "react-native";
-import Layout from "../../../../constants/Layout";
+import Layout from "@/constants/Layout";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import useGetTimelineById from "../hooks/query/useGetTimelineById";
 import Animated, {
@@ -9,9 +9,9 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
-import { IFile } from "../../../../types";
-import Url from "../../../../constants/Url";
-import useGoBackOnBackPress from "../../../../utils/hooks/useGoBackOnBackPress";
+import { IFile } from "@/types";
+import Url from "@/constants/Url";
+import useGoBackOnBackPress from "@/utils/hooks/useGoBackOnBackPress";
 
 export default function ImagesPreview({ route }: any) {
   const { data } = useGetTimelineById(route.params.timelineId! as string, {

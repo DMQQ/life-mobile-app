@@ -1,14 +1,15 @@
-import ErrorMessageModal from "../../../components/Forms/ErrorMessageModal";
-import LoginForm from "../../../components/Forms/LoginForm";
-import Modal from "../../../components/ui/Modal";
-import ScreenContainer from "../../../components/ui/ScreenContainer";
-import Colors from "../../../constants/Colors";
-import useAuthForm from "../../../utils/hooks/useAuthForm";
+import ErrorMessageModal from "../components/ErrorMessageModal";
+import LoginForm from "../components/LoginForm";
+import Modal from "@/components/ui/Modal";
+import ScreenContainer from "@/components/ui/ScreenContainer";
+import Colors from "@/constants/Colors";
+import useAuthForm from "../hooks/useAuthForm";
 
 import { ActivityIndicator } from "react-native";
 
 export default function Login() {
-  const { validationSchema, onSubmit, state } = useAuthForm("login");
+  const { validationSchema, onSubmit, state, savedCredentials } =
+    useAuthForm("login");
 
   return (
     <ScreenContainer>
@@ -23,6 +24,7 @@ export default function Login() {
         onDismiss={() => {
           state.reset();
         }}
+        onRetry={() => onSubmit(savedCredentials)}
       />
 
       <LoginForm onSubmit={onSubmit} validationSchema={validationSchema} />

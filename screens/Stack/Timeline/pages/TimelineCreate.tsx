@@ -85,11 +85,13 @@ export default function CreateTimeLineEventModal({
     is24Hour: true,
   } as any;
 
-  const timePicker = (formik: any, type: string) => {
+  const timePicker = (formik: any, type: "begin" | "end") => {
     DateTimePickerAndroid.open({
       value: new Date(),
       mode: "time",
       ...dateTimeDefaultOptions,
+
+      display: "spinner",
 
       onChange(event, date) {
         formik.handleChange(type)(date?.toLocaleTimeString());
@@ -107,6 +109,7 @@ export default function CreateTimeLineEventModal({
         navigation.setParams({
           selectedDate: moment(date).format("YYYY-MM-DD"),
         });
+        f.setFieldValue("date", moment(date).format("YYYY-MM-DD"));
       },
     });
   };
@@ -135,7 +138,7 @@ export default function CreateTimeLineEventModal({
         </View>
       ),
     });
-  }, [optionsVisible]);
+  }, [optionsVisible, f.values.date]);
 
   return (
     <ScreenContainer>

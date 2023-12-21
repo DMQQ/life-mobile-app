@@ -13,26 +13,27 @@ import { memo } from "react";
 const styles = StyleSheet.create({
   arrow_button: {
     backgroundColor: Color(Colors.primary).lighten(0.5).hex(),
-    marginBottom: 10,
     justifyContent: "center",
     alignItems: "center",
-    width: 50,
+    padding: 10,
+    borderRadius: 5,
   },
   modal_container: {
     backgroundColor: Colors.primary,
-    marginTop: 20,
-    borderRadius: 30,
+    borderRadius: 35,
     padding: 15,
+    paddingVertical: 30,
   },
   title_container: {
     marginBottom: 15,
     flexDirection: "row",
     justifyContent: "space-between",
+    paddingHorizontal: 10,
   },
   title: {
     color: Colors.secondary,
     fontWeight: "bold",
-    fontSize: 25,
+    fontSize: 20,
   },
 
   clear_button: {
@@ -53,6 +54,7 @@ const styles = StyleSheet.create({
     color: "gray",
     fontWeight: "bold",
     fontSize: 14,
+    marginTop: 15,
   },
   save_button: {
     backgroundColor: Colors.secondary,
@@ -72,8 +74,13 @@ interface CreateRepeatableTimelineProps {
 const ArrowButton = (props: {
   onPress: () => void;
   arrow: "arrowup" | "arrowdown";
+  disabled?: boolean;
 }) => (
-  <Ripple onPress={() => props.onPress()} style={styles.arrow_button}>
+  <Ripple
+    disabled={props.disabled || false}
+    onPress={() => props.onPress()}
+    style={[styles.arrow_button, { opacity: props.disabled ? 0.5 : 1 }]}
+  >
     <AntDesign
       name={props.arrow}
       size={24}
@@ -132,12 +139,14 @@ function CreateRepeatableTimeline({
 
   return (
     <Modal
-      animationIn={"slideInUp"}
-      animationOut={"slideOutDown"}
+      useNativeDriver
+      useNativeDriverForBackdrop
       hideModalContentWhileAnimating
       isVisible={isVisible}
       onBackButtonPress={onClose}
       onBackdropPress={onClose}
+      animationIn={"slideInUp"}
+      animationOut={"slideOutDown"}
     >
       <View style={styles.modal_container}>
         <View style={styles.title_container}>
@@ -151,18 +160,25 @@ function CreateRepeatableTimeline({
         <View>
           <Txt text="Number of events" />
 
-          <View style={{ flexDirection: "row" }}>
-            <ArrowButton arrow="arrowdown" onPress={onArrowDownPress} />
-            <Input
-              keyboardType="numeric"
-              style={{ flex: 1, width: Layout.screen.width - 40 - 60 - 70 }}
-              value={f.values.repeatCount}
-              onChangeText={(t) => f.setFieldValue("repeatCount", t)}
-              placeholder="Repeat count"
-              placeholderTextColor={"gray"}
-            />
-            <ArrowButton arrow="arrowup" onPress={onArrowUpPress} />
-          </View>
+          <Input
+            keyboardType="numeric"
+            style={{ flex: 1, width: Layout.screen.width - 70 }}
+            value={f.values.repeatCount}
+            onChangeText={(t) => f.setFieldValue("repeatCount", t)}
+            placeholder="Repeat count"
+            placeholderTextColor={"gray"}
+            left={
+              <ArrowButton
+                disabled={
+                  Number(f.values.repeatCount) === 0 ||
+                  f.values.repeatCount === ""
+                }
+                arrow="arrowdown"
+                onPress={onArrowDownPress}
+              />
+            }
+            right={<ArrowButton arrow="arrowup" onPress={onArrowUpPress} />}
+          />
         </View>
 
         <View>
