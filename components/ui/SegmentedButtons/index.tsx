@@ -20,6 +20,8 @@ interface SegmentedButtonsProps {
 
   buttonStyle?: RippleProps["style"];
   buttonTextStyle?: StyleProp<TextStyle>;
+
+  direction?: "row" | "column";
 }
 
 export default function SegmentedButtons(props: SegmentedButtonsProps) {
@@ -31,7 +33,7 @@ export default function SegmentedButtons(props: SegmentedButtonsProps) {
   return (
     <View
       style={{
-        flexDirection: "row",
+        flexDirection: props.direction || "row",
         // width: Layout.screen.width - 20,
         width: "100%",
         backgroundColor: Color(Colors.primary).lighten(0.5).toString(),

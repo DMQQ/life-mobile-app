@@ -18,6 +18,7 @@ import { AntDesign } from "@expo/vector-icons";
 import useKeyboard from "../../../../utils/hooks/useKeyboard";
 import Animated, { ZoomInDown, ZoomOutDown } from "react-native-reanimated";
 import { RadioGroup } from "../../../../components/ui/Radio/Radio";
+import SegmentedButtons from "@/components/ui/SegmentedButtons";
 
 const styles = StyleSheet.create({
   header: {
@@ -48,8 +49,20 @@ const radioOptions = [
   { label: "None", value: "none" },
   { label: "All day", value: "all-day" },
   { label: "Repeatable", value: "repeatable" },
-  { label: "Notify before expire", value: "notify-before-expire" },
 ];
+
+const Label = (props: { text: string }) => (
+  <Text
+    style={{
+      color: "#fff",
+      fontWeight: "bold",
+      padding: 5,
+      fontSize: 16,
+    }}
+  >
+    {props.text}
+  </Text>
+);
 
 export default function CreateTimeLineEventModal({
   route,
@@ -80,8 +93,8 @@ export default function CreateTimeLineEventModal({
 
   const dateTimeDefaultOptions = {
     display: "default",
-    positiveButtonLabel: "ok",
-    negativeButtonLabel: "cancel",
+    positiveButtonLabel: "Set time",
+    negativeButtonLabel: "Cancel",
     is24Hour: true,
   } as any;
 
@@ -90,8 +103,7 @@ export default function CreateTimeLineEventModal({
       value: new Date(),
       mode: "time",
       ...dateTimeDefaultOptions,
-
-      display: "spinner",
+      display: "clock",
 
       onChange(event, date) {
         formik.handleChange(type)(date?.toLocaleTimeString());
@@ -143,17 +155,19 @@ export default function CreateTimeLineEventModal({
   return (
     <ScreenContainer>
       <ScrollView style={{ flex: 1 }}>
+        <Label text="Event's title" />
         <ValidatedInput
-          placeholder="Event's title"
+          placeholder="Like  'take out the trash' etc.."
           name="title"
           formik={f}
           helperText="Event's title (not required)"
           helperStyle={{ marginLeft: 2.5 }}
         />
+        <Label text="Event's content" />
         <ValidatedInput
           numberOfLines={10}
           multiline
-          placeholder="Event's description"
+          placeholder="What you wanted to do"
           helperText="Event's description (2000char's)"
           name="desc"
           formik={f}
@@ -161,6 +175,7 @@ export default function CreateTimeLineEventModal({
           textAlignVertical="top"
         />
 
+        <Label text="Time range" />
         <View style={styles.timeContainer}>
           <Ripple
             style={{ flex: 1, padding: 10 }}
@@ -189,11 +204,18 @@ export default function CreateTimeLineEventModal({
           formik={f}
         />
 
-        <RadioGroup
-          value={f.values.notification}
-          options={radioOptions}
-          onChange={(val) => f.setFieldValue("notification", val)}
-        />
+        <View style={{ marginTop: 10 }}>
+          <Label text="Notifications settings" />
+          <SegmentedButtons
+            buttonTextStyle={{ fontWeight: "400" }}
+            buttons={radioOptions.map((prev) => ({
+              text: prev.label,
+              value: prev.value,
+            }))}
+            value={f.values.notification}
+            onChange={(val) => f.setFieldValue("notification", val)}
+          />
+        </View>
       </ScrollView>
 
       <SubmitButton

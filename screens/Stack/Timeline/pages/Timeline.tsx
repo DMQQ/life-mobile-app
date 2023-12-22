@@ -22,6 +22,7 @@ import { gql, useQuery } from "@apollo/client";
 import Color from "color";
 import Overlay from "../../../../components/ui/Overlay/Overlay";
 import Animated, { FadeInUp, FadeOutDown } from "react-native-reanimated";
+import NotFound from "../../Home/components/NotFound";
 
 const GET_MONTHLY_EVENTS = gql`
   query GetMonthlyEvents($date: String!) {
@@ -30,27 +31,6 @@ const GET_MONTHLY_EVENTS = gql`
     }
   }
 `;
-
-// const groupDates = (dates: { date: string }[]) => {
-//   const map = new Map();
-
-//   for (let i = 0; i < dates.length; i++) {
-//     const item = map.get(dates[i].date);
-//     if (item) {
-//       map.set(dates[i].date, item + 1);
-//     } else {
-//       map.set(dates[i].date, 1);
-//     }
-//   }
-
-//   const res = {} as { [key: string]: number };
-
-//   map.forEach((val, key) => {
-//     res[key] = val;
-//   });
-
-//   return res;
-// };
 
 const groupDates = (dates: { date: string }[]) => {
   const monthEvents = {} as {
@@ -211,6 +191,19 @@ export default function Timeline({
       />
 
       <Loader loading={loading} />
+
+      {!loading && data?.timeline.length === 0 && (
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            marginTop: 50,
+          }}
+        >
+          <NotFound />
+        </View>
+      )}
     </ScrollView>
   );
 }
