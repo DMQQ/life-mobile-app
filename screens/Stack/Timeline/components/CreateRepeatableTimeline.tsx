@@ -20,9 +20,9 @@ const styles = StyleSheet.create({
   },
   modal_container: {
     backgroundColor: Colors.primary,
-    borderRadius: 35,
+    borderRadius: 15,
     padding: 15,
-    paddingVertical: 30,
+    paddingVertical: 20,
   },
   title_container: {
     marginBottom: 15,

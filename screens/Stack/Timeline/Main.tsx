@@ -26,6 +26,10 @@ export default function TimelineScreens({
       (navigation as any).navigate("TimelineDetails", {
         timelineId: route.params.timelineId,
       });
+    } else if (route.params?.selectedDate !== undefined) {
+      navigation.navigate("TimelineCreate", {
+        selectedDate: route.params.selectedDate,
+      });
     }
   }, [route.params]);
 
