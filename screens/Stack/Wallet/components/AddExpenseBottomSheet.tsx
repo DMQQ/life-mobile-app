@@ -18,6 +18,7 @@ import BottomSheet, {
 } from "@gorhom/bottom-sheet";
 import { forwardRef, useCallback, useEffect, useState } from "react";
 import Select from "../../../../components/ui/Select/Select";
+import Layout from "@/constants/Layout";
 
 const schema = yup.object().shape({
   name: yup.string().required("Name is required"),
@@ -115,7 +116,7 @@ const Form = (props: FormProps) => {
       }}
     >
       {(f) => (
-        <View style={{ padding: 10 }}>
+        <View style={{ padding: 15 }}>
           <SegmentedButtons
             buttons={SegmentVariants}
             onChange={(value) => f.setFieldValue("type", value)}
@@ -124,28 +125,33 @@ const Form = (props: FormProps) => {
 
           <View style={{ marginTop: 15 }}>
             <ValidatedInput
-              placeholder="Expense name"
+              style={{
+                width: Layout.screen.width - 30,
+              }}
+              placeholder="Like 'new phone', 'christmas gift'..."
               name="name"
               left={(props) => (
                 <Input.Icon Icon="AntDesign" name="wallet" {...props} />
               )}
               formik={f}
-              onFocus={() => expand()}
             />
 
             <ValidatedInput
-              placeholder="Amount [zł]"
+              style={{
+                width: Layout.screen.width - 30,
+              }}
+              placeholder="How much you spent"
               name="amount"
               left={(props) => (
                 <Input.Icon Icon="Ionicons" name="cash-outline" {...props} />
               )}
               keyboardType="numeric"
               formik={f}
-              onFocus={() => expand()}
             />
           </View>
 
           <Select
+            placeholderText="Choose category or create your own"
             onFocusChange={(focused) => {
               snapToIndex(focused ? 1 : 0);
             }}

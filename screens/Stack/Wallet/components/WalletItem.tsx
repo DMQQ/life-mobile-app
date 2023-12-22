@@ -8,7 +8,11 @@ import moment from "moment";
 import Color from "color";
 import Colors from "../../../../constants/Colors";
 import Ripple from "react-native-material-ripple";
-import Animated, { Layout } from "react-native-reanimated";
+import Animated, {
+  AnimatedStyleProp,
+  FadeInUp,
+  Layout,
+} from "react-native-reanimated";
 
 export interface WalletElement {
   description: string;
@@ -32,7 +36,7 @@ const styles = StyleSheet.create({
   },
   title: {
     color: "#fff",
-    fontSize: 24,
+    fontSize: 20,
     marginLeft: 10,
     fontWeight: "bold",
     marginBottom: 5,
@@ -139,17 +143,41 @@ const Icons = {
   },
 };
 
+const Dot = () => {
+  return (
+    <View
+      style={{
+        position: "absolute",
+        top: "45%",
+        left: -5,
+        width: 10,
+        height: 10,
+        backgroundColor: "red",
+        borderRadius: 100,
+        zIndex: 100,
+      }}
+    ></View>
+  );
+};
+
 export default function WalletItem(
   item: WalletItemProps & {
     handlePress: Function;
-    animatedStyle: any;
+    animatedStyle: AnimatedStyleProp<any>;
+    index: number;
   }
 ) {
   const selectedCategory = Object.keys(Icons)[
     Math.trunc(Math.random() * Object.keys(Icons).length)
   ] as keyof typeof Icons;
+
+  const price =
+    item.type === "expense"
+      ? (item.amount * -1).toFixed(2)
+      : item.amount.toFixed(2);
   return (
     <Animated.View
+      // entering={FadeInUp.delay(item.index * 100)}
       layout={Layout}
       style={[
         {
@@ -159,6 +187,8 @@ export default function WalletItem(
         item.animatedStyle,
       ]}
     >
+      {/* <Dot /> */}
+
       <Ripple style={styles.expense_item} onPress={() => item.handlePress()}>
         <View
           style={[
@@ -182,10 +212,9 @@ export default function WalletItem(
           </View>
         </View>
         <View style={[styles.price_container, { flexDirection: "row" }]}>
-          {/* <Dot color={item.type === "expense" ? "red" : "green"} /> */}
           <Text style={[styles.price, { marginLeft: 5 }]}>
-            {item.type === "expense" ? "-" : "+"}
-            {item.amount.toFixed(2)}zł
+            {price}
+            <Text style={{ fontSize: 16 }}>zł</Text>
           </Text>
         </View>
       </Ripple>
