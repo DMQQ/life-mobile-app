@@ -4,15 +4,18 @@ import Colors from "../../constants/Colors";
 import { AntDesign } from "@expo/vector-icons";
 import { useState, useMemo } from "react";
 import { DateData, MarkedDates } from "react-native-calendars/src/types";
-import { ApolloQueryResult, gql, useQuery } from "@apollo/client";
-import useUser from "../../utils/hooks/useUser";
+import { ApolloQueryResult } from "@apollo/client";
 import { StyleSheet } from "react-native";
 import { useTheme } from "@/utils/context/ThemeContext";
 
 interface CalendarProps {
   onDayPress: (day: DateData) => void;
 
-  monthData: { timelineMonth?: any[] };
+  monthData: {
+    timelineMonth?: {
+      date: string;
+    }[];
+  };
 
   selected: string;
 
@@ -45,8 +48,6 @@ export default function Calendar({
   selected: propSelected,
   monthData: data,
 }: CalendarProps) {
-  const usr = useUser();
-
   const onMonthChange = async (date: { dateString: string }) =>
     await refetch({
       date: moment(date.dateString).format("YYYY-MM-DD"),

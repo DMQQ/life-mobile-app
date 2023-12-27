@@ -7,6 +7,7 @@ import { createDates, createFutureDates } from "./fns";
 import Ripple from "react-native-material-ripple";
 import { AntDesign, Entypo } from "@expo/vector-icons";
 import Animated from "react-native-reanimated";
+import { Padding } from "@/constants/Values";
 
 type TDate = {
   date: string;
@@ -95,14 +96,14 @@ export default function DateList({
           flexDirection: "row",
           justifyContent: "space-between",
           alignItems: "center",
-          marginBottom: 10,
+          marginBottom: Padding.m,
         }}
       >
         <Text
           style={{
             color: "#ffffffda",
             fontSize: 30,
-            padding: 15,
+            padding: Padding.l,
             fontWeight: "bold",
           }}
         >
@@ -111,8 +112,6 @@ export default function DateList({
       </View>
       <MonthSelectList selected={month} onPress={onMonthChange} />
       <VirtualizedList
-        //  snapToOffsets={snapOffsets}
-        // style={{ padding: 5 }}
         removeClippedSubviews
         onEndReached={onEndReached}
         showsHorizontalScrollIndicator={false}

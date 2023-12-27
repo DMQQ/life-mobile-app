@@ -34,17 +34,17 @@ export type RootStackParamList = {
 
   Root: undefined;
 
-  Login: undefined;
+  // Login: undefined;
 
-  Register: undefined;
+  // Register: undefined;
+
+  //  Landing: undefined;
+
+  Authentication: undefined;
 
   WorkoutScreens: undefined;
 
-  Landing: undefined;
-
-  TimelineScreens: {
-    timelineId?: string;
-  };
+  TimelineScreens: any;
 
   WalletScreens: undefined;
 

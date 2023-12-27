@@ -5,6 +5,7 @@ import Ripple from "react-native-material-ripple";
 import Colors from "../../constants/Colors";
 import { Text } from "react-native";
 import Color from "color";
+import { Padding, Rounded } from "@/constants/Values";
 
 interface MonthSelectListProps {
   selected: string;
@@ -34,8 +35,8 @@ export default function MonthSelectList(props: MonthSelectListProps) {
         onPress={() => props.onPress(month)}
         style={{
           backgroundColor: props.selected === month ? Colors.secondary : bg,
-          marginHorizontal: 5,
-          borderRadius: 10,
+          marginHorizontal: Padding.xs,
+          borderRadius: Rounded.m,
           width: 100,
           height: 45,
           justifyContent: "center",
@@ -52,7 +53,7 @@ export default function MonthSelectList(props: MonthSelectListProps) {
     <FlatList
       ref={listRef}
       getItemLayout={getItemLayout}
-      style={{ marginBottom: 10, padding: 5 }}
+      style={{ marginBottom: Padding.m, padding: Padding.xs }}
       horizontal
       showsHorizontalScrollIndicator={false}
       data={moment.months()}

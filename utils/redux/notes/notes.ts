@@ -5,6 +5,8 @@ type Note = {
   id: number;
   content: string;
   secure: boolean;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export const notesSlice = createSlice({
@@ -17,8 +19,10 @@ export const notesSlice = createSlice({
     createNote(state, { payload }) {
       state.notes.push({
         id: Date.now(),
-        content: payload,
-        secure: false,
+        content: payload.content,
+        secure: payload.secure,
+        createdAt: new Date().toLocaleDateString(),
+        updatedAt: new Date().toLocaleDateString(),
       });
 
       SecureStore.setItemAsync("notes", JSON.stringify(state.notes));
@@ -26,20 +30,27 @@ export const notesSlice = createSlice({
 
     removeNote(state, { payload }) {
       state.notes = state.notes.filter((n) => n.id !== payload);
+
+      SecureStore.setItemAsync("notes", JSON.stringify(state.notes));
     },
 
     editNote(
       state,
-      { payload }: PayloadAction<{ noteId: number; content: string }>
+      {
+        payload,
+      }: PayloadAction<{ noteId: number; content: string; secure: boolean }>
     ) {
-      let note = state.notes.findIndex((note) => (note.id = payload.noteId));
+      let note = state.notes.findIndex((note) => note.id === payload.noteId);
 
       if (note > 0) {
         state.notes[note] = {
+          ...state.notes[note],
           id: payload.noteId,
           content: payload.content,
-          secure: false,
+          secure: payload.secure,
         };
+
+        SecureStore.setItemAsync("notes", JSON.stringify(state.notes));
       }
     },
   },

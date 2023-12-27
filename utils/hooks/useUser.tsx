@@ -2,10 +2,12 @@ import { useDispatch } from "react-redux";
 import { useAppSelector } from "../redux/index";
 import * as SecureStore from "expo-secure-store";
 import { userActions } from "../redux/user/user";
+import { useApolloClient, ApolloLink } from "@apollo/client";
 
 export default function useUser() {
   const dispatch = useDispatch();
   const user = useAppSelector((state) => state.user);
+  const apollo = useApolloClient();
 
   async function loadUser() {
     const json = await SecureStore.getItemAsync("user");
@@ -20,6 +22,8 @@ export default function useUser() {
 
   async function removeUser() {
     await SecureStore.deleteItemAsync("user");
+
+    await apollo.clearStore();
 
     dispatch(userActions.removeUser());
   }
