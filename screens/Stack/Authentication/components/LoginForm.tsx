@@ -5,6 +5,11 @@ import { useState } from "react";
 import IconButton from "../../../../components/ui/IconButton/IconButton";
 import Button from "../../../../components/ui/Button/Button";
 import Input from "../../../../components/ui/TextInput/TextInput";
+import Layout from "@/constants/Layout";
+import Colors from "@/constants/Colors";
+import Color from "color";
+import { useNavigation } from "@react-navigation/native";
+import ChangeButton from "./ChangeButton";
 
 interface LoginFormProps {
   validationSchema: any;
@@ -18,6 +23,8 @@ export default function LoginForm({
 }: LoginFormProps) {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
+  const navigation = useNavigation<any>();
+
   return (
     <Formik
       onSubmit={onSubmit}
@@ -30,12 +37,16 @@ export default function LoginForm({
       {(f) => (
         <View>
           <ValidatedInput
+            label="Email"
+            showLabel
             left={(props) => <Input.Icon {...props} name="mail" />}
             placeholder="email"
             name="email"
             formik={f}
           />
           <ValidatedInput
+            showLabel
+            label="Password"
             left={(props) => <Input.Icon {...props} name="lock" />}
             right={(props) => (
               <IconButton
@@ -64,6 +75,11 @@ export default function LoginForm({
           >
             LOGIN
           </Button>
+
+          <ChangeButton
+            displayText="Or sign up instead"
+            navigateTo="Register"
+          />
         </View>
       )}
     </Formik>

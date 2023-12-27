@@ -15,7 +15,7 @@ import BalanceAlertEditModal from "../components/BalanceAlertEditModal";
 import Skeleton from "../../../../components/SkeletonLoader/Skeleton";
 import { WalletScreens } from "../Main";
 import { StatusBar } from "expo-status-bar";
-import AddExpenseBottomSheet from "../components/AddExpenseBottomSheet";
+import CreateExpenseSheet from "../components/AddExpenseBottomSheet";
 import BottomSheet from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheet/BottomSheet";
 import WalletList from "../components/WalletList";
 
@@ -114,7 +114,7 @@ export default function WalletScreen({ navigation }: WalletScreens<"Wallet">) {
         <ActionTiles
           scrollY={scrollY}
           onAddExpense={() => bottomSheetRef.current?.snapToIndex(0)}
-          // onAddExpense={() => navigation.navigate("CreateActivity")}
+          //onAddExpense={() => navigation.navigate("CreateActivity")}
         />
 
         {loading && (
@@ -149,7 +149,7 @@ export default function WalletScreen({ navigation }: WalletScreens<"Wallet">) {
         onClose={() => setModalVisible(false)}
       />
 
-      <AddExpenseBottomSheet onCompleted={() => {}} ref={bottomSheetRef} />
+      <CreateExpenseSheet onCompleted={() => {}} ref={bottomSheetRef} />
     </SafeAreaView>
   );
 }

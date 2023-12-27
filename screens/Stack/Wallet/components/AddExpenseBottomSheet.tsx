@@ -1,6 +1,6 @@
 import { Formik } from "formik";
 import Input from "../../../../components/ui/TextInput/TextInput";
-import { View, Text, Keyboard } from "react-native";
+import { View, Keyboard, TextStyle, StyleProp } from "react-native";
 
 import ValidatedInput from "../../../../components/ui/ValidatedInput";
 import Button from "../../../../components/ui/Button/Button";
@@ -16,9 +16,10 @@ import BottomSheet, {
   BottomSheetBackdropProps,
   useBottomSheet,
 } from "@gorhom/bottom-sheet";
-import { forwardRef, useCallback, useEffect, useState } from "react";
+import { forwardRef, useCallback } from "react";
 import Select from "../../../../components/ui/Select/Select";
 import Layout from "@/constants/Layout";
+import { Text } from "react-native";
 
 const schema = yup.object().shape({
   name: yup.string().required("Name is required"),
@@ -88,7 +89,7 @@ const AddExpenseBottomSheet = forwardRef<
         backgroundColor: Colors.primary,
       }}
       enablePanDownToClose
-      snapPoints={["65%", "80%"]}
+      snapPoints={["70%", "90%"]}
       backdropComponent={backdropComponent}
     >
       <Form onSubmit={onSubmit} />
@@ -101,8 +102,15 @@ interface FormProps {
   onSetFormHeight?: (n: number) => void;
 }
 
+const label = {
+  color: "#fff",
+  fontSize: 16,
+  fontWeight: "bold",
+  padding: 5,
+} as StyleProp<TextStyle>;
+
 const Form = (props: FormProps) => {
-  const { expand, snapToIndex } = useBottomSheet();
+  const { snapToIndex } = useBottomSheet();
 
   return (
     <Formik
@@ -116,15 +124,17 @@ const Form = (props: FormProps) => {
       }}
     >
       {(f) => (
-        <View style={{ padding: 15 }}>
+        <View style={{ paddingHorizontal: 15 }}>
           <SegmentedButtons
             buttons={SegmentVariants}
             onChange={(value) => f.setFieldValue("type", value)}
             value={f.values.type}
           />
 
-          <View style={{ marginTop: 15 }}>
+          <View>
             <ValidatedInput
+              showLabel
+              label="Purchase's name"
               style={{
                 width: Layout.screen.width - 30,
               }}
@@ -137,6 +147,8 @@ const Form = (props: FormProps) => {
             />
 
             <ValidatedInput
+              showLabel
+              label="Amount (zł)"
               style={{
                 width: Layout.screen.width - 30,
               }}
@@ -150,6 +162,7 @@ const Form = (props: FormProps) => {
             />
           </View>
 
+          <Text style={label}>Category</Text>
           <Select
             placeholderText="Choose category or create your own"
             onFocusChange={(focused) => {

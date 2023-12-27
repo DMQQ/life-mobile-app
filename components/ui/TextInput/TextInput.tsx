@@ -82,6 +82,8 @@ export interface InputProps extends TextInputProps {
    * size of the input
    */
   size?: "small" | "medium" | "large";
+
+  label?: string;
 }
 
 export default function Input({
@@ -119,11 +121,11 @@ export default function Input({
             styles.label,
             labelStyle,
             {
-              color: error ? "#ff3030" : "#e0e0e0",
+              color: error ? "#ff3030" : "#e0e0e0f1",
             },
           ]}
         >
-          {name}
+          {rest?.label || name} {rest.label && helperText && `(${helperText})`}
         </Text>
       )}
       <View
@@ -181,7 +183,7 @@ export default function Input({
           </View>
         )}
       </View>
-      {typeof helperText !== "undefined" && (
+      {typeof helperText !== "undefined" && !rest.label && (
         <Text
           style={[
             styles.label,

@@ -235,38 +235,15 @@ const ListContainer = (props: {
     {props.list.map((timeline) => (
       <TimelineItem
         styles={{
-          backgroundColor: Color(Colors.primary).lighten(0.5).string(),
+          backgroundColor: Colors.primary_lighter,
           borderRadius: 15,
           padding: 20,
+          marginBottom: 10,
         }}
         key={timeline.id}
         location="timeline"
         {...timeline}
       />
     ))}
-
-    {/* <VirtualizedList
-      ListEmptyComponent={
-        <View
-          style={{
-            padding: 10,
-
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <MaterialIcons name="event-busy" color={"#2c2c2c"} size={150} />
-          <Text style={{ color: "#2c2c2c", fontWeight: "bold", fontSize: 35 }}>
-            No events
-          </Text>
-        </View>
-      }
-      style={{ zIndex: 1000 }}
-      data={props.list}
-      getItem={(list, index) => list[index] as any}
-      getItemCount={(arr) => arr.length}
-      keyExtractor={(timeline) => timeline.id}
-      renderItem={({ item }) => <TimelineItem location="timeline" {...item} />}
-    /> */}
   </View>
 );
