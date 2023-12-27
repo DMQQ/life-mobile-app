@@ -17,10 +17,10 @@ const styles = StyleSheet.create({
     minHeight: 50,
   },
   label: {
-    fontSize: 21,
+    fontSize: 16,
     fontWeight: "bold",
     color: "black",
-    marginLeft: 5,
+    padding: 5,
   },
 });
 
