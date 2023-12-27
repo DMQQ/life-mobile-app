@@ -24,7 +24,10 @@ export default function useNotifications() {
     token = await Notifications.getExpoPushTokenAsync({
       projectId: Constants?.expoConfig?.extra?.eas?.projectId as string,
     });
-    console.log(token);
+
+    console.log(
+      JSON.stringify(await Notifications.getDevicePushTokenAsync(), null, 2)
+    );
 
     if (Platform.OS === "android") {
       Notifications.setNotificationChannelAsync("default", {

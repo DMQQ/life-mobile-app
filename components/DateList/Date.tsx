@@ -6,23 +6,25 @@ import { Date as TDate } from "./fns";
 import moment from "moment";
 import { memo, useMemo } from "react";
 import Animated, { FadeIn, FadeOut, ZoomIn } from "react-native-reanimated";
+import { Rounded } from "@/constants/Values";
+import { Padding } from "@/constants/Layout";
 
 const styles = StyleSheet.create({
   container: {
     alignItems: "center",
-    borderRadius: 10,
+    borderRadius: Rounded.m,
     width: 75,
     justifyContent: "center",
     height: 100,
-    margin: 5,
+    margin: Padding.xs,
   },
   indicator: {
     width: 10,
     height: 10,
-    borderRadius: 100,
-    marginRight: 2,
-    borderWidth: 1,
-    borderColor: "#fff",
+    borderRadius: Rounded.full,
+    marginRight: 1,
+    borderWidth: 0.5,
+    borderColor: Colors.primary,
   },
 });
 
@@ -72,13 +74,13 @@ export default function Date(props: DateProps) {
       style={[styles.container, { backgroundColor: dateItemBg }]}
     >
       <Dots tasks={tasks} />
-      <Text style={{ color: "#fff", fontSize: 30, fontWeight: "bold" }}>
+      <Text style={{ color: "#fff", fontSize: 32, fontWeight: "bold" }}>
         {props.dayNumber}
       </Text>
-      <Text style={{ color: "#ffffffcb", fontSize: 16 }}>
+      <Text style={{ color: "#ffffffcb", fontSize: 17 }}>
         {props.dayName.slice(0, 3)}
       </Text>
-      <Text style={{ color: "#ffffff8c", fontSize: 12 }}>
+      <Text style={{ color: "#ffffff8c", fontSize: 11 }}>
         {moment.months()[moment(props.date).month()].slice(0, 3)}
       </Text>
     </AnimatedRipple>

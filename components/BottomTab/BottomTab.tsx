@@ -7,6 +7,7 @@ import { Ionicons } from "@expo/vector-icons";
 import useKeyboard from "../../utils/hooks/useKeyboard";
 import Animated, { FadeInDown, FadeOutDown } from "react-native-reanimated";
 import { useTheme } from "../../utils/context/ThemeContext";
+import { IconSize, Padding, Rounded } from "@/constants/Values";
 
 const styles = StyleSheet.create({
   container: {
@@ -20,10 +21,10 @@ const styles = StyleSheet.create({
 
   button: {
     flex: 1,
-    padding: 12.5,
+    padding: Padding.l,
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: 100,
+    borderRadius: Rounded.full,
   },
 });
 
@@ -40,16 +41,18 @@ export default function BottomTab({
 
   const activeRoute = state.routes[state.index].name;
 
+  const { theme } = useTheme();
+
   const Btn = (props: { route: string; iconName: any }) => (
     <Ripple
       rippleCentered
-      rippleColor={Colors.secondary}
+      rippleColor={theme.colors.secondary}
       onLongPress={onCalendarLongPress}
       style={[styles.button]}
       onPress={() => navigate(props.route)}
     >
       <Ionicons
-        size={25}
+        size={IconSize.l}
         name={props.iconName}
         color={activeRoute === props.route ? Colors.secondary_light_1 : "#fff"}
       />
@@ -70,7 +73,7 @@ export default function BottomTab({
     <Animated.View
       style={[
         styles.container,
-        { paddingBottom: 5, backgroundColor: colors.primary_light },
+        { paddingBottom: Padding.xs, backgroundColor: colors.primary_light },
       ]}
       entering={FadeInDown}
       exiting={FadeOutDown}

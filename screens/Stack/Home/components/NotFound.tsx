@@ -5,6 +5,13 @@ import Button from "@/components/ui/Button/Button";
 import moment from "moment";
 import Colors, { Sizing } from "@/constants/Colors";
 import { useNavigation } from "@react-navigation/native";
+import Animated, {
+  FadeIn,
+  SlideInUp,
+  ZoomIn,
+  ZoomInDown,
+  ZoomInUp,
+} from "react-native-reanimated";
 
 const styles = StyleSheet.create({
   container: {
@@ -39,27 +46,34 @@ export default function NotFound() {
   return (
     <View style={{ flexDirection: "column" }}>
       <View style={styles.container}>
-        <SVGImage width={Layout.screen.width / 4} height={100} />
+        <Animated.View entering={FadeIn.delay(50)}>
+          <SVGImage width={Layout.screen.width / 4} height={100} />
+        </Animated.View>
         <View style={{ paddingHorizontal: 15 }}>
-          <Text style={styles.heading}>Your Calendar is Empty </Text>
-          <Text
+          <Animated.Text entering={FadeIn.delay(75)} style={styles.heading}>
+            Your Calendar is Empty{" "}
+          </Animated.Text>
+          <Animated.Text
+            entering={FadeIn.delay(100)}
             lineBreakMode="clip"
             textBreakStrategy="highQuality"
             style={styles.content}
           >
             No upcoming events in{"\n"}your calendar.{"\n"}
-          </Text>
+          </Animated.Text>
         </View>
       </View>
 
-      <Button
-        onPress={onPress}
-        size="xl"
-        style={{ backgroundColor: "#fff", borderRadius: 100 }}
-        fontStyle={{ color: Colors.primary }}
-      >
-        Create event
-      </Button>
+      <Animated.View entering={FadeIn.delay(150)}>
+        <Button
+          onPress={onPress}
+          size="xl"
+          style={{ backgroundColor: "#fff", borderRadius: 100 }}
+          fontStyle={{ color: Colors.primary }}
+        >
+          Create event
+        </Button>
+      </Animated.View>
     </View>
   );
 }

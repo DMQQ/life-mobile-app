@@ -4,38 +4,25 @@ const window = Dimensions.get("window");
 
 const screen = Dimensions.get("screen");
 
-const spacingTypes = {
-  xs: 4,
-  sm: 8,
-  md: 16,
-  lg: 24,
-  xl: 32,
-  xxl: 40,
-};
-
 export const Padding = {
-  xs: 2.5,
-  sm: 5,
-  md: 7.5,
-  lg: 10,
-  xl: 15,
-  xxl: 20,
+  xxs: 2.5,
+  xs: 5,
+  s: 7.5,
+  m: 10,
+  l: 15,
+  xl: 20,
+  xxl: 25,
 };
 
 export const Rounded = {
-  xs: 5,
-  sm: 7.5,
-  md: 10,
-  lg: 10,
-  xl: 15,
-  xxl: 20,
+  ...Padding,
+  full: 100,
+  half: 50,
 };
 
 export default {
   window,
   screen,
-
-  spacing: (s: keyof typeof spacingTypes) => spacingTypes[s],
 
   padding: 10,
 
