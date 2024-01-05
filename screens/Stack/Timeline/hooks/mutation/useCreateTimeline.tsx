@@ -22,6 +22,8 @@ const initialValues = {
   repeatEveryNth: "",
 };
 
+export type InitialValuesType = typeof initialValues;
+
 const validationSchema = Yup.object().shape({
   title: Yup.string().required("Title is required"),
   desc: Yup.string().required("Description is required"),

@@ -9,13 +9,7 @@ import { useEffect, useMemo, useState } from "react";
 import Skeleton from "../../../../components/SkeletonLoader/Skeleton";
 import { TimelineScreenProps } from "../types";
 import TimelineItem from "../components/TimelineItem";
-import {
-  AntDesign,
-  Feather,
-  FontAwesome,
-  FontAwesome5,
-  MaterialIcons,
-} from "@expo/vector-icons";
+import { AntDesign, Feather, FontAwesome5, Ionicons } from "@expo/vector-icons";
 import DateList from "../../../../components/DateList/DateList";
 import useUser from "../../../../utils/hooks/useUser";
 import { gql, useQuery } from "@apollo/client";
@@ -70,7 +64,7 @@ const Loader = (props: { loading: boolean }) =>
     </View>
   ) : null;
 
-const iconColor = Color(Colors.primary).lighten(4.5).hex();
+const iconColor = "#fff";
 
 export default function Timeline({
   navigation,
@@ -115,11 +109,8 @@ export default function Timeline({
     "date-list"
   );
 
-  const [isFloatingVisible, setIsFloatingVisible] = useState(false);
-
   const onViewToggle = () => {
     setSwitchView((sw) => (sw === "calendar" ? "date-list" : "calendar"));
-    setIsFloatingVisible(false);
   };
 
   return (
@@ -146,42 +137,17 @@ export default function Timeline({
         <Text style={timelineStyles.dayHeader}>{displayDate}</Text>
 
         <Ripple
-          onPress={() => setIsFloatingVisible((f) => !f)}
-          style={{ paddingHorizontal: 10 }}
+          onPress={onViewToggle}
+          style={{
+            paddingHorizontal: 10,
+          }}
         >
-          <AntDesign name="bars" color={iconColor} size={24} />
+          {switchView === "calendar" ? (
+            <AntDesign name="calendar" color={iconColor} size={24} />
+          ) : (
+            <Ionicons name="list" size={24} color={iconColor} />
+          )}
         </Ripple>
-
-        <Overlay
-          isVisible={isFloatingVisible}
-          onClose={() => setIsFloatingVisible(false)}
-          opacity={0.65}
-        >
-          <Animated.View
-            entering={FadeInUp}
-            exiting={FadeOutDown}
-            style={timelineStyles.floatingContainer}
-          >
-            <Ripple
-              style={[timelineStyles.floatingButton, { marginBottom: 10 }]}
-              onPress={onViewToggle}
-            >
-              <AntDesign name="calendar" size={24} color={iconColor} />
-              <Text style={timelineStyles.floatingText}>
-                {switchView === "calendar" ? "Date list" : "Calendar"}
-              </Text>
-            </Ripple>
-
-            <Ripple
-              style={timelineStyles.floatingButton}
-              onPress={() => navigation.navigate("Schedule", { selected })}
-            >
-              <Feather name="list" size={24} color={iconColor} />
-
-              <Text style={timelineStyles.floatingText}>List</Text>
-            </Ripple>
-          </Animated.View>
-        </Overlay>
       </View>
 
       <ListContainer

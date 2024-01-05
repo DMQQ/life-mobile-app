@@ -19,6 +19,8 @@ import useKeyboard from "../../../../utils/hooks/useKeyboard";
 import Animated, { ZoomInDown, ZoomOutDown } from "react-native-reanimated";
 import { RadioGroup } from "../../../../components/ui/Radio/Radio";
 import SegmentedButtons from "@/components/ui/SegmentedButtons";
+import Layout from "@/constants/Layout";
+import SuggestedEvents from "../components/SuggestedEvents";
 
 const styles = StyleSheet.create({
   header: {
@@ -30,10 +32,10 @@ const styles = StyleSheet.create({
   timeContainer: {
     flexDirection: "row",
     width: "100%",
-    backgroundColor: Color(Colors.primary).lighten(0.5).hex(),
+    backgroundColor: Colors.primary_light,
     borderWidth: 2,
     borderColor: Colors.primary_light,
-    borderRadius: 5,
+    borderRadius: 10,
     padding: 7.5,
     alignItems: "center",
     justifyContent: "space-between",
@@ -154,17 +156,31 @@ export default function CreateTimeLineEventModal({
 
   return (
     <ScreenContainer>
-      <ScrollView style={{ flex: 1 }}>
-        <Label text="Event's title" />
+      <ScrollView
+        style={{ flex: 1, padding: 5 }}
+        showsVerticalScrollIndicator={false}
+      >
+        <SuggestedEvents
+          createTimelineAsync={handleSubmit}
+          initialValues={initialValues}
+          date={route.params.selectedDate}
+        />
+
         <ValidatedInput
           placeholder="Like  'take out the trash' etc.."
           name="title"
+          label="Event's title*"
+          showLabel
           formik={f}
           helperText="Event's title (not required)"
           helperStyle={{ marginLeft: 2.5 }}
+          style={{
+            width: Layout.screen.width - 15 * 2,
+          }}
         />
-        <Label text="Event's content" />
         <ValidatedInput
+          showLabel
+          label="Event's content*"
           numberOfLines={10}
           multiline
           placeholder="What you wanted to do"
@@ -173,9 +189,12 @@ export default function CreateTimeLineEventModal({
           formik={f}
           scrollEnabled
           textAlignVertical="top"
+          style={{
+            width: Layout.screen.width - 15 * 2,
+          }}
         />
 
-        <Label text="Time range" />
+        <Label text="Time range*" />
         <View style={styles.timeContainer}>
           <Ripple
             style={{ flex: 1, padding: 10 }}
@@ -205,9 +224,17 @@ export default function CreateTimeLineEventModal({
         />
 
         <View style={{ marginTop: 10 }}>
-          <Label text="Notifications settings" />
+          <Label text="How to send you notifications?" />
           <SegmentedButtons
+            containerStyle={{
+              borderRadius: 15,
+              backgroundColor: Colors.primary_light,
+            }}
             buttonTextStyle={{ fontWeight: "400" }}
+            buttonStyle={{
+              margin: 10,
+              height: 40,
+            }}
             buttons={radioOptions.map((prev) => ({
               text: prev.label,
               value: prev.value,

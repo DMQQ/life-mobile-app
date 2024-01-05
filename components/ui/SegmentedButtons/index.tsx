@@ -1,4 +1,4 @@
-import { View, Text, StyleProp, TextStyle } from "react-native";
+import { View, Text, StyleProp, TextStyle, ViewStyle } from "react-native";
 import Layout from "../../../constants/Layout";
 import Colors from "../../../constants/Colors";
 import Color from "color";
@@ -22,6 +22,8 @@ interface SegmentedButtonsProps {
   buttonTextStyle?: StyleProp<TextStyle>;
 
   direction?: "row" | "column";
+
+  containerStyle?: StyleProp<ViewStyle>;
 }
 
 export default function SegmentedButtons(props: SegmentedButtonsProps) {
@@ -32,19 +34,23 @@ export default function SegmentedButtons(props: SegmentedButtonsProps) {
 
   return (
     <View
-      style={{
-        flexDirection: props.direction || "row",
-        // width: Layout.screen.width - 20,
-        width: "100%",
-        backgroundColor: Color(Colors.primary).lighten(0.5).toString(),
-        borderWidth: 2,
-        borderColor: props.isError ? Colors.error : Colors.primary_light,
-        borderRadius: 5,
-        marginBottom: 10,
-      }}
+      style={[
+        {
+          flexDirection: props.direction || "row",
+          // width: Layout.screen.width - 20,
+          width: "100%",
+          backgroundColor: Colors.primary_light,
+          borderWidth: 2,
+          borderColor: props.isError ? Colors.error : Colors.primary_light,
+          borderRadius: 5,
+          marginBottom: 10,
+        },
+        props.containerStyle,
+      ]}
     >
       {props.buttons.map((value, index) => (
         <Ripple
+          rippleColor={Colors.secondary}
           onPress={() => props.onChange(value.value)}
           key={value.value}
           style={[
@@ -60,7 +66,7 @@ export default function SegmentedButtons(props: SegmentedButtonsProps) {
               backgroundColor:
                 props.value === value.value
                   ? Colors.secondary
-                  : Color(Colors.primary).lighten(0.5).toString(),
+                  : Colors.primary_light,
             },
             props.buttonStyle,
           ]}
