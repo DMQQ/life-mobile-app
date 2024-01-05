@@ -5,7 +5,7 @@ import { StyleSheet, Text, View } from "react-native";
 import { Date as TDate } from "./fns";
 import moment from "moment";
 import { memo, useMemo } from "react";
-import Animated, { FadeIn, FadeOut, ZoomIn } from "react-native-reanimated";
+import Animated, { FadeIn } from "react-native-reanimated";
 import { Rounded } from "@/constants/Values";
 import { Padding } from "@/constants/Layout";
 
@@ -30,9 +30,12 @@ const styles = StyleSheet.create({
 
 interface DateProps extends TDate {
   isSelected: boolean;
+
   onPress: Function;
 
   tasks: number;
+
+  onLongPress: Function;
 }
 
 const bg = Color(Colors.primary).lighten(0.5).hex();
@@ -70,6 +73,8 @@ export default function Date(props: DateProps) {
 
   return (
     <AnimatedRipple
+      delayLongPress={500}
+      onLongPress={() => props.onLongPress()}
       onPress={() => props.onPress()}
       style={[styles.container, { backgroundColor: dateItemBg }]}
     >

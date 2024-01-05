@@ -10,7 +10,7 @@ export default StyleSheet.create({
     color: "#ffffffda",
     fontSize: 17,
     fontWeight: "bold",
-    marginLeft: 10,
+    marginLeft: 15,
   },
   eventsLeft: {
     color: Colors.secondary,
@@ -78,6 +78,7 @@ export default StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: Colors.primary_light,
     marginVertical: 15,
+    paddingVertical: 10,
   },
   listHeadingText: {
     fontWeight: "bold",
@@ -89,7 +90,7 @@ export default StyleSheet.create({
   listHeading: {
     borderRadius: 5,
 
-    padding: 10,
+    paddingHorizontal: 10,
 
     // backgroundColor: Color(Colors.primary).lighten(0.35).string(),
   },

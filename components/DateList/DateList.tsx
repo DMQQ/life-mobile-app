@@ -1,13 +1,11 @@
 import moment, { Moment } from "moment";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { View, VirtualizedList, Text } from "react-native";
 import Date from "./Date";
 import MonthSelectList from "./MonthSelectList";
 import { createDates, createFutureDates } from "./fns";
-import Ripple from "react-native-material-ripple";
-import { AntDesign, Entypo } from "@expo/vector-icons";
-import Animated from "react-native-reanimated";
 import { Padding } from "@/constants/Values";
+import { useNavigation } from "@react-navigation/native";
 
 type TDate = {
   date: string;
@@ -87,7 +85,9 @@ export default function DateList({
     offset: (75 + 5 * 2) * index,
   });
 
-  const snapOffsets = dates.map((_, index) => (75 + 10) * index);
+  const snapOffsets = dates.map((_, index) => (75 + Padding.xs * 2) * index);
+
+  const navigation = useNavigation<any>();
 
   return (
     <View>
@@ -112,6 +112,7 @@ export default function DateList({
       </View>
       <MonthSelectList selected={month} onPress={onMonthChange} />
       <VirtualizedList
+        snapToOffsets={snapOffsets}
         removeClippedSubviews
         onEndReached={onEndReached}
         showsHorizontalScrollIndicator={false}
@@ -128,6 +129,12 @@ export default function DateList({
             {...item}
             isSelected={selectedDate === item.date}
             onPress={() => setSelected(item.date)}
+            onLongPress={() => {
+              setSelected(item.date);
+              navigation.navigate("TimelineCreate", {
+                selectedDate: item.date,
+              });
+            }}
           />
         )}
       />

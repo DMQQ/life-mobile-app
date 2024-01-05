@@ -8,11 +8,12 @@ export const secondary_candidates = [
   "#FFA51A",
   "#FF1A56",
   "#BE15A8",
+  "#008CFF",
 ];
 
 const primary = "#151421"; // "#0F0F0F";
 
-const secondary = "#008CFF";
+const secondary = secondary_candidates[5];
 
 export const randColor = () =>
   secondary_candidates[Math.floor(Math.random() * secondary_candidates.length)];
