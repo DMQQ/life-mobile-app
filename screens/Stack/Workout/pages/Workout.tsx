@@ -45,7 +45,6 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   container: {
-    // backgroundColor: Color(Colors.primary).lighten(0.5).hex(),
     marginBottom: 10,
     padding: 10,
     borderRadius: 10,

@@ -116,17 +116,15 @@ export default function Input({
   return (
     <View style={styles.container}>
       {typeof name !== "undefined" && (
-        <Text
-          style={[
-            styles.label,
-            labelStyle,
-            {
-              color: error ? "#ff3030" : "#e0e0e0f1",
-            },
-          ]}
-        >
-          {rest?.label || name} {rest.label && helperText && `(${helperText})`}
-        </Text>
+        <Input.Label
+          error={error}
+          text={
+            (rest?.label || name) +
+            " " +
+            (rest.label && helperText ? `(${helperText})` : "")
+          }
+          labelStyle={labelStyle}
+        />
       )}
       <View
         style={{
@@ -218,7 +216,7 @@ Input.Icon = ({
   const Component = Icons[Icon];
 
   return (
-    <Ripple onPress={props.onPress}>
+    <Ripple onPress={props.onPress} style={{ paddingHorizontal: 5 }}>
       <Component
         {...props}
         size={props.size || 25}
@@ -233,3 +231,21 @@ Input.Icon = ({
     </Ripple>
   );
 };
+
+Input.Label = (props: {
+  text: string;
+  labelStyle?: StyleProp<TextStyle>;
+  error: boolean;
+}) => (
+  <Text
+    style={[
+      styles.label,
+      props.labelStyle,
+      {
+        color: props.error ? "#ff3030" : "#e0e0e0f1",
+      },
+    ]}
+  >
+    {props.text}
+  </Text>
+);

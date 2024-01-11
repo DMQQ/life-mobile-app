@@ -30,7 +30,14 @@ export default function WorkoutScreens() {
       />
       <Stack.Screen name="Workout" component={Workout} />
       <Stack.Screen name="Exercise" component={ExerciseScreen} />
-      <Stack.Screen name="WorkoutCreate" component={CreateWorkout} />
+      <Stack.Screen
+        name="WorkoutCreate"
+        component={CreateWorkout}
+        options={{
+          title: "Create workout",
+          headerTitleAlign: "center",
+        }}
+      />
       <Stack.Screen
         initialParams={{
           delayTimerStart: 0,

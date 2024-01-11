@@ -44,3 +44,6 @@ export default function ValidatedInput({
     />
   );
 }
+
+ValidatedInput.Icon = TextInput.Icon;
+ValidatedInput.Label = TextInput.Label;

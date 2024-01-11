@@ -1,7 +1,6 @@
 import { Text, View } from "react-native";
-import ScreenContainer from "../../../../components/ui/ScreenContainer";
+
 import { StackScreenProps } from "../../../../types";
-import { useLayoutEffect } from "react";
 import { gql, useMutation } from "@apollo/client";
 import useUser from "../../../../utils/hooks/useUser";
 import Colors from "../../../../constants/Colors";

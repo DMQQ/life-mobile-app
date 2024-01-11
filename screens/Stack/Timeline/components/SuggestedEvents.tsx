@@ -9,6 +9,7 @@ import Animated from "react-native-reanimated";
 import { InitialValuesType } from "../hooks/mutation/useCreateTimeline";
 import { StyleSheet } from "react-native";
 import { CommonEvents } from "./CommonEvents.data";
+import Color from "color";
 
 type EventType = (typeof CommonEvents)[0];
 
@@ -30,6 +31,7 @@ export default function SuggestedEvents(props: SuggestedEventsProps) {
   const handleSelectQuickOption = (item: (typeof CommonEvents)[0]) => {
     setSelected((prev) => (prev.name === item.name ? {} : item));
     setSubCategory("");
+    setTime(undefined);
   };
 
   const handleSelectSubCategory = (sub: string) => {
@@ -154,10 +156,14 @@ export default function SuggestedEvents(props: SuggestedEventsProps) {
         disabled={!canSubmit}
         rippleColor={Colors.secondary}
         type="outlined"
-        fontStyle={{ fontSize: 16 }}
+        fontStyle={{
+          fontSize: 16,
+          color: canSubmit ? "#fff" : Color(Colors.secondary).darken(0.5).hex(),
+        }}
         style={{
           marginTop: 20,
           borderWidth: 1,
+          backgroundColor: canSubmit ? Colors.secondary : "transparent",
         }}
       >
         Create quick event
@@ -183,9 +189,7 @@ const Tile = ({ item, selected, ...props }: TileProps) => {
       style={[
         {
           backgroundColor:
-            selected?.name === item.name
-              ? Colors.secondary
-              : Colors.primary_light,
+            selected?.name === item.name ? Colors.secondary : Colors.primary,
         },
         styles.tile,
       ]}
@@ -230,6 +234,8 @@ const styles = StyleSheet.create({
     borderRadius: 17.5,
     minWidth: 150,
     marginRight: 15,
+    borderWidth: 1,
+    borderColor: Colors.primary_lighter,
   },
 
   time: {

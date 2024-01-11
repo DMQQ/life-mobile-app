@@ -12,7 +12,7 @@ import { memo } from "react";
 
 const styles = StyleSheet.create({
   arrow_button: {
-    backgroundColor: Color(Colors.primary).lighten(0.5).hex(),
+    backgroundColor: Colors.primary_lighter,
     justifyContent: "center",
     alignItems: "center",
     padding: 10,
@@ -37,7 +37,7 @@ const styles = StyleSheet.create({
   },
 
   clear_button: {
-    backgroundColor: Color(Colors.primary).lighten(0.5).hex(),
+    backgroundColor: Colors.primary_lighter,
     alignItems: "center",
     justifyContent: "center",
     padding: 5,

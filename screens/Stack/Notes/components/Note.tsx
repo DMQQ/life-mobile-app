@@ -24,7 +24,7 @@ const styles = StyleSheet.create({
   container: {
     width: "100%",
     padding: Gap,
-    backgroundColor: Color(Colors.primary).lighten(0.5).string(),
+    backgroundColor: Colors.primary_lighter,
     borderRadius: 15,
     marginTop: 15,
   },

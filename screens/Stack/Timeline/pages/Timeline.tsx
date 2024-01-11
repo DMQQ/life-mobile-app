@@ -9,16 +9,15 @@ import { useEffect, useMemo, useState } from "react";
 import Skeleton from "../../../../components/SkeletonLoader/Skeleton";
 import { TimelineScreenProps } from "../types";
 import TimelineItem from "../components/TimelineItem";
-import { AntDesign, Feather, FontAwesome5, Ionicons } from "@expo/vector-icons";
+import { AntDesign, Entypo, Ionicons } from "@expo/vector-icons";
 import DateList from "../../../../components/DateList/DateList";
 import useUser from "../../../../utils/hooks/useUser";
 import { gql, useQuery } from "@apollo/client";
-import Color from "color";
-import Overlay from "../../../../components/ui/Overlay/Overlay";
-import Animated, { FadeInUp, FadeOutDown } from "react-native-reanimated";
 import NotFound from "../../Home/components/NotFound";
+import BottomSheet from "@gorhom/bottom-sheet";
+import CreateTimeLineEventModal from "./TimelineCreate";
 
-const GET_MONTHLY_EVENTS = gql`
+export const GET_MONTHLY_EVENTS = gql`
   query GetMonthlyEvents($date: String!) {
     timelineMonth(date: $date) {
       date
@@ -151,6 +150,7 @@ export default function Timeline({
       </View>
 
       <ListContainer
+        date={selected}
         list={data?.timeline || []}
         navigation={navigation}
         onPress={createTimeline}
@@ -178,10 +178,24 @@ const ListContainer = (props: {
   list: any[];
   onPress: () => void;
   navigation: any;
+  date: string;
 }) => (
   <View style={timelineStyles.listHeading}>
     <View style={timelineStyles.listHeadingContainer}>
-      <Text style={timelineStyles.listHeadingText}>My events</Text>
+      <View style={{ flexDirection: "row", alignItems: "center" }}>
+        <Text style={timelineStyles.listHeadingText}>My events</Text>
+
+        <Ripple
+          style={{ padding: 2.5, marginLeft: 10 }}
+          onPress={() =>
+            props.navigation.navigate("Schedule", {
+              selectedDate: props.date,
+            })
+          }
+        >
+          <Entypo name="list" color={"#fff"} size={25} />
+        </Ripple>
+      </View>
 
       <Ripple
         style={{
