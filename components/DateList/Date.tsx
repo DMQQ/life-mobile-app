@@ -38,7 +38,7 @@ interface DateProps extends TDate {
   onLongPress: Function;
 }
 
-const bg = Color(Colors.primary).lighten(0.5).hex();
+const bg = Colors.primary_lighter;
 
 const AnimatedRipple = Animated.createAnimatedComponent(Ripple);
 

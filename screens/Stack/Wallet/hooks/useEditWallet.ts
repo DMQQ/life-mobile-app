@@ -6,14 +6,6 @@ const EDIT_BALANCE = gql`
     editWalletBalance(amount: $balance) {
       id
       balance
-      expenses {
-        id
-        amount
-        description
-        date
-        type
-        category
-      }
     }
   }
 `;

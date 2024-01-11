@@ -6,8 +6,6 @@ import useUser from "../../../../utils/hooks/useUser";
 import ExercisesSelect from "../../../../components/ExercisesSelectDropdown/ExercisesSelect";
 import Button from "../../../../components/ui/Button/Button";
 import Colors from "../../../../constants/Colors";
-
-import TextInput from "../../../../components/ui/TextInput/TextInput";
 import Color from "color";
 import { WorkoutScreenProps } from "../types";
 import SegmentedButtons from "../../../../components/ui/SegmentedButtons";
@@ -87,7 +85,7 @@ function useCreateWorkout(
 }
 
 import * as yup from "yup";
-import { View } from "react-native";
+import { Text, View } from "react-native";
 
 const validationSchema = yup.object().shape({
   exercises: yup.array().min(1).required("Add at least 1 exercise"),
@@ -144,42 +142,60 @@ export default function WorkoutCreate({
           <View style={{ flex: 1, justifyContent: "space-between" }}>
             <View>
               <ValidatedInput
+                label="Name"
+                showLabel
                 formik={f}
                 name="name"
                 placeholder="Workout's name"
               />
 
               <ValidatedInput
+                label="Short description"
+                numberOfLines={3}
+                textAlignVertical="top"
+                showLabel
                 formik={f}
                 name="description"
                 placeholder="Workout's description"
               />
 
+              <ValidatedInput.Label
+                error={!!f.errors.difficulty && f.touched.difficulty}
+                text="Set Difficulty"
+              />
+
               <SegmentedButtons
-                //isError={!!f.errors.difficulty && f.touched.difficulty}
+                isError={!!f.errors.difficulty && f.touched.difficulty}
                 buttons={["Beginner", "Intermediate", "Advanced"].map(
                   (text) => ({
                     text,
                     value: text,
                   })
                 )}
+                buttonTextStyle={{ fontWeight: "400", fontSize: 16 }}
+                buttonStyle={{ height: 40, margin: 10, borderRadius: 5 }}
+                containerStyle={{ borderRadius: 5 }}
                 onChange={(value) => f.setFieldValue("difficulty", value)}
                 value={f.values.difficulty}
               />
+
+              <ValidatedInput.Label error={false} text="Choose exercises" />
 
               <ExercisesSelect
                 setSelected={(sel) => f.setFieldValue("exercises", sel) as any}
               />
 
+              <ValidatedInput.Label error={false} text="Choose workout type" />
+
               <Select
-                containerStyle={{ marginTop: 10 }}
                 options={EXERCISE_TYPES as string[]}
                 selected={[f.values.type]}
                 setSelected={(sel) => f.setFieldValue("type", sel[0])}
                 multiSelect={false}
                 renderDefaultItem
-                maxSelectHeight={300}
+                maxSelectHeight={200}
                 closeOnSelect
+                placeholderText="Type"
               />
             </View>
 

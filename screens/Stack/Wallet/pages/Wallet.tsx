@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import { StyleSheet, Text, View, SafeAreaView } from "react-native";
 import useGetWallet from "../hooks/useGetWallet";
 import Ripple from "react-native-material-ripple";

@@ -16,10 +16,11 @@ import BottomSheet, {
   BottomSheetBackdropProps,
   useBottomSheet,
 } from "@gorhom/bottom-sheet";
-import { forwardRef, useCallback } from "react";
+import { forwardRef, useCallback, useEffect } from "react";
 import Select from "../../../../components/ui/Select/Select";
 import Layout from "@/constants/Layout";
 import { Text } from "react-native";
+import { Icons } from "./WalletItem";
 
 const schema = yup.object().shape({
   name: yup.string().required("Name is required"),
@@ -89,7 +90,7 @@ const AddExpenseBottomSheet = forwardRef<
         backgroundColor: Colors.primary,
       }}
       enablePanDownToClose
-      snapPoints={["70%", "90%"]}
+      snapPoints={["70%", "95%"]}
       backdropComponent={backdropComponent}
     >
       <Form onSubmit={onSubmit} />
@@ -110,7 +111,7 @@ const label = {
 } as StyleProp<TextStyle>;
 
 const Form = (props: FormProps) => {
-  const { snapToIndex } = useBottomSheet();
+  const { snapToIndex, animatedIndex } = useBottomSheet();
 
   return (
     <Formik
@@ -129,6 +130,8 @@ const Form = (props: FormProps) => {
             buttons={SegmentVariants}
             onChange={(value) => f.setFieldValue("type", value)}
             value={f.values.type}
+            containerStyle={{ borderRadius: 12.5 }}
+            buttonStyle={{ height: 45, margin: 10, borderRadius: 5 }}
           />
 
           <View>
@@ -152,7 +155,7 @@ const Form = (props: FormProps) => {
               style={{
                 width: Layout.screen.width - 30,
               }}
-              placeholder="How much you spent"
+              placeholder="How much have you spent?"
               name="amount"
               left={(props) => (
                 <Input.Icon Icon="Ionicons" name="cash-outline" {...props} />
@@ -170,9 +173,10 @@ const Form = (props: FormProps) => {
             }}
             selected={[f.values.category]}
             setSelected={([selected]) => f.setFieldValue("category", selected)}
-            options={["Food", "Transport", "Debt", "Night out"]}
+            options={Object.keys(Icons)}
             transparentOverlay
             closeOnSelect
+            maxSelectHeight={250}
           />
 
           <Button
@@ -190,7 +194,7 @@ const Form = (props: FormProps) => {
                 : Colors.secondary,
             }}
           >
-            Create
+            Create expense
           </Button>
         </View>
       )}

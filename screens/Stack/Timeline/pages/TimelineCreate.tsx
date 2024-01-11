@@ -1,7 +1,13 @@
 import { useFormik } from "formik";
 import ScreenContainer from "../../../../components/ui/ScreenContainer";
 import ValidatedInput from "../../../../components/ui/ValidatedInput";
-import { ActivityIndicator, Text, ScrollView, StyleSheet } from "react-native";
+import {
+  ActivityIndicator,
+  Text,
+  ScrollView,
+  StyleSheet,
+  ToastAndroid,
+} from "react-native";
 import Colors from "../../../../constants/Colors";
 import Button from "../../../../components/ui/Button/Button";
 import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
@@ -14,13 +20,13 @@ import type { TimelineScreenProps } from "../types";
 import CreateRepeatableTimeline from "../components/CreateRepeatableTimeline";
 import { useEffect, useState } from "react";
 import useCreateTimeline from "../hooks/mutation/useCreateTimeline";
-import { AntDesign } from "@expo/vector-icons";
+import { AntDesign, Feather } from "@expo/vector-icons";
 import useKeyboard from "../../../../utils/hooks/useKeyboard";
 import Animated, { ZoomInDown, ZoomOutDown } from "react-native-reanimated";
-import { RadioGroup } from "../../../../components/ui/Radio/Radio";
 import SegmentedButtons from "@/components/ui/SegmentedButtons";
 import Layout from "@/constants/Layout";
 import SuggestedEvents from "../components/SuggestedEvents";
+import IconButton from "@/components/ui/IconButton/IconButton";
 
 const styles = StyleSheet.create({
   header: {
@@ -42,8 +48,9 @@ const styles = StyleSheet.create({
   },
   timeText: {
     color: Colors.secondary,
-    fontSize: 18,
+    fontSize: 25,
     textAlign: "center",
+    fontWeight: "bold",
   },
 });
 
@@ -94,10 +101,8 @@ export default function CreateTimeLineEventModal({
   });
 
   const dateTimeDefaultOptions = {
-    display: "default",
-    positiveButtonLabel: "Set time",
-    negativeButtonLabel: "Cancel",
     is24Hour: true,
+    textColor: Colors.primary,
   } as any;
 
   const timePicker = (formik: any, type: "begin" | "end") => {
@@ -265,8 +270,20 @@ const SubmitButton = (props: SubmitButtonProps) =>
     <Animated.View
       entering={ZoomInDown}
       exiting={ZoomOutDown}
-      style={{ paddingTop: 10 }}
+      style={{ paddingTop: 10, flexDirection: "row" }}
     >
+      <IconButton
+        onPress={() => {
+          props.f.resetForm();
+          ToastAndroid.show("Form reseted", ToastAndroid.SHORT);
+        }}
+        style={{
+          padding: 10,
+          width: 55,
+          marginRight: 15,
+        }}
+        icon={<Feather name="trash-2" color={Colors.error} size={22} />}
+      />
       <Button
         icon={
           props.isLoading ? (

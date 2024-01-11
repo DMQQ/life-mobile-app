@@ -44,12 +44,12 @@ const styles = StyleSheet.create({
     borderRadius: 100,
   },
   todo: {
-    backgroundColor: Color(Colors.primary).lighten(0.5).string(),
+    backgroundColor: Colors.primary_lighter,
     padding: 15,
-    borderRadius: 5,
+    borderRadius: 15,
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 10,
+    marginBottom: 15,
     alignItems: "center",
   },
 });
@@ -126,7 +126,7 @@ export default function TimelineTodos(props: {
   const [show, setShow] = React.useState(false);
 
   return (
-    <View style={{ marginTop: 20 }}>
+    <View style={{ marginTop: 10 }}>
       <View style={styles.header}>
         <Text style={styles.title}>Todos ({props.todos.length})</Text>
 
@@ -231,7 +231,9 @@ const Todo = (todo: Todos & { timelineId: string }) => {
         <View style={{ flexDirection: "row", alignItems: "center" }}>
           <Dot color={todo.isCompleted ? Colors.secondary : "red"} />
 
-          <Text style={{ color: "#fff", marginLeft: 15 }}>{todo.title}</Text>
+          <Text style={{ color: "#fff", marginLeft: 15, fontSize: 16 }}>
+            {todo.title}
+          </Text>
         </View>
 
         <CompleteTodoButton timelineId={todo.timelineId} todoId={todo.id} />

@@ -143,7 +143,7 @@ export default function SearchBar({
               borderBottomLeftRadius: 15,
               borderBottomRightRadius: 15,
 
-              backgroundColor: Color(Colors.primary).lighten(0.5).hex(),
+              backgroundColor: Colors.primary_lighter,
             },
           ]}
         >

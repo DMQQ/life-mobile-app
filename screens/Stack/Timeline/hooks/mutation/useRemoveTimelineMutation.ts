@@ -1,5 +1,7 @@
 import { gql, useMutation } from "@apollo/client";
 import useUser from "../../../../../utils/hooks/useUser";
+import { GET_MONTHLY_EVENTS } from "../../pages/Timeline";
+import moment from "moment";
 
 const REMOVE_TIMELINE_EVENT_MUTATION = gql`
   mutation RemoveTimelineEvent($id: String!) {
@@ -19,7 +21,20 @@ export default function useRemoveTimelineMutation(timeline: { id: string }) {
     variables: {
       id: timeline.id,
     },
-    refetchQueries: ["GetMonthlyEvents"],
+    refetchQueries: [
+      {
+        query: GET_MONTHLY_EVENTS,
+        variables: {
+          date: moment().format("YYYY-MM-DD"),
+        },
+
+        context: {
+          headers: {
+            authentication: usr.token,
+          },
+        },
+      },
+    ],
     update(cache) {
       cache.modify({
         fields: {

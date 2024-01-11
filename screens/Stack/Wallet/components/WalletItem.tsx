@@ -32,7 +32,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 10,
     flexDirection: "row",
-    backgroundColor: Color(Colors.primary).lighten(0.5).hex(),
+    backgroundColor: Colors.primary_lighter,
   },
   title: {
     color: "#fff",
@@ -91,7 +91,7 @@ export function parseDateToText(date: string) {
   return providedDate.format("YYYY-MM-DD");
 }
 
-const Icons = {
+export const Icons = {
   housing: {
     icon: <AntDesign name="home" size={25} color={"#05ad21"} />,
     backgroundColor: "#05ad21",

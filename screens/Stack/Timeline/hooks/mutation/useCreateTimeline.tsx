@@ -8,6 +8,8 @@ import { useNavigation } from "@react-navigation/native";
 import { ToastAndroid } from "react-native";
 
 import * as Yup from "yup";
+import { GET_MONTHLY_EVENTS } from "../../pages/Timeline";
+import moment from "moment";
 
 const initialValues = {
   title: "",
@@ -68,6 +70,20 @@ export default function useCreateTimeline(props: { selectedDate: string }) {
             repeatEveryNth: parseInt(input.repeatEveryNth),
           }),
       },
+
+      refetchQueries: [
+        {
+          query: GET_MONTHLY_EVENTS,
+          variables: {
+            date: moment().format("YYYY-MM-DD"),
+          },
+          context: {
+            headers: {
+              authentication: usr.token,
+            },
+          },
+        },
+      ],
 
       update(cache, { data: { createTimeline } }) {
         const { timeline } = cache.readQuery({

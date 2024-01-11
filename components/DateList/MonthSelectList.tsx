@@ -12,7 +12,7 @@ interface MonthSelectListProps {
   onPress: (month: string) => void;
 }
 
-const bg = Color(Colors.primary).lighten(0.5).hex();
+const bg = Colors.primary_lighter;
 
 const getItemLayout = (_: any, index: number) => ({
   index,

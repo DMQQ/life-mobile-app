@@ -43,15 +43,15 @@ export default function BalanceAlertEditModal({
         <Animated.View
           style={{
             backgroundColor: Colors.primary,
-            padding: 10,
-            borderRadius: 10,
+            padding: 25,
+            borderRadius: 20,
           }}
         >
           <Text
             style={{
               fontWeight: "bold",
               color: Colors.secondary,
-              fontSize: 25,
+              fontSize: 35,
               marginBottom: 20,
             }}
           >
@@ -79,7 +79,11 @@ export default function BalanceAlertEditModal({
             setValue={setBalance}
           />
 
+          <Text style={{ color: "gray" }}>Action cannot be undone</Text>
+
           <Button
+            style={{ marginTop: 25 }}
+            size="xl"
             onPress={onSubmit}
             disabled={
               balance.trim() === "" || Number.isNaN(Number(balance.trim()))

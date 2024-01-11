@@ -1,4 +1,4 @@
-import { Image, View } from "react-native";
+import { Image, Text, View } from "react-native";
 import ScreenContainer from "../../../../components/ui/ScreenContainer";
 import Button from "../../../../components/ui/Button/Button";
 
@@ -9,6 +9,20 @@ import Colors from "@/constants/Colors";
 export default function Landing({ navigation }: any) {
   return (
     <ScreenContainer>
+      <Text
+        style={{
+          color: "#fff",
+          fontSize: 60,
+          fontWeight: "bold",
+          position: "absolute",
+          top: 20,
+          left: 20,
+          zIndex: 100,
+        }}
+      >
+        HELLO!!
+      </Text>
+
       {[1, 2, 3].map((index) => (
         <Image
           key={index}

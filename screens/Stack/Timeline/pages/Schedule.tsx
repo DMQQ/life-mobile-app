@@ -1,6 +1,5 @@
 import React, { useMemo } from "react";
 import { ScrollView, Text, View } from "react-native";
-import ScreenContainer from "../../../../components/ui/ScreenContainer";
 import Color from "color";
 import Colors, { secondary_candidates } from "../../../../constants/Colors";
 import TimeTable from "react-native-calendar-timetable";
@@ -34,10 +33,6 @@ export default function ScheduleScreen({
     secondary_candidates[
       Math.trunc(Math.random() * secondary_candidates.length)
     ];
-
-  const minHour = Math.min(
-    ...(data?.timeline.map((v) => +trimTime(v.beginTime, 1)) || [])
-  );
 
   const Header = () => (
     <View
@@ -120,10 +115,11 @@ export default function ScheduleScreen({
               style={[
                 props.style,
                 {
-                  backgroundColor: randColor(),
+                  backgroundColor: secondary_candidates[7],
                   borderRadius: 5,
                   paddingHorizontal: 10,
                   paddingVertical: 5,
+                  overflow: "hidden",
                 },
               ]}
             >

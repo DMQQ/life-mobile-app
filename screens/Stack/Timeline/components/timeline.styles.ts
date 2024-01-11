@@ -47,7 +47,7 @@ export default StyleSheet.create({
     fontWeight: "bold",
   },
   pickerStyle: {
-    backgroundColor: Color(Colors.primary).lighten(0.5).string(),
+    backgroundColor: Colors.primary_lighter,
     borderWidth: 2,
     borderColor: Colors.primary_light,
   },
@@ -59,7 +59,7 @@ export default StyleSheet.create({
     paddingVertical: 15,
     backgroundColor: Colors.secondary,
     flexDirection: "row-reverse",
-    width: Layout.screen.width - 20,
+    flex: 1,
   },
   button: {
     margin: 5,

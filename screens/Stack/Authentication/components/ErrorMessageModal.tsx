@@ -35,9 +35,10 @@ export default function ErrorMessageModal(props: {
               color: Colors.secondary,
               fontSize: 40,
               fontWeight: "bold",
+              marginBottom: 15,
             }}
           >
-            Oops!
+            Ops!
           </Text>
           <Text
             style={{

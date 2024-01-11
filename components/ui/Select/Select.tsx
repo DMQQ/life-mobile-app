@@ -60,6 +60,8 @@ interface Props<T> {
   renderCustomSelected?: ReactNode;
 
   onFocusChange?: (focus: boolean) => void;
+
+  anchor?: "top" | "bottom";
 }
 
 const backgroundColor = Color(Colors.primary).lighten(0.25).hex();
@@ -258,7 +260,12 @@ export default function Select({
                 borderTopRightRadius: 0 /* 4 props below are optional set for testing */,
                 borderTopLeftRadius: 0,
                 left: -2,
-                top: 10,
+                top:
+                  rest.anchor === "top"
+                    ? -1 * buttonHeight.value -
+                      10 -
+                      (maxSelectHeight || ABS_LIST_HEIGHT)
+                    : 10,
               },
               flatListTransformStyle,
             ]}

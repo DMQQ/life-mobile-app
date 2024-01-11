@@ -73,7 +73,7 @@ export default function ExerciseTile({
       entering={FadeIn.delay(rest.tileIndex * 75)}
       style={[
         {
-          backgroundColor: Color(Colors.primary).lighten(0.5).hex(),
+          backgroundColor: Colors.primary_lighter,
           padding: GAPS,
           borderRadius: 10,
           marginBottom: 10,

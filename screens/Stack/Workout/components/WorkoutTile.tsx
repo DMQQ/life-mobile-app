@@ -4,7 +4,7 @@ import Colors from "../../../../constants/Colors";
 import { Workout } from "../../../../types";
 import Color from "color";
 
-const bgColor = Color(Colors.primary).lighten(0.5).string();
+const bgColor = Colors.primary_lighter;
 
 const styles = StyleSheet.create({
   tag: {
