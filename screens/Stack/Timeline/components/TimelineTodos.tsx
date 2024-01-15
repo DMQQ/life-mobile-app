@@ -7,9 +7,11 @@ import useUser from "../../../../utils/hooks/useUser";
 import { gql, useMutation } from "@apollo/client";
 import { GET_TIMELINE } from "../hooks/query/useGetTimelineById";
 import Button from "../../../../components/ui/Button/Button";
-import React from "react";
+import React, { useState } from "react";
 import Input from "../../../../components/ui/TextInput/TextInput";
 import CompleteTodoButton from "./CompleteTodoButton";
+
+import L from "@/constants/Layout";
 
 const styles = StyleSheet.create({
   header: {
@@ -46,10 +48,11 @@ const styles = StyleSheet.create({
   todo: {
     backgroundColor: Colors.primary_lighter,
     padding: 15,
-    borderRadius: 15,
+    paddingHorizontal: 20,
+    borderRadius: 10,
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 15,
+    marginBottom: 10,
     alignItems: "center",
   },
 });
@@ -102,6 +105,24 @@ const useCreateTodo = (timelineId: string) => {
   return { createTodo, state };
 };
 
+const useTransferTodos = (oldTodos: Todos[], newTimelineId: string) => {
+  const { createTodo, state } = useCreateTodo(newTimelineId);
+  const handleTransfer = async () => {
+    await createTodo({
+      variables: oldTodos.map(({ title }) => ({
+        title,
+        timelineId: newTimelineId,
+      })),
+    });
+
+    // to be fixed
+
+    console.log(state);
+  };
+
+  return handleTransfer;
+};
+
 export default function TimelineTodos(props: {
   todos: Todos[];
   timelineId: string;
@@ -125,42 +146,92 @@ export default function TimelineTodos(props: {
 
   const [show, setShow] = React.useState(false);
 
+  const [dialog, setDialog] = useState(false);
+  const [dialogText, setDialogText] = useState("");
+
+  const handleTransfer = useTransferTodos(props.todos, dialogText);
+
   return (
-    <View style={{ marginTop: 10 }}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Todos ({props.todos.length})</Text>
+    <>
+      <View style={{ marginTop: 25 }}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Todos ({props.todos.length})</Text>
 
-        <Ripple onPress={() => setShow((s) => !s)} style={styles.createTodo}>
-          <Text style={{ fontWeight: "bold", color: Colors.primary }}>
-            Create todo
-          </Text>
-        </Ripple>
-      </View>
-      {props.todos.map((todo) => (
-        <Todo timelineId={props.timelineId} key={todo.id} {...todo} />
-      ))}
-
-      {show && (
-        <View style={{ marginTop: 15 }}>
-          <Input
-            autoFocus
-            value={text}
-            setValue={setText}
-            placeholder="todo's name"
-            placeholderTextColor={"gray"}
-            onSubmitEditing={handleCreateTodo}
-          />
-
-          <Button
-            onPress={handleCreateTodo}
-            fontStyle={styles.buttonText}
-            style={styles.button}
+          <Ripple
+            onLongPress={() => setDialog((p) => !p)}
+            onPress={() => setShow((s) => !s)}
+            style={styles.createTodo}
           >
-            Add todo
-          </Button>
+            <Text style={{ fontWeight: "bold", color: Colors.primary }}>
+              Create todo
+            </Text>
+          </Ripple>
         </View>
-      )}
-    </View>
+
+        <View style={{ paddingHorizontal: 7.5 }}>
+          {props.todos.map((todo) => (
+            <Todo timelineId={props.timelineId} key={todo.id} {...todo} />
+          ))}
+        </View>
+
+        {show && (
+          <View style={{ marginTop: 15 }}>
+            <Input
+              autoFocus
+              value={text}
+              setValue={setText}
+              placeholder="todo's name"
+              placeholderTextColor={"gray"}
+              onSubmitEditing={handleCreateTodo}
+            />
+
+            <Button
+              disabled={text.trim().length === 0}
+              onPress={handleCreateTodo}
+              fontStyle={styles.buttonText}
+            >
+              Create task
+            </Button>
+          </View>
+        )}
+      </View>
+
+      <Overlay
+        opacity={0.8}
+        onClose={() => setDialog(false)}
+        isVisible={dialog}
+      >
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <View
+            style={{
+              padding: 20,
+              backgroundColor: Colors.primary,
+              borderRadius: 20,
+            }}
+          >
+            <Input
+              label="Event id to be copied"
+              value={dialogText}
+              setValue={setDialogText}
+              style={{ width: L.screen.width - 50 }}
+            />
+            <Button
+              style={{ marginTop: 10 }}
+              type="outlined"
+              onPress={handleTransfer}
+            >
+              Copy
+            </Button>
+          </View>
+        </View>
+      </Overlay>
+    </>
   );
 }
 
@@ -173,6 +244,7 @@ import Animated, {
   FadeOutUp,
   Layout,
 } from "react-native-reanimated";
+import Overlay from "@/components/ui/Overlay/Overlay";
 
 const Todo = (todo: Todos & { timelineId: string }) => {
   const usr = useUser();
@@ -236,7 +308,9 @@ const Todo = (todo: Todos & { timelineId: string }) => {
           </Text>
         </View>
 
-        <CompleteTodoButton timelineId={todo.timelineId} todoId={todo.id} />
+        {!todo.isCompleted && (
+          <CompleteTodoButton timelineId={todo.timelineId} todoId={todo.id} />
+        )}
       </Pressable>
     </Animated.View>
   );

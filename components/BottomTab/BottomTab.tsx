@@ -12,15 +12,12 @@ import { IconSize, Padding, Rounded } from "@/constants/Values";
 const styles = StyleSheet.create({
   container: {
     width: Layout.screen.width,
-    backgroundColor: Colors.primary_dark,
+    backgroundColor: Colors.primary,
     justifyContent: "space-around",
     flexDirection: "row",
-    borderTopWidth: 1,
-    borderTopColor: Colors.primary_light,
   },
 
   button: {
-    flex: 1,
     padding: Padding.l,
     justifyContent: "center",
     alignItems: "center",
@@ -71,10 +68,7 @@ export default function BottomTab({
 
   return (
     <Animated.View
-      style={[
-        styles.container,
-        { paddingBottom: Padding.xs, backgroundColor: colors.primary_light },
-      ]}
+      style={[styles.container, { paddingBottom: Padding.xs }]}
       entering={FadeInDown}
       exiting={FadeOutDown}
     >

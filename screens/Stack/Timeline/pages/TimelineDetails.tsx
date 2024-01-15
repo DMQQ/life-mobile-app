@@ -25,6 +25,8 @@ import Animated, {
   FadeIn,
   withDelay,
 } from "react-native-reanimated";
+import CompletionBar from "../components/CompletionBar";
+import { useMemo } from "react";
 
 const COMPLETE_TIMELINE = gql`
   mutation CompleteTimeline($id: String!) {
@@ -163,24 +165,46 @@ export default function TimelineDetails({
     },
   });
 
+  const progress = useMemo(() => {
+    let count = 0;
+
+    if (data?.todos === undefined) return 0;
+
+    for (let todo of data?.todos || []) {
+      if (todo.isCompleted) count += 1;
+    }
+
+    return Math.trunc((count / data?.todos?.length) * 100);
+  }, [data?.todos]);
+
   return (
     <>
       <Header
-        title={data?.title.slice(0, 20)}
+        title={data?.title.slice(0, 18)}
         scrollY={scrollY}
         isCompleted={data?.isCompleted}
         onTaskToggle={completeTimeline}
         navigation={navigation}
       />
-      <Animated.ScrollView style={{ padding: 10 }} onScroll={onScroll}>
+      <Animated.ScrollView
+        style={{ padding: 10 }}
+        onScroll={onScroll}
+        showsVerticalScrollIndicator={false}
+      >
         {loading ? (
           <LoaderSkeleton />
         ) : (
-          <View>
+          <View
+            style={{
+              paddingBottom: 20,
+              minHeight: Layout.screen.height - 120,
+            }}
+          >
+            {data?.todos.length > 0 && <CompletionBar percentage={progress} />}
             <Text
               style={{
-                marginBottom: 5,
-                fontSize: 35,
+                marginBottom: 15,
+                fontSize: 32.5,
                 fontWeight: "bold",
                 color: Colors.secondary,
               }}
@@ -201,6 +225,18 @@ export default function TimelineDetails({
             <TimelineTodos timelineId={data?.id} todos={data?.todos || []} />
 
             <FileList timelineId={data?.id} />
+
+            <Text
+              selectable
+              style={{
+                color: "gray",
+                marginTop: 10,
+                position: "absolute",
+                bottom: 0,
+              }}
+            >
+              Event id: {data?.id}
+            </Text>
           </View>
         )}
       </Animated.ScrollView>

@@ -35,16 +35,20 @@ export default StyleSheet.create({
     fontSize: 22,
   },
   itemDescription: {
-    color: "gray",
+    color: Color(Colors.primary).lighten(5).hex(),
     fontSize: 17,
     marginTop: 5,
   },
-  itemTimeLeft: { color: Colors.secondary, fontSize: 17 },
+  itemTimeLeft: {
+    color: Colors.secondary_light_1,
+    fontSize: 15,
+  },
 
   eventTitle: {
     color: "#fff",
     fontSize: 20,
     fontWeight: "bold",
+    marginRight: 2.5,
   },
   pickerStyle: {
     backgroundColor: Colors.primary_lighter,
@@ -103,6 +107,7 @@ export default StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: 100,
     fontSize: 13,
+    marginLeft: 2.5,
   },
 
   floatingContainer: {
