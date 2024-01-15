@@ -14,8 +14,6 @@ import DateList from "../../../../components/DateList/DateList";
 import useUser from "../../../../utils/hooks/useUser";
 import { gql, useQuery } from "@apollo/client";
 import NotFound from "../../Home/components/NotFound";
-import BottomSheet from "@gorhom/bottom-sheet";
-import CreateTimeLineEventModal from "./TimelineCreate";
 
 export const GET_MONTHLY_EVENTS = gql`
   query GetMonthlyEvents($date: String!) {
@@ -113,7 +111,7 @@ export default function Timeline({
   };
 
   return (
-    <ScrollView>
+    <ScrollView showsVerticalScrollIndicator={false}>
       {switchView === "calendar" && (
         <Calendar
           selected={selected}
@@ -179,51 +177,61 @@ const ListContainer = (props: {
   onPress: () => void;
   navigation: any;
   date: string;
-}) => (
-  <View style={timelineStyles.listHeading}>
-    <View style={timelineStyles.listHeadingContainer}>
-      <View style={{ flexDirection: "row", alignItems: "center" }}>
-        <Text style={timelineStyles.listHeadingText}>My events</Text>
+}) => {
+  const data = useMemo(
+    () =>
+      [...props?.list]?.sort((a, b) => {
+        return (a.isCompleted ? 1 : 0) - (b.isCompleted ? 1 : 0);
+      }),
+    [props.list]
+  );
+
+  return (
+    <View style={timelineStyles.listHeading}>
+      <View style={timelineStyles.listHeadingContainer}>
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <Text style={timelineStyles.listHeadingText}>My events</Text>
+
+          <Ripple
+            style={{ padding: 2.5, marginLeft: 10 }}
+            onPress={() =>
+              props.navigation.navigate("Schedule", {
+                selectedDate: props.date,
+              })
+            }
+          >
+            <Entypo name="list" color={"#fff"} size={25} />
+          </Ripple>
+        </View>
 
         <Ripple
-          style={{ padding: 2.5, marginLeft: 10 }}
-          onPress={() =>
-            props.navigation.navigate("Schedule", {
-              selectedDate: props.date,
-            })
-          }
+          style={{
+            padding: 7.5,
+            paddingHorizontal: 10,
+            backgroundColor: Colors.secondary,
+            borderRadius: 25,
+          }}
+          onPress={props.onPress}
         >
-          <Entypo name="list" color={"#fff"} size={25} />
+          <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 13 }}>
+            CREATE EVENT
+          </Text>
         </Ripple>
       </View>
 
-      <Ripple
-        style={{
-          padding: 7.5,
-          paddingHorizontal: 10,
-          backgroundColor: Colors.secondary,
-          borderRadius: 25,
-        }}
-        onPress={props.onPress}
-      >
-        <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 13 }}>
-          CREATE EVENT
-        </Text>
-      </Ripple>
+      {data.map((timeline) => (
+        <TimelineItem
+          styles={{
+            backgroundColor: Colors.primary_lighter,
+            borderRadius: 15,
+            padding: 20,
+            marginBottom: 10,
+          }}
+          key={timeline.id}
+          location="timeline"
+          {...timeline}
+        />
+      ))}
     </View>
-
-    {props.list.map((timeline) => (
-      <TimelineItem
-        styles={{
-          backgroundColor: Colors.primary_lighter,
-          borderRadius: 15,
-          padding: 20,
-          marginBottom: 10,
-        }}
-        key={timeline.id}
-        location="timeline"
-        {...timeline}
-      />
-    ))}
-  </View>
-);
+  );
+};

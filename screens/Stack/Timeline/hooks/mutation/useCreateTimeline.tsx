@@ -28,7 +28,7 @@ export type InitialValuesType = typeof initialValues;
 
 const validationSchema = Yup.object().shape({
   title: Yup.string().required("Title is required"),
-  desc: Yup.string().required("Description is required"),
+  desc: Yup.string(),
   date: Yup.string().required("Date is required"),
   begin: Yup.string().required("Begin time is required"),
   end: Yup.string().required("End time is required"),
@@ -100,7 +100,7 @@ export default function useCreateTimeline(props: { selectedDate: string }) {
       },
 
       onError: (err) => {
-        ToastAndroid.show("Creating timeline failed", ToastAndroid.LONG);
+        ToastAndroid.show("Could not create timeline", ToastAndroid.LONG);
       },
     });
 
