@@ -4,6 +4,7 @@ import Color from "color";
 import { View } from "react-native";
 import useDeleteActivity from "../hooks/useDeleteActivity";
 import { WalletElement } from "./WalletItem";
+import { useNavigation } from "@react-navigation/native";
 
 const SheetActionButtons = (props: {
   selectedExpense: WalletElement | undefined;
@@ -24,6 +25,8 @@ const SheetActionButtons = (props: {
       });
   };
 
+  const navigation = useNavigation<any>();
+
   return (
     <View
       style={{
@@ -34,6 +37,13 @@ const SheetActionButtons = (props: {
       }}
     >
       <Button
+        onPress={() =>
+          navigation.navigate("CreateActivity", {
+            edit: {
+              ...props.selectedExpense,
+            },
+          })
+        }
         type="contained"
         fontStyle={{ color: Colors.secondary, textTransform: "none" }}
         style={{

@@ -1,7 +1,7 @@
 import BottomSheet from "@gorhom/bottom-sheet";
 import { Wallet } from "../../../../types";
 import WalletItem, { WalletElement, parseDateToText } from "./WalletItem";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Text, NativeScrollEvent } from "react-native";
 
 import Animated, { Layout, SharedValue } from "react-native-reanimated";
@@ -19,6 +19,12 @@ export default function WalletList(props: {
   );
 
   const sheet = useRef<BottomSheet | null>(null);
+
+  useEffect(() => {
+    // or just replace it
+    setSelected(undefined);
+    sheet.current?.close();
+  }, [props.wallet.expenses]);
 
   const AnimatedWalletItem = ({
     item,
@@ -43,7 +49,6 @@ export default function WalletList(props: {
   return (
     <>
       <Animated.FlatList
-        layout={Layout}
         removeClippedSubviews
         onScroll={props.onScroll}
         style={{ flex: 1 }}
@@ -78,7 +83,7 @@ export default function WalletList(props: {
                   {parseDateToText(item.date)}
                 </Text>
               )}
-              <AnimatedWalletItem index={index} item={item} />
+              <AnimatedWalletItem index={index} item={item as any} />
             </>
           );
         }}

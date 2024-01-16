@@ -8,8 +8,14 @@ const CREATE_EXPENSE = gql`
     $amount: Float!
     $description: String!
     $type: String!
+    $category: String!
   ) {
-    createExpense(amount: $amount, description: $description, type: $type) {
+    createExpense(
+      amount: $amount
+      description: $description
+      type: $type
+      category: $category
+    ) {
       id
       amount
       description

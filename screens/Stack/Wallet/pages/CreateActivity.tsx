@@ -14,6 +14,11 @@ import SegmentedButtons from "../../../../components/ui/SegmentedButtons";
 import Color from "color";
 import Select from "@/components/ui/Select/Select";
 import Layout from "@/constants/Layout";
+import { Icons } from "../components/WalletItem";
+import useUser from "@/utils/hooks/useUser";
+import { gql, useMutation } from "@apollo/client";
+import { GET_WALLET } from "../hooks/useGetWallet";
+import { Wallet } from "@/types";
 
 const schema = yup.object().shape({
   name: yup.string().required("Name is required"),
@@ -32,17 +37,103 @@ const SegmentVariants = [
   },
 ];
 
-export default function CreateActivity({ navigation }: any) {
-  const { createExpense } = useCreateActivity({ onCompleted: () => {} });
+const useEditExpense = () => {
+  const user = useUser();
+
+  const [editExpense, { error }] = useMutation(
+    gql`
+      mutation EditExpense(
+        $amount: Float!
+        $description: String!
+        $type: String!
+        $category: String!
+        $expenseId: ID!
+      ) {
+        editExpense(
+          amount: $amount
+          description: $description
+          type: $type
+          category: $category
+          expenseId: $expenseId
+        ) {
+          id
+          amount
+          description
+          date
+          type
+          category
+          balanceBeforeInteraction
+        }
+      }
+    `,
+    {
+      context: {
+        headers: {
+          authentication: user.token,
+        },
+      },
+      update(cache, { data: { editExpense } }) {
+        cache.modify({
+          fields: {
+            wallet() {
+              const wallet = cache.readQuery({
+                query: GET_WALLET,
+              }) as { wallet: Wallet };
+
+              const walletCopy = {
+                ...wallet.wallet,
+                expenses: [...wallet.wallet.expenses],
+              };
+
+              const index = walletCopy.expenses.findIndex(
+                (ex) => ex.id === editExpense.id
+              );
+
+              walletCopy.expenses[index] = editExpense;
+
+              if (editExpense.type === "expense") {
+                walletCopy.balance = walletCopy.balance - editExpense.amount;
+              } else {
+                walletCopy.balance = walletCopy.balance + editExpense.amount;
+              }
+
+              cache.writeQuery({
+                query: GET_WALLET,
+                data: { wallet: walletCopy },
+              });
+
+              return walletCopy;
+            },
+          },
+        });
+      },
+
+      onError(err) {
+        console.log(JSON.stringify(err, null, 2));
+      },
+    }
+  );
+
+  return editExpense;
+};
+
+export default function CreateActivity({ navigation, route: { params } }: any) {
+  const editExpense = useEditExpense();
 
   const onSubmit = async (values: any, { resetForm }: any) => {
-    await createExpense({
+    await editExpense({
       variables: {
-        amount: +values.amount,
+        amount: Number(values.amount),
         description: values.name,
         type: values.type,
+        category: values.category,
+        expenseId: params.edit.id,
       },
     });
+
+    resetForm();
+
+    navigation.goBack();
   };
 
   return (
@@ -55,16 +146,18 @@ export default function CreateActivity({ navigation }: any) {
           fontWeight: "bold",
         }}
       >
-        Create Expense
+        Edit expense
       </Text>
 
       <Formik
         validationSchema={schema}
         onSubmit={onSubmit}
+        enableReinitialize
         initialValues={{
-          name: "",
-          amount: "",
-          type: "",
+          name: params.edit.description,
+          amount: params.edit.amount,
+          type: params.edit.type,
+          category: params.edit.category,
         }}
       >
         {(f) => (
@@ -72,17 +165,20 @@ export default function CreateActivity({ navigation }: any) {
             <View style={{ flex: 1 }}>
               <SegmentedButtons
                 buttonStyle={{
-                  height: 75,
+                  height: 60,
                 }}
                 buttonTextStyle={{
-                  fontSize: 18,
+                  fontSize: 16,
+                  fontWeight: "400",
                 }}
                 buttons={SegmentVariants}
-                onChange={(value) => f.setFieldValue("type", value)}
+                onChange={(value) => f.setFieldValue("type", value)} // property cant be changed in edit mode
                 value={f.values.type}
               />
 
               <ValidatedInput
+                showLabel
+                label="Purchase's name"
                 placeholder="Like 'shopping', 'new phone' ..."
                 name="name"
                 left={(props) => (
@@ -95,6 +191,8 @@ export default function CreateActivity({ navigation }: any) {
               />
 
               <ValidatedInput
+                showLabel
+                label="Amount (zł)"
                 placeholder="How much you spent? "
                 name="amount"
                 left={(props) => (
@@ -107,12 +205,26 @@ export default function CreateActivity({ navigation }: any) {
                 }}
               />
 
+              <Text
+                style={{
+                  color: "#fff",
+                  fontSize: 16,
+                  fontWeight: "bold",
+                  padding: 5,
+                }}
+              >
+                Category
+              </Text>
               <Select
-                selected={["Food"]}
-                setSelected={() => {}}
-                options={["Food", "Transport", "Debt", "Night out"]}
+                placeholderText="Choose category or create your own"
+                selected={[f.values.category]}
+                setSelected={([selected]) =>
+                  f.setFieldValue("category", selected)
+                }
+                options={Object.keys(Icons)}
                 transparentOverlay
                 closeOnSelect
+                maxSelectHeight={250}
               />
             </View>
 
@@ -131,7 +243,7 @@ export default function CreateActivity({ navigation }: any) {
                   : Colors.secondary,
               }}
             >
-              Create expense
+              Edit expense
             </Button>
           </View>
         )}
