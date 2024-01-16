@@ -1,11 +1,8 @@
-import { View, Text, Pressable, StyleSheet, ToastAndroid } from "react-native";
-import { Timeline, Todos } from "../../../../types";
+import { View, Text, Pressable, StyleSheet } from "react-native";
+import { Todos } from "../../../../types";
 import Colors from "../../../../constants/Colors";
 import Color from "color";
 import Ripple from "react-native-material-ripple";
-import useUser from "../../../../utils/hooks/useUser";
-import { gql, useMutation } from "@apollo/client";
-import { GET_TIMELINE } from "../hooks/query/useGetTimelineById";
 import Button from "../../../../components/ui/Button/Button";
 import React, { useState } from "react";
 import Input from "../../../../components/ui/TextInput/TextInput";
@@ -56,72 +53,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 });
-
-const useCreateTodo = (timelineId: string) => {
-  const usr = useUser();
-
-  const [createTodo, state] = useMutation(
-    gql`
-      mutation CreateTodo($title: String!, $timelineId: ID!) {
-        createTimelineTodos(todos: { title: $title, timelineId: $timelineId }) {
-          id
-          title
-          isCompleted
-        }
-      }
-    `,
-    {
-      update(cache, data) {
-        const timeline = cache.readQuery({
-          query: GET_TIMELINE,
-          variables: { id: timelineId },
-        }) as { timelineById: Timeline };
-
-        const final = {
-          timelineById: {
-            ...timeline.timelineById,
-            todos: [
-              ...timeline.timelineById.todos,
-              data.data.createTimelineTodos,
-            ],
-          },
-        };
-
-        cache.writeQuery({
-          data: final,
-          id: cache.identify(final),
-          query: GET_TIMELINE,
-          variables: { id: timeline.timelineById.id },
-        });
-      },
-      context: {
-        headers: {
-          authentication: usr.token,
-        },
-      },
-    }
-  );
-
-  return { createTodo, state };
-};
-
-const useTransferTodos = (oldTodos: Todos[], newTimelineId: string) => {
-  const { createTodo, state } = useCreateTodo(newTimelineId);
-  const handleTransfer = async () => {
-    await createTodo({
-      variables: oldTodos.map(({ title }) => ({
-        title,
-        timelineId: newTimelineId,
-      })),
-    });
-
-    // to be fixed
-
-    console.log(state);
-  };
-
-  return handleTransfer;
-};
 
 export default function TimelineTodos(props: {
   todos: Todos[];
@@ -245,53 +176,12 @@ import Animated, {
   Layout,
 } from "react-native-reanimated";
 import Overlay from "@/components/ui/Overlay/Overlay";
+import useCreateTodo from "../hooks/mutation/useCreateTodo";
+import useTransferTodos from "../hooks/mutation/useTransferTodos";
+import useRemoveTodo from "../hooks/mutation/useRemoveTodo";
 
 const Todo = (todo: Todos & { timelineId: string }) => {
-  const usr = useUser();
-
-  const [removeTodo] = useMutation(
-    gql`
-      mutation RemoveTodo($id: ID!) {
-        removeTimelineTodo(id: $id)
-      }
-    `,
-    {
-      context: {
-        headers: {
-          token: usr.token,
-        },
-      },
-      update(cache) {
-        const todos = cache.readQuery({
-          query: GET_TIMELINE,
-          variables: { id: todo.timelineId },
-        }) as { timelineById: Timeline };
-
-        const final = {
-          timelineById: {
-            ...todos.timelineById,
-            todos: todos.timelineById.todos.filter(
-              (t: Todos) => t.id !== todo.id
-            ),
-          },
-        };
-
-        cache.writeQuery({
-          overwrite: true,
-          query: GET_TIMELINE,
-          variables: { id: todo.timelineId },
-          data: final,
-          id: cache.identify(final),
-        });
-      },
-      onCompleted() {
-        ToastAndroid.show("Todo removed", ToastAndroid.SHORT);
-      },
-      variables: {
-        id: todo.id,
-      },
-    }
-  );
+  const removeTodo = useRemoveTodo(todo);
 
   return (
     <Animated.View
