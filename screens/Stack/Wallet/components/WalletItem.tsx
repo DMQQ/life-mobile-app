@@ -22,6 +22,8 @@ export interface WalletElement {
   id: string;
 
   balanceBeforeInteraction: number;
+
+  category: keyof typeof Icons;
 }
 
 interface WalletItemProps extends WalletElement {}
@@ -141,6 +143,11 @@ export const Icons = {
     backgroundColor: "#33FF57",
     icon: <Ionicons name="airplane-outline" size={24} color="#33ff57" />,
   },
+
+  none: {
+    backgroundColor: Colors.primary,
+    icon: <Ionicons name="alert" color={Colors.secondary} size={24} />,
+  },
 };
 
 const Dot = () => {
@@ -167,10 +174,6 @@ export default function WalletItem(
     index: number;
   }
 ) {
-  const selectedCategory = Object.keys(Icons)[
-    Math.trunc(Math.random() * Object.keys(Icons).length)
-  ] as keyof typeof Icons;
-
   const price =
     item.type === "expense"
       ? (item.amount * -1).toFixed(2)
@@ -194,13 +197,15 @@ export default function WalletItem(
           style={[
             styles.icon_container,
             {
-              backgroundColor: Color(Icons[selectedCategory].backgroundColor)
+              backgroundColor: Color(
+                Icons[item.category || "none"].backgroundColor
+              )
                 .darken(0.7)
                 .hex(),
             },
           ]}
         >
-          {Icons[selectedCategory].icon}
+          {Icons[item.category || "none"].icon}
         </View>
 
         <View style={{ height: "100%", justifyContent: "center", flex: 3 }}>

@@ -55,6 +55,7 @@ const AddExpenseBottomSheet = forwardRef<
         amount: +values.amount,
         description: values.name,
         type: values.type,
+        category: values.category,
       },
     });
 
