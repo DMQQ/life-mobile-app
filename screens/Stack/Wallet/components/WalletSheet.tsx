@@ -33,7 +33,7 @@ export const WalletSheet = forwardRef<
     (props: BottomSheetBackdropProps) => (
       <BottomSheetBackdrop
         {...props}
-        opacity={0.55}
+        opacity={0.65}
         appearsOnIndex={0}
         disappearsOnIndex={-1}
       />
@@ -45,6 +45,13 @@ export const WalletSheet = forwardRef<
     selected?.type === "expense"
       ? (selected.amount * -1).toFixed(2)
       : selected?.amount.toFixed(2);
+
+  const postBalance =
+    typeof selected !== "undefined"
+      ? selected.type === "income"
+        ? selected?.balanceBeforeInteraction - selected?.amount
+        : selected?.balanceBeforeInteraction + selected?.amount
+      : 0;
   return (
     <BottomSheet
       ref={ref}
@@ -56,10 +63,10 @@ export const WalletSheet = forwardRef<
       }}
       enablePanDownToClose
       index={-1}
-      snapPoints={["60%"]}
+      snapPoints={["70%"]}
       backdropComponent={backdropComponent}
     >
-      <View style={{ padding: 15, flex: 1 }}>
+      <View style={{ paddingHorizontal: 15, flex: 1 }}>
         <View style={{ flex: 2 }}>
           <View style={{ marginBottom: 15 }}>
             <Txt size={40} color={Colors.secondary}>
@@ -78,8 +85,7 @@ export const WalletSheet = forwardRef<
               color: "rgba(255,255,255,0.2)",
             }}
           >
-            Balance before ({selected?.balanceBeforeInteraction}
-            zł)
+            Before {selected?.balanceBeforeInteraction}zł, After {postBalance}zł
           </Text>
 
           <View style={{ marginTop: 15 }}>

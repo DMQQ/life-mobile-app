@@ -24,7 +24,7 @@ export default function WalletList(props: {
     // or just replace it
     setSelected(undefined);
     sheet.current?.close();
-  }, [props.wallet.expenses]);
+  }, [props?.wallet?.expenses]);
 
   const AnimatedWalletItem = ({
     item,

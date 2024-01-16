@@ -2,13 +2,9 @@ import { Formik } from "formik";
 import ScreenContainer from "../../../../components/ui/ScreenContainer";
 import Input from "../../../../components/ui/TextInput/TextInput";
 import { View, Text } from "react-native";
-
 import ValidatedInput from "../../../../components/ui/ValidatedInput";
 import Button from "../../../../components/ui/Button/Button";
-import Ripple from "react-native-material-ripple";
 import Colors from "../../../../constants/Colors";
-import useCreateActivity from "../hooks/useCreateActivity";
-
 import * as yup from "yup";
 import SegmentedButtons from "../../../../components/ui/SegmentedButtons";
 import Color from "color";
@@ -17,8 +13,6 @@ import Layout from "@/constants/Layout";
 import { Icons } from "../components/WalletItem";
 import useUser from "@/utils/hooks/useUser";
 import { gql, useMutation } from "@apollo/client";
-import { GET_WALLET } from "../hooks/useGetWallet";
-import { Wallet } from "@/types";
 
 const schema = yup.object().shape({
   name: yup.string().required("Name is required"),
@@ -57,12 +51,6 @@ const useEditExpense = () => {
           expenseId: $expenseId
         ) {
           id
-          amount
-          description
-          date
-          type
-          category
-          balanceBeforeInteraction
         }
       }
     `,
@@ -72,41 +60,8 @@ const useEditExpense = () => {
           authentication: user.token,
         },
       },
-      update(cache, { data: { editExpense } }) {
-        cache.modify({
-          fields: {
-            wallet() {
-              const wallet = cache.readQuery({
-                query: GET_WALLET,
-              }) as { wallet: Wallet };
 
-              const walletCopy = {
-                ...wallet.wallet,
-                expenses: [...wallet.wallet.expenses],
-              };
-
-              const index = walletCopy.expenses.findIndex(
-                (ex) => ex.id === editExpense.id
-              );
-
-              walletCopy.expenses[index] = editExpense;
-
-              if (editExpense.type === "expense") {
-                walletCopy.balance = walletCopy.balance - editExpense.amount;
-              } else {
-                walletCopy.balance = walletCopy.balance + editExpense.amount;
-              }
-
-              cache.writeQuery({
-                query: GET_WALLET,
-                data: { wallet: walletCopy },
-              });
-
-              return walletCopy;
-            },
-          },
-        });
-      },
+      refetchQueries: ["GetWallet"],
 
       onError(err) {
         console.log(JSON.stringify(err, null, 2));

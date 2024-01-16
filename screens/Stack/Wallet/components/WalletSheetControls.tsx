@@ -47,7 +47,7 @@ const SheetActionButtons = (props: {
         type="contained"
         fontStyle={{ color: Colors.secondary, textTransform: "none" }}
         style={{
-          backgroundColor: Color(Colors.secondary).alpha(0.15).string(),
+          backgroundColor: Color(Colors.secondary).alpha(0.05).string(),
           flexDirection: "row-reverse",
           flex: 1,
           marginLeft: 10,
@@ -65,7 +65,7 @@ const SheetActionButtons = (props: {
           textTransform: "none",
         }}
         style={{
-          backgroundColor: Color(Colors.error).alpha(0.15).string(),
+          backgroundColor: Color(Colors.error).alpha(0.05).string(),
           flex: 1,
           flexDirection: "row-reverse",
           borderRadius: 5,

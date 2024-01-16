@@ -198,14 +198,14 @@ export default function WalletItem(
             styles.icon_container,
             {
               backgroundColor: Color(
-                Icons[item.category || "none"].backgroundColor
+                Icons[item.category || "none"]?.backgroundColor
               )
                 .darken(0.7)
                 .hex(),
             },
           ]}
         >
-          {Icons[item.category || "none"].icon}
+          {Icons[item.category || "none"]?.icon}
         </View>
 
         <View style={{ height: "100%", justifyContent: "center", flex: 3 }}>
