@@ -14,11 +14,6 @@ export default function useEditWallet(onCompleted: () => void) {
   const usr = useUser();
 
   const [editBalance, { data, loading, error }] = useMutation(EDIT_BALANCE, {
-    context: {
-      headers: {
-        authentication: usr.token,
-      },
-    },
     onCompleted,
   });
 

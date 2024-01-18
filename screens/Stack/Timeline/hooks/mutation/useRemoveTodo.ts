@@ -14,11 +14,6 @@ const useRemoveTodo = (todo: Todos & { timelineId: string }) => {
       }
     `,
     {
-      context: {
-        headers: {
-          token: usr.token,
-        },
-      },
       update(cache) {
         const todos = cache.readQuery({
           query: GET_TIMELINE,

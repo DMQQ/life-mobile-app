@@ -1,5 +1,4 @@
 import { gql, useMutation } from "@apollo/client";
-import useUser from "../../../../utils/hooks/useUser";
 import { GET_WORKOUT } from "../../../../utils/schemas/GET_WORKOUT";
 
 const ADD_EXERCISE_TO_WORKOUT = gql`
@@ -12,15 +11,7 @@ export default function useAddExerciseToWorkout(
   workoutId?: string,
   exerciseId?: string
 ) {
-  const user = useUser();
-
-  const [addExercise, state] = useMutation(ADD_EXERCISE_TO_WORKOUT, {
-    context: {
-      headers: {
-        token: user.token,
-      },
-    },
-  });
+  const [addExercise] = useMutation(ADD_EXERCISE_TO_WORKOUT, {});
 
   function add(_workoutId: string, _exerciseId: string) {
     return addExercise({

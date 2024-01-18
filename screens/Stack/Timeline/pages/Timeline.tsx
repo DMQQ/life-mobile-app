@@ -44,15 +44,9 @@ export default function Timeline({
 }: TimelineScreenProps<"Timeline">) {
   const { data, selected, setSelected, loading } = useGetTimeLineQuery();
 
-  const usr = useUser();
-
   const { data: monthData, refetch } = useQuery(GET_MONTHLY_EVENTS, {
     variables: { date: moment().format("YYYY-MM-DD") },
-    context: {
-      headers: {
-        authentication: usr.token,
-      },
-    },
+
     onError: (err) => console.log(JSON.stringify(err, null, 2)),
   });
 

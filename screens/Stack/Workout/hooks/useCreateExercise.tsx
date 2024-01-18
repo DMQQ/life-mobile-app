@@ -38,11 +38,6 @@ export default function useCreateExercise() {
   const usr = useUser();
 
   const [create, state] = useMutation(CREATE_EXERCISE_MUTATION, {
-    context: {
-      headers: {
-        token: usr.token,
-      },
-    },
     update(cache, { data: { createExercise } }) {
       cache.modify({
         fields: {

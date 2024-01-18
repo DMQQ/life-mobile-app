@@ -13,6 +13,7 @@ import {
 import ScheduleScreen from "./pages/Schedule";
 import type { RootStackScreenProps } from "@/types";
 import moment from "moment";
+import Colors from "@/constants/Colors";
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -63,6 +64,9 @@ export default function TimelineScreens({
           headerTitle: "Images",
           headerTitleAlign: "center",
           ...horizontalAnimation,
+          headerStyle: {
+            backgroundColor: Colors.primary,
+          },
         }}
         name="ImagesPreview"
         component={ImagesPreview}

@@ -130,20 +130,9 @@ export default function TimelineDetails({
   { TimelineDetails: { timelineId: string } },
   "TimelineDetails"
 >) {
-  const usr = useUser();
-
-  const ctx = {
-    context: {
-      headers: {
-        authentication: usr?.token,
-      },
-    },
-  };
-
   const { data, loading } = useGetTimelineById(route.params.timelineId);
 
   const [completeTimeline] = useMutation(COMPLETE_TIMELINE, {
-    ...ctx,
     variables: {
       id: route.params.timelineId,
     },

@@ -16,14 +16,7 @@ export default function Root({ navigation }: ScreenProps<"Root">) {
   const { token } = useUser();
   const workout = useAppSelector((s) => s.workout);
 
-  const { data } = useQuery(GET_MAIN_SCREEN, {
-    context: {
-      headers: {
-        authentication: token,
-        token,
-      },
-    },
-  });
+  const { data } = useQuery(GET_MAIN_SCREEN, {});
 
   return (
     <View style={{ flex: 1 }}>

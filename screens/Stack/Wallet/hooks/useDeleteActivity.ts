@@ -13,11 +13,6 @@ export default function useDeleteActivity() {
   const [deleteActivity, { data, loading, error }] = useMutation(
     DELETE_ACTIVITY,
     {
-      context: {
-        headers: {
-          authorization: usr.token,
-        },
-      },
       refetchQueries: ["GetWallet"],
 
       onCompleted(data) {},

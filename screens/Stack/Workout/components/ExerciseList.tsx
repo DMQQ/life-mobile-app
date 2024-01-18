@@ -23,16 +23,7 @@ const GET_EXERCISES_QUERY = gql`
 `;
 
 export const useGetAllExercises = () => {
-  const { token } = useUser();
-  const r = useQuery(GET_EXERCISES_QUERY, {
-    context: {
-      headers: {
-        token,
-      },
-    },
-  });
-
-  return r;
+  return useQuery(GET_EXERCISES_QUERY, {});
 };
 
 export default function ExerciseList() {
