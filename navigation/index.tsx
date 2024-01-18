@@ -63,6 +63,9 @@ export default function Navigation() {
         tabBar={renderTab}
         screenOptions={{
           headerShown: false,
+          headerStyle: {
+            backgroundColor: Colors.primary,
+          },
         }}
       >
         {isLoading && <Tab.Screen name="Loader" component={LoaderScreen} />}

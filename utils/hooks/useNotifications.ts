@@ -25,9 +25,9 @@ export default function useNotifications() {
       projectId: Constants?.expoConfig?.extra?.eas?.projectId as string,
     });
 
-    console.log(
-      JSON.stringify(await Notifications.getDevicePushTokenAsync(), null, 2)
-    );
+    // console.log(
+    //   JSON.stringify(await Notifications.getDevicePushTokenAsync(), null, 2)
+    // );
 
     if (Platform.OS === "android") {
       Notifications.setNotificationChannelAsync("default", {
@@ -65,7 +65,7 @@ export default function useNotifications() {
 
       if (token) await create({ variables: { token } });
 
-      ToastAndroid.show("Token: " + token, ToastAndroid.SHORT);
+      // ToastAndroid.show("Token: " + token, ToastAndroid.SHORT);
     } catch (error) {
       ToastAndroid.show(
         "Notifcations disabled: Couln't upload token \n" + token,

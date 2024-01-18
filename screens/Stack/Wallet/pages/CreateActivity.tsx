@@ -92,12 +92,12 @@ export default function CreateActivity({ navigation, route: { params } }: any) {
   };
 
   return (
-    <ScreenContainer style={{ padding: 15 }}>
+    <ScreenContainer style={{ paddingHorizontal: 15, paddingVertical: 0 }}>
       <Text
         style={{
           color: "#fff",
           fontSize: 35,
-          marginVertical: 20,
+          marginBottom: 15,
           fontWeight: "bold",
         }}
       >

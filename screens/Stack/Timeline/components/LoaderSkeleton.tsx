@@ -38,3 +38,29 @@ export default function LoaderSkeleton() {
     </Skeleton>
   );
 }
+
+export const TimelineScreenLoader = (props: { loading: boolean }) =>
+  props.loading ? (
+    <View style={{ padding: 10 }}>
+      <Skeleton
+        backgroundColor={Colors.primary_light}
+        highlightColor={Colors.primary_lighter}
+        size={({ width }) => ({
+          width: width - 20,
+          height: ((65 + 10) * 3 + 40) * 2 + 30,
+        })}
+      >
+        <View>
+          <Skeleton.Item width={(w) => w / 2} height={30} />
+          <Skeleton.Item width={(w) => w - 20} height={65} />
+          <Skeleton.Item width={(w) => w - 20} height={65} />
+          <Skeleton.Item width={(w) => w - 20} height={65} />
+
+          <Skeleton.Item marginTop={30} width={(w) => w / 2} height={30} />
+          <Skeleton.Item width={(w) => w - 20} height={65} />
+          <Skeleton.Item width={(w) => w - 20} height={65} />
+          <Skeleton.Item width={(w) => w - 20} height={65} />
+        </View>
+      </Skeleton>
+    </View>
+  ) : null;
