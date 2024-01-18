@@ -4,11 +4,22 @@ import { Provider } from "react-redux";
 import useCachedResources from "./hooks/useCachedResources";
 import Navigation from "./navigation";
 import { store } from "./utils/redux";
-import { ApolloProvider, InMemoryCache, ApolloClient } from "@apollo/client";
+import {
+  ApolloProvider,
+  InMemoryCache,
+  ApolloClient,
+  ApolloLink,
+  from,
+  createHttpLink,
+} from "@apollo/client";
 import ThemeContextProvider from "./utils/context/ThemeContext";
 import * as Notifications from "expo-notifications";
 import Url from "./constants/Url";
 import Colors from "./constants/Colors";
+
+import { setContext } from "@apollo/client/link/context";
+import { getItemAsync } from "expo-secure-store";
+import { STORE_KEY } from "./utils/hooks/useUser";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -18,9 +29,44 @@ Notifications.setNotificationHandler({
   }),
 });
 
+let token: string | undefined;
+
+const withToken = setContext(async () => {
+  // if you have a cached value, return it immediately
+  if (token) return { token };
+
+  return await getItemAsync(STORE_KEY).then((v) => {
+    let user = JSON.parse(v || "{}") as { token: string } | null;
+
+    if (token) return { token };
+
+    if (user !== undefined && typeof user?.token === "string")
+      token = user.token;
+
+    return { token };
+  });
+});
+
+const authMiddleware = new ApolloLink((op, forw) => {
+  const { token } = op.getContext();
+
+  op.setContext(() => ({
+    headers: {
+      authentication: token || "",
+    },
+  }));
+  return forw(op);
+});
+
+const httpLink = createHttpLink({
+  uri: Url.API + "/graphql",
+});
+
+const link = from([withToken, authMiddleware.concat(httpLink)]);
+
 const apolloClient = new ApolloClient({
   cache: new InMemoryCache(),
-  uri: Url.API + "/graphql",
+  link,
 });
 
 export default function App() {

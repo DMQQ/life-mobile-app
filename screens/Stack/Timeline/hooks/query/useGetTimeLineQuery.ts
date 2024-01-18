@@ -39,16 +39,9 @@ export default function useGetTimeLineQuery(date?: string) {
   const [selected, setSelected] = useState(
     date || moment().format("YYYY-MM-DD")
   );
-  const usr = useUser();
-
   const { data, loading, ...rest } = useQuery<{ timeline: GetTimelineQuery[] }>(
     GET_TIMELINE_QUERY,
     {
-      context: {
-        headers: {
-          authentication: usr.token,
-        },
-      },
       variables: {
         date: selected,
       },

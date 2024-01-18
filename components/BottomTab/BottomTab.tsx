@@ -62,10 +62,6 @@ export default function BottomTab({
 
   if (isOpenSubScreen || keyboard) return null;
 
-  const {
-    theme: { colors },
-  } = useTheme();
-
   return (
     <Animated.View
       style={[styles.container, { paddingBottom: Padding.xs }]}

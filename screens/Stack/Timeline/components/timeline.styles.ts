@@ -141,4 +141,10 @@ export default StyleSheet.create({
     position: "relative",
     marginTop: 10,
   },
+  notFoundContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 50,
+  },
 });

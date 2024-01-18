@@ -14,6 +14,8 @@ import DateList from "../../../../components/DateList/DateList";
 import useUser from "../../../../utils/hooks/useUser";
 import { gql, useQuery } from "@apollo/client";
 import NotFound from "../../Home/components/NotFound";
+import { TimelineScreenLoader } from "../components/LoaderSkeleton";
+import ListContainer from "../components/ListContainer";
 
 export const GET_MONTHLY_EVENTS = gql`
   query GetMonthlyEvents($date: String!) {
@@ -34,32 +36,6 @@ const groupDates = (dates: { date: string }[]) => {
 
   return monthEvents;
 };
-
-const Loader = (props: { loading: boolean }) =>
-  props.loading ? (
-    <View style={{ padding: 10 }}>
-      <Skeleton
-        backgroundColor={Colors.primary_light}
-        highlightColor={Colors.primary_lighter}
-        size={({ width }) => ({
-          width: width - 20,
-          height: ((65 + 10) * 3 + 40) * 2 + 30,
-        })}
-      >
-        <View>
-          <Skeleton.Item width={(w) => w / 2} height={30} />
-          <Skeleton.Item width={(w) => w - 20} height={65} />
-          <Skeleton.Item width={(w) => w - 20} height={65} />
-          <Skeleton.Item width={(w) => w - 20} height={65} />
-
-          <Skeleton.Item marginTop={30} width={(w) => w / 2} height={30} />
-          <Skeleton.Item width={(w) => w - 20} height={65} />
-          <Skeleton.Item width={(w) => w - 20} height={65} />
-          <Skeleton.Item width={(w) => w - 20} height={65} />
-        </View>
-      </Skeleton>
-    </View>
-  ) : null;
 
 const iconColor = "#fff";
 
@@ -85,12 +61,6 @@ export default function Timeline({
 
   const createTimeline = () =>
     navigation.navigate("TimelineCreate", { selectedDate: selected });
-
-  useEffect(() => {
-    navigation.setOptions({
-      headerShown: false,
-    });
-  }, []);
 
   const dayEventsSorted = useMemo(
     () => groupDates(monthData?.timelineMonth || []),
@@ -154,84 +124,13 @@ export default function Timeline({
         onPress={createTimeline}
       />
 
-      <Loader loading={loading} />
+      <TimelineScreenLoader loading={loading} />
 
       {!loading && data?.timeline.length === 0 && (
-        <View
-          style={{
-            flex: 1,
-            justifyContent: "center",
-            alignItems: "center",
-            marginTop: 50,
-          }}
-        >
+        <View style={timelineStyles.notFoundContainer}>
           <NotFound />
         </View>
       )}
     </ScrollView>
   );
 }
-
-const ListContainer = (props: {
-  list: any[];
-  onPress: () => void;
-  navigation: any;
-  date: string;
-}) => {
-  const data = useMemo(
-    () =>
-      [...props?.list]?.sort((a, b) => {
-        return (a.isCompleted ? 1 : 0) - (b.isCompleted ? 1 : 0);
-      }),
-    [props.list]
-  );
-
-  return (
-    <View style={timelineStyles.listHeading}>
-      <View style={timelineStyles.listHeadingContainer}>
-        <View style={{ flexDirection: "row", alignItems: "center" }}>
-          <Text style={timelineStyles.listHeadingText}>My events</Text>
-
-          <Ripple
-            style={{ padding: 2.5, marginLeft: 10 }}
-            onPress={() =>
-              props.navigation.navigate("Schedule", {
-                selectedDate: props.date,
-              })
-            }
-          >
-            <Entypo name="list" color={"#fff"} size={25} />
-          </Ripple>
-        </View>
-
-        <Ripple
-          style={{
-            padding: 7.5,
-            paddingHorizontal: 10,
-            backgroundColor: Colors.secondary,
-            borderRadius: 25,
-          }}
-          onPress={props.onPress}
-        >
-          <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 13 }}>
-            CREATE EVENT
-          </Text>
-        </Ripple>
-      </View>
-
-      {data.map((timeline) => (
-        <TimelineItem
-          styles={{
-            backgroundColor: Colors.primary_lighter,
-            borderRadius: 15,
-            padding: 20,
-            marginBottom: 10,
-          }}
-          key={timeline.id}
-          location="timeline"
-          {...timeline}
-        />
-      ))}
-    </View>
-  );
-};

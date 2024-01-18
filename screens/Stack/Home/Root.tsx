@@ -10,28 +10,7 @@ import { useAppSelector } from "@/utils/redux";
 import { ScrollView } from "react-native-gesture-handler";
 import NoteWidget from "./components/NoteWidget";
 import Header from "./components/HomeHeader";
-
-const GET_MAIN_SCREEN = gql`
-  query GetRootView {
-    timelineByCurrentDate {
-      id
-      title
-      description
-      date
-      beginTime
-      endTime
-      isCompleted
-    }
-    wallet {
-      balance
-      expenses {
-        id
-        amount
-        description
-      }
-    }
-  }
-`;
+import { GET_MAIN_SCREEN } from "@/utils/schemas/GET_MAIN_SCREEN";
 
 export default function Root({ navigation }: ScreenProps<"Root">) {
   const { token } = useUser();

@@ -5,9 +5,6 @@ import { useState } from "react";
 import IconButton from "../../../../components/ui/IconButton/IconButton";
 import Button from "../../../../components/ui/Button/Button";
 import Input from "../../../../components/ui/TextInput/TextInput";
-import Layout from "@/constants/Layout";
-import Colors from "@/constants/Colors";
-import Color from "color";
 import { useNavigation } from "@react-navigation/native";
 import ChangeButton from "./ChangeButton";
 

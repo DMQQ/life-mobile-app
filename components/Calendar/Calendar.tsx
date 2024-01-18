@@ -82,10 +82,6 @@ export default function Calendar({
     return marked;
   }, [selected, data?.timelineMonth]);
 
-  const {
-    theme: { colors },
-  } = useTheme();
-
   return (
     <RNCalendar
       markingType="multi-dot"
