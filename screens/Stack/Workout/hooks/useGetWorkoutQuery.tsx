@@ -31,10 +31,5 @@ export default function useGetWorkoutQuery(workoutId: string) {
     variables: {
       id: workoutId,
     },
-    context: {
-      headers: {
-        authentication: token,
-      },
-    },
   });
 }

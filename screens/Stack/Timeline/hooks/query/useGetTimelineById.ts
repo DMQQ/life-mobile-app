@@ -30,18 +30,7 @@ export const GET_TIMELINE = gql`
 `;
 
 export default function useGetTimelineById(id: string, headers?: Object) {
-  const usr = useUser();
-
-  const ctx = {
-    context: {
-      headers: {
-        authentication: usr?.token,
-      },
-    },
-  };
-
   const { data, refetch, loading } = useQuery(GET_TIMELINE, {
-    ...ctx,
     variables: {
       id,
     },
@@ -55,18 +44,7 @@ export default function useGetTimelineById(id: string, headers?: Object) {
 }
 
 export const useGetTimelineByIdLazy = (id: string) => {
-  const usr = useUser();
-
-  const ctx = {
-    context: {
-      headers: {
-        authentication: usr?.token,
-      },
-    },
-  };
-
   const [reload, { data }] = useLazyQuery(GET_TIMELINE, {
-    ...ctx,
     variables: {
       id,
     },

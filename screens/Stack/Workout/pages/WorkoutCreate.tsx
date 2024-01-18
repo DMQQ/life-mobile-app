@@ -54,12 +54,6 @@ function useCreateWorkout(
 ) {
   const { token } = useUser();
   return useMutation(CREATE_WORKOUT, {
-    context: {
-      headers: {
-        authentication: token,
-      },
-    },
-
     refetchQueries: ["GetWorkouts"],
 
     // update(cache, { data: { createWorkout } }: any) {

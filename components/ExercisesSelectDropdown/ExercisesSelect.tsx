@@ -25,14 +25,7 @@ const GET_EXERCISES = gql`
 `;
 
 const useGetExercises = () => {
-  const { token } = useUser();
-  return useQuery(GET_EXERCISES, {
-    context: {
-      headers: {
-        authentication: token,
-      },
-    },
-  });
+  return useQuery(GET_EXERCISES);
 };
 
 interface Props {

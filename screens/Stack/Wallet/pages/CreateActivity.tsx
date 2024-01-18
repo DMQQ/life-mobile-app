@@ -55,12 +55,6 @@ const useEditExpense = () => {
       }
     `,
     {
-      context: {
-        headers: {
-          authentication: user.token,
-        },
-      },
-
       refetchQueries: ["GetWallet"],
 
       onError(err) {

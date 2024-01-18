@@ -20,11 +20,6 @@ export default function useGetExerciseProgressQuery(
   const usr = useUser();
 
   const { data } = useQuery(GetExerciseProgressQuery, {
-    context: {
-      headers: {
-        token: usr.token,
-      },
-    },
     variables: {
       exerciseId: exerciseId,
     },

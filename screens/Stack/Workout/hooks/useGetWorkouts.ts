@@ -21,11 +21,5 @@ const GetWorkoutsQuery = gql`
 export default function useGetWorkoutsQuery() {
   const usr = useUser();
 
-  return useQuery<{ workouts: Workout[] }>(GetWorkoutsQuery, {
-    context: {
-      headers: {
-        token: usr.token,
-      },
-    },
-  });
+  return useQuery<{ workouts: Workout[] }>(GetWorkoutsQuery, {});
 }

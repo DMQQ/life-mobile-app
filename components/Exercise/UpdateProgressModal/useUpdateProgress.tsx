@@ -1,5 +1,4 @@
 import { gql, useMutation } from "@apollo/client";
-import { useAppSelector } from "../../../utils/redux";
 import UPDATE_PROGRESS, {
   UpdateProgressVariables,
 } from "../../../utils/schemas/UPDATE_PROGRESS";
@@ -33,15 +32,7 @@ export default function useUpdateProgress(props: {
   onDismiss: () => void;
   exerciseId: string;
 }) {
-  const token = useAppSelector((st) => st.user.token);
-  const workout = useAppSelector((s) => s.workout);
-
   const [addExerciseProgress] = useMutation(UPDATE_PROGRESS, {
-    context: {
-      headers: {
-        authentication: token,
-      },
-    },
     onCompleted() {
       props.onDismiss();
     },

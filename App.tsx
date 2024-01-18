@@ -17,8 +17,9 @@ import * as Notifications from "expo-notifications";
 import Url from "./constants/Url";
 import Colors from "./constants/Colors";
 
+import { onError } from "@apollo/client/link/error";
 import { setContext } from "@apollo/client/link/context";
-import { getItemAsync } from "expo-secure-store";
+import { getItemAsync, deleteItemAsync } from "expo-secure-store";
 import { STORE_KEY } from "./utils/hooks/useUser";
 
 Notifications.setNotificationHandler({
@@ -58,11 +59,25 @@ const authMiddleware = new ApolloLink((op, forw) => {
   return forw(op);
 });
 
+const resetToken = onError(({ networkError, graphQLErrors, response }) => {
+  if (
+    (networkError && networkError?.statusCode === 401) ||
+    graphQLErrors?.[0].extensions.response.statusCode === 403 ||
+    response?.errors?.[0].message === "Forbidden resource"
+  ) {
+    token = undefined;
+    deleteItemAsync(STORE_KEY);
+  }
+});
+
 const httpLink = createHttpLink({
   uri: Url.API + "/graphql",
 });
 
-const link = from([withToken, authMiddleware.concat(httpLink)]);
+const link = from([
+  withToken.concat(resetToken),
+  authMiddleware.concat(httpLink),
+]);
 
 const apolloClient = new ApolloClient({
   cache: new InMemoryCache(),

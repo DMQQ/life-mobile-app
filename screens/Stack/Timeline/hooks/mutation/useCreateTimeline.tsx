@@ -44,13 +44,7 @@ export default function useCreateTimeline(props: { selectedDate: string }) {
 
   const navigation = useNavigation<any>();
 
-  const [createTimelineEvent, state] = useMutation(CREATE_TIMELINE_EVENT, {
-    context: {
-      headers: {
-        authentication: usr.token,
-      },
-    },
-  });
+  const [createTimelineEvent, state] = useMutation(CREATE_TIMELINE_EVENT, {});
 
   const handleSubmit = async (input: typeof initialValues) => {
     const { data, errors } = await createTimelineEvent({
@@ -76,11 +70,6 @@ export default function useCreateTimeline(props: { selectedDate: string }) {
           query: GET_MONTHLY_EVENTS,
           variables: {
             date: moment().format("YYYY-MM-DD"),
-          },
-          context: {
-            headers: {
-              authentication: usr.token,
-            },
           },
         },
       ],
