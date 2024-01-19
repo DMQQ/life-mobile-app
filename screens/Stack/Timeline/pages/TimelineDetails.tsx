@@ -1,14 +1,9 @@
-import { Text, View } from "react-native";
-
+import { StyleSheet, Text, View } from "react-native";
 import { StackScreenProps } from "../../../../types";
-import { gql, useMutation } from "@apollo/client";
-import useUser from "../../../../utils/hooks/useUser";
 import Colors from "../../../../constants/Colors";
 import Color from "color";
 import FileList from "../components/FileList";
-import useGetTimelineById, {
-  GET_TIMELINE,
-} from "../hooks/query/useGetTimelineById";
+import useGetTimelineById from "../hooks/query/useGetTimelineById";
 import Ripple from "react-native-material-ripple";
 import Layout from "../../../../constants/Layout";
 import { AntDesign } from "@expo/vector-icons";
@@ -16,112 +11,53 @@ import TimelineTodos from "../components/TimelineTodos";
 import LoaderSkeleton from "../components/LoaderSkeleton";
 import useGoBackOnBackPress from "../../../../utils/hooks/useGoBackOnBackPress";
 import Animated, {
-  SharedValue,
   useAnimatedScrollHandler,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
-  Layout as LayoutAnim,
-  FadeIn,
-  withDelay,
 } from "react-native-reanimated";
 import CompletionBar from "../components/CompletionBar";
 import { useMemo } from "react";
-
-const COMPLETE_TIMELINE = gql`
-  mutation CompleteTimeline($id: String!) {
-    completeTimeline(id: $id) {
-      id
-      title
-      description
-      date
-      beginTime
-      endTime
-      isCompleted
-      isAllDay
-    }
-  }
-`;
+import useCompleteTimeline from "../hooks/mutation/useCompleteTimeline";
+import TimelineHeader from "../components/TimelineHeader";
 
 const AnimatedRipple = Animated.createAnimatedComponent(Ripple);
 
-const Header = (props: {
-  navigation: any;
-  isCompleted: boolean;
-  onTaskToggle: Function;
-  scrollY: SharedValue<number>;
-  title: string;
-}) => {
-  const titleAnimatedStyle = useAnimatedStyle(() => ({
-    opacity: props.scrollY.value > 40 ? withTiming(1) : withTiming(0),
-  }));
-
-  const buttonTextHideStyle = useAnimatedStyle(() =>
-    props.isCompleted
-      ? {
-          opacity:
-            props.scrollY.value > 40
-              ? withTiming(0, { duration: 100 })
-              : withDelay(200, withTiming(1)),
-          display: props.scrollY.value > 40 ? "none" : "flex",
-        }
-      : {}
-  );
-
-  return (
-    <View
-      style={{
-        width: Layout.screen.width,
-        height: 60,
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-        paddingHorizontal: 10,
-      }}
-    >
-      <Ripple onPress={() => props.navigation.goBack()} style={{ padding: 10 }}>
-        <AntDesign name="arrowleft" size={20} color={"#fff"} />
-      </Ripple>
-
-      <Animated.Text
-        layout={LayoutAnim}
-        style={[
-          { color: "#fff", fontSize: 20, fontWeight: "bold" },
-          titleAnimatedStyle,
-        ]}
-      >
-        {props.title}
-      </Animated.Text>
-
-      <AnimatedRipple
-        layout={LayoutAnim}
-        disabled={props.isCompleted}
-        onPress={() => props.onTaskToggle()}
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          backgroundColor: Colors.secondary,
-          padding: 5,
-          paddingHorizontal: 10,
-          borderRadius: 100,
-        }}
-      >
-        {props.isCompleted && (
-          <AntDesign name="checkcircle" size={18} color={"#fff"} />
-        )}
-        <Animated.Text
-          entering={FadeIn.delay(100)}
-          style={[
-            { fontSize: 16, fontWeight: "600", color: "#fff", marginLeft: 5 },
-            buttonTextHideStyle,
-          ]}
-        >
-          {props.isCompleted ? "Finished" : "Not Completed"}
-        </Animated.Text>
-      </AnimatedRipple>
-    </View>
-  );
-};
+const styles = StyleSheet.create({
+  title: {
+    marginBottom: 15,
+    fontSize: 32.5,
+    fontWeight: "bold",
+    color: Colors.secondary,
+  },
+  container: {
+    paddingBottom: 20,
+    minHeight: Layout.screen.height - 120,
+  },
+  contentText: {
+    fontSize: 20,
+    marginTop: 5,
+    color: Color(Colors.primary).lighten(5).string(),
+  },
+  timelineIdText: {
+    color: Color(Colors.primary).lighten(4).string(),
+    marginTop: 10,
+    position: "absolute",
+    bottom: 0,
+  },
+  fab: {
+    padding: 10,
+    position: "absolute",
+    right: 10,
+    bottom: 20,
+    backgroundColor: Colors.secondary,
+    width: 60,
+    height: 60,
+    borderRadius: 100,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+});
 
 export default function TimelineDetails({
   route,
@@ -131,30 +67,16 @@ export default function TimelineDetails({
   "TimelineDetails"
 >) {
   const { data, loading } = useGetTimelineById(route.params.timelineId);
-
-  const [completeTimeline] = useMutation(COMPLETE_TIMELINE, {
-    variables: {
-      id: route.params.timelineId,
-    },
-    refetchQueries: [
-      { query: GET_TIMELINE, variables: { id: route.params.timelineId } },
-    ],
-    onError(err) {
-      console.log(JSON.stringify(err, null, 2));
-    },
-  });
-
-  useGoBackOnBackPress();
-
+  const [completeTimeline] = useCompleteTimeline(route.params.timelineId);
+  const backListener = useGoBackOnBackPress();
   const scrollY = useSharedValue(0);
-
   const onScroll = useAnimatedScrollHandler({
     onScroll(event) {
       scrollY.value = event.contentOffset.y;
     },
   });
 
-  const progress = useMemo(() => {
+  const taskCompletionProgressBar = useMemo(() => {
     let count = 0;
 
     if (data?.todos === undefined) return 0;
@@ -166,9 +88,28 @@ export default function TimelineDetails({
     return Math.trunc((count / data?.todos?.length) * 100);
   }, [data?.todos]);
 
+  const fabAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [
+      {
+        translateX:
+          scrollY.value > 40
+            ? withTiming(100, { duration: 250 })
+            : withTiming(0, { duration: 250 }),
+      },
+    ],
+  }));
+
+  const onFabPress = () => {
+    (navigation as any).navigate("TimelineCreate", {
+      mode: "edit",
+      selectedDate: data?.date,
+      timelineId: data?.id,
+    });
+  };
+
   return (
     <>
-      <Header
+      <TimelineHeader
         title={data?.title.slice(0, 18)}
         scrollY={scrollY}
         isCompleted={data?.isCompleted}
@@ -183,31 +124,16 @@ export default function TimelineDetails({
         {loading ? (
           <LoaderSkeleton />
         ) : (
-          <View
-            style={{
-              paddingBottom: 20,
-              minHeight: Layout.screen.height - 120,
-            }}
-          >
-            {data?.todos.length > 0 && <CompletionBar percentage={progress} />}
-            <Text
-              style={{
-                marginBottom: 15,
-                fontSize: 32.5,
-                fontWeight: "bold",
-                color: Colors.secondary,
-              }}
-            >
+          <View style={styles.container}>
+            {data?.todos.length > 0 && (
+              <CompletionBar percentage={taskCompletionProgressBar} />
+            )}
+
+            <Text selectable selectionColor={"#fff"} style={styles.title}>
               {data?.title}
             </Text>
 
-            <Text
-              style={{
-                fontSize: 20,
-                marginTop: 5,
-                color: Color(Colors.primary).lighten(5).string(),
-              }}
-            >
+            <Text selectionColor={"#fff"} selectable style={styles.contentText}>
               {data?.description}
             </Text>
 
@@ -215,20 +141,19 @@ export default function TimelineDetails({
 
             <FileList timelineId={data?.id} />
 
-            <Text
-              selectable
-              style={{
-                color: "gray",
-                marginTop: 10,
-                position: "absolute",
-                bottom: 0,
-              }}
-            >
-              Event id: {data?.id}
+            <Text selectable style={styles.timelineIdText}>
+              Event unique id: {data?.id}
             </Text>
           </View>
         )}
       </Animated.ScrollView>
+
+      <AnimatedRipple
+        style={[fabAnimatedStyle, styles.fab]}
+        onPress={onFabPress}
+      >
+        <AntDesign name="edit" color={"#fff"} size={25} />
+      </AnimatedRipple>
     </>
   );
 }

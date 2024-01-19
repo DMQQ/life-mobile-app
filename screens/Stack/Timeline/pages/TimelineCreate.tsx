@@ -20,21 +20,18 @@ import type { TimelineScreenProps } from "../types";
 import CreateRepeatableTimeline from "../components/CreateRepeatableTimeline";
 import { useEffect, useState } from "react";
 import useCreateTimeline from "../hooks/mutation/useCreateTimeline";
-import { AntDesign, Feather } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
 import useKeyboard from "../../../../utils/hooks/useKeyboard";
 import Animated, { ZoomInDown, ZoomOutDown } from "react-native-reanimated";
 import SegmentedButtons from "@/components/ui/SegmentedButtons";
 import Layout from "@/constants/Layout";
 import SuggestedEvents from "../components/SuggestedEvents";
 import IconButton from "@/components/ui/IconButton/IconButton";
+import useGetTimelineById from "../hooks/query/useGetTimelineById";
+import useEditTimeline from "../hooks/mutation/useEditTimeline";
+import TimelineCreateHeader from "../components/TimelineCreateHeader";
 
 const styles = StyleSheet.create({
-  header: {
-    justifyContent: "space-between",
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 10,
-  },
   timeContainer: {
     flexDirection: "row",
     width: "100%",
@@ -60,19 +57,6 @@ const radioOptions = [
   { label: "Repeatable", value: "repeatable" },
 ];
 
-const Label = (props: { text: string }) => (
-  <Text
-    style={{
-      color: "#fff",
-      fontWeight: "bold",
-      padding: 5,
-      fontSize: 16,
-    }}
-  >
-    {props.text}
-  </Text>
-);
-
 export default function CreateTimeLineEventModal({
   route,
   navigation,
@@ -88,16 +72,39 @@ export default function CreateTimeLineEventModal({
     selectedDate: route.params.selectedDate,
   });
 
+  const isEditing = route.params.mode === "edit";
+
+  const { data } = useGetTimelineById(route.params.timelineId || "", {
+    skip: !isEditing,
+  });
+
+  const { editTimeline, initialFormProps: initialEditFormValues } =
+    useEditTimeline(route.params.timelineId || "", isEditing);
+
+  const initialFormValues =
+    isEditing && data !== undefined
+      ? initialEditFormValues
+      : {
+          ...initialValues,
+          date: route.params.selectedDate,
+          begin: moment().format("HH:mm:ss"),
+          end: moment().add(1, "hours").format("HH:mm:ss"),
+          notification: "none",
+        };
+
+  const formikSubmitForm = async (input: typeof initialFormValues) => {
+    if (isEditing) {
+      await editTimeline(input, route.params.selectedDate);
+    } else {
+      await handleSubmit(input);
+    }
+  };
+
   const f = useFormik({
-    onSubmit: handleSubmit,
+    onSubmit: formikSubmitForm,
     validationSchema: validationSchema,
-    initialValues: {
-      ...initialValues,
-      date: route.params.selectedDate,
-      begin: moment().format("HH:mm:ss"),
-      end: moment().add(1, "hours").format("HH:mm:ss"),
-      notification: "none",
-    },
+    initialValues: initialFormValues,
+    enableReinitialize: isEditing,
   });
 
   const dateTimeDefaultOptions = {
@@ -118,7 +125,7 @@ export default function CreateTimeLineEventModal({
     });
   };
 
-  const handleOpenDatePicker = () => {
+  const handleChangeDate = () => {
     DateTimePickerAndroid.open({
       value: moment(route.params.selectedDate).toDate(),
       mode: "date",
@@ -138,26 +145,21 @@ export default function CreateTimeLineEventModal({
   useEffect(() => {
     navigation.setOptions({
       header: (props) => (
-        <View style={styles.header}>
-          <Ripple style={{ padding: 10 }} onPress={props.navigation.goBack}>
-            <AntDesign name="arrowleft" color="#fff" size={23} />
-          </Ripple>
-
-          <Ripple onPress={handleOpenDatePicker}>
-            <Text style={[timelineStyles.eventTitle]}>
-              {route.params.selectedDate}
-            </Text>
-          </Ripple>
-          <Ripple
-            style={{ padding: 10 }}
-            onPress={() => setOptionsVisible((p) => !p)}
-          >
-            <AntDesign name="setting" color={"#fff"} size={23} />
-          </Ripple>
-        </View>
+        <TimelineCreateHeader
+          {...props}
+          handleChangeDate={handleChangeDate}
+          selectedDate={route.params.selectedDate}
+          onToggleOptions={() => setOptionsVisible((p) => !p)}
+        />
       ),
     });
   }, [optionsVisible, f.values.date]);
+
+  const TOTAL_PADDING = 30;
+
+  const inputStyle = {
+    width: Layout.screen.width - TOTAL_PADDING,
+  };
 
   return (
     <ScreenContainer>
@@ -165,11 +167,13 @@ export default function CreateTimeLineEventModal({
         style={{ flex: 1, padding: 5 }}
         showsVerticalScrollIndicator={false}
       >
-        <SuggestedEvents
-          createTimelineAsync={handleSubmit}
-          initialValues={initialValues}
-          date={route.params.selectedDate}
-        />
+        {!isEditing && (
+          <SuggestedEvents
+            createTimelineAsync={handleSubmit}
+            initialValues={initialValues}
+            date={route.params.selectedDate}
+          />
+        )}
 
         <ValidatedInput
           placeholder="Like  'take out the trash' etc.."
@@ -177,29 +181,23 @@ export default function CreateTimeLineEventModal({
           label="Event's title*"
           showLabel
           formik={f}
-          helperText="Event's title (not required)"
           helperStyle={{ marginLeft: 2.5 }}
-          style={{
-            width: Layout.screen.width - 15 * 2,
-          }}
+          style={inputStyle}
         />
         <ValidatedInput
           showLabel
-          label="Event's content*"
+          label="Event's content"
           numberOfLines={10}
           multiline
           placeholder="What you wanted to do"
-          helperText="Event's description (2000char's)"
           name="desc"
           formik={f}
           scrollEnabled
           textAlignVertical="top"
-          style={{
-            width: Layout.screen.width - 15 * 2,
-          }}
+          style={inputStyle}
         />
 
-        <Label text="Time range*" />
+        <ValidatedInput.Label error={false} text="Time range*" />
         <View style={styles.timeContainer}>
           <Ripple
             style={{ flex: 1, padding: 10 }}
@@ -229,7 +227,10 @@ export default function CreateTimeLineEventModal({
         />
 
         <View style={{ marginTop: 10 }}>
-          <Label text="How to send you notifications?" />
+          <ValidatedInput.Label
+            error={false}
+            text="How to send you notifications?"
+          />
           <SegmentedButtons
             containerStyle={{
               borderRadius: 15,
@@ -252,6 +253,7 @@ export default function CreateTimeLineEventModal({
 
       <SubmitButton
         f={f}
+        isEditing={isEditing}
         isKeyboardOpen={isKeyboardOpen || false}
         isLoading={isLoading}
       />
@@ -263,6 +265,8 @@ interface SubmitButtonProps {
   isKeyboardOpen: boolean;
   isLoading: boolean;
   f: any;
+
+  isEditing: boolean;
 }
 
 const SubmitButton = (props: SubmitButtonProps) =>
@@ -309,9 +313,9 @@ const SubmitButton = (props: SubmitButtonProps) =>
               : Colors.secondary,
           },
         ]}
-        fontStyle={{ textTransform: "none", letterSpacing: 1 }}
+        fontStyle={{ letterSpacing: 1 }}
       >
-        CREATE EVENT
+        {props.isEditing ? "Edit event" : "Create event"}
       </Button>
     </Animated.View>
   ) : null;

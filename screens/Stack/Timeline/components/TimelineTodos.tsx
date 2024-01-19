@@ -106,7 +106,7 @@ export default function TimelineTodos(props: {
         </View>
 
         {show && (
-          <View style={{ marginTop: 15 }}>
+          <View style={{ marginTop: 5 }}>
             <Input
               autoFocus
               value={text}
@@ -120,6 +120,8 @@ export default function TimelineTodos(props: {
               disabled={text.trim().length === 0}
               onPress={handleCreateTodo}
               fontStyle={styles.buttonText}
+              type="outlined"
+              style={{ borderRadius: 10 }}
             >
               Create task
             </Button>
@@ -146,8 +148,20 @@ export default function TimelineTodos(props: {
               borderRadius: 20,
             }}
           >
+            <Text
+              style={{
+                color: Colors.secondary,
+                marginBottom: 10,
+                fontSize: 18,
+                fontWeight: "bold",
+              }}
+            >
+              New event ID
+            </Text>
             <Input
               label="Event id to be copied"
+              placeholder="xxxx-xxxxx-xxxxx"
+              placeholderTextColor="gray"
               value={dialogText}
               setValue={setDialogText}
               style={{ width: L.screen.width - 50 }}

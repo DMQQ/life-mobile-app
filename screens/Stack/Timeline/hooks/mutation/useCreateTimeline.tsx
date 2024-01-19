@@ -40,8 +40,6 @@ const validationSchema = Yup.object().shape({
 });
 
 export default function useCreateTimeline(props: { selectedDate: string }) {
-  const usr = useUser();
-
   const navigation = useNavigation<any>();
 
   const [createTimelineEvent, state] = useMutation(CREATE_TIMELINE_EVENT, {});

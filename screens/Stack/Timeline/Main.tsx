@@ -57,6 +57,7 @@ export default function TimelineScreens({
         component={CreateTimeLineEventModal}
         initialParams={{
           selectedDate: moment().format("YYYY-MM-DD"),
+          mode: "create",
         }}
       />
       <Stack.Screen
