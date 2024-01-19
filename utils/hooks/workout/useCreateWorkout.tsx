@@ -20,15 +20,7 @@ const CREATE_WORKOUT = gql`
 `;
 
 const useCreateWorkout = () => {
-  const { token } = useUser();
   return useMutation(CREATE_WORKOUT, {
-    context: {
-      headers: {
-        authorization: token,
-        authentication: token,
-        token,
-      },
-    },
     update(cache, { data: { createWorkout } }) {
       cache.modify({
         fields: {

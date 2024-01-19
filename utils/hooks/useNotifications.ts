@@ -48,14 +48,7 @@ export default function useNotifications() {
       mutation createNotification($token: String!) {
         setNotificationsToken(token: $token)
       }
-    `,
-    {
-      context: {
-        headers: {
-          authentication: usr.token,
-        },
-      },
-    }
+    `
   );
 
   async function sendTokenToServer() {
