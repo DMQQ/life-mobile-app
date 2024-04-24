@@ -3,7 +3,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 import Workout from "./pages/Workout";
 import CreateWorkout from "./pages/WorkoutCreate";
 import Workouts from "./pages/Workouts";
-import ExerciseScreen from "./pages/Exercise";
+import CreateExercise from "./pages/CreateExercise";
 import { WorkoutStackParamList } from "./types";
 import PendingWorkout from "./pages/PendingWorkout";
 import Colors from "../../../constants/Colors";
@@ -29,7 +29,7 @@ export default function WorkoutScreens() {
         options={{ headerShown: false }}
       />
       <Stack.Screen name="Workout" component={Workout} />
-      <Stack.Screen name="Exercise" component={ExerciseScreen} />
+      <Stack.Screen name="Exercise" component={CreateExercise} />
       <Stack.Screen
         name="WorkoutCreate"
         component={CreateWorkout}

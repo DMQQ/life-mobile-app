@@ -2,7 +2,6 @@ import React from "react";
 import ScreenContainer from "../../../../components/ui/ScreenContainer";
 import { Formik } from "formik";
 import { gql, useMutation } from "@apollo/client";
-import useUser from "../../../../utils/hooks/useUser";
 import ExercisesSelect from "../../../../components/ExercisesSelectDropdown/ExercisesSelect";
 import Button from "../../../../components/ui/Button/Button";
 import Colors from "../../../../constants/Colors";
@@ -52,26 +51,24 @@ function useCreateWorkout(
   onCompleted?: (data: unknown) => void,
   onError?: (err: unknown) => void
 ) {
-  const { token } = useUser();
   return useMutation(CREATE_WORKOUT, {
-    refetchQueries: ["GetWorkouts"],
+    update(cache, { data: { createWorkout } }: any) {
+      cache.modify({
+        fields: {
+          workouts(workouts = []) {
+            const workouts_updated = [createWorkout, ...workouts];
 
-    // update(cache, { data: { createWorkout } }: any) {
-    //   cache.modify({
-    //     fields: {
-    //       workouts(workouts = []) {
-    //         const workoutRef = cache.writeFragment({
-    //           data: createWorkout,
-    //           fragment: CREATE_WORKOUT_FRAGMENT,
-    //         });
+            cache.writeQuery({
+              query: GetWorkoutsQuery,
+              data: { workous: workouts_updated },
+              overwrite: true,
+            });
 
-    //         console.log(createWorkout);
-
-    //         return [workoutRef, ...workouts];
-    //       },
-    //     },
-    //   });
-    // },
+            return workouts_updated;
+          },
+        },
+      });
+    },
 
     onCompleted,
     onError,
@@ -80,6 +77,8 @@ function useCreateWorkout(
 
 import * as yup from "yup";
 import { Text, View } from "react-native";
+import { GetWorkoutsQuery } from "../hooks/useGetWorkouts";
+import Ripple from "react-native-material-ripple";
 
 const validationSchema = yup.object().shape({
   exercises: yup.array().min(1).required("Add at least 1 exercise"),
@@ -113,9 +112,14 @@ export default function WorkoutCreate({
   );
 
   const onSubmit = async (props: any) => {
-    console.log(props);
     await createWorkout({
       variables: props,
+    });
+  };
+
+  const onHandleContribute = () => {
+    navigation.navigate("Exercise", {
+      exerciseId: "",
     });
   };
 
@@ -145,7 +149,7 @@ export default function WorkoutCreate({
 
               <ValidatedInput
                 label="Short description"
-                numberOfLines={3}
+                numberOfLines={4}
                 textAlignVertical="top"
                 showLabel
                 formik={f}
@@ -154,7 +158,7 @@ export default function WorkoutCreate({
               />
 
               <ValidatedInput.Label
-                error={!!f.errors.difficulty && f.touched.difficulty}
+                error={(!!f.errors.difficulty && f.touched.difficulty) || false}
                 text="Set Difficulty"
               />
 
@@ -178,6 +182,19 @@ export default function WorkoutCreate({
               <ExercisesSelect
                 setSelected={(sel) => f.setFieldValue("exercises", sel) as any}
               />
+              <Ripple
+                style={{ padding: 5, marginBottom: 10 }}
+                onPress={onHandleContribute}
+              >
+                <Text
+                  style={{
+                    color: Colors.secondary,
+                    textDecorationLine: "underline",
+                  }}
+                >
+                  Contribute to creating exercises
+                </Text>
+              </Ripple>
 
               <ValidatedInput.Label error={false} text="Choose workout type" />
 
@@ -189,19 +206,20 @@ export default function WorkoutCreate({
                 renderDefaultItem
                 maxSelectHeight={200}
                 closeOnSelect
+                anchor="top"
                 placeholderText="Type"
               />
             </View>
 
             <Button
+              type={!(f.isValid && f.dirty) ? "outlined" : "contained"}
               onPress={() => f.handleSubmit()}
               disabled={!(f.isValid && f.dirty)}
               size="xl"
-              fontStyle={{ color: "#000" }}
+              fontStyle={{
+                color: !(f.isValid && f.dirty) ? Colors.secondary : "#fff",
+              }}
               style={{
-                backgroundColor: !(f.isValid && f.dirty)
-                  ? Color(Colors.secondary).alpha(0.5).string()
-                  : Colors.secondary,
                 marginTop: 15,
                 borderRadius: 100,
               }}

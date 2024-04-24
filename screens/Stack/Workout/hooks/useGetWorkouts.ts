@@ -2,7 +2,7 @@ import { gql, useQuery } from "@apollo/client";
 import useUser from "../../../../utils/hooks/useUser";
 import { Workout } from "../../../../types";
 
-const GetWorkoutsQuery = gql`
+export const GetWorkoutsQuery = gql`
   query GetWorkouts {
     workouts {
       workoutId

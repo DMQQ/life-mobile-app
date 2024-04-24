@@ -15,8 +15,8 @@ export const styles = StyleSheet.create({
 });
 
 export const VARIANTS = {
-  // primary: "#FF0056",
-  primary: "#8408D4",
+  // primary: "#FF0056", // #8408D4
+  primary: Colors.secondary,
 
   secondary: Colors.primary,
   ternary: Colors.secondary,
