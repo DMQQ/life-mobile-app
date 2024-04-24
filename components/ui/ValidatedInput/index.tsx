@@ -19,6 +19,8 @@ interface ValidatedInputProps extends OmitedTextInputProps {
   name: string;
 
   showLabel?: boolean;
+
+  transformValueToNumber?: boolean;
 }
 
 export default function ValidatedInput({
@@ -40,7 +42,9 @@ export default function ValidatedInput({
       error={isError}
       helperText={isError ? errors?.[name]?.toString() : undefined}
       onBlur={handleBlur(name)}
-      onChangeText={handleChange(name)}
+      onChangeText={(text) =>
+        handleChange(name)((rest.transformValueToNumber ? +text : text) as any)
+      }
     />
   );
 }

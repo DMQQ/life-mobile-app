@@ -84,6 +84,7 @@ export default function ExercisesSelect({
 
   return (
     <Select
+      anchor="top"
       renderCustomSelected={
         <View
           style={{

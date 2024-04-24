@@ -133,7 +133,7 @@ export default function Input({
             : Colors.primary_light,
           borderRadius: 7.5,
           flexDirection: "row",
-          width: (style as any)?.width ?? Layout.screen.width * 0.95,
+          width: (style as any)?.width || "100%", //(style as any)?.width ?? Layout.screen.width * 0.95,
           borderWidth: 2,
           borderColor: error
             ? Colors.error
