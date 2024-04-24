@@ -1,9 +1,7 @@
-import {
-  BottomSheetBackdrop,
-  BottomSheetBackdropProps,
-} from "@gorhom/bottom-sheet";
-import BottomSheet from "@gorhom/bottom-sheet";
-import { ReactNode, forwardRef, useCallback } from "react";
+import BottomSheet, {
+  BottomSheetGorhom,
+} from "@/components/ui/BottomSheet/BottomSheet";
+import { ReactNode, forwardRef } from "react";
 import { Text, View } from "react-native";
 import Colors from "@/constants/Colors";
 import { WalletElement } from "./WalletItem";
@@ -16,6 +14,7 @@ const Txt = (props: { children: ReactNode; size: number; color?: any }) => (
       fontSize: props.size,
       fontWeight: "bold",
       lineHeight: props.size + 5,
+      padding: 5,
     }}
   >
     {props.children}
@@ -23,49 +22,18 @@ const Txt = (props: { children: ReactNode; size: number; color?: any }) => (
 );
 
 export const WalletSheet = forwardRef<
-  BottomSheet,
+  BottomSheetGorhom,
   {
     selected: WalletElement | undefined;
-    sheet: { current: BottomSheet | null };
   }
->(({ selected, sheet }, ref) => {
-  const backdropComponent = useCallback(
-    (props: BottomSheetBackdropProps) => (
-      <BottomSheetBackdrop
-        {...props}
-        opacity={0.65}
-        appearsOnIndex={0}
-        disappearsOnIndex={-1}
-      />
-    ),
-    []
-  );
-
+>(({ selected }, ref) => {
   const amount =
     selected?.type === "expense"
       ? (selected.amount * -1).toFixed(2)
       : selected?.amount.toFixed(2);
 
-  const postBalance =
-    typeof selected !== "undefined"
-      ? selected.type === "income"
-        ? selected?.balanceBeforeInteraction - selected?.amount
-        : selected?.balanceBeforeInteraction + selected?.amount
-      : 0;
   return (
-    <BottomSheet
-      ref={ref}
-      handleIndicatorStyle={{
-        backgroundColor: Colors.secondary,
-      }}
-      backgroundStyle={{
-        backgroundColor: Colors.primary,
-      }}
-      enablePanDownToClose
-      index={-1}
-      snapPoints={["70%"]}
-      backdropComponent={backdropComponent}
-    >
+    <BottomSheet ref={ref} snapPoints={["70%"]}>
       <View style={{ paddingHorizontal: 15, flex: 1 }}>
         <View style={{ flex: 2 }}>
           <View style={{ marginBottom: 15 }}>
@@ -78,15 +46,6 @@ export const WalletSheet = forwardRef<
             {amount}
             <Text style={{ fontSize: 17 }}>zł</Text>
           </Txt>
-
-          <Text
-            style={{
-              fontSize: 15,
-              color: "rgba(255,255,255,0.2)",
-            }}
-          >
-            Before {selected?.balanceBeforeInteraction}zł, After {postBalance}zł
-          </Text>
 
           <View style={{ marginTop: 15 }}>
             <Txt size={18} color={"#fff"}>
@@ -116,7 +75,7 @@ export const WalletSheet = forwardRef<
 
         <SheetActionButtons
           onCompleted={() => {
-            sheet.current?.forceClose();
+            (ref as any).current.forceClose();
           }}
           selectedExpense={selected}
         />

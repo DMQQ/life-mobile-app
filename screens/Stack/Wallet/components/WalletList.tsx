@@ -53,7 +53,7 @@ export default function WalletList(props: {
         onScroll={props.onScroll}
         style={{ flex: 1 }}
         contentContainerStyle={{
-          padding: 10,
+          padding: 15,
         }}
         data={props?.wallet?.expenses || []}
         keyExtractor={(expense) => expense.id}
@@ -77,7 +77,8 @@ export default function WalletList(props: {
                     color: "#fff",
                     fontWeight: "bold",
                     fontSize: 20,
-                    padding: 10,
+                    padding: 5,
+                    marginTop: index === 0 ? 0 : 10,
                   }}
                 >
                   {parseDateToText(item.date)}
