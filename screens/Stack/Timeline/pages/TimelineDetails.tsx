@@ -25,7 +25,7 @@ const AnimatedRipple = Animated.createAnimatedComponent(Ripple);
 
 const styles = StyleSheet.create({
   title: {
-    marginBottom: 15,
+    marginBottom: 10,
     fontSize: 32.5,
     fontWeight: "bold",
     color: Colors.secondary,
@@ -36,7 +36,6 @@ const styles = StyleSheet.create({
   },
   contentText: {
     fontSize: 20,
-    marginTop: 5,
     color: Color(Colors.primary).lighten(5).string(),
   },
   timelineIdText: {
@@ -125,19 +124,20 @@ export default function TimelineDetails({
           <LoaderSkeleton />
         ) : (
           <View style={styles.container}>
-            {data?.todos.length > 0 && (
-              <CompletionBar percentage={taskCompletionProgressBar} />
-            )}
-
             <Text selectable selectionColor={"#fff"} style={styles.title}>
               {data?.title}
             </Text>
 
             <Text selectionColor={"#fff"} selectable style={styles.contentText}>
-              {data?.description}
+              {data?.description || "(no content)"}
             </Text>
 
             <TimelineTodos timelineId={data?.id} todos={data?.todos || []} />
+            {data?.todos.length > 0 && (
+              <View style={{ marginTop: 10 }}>
+                <CompletionBar percentage={taskCompletionProgressBar} />
+              </View>
+            )}
 
             <FileList timelineId={data?.id} />
 

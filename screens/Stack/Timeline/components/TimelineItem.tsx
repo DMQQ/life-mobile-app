@@ -66,8 +66,11 @@ export default function TimelineItem(
     () =>
       moment(moment(), "hh:mm:ss").isAfter(
         moment(timeline.endTime, "hh:mm:ss")
-      ) ||
-      moment(moment(), "YYYY-MM-DD").isAfter(moment(timeline.date), "date"),
+      ) &&
+      moment(moment(), "YYYY-MM-DD").isAfter(
+        moment(timeline.date, "YYYY-MM-DD"),
+        "date"
+      ),
     []
   );
 
