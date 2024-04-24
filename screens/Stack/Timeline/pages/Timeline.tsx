@@ -16,6 +16,7 @@ import { gql, useQuery } from "@apollo/client";
 import NotFound from "../../Home/components/NotFound";
 import { TimelineScreenLoader } from "../components/LoaderSkeleton";
 import ListContainer from "../components/ListContainer";
+import { Padding } from "@/constants/Layout";
 
 export const GET_MONTHLY_EVENTS = gql`
   query GetMonthlyEvents($date: String!) {
@@ -54,7 +55,10 @@ export default function Timeline({
     setSelected(day.dateString);
 
   const createTimeline = () =>
-    navigation.navigate("TimelineCreate", { selectedDate: selected });
+    navigation.navigate("TimelineCreate", {
+      selectedDate: selected,
+      mode: "create",
+    });
 
   const dayEventsSorted = useMemo(
     () => groupDates(monthData?.timelineMonth || []),
