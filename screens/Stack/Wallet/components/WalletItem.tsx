@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
   },
   price: {
     color: "#fff",
-    fontSize: 22,
+    fontSize: 23,
     fontWeight: "bold",
   },
   button: {
@@ -150,22 +150,20 @@ export const Icons = {
   },
 };
 
-const Dot = () => {
-  return (
-    <View
-      style={{
-        position: "absolute",
-        top: "45%",
-        left: -5,
-        width: 10,
-        height: 10,
-        backgroundColor: "red",
-        borderRadius: 100,
-        zIndex: 100,
-      }}
-    ></View>
-  );
-};
+export const CategoryIcon = (props: { category: keyof typeof Icons }) => (
+  <View
+    style={[
+      styles.icon_container,
+      {
+        backgroundColor: Color(Icons[props.category || "none"]?.backgroundColor)
+          .darken(0.7)
+          .hex(),
+      },
+    ]}
+  >
+    {Icons[props.category || "none"]?.icon}
+  </View>
+);
 
 export default function WalletItem(
   item: WalletItemProps & {
@@ -178,35 +176,27 @@ export default function WalletItem(
     item.type === "expense"
       ? (item.amount * -1).toFixed(2)
       : item.amount.toFixed(2);
+
+  const isBalanceEdit =
+    item.description === "Balance edit" && item.amount === 0;
+
   return (
     <Animated.View
-      // entering={FadeInUp.delay(item.index * 100)}
       layout={Layout}
       style={[
         {
-          marginBottom: 10,
+          marginBottom: 15,
           position: "relative",
         },
         item.animatedStyle,
       ]}
     >
-      {/* <Dot /> */}
-
-      <Ripple style={styles.expense_item} onPress={() => item.handlePress()}>
-        <View
-          style={[
-            styles.icon_container,
-            {
-              backgroundColor: Color(
-                Icons[item.category || "none"]?.backgroundColor
-              )
-                .darken(0.7)
-                .hex(),
-            },
-          ]}
-        >
-          {Icons[item.category || "none"]?.icon}
-        </View>
+      <Ripple
+        disabled={isBalanceEdit}
+        style={[styles.expense_item]}
+        onPress={() => item.handlePress()}
+      >
+        {!isBalanceEdit && <CategoryIcon category={item.category} />}
 
         <View style={{ height: "100%", justifyContent: "center", flex: 3 }}>
           <Text style={styles.title} numberOfLines={1}>
@@ -216,12 +206,14 @@ export default function WalletItem(
             <Text style={styles.date}>{parseDateToText(item.date)}</Text>
           </View>
         </View>
-        <View style={[styles.price_container, { flexDirection: "row" }]}>
-          <Text style={[styles.price, { marginLeft: 5 }]}>
-            {price}
-            <Text style={{ fontSize: 16 }}>zł</Text>
-          </Text>
-        </View>
+        {!isBalanceEdit && (
+          <View style={[styles.price_container, { flexDirection: "row" }]}>
+            <Text style={[styles.price, { marginLeft: 5 }]}>
+              {price}
+              <Text style={{ fontSize: 15 }}>zł</Text>
+            </Text>
+          </View>
+        )}
       </Ripple>
     </Animated.View>
   );

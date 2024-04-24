@@ -28,7 +28,15 @@ export default function WalletScreens() {
       }}
     >
       <Stack.Screen name="Wallet" component={Wallet} />
-      <Stack.Screen name="Watchlist" component={Watchlist} />
+      <Stack.Screen
+        name="Watchlist"
+        component={Watchlist}
+        options={{
+          headerShown: true,
+          title: "Create shopping list",
+          headerTitleAlign: "center",
+        }}
+      />
       <Stack.Screen
         name="CreateActivity"
         component={CreateActivity}

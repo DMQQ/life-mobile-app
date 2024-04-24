@@ -110,11 +110,11 @@ export default function CreateActivity({ navigation, route: { params } }: any) {
         }}
       >
         {(f) => (
-          <View style={{ flex: 1 }}>
+          <View style={{ flex: 1, paddingBottom: 25 }}>
             <View style={{ flex: 1 }}>
               <SegmentedButtons
                 buttonStyle={{
-                  height: 60,
+                  height: 45,
                 }}
                 buttonTextStyle={{
                   fontSize: 16,
@@ -184,6 +184,7 @@ export default function CreateActivity({ navigation, route: { params } }: any) {
               onPress={() => {
                 f.handleSubmit();
               }}
+              fontStyle={{ fontSize: 15 }}
               style={{
                 marginTop: 20,
                 paddingVertical: 15,
@@ -192,7 +193,7 @@ export default function CreateActivity({ navigation, route: { params } }: any) {
                   : Colors.secondary,
               }}
             >
-              Edit expense
+              Save changes
             </Button>
           </View>
         )}
