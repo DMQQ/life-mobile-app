@@ -40,8 +40,6 @@ interface DateProps extends TDate {
 
 const bg = Colors.primary_lighter;
 
-const AnimatedRipple = Animated.createAnimatedComponent(Ripple);
-
 const Dots = memo((props: { tasks: number[] }) =>
   props.tasks.length > 0 ? (
     <View style={{ flexDirection: "row", position: "absolute", top: -3 }}>
@@ -59,7 +57,7 @@ const Dots = memo((props: { tasks: number[] }) =>
   ) : null
 );
 
-export default function Date(props: DateProps) {
+const Date = memo((props: DateProps) => {
   const tasks = useMemo(
     () => Array.from(new Array(props?.tasks > 4 ? 4 : props.tasks).keys()),
     [props?.tasks]
@@ -71,8 +69,10 @@ export default function Date(props: DateProps) {
     ? Color(bg).lighten(0.5).hex()
     : bg;
 
+  const date = moment(props.date);
+
   return (
-    <AnimatedRipple
+    <Ripple
       delayLongPress={500}
       onLongPress={() => props.onLongPress()}
       onPress={() => props.onPress()}
@@ -80,14 +80,18 @@ export default function Date(props: DateProps) {
     >
       <Dots tasks={tasks} />
       <Text style={{ color: "#fff", fontSize: 32, fontWeight: "bold" }}>
-        {props.dayNumber}
+        {date.get("D")}
       </Text>
       <Text style={{ color: "#ffffffcb", fontSize: 17 }}>
-        {props.dayName.slice(0, 3)}
+        {date.weekday() === 0
+          ? "Sun"
+          : moment.weekdays()[date.weekday()].slice(0, 3)}
       </Text>
       <Text style={{ color: "#ffffff8c", fontSize: 11 }}>
-        {moment.months()[moment(props.date).month()].slice(0, 3)}
+        {moment.months()[date.month()].slice(0, 3)}
       </Text>
-    </AnimatedRipple>
+    </Ripple>
   );
-}
+});
+
+export default Date;

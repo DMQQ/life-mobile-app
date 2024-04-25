@@ -2,7 +2,7 @@ import Button from "@/components/ui/Button/Button";
 import Colors from "@/constants/Colors";
 import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 import moment from "moment";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FlatList, Pressable, Text, View, VirtualizedList } from "react-native";
 import Ripple from "react-native-material-ripple";
 import Animated from "react-native-reanimated";
@@ -143,7 +143,11 @@ export default function SuggestedEvents(props: SuggestedEventsProps) {
 
       {selected.name !== undefined &&
         ((selected?.categories?.length || 0) > 0 ? subCategory : true) && (
-          <Ripple style={styles.time} onPress={handleSetTime}>
+          <Ripple
+            style={styles.time}
+            onPress={handleSetTime}
+            onLayout={() => handleSetTime()}
+          >
             <Text style={{ color: "#fff", fontSize: 17 }}>Set time</Text>
             <Text style={{ color: "#fff", fontSize: 17 }}>
               {time !== undefined && time?.toLocaleTimeString()} to {endTime}
@@ -157,7 +161,7 @@ export default function SuggestedEvents(props: SuggestedEventsProps) {
         rippleColor={Colors.secondary}
         type="outlined"
         fontStyle={{
-          fontSize: 16,
+          fontSize: 15,
           color: canSubmit ? "#fff" : Color(Colors.secondary).darken(0.5).hex(),
         }}
         style={{

@@ -1,16 +1,14 @@
 import moment, { Moment } from "moment";
-import { useLayoutEffect, useRef, useState } from "react";
+import { memo, useCallback, useLayoutEffect, useRef, useState } from "react";
 import { View, VirtualizedList, Text } from "react-native";
 import Date from "./Date";
 import MonthSelectList from "./MonthSelectList";
-import { createDates, createFutureDates } from "./fns";
+import { createDates } from "./fns";
 import { Padding } from "@/constants/Values";
 import { useNavigation } from "@react-navigation/native";
 
 type TDate = {
   date: string;
-  dayName: string;
-  dayNumber: number;
 };
 
 interface DateListProps {
@@ -33,111 +31,109 @@ const date = (today: Moment, month: string) => {
   return newDate;
 };
 
-export default function DateList({
-  selectedDate,
-  setSelected,
-  dayEvents,
-  onMenuPress,
-}: DateListProps) {
-  const today = moment(selectedDate);
-  const [dates, setDates] = useState<TDate[]>(createDates());
-  const [month, setMonth] = useState(moment.months()[today.month()]);
+const getItemLayout = (_: any, index: number) => ({
+  index,
+  length: 75,
+  offset: (75 + 5 * 2) * index,
+});
 
-  const listRef = useRef<VirtualizedList<TDate>>(null);
+const DateList = memo(
+  ({ selectedDate, setSelected, dayEvents, onMenuPress }: DateListProps) => {
+    const today = moment(selectedDate);
+    const [month, setMonth] = useState(moment.months()[today.month()]);
 
-  function onMonthChange(newMonth: string) {
-    if (newMonth === month) return;
+    const [dates, setDates] = useState<TDate[]>(createDates(today));
 
-    const realDate = moment();
+    const listRef = useRef<VirtualizedList<TDate>>(null);
 
-    const dt = date(today, newMonth);
-    const newDates = createDates(dt);
+    function onMonthChange(newMonth: string) {
+      if (newMonth === month) return;
 
-    setDates(newDates);
+      const realDate = moment();
 
-    if (newMonth === moment.months()[realDate.month()]) {
-      setSelected(realDate.format("YYYY-MM-DD"));
-    } else {
-      const firstOfMonth = [...dt.split("-").slice(0, 2), "01"].join("-");
-      setSelected(firstOfMonth);
+      const dt = date(today, newMonth);
+      const newDates = createDates(moment(dt));
+
+      setDates(newDates);
+
+      if (newMonth === moment.months()[realDate.month()]) {
+        setSelected(realDate.format("YYYY-MM-DD"));
+      } else {
+        const firstOfMonth = [...dt.split("-").slice(0, 2), "01"].join("-");
+        setSelected(firstOfMonth);
+      }
+
+      setMonth(newMonth);
     }
 
-    setMonth(newMonth);
-  }
+    useLayoutEffect(() => {
+      listRef.current?.scrollToItem({
+        item: dates.find((d) => d.date === selectedDate)!,
+        animated: true,
+      });
+    }, [month]);
 
-  useLayoutEffect(() => {
-    listRef.current?.scrollToItem({
-      item: dates.find((d) => d.date === selectedDate)!,
-      animated: false,
-    });
-  }, [month]);
+    const snapOffsets = dates.map((_, index) => (75 + Padding.xs * 2) * index);
 
-  const onEndReached = () => {
-    setDates((prev) => [
-      ...prev,
-      ...createFutureDates(dates[dates.length - 1].date, 5),
-    ]);
-  };
+    const navigation = useNavigation<any>();
 
-  const getItemLayout = (_: any, index: number) => ({
-    index,
-    length: 75,
-    offset: (75 + 5 * 2) * index,
-  });
+    const renderItem = useCallback(
+      ({ item }: { item: TDate }) => (
+        <Date
+          tasks={dayEvents[item.date] || 0}
+          {...item}
+          isSelected={selectedDate === item.date}
+          onPress={() => setSelected(item.date)}
+          onLongPress={() => {
+            setSelected(item.date);
+            navigation.navigate("TimelineCreate", {
+              selectedDate: item.date,
+            });
+          }}
+        />
+      ),
+      [selectedDate, dayEvents]
+    );
 
-  const snapOffsets = dates.map((_, index) => (75 + Padding.xs * 2) * index);
-
-  const navigation = useNavigation<any>();
-
-  return (
-    <View>
-      <View
-        style={{
-          flexDirection: "row",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: Padding.m,
-        }}
-      >
-        <Text
+    return (
+      <View>
+        <View
           style={{
-            color: "#ffffffda",
-            fontSize: 30,
-            padding: Padding.l,
-            fontWeight: "bold",
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: Padding.m,
           }}
         >
-          {moment.months()[today.month()]} {moment(selectedDate).year()}
-        </Text>
-      </View>
-      <MonthSelectList selected={month} onPress={onMonthChange} />
-      <VirtualizedList
-        snapToOffsets={snapOffsets}
-        removeClippedSubviews
-        onEndReached={onEndReached}
-        showsHorizontalScrollIndicator={false}
-        getItemLayout={getItemLayout}
-        ref={listRef}
-        horizontal
-        getItem={(arr, i) => arr[i] as any}
-        getItemCount={(it) => it.length}
-        data={dates}
-        keyExtractor={(item) => item.date}
-        renderItem={({ item }) => (
-          <Date
-            tasks={dayEvents[item.date] || 0}
-            {...item}
-            isSelected={selectedDate === item.date}
-            onPress={() => setSelected(item.date)}
-            onLongPress={() => {
-              setSelected(item.date);
-              navigation.navigate("TimelineCreate", {
-                selectedDate: item.date,
-              });
+          <Text
+            style={{
+              color: "#ffffffda",
+              fontSize: 30,
+              padding: Padding.l,
+              fontWeight: "bold",
             }}
-          />
-        )}
-      />
-    </View>
-  );
-}
+          >
+            {moment.months()[today.month()]} {moment(selectedDate).year()}
+          </Text>
+        </View>
+        <MonthSelectList selected={month} onPress={onMonthChange} />
+        <VirtualizedList
+          initialNumToRender={10}
+          snapToOffsets={snapOffsets}
+          removeClippedSubviews
+          showsHorizontalScrollIndicator={false}
+          getItemLayout={getItemLayout}
+          ref={listRef}
+          horizontal
+          getItem={(arr, i) => arr[i] as any}
+          getItemCount={(it) => it.length}
+          data={dates}
+          keyExtractor={(item) => item.date}
+          renderItem={renderItem}
+        />
+      </View>
+    );
+  }
+);
+
+export default DateList;
