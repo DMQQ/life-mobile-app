@@ -67,7 +67,6 @@ export default function TimelineDetails({
 >) {
   const { data, loading } = useGetTimelineById(route.params.timelineId);
   const [completeTimeline] = useCompleteTimeline(route.params.timelineId);
-  const backListener = useGoBackOnBackPress();
   const scrollY = useSharedValue(0);
   const onScroll = useAnimatedScrollHandler({
     onScroll(event) {
