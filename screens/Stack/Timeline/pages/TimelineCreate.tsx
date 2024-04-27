@@ -1,4 +1,3 @@
-import { useFormik } from "formik";
 import ScreenContainer from "../../../../components/ui/ScreenContainer";
 import ValidatedInput from "../../../../components/ui/ValidatedInput";
 import {
@@ -10,26 +9,20 @@ import {
 } from "react-native";
 import Colors from "../../../../constants/Colors";
 import Button from "../../../../components/ui/Button/Button";
-import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 import timelineStyles from "../components/timeline.styles";
-import moment from "moment";
 import { View } from "react-native";
 import Ripple from "react-native-material-ripple";
 import Color from "color";
 import type { TimelineScreenProps } from "../types";
-import CreateRepeatableTimeline from "../components/CreateRepeatableTimeline";
-import { useEffect, useState } from "react";
-import useCreateTimeline from "../hooks/mutation/useCreateTimeline";
+import CreateRepeatableTimeline from "../components/CreateTimeline/CreateRepeatableTimeline";
+import useCreateTimeline from "../hooks/general/useCreateTimeline";
 import { Feather } from "@expo/vector-icons";
 import useKeyboard from "../../../../utils/hooks/useKeyboard";
 import Animated, { ZoomInDown, ZoomOutDown } from "react-native-reanimated";
 import SegmentedButtons from "@/components/ui/SegmentedButtons";
 import Layout from "@/constants/Layout";
-import SuggestedEvents from "../components/SuggestedEvents";
+import SuggestedEvents from "../components/CreateTimeline/SuggestedEvents/SuggestedEvents";
 import IconButton from "@/components/ui/IconButton/IconButton";
-import useGetTimelineById from "../hooks/query/useGetTimelineById";
-import useEditTimeline from "../hooks/mutation/useEditTimeline";
-import TimelineCreateHeader from "../components/TimelineCreateHeader";
 
 const styles = StyleSheet.create({
   timeContainer: {
@@ -64,96 +57,15 @@ export default function CreateTimeLineEventModal({
   const isKeyboardOpen = useKeyboard();
 
   const {
-    handleSubmit,
+    f,
+    isLoading,
+    optionsVisible,
+    setOptionsVisible,
+    timePicker,
+    isEditing,
     initialValues,
-    validationSchema,
-    state: { loading: isLoading },
-  } = useCreateTimeline({
-    selectedDate: route.params.selectedDate,
-  });
-
-  const isEditing = route.params.mode === "edit";
-
-  const { data } = useGetTimelineById(route.params.timelineId || "", {
-    skip: !isEditing,
-  });
-
-  const { editTimeline, initialFormProps: initialEditFormValues } =
-    useEditTimeline(route.params.timelineId || "", isEditing);
-
-  const initialFormValues =
-    isEditing && data !== undefined
-      ? initialEditFormValues
-      : {
-          ...initialValues,
-          date: route.params.selectedDate,
-          begin: moment().format("HH:mm:ss"),
-          end: moment().add(1, "hours").format("HH:mm:ss"),
-          notification: "none",
-        };
-
-  const formikSubmitForm = async (input: typeof initialFormValues) => {
-    if (isEditing) {
-      await editTimeline(input, route.params.selectedDate);
-    } else {
-      await handleSubmit(input);
-    }
-  };
-
-  const f = useFormik({
-    onSubmit: formikSubmitForm,
-    validationSchema: validationSchema,
-    initialValues: initialFormValues,
-    enableReinitialize: isEditing,
-  });
-
-  const dateTimeDefaultOptions = {
-    is24Hour: true,
-    textColor: Colors.primary,
-  } as any;
-
-  const timePicker = (formik: any, type: "begin" | "end") => {
-    DateTimePickerAndroid.open({
-      value: new Date(),
-      mode: "time",
-      ...dateTimeDefaultOptions,
-      display: "clock",
-
-      onChange(event, date) {
-        formik.handleChange(type)(date?.toLocaleTimeString());
-      },
-    });
-  };
-
-  const handleChangeDate = () => {
-    DateTimePickerAndroid.open({
-      value: moment(route.params.selectedDate).toDate(),
-      mode: "date",
-      ...dateTimeDefaultOptions,
-
-      onChange(_, date) {
-        navigation.setParams({
-          selectedDate: moment(date).format("YYYY-MM-DD"),
-        });
-        f.setFieldValue("date", moment(date).format("YYYY-MM-DD"));
-      },
-    });
-  };
-
-  const [optionsVisible, setOptionsVisible] = useState(false);
-
-  useEffect(() => {
-    navigation.setOptions({
-      header: (props) => (
-        <TimelineCreateHeader
-          {...props}
-          handleChangeDate={handleChangeDate}
-          selectedDate={route.params.selectedDate}
-          onToggleOptions={() => setOptionsVisible((p) => !p)}
-        />
-      ),
-    });
-  }, [optionsVisible, f.values.date]);
+    handleSubmit,
+  } = useCreateTimeline({ route, navigation });
 
   const TOTAL_PADDING = 30;
 

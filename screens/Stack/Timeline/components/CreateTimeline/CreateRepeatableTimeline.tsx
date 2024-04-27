@@ -1,13 +1,13 @@
 import { View, Text, StyleSheet } from "react-native";
-import Input from "../../../../components/ui/TextInput/TextInput";
-import Colors from "../../../../constants/Colors";
-import SegmentedButtons from "../../../../components/ui/SegmentedButtons";
+import Input from "../../../../../components/ui/TextInput/TextInput";
+import Colors from "../../../../../constants/Colors";
+import SegmentedButtons from "../../../../../components/ui/SegmentedButtons";
 import Ripple from "react-native-material-ripple";
 import Color from "color";
 import { AntDesign } from "@expo/vector-icons";
-import Layout from "../../../../constants/Layout";
-import Modal from "../../../../components/ui/Modal";
-import Button from "../../../../components/ui/Button/Button";
+import Layout from "../../../../../constants/Layout";
+import Modal from "../../../../../components/ui/Modal";
+import Button from "../../../../../components/ui/Button/Button";
 import { memo } from "react";
 
 const styles = StyleSheet.create({
