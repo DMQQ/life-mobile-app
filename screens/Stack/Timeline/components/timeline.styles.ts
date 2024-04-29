@@ -146,5 +146,6 @@ export default StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginTop: 50,
+    paddingHorizontal: 25,
   },
 });

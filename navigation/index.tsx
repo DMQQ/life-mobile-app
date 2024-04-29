@@ -1,6 +1,10 @@
-import { DarkTheme, NavigationContainer } from "@react-navigation/native";
+import {
+  DarkTheme,
+  NavigationContainer,
+  NavigationContainerRef,
+} from "@react-navigation/native";
 import useUser from "../utils/hooks/useUser";
-import { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import Root from "../screens/Stack/Home/Root";
 import { RootStackParamList } from "../types";
 import Colors from "../constants/Colors";
@@ -25,6 +29,9 @@ const LoaderScreen = () => (
   </ScreenContainer>
 );
 
+export const navigationRef =
+  React.createRef<NavigationContainerRef<RootStackParamList>>();
+
 const Tab = createBottomTabNavigator<RootStackParamList>();
 
 export default function Navigation() {
@@ -43,13 +50,13 @@ export default function Navigation() {
   }, [isAuthenticated]);
 
   const renderTab = useCallback(
-    (props: BottomTabBarProps) =>
-      isAuthenticated ? <BottomTab {...props} /> : null,
-    [isAuthenticated]
+    (props: BottomTabBarProps) => <BottomTab {...props} />,
+    []
   );
 
   return (
     <NavigationContainer
+      ref={navigationRef}
       theme={{
         ...DarkTheme,
         colors: {
@@ -60,7 +67,7 @@ export default function Navigation() {
     >
       <Tab.Navigator
         initialRouteName={isLoading ? "Loader" : "Root"}
-        tabBar={renderTab}
+        tabBar={isAuthenticated ? renderTab : undefined}
         screenOptions={{
           headerShown: false,
           headerStyle: {

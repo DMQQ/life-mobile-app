@@ -34,7 +34,7 @@ let token: string | undefined;
 
 const withToken = setContext(async () => {
   // if you have a cached value, return it immediately
-  if (token) return { token };
+  if (token !== undefined) return { token };
 
   return await getItemAsync(STORE_KEY).then((v) => {
     let user = JSON.parse(v || "{}") as { token: string } | null;
@@ -59,25 +59,11 @@ const authMiddleware = new ApolloLink((op, forw) => {
   return forw(op);
 });
 
-const resetToken = onError(({ networkError, graphQLErrors, response }) => {
-  if (
-    (networkError && networkError?.statusCode === 401) ||
-    graphQLErrors?.[0].extensions.response.statusCode === 403 ||
-    response?.errors?.[0].message === "Forbidden resource"
-  ) {
-    token = undefined;
-    deleteItemAsync(STORE_KEY);
-  }
-});
-
 const httpLink = createHttpLink({
   uri: Url.API + "/graphql",
 });
 
-const link = from([
-  withToken.concat(resetToken),
-  authMiddleware.concat(httpLink),
-]);
+const link = from([withToken, authMiddleware.concat(httpLink)]);
 
 const apolloClient = new ApolloClient({
   cache: new InMemoryCache(),
