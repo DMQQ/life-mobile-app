@@ -3,12 +3,26 @@ import { Platform, ToastAndroid } from "react-native";
 import useUser from "./useUser";
 import { gql, useMutation } from "@apollo/client";
 import Constants from "expo-constants";
+import { useEffect, useRef, useState } from "react";
+import { navigationRef } from "@/navigation";
 
 const NOTIFICATION_KEY = "FitnessApp:notifications";
 
 export default function useNotifications() {
+  const [notificationToken, setNotificationToken] = useState<string | null>(
+    null
+  );
   async function registerForPushNotificationsAsync() {
     let token;
+
+    if (Platform.OS === "android") {
+      await Notifications.setNotificationChannelAsync("default", {
+        name: "default",
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: "#FF231F7C",
+      });
+    }
 
     const { status: existingStatus } =
       await Notifications.getPermissionsAsync();
@@ -41,7 +55,38 @@ export default function useNotifications() {
     return token.data;
   }
 
-  const usr = useUser();
+  const notificationListener = useRef<any>();
+  const responseListener = useRef<any>();
+
+  useEffect(() => {
+    registerForPushNotificationsAsync().then((token) => {
+      if (token) setNotificationToken(token);
+    });
+    notificationListener.current =
+      Notifications.addNotificationReceivedListener((notification: any) => {
+        Notifications.addNotificationResponseReceivedListener((response) => {
+          const request = response.notification.request as any;
+
+          const allowedTypes = ["product_update", "daily_sale", "new_product"];
+
+          if (allowedTypes.includes(request.content.data.type)) {
+            navigationRef.current?.navigate("TimelineScreens", {
+              timelineId: request.content.data.timelineId,
+            });
+          }
+        });
+      });
+
+    responseListener.current =
+      Notifications.addNotificationResponseReceivedListener((e) => {});
+
+    return () => {
+      Notifications.removeNotificationSubscription(
+        notificationListener.current
+      );
+      Notifications.removeNotificationSubscription(responseListener.current);
+    };
+  }, []);
 
   const [create] = useMutation(
     gql`
@@ -60,6 +105,7 @@ export default function useNotifications() {
 
       // ToastAndroid.show("Token: " + token, ToastAndroid.SHORT);
     } catch (error) {
+      console.log("Error: ", error);
       ToastAndroid.show(
         "Notifcations disabled: Couln't upload token \n" + token,
         ToastAndroid.SHORT

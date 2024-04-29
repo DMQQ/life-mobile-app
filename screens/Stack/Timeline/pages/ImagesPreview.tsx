@@ -1,6 +1,6 @@
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import ScreenContainer from "@/components/ui/ScreenContainer";
-import { InteractionManager, ScrollView } from "react-native";
+import { InteractionManager, ScrollView, Text } from "react-native";
 import Layout from "@/constants/Layout";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import useGetTimelineById from "../hooks/query/useGetTimelineById";
@@ -9,29 +9,47 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
-import { IFile } from "@/types";
+import { IFile, Timeline } from "@/types";
 import Url from "@/constants/Url";
 import useGoBackOnBackPress from "@/utils/hooks/useGoBackOnBackPress";
+import { TimelineScreenProps } from "../types";
+import Ripple from "react-native-material-ripple";
+import { AntDesign, Feather } from "@expo/vector-icons";
 
-export default function ImagesPreview({ route }: any) {
+export default function ImagesPreview({
+  route,
+  navigation,
+}: TimelineScreenProps<"ImagesPreview">) {
   const { data } = useGetTimelineById(route.params.timelineId! as string, {
     fetchPolicy: "cache-only",
   });
 
-  const scrollRef = useRef<ScrollView | null>(null);
+  const currentImageIndex = data.images.findIndex(
+    (img: { id: string; url: string }) => img.url === route.params.selectedImage
+  );
 
-  useLayoutEffect(() => {
-    const index = data?.images.findIndex(
-      (el: IFile) => el.url === route.params.selectedImage
-    );
-    scrollRef.current?.scrollTo({
-      x: index! * Layout.window.width,
-      y: 0,
-      animated: false,
+  console.log(data.images, route.params.selectedImage);
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerTitle: "",
+      headerTransparent: true,
+      headerRight: () =>
+        currentImageIndex + 1 <= data.images.length ? (
+          <Ripple
+            style={{ paddingRight: 10 }}
+            onPress={() =>
+              navigation.push("ImagesPreview", {
+                timelineId: route.params.timelineId,
+                selectedImage: data.images[currentImageIndex + 1],
+              })
+            }
+          >
+            <Text style={{ color: "#fff" }}>Next</Text>
+          </Ripple>
+        ) : null,
     });
-  }, []);
-
-  useGoBackOnBackPress();
+  }, [data.images, route.params.selectedImage]);
 
   return (
     <ScreenContainer

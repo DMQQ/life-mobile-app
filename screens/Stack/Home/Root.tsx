@@ -13,7 +13,6 @@ import Header from "./components/HomeHeader";
 import { GET_MAIN_SCREEN } from "@/utils/schemas/GET_MAIN_SCREEN";
 
 export default function Root({ navigation }: ScreenProps<"Root">) {
-  const { token } = useUser();
   const workout = useAppSelector((s) => s.workout);
 
   const { data } = useQuery(GET_MAIN_SCREEN, {});
@@ -21,7 +20,12 @@ export default function Root({ navigation }: ScreenProps<"Root">) {
   return (
     <View style={{ flex: 1 }}>
       <Header />
-      <ScrollView style={{ flex: 1, paddingHorizontal: 10 }}>
+      <ScrollView
+        style={{ flex: 1, paddingHorizontal: 10 }}
+        contentContainerStyle={{
+          paddingTop: 10,
+        }}
+      >
         <AvailableBalanceWidget data={data?.wallet} />
 
         <TodaysTimelineEvents data={data?.timelineByCurrentDate} />

@@ -14,7 +14,6 @@ import timelineStyles from "./timeline.styles";
 import { GetTimelineQuery } from "../hooks/query/useGetTimeLineQuery";
 import Colors from "../../../../constants/Colors";
 import { useMemo } from "react";
-import CompletionBar from "./CompletionBar";
 
 export default function TimelineItem(
   timeline: GetTimelineQuery & {
@@ -62,17 +61,26 @@ export default function TimelineItem(
     );
   };
 
-  const isExpired = useMemo(
-    () =>
-      moment(moment(), "hh:mm:ss").isAfter(
-        moment(timeline.endTime, "hh:mm:ss")
-      ) &&
-      moment(moment(), "YYYY-MM-DD").isAfter(
-        moment(timeline.date, "YYYY-MM-DD"),
-        "date"
-      ),
-    []
-  );
+  const isExpired = useMemo(() => {
+    const now = moment();
+
+    if (moment(timeline.date).isBefore(now, "day")) return true;
+
+    if (timeline.isCompleted) return false;
+
+    const start = moment(timeline.beginTime, "HH:mm");
+    const end = moment(timeline.endTime, "HH:mm");
+
+    if (now.isAfter(end)) {
+      return true;
+    }
+
+    if (now.isAfter(start) && now.isBefore(end)) {
+      return false;
+    }
+  }, []);
+
+  console.log(timeline.todos, timeline.images);
 
   return (
     <Ripple

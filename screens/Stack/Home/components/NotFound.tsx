@@ -5,32 +5,26 @@ import Button from "@/components/ui/Button/Button";
 import moment from "moment";
 import Colors, { Sizing } from "@/constants/Colors";
 import { useNavigation } from "@react-navigation/native";
-import Animated, {
-  FadeIn,
-  SlideInUp,
-  ZoomIn,
-  ZoomInDown,
-  ZoomInUp,
-} from "react-native-reanimated";
+import Animated, { FadeIn } from "react-native-reanimated";
 
 const styles = StyleSheet.create({
   container: {
-    paddingVertical: 10,
-    marginBottom: 10,
+    paddingVertical: 7.5,
     alignItems: "center",
     flexDirection: "row",
+    flex: 1,
   },
   heading: {
     color: "#fff",
-    fontSize: Sizing.subHead - 2,
+    fontSize: Sizing.subHead + 2,
     fontWeight: "bold",
   },
   content: {
     color: "#fff",
-    fontSize: 18,
+    fontSize: 19,
     flex: 1,
     flexWrap: "wrap",
-    marginTop: 5,
+    marginTop: 2.5,
   },
 });
 
@@ -44,14 +38,14 @@ export default function NotFound() {
   };
 
   return (
-    <View style={{ flexDirection: "column" }}>
+    <View style={{ flexDirection: "column", flex: 1, width: "100%" }}>
       <View style={styles.container}>
-        <Animated.View entering={FadeIn.delay(50)}>
-          <SVGImage width={Layout.screen.width / 4} height={100} />
+        <Animated.View entering={FadeIn.delay(50)} style={{ marginRight: 10 }}>
+          <SVGImage width={Layout.screen.width / 5} height={100} />
         </Animated.View>
-        <View style={{ paddingHorizontal: 15 }}>
+        <View style={{ flex: 1 }}>
           <Animated.Text entering={FadeIn.delay(75)} style={styles.heading}>
-            Your Calendar is Empty{" "}
+            No events found
           </Animated.Text>
           <Animated.Text
             entering={FadeIn.delay(100)}
@@ -59,7 +53,7 @@ export default function NotFound() {
             textBreakStrategy="highQuality"
             style={styles.content}
           >
-            No upcoming events in{"\n"}your calendar.{"\n"}
+            Create events to keep track of your daily activities
           </Animated.Text>
         </View>
       </View>

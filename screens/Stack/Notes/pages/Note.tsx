@@ -33,7 +33,7 @@ export default function NoteScreen({ route, navigation }: any) {
   }, []);
 
   return (
-    <ScreenContainer>
+    <ScreenContainer scroll>
       <SharedElement id={`note.title.${route.params?.noteId as string}`}>
         <View style={{ width: "100%" }}>
           <Text
@@ -49,7 +49,13 @@ export default function NoteScreen({ route, navigation }: any) {
       </SharedElement>
 
       <SharedElement id={`note.desc.${route.params?.noteId as string}`}>
-        <Text style={{ color: "#ffffff7b", marginBottom: 5, fontSize: 20 }}>
+        <Text
+          style={{
+            color: "#ffffff7b",
+            marginBottom: 5,
+            fontSize: 20,
+          }}
+        >
           {note?.content}
         </Text>
       </SharedElement>
