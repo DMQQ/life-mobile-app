@@ -25,14 +25,7 @@ const GET_EXERCISES = gql`
 `;
 
 const useGetExercises = () => {
-  const { token } = useUser();
-  return useQuery(GET_EXERCISES, {
-    context: {
-      headers: {
-        authentication: token,
-      },
-    },
-  });
+  return useQuery(GET_EXERCISES);
 };
 
 interface Props {
@@ -70,6 +63,7 @@ export default function ExercisesSelect({
             flexDirection: "row",
             alignItems: "center",
             padding: 10,
+            paddingHorizontal: 15,
             backgroundColor: find ? Colors.primary : "transparent",
           }}
         >
@@ -82,17 +76,6 @@ export default function ExercisesSelect({
               {item.description}
             </Text>
           </View>
-          <View
-            style={{
-              flex: 1,
-              flexDirection: "row",
-              justifyContent: "flex-end",
-            }}
-          >
-            {find && (
-              <AntDesign name="check" size={25} color={Colors.secondary} />
-            )}
-          </View>
         </Ripple>
       ) as any;
     },
@@ -101,12 +84,13 @@ export default function ExercisesSelect({
 
   return (
     <Select
+      anchor="top"
       renderCustomSelected={
         <View
           style={{
             flexWrap: "wrap",
             flexDirection: "row",
-            paddingVertical: 2.5,
+            padding: 5,
           }}
         >
           {selected.map((element) => (

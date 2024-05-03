@@ -1,9 +1,10 @@
-import { View, Text } from "react-native";
-import { useState, useEffect, ReactNode } from "react";
+import { View, Text, StyleSheet } from "react-native";
+import { useState, useEffect, memo, useMemo } from "react";
 import Colors from "../../../constants/Colors";
 import Ripple from "react-native-material-ripple";
-import { AntDesign, Ionicons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import Color from "color";
+import { useIsFocused } from "@react-navigation/native";
 
 function parseTime(remainingTime: number) {
   const minutes = Math.floor(remainingTime / 60);
@@ -31,14 +32,43 @@ interface TimeKeeperProps {
   text: string;
 }
 
-export default function TimeKeeper(props: TimeKeeperProps) {
+const styles = StyleSheet.create({
+  headline: { color: "#ffffff97", fontSize: 15, textAlign: "center" },
+  finish: {
+    backgroundColor: Color(Colors.secondary).alpha(0.25).string(),
+    borderRadius: 5,
+    padding: 10,
+    marginLeft: 10,
+    width: "40%",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  timer: {
+    color: Colors.secondary,
+    fontSize: 100,
+    fontWeight: "bold",
+    lineHeight: 110,
+    textAlign: "center",
+  },
+  text: { color: "#fff", fontSize: 18, fontWeight: "bold" },
+  stop: {
+    borderRadius: 5,
+    padding: 10,
+  },
+  finishText: { color: Colors.secondary, fontSize: 20 },
+});
+
+function TimeKeeper(props: TimeKeeperProps) {
   const [time, setTime] = useState(0); // seconds
   const [isStopped, setIsStopped] = useState(props?.pausedOnStart || false);
+
+  const isFocused = useIsFocused();
 
   useEffect(() => {
     if (
       isStopped ||
       props?.stopTimer ||
+      !isFocused ||
       (props?.stopTimerOnN && props?.stopTimerOnN === time)
     )
       return;
@@ -50,7 +80,24 @@ export default function TimeKeeper(props: TimeKeeperProps) {
     return () => {
       clearInterval(interval);
     };
-  }, [isStopped, props?.stopTimer]);
+  }, [isStopped, props?.stopTimer, isFocused]);
+
+  const backgroundColor = useMemo(
+    () =>
+      isStopped
+        ? Color(Colors.ternary).alpha(0.25).string()
+        : Color(Colors.error).alpha(0.25).string(),
+    [isStopped]
+  );
+
+  function onStopPress() {
+    setIsStopped((p) => !p);
+    props.onStoped?.();
+  }
+
+  function onCompleted() {
+    props.onCompleted?.(time);
+  }
 
   return (
     <View
@@ -59,40 +106,19 @@ export default function TimeKeeper(props: TimeKeeperProps) {
       }}
     >
       <View style={{ justifyContent: "center" }}>
-        <Text style={{ color: "#ffffff97", fontSize: 15, textAlign: "center" }}>
+        <Text style={styles.headline}>
           {props.headLineText || "Scored time"}
         </Text>
-        <Text
-          style={{
-            color: Colors.secondary,
-            fontSize: 100,
-            fontWeight: "bold",
-            lineHeight: 110,
-            textAlign: "center",
-          }}
-        >
-          {parseTime(time)}
-        </Text>
+        <Text style={styles.timer}>{parseTime(time)}</Text>
       </View>
       <View style={{ justifyContent: "center" }}>
-        <Text style={{ color: "#fff", fontSize: 18, fontWeight: "bold" }}>
-          {props.text}
-        </Text>
+        <Text style={styles.text}>{props.text}</Text>
       </View>
       {/* Controls */}
       <View style={{ flexDirection: "row", marginTop: 20 }}>
         <Ripple
-          onPress={() => {
-            setIsStopped((p) => !p);
-            props.onStoped?.();
-          }}
-          style={{
-            backgroundColor: isStopped
-              ? Color(Colors.ternary).alpha(0.25).string()
-              : Color(Colors.error).alpha(0.25).string(),
-            borderRadius: 5,
-            padding: 10,
-          }}
+          onPress={onStopPress}
+          style={[styles.stop, { backgroundColor }]}
         >
           <Ionicons
             name={isStopped ? "play" : "pause"}
@@ -101,19 +127,8 @@ export default function TimeKeeper(props: TimeKeeperProps) {
           />
         </Ripple>
 
-        <Ripple
-          onPress={() => props.onCompleted?.(time)}
-          style={{
-            backgroundColor: Color(Colors.secondary).alpha(0.25).string(),
-            borderRadius: 5,
-            padding: 10,
-            marginLeft: 10,
-            width: "40%",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Text style={{ color: Colors.secondary, fontSize: 20 }}>
+        <Ripple onPress={onCompleted} style={styles.finish}>
+          <Text style={styles.finishText}>
             {props?.finishButtonText || "Finish"}
           </Text>
         </Ripple>
@@ -121,3 +136,5 @@ export default function TimeKeeper(props: TimeKeeperProps) {
     </View>
   );
 }
+
+export default memo(TimeKeeper);

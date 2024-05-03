@@ -36,6 +36,7 @@ const ClockTimer = (props: ClockTimerProps) => {
 
   const [timer, setTimer] = useState(initialTime);
   const [isActive, setIsActive] = useState(true);
+  const isFocused = useIsFocused();
 
   const circumference = 2 * Math.PI * radius;
   const progress = (timer / initialTime) * circumference;
@@ -64,6 +65,10 @@ const ClockTimer = (props: ClockTimerProps) => {
   }, [timer]);
 
   useEffect(() => {
+    if (!isFocused) onStopTimer();
+  }, [isFocused]);
+
+  useEffect(() => {
     animationRef.current = Animated.timing(animatedValue, {
       toValue: 0,
       duration: timer * 1000, // Convert timerValue to milliseconds
@@ -72,7 +77,7 @@ const ClockTimer = (props: ClockTimerProps) => {
     });
 
     animationRef.current.start();
-  }, [animatedValue, progress, timer]);
+  }, [animatedValue, timer]);
 
   const onStopTimer = () => {
     animationRef.current?.stop();
@@ -80,16 +85,8 @@ const ClockTimer = (props: ClockTimerProps) => {
 
     if (!isActive) animationRef.current?.start();
 
-    if (timer === 0) {
-      onReset();
-    }
+    if (timer === 0) onReset();
   };
-
-  const isFocused = useIsFocused();
-
-  useEffect(() => {
-    if (!isFocused) onStopTimer();
-  }, [isFocused]);
 
   const onReset = (time = props.initialSecondsLeft) => {
     setTimeout(() => setIsActive(true), 1000);
@@ -196,4 +193,4 @@ const ClockTimer = (props: ClockTimerProps) => {
   );
 };
 
-export default ClockTimer;
+export default React.memo(ClockTimer);

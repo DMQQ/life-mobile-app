@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "mylife-mobile",
+    "name": "myLife",
     "slug": "mylife-mobile",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
@@ -10,7 +10,7 @@
     "splash": {
       "image": "./assets/images/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#151421"
     },
     "updates": {
       "fallbackToCacheTimeout": 0
@@ -20,9 +20,10 @@
       "supportsTablet": true
     },
     "android": {
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#151421"
       },
       "permissions": ["android.permission.RECORD_AUDIO"],
       "package": "com.dmq.mylifemobile"

@@ -1,15 +1,14 @@
-import { View, Text, Pressable, StyleSheet, ToastAndroid } from "react-native";
-import { Timeline, Todos } from "../../../../types";
+import { View, Text, Pressable, StyleSheet } from "react-native";
+import { Todos } from "../../../../types";
 import Colors from "../../../../constants/Colors";
 import Color from "color";
 import Ripple from "react-native-material-ripple";
-import useUser from "../../../../utils/hooks/useUser";
-import { gql, useMutation } from "@apollo/client";
-import { GET_TIMELINE } from "../hooks/query/useGetTimelineById";
 import Button from "../../../../components/ui/Button/Button";
-import React from "react";
+import React, { useState } from "react";
 import Input from "../../../../components/ui/TextInput/TextInput";
 import CompleteTodoButton from "./CompleteTodoButton";
+
+import L from "@/constants/Layout";
 
 const styles = StyleSheet.create({
   header: {
@@ -44,63 +43,16 @@ const styles = StyleSheet.create({
     borderRadius: 100,
   },
   todo: {
-    backgroundColor: Color(Colors.primary).lighten(0.5).string(),
+    backgroundColor: Colors.primary_lighter,
     padding: 15,
-    borderRadius: 5,
+    paddingHorizontal: 20,
+    borderRadius: 10,
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 10,
     alignItems: "center",
   },
 });
-
-const useCreateTodo = (timelineId: string) => {
-  const usr = useUser();
-
-  const [createTodo, state] = useMutation(
-    gql`
-      mutation CreateTodo($title: String!, $timelineId: ID!) {
-        createTimelineTodos(todos: { title: $title, timelineId: $timelineId }) {
-          id
-          title
-          isCompleted
-        }
-      }
-    `,
-    {
-      update(cache, data) {
-        const timeline = cache.readQuery({
-          query: GET_TIMELINE,
-          variables: { id: timelineId },
-        }) as { timelineById: Timeline };
-
-        const final = {
-          timelineById: {
-            ...timeline.timelineById,
-            todos: [
-              ...timeline.timelineById.todos,
-              data.data.createTimelineTodos,
-            ],
-          },
-        };
-
-        cache.writeQuery({
-          data: final,
-          id: cache.identify(final),
-          query: GET_TIMELINE,
-          variables: { id: timeline.timelineById.id },
-        });
-      },
-      context: {
-        headers: {
-          authentication: usr.token,
-        },
-      },
-    }
-  );
-
-  return { createTodo, state };
-};
 
 export default function TimelineTodos(props: {
   todos: Todos[];
@@ -111,6 +63,7 @@ export default function TimelineTodos(props: {
   const [text, setText] = React.useState("");
 
   const handleCreateTodo = async () => {
+    if (text.trim() === "") return;
     await createTodo({
       variables: {
         title: text,
@@ -124,43 +77,106 @@ export default function TimelineTodos(props: {
 
   const [show, setShow] = React.useState(false);
 
+  const [dialog, setDialog] = useState(false);
+  const [dialogText, setDialogText] = useState("");
+
+  const handleTransfer = useTransferTodos(props.todos, dialogText);
+
   return (
-    <View style={{ marginTop: 20 }}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Todos ({props.todos.length})</Text>
+    <>
+      <View style={{ marginTop: 25 }}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Todos ({props.todos.length})</Text>
 
-        <Ripple onPress={() => setShow((s) => !s)} style={styles.createTodo}>
-          <Text style={{ fontWeight: "bold", color: Colors.primary }}>
-            Create todo
-          </Text>
-        </Ripple>
-      </View>
-      {props.todos.map((todo) => (
-        <Todo timelineId={props.timelineId} key={todo.id} {...todo} />
-      ))}
-
-      {show && (
-        <View style={{ marginTop: 15 }}>
-          <Input
-            value={text}
-            setValue={setText}
-            placeholder="todo's name"
-            placeholderTextColor={"gray"}
-            onSubmitEditing={() => {
-              if (text.trim() !== "") handleCreateTodo();
-            }}
-          />
-
-          <Button
-            onPress={handleCreateTodo}
-            fontStyle={styles.buttonText}
-            style={styles.button}
+          <Ripple
+            onLongPress={() => setDialog((p) => !p)}
+            onPress={() => setShow((s) => !s)}
+            style={styles.createTodo}
           >
-            Add todo
-          </Button>
+            <Text style={{ fontWeight: "bold", color: Colors.primary }}>
+              Create todo
+            </Text>
+          </Ripple>
         </View>
-      )}
-    </View>
+
+        <View style={{ paddingHorizontal: 7.5 }}>
+          {props.todos.map((todo) => (
+            <Todo timelineId={props.timelineId} key={todo.id} {...todo} />
+          ))}
+        </View>
+
+        {show && (
+          <View style={{ marginTop: 5 }}>
+            <Input
+              autoFocus
+              value={text}
+              setValue={setText}
+              placeholder="todo's name"
+              placeholderTextColor={"gray"}
+              onSubmitEditing={handleCreateTodo}
+            />
+
+            <Button
+              disabled={text.trim().length === 0}
+              onPress={handleCreateTodo}
+              fontStyle={styles.buttonText}
+              type="outlined"
+              style={{ borderRadius: 10 }}
+            >
+              Create task
+            </Button>
+          </View>
+        )}
+      </View>
+
+      <Overlay
+        opacity={0.8}
+        onClose={() => setDialog(false)}
+        isVisible={dialog}
+      >
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <View
+            style={{
+              padding: 20,
+              backgroundColor: Colors.primary,
+              borderRadius: 20,
+            }}
+          >
+            <Text
+              style={{
+                color: Colors.secondary,
+                marginBottom: 10,
+                fontSize: 18,
+                fontWeight: "bold",
+              }}
+            >
+              New event ID
+            </Text>
+            <Input
+              label="Event id to be copied"
+              placeholder="xxxx-xxxxx-xxxxx"
+              placeholderTextColor="gray"
+              value={dialogText}
+              setValue={setDialogText}
+              style={{ width: L.screen.width - 50 }}
+            />
+            <Button
+              style={{ marginTop: 10 }}
+              type="outlined"
+              onPress={handleTransfer}
+            >
+              Copy
+            </Button>
+          </View>
+        </View>
+      </Overlay>
+    </>
   );
 }
 
@@ -173,53 +189,13 @@ import Animated, {
   FadeOutUp,
   Layout,
 } from "react-native-reanimated";
+import Overlay from "@/components/ui/Overlay/Overlay";
+import useCreateTodo from "../hooks/mutation/useCreateTodo";
+import useTransferTodos from "../hooks/mutation/useTransferTodos";
+import useRemoveTodo from "../hooks/mutation/useRemoveTodo";
 
 const Todo = (todo: Todos & { timelineId: string }) => {
-  const usr = useUser();
-
-  const [removeTodo] = useMutation(
-    gql`
-      mutation RemoveTodo($id: ID!) {
-        removeTimelineTodo(id: $id)
-      }
-    `,
-    {
-      context: {
-        headers: {
-          token: usr.token,
-        },
-      },
-      update(cache) {
-        const todos = cache.readQuery({
-          query: GET_TIMELINE,
-          variables: { id: todo.timelineId },
-        }) as { timelineById: Timeline };
-
-        const final = {
-          timelineById: {
-            ...todos.timelineById,
-            todos: todos.timelineById.todos.filter(
-              (t: Todos) => t.id !== todo.id
-            ),
-          },
-        };
-
-        cache.writeQuery({
-          overwrite: true,
-          query: GET_TIMELINE,
-          variables: { id: todo.timelineId },
-          data: final,
-          id: cache.identify(final),
-        });
-      },
-      onCompleted() {
-        ToastAndroid.show("Todo removed", ToastAndroid.SHORT);
-      },
-      variables: {
-        id: todo.id,
-      },
-    }
-  );
+  const removeTodo = useRemoveTodo(todo);
 
   return (
     <Animated.View
@@ -231,10 +207,14 @@ const Todo = (todo: Todos & { timelineId: string }) => {
         <View style={{ flexDirection: "row", alignItems: "center" }}>
           <Dot color={todo.isCompleted ? Colors.secondary : "red"} />
 
-          <Text style={{ color: "#fff", marginLeft: 15 }}>{todo.title}</Text>
+          <Text style={{ color: "#fff", marginLeft: 15, fontSize: 16 }}>
+            {todo.title}
+          </Text>
         </View>
 
-        <CompleteTodoButton timelineId={todo.timelineId} todoId={todo.id} />
+        {!todo.isCompleted && (
+          <CompleteTodoButton timelineId={todo.timelineId} todoId={todo.id} />
+        )}
       </Pressable>
     </Animated.View>
   );

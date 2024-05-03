@@ -17,12 +17,6 @@ export default function useCompleteTodo(props: {
       }
     `,
     {
-      context: {
-        headers: {
-          authentication: token,
-        },
-      },
-
       update(cache) {
         const data = cache.readQuery({
           query: GET_TIMELINE,

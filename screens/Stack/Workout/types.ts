@@ -11,6 +11,7 @@ export interface WorkoutStackParamList extends ParamListBase {
     delayTimerStart?: number;
     exerciseId: string;
   };
+  WorkoutSummary?: { workoutId?: string };
 }
 
 export type WorkoutScreenProps<T extends keyof WorkoutStackParamList> =

@@ -6,7 +6,7 @@ import BottomSheet, {
 import Colors from "../../../../constants/Colors";
 import { Text, View, StyleSheet } from "react-native";
 import { Exercise, ExerciseProgress } from "../../../../types";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { gql, useQuery } from "@apollo/client";
 import useUser from "../../../../utils/hooks/useUser";
 import Ripple from "react-native-material-ripple";
@@ -22,6 +22,7 @@ import Animated, {
   FadeInUp,
   FadeOutDown,
 } from "react-native-reanimated";
+import moment from "moment";
 
 const styles = StyleSheet.create({
   title: { color: Colors.secondary, fontWeight: "bold", fontSize: 25 },
@@ -79,14 +80,10 @@ interface ExerciseProgressSheetProps {
   workoutId: string;
 }
 
-export default function ExerciseProgressSheet(
-  props: ExerciseProgressSheetProps
-) {
+function ExerciseProgressSheet(props: ExerciseProgressSheetProps) {
   const sheetRef = useRef<BottomSheet | null>(null);
 
-  const { data } = useGetExerciseProgressQuery(
-    props.selectedExercise?.exerciseId
-  );
+  const data = useGetExerciseProgressQuery(props.selectedExercise?.exerciseId);
 
   useEffect(() => {
     if (typeof props.selectedExercise !== "undefined") {
@@ -159,7 +156,7 @@ export default function ExerciseProgressSheet(
 
       <BottomSheetFlatList
         scrollEnabled
-        data={(data?.exerciseProgress as ExerciseProgress[]) || []}
+        data={data}
         keyExtractor={(item) => item.exerciseProgressId}
         renderItem={({ item }) => <ExerciseProgressTile {...item} />}
       />
@@ -167,7 +164,18 @@ export default function ExerciseProgressSheet(
   );
 }
 
+export default memo(ExerciseProgressSheet);
+
 const ExerciseProgressTile = (props: ExerciseProgress) => {
+  const date = useMemo(() => {
+    if (moment(props.date).isSame(moment().subtract(1, "day"), "date"))
+      return "Yesterday";
+
+    if (moment(props.date).isSame(moment(), "date")) return "Today";
+
+    return props.date;
+  }, [props.date]);
+
   return (
     <View
       style={{
@@ -175,7 +183,7 @@ const ExerciseProgressTile = (props: ExerciseProgress) => {
         flexDirection: "row",
       }}
     >
-      <Text style={{ color: "#ffffffc3", flex: 1 }}>{props.date}</Text>
+      <Text style={{ color: "#ffffffc3", flex: 1 }}>{date}</Text>
       <Text style={{ color: "#ffffffc3", flex: 1, textAlign: "center" }}>
         reps ({props.reps})
       </Text>

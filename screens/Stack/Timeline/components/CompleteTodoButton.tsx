@@ -11,8 +11,8 @@ export default function CompleteTodoButton(props: {
 
   return (
     <Ripple onPress={() => completeTodo()}>
-      <Text style={{ color: Colors.secondary, marginLeft: 15 }}>
-        complete task
+      <Text style={{ color: Colors.secondary, marginLeft: 15, fontSize: 16 }}>
+        Complete
       </Text>
     </Ripple>
   );

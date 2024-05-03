@@ -34,15 +34,10 @@ const CREATE_EXERCISE_MUTATION = gql`
   }
 `;
 
-export default function useCreateExercise() {
+export default function useCreateExercise(onCompleted?: () => {}) {
   const usr = useUser();
 
   const [create, state] = useMutation(CREATE_EXERCISE_MUTATION, {
-    context: {
-      headers: {
-        token: usr.token,
-      },
-    },
     update(cache, { data: { createExercise } }) {
       cache.modify({
         fields: {
@@ -76,6 +71,8 @@ export default function useCreateExercise() {
   const createExercise = async (props: any) =>
     create({
       variables: props,
+      onCompleted,
+      onError: (er) => console.log(JSON.stringify(er, null, 2)),
     });
 
   return { createExercise, state };

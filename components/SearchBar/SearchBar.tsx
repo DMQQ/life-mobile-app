@@ -1,5 +1,5 @@
 import {
-  FlatList,
+  LayoutRectangle,
   StyleProp,
   StyleSheet,
   Text,
@@ -8,23 +8,27 @@ import {
   ViewStyle,
 } from "react-native";
 import Colors from "../../constants/Colors";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Color from "color";
 import Ripple from "react-native-material-ripple";
 import { AntDesign } from "@expo/vector-icons";
 import Layout from "../../constants/Layout";
 import { useNavigation } from "@react-navigation/core";
+import Note from "../../screens/Stack/Notes/components/Note";
+import { useAppSelector } from "../../utils/redux";
 
 const backgroundColor = Color(Colors.primary).lighten(0.25).string();
 
 const styles = StyleSheet.create({
   container: {
+    position: "relative",
     width: "100%",
-    padding: 0,
+    paddingHorizontal: 15,
+    paddingVertical: 2.5,
     borderWidth: 1.5,
     backgroundColor: backgroundColor,
-    borderRadius: 5,
-    flexDirection: "row",
+    borderRadius: 100,
+    flexDirection: "row-reverse",
     alignItems: "center",
   },
   input: {
@@ -35,118 +39,135 @@ const styles = StyleSheet.create({
   },
   floatingContainer: {
     position: "absolute",
-    left: 10,
-    top: 10,
     backgroundColor: backgroundColor,
-    width: Layout.screen.width - 20,
-    padding: 10,
-    paddingVertical: 15,
     borderWidth: 1,
-    borderColor: Colors.secondary,
-    borderBottomEndRadius: 5,
-    borderBottomStartRadius: 5,
+    borderRadius: 100,
+  },
+  icons: {
+    backgroundColor: Colors.secondary,
+    padding: 5,
+    borderRadius: 100,
   },
 });
 
 interface SearchBarProps<T = []> {
   outerContainerStyles?: StyleProp<ViewStyle>;
 
-  itemList?: T[];
+  isFocused: boolean;
 
-  renderItem?: Function;
+  setIsFocused: React.Dispatch<React.SetStateAction<boolean>>;
 
-  keyExtractor?: (item: T) => string;
-
-  isListVisible?: boolean;
-
-  onSubmitEditing: (text: string) => any;
+  textInputRef?: React.MutableRefObject<TextInput | null>;
 }
 
-export default function SearchBar(props: SearchBarProps) {
-  const [isFocused, setIsFocused] = useState(false);
-
+export default function SearchBar({
+  isFocused,
+  setIsFocused,
+  ...props
+}: SearchBarProps) {
+  const [layout, setLayout] = useState<LayoutRectangle | undefined>();
   const [text, setText] = useState<string>("");
-
-  // prettier-ignore
-  const [inputLayoutSize, setInputLayoutSize] = useState({ height: 0,width: 0,x: 0,y: 0 });
-
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
+  const [suggestions, setSuggestions] = useState<typeof notes.notes>([]);
 
   const borderColor = isFocused
-    ? Color(Colors.secondary).lighten(0.5).hex()
-    : Color(Colors.secondary).darken(0.25).string();
+    ? Color(Colors.secondary).lighten(0.1).hex()
+    : Colors.secondary;
 
-  const backgroundColor = Color(Colors.primary_light).darken(0.25).string();
+  const onPlusPress = () => navigation.navigate("NoteCreate");
 
-  const onPlusPress = () => navigation.navigate<any>("NoteCreate");
+  const notes = useAppSelector((s) => s.notes);
+
+  const handleSearchMatchingQuery = () => {
+    let output = [] as typeof notes.notes;
+
+    for (let note of notes.notes) {
+      const regex = new RegExp(text, "gi");
+
+      if (note.content.match(regex) && text !== "") {
+        output.push(note);
+      }
+    }
+
+    setSuggestions(output);
+  };
+
+  useEffect(() => {
+    handleSearchMatchingQuery();
+  }, [text]);
 
   return (
-    <>
-      <View style={{ padding: 10 }}>
-        <View
-          style={[
-            styles.container,
-            { borderColor },
-            props.outerContainerStyles,
-          ]}
-        >
-          <Ripple
-            onPress={onPlusPress}
-            style={{
-              backgroundColor,
-              padding: 5,
-              borderRadius: 100,
-              marginLeft: 10,
-            }}
-          >
-            <AntDesign size={24} name="plus" color={Colors.secondary} />
-          </Ripple>
-          <TextInput
-            onLayout={(event) => setInputLayoutSize(event.nativeEvent.layout)}
-            value={text}
-            onChangeText={setText}
-            style={[styles.input]}
-            onBlur={() => setIsFocused(false)}
-            onFocus={() => setIsFocused(true)}
-            onSubmitEditing={() => props.onSubmitEditing(text)}
-          />
-          <Ripple
-            rippleCentered
-            rippleColor={Colors.secondary}
-            style={{
-              padding: 10,
-              justifyContent: "center",
-              alignItems: "center",
-              borderRadius: 100,
-            }}
-          >
-            <AntDesign name="search1" size={24} color={Colors.secondary} />
-          </Ripple>
-        </View>
+    <View
+      style={{
+        paddingHorizontal: 15,
+        zIndex: isFocused ? 100 : 1,
+        paddingTop: 7.5,
+      }}
+    >
+      <View
+        onLayout={(ev) => setLayout(ev.nativeEvent.layout)}
+        style={[
+          styles.container,
+          { borderColor },
+          { zIndex: isFocused ? 100 : 1 },
+          props.outerContainerStyles,
+        ]}
+      >
+        <Ripple onPress={onPlusPress} style={styles.icons}>
+          <AntDesign size={24} name="plus" color={"#fff"} />
+        </Ripple>
+        <TextInput
+          ref={props.textInputRef}
+          value={text}
+          onChangeText={setText}
+          style={[styles.input]}
+          onFocus={() => setIsFocused(true)}
+        />
       </View>
 
-      {props.isListVisible && (
+      {isFocused && (
         <View
           style={[
             styles.floatingContainer,
+            { borderColor },
             {
-              transform: [
-                {
-                  translateY: inputLayoutSize?.height,
-                },
-              ],
+              top: layout?.height! / 2 + 7.5,
+              left: layout?.x,
+              width: layout?.width,
+              borderRadius: 0,
+              zIndex: 10,
+
+              paddingTop: 15 + layout?.height! / 2,
+              paddingBottom: 10,
+
+              borderBottomLeftRadius: 15,
+              borderBottomRightRadius: 15,
+
+              backgroundColor: Colors.primary_lighter,
             },
           ]}
         >
-          <Text style={{ color: "#fff" }}>List of suggestions</Text>
+          <Text style={{ color: "#ffffff74", marginBottom: 5, marginLeft: 15 }}>
+            List of suggestions
+          </Text>
 
-          <FlatList
-            data={props.itemList}
-            keyExtractor={props.keyExtractor}
-            renderItem={props.renderItem as any}
-          />
+          {suggestions.map((item) => (
+            <Note
+              hideContent
+              key={item.id.toString()}
+              {...item}
+              noteId={item.id.toString()}
+              title={item.content.split("\n")[0]}
+              text={item.content}
+              containerStyles={{
+                padding: 0,
+                paddingHorizontal: 10,
+                marginBottom: 5,
+              }}
+            />
+          ))}
         </View>
       )}
-    </>
+    </View>
   );
 }
