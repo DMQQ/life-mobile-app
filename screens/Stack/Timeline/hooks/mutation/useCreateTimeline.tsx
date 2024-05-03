@@ -1,5 +1,4 @@
 import { useMutation } from "@apollo/client";
-import useUser from "../../../../../utils/hooks/useUser";
 import { CREATE_TIMELINE_EVENT } from "../schemas/schemas";
 import { GET_TIMELINE_QUERY } from "../query/useGetTimeLineQuery";
 import { Timeline } from "../../../../../types";
@@ -8,10 +7,12 @@ import { useNavigation } from "@react-navigation/native";
 import { ToastAndroid } from "react-native";
 
 import * as Yup from "yup";
+import { GET_MONTHLY_EVENTS } from "../general/useTimeline";
+import moment from "moment";
 
 const initialValues = {
-  title: "No title",
-  desc: "(no content)",
+  title: "",
+  desc: "",
   date: "",
   begin: "",
   end: "",
@@ -22,34 +23,24 @@ const initialValues = {
   repeatEveryNth: "",
 };
 
+export type InitialValuesType = typeof initialValues;
+
 const validationSchema = Yup.object().shape({
   title: Yup.string().required("Title is required"),
-  desc: Yup.string().required("Description is required"),
+  desc: Yup.string(),
   date: Yup.string().required("Date is required"),
   begin: Yup.string().required("Begin time is required"),
   end: Yup.string().required("End time is required"),
   tags: Yup.string().required("Tags are required"),
-
-  // repeatCount: Yup.number().positive(),
-  // repeatOn: Yup.string().equals(["daily", "weekly"]),
-  // repeatEveryNth: Yup.number().positive(),
 });
 
 export default function useCreateTimeline(props: { selectedDate: string }) {
-  const usr = useUser();
-
   const navigation = useNavigation<any>();
 
-  const [createTimelineEvent, state] = useMutation(CREATE_TIMELINE_EVENT, {
-    context: {
-      headers: {
-        authentication: usr.token,
-      },
-    },
-  });
+  const [createTimelineEvent, state] = useMutation(CREATE_TIMELINE_EVENT, {});
 
   const handleSubmit = async (input: typeof initialValues) => {
-    const { data, errors } = await createTimelineEvent({
+    const { data } = await createTimelineEvent({
       variables: {
         title: input.title,
         desc: input.desc,
@@ -67,6 +58,16 @@ export default function useCreateTimeline(props: { selectedDate: string }) {
           }),
       },
 
+      refetchQueries: [
+        {
+          query: GET_MONTHLY_EVENTS,
+          variables: {
+            date: moment().format("YYYY-MM-DD"),
+          },
+        },
+        "GetRootView",
+      ],
+
       update(cache, { data: { createTimeline } }) {
         const { timeline } = cache.readQuery({
           query: GET_TIMELINE_QUERY,
@@ -82,7 +83,7 @@ export default function useCreateTimeline(props: { selectedDate: string }) {
       },
 
       onError: (err) => {
-        ToastAndroid.show("Creating timeline failed", ToastAndroid.LONG);
+        ToastAndroid.show("Could not create timeline", ToastAndroid.LONG);
       },
     });
 

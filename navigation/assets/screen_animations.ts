@@ -50,7 +50,7 @@ export const fadeInFromBottomAndScaleUp: StackNavigationOptions = {
     cardStyle: {
       opacity: progress.interpolate({
         inputRange: [0.5, 1],
-        outputRange: [0, 1],
+        outputRange: [0.5, 1],
       }),
       transform: [
         {
@@ -62,7 +62,7 @@ export const fadeInFromBottomAndScaleUp: StackNavigationOptions = {
         {
           scale: progress.interpolate({
             inputRange: [0, 1],
-            outputRange: [0.8, 1],
+            outputRange: [0.5, 1],
           }),
         },
       ],

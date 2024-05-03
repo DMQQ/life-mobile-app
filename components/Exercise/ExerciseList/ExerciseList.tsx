@@ -1,7 +1,6 @@
-import { FlatList, Text, FlatListProps } from "react-native";
+import { FlatList, FlatListProps } from "react-native";
 import { Exercise } from "../../../types";
 import ExerciseTile from "../ExerciseTile/ExerciseTile";
-import Button from "../../ui/Button/Button";
 
 interface ExerciseListProps
   extends Pick<FlatListProps<Exercise>, "ListFooterComponent">,

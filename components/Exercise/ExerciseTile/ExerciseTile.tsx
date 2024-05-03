@@ -1,4 +1,12 @@
-import { Image, LayoutRectangle, Pressable, Text, View } from "react-native";
+import {
+  Image,
+  LayoutRectangle,
+  Pressable,
+  StyleProp,
+  Text,
+  View,
+  ViewStyle,
+} from "react-native";
 import { Exercise } from "../../../types";
 import Colors from "../../../constants/Colors";
 import Color from "color";
@@ -23,8 +31,23 @@ const images = {
   'Plank':'https://cdn-icons-png.flaticon.com/512/2647/2647643.png'
 };
 
+export const ExerciseIcon = (props: { name: keyof typeof images }) => (
+  <Image
+    style={{
+      width: 40,
+      height: 40,
+      margin: GAPS,
+    }}
+    source={{
+      uri: images[props.name] || defaultImageUri,
+    }}
+  />
+);
+
 const defaultImageUri =
   "https://cdn-icons-png.flaticon.com/512/1895/1895100.png";
+
+const GAPS = 10;
 
 export default function ExerciseTile({
   image = defaultImageUri,
@@ -34,7 +57,12 @@ export default function ExerciseTile({
   difficulty,
   description,
   ...rest
-}: Exercise & { onPress: Function; tileIndex: number }) {
+}: Exercise & {
+  onPress: Function;
+  tileIndex: number;
+  enableActionButtons?: boolean;
+  styles?: StyleProp<ViewStyle>;
+}) {
   const [isVisible, setIsVisible] = useState(false);
 
   const [layout, setLayout] = useState<LayoutRectangle | undefined>();
@@ -43,12 +71,15 @@ export default function ExerciseTile({
     <Animated.View
       onLayout={(ev) => setLayout(ev.nativeEvent.layout)}
       entering={FadeIn.delay(rest.tileIndex * 75)}
-      style={{
-        backgroundColor: Color(Colors.primary).lighten(0.5).hex(),
-        padding: 13,
-        borderRadius: 10,
-        marginBottom: 10,
-      }}
+      style={[
+        {
+          backgroundColor: Colors.primary_lighter,
+          padding: GAPS,
+          borderRadius: 10,
+          marginBottom: 10,
+        },
+        rest.styles,
+      ]}
     >
       <Pressable
         onLongPress={() => setIsVisible((p) => !p)}
@@ -57,20 +88,12 @@ export default function ExerciseTile({
           rest.onPress();
         }}
       >
-        <Image
-          style={{
-            width: 40,
-            height: 40,
-          }}
-          source={{
-            uri: images[title as keyof typeof images] || defaultImageUri,
-          }}
-        />
-        <View style={{ marginLeft: 10, flex: 1 }}>
+        <ExerciseIcon name={title as keyof typeof images} />
+        <View style={{ flex: 1 }}>
           <Text
             style={{
               color: Colors.secondary,
-              fontSize: 20,
+              fontSize: 18,
               fontWeight: "bold",
               lineHeight: 25,
             }}
@@ -83,6 +106,7 @@ export default function ExerciseTile({
               flexDirection: "row",
               justifyContent: "space-between",
               alignItems: "center",
+              marginTop: GAPS / 2,
             }}
           >
             <Text style={{ color: "#bababa" }} lineBreakMode="clip">
@@ -120,7 +144,7 @@ export default function ExerciseTile({
           </View>
         </View>
       </Pressable>
-      {isVisible && (
+      {isVisible && rest.enableActionButtons && (
         <View
           style={{
             width: layout?.width,
@@ -134,6 +158,7 @@ export default function ExerciseTile({
           }}
         >
           <Button
+            onPress={() => {}}
             fontStyle={{ fontSize: 15 }}
             type="contained"
             style={{ backgroundColor: Colors.error, flex: 3, marginRight: 20 }}

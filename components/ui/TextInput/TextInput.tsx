@@ -82,6 +82,8 @@ export interface InputProps extends TextInputProps {
    * size of the input
    */
   size?: "small" | "medium" | "large";
+
+  label?: string;
 }
 
 export default function Input({
@@ -114,24 +116,24 @@ export default function Input({
   return (
     <View style={styles.container}>
       {typeof name !== "undefined" && (
-        <Text
-          style={[
-            styles.label,
-            labelStyle,
-            {
-              color: error ? "#ff3030" : "#e0e0e0",
-            },
-          ]}
-        >
-          {name}
-        </Text>
+        <Input.Label
+          error={error}
+          text={
+            (rest?.label || name) +
+            " " +
+            (rest.label && helperText ? `(${helperText})` : "")
+          }
+          labelStyle={labelStyle}
+        />
       )}
       <View
         style={{
-          backgroundColor: Color(Colors.primary).lighten(0.5).string(),
-          borderRadius: 5,
+          backgroundColor: isFocused
+            ? Colors.primary_lighter
+            : Colors.primary_light,
+          borderRadius: 7.5,
           flexDirection: "row",
-          width: (style as any)?.width ?? Layout.screen.width * 0.95,
+          width: (style as any)?.width || "100%", //(style as any)?.width ?? Layout.screen.width * 0.95,
           borderWidth: 2,
           borderColor: error
             ? Colors.error
@@ -179,7 +181,7 @@ export default function Input({
           </View>
         )}
       </View>
-      {typeof helperText !== "undefined" && (
+      {typeof helperText !== "undefined" && !rest.label && (
         <Text
           style={[
             styles.label,
@@ -214,7 +216,7 @@ Input.Icon = ({
   const Component = Icons[Icon];
 
   return (
-    <Ripple onPress={props.onPress}>
+    <Ripple onPress={props.onPress} style={{ paddingHorizontal: 5 }}>
       <Component
         {...props}
         size={props.size || 25}
@@ -229,3 +231,21 @@ Input.Icon = ({
     </Ripple>
   );
 };
+
+Input.Label = (props: {
+  text: string;
+  labelStyle?: StyleProp<TextStyle>;
+  error: boolean;
+}) => (
+  <Text
+    style={[
+      styles.label,
+      props.labelStyle,
+      {
+        color: props.error ? "#ff3030" : "#e0e0e0f1",
+      },
+    ]}
+  >
+    {props.text}
+  </Text>
+);

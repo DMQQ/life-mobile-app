@@ -33,11 +33,6 @@ export const useGetWorkouts = (offset?: Offset) => {
   const { token } = useUser();
 
   return useQuery<{ workouts: Workout[] }>(GET_WORKOUTS, {
-    context: {
-      headers: {
-        authentication: token,
-      },
-    },
     variables: {
       ...offset,
     },

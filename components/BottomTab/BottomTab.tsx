@@ -1,30 +1,27 @@
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import Layout from "../../constants/Layout";
 import Colors from "../../constants/Colors";
 import Ripple from "react-native-material-ripple";
 import { Ionicons } from "@expo/vector-icons";
 import useKeyboard from "../../utils/hooks/useKeyboard";
 import Animated, { FadeInDown, FadeOutDown } from "react-native-reanimated";
+import { useTheme } from "../../utils/context/ThemeContext";
+import { IconSize, Padding, Rounded } from "@/constants/Values";
 
 const styles = StyleSheet.create({
   container: {
     width: Layout.screen.width,
-    padding: 5,
     backgroundColor: Colors.primary,
     justifyContent: "space-around",
     flexDirection: "row",
-    borderTopWidth: 1,
-    borderTopColor: Colors.primary_light,
   },
 
   button: {
-    flex: 1,
-    padding: 15,
-    paddingHorizontal: 15,
+    padding: Padding.l,
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: 100,
+    borderRadius: Rounded.full,
   },
 });
 
@@ -41,18 +38,20 @@ export default function BottomTab({
 
   const activeRoute = state.routes[state.index].name;
 
+  const { theme } = useTheme();
+
   const Btn = (props: { route: string; iconName: any }) => (
     <Ripple
       rippleCentered
-      rippleColor={Colors.secondary}
+      rippleColor={theme.colors.secondary}
       onLongPress={onCalendarLongPress}
       style={[styles.button]}
       onPress={() => navigate(props.route)}
     >
       <Ionicons
-        size={25}
+        size={IconSize.l}
         name={props.iconName}
-        color={activeRoute === props.route ? "#fff" : Colors.secondary}
+        color={activeRoute === props.route ? Colors.secondary_light_1 : "#fff"}
       />
     </Ripple>
   );
@@ -65,7 +64,7 @@ export default function BottomTab({
 
   return (
     <Animated.View
-      style={[styles.container, { paddingBottom: 5 }]}
+      style={[styles.container, { paddingBottom: Padding.xs }]}
       entering={FadeInDown}
       exiting={FadeOutDown}
     >

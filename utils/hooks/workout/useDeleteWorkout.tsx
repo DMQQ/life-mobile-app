@@ -13,11 +13,6 @@ export default function useDeleteWorkout() {
   const { token } = useUser();
 
   return useMutation(DELETE_WORKOUT, {
-    context: {
-      headers: {
-        authentication: token,
-      },
-    },
     update(cache, { data: { deleteWorkout } }) {
       const workoutId = deleteWorkout;
 
@@ -29,7 +24,7 @@ export default function useDeleteWorkout() {
             }) as { workouts: Workout[] };
 
             return workouts.filter(
-              (workout: Workout) => workout.id !== workoutId
+              (workout: Workout) => workout.workoutId !== workoutId
             );
           },
         },

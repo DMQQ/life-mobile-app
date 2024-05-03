@@ -4,21 +4,29 @@ import Colors from "../../constants/Colors";
 import { AntDesign } from "@expo/vector-icons";
 import { useState, useMemo } from "react";
 import { DateData, MarkedDates } from "react-native-calendars/src/types";
-import { gql, useQuery } from "@apollo/client";
-import useUser from "../../utils/hooks/useUser";
+import { ApolloQueryResult } from "@apollo/client";
 import { StyleSheet } from "react-native";
+import { useTheme } from "@/utils/context/ThemeContext";
 
 interface CalendarProps {
   onDayPress: (day: DateData) => void;
-}
 
-const GET_MONTHLY_EVENTS = gql`
-  query GetMonthlyEvents($date: String!) {
-    timelineMonth(date: $date) {
-      date
-    }
-  }
-`;
+  monthData: {
+    timelineMonth?: {
+      date: string;
+    }[];
+  };
+
+  selected: string;
+
+  refetch: (
+    variables?:
+      | Partial<{
+          date: string;
+        }>
+      | undefined
+  ) => Promise<ApolloQueryResult<any>>;
+}
 
 const styles = StyleSheet.create({
   calendar: {
@@ -34,19 +42,12 @@ const styles = StyleSheet.create({
   },
 });
 
-export default function Calendar({ onDayPress }: CalendarProps) {
-  const usr = useUser();
-
-  const { data, refetch } = useQuery(GET_MONTHLY_EVENTS, {
-    variables: { date: moment().format("YYYY-MM-DD") },
-    context: {
-      headers: {
-        authentication: usr.token,
-      },
-    },
-    onError: (err) => console.log(JSON.stringify(err, null, 2)),
-  });
-
+export default function Calendar({
+  onDayPress,
+  refetch,
+  selected: propSelected,
+  monthData: data,
+}: CalendarProps) {
   const onMonthChange = async (date: { dateString: string }) =>
     await refetch({
       date: moment(date.dateString).format("YYYY-MM-DD"),
@@ -56,7 +57,7 @@ export default function Calendar({ onDayPress }: CalendarProps) {
     <AntDesign name={`arrow${direction}`} color={Colors.secondary} size={20} />
   );
 
-  const [selected, setSelected] = useState("");
+  const [selected, setSelected] = useState(propSelected || "");
 
   const markedDates: MarkedDates = useMemo(() => {
     const marked: MarkedDates = {};
@@ -75,7 +76,7 @@ export default function Calendar({ onDayPress }: CalendarProps) {
 
     marked[selected] = {
       selected: true,
-      selectedColor: "#6186D2",
+      selectedColor: Colors.secondary,
     };
 
     return marked;

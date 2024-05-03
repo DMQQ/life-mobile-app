@@ -1,15 +1,26 @@
 import { StatusBar } from "expo-status-bar";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Provider } from "react-redux";
 import useCachedResources from "./hooks/useCachedResources";
 import Navigation from "./navigation";
 import { store } from "./utils/redux";
-import { ApolloProvider, InMemoryCache, ApolloClient } from "@apollo/client";
+import {
+  ApolloProvider,
+  InMemoryCache,
+  ApolloClient,
+  ApolloLink,
+  from,
+  createHttpLink,
+} from "@apollo/client";
 import ThemeContextProvider from "./utils/context/ThemeContext";
-
 import * as Notifications from "expo-notifications";
 import Url from "./constants/Url";
 import Colors from "./constants/Colors";
+
+import { onError } from "@apollo/client/link/error";
+import { setContext } from "@apollo/client/link/context";
+import { getItemAsync, deleteItemAsync } from "expo-secure-store";
+import { STORE_KEY } from "./utils/hooks/useUser";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -19,28 +30,44 @@ Notifications.setNotificationHandler({
   }),
 });
 
-const dev = true;
+let token: string | undefined;
+
+const withToken = setContext(async () => {
+  // if you have a cached value, return it immediately
+  if (token !== undefined) return { token };
+
+  return await getItemAsync(STORE_KEY).then((v) => {
+    let user = JSON.parse(v || "{}") as { token: string } | null;
+
+    if (token) return { token };
+
+    if (user !== undefined && typeof user?.token === "string")
+      token = user.token;
+
+    return { token };
+  });
+});
+
+const authMiddleware = new ApolloLink((op, forw) => {
+  const { token } = op.getContext();
+
+  op.setContext(() => ({
+    headers: {
+      authentication: token || "",
+    },
+  }));
+  return forw(op);
+});
+
+const httpLink = createHttpLink({
+  uri: Url.API + "/graphql",
+});
+
+const link = from([withToken, authMiddleware.concat(httpLink)]);
 
 const apolloClient = new ApolloClient({
   cache: new InMemoryCache(),
-  uri: Url.API + "/graphql",
-
-  defaultOptions: {
-    mutate: {
-      context: {
-        headers: {
-          token: store.getState().user.token,
-        },
-      },
-    },
-    query: {
-      context: {
-        headers: {
-          token: store.getState().user.token,
-        },
-      },
-    },
-  },
+  link,
 });
 
 export default function App() {

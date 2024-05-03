@@ -3,24 +3,25 @@ import Colors from "../../../../constants/Colors";
 import Color from "color";
 import Layout from "../../../../constants/Layout";
 
+const iconColor = Color(Colors.primary).lighten(4.5).hex();
+
 export default StyleSheet.create({
   dayHeader: {
-    color: Colors.secondary,
-    fontSize: 20,
+    color: "#ffffffda",
+    fontSize: 17,
     fontWeight: "bold",
-    marginLeft: 10,
+    marginLeft: 15,
   },
   eventsLeft: {
-    color: Colors.primary_lighter,
+    color: Colors.secondary,
     fontSize: 17,
     marginLeft: 10,
   },
   itemContainer: {
-    marginVertical: 7.5,
+    marginVertical: 5,
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 10,
-    paddingHorizontal: 10,
+    padding: 10,
   },
   itemContainerTitleRow: {
     flexDirection: "row",
@@ -31,22 +32,26 @@ export default StyleSheet.create({
   itemTitle: {
     color: Colors.secondary,
     fontWeight: "bold",
-    fontSize: 20,
+    fontSize: 22,
   },
   itemDescription: {
-    color: "gray",
+    color: Color(Colors.primary).lighten(5).hex(),
     fontSize: 17,
     marginTop: 5,
   },
-  itemTimeLeft: { color: Colors.secondary, fontSize: 17 },
+  itemTimeLeft: {
+    color: Colors.secondary_light_1,
+    fontSize: 15,
+  },
 
   eventTitle: {
-    color: Colors.secondary,
+    color: "#fff",
+    fontSize: 20,
     fontWeight: "bold",
-    fontSize: 25,
+    marginRight: 2.5,
   },
   pickerStyle: {
-    backgroundColor: Color(Colors.primary).lighten(0.5).string(),
+    backgroundColor: Colors.primary_lighter,
     borderWidth: 2,
     borderColor: Colors.primary_light,
   },
@@ -55,15 +60,10 @@ export default StyleSheet.create({
     justifyContent: "space-around",
   },
   submitButton: {
-    marginTop: 15,
     paddingVertical: 15,
     backgroundColor: Colors.secondary,
     flexDirection: "row-reverse",
-
-    position: "absolute",
-    bottom: 10,
-    left: 10,
-    width: Layout.screen.width - 20,
+    flex: 1,
   },
   button: {
     margin: 5,
@@ -79,23 +79,73 @@ export default StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingBottom: 10,
     borderBottomWidth: 1,
     borderBottomColor: Colors.primary_light,
-    marginBottom: 15,
+    marginVertical: 15,
+    paddingVertical: 10,
   },
   listHeadingText: {
     fontWeight: "bold",
     paddingHorizontal: 5,
-    color: Colors.secondary,
-    fontSize: 25,
+    color: "#ffffffda",
+    fontSize: 22,
     marginLeft: 5,
   },
   listHeading: {
     borderRadius: 5,
-    margin: 10,
+
+    paddingHorizontal: 10,
+
+    // backgroundColor: Color(Colors.primary).lighten(0.35).string(),
+  },
+  status: {
+    color: Colors.primary,
+    fontWeight: "600",
+    marginTop: 10,
+    backgroundColor: Colors.secondary,
+    padding: 2.5,
+    paddingHorizontal: 10,
+    borderRadius: 100,
+    fontSize: 13,
+    marginLeft: 2.5,
+  },
+
+  floatingContainer: {
+    position: "absolute",
+    backgroundColor: Colors.primary,
+    padding: 15,
+    borderRadius: 20,
+    right: 10,
+    top: 200,
+  },
+  floatingButton: {
+    padding: 10,
+    flexDirection: "row",
+    backgroundColor: Colors.primary_lighter,
+    borderRadius: 10,
+    paddingHorizontal: 15,
+  },
+
+  floatingText: {
+    color: iconColor,
+    fontSize: 18,
+    fontWeight: "bold",
+    marginLeft: 10,
+  },
+
+  dateRow: {
     padding: 5,
-    marginVertical: 15,
-    backgroundColor: Color(Colors.primary).lighten(0.35).string(),
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    position: "relative",
+    marginTop: 10,
+  },
+  notFoundContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 50,
+    paddingHorizontal: 25,
   },
 });

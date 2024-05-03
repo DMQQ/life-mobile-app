@@ -8,8 +8,14 @@ const CREATE_EXPENSE = gql`
     $amount: Float!
     $description: String!
     $type: String!
+    $category: String!
   ) {
-    createExpense(amount: $amount, description: $description, type: $type) {
+    createExpense(
+      amount: $amount
+      description: $description
+      type: $type
+      category: $category
+    ) {
       id
       amount
       description
@@ -22,16 +28,9 @@ const CREATE_EXPENSE = gql`
 `;
 
 export default function useCreateActivity(props: { onCompleted?: () => void }) {
-  const usr = useUser();
-
   const [createExpense, { data, loading, error, called, reset }] = useMutation(
     CREATE_EXPENSE,
     {
-      context: {
-        headers: {
-          authorization: usr.token,
-        },
-      },
       update(cache, { data }) {
         cache.modify({
           fields: {

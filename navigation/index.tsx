@@ -1,28 +1,36 @@
-import { DarkTheme, NavigationContainer } from "@react-navigation/native";
-import Login from "../screens/Stack/Login";
-import Register from "../screens/Stack/Register";
+import {
+  DarkTheme,
+  NavigationContainer,
+  NavigationContainerRef,
+} from "@react-navigation/native";
 import useUser from "../utils/hooks/useUser";
-import { useEffect } from "react";
-import Root from "../screens/Stack/Root";
+import React, { useCallback, useEffect } from "react";
+import Root from "../screens/Stack/Home/Root";
 import { RootStackParamList } from "../types";
 import Colors from "../constants/Colors";
-import Landing from "../screens/Stack/Landing";
 import useNotifications from "../utils/hooks/useNotifications";
-import { Timeline as TimelineScreens } from "../screens/Stack/Timeline";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import TimelineScreens from "../screens/Stack/Timeline/Main";
+import {
+  BottomTabBarProps,
+  createBottomTabNavigator,
+} from "@react-navigation/bottom-tabs";
 import BottomTab from "../components/BottomTab/BottomTab";
-import WalletScreens from "../screens/Stack/Wallet";
-import WorkoutScreens from "../screens/Stack/Workout";
+import WalletScreens from "../screens/Stack/Wallet/Main";
+import WorkoutScreens from "../screens/Stack/Workout/Main";
 import NotesScreens from "../screens/Stack/Notes/Main";
 import ScreenContainer from "../components/ui/ScreenContainer";
 import { ActivityIndicator } from "react-native";
 import Settings from "../screens/Stack/Settings/Settings";
+import Authentication from "../screens/Stack/Authentication/Main";
 
 const LoaderScreen = () => (
   <ScreenContainer style={{ justifyContent: "center", alignItems: "center" }}>
     <ActivityIndicator color={"white"} size={45} />
   </ScreenContainer>
 );
+
+export const navigationRef =
+  React.createRef<NavigationContainerRef<RootStackParamList>>();
 
 const Tab = createBottomTabNavigator<RootStackParamList>();
 
@@ -41,8 +49,14 @@ export default function Navigation() {
     }
   }, [isAuthenticated]);
 
+  const renderTab = useCallback(
+    (props: BottomTabBarProps) => <BottomTab {...props} />,
+    []
+  );
+
   return (
     <NavigationContainer
+      ref={navigationRef}
       theme={{
         ...DarkTheme,
         colors: {
@@ -53,9 +67,12 @@ export default function Navigation() {
     >
       <Tab.Navigator
         initialRouteName={isLoading ? "Loader" : "Root"}
-        tabBar={(props) => (isAuthenticated ? <BottomTab {...props} /> : null)}
+        tabBar={isAuthenticated ? renderTab : undefined}
         screenOptions={{
           headerShown: false,
+          headerStyle: {
+            backgroundColor: Colors.primary,
+          },
         }}
       >
         {isLoading && <Tab.Screen name="Loader" component={LoaderScreen} />}
@@ -76,9 +93,7 @@ export default function Navigation() {
           </>
         ) : (
           <>
-            <Tab.Screen name="Landing" component={Landing} />
-            <Tab.Screen name="Login" component={Login} />
-            <Tab.Screen name="Register" component={Register} />
+            <Tab.Screen name="Authentication" component={Authentication} />
           </>
         )}
       </Tab.Navigator>

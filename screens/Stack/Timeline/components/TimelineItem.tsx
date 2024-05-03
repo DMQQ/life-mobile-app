@@ -2,15 +2,27 @@ import { useNavigation } from "@react-navigation/native";
 import useRemoveTimelineMutation from "../hooks/mutation/useRemoveTimelineMutation";
 import moment from "moment";
 import Ripple from "react-native-material-ripple";
-import { Alert, Text, ToastAndroid, View } from "react-native";
+import {
+  Alert,
+  StyleProp,
+  Text,
+  ToastAndroid,
+  View,
+  ViewStyle,
+} from "react-native";
 import timelineStyles from "./timeline.styles";
-import Colors from "../../../../constants/Colors";
 import { GetTimelineQuery } from "../hooks/query/useGetTimeLineQuery";
+import Colors from "../../../../constants/Colors";
+import { useMemo } from "react";
 
 export default function TimelineItem(
-  timeline: GetTimelineQuery & { location: "timeline" | "root" }
+  timeline: GetTimelineQuery & {
+    location: "timeline" | "root";
+    textColor?: string;
+    styles?: StyleProp<ViewStyle>;
+  }
 ) {
-  const { loading, remove } = useRemoveTimelineMutation(timeline);
+  const { remove } = useRemoveTimelineMutation(timeline);
 
   const navigation = useNavigation<any>();
 
@@ -42,29 +54,97 @@ export default function TimelineItem(
           onPress: async () => {
             await remove();
 
-            ToastAndroid.show("Timeline deleted", ToastAndroid.SHORT);
+            ToastAndroid.show("Event deleted", ToastAndroid.SHORT);
           },
         },
       ]
     );
   };
 
+  const isExpired = useMemo(() => {
+    const now = moment();
+
+    if (moment(timeline.date).isBefore(now, "day")) return true;
+
+    if (timeline.isCompleted) return false;
+
+    const start = moment(timeline.beginTime, "HH:mm");
+    const end = moment(timeline.endTime, "HH:mm");
+
+    if (now.isAfter(end)) {
+      return true;
+    }
+
+    if (now.isAfter(start) && now.isBefore(end)) {
+      return false;
+    }
+  }, []);
+
+  console.log(timeline.todos, timeline.images);
+
   return (
     <Ripple
       onLongPress={onLongPress}
       onPress={onPress}
-      style={[timelineStyles.itemContainer]}
+      style={[timelineStyles.itemContainer, timeline.styles]}
     >
       <View style={{ flex: 1 }}>
         <View style={[timelineStyles.itemContainerTitleRow]}>
-          <Text style={timelineStyles.itemTitle}>{timeline.title}</Text>
-          <Text style={timelineStyles.itemTimeLeft}>
+          <Text
+            numberOfLines={1}
+            style={[
+              timelineStyles.itemTitle,
+              { ...(timeline.textColor && { color: timeline.textColor }) },
+            ]}
+          >
+            {timeline.title}
+          </Text>
+          <Text
+            style={[
+              timelineStyles.itemTimeLeft,
+              { ...(timeline.textColor && { color: timeline.textColor }) },
+            ]}
+          >
             {start} - {end}
           </Text>
         </View>
-        <Text numberOfLines={2} style={timelineStyles.itemDescription}>
-          {timeline.description}
-        </Text>
+        <View
+          style={{
+            flexDirection: "row",
+            flexWrap: "wrap",
+            alignItems: "center",
+            justifyContent: "flex-end",
+            marginTop: 5,
+          }}
+        >
+          <Text
+            numberOfLines={3}
+            style={[
+              timelineStyles.itemDescription,
+              { flex: 1 },
+              { ...(timeline.textColor && { color: timeline.textColor }) },
+            ]}
+          >
+            {timeline.description}
+          </Text>
+          {timeline.location === "timeline" && (
+            <Text
+              style={[
+                timelineStyles.status,
+                {
+                  backgroundColor: timeline.isCompleted
+                    ? "lightgreen"
+                    : isExpired
+                    ? "#BA4343"
+                    : Colors.secondary,
+                  alignSelf: "flex-end",
+                },
+              ]}
+            >
+              {timeline.isCompleted ? "Finished" : isExpired ? "Late" : "To do"}
+            </Text>
+          )}
+        </View>
       </View>
     </Ripple>
   );
