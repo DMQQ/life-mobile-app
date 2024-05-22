@@ -15,7 +15,7 @@ import { GET_MAIN_SCREEN } from "@/utils/schemas/GET_MAIN_SCREEN";
 export default function Root({ navigation }: ScreenProps<"Root">) {
   const workout = useAppSelector((s) => s.workout);
 
-  const { data } = useQuery(GET_MAIN_SCREEN, {});
+  const { data, loading } = useQuery(GET_MAIN_SCREEN, {});
 
   return (
     <View style={{ flex: 1 }}>
@@ -26,9 +26,12 @@ export default function Root({ navigation }: ScreenProps<"Root">) {
           paddingTop: 10,
         }}
       >
-        <AvailableBalanceWidget data={data?.wallet} />
+        <AvailableBalanceWidget data={data?.wallet} loading={loading} />
 
-        <TodaysTimelineEvents data={data?.timelineByCurrentDate} />
+        <TodaysTimelineEvents
+          data={data?.timelineByCurrentDate}
+          loading={loading}
+        />
 
         {workout.isWorkoutPending && <WorkoutWidget />}
 

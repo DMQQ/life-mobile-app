@@ -18,6 +18,7 @@ import { StatusBar } from "expo-status-bar";
 import CreateExpenseSheet from "../components/AddExpenseBottomSheet";
 import BottomSheet from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheet/BottomSheet";
 import WalletList from "../components/WalletList";
+import Color from "color";
 
 const styles = StyleSheet.create({
   container: {
@@ -119,8 +120,10 @@ export default function WalletScreen({ navigation }: WalletScreens<"Wallet">) {
 
         {loading && (
           <Skeleton
-            backgroundColor={Colors.primary_light}
-            highlightColor={Colors.primary_lighter}
+            backgroundColor={Color(Colors.primary_lighter)
+              .lighten(0.5)
+              .string()}
+            highlightColor={Colors.secondary}
             size={(props) => ({
               width: props.width - 20,
               height: props.height,

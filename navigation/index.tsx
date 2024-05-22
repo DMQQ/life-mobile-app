@@ -23,6 +23,8 @@ import { ActivityIndicator } from "react-native";
 import Settings from "../screens/Stack/Settings/Settings";
 import Authentication from "../screens/Stack/Authentication/Main";
 
+import { slideInUpAndFadeIn } from "./assets/screen_animations";
+
 const LoaderScreen = () => (
   <ScreenContainer style={{ justifyContent: "center", alignItems: "center" }}>
     <ActivityIndicator color={"white"} size={45} />
@@ -50,8 +52,9 @@ export default function Navigation() {
   }, [isAuthenticated]);
 
   const renderTab = useCallback(
-    (props: BottomTabBarProps) => <BottomTab {...props} />,
-    []
+    (props: BottomTabBarProps) =>
+      isAuthenticated ? <BottomTab {...props} /> : null,
+    [isAuthenticated]
   );
 
   return (
@@ -67,7 +70,7 @@ export default function Navigation() {
     >
       <Tab.Navigator
         initialRouteName={isLoading ? "Loader" : "Root"}
-        tabBar={isAuthenticated ? renderTab : undefined}
+        tabBar={renderTab}
         screenOptions={{
           headerShown: false,
           headerStyle: {

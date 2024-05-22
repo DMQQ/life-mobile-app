@@ -36,7 +36,7 @@ const styles = StyleSheet.create({
   },
   contentText: {
     fontSize: 20,
-    color: Color(Colors.primary).lighten(5).string(),
+    color: "rgba(255,255,255,0.7)",
   },
   timelineIdText: {
     color: Color(Colors.primary).lighten(4).string(),
