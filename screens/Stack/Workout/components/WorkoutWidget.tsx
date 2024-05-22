@@ -1,23 +1,19 @@
 import { View, StyleSheet, Text } from "react-native";
-import Colors, { randColor } from "../../../../constants/Colors";
+import Colors from "../../../../constants/Colors";
 import Color from "color";
 import { useAppSelector } from "../../../../utils/redux";
-import { useDispatch } from "react-redux";
-import ExerciseTile, {
-  ExerciseIcon,
-} from "../../../../components/Exercise/ExerciseTile/ExerciseTile";
 import Ripple from "react-native-material-ripple";
 import { useNavigation } from "@react-navigation/native";
 import { Padding, Rounded } from "../../../../constants/Layout";
 import { AntDesign } from "@expo/vector-icons";
 
-const bg = "#FF1A56";
+const backgroundColor = Colors.primary_lighter;
 
 const styles = StyleSheet.create({
   container: {
     padding: Padding.xxl,
     borderRadius: Rounded.xxl,
-    backgroundColor: bg,
+    backgroundColor,
     marginTop: 15,
   },
   title: {
@@ -26,14 +22,14 @@ const styles = StyleSheet.create({
     fontSize: 30,
   },
   button: {
-    marginTop: Padding.md,
+    marginTop: Padding.m,
     padding: Padding.xl,
     backgroundColor: "#fff",
     borderRadius: Rounded.xxl,
   },
   buttonText: {
     fontWeight: "bold",
-    color: bg,
+    color: backgroundColor,
     textAlign: "center",
     fontSize: 18,
   },
@@ -76,14 +72,12 @@ export default function WorkoutWidget() {
 
       <View
         style={{
-          backgroundColor: "#ffffff25",
-          borderRadius: Rounded.xxl,
-          padding: Padding.md,
+          borderRadius: Rounded.xl,
+          padding: Padding.m,
           flexDirection: "row",
         }}
       >
-        <ExerciseIcon name={exercise?.title as any} />
-        <View style={{ paddingHorizontal: Padding.md, flex: 1 }}>
+        <View style={{ paddingHorizontal: Padding.m, flex: 1 }}>
           <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 18 }}>
             {exercise?.title}
           </Text>
@@ -99,7 +93,7 @@ export default function WorkoutWidget() {
               marginRight: 5,
             }}
           >
-            <AntDesign name="play" color={"#fff"} size={45} />
+            <AntDesign name="play" color={"#fff"} size={30} />
           </Ripple>
         </View>
       </View>

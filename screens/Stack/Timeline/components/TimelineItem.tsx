@@ -80,8 +80,6 @@ export default function TimelineItem(
     }
   }, []);
 
-  console.log(timeline.todos, timeline.images);
-
   return (
     <Ripple
       onLongPress={onLongPress}

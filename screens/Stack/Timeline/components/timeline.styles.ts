@@ -35,7 +35,7 @@ export default StyleSheet.create({
     fontSize: 22,
   },
   itemDescription: {
-    color: Color(Colors.primary).lighten(5).hex(),
+    color: "rgba(255,255,255,0.7)",
     fontSize: 17,
     marginTop: 5,
   },

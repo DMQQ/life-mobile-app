@@ -5,6 +5,7 @@ import Button from "../../../../components/ui/Button/Button";
 import useUser from "../../../../utils/hooks/useUser";
 import Ripple from "react-native-material-ripple";
 import { Padding, Rounded } from "../../../../constants/Layout";
+import Color from "color";
 
 export default function AccountActions({ navigation }: any) {
   const { removeUser } = useUser();
@@ -25,7 +26,7 @@ export default function AccountActions({ navigation }: any) {
   return (
     <View
       style={{
-        backgroundColor: "#1BA3B4",
+        backgroundColor: Colors.primary_lighter,
         borderRadius: Rounded.xxl,
         padding: Padding.xxl,
         marginTop: 15,
@@ -52,14 +53,10 @@ export default function AccountActions({ navigation }: any) {
 
       <Button
         onPress={handleSignout}
-        type="contained"
-        size="xl"
-        fontStyle={{
-          color: Colors.primary,
-        }}
+        fontStyle={{ color: "#fff", fontSize: 16 }}
         style={{
-          backgroundColor: "#fff",
-          marginTop: 10,
+          backgroundColor: Color(Colors.primary).lighten(2).hex(),
+          borderRadius: 100,
         }}
       >
         Sign out

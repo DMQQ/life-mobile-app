@@ -2,7 +2,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import { fadeInFromBottomAndScaleUp } from "@/navigation/assets/screen_animations";
+import { slideInUpAndFadeIn } from "@/navigation/assets/screen_animations";
 import Colors from "@/constants/Colors";
 
 const Stack = createStackNavigator();
@@ -11,7 +11,6 @@ const AuthenticationScreens = () => (
   <Stack.Navigator
     initialRouteName="Landing"
     screenOptions={{
-      ...fadeInFromBottomAndScaleUp,
       headerStyle: {
         backgroundColor: Colors.primary,
       },

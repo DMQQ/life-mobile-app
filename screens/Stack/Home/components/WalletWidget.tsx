@@ -5,8 +5,9 @@ import { ViewMoreButton } from "../../../../components/ui/Button/Button";
 import { useNavigation } from "@react-navigation/native";
 import { Expense, Wallet } from "../../../../types";
 import { Padding, Rounded } from "../../../../constants/Layout";
+import Skeleton from "@/components/SkeletonLoader/Skeleton";
 
-const backgroundColor = "#BE15A8";
+const backgroundColor = Colors.primary_lighter;
 
 const styles = StyleSheet.create({
   dot: {
@@ -64,36 +65,71 @@ const ExpenseItem = (props: { text: string }) => (
   </View>
 );
 
-export default function AvailableBalanceWidget(props: { data: Wallet }) {
+export default function AvailableBalanceWidget(props: {
+  data: Wallet;
+  loading: boolean;
+}) {
   const navigation = useNavigation<any>();
 
   const expenses = props?.data?.expenses?.slice(0, 4) || [];
 
   return (
     <View style={styles.container}>
-      <View style={{ marginBottom: 10 }}>
-        <View style={styles.title_row}>
-          <Text style={styles.title}>Available Balance</Text>
+      {props.loading ? (
+        <Skeleton
+          size={({ width, height }) => ({
+            width,
+            height: 175,
+          })}
+          backgroundColor={Color(Colors.primary_lighter).lighten(0.5).string()}
+          highlightColor={Colors.secondary}
+        >
+          <View>
+            <Skeleton.Item width={(w) => w - 70} height={25} />
+            <Skeleton.Item width={(w) => w - 70} height={100} marginTop={10} />
 
-          <ViewMoreButton
-            bg="#fff"
-            text="See more"
-            onPress={() => navigation.navigate("WalletScreens")}
-          />
-        </View>
-        <Text style={styles.balance}>
-          {props?.data?.balance.toFixed(2)}
-          <Text style={{ fontSize: 25 }}>zł</Text>
-        </Text>
-      </View>
+            <View style={{ flexDirection: "row", marginTop: 0 }}>
+              <Skeleton.Item
+                width={(w) => (w - 70) / 3 - 5}
+                height={20}
+                marginRight={5}
+              />
+              <Skeleton.Item
+                width={(w) => (w - 70) / 3 - 5}
+                height={20}
+                marginRight={5}
+              />
+              <Skeleton.Item width={(w) => (w - 70) / 3} height={20} />
+            </View>
+          </View>
+        </Skeleton>
+      ) : (
+        <>
+          <View style={{ marginBottom: 10 }}>
+            <View style={styles.title_row}>
+              <Text style={styles.title}>Available Balance</Text>
 
-      <Text style={styles.activity}>Recent activity</Text>
+              <ViewMoreButton
+                bg="#fff"
+                text="See more"
+                onPress={() => navigation.navigate("WalletScreens")}
+              />
+            </View>
+            <Text style={styles.balance}>
+              {props?.data?.balance.toFixed(2)}
+              <Text style={{ fontSize: 25 }}>zł</Text>
+            </Text>
+          </View>
 
-      <View style={styles.list}>
-        {expenses.map((item: Expense) => (
-          <ExpenseItem key={item.id} text={item.description} />
-        ))}
-      </View>
+          <Text style={styles.activity}>Recent activity</Text>
+
+          <View style={styles.list}>
+            {expenses.map((item: Expense) => (
+              <ExpenseItem key={item.id} text={item.description} />
+            ))}
+          </View>
+        </>
+      )}
     </View>
   );
 }

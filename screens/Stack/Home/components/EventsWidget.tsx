@@ -6,14 +6,17 @@ import Ripple from "react-native-material-ripple";
 import moment from "moment";
 import { Padding, Rounded } from "../../../../constants/Layout";
 import NotFound from "./NotFound";
-import { Timeline } from "@/types";
 import { GetTimelineQuery } from "../../Timeline/hooks/query/useGetTimeLineQuery";
+import Skeleton from "@/components/SkeletonLoader/Skeleton";
+import Color from "color";
+
+const backgroundColor = Colors.primary_lighter;
 
 const styles = StyleSheet.create({
   container: {
     padding: Padding.xxl,
     marginTop: 15,
-    backgroundColor: "#00C896",
+    backgroundColor,
     borderRadius: Rounded.xxl,
   },
 
@@ -58,7 +61,7 @@ const EventsList = (props: { data: GetTimelineQuery[] }) => (
     {props?.data?.slice(0, 3).map((timeline) => (
       <TimelineItem
         styles={{
-          backgroundColor: "#ffffff25",
+          backgroundColor: Colors.primary_lighter,
           borderRadius: 15,
           paddingHorizontal: 20,
         }}
@@ -71,7 +74,10 @@ const EventsList = (props: { data: GetTimelineQuery[] }) => (
   </>
 );
 
-export default function TodaysTimelineEvents(props: { data: any[] }) {
+export default function TodaysTimelineEvents(props: {
+  data: any[];
+  loading: boolean;
+}) {
   const navigation = useNavigation<any>();
 
   const date = moment();
@@ -92,7 +98,25 @@ export default function TodaysTimelineEvents(props: { data: any[] }) {
 
       <EventsList data={props.data || []} />
 
-      {props?.data?.length === 0 && <NotFound />}
+      {props.loading && (
+        <Skeleton
+          size={({ width, height }) => ({
+            height: 150,
+            width,
+          })}
+          backgroundColor={Color(Colors.primary_lighter).lighten(0.5).string()}
+          highlightColor={Colors.secondary}
+        >
+          <View>
+            <Skeleton.Item width={(w) => w - 70} height={40} />
+            <Skeleton.Item width={(w) => w - 70} height={40} />
+            <Skeleton.Item width={(w) => w - 70} height={40} />
+            <Skeleton.Item width={(w) => w - 70} height={40} />
+          </View>
+        </Skeleton>
+      )}
+
+      {props?.data?.length === 0 && !props.loading && <NotFound />}
     </View>
   );
 }

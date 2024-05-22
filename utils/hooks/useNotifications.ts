@@ -1,6 +1,5 @@
 import * as Notifications from "expo-notifications";
 import { Platform, ToastAndroid } from "react-native";
-import useUser from "./useUser";
 import { gql, useMutation } from "@apollo/client";
 import Constants from "expo-constants";
 import { useEffect, useRef, useState } from "react";
@@ -32,7 +31,7 @@ export default function useNotifications() {
       finalStatus = status;
     }
     if (finalStatus !== "granted") {
-      alert("Failed to get push token for push notification!");
+      // alert("Failed to get push token for push notification!");
       return;
     }
     token = await Notifications.getExpoPushTokenAsync({
