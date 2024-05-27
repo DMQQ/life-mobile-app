@@ -4,7 +4,7 @@ import Button from "../../../../components/ui/Button/Button";
 
 import Layout from "../../../../constants/Layout";
 import Color from "color";
-import Colors from "@/constants/Colors";
+import Colors, { secondary_candidates } from "@/constants/Colors";
 
 export default function Landing({ navigation }: any) {
   return (
@@ -12,31 +12,12 @@ export default function Landing({ navigation }: any) {
       <Text
         style={{
           color: "#fff",
-          fontSize: 60,
+          fontSize: 24,
           fontWeight: "bold",
-          position: "absolute",
-          top: 20,
-          left: 20,
-          zIndex: 100,
         }}
       >
-        HELLO!!
+        Hi there!
       </Text>
-
-      {[1, 2, 3].map((index) => (
-        <Image
-          key={index}
-          source={{
-            uri: "https://blog.tubikstudio.com/wp-content/uploads/2022/08/flower-store-app-design-tubik.jpg",
-          }}
-          style={{
-            width: "100%",
-            height: Layout.screen.height - 250,
-            marginBottom: 15,
-            borderRadius: 10,
-          }}
-        />
-      ))}
 
       <View
         style={{
@@ -51,16 +32,19 @@ export default function Landing({ navigation }: any) {
         <Button
           size="xl"
           type="contained"
-          color="primary"
           onPress={() => navigation.navigate("Login")}
-          style={{ borderRadius: 100 }}
+          style={{
+            borderRadius: 100,
+            backgroundColor: secondary_candidates[2],
+          }}
+          fontStyle={{ fontSize: 16 }}
         >
           login
         </Button>
         <Button
           size="xl"
           type="contained"
-          color="ternary"
+          fontStyle={{ fontSize: 16 }}
           style={{ marginTop: 10, borderRadius: 100 }}
           onPress={() => navigation.navigate("Register")}
         >

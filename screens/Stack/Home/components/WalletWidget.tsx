@@ -77,7 +77,7 @@ export default function AvailableBalanceWidget(props: {
     <View style={styles.container}>
       {props.loading ? (
         <Skeleton
-          size={({ width, height }) => ({
+          size={({ width }) => ({
             width,
             height: 175,
           })}

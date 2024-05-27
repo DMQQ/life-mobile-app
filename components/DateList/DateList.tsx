@@ -118,7 +118,7 @@ const DateList = memo(
         </View>
         <MonthSelectList selected={month} onPress={onMonthChange} />
         <VirtualizedList
-          initialNumToRender={10}
+          initialNumToRender={5}
           snapToOffsets={snapOffsets}
           removeClippedSubviews
           showsHorizontalScrollIndicator={false}

@@ -7,7 +7,7 @@ import { useNavigation } from "@react-navigation/native";
 import { Padding, Rounded } from "../../../../constants/Layout";
 import { AntDesign } from "@expo/vector-icons";
 
-const backgroundColor = Colors.primary_lighter;
+const backgroundColor = Colors.primary_darker;
 
 const styles = StyleSheet.create({
   container: {

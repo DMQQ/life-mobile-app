@@ -66,7 +66,7 @@ const Skeleton = ({
       style={{ width, height, marginVertical, marginHorizontal }}
     >
       <MaskedView
-        androidRenderingMode="software"
+        androidRenderingMode="hardware"
         maskElement={children}
         style={{
           width,
