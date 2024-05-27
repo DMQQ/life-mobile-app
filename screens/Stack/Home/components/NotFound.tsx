@@ -63,7 +63,7 @@ export default function NotFound() {
         <Button
           onPress={onPress}
           style={{
-            backgroundColor: Color(Colors.primary).lighten(2).hex(),
+            backgroundColor: Colors.primary,
             borderRadius: 100,
           }}
           fontStyle={{ color: "#fff", fontSize: 16 }}

@@ -12,7 +12,7 @@ import { IconSize, Padding, Rounded } from "@/constants/Values";
 const styles = StyleSheet.create({
   container: {
     width: Layout.screen.width,
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.primary_dark,
     justifyContent: "space-around",
     flexDirection: "row",
   },
@@ -44,12 +44,14 @@ export default function BottomTab({
     <Ripple
       rippleCentered
       rippleColor={theme.colors.secondary}
-      onLongPress={onCalendarLongPress}
+      onLongPress={
+        props.route === "TimelineScreens" ? onCalendarLongPress : undefined
+      }
       style={[styles.button]}
       onPress={() => navigate(props.route)}
     >
       <Ionicons
-        size={IconSize.l}
+        size={IconSize.m}
         name={props.iconName}
         color={activeRoute === props.route ? Colors.secondary_light_1 : "#fff"}
       />
@@ -64,7 +66,14 @@ export default function BottomTab({
 
   return (
     <Animated.View
-      style={[styles.container, { paddingBottom: Padding.xs }]}
+      style={[
+        styles.container,
+        {
+          paddingBottom: Padding.l + insets.bottom,
+          borderTopColor: Colors.primary_dark,
+          borderTopWidth: 1,
+        },
+      ]}
       entering={FadeInDown}
       exiting={FadeOutDown}
     >

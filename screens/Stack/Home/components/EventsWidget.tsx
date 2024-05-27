@@ -61,7 +61,7 @@ const EventsList = (props: { data: GetTimelineQuery[] }) => (
     {props?.data?.slice(0, 3).map((timeline) => (
       <TimelineItem
         styles={{
-          backgroundColor: Colors.primary_lighter,
+          backgroundColor: Colors.primary_light,
           borderRadius: 15,
           paddingHorizontal: 20,
         }}

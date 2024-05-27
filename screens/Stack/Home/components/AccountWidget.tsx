@@ -55,7 +55,7 @@ export default function AccountActions({ navigation }: any) {
         onPress={handleSignout}
         fontStyle={{ color: "#fff", fontSize: 16 }}
         style={{
-          backgroundColor: Color(Colors.primary).lighten(2).hex(),
+          backgroundColor: Colors.primary,
           borderRadius: 100,
         }}
       >
