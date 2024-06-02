@@ -6,6 +6,8 @@ import { StackScreenProps } from "../../../types";
 import Watchlist from "./pages/Watchlist";
 import Colors from "@/constants/Colors";
 
+import { fadeInFromBottomAndScaleUp } from "@/navigation/assets/screen_animations";
+
 interface WalletRootStack extends ParamListBase {
   Wallet: undefined;
   Watchlist: undefined;
@@ -25,6 +27,8 @@ export default function WalletScreens() {
         headerStyle: {
           backgroundColor: Colors.primary,
         },
+
+        ...fadeInFromBottomAndScaleUp,
       }}
     >
       <Stack.Screen name="Wallet" component={Wallet} />
