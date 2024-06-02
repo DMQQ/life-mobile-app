@@ -44,6 +44,9 @@ const BottomSheet = forwardRef<
         backgroundColor: Colors.primary,
       }}
       enablePanDownToClose
+      containerStyle={{
+        zIndex: 1000,
+      }}
     >
       {props.children}
     </BottomSheetGorhom>

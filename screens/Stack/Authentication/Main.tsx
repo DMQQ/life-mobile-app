@@ -1,11 +1,11 @@
-import { createStackNavigator } from "@react-navigation/stack";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 
 import Colors from "@/constants/Colors";
 
-const Stack = createStackNavigator();
+const Stack = createNativeStackNavigator();
 
 const AuthenticationScreens = () => (
   <Stack.Navigator
@@ -14,6 +14,7 @@ const AuthenticationScreens = () => (
       headerStyle: {
         backgroundColor: Colors.primary,
       },
+      animation: "fade",
     }}
   >
     <Stack.Screen

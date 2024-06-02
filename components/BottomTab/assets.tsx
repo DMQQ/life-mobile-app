@@ -1,5 +1,5 @@
 import * as Icons from "@expo/vector-icons";
-import Colors from "../../constants/Colors";
+import Colors from "@/constants/Colors";
 
 interface RouteProp {
   name: string;

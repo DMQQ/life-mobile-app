@@ -1,12 +1,10 @@
-import { createStackNavigator } from "@react-navigation/stack";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Wallet from "./pages/Wallet";
 import CreateActivity from "./pages/CreateActivity";
 import { ParamListBase } from "@react-navigation/native";
 import { StackScreenProps } from "../../../types";
 import Watchlist from "./pages/Watchlist";
 import Colors from "@/constants/Colors";
-
-import { fadeInFromBottomAndScaleUp } from "@/navigation/assets/screen_animations";
 
 interface WalletRootStack extends ParamListBase {
   Wallet: undefined;
@@ -16,7 +14,7 @@ interface WalletRootStack extends ParamListBase {
 export type WalletScreens<Screen extends keyof WalletRootStack> =
   StackScreenProps<WalletRootStack, Screen>;
 
-const Stack = createStackNavigator<WalletRootStack>();
+const Stack = createNativeStackNavigator<WalletRootStack>();
 
 export default function WalletScreens() {
   return (
@@ -27,8 +25,7 @@ export default function WalletScreens() {
         headerStyle: {
           backgroundColor: Colors.primary,
         },
-
-        ...fadeInFromBottomAndScaleUp,
+        animation: "fade",
       }}
     >
       <Stack.Screen name="Wallet" component={Wallet} />

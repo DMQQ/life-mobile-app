@@ -1,5 +1,4 @@
-import React from "react";
-import { createStackNavigator } from "@react-navigation/stack";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Workout from "./pages/Workout";
 import CreateWorkout from "./pages/WorkoutCreate";
 import Workouts from "./pages/Workouts";
@@ -8,9 +7,8 @@ import { WorkoutStackParamList } from "./types";
 import PendingWorkout from "./pages/PendingWorkout";
 import Colors from "../../../constants/Colors";
 import WorkoutSummary from "./pages/WorkoutSummary";
-import { fadeInFromBottomAndScaleUp } from "../../../navigation/assets/screen_animations";
 
-const Stack = createStackNavigator<WorkoutStackParamList>();
+const Stack = createNativeStackNavigator<WorkoutStackParamList>();
 
 export default function WorkoutScreens() {
   return (
@@ -20,7 +18,7 @@ export default function WorkoutScreens() {
         headerStyle: {
           backgroundColor: Colors.primary,
         },
-        ...fadeInFromBottomAndScaleUp,
+        animation: "fade",
       }}
     >
       <Stack.Screen

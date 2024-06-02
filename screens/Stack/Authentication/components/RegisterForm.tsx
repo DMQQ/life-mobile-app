@@ -1,13 +1,9 @@
 import { Formik } from "formik";
 import { View } from "react-native";
-
 import { useState } from "react";
-import ValidatedInput from "../../../../components/ui/ValidatedInput";
-import Button from "../../../../components/ui/Button/Button";
-import Input from "../../../../components/ui/TextInput/TextInput";
-import Layout from "@/constants/Layout";
-import Colors from "@/constants/Colors";
-import Color from "color";
+import ValidatedInput from "@/components/ui/ValidatedInput";
+import Button from "@/components/ui/Button/Button";
+import Input from "@/components/ui/TextInput/TextInput";
 import { useNavigation } from "@react-navigation/native";
 import ChangeButton from "./ChangeButton";
 
