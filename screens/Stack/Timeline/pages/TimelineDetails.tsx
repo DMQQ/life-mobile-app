@@ -105,7 +105,7 @@ export default function TimelineDetails({
   };
 
   return (
-    <>
+    <View style={{ backgroundColor: Colors.primary }}>
       <TimelineHeader
         title={data?.title.slice(0, 18)}
         scrollY={scrollY}
@@ -152,6 +152,6 @@ export default function TimelineDetails({
       >
         <AntDesign name="edit" color={"#fff"} size={25} />
       </AnimatedRipple>
-    </>
+    </View>
   );
 }

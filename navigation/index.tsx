@@ -18,18 +18,8 @@ import BottomTab from "../components/BottomTab/BottomTab";
 import WalletScreens from "../screens/Stack/Wallet/Main";
 import WorkoutScreens from "../screens/Stack/Workout/Main";
 import NotesScreens from "../screens/Stack/Notes/Main";
-import ScreenContainer from "../components/ui/ScreenContainer";
-import { ActivityIndicator } from "react-native";
 import Settings from "../screens/Stack/Settings/Settings";
 import Authentication from "../screens/Stack/Authentication/Main";
-
-import { slideInUpAndFadeIn } from "./assets/screen_animations";
-
-const LoaderScreen = () => (
-  <ScreenContainer style={{ justifyContent: "center", alignItems: "center" }}>
-    <ActivityIndicator color={"white"} size={45} />
-  </ScreenContainer>
-);
 
 export const navigationRef =
   React.createRef<NavigationContainerRef<RootStackParamList>>();
@@ -57,6 +47,8 @@ export default function Navigation() {
     [isAuthenticated]
   );
 
+  if (isLoading) return null;
+
   return (
     <NavigationContainer
       ref={navigationRef}
@@ -78,8 +70,6 @@ export default function Navigation() {
           },
         }}
       >
-        {isLoading && <Tab.Screen name="Loader" component={LoaderScreen} />}
-
         {isAuthenticated ? (
           <>
             <Tab.Screen name="Root" component={Root} />

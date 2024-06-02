@@ -19,6 +19,8 @@ import Url from "../../../../constants/Url";
 import { Ionicons } from "@expo/vector-icons";
 import Layout from "../../../../constants/Layout";
 import { IFile } from "../../../../types";
+import Animated from "react-native-reanimated";
+import { transition } from "../sharedTransition";
 
 const styles = StyleSheet.create({
   available: {
@@ -173,14 +175,15 @@ const GridImageView = memo((props: ImageDisplayViewProps) => {
           props.onShowPreview(item);
         }}
       >
-        <Image
+        <Animated.Image
+          //  sharedTransitionStyle={transition}
+          sharedTransitionTag={`image-${item.url}`}
           key={item.id}
           style={styles.img}
           source={{
             uri: Url.API + "/upload/images/" + item.url,
             height: styles.img.height,
             width: styles.img.width,
-            scale: 5,
           }}
         />
       </Ripple>
@@ -212,7 +215,9 @@ const ListImageView = memo((props: ImageDisplayViewProps) => (
         onLongPress={() => props.onRemovePhoto(item.id)}
         onPress={() => props.onShowPreview(item)}
       >
-        <Image
+        <Animated.Image
+          sharedTransitionStyle={transition}
+          sharedTransitionTag={`image-${item.url}`}
           style={styles.img}
           source={{
             uri: Url.API + "/upload/images/" + item.url,
