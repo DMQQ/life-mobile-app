@@ -73,11 +73,11 @@ export function createDates(originalDate: moment.Moment) {
   const month = originalDate.month();
   const daysInMonth = new Date(year, month + 1, 0).getDate(); // Get the number of days in the month
 
-  for (let i = 1; i <= daysInMonth; i++) {
+  for (let i = 2; i <= daysInMonth + 1; i++) {
     const date = new Date(year, month, i);
     const formattedDate = date.toISOString().split("T")[0]; // Format the date as "YYYY-MM-DD"
 
-    dates.push({ date: formattedDate });
+    dates.push(formattedDate);
   }
 
   return dates;
