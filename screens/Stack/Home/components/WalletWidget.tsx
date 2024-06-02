@@ -50,6 +50,8 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     marginTop: Padding.xs,
+
+    overflow: "hidden",
   },
   expense_container: {
     flexDirection: "row",
@@ -120,8 +122,6 @@ export default function AvailableBalanceWidget(props: {
               <Text style={{ fontSize: 25 }}>zł</Text>
             </Text>
           </View>
-
-          <Text style={styles.activity}>Recent activity</Text>
 
           <View style={styles.list}>
             {expenses.map((item: Expense) => (
