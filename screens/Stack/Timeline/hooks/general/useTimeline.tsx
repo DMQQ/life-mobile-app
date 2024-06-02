@@ -1,8 +1,9 @@
 import { gql, useQuery } from "@apollo/client";
 import moment from "moment";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import useGetTimeLineQuery from "../query/useGetTimeLineQuery";
 import { TimelineScreenProps } from "../../types";
+import { InteractionManager } from "react-native";
 
 export const GET_MONTHLY_EVENTS = gql`
   query GetMonthlyEvents($date: String!) {
