@@ -1,7 +1,6 @@
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Provider } from "react-redux";
-import useCachedResources from "./hooks/useCachedResources";
 import Navigation from "./navigation";
 import { store } from "./utils/redux";
 import {
@@ -21,6 +20,7 @@ import { onError } from "@apollo/client/link/error";
 import { setContext } from "@apollo/client/link/context";
 import { getItemAsync, deleteItemAsync } from "expo-secure-store";
 import { STORE_KEY } from "./utils/hooks/useUser";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -71,12 +71,8 @@ const apolloClient = new ApolloClient({
 });
 
 export default function App() {
-  const isLoadingComplete = useCachedResources();
-
-  if (!isLoadingComplete) {
-    return null;
-  } else {
-    return (
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
       <ThemeContextProvider>
         <ApolloProvider client={apolloClient}>
           <SafeAreaView style={{ flex: 1, backgroundColor: Colors.primary }}>
@@ -87,6 +83,6 @@ export default function App() {
           </SafeAreaView>
         </ApolloProvider>
       </ThemeContextProvider>
-    );
-  }
+    </GestureHandlerRootView>
+  );
 }
