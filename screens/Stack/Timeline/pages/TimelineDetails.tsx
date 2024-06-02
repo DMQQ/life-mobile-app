@@ -9,7 +9,6 @@ import Layout from "../../../../constants/Layout";
 import { AntDesign } from "@expo/vector-icons";
 import TimelineTodos from "../components/TimelineTodos";
 import LoaderSkeleton from "../components/LoaderSkeleton";
-import useGoBackOnBackPress from "../../../../utils/hooks/useGoBackOnBackPress";
 import Animated, {
   useAnimatedScrollHandler,
   useAnimatedStyle,
@@ -70,7 +69,7 @@ export default function TimelineDetails({
   const scrollY = useSharedValue(0);
   const onScroll = useAnimatedScrollHandler({
     onScroll(event) {
-      scrollY.value = event.contentOffset.y;
+      if (scrollY.value) scrollY.value = event.contentOffset.y;
     },
   });
 
@@ -90,11 +89,11 @@ export default function TimelineDetails({
     transform: [
       {
         translateX:
-          scrollY.value > 40
+          scrollY?.value > 40
             ? withTiming(100, { duration: 250 })
             : withTiming(0, { duration: 250 }),
       },
-    ],
+    ] as any,
   }));
 
   const onFabPress = () => {

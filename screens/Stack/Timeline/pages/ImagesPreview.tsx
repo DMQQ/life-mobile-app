@@ -35,7 +35,7 @@ export default function ImagesPreview({
       headerTitle: "",
       headerTransparent: true,
       headerRight: () =>
-        currentImageIndex + 1 <= data.images.length ? (
+        currentImageIndex + 1 < data.images.length ? (
           <Ripple
             style={{ paddingRight: 10 }}
             onPress={() =>
@@ -96,7 +96,7 @@ const GesturedImage = (props: { uri: string }) => {
       { translateY: -focalY.value },
       { translateX: Layout.window.width / 2 },
       { translateY: Layout.window.height / 2 },
-    ],
+    ] as any,
   }));
 
   return (
