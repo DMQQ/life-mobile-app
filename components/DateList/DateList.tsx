@@ -7,10 +7,6 @@ import { createDates } from "./fns";
 import { Padding } from "@/constants/Values";
 import { useNavigation } from "@react-navigation/native";
 
-type TDate = {
-  date: string;
-};
-
 interface DateListProps {
   selectedDate: string;
   setSelected: React.Dispatch<React.SetStateAction<string>>;
@@ -21,14 +17,9 @@ interface DateListProps {
 }
 
 const date = (today: Moment, month: string) => {
-  const day = today.date().toString();
-
-  const _month = moment.months().findIndex((m) => m === month) + 1; // human readable date
-  const _monthStr = _month < 10 ? "0" + _month : _month;
-  const _dayStr = +day < 10 ? "0" + day : day;
-  const newDate = `${today.year()}-${_monthStr}-${_dayStr}`;
-
-  return newDate;
+  const year = today.year();
+  const monthIndex = moment.months().indexOf(month);
+  return moment([year, monthIndex]).format("YYYY-MM-DD");
 };
 
 const getItemLayout = (_: any, index: number) => ({
@@ -42,19 +33,15 @@ const DateList = memo(
     const today = moment(selectedDate);
     const [month, setMonth] = useState(moment.months()[today.month()]);
 
-    const [dates, setDates] = useState<TDate[]>(createDates(today));
+    const [dates, setDates] = useState<string[]>(createDates(today));
 
-    const listRef = useRef<VirtualizedList<TDate>>(null);
+    const listRef = useRef<VirtualizedList<string>>(null);
 
     function onMonthChange(newMonth: string) {
-      if (newMonth === month) return;
-
       const realDate = moment();
 
       const dt = date(today, newMonth);
       const newDates = createDates(moment(dt));
-
-      setDates(newDates);
 
       if (newMonth === moment.months()[realDate.month()]) {
         setSelected(realDate.format("YYYY-MM-DD"));
@@ -63,12 +50,13 @@ const DateList = memo(
         setSelected(firstOfMonth);
       }
 
+      setDates(newDates);
       setMonth(newMonth);
     }
 
     useLayoutEffect(() => {
       listRef.current?.scrollToItem({
-        item: dates.find((d) => d.date === selectedDate)!,
+        item: dates.find((d) => d === selectedDate)!,
         animated: true,
       });
     }, [month]);
@@ -78,16 +66,16 @@ const DateList = memo(
     const navigation = useNavigation<any>();
 
     const renderItem = useCallback(
-      ({ item }: { item: TDate }) => (
+      ({ item }: { item: string }) => (
         <Date
-          tasks={dayEvents[item.date] || 0}
-          {...item}
-          isSelected={selectedDate === item.date}
-          onPress={() => setSelected(item.date)}
+          tasks={dayEvents[item] || 0}
+          date={item}
+          isSelected={selectedDate === item}
+          onPress={() => setSelected(item)}
           onLongPress={() => {
-            setSelected(item.date);
+            setSelected(item);
             navigation.navigate("TimelineCreate", {
-              selectedDate: item.date,
+              selectedDate: item,
             });
           }}
         />
@@ -109,7 +97,7 @@ const DateList = memo(
             style={{
               color: "#ffffffda",
               fontSize: 30,
-              padding: Padding.l,
+              padding: Padding.m,
               fontWeight: "bold",
             }}
           >
@@ -118,7 +106,7 @@ const DateList = memo(
         </View>
         <MonthSelectList selected={month} onPress={onMonthChange} />
         <VirtualizedList
-          initialNumToRender={10}
+          initialNumToRender={today.get("d") < 5 ? 5 : 31}
           snapToOffsets={snapOffsets}
           removeClippedSubviews
           showsHorizontalScrollIndicator={false}
@@ -128,7 +116,7 @@ const DateList = memo(
           getItem={(arr, i) => arr[i] as any}
           getItemCount={(it) => it.length}
           data={dates}
-          keyExtractor={(item) => item.date}
+          keyExtractor={(item) => item}
           renderItem={renderItem}
         />
       </View>

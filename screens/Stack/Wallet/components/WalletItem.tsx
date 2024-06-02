@@ -30,15 +30,15 @@ interface WalletItemProps extends WalletElement {}
 
 const styles = StyleSheet.create({
   expense_item: {
-    height: 80,
-    borderRadius: 10,
+    height: 70,
+    borderRadius: 15,
     padding: 10,
     flexDirection: "row",
     backgroundColor: Colors.primary_lighter,
   },
   title: {
     color: "#fff",
-    fontSize: 20,
+    fontSize: 18,
     marginLeft: 10,
     fontWeight: "bold",
     marginBottom: 5,
@@ -47,7 +47,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 10,
-    flex: 1,
+    width: 40,
     backgroundColor: "rgba(255,0,0,0.15)",
   },
   date: {
@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
   },
   price: {
     color: "#fff",
-    fontSize: 23,
+    fontSize: 18,
     fontWeight: "bold",
   },
   button: {
@@ -148,7 +148,7 @@ export const Icons = {
     backgroundColor: Colors.primary,
     icon: <Ionicons name="alert" color={Colors.secondary} size={24} />,
   },
-};
+} as const;
 
 export const CategoryIcon = (props: { category: keyof typeof Icons }) => (
   <View
@@ -203,14 +203,17 @@ export default function WalletItem(
             {item.description}
           </Text>
           <View style={{ flexDirection: "row" }}>
-            <Text style={styles.date}>{parseDateToText(item.date)}</Text>
+            <Text style={styles.date}>
+              {parseDateToText(item.date)}
+              {item.category ? ", " + item.category : ""}
+            </Text>
           </View>
         </View>
         {!isBalanceEdit && (
           <View style={[styles.price_container, { flexDirection: "row" }]}>
             <Text style={[styles.price, { marginLeft: 5 }]}>
               {price}
-              <Text style={{ fontSize: 15 }}>zł</Text>
+              <Text style={{ fontSize: 14 }}>zł</Text>
             </Text>
           </View>
         )}

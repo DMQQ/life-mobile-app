@@ -1,4 +1,4 @@
-import { createStackNavigator } from "@react-navigation/stack";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Wallet from "./pages/Wallet";
 import CreateActivity from "./pages/CreateActivity";
 import { ParamListBase } from "@react-navigation/native";
@@ -14,7 +14,7 @@ interface WalletRootStack extends ParamListBase {
 export type WalletScreens<Screen extends keyof WalletRootStack> =
   StackScreenProps<WalletRootStack, Screen>;
 
-const Stack = createStackNavigator<WalletRootStack>();
+const Stack = createNativeStackNavigator<WalletRootStack>();
 
 export default function WalletScreens() {
   return (
@@ -25,6 +25,7 @@ export default function WalletScreens() {
         headerStyle: {
           backgroundColor: Colors.primary,
         },
+        animation: "simple_push",
       }}
     >
       <Stack.Screen name="Wallet" component={Wallet} />

@@ -10,7 +10,7 @@ import useSuggestedEvents from "./useSuggestedEvents";
 import TilesList from "./TilesList";
 import SubcategoryList from "./SubcategoryList";
 
-type EventType = (typeof CommonEvents)[0];
+type EventType = (typeof CommonEvents)[number];
 
 interface SuggestedEventsProps {
   date: string;
@@ -75,7 +75,13 @@ export default function SuggestedEvents(props: SuggestedEventsProps) {
           >
             <Text style={{ color: "#fff", fontSize: 17 }}>Set time</Text>
             <Text style={{ color: "#fff", fontSize: 17 }}>
-              {time !== undefined && time?.toLocaleTimeString()} to {endTime}
+              {time?.toLocaleTimeString("pl-PL", {
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: false,
+              })}
+              {" - "}
+              {endTime}
             </Text>
           </Ripple>
         )}

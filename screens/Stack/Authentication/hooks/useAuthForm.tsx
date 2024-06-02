@@ -23,10 +23,8 @@ const SIGNUP_USER_MUTATION = gql`
   }
 `;
 
-export default function useAuthForm(variant: "login" | "register") {
-  const { saveUser } = useUser();
-
-  const validationSchema = yup.object().shape({
+export const validationSchema = (variant: string) =>
+  yup.object().shape({
     email: yup
       .string()
       .email("Email must contain @")
@@ -47,6 +45,9 @@ export default function useAuthForm(variant: "login" | "register") {
         .oneOf([yup.ref("password"), null], "Passwords must match"),
     }),
   });
+
+export default function useAuthForm(variant: "login" | "register") {
+  const { saveUser } = useUser();
 
   const schema =
     variant === "login" ? LOGIN_USER_MUTATION : SIGNUP_USER_MUTATION;
@@ -105,7 +106,7 @@ export default function useAuthForm(variant: "login" | "register") {
   return {
     onSubmit: handleSubmit,
     state,
-    validationSchema,
+    validationSchema: validationSchema(variant),
     error,
     savedCredentials: credentials,
   };

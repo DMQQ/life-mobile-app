@@ -6,6 +6,7 @@ import moment from "moment";
 import Colors, { Sizing } from "@/constants/Colors";
 import { useNavigation } from "@react-navigation/native";
 import Animated, { FadeIn } from "react-native-reanimated";
+import Color from "color";
 
 const styles = StyleSheet.create({
   container: {
@@ -21,7 +22,7 @@ const styles = StyleSheet.create({
   },
   content: {
     color: "#fff",
-    fontSize: 19,
+    fontSize: 17,
     flex: 1,
     flexWrap: "wrap",
     marginTop: 2.5,
@@ -61,9 +62,11 @@ export default function NotFound() {
       <Animated.View entering={FadeIn.delay(150)}>
         <Button
           onPress={onPress}
-          size="xl"
-          style={{ backgroundColor: "#fff", borderRadius: 100 }}
-          fontStyle={{ color: Colors.primary }}
+          style={{
+            backgroundColor: Colors.primary,
+            borderRadius: 100,
+          }}
+          fontStyle={{ color: "#fff", fontSize: 16 }}
         >
           Create event
         </Button>

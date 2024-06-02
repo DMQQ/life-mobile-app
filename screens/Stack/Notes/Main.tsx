@@ -1,13 +1,14 @@
 import NotesScreen from "./pages/NotesScreen";
 import NoteScreen from "./pages/Note";
 import CreateNoteScreen from "./pages/CreateNote";
-import { createSharedElementStackNavigator } from "react-navigation-shared-element";
 import Colors from "../../../constants/Colors";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { loadNotes } from "../../../utils/redux/notes/notes";
 
-const SharedStack = createSharedElementStackNavigator();
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+
+const SharedStack = createNativeStackNavigator();
 
 export default function NotesScreens() {
   const dispatch = useDispatch();
@@ -32,17 +33,6 @@ export default function NotesScreens() {
         options={{
           headerStyle: { backgroundColor: Colors.primary },
         }}
-        sharedElements={({ params }, opt) => [
-          {
-            id: `note.title.${params.noteId}`,
-            animation: "fade-in",
-            resize: "clip",
-          },
-          {
-            id: `note.desc.${params.noteId}`,
-            animation: "fade",
-          },
-        ]}
       />
       <SharedStack.Screen
         options={{

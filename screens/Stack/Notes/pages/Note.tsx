@@ -1,13 +1,12 @@
 import { Text, View } from "react-native";
 import ScreenContainer from "../../../../components/ui/ScreenContainer";
 import { SharedElement } from "react-navigation-shared-element";
-import { ScreenProps } from "../../../../types";
 import Colors from "../../../../constants/Colors";
-import Button from "../../../../components/ui/Button/Button";
 import { useAppSelector } from "../../../../utils/redux";
 import { useEffect } from "react";
 import Ripple from "react-native-material-ripple";
 import { AntDesign } from "@expo/vector-icons";
+import Animated from "react-native-reanimated";
 
 export default function NoteScreen({ route, navigation }: any) {
   const { notes } = useAppSelector((s) => s.notes);
@@ -34,19 +33,17 @@ export default function NoteScreen({ route, navigation }: any) {
 
   return (
     <ScreenContainer scroll>
-      <SharedElement id={`note.title.${route.params?.noteId as string}`}>
-        <View style={{ width: "100%" }}>
-          <Text
-            style={{
-              color: Colors.secondary,
-              fontSize: 50,
-              fontWeight: "bold",
-            }}
-          >
-            {note?.content.split("\n")[0]}
-          </Text>
-        </View>
-      </SharedElement>
+      <Animated.View style={{ width: "100%" }} sharedTransitionTag="title">
+        <Text
+          style={{
+            color: Colors.secondary,
+            fontSize: 50,
+            fontWeight: "bold",
+          }}
+        >
+          {note?.content.split("\n")[0]}
+        </Text>
+      </Animated.View>
 
       <SharedElement id={`note.desc.${route.params?.noteId as string}`}>
         <Text

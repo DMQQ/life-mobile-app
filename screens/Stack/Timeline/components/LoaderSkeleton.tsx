@@ -1,3 +1,4 @@
+import Color from "color";
 import Skeleton from "../../../../components/SkeletonLoader/Skeleton";
 import Colors from "../../../../constants/Colors";
 import { View } from "react-native";
@@ -5,8 +6,8 @@ import { View } from "react-native";
 export default function LoaderSkeleton() {
   return (
     <Skeleton
-      backgroundColor={Colors.primary_light}
-      highlightColor={Colors.primary_lighter}
+      backgroundColor={Color(Colors.primary_lighter).lighten(0.5).string()}
+      highlightColor={Colors.secondary}
       size={({ width, height }) => ({
         width: width,
         height: height - 150,
@@ -43,8 +44,8 @@ export const TimelineScreenLoader = (props: { loading: boolean }) =>
   props.loading ? (
     <View style={{ padding: 10 }}>
       <Skeleton
-        backgroundColor={Colors.primary_light}
-        highlightColor={Colors.primary_lighter}
+        backgroundColor={Color(Colors.primary_lighter).lighten(0.5).string()}
+        highlightColor={Colors.secondary}
         size={({ width }) => ({
           width: width - 20,
           height: ((65 + 10) * 3 + 40) * 2 + 30,
