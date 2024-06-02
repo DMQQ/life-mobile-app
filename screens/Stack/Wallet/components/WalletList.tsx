@@ -3,11 +3,10 @@ import { Wallet } from "../../../../types";
 import WalletItem, { WalletElement, parseDateToText } from "./WalletItem";
 import { useState, useRef, useEffect } from "react";
 import { Text, NativeScrollEvent } from "react-native";
-
-import Animated, { Layout, SharedValue } from "react-native-reanimated";
+import { WalletSheet } from "../components/WalletSheet";
+import Animated, { SharedValue } from "react-native-reanimated";
 import { NativeSyntheticEvent } from "react-native";
 import moment from "moment";
-import { WalletSheet } from "./WalletSheet";
 
 export default function WalletList(props: {
   wallet: Wallet;
@@ -76,7 +75,7 @@ export default function WalletList(props: {
                   style={{
                     color: "#fff",
                     fontWeight: "bold",
-                    fontSize: 20,
+                    fontSize: 16,
                     padding: 5,
                     marginTop: index === 0 ? 0 : 10,
                   }}

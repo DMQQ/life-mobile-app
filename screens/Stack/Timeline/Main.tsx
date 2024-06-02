@@ -1,4 +1,3 @@
-import { createStackNavigator } from "@react-navigation/stack";
 import CreateTimeLineEventModal from "./pages/TimelineCreate";
 import TimelineDetails from "./pages/TimelineDetails";
 import Timeline from "./pages/Timeline";
@@ -6,16 +5,12 @@ import { useNavigation } from "@react-navigation/native";
 import ImagesPreview from "./pages/ImagesPreview";
 import { useEffect } from "react";
 import type { TimelineRootStack as RootStackParamList } from "./types";
-import {
-  fadeInFromBottomAndScaleUp,
-  horizontalAnimation,
-} from "@/navigation/assets/screen_animations";
 import ScheduleScreen from "./pages/Schedule";
 import type { RootStackScreenProps } from "@/types";
 import moment from "moment";
-import Colors from "@/constants/Colors";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
-const Stack = createStackNavigator<RootStackParamList>();
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function TimelineScreens({
   route,
@@ -37,7 +32,11 @@ export default function TimelineScreens({
   return (
     <Stack.Navigator
       initialRouteName="Timeline"
-      screenOptions={{ ...fadeInFromBottomAndScaleUp }}
+      screenOptions={{
+        animation: "simple_push",
+        statusBarAnimation: "slide",
+        animationDuration: 100,
+      }}
     >
       <Stack.Screen
         name="Timeline"
@@ -62,12 +61,11 @@ export default function TimelineScreens({
       />
       <Stack.Screen
         options={{
-          headerTitle: "Images",
-          headerTitleAlign: "center",
-          ...horizontalAnimation,
-          headerStyle: {
-            backgroundColor: Colors.primary,
-          },
+          headerTitle: "",
+          headerTransparent: true,
+          animationTypeForReplace: "pop",
+          animation: "none",
+          presentation: "transparentModal",
         }}
         name="ImagesPreview"
         component={ImagesPreview}

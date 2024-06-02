@@ -70,6 +70,7 @@ export default function Button({
 
   return (
     <Ripple
+      testID={"Button"}
       rippleCentered
       onPress={callback}
       disabled={disabled}
@@ -95,7 +96,6 @@ export const ViewMoreButton = (props: {
     onPress={props.onPress}
     disabled={props.disabled}
     style={{
-      backgroundColor: props?.bg || Colors.secondary,
       borderRadius: 100,
       padding: 5,
       paddingHorizontal: 10,
@@ -103,9 +103,8 @@ export const ViewMoreButton = (props: {
   >
     <Text
       style={{
-        color: Colors.primary,
+        color: "#fff",
         fontSize: 15,
-        fontWeight: "bold",
       }}
     >
       {props.text}

@@ -30,8 +30,7 @@ export default function useSuggestedEvents(props: {
     DateTimePickerAndroid.open({
       value: new Date(), // i need only time so no need to have correct date
       display: "default",
-      positiveButtonLabel: "Set time",
-      negativeButtonLabel: "Cancel",
+
       is24Hour: true,
       mode: "time",
 
@@ -41,7 +40,14 @@ export default function useSuggestedEvents(props: {
     });
   };
 
-  const endTime = moment(time).add(1, "hour").toDate().toLocaleTimeString();
+  const endTime = moment(time)
+    .add(1, "hour")
+    .toDate()
+    .toLocaleTimeString("pl-PL", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
 
   const handleSubmit = async () => {
     if (time === undefined) return;
@@ -49,7 +55,11 @@ export default function useSuggestedEvents(props: {
     const title = selected.name + " - " + subCategory;
 
     const _time = {
-      begin: time?.toLocaleTimeString()!,
+      begin: time?.toLocaleTimeString("pl-PL", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      })!,
       end: endTime,
     };
 
@@ -60,6 +70,8 @@ export default function useSuggestedEvents(props: {
       tags: "pre-made-event",
       date: moment().format("YYYY-MM-DD"),
     };
+
+    console.log(finalData);
 
     await props.createTimelineAsync({ ...props.initialValues, ...finalData });
 

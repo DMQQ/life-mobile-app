@@ -11,7 +11,7 @@ export const secondary_candidates = [
   "#008CFF",
 ];
 
-const primary = "#151421"; // "#0F0F0F";
+const primary = "#151421";
 
 const secondary = secondary_candidates[secondary_candidates.length - 1];
 

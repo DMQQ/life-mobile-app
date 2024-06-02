@@ -56,20 +56,16 @@ export default function useCreateTimeline({
     enableReinitialize: isEditing,
   });
 
-  const dateTimeDefaultOptions = {
-    is24Hour: true,
-  } as any;
-
   const timePicker = (formik: any, type: "begin" | "end") => {
     DateTimePickerAndroid.open({
       value: new Date(),
       mode: "time",
-      ...dateTimeDefaultOptions,
       display: "default",
 
-      onChange(event, date) {
-        formik.handleChange(type)(date?.toLocaleTimeString());
-      },
+      is24Hour: true,
+
+      onChange: (_, date) =>
+        formik.setFieldValue(type, moment(date).format("HH:mm:ss")),
     });
   };
 
@@ -77,7 +73,8 @@ export default function useCreateTimeline({
     DateTimePickerAndroid.open({
       value: moment(route.params.selectedDate).toDate(),
       mode: "date",
-      ...dateTimeDefaultOptions,
+
+      is24Hour: true,
 
       onChange(_, date) {
         navigation.setParams({

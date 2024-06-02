@@ -46,7 +46,7 @@ const Skeleton = ({
       : size;
 
   React.useEffect(() => {
-    shared.value = withRepeat(withTiming(1, { duration: 1000 }), Infinity);
+    shared.value = withRepeat(withTiming(1, { duration: 750 }), Infinity);
   }, []);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -66,7 +66,7 @@ const Skeleton = ({
       style={{ width, height, marginVertical, marginHorizontal }}
     >
       <MaskedView
-        androidRenderingMode="software"
+        androidRenderingMode="hardware"
         maskElement={children}
         style={{
           width,

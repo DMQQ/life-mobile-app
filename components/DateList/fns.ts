@@ -77,7 +77,7 @@ export function createDates(originalDate: moment.Moment) {
     const date = new Date(year, month, i);
     const formattedDate = date.toISOString().split("T")[0]; // Format the date as "YYYY-MM-DD"
 
-    dates.push({ date: formattedDate });
+    dates.push(formattedDate);
   }
 
   return dates;

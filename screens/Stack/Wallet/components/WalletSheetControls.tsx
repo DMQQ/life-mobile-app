@@ -33,7 +33,7 @@ const SheetActionButtons = (props: {
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
-        marginTop: 20,
+        marginBottom: 20,
       }}
     >
       <Button

@@ -1,20 +1,18 @@
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import ScreenContainer from "@/components/ui/ScreenContainer";
-import { InteractionManager, ScrollView, Text } from "react-native";
+import { InteractionManager, Text, Image, Dimensions } from "react-native";
 import Layout from "@/constants/Layout";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import useGetTimelineById from "../hooks/query/useGetTimelineById";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
-import { IFile, Timeline } from "@/types";
 import Url from "@/constants/Url";
-import useGoBackOnBackPress from "@/utils/hooks/useGoBackOnBackPress";
 import { TimelineScreenProps } from "../types";
 import Ripple from "react-native-material-ripple";
-import { AntDesign, Feather } from "@expo/vector-icons";
+import { transition } from "../sharedTransition";
 
 export default function ImagesPreview({
   route,
@@ -28,22 +26,20 @@ export default function ImagesPreview({
     (img: { id: string; url: string }) => img.url === route.params.selectedImage
   );
 
-  console.log(data.images, route.params.selectedImage);
-
   useEffect(() => {
     navigation.setOptions({
-      headerTitle: "",
-      headerTransparent: true,
       headerRight: () =>
-        currentImageIndex + 1 <= data.images.length ? (
+        currentImageIndex + 1 < data.images.length ? (
           <Ripple
             style={{ paddingRight: 10 }}
-            onPress={() =>
-              navigation.push("ImagesPreview", {
-                timelineId: route.params.timelineId,
-                selectedImage: data.images[currentImageIndex + 1],
-              })
-            }
+            onPress={() => {
+              InteractionManager.runAfterInteractions(() => {
+                navigation.setParams({
+                  selectedImage: data.images[currentImageIndex + 1].url,
+                  timelineId: route.params.timelineId,
+                });
+              });
+            }}
           >
             <Text style={{ color: "#fff" }}>Next</Text>
           </Ripple>
@@ -53,7 +49,12 @@ export default function ImagesPreview({
 
   return (
     <ScreenContainer
-      style={{ justifyContent: "center", alignItems: "center", padding: 0 }}
+      style={{
+        justifyContent: "center",
+        alignItems: "center",
+        padding: 0,
+        backgroundColor: "rgba(0,0,0,0.75)",
+      }}
     >
       <GesturedImage uri={route.params.selectedImage} />
     </ScreenContainer>
@@ -68,49 +69,78 @@ const GesturedImage = (props: { uri: string }) => {
 
   const src = { uri: Url.API + "/upload/images/" + props.uri };
 
-  const [enableGesture, setEnableGesture] = useState(false);
+  const dimenstions = useSharedValue({ width: 0, height: 0 });
 
-  useEffect(() => {
-    InteractionManager.runAfterInteractions(() => {
-      setEnableGesture(true);
+  useLayoutEffect(() => {
+    Image.getSize(src.uri, (width, height) => {
+      const imageRatio = width / height;
+      const screenWidth = Layout.window.width;
+      const screenHeight = Layout.window.height;
+
+      if (imageRatio > screenWidth / screenHeight) {
+        dimenstions.value = {
+          width: screenWidth,
+          height: screenWidth / imageRatio,
+        };
+      } else {
+        dimenstions.value = {
+          width: screenHeight * imageRatio,
+          height: screenHeight,
+        };
+      }
     });
-  }, []);
+  }, [props.uri]);
 
-  const handleGesture = Gesture.Pinch()
+  const handlePinchGesture = Gesture.Pinch()
     .onUpdate((event) => {
       scale.value = event.scale;
+
       focalX.value = event.focalX;
       focalY.value = event.focalY;
     })
-    .onEnd(() => (scale.value = withTiming(1)))
-    .enabled(enableGesture);
+    .onEnd(() => {
+      if (scale.value < 1) {
+        scale.value = withTiming(1);
+      } else if (scale.value > 3) {
+        scale.value = withTiming(2);
+      }
+    });
+
+  const handlePanGesture = Gesture.Pan().onUpdate((event) => {
+    // focalX.value = event.translationX;
+    // focalY.value = event.translationY;
+  });
+
+  // .onEnd(() => (scale.value = withTiming(1)));
+
+  const animatedDims = useAnimatedStyle(() => ({
+    width: dimenstions.value.width,
+    height: dimenstions.value.height,
+  }));
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [
       { translateX: focalX.value },
       { translateY: focalY.value },
       { translateX: -Layout.window.width / 2 },
-      { translateY: -Layout.window.height / 2 },
+      { translateY: -Layout.window.height / 4 },
       { scale: scale.value },
       { translateX: -focalX.value },
       { translateY: -focalY.value },
       { translateX: Layout.window.width / 2 },
-      { translateY: Layout.window.height / 2 },
-    ],
+      { translateY: Layout.window.height / 4 },
+    ] as any,
   }));
+
+  const handleGesture = Gesture.Race(handlePinchGesture);
 
   return (
     <GestureDetector gesture={handleGesture}>
       <Animated.Image
+        sharedTransitionStyle={transition}
+        sharedTransitionTag={`image-${props.uri}`}
         source={src}
-        style={[
-          {
-            width: Layout.screen.width,
-            height: Layout.screen.height - 80,
-          },
-          animatedStyle,
-        ]}
-        resizeMode="contain"
+        style={[animatedDims, animatedStyle]}
       />
     </GestureDetector>
   );

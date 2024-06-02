@@ -18,16 +18,8 @@ import BottomTab from "../components/BottomTab/BottomTab";
 import WalletScreens from "../screens/Stack/Wallet/Main";
 import WorkoutScreens from "../screens/Stack/Workout/Main";
 import NotesScreens from "../screens/Stack/Notes/Main";
-import ScreenContainer from "../components/ui/ScreenContainer";
-import { ActivityIndicator } from "react-native";
 import Settings from "../screens/Stack/Settings/Settings";
 import Authentication from "../screens/Stack/Authentication/Main";
-
-const LoaderScreen = () => (
-  <ScreenContainer style={{ justifyContent: "center", alignItems: "center" }}>
-    <ActivityIndicator color={"white"} size={45} />
-  </ScreenContainer>
-);
 
 export const navigationRef =
   React.createRef<NavigationContainerRef<RootStackParamList>>();
@@ -50,9 +42,12 @@ export default function Navigation() {
   }, [isAuthenticated]);
 
   const renderTab = useCallback(
-    (props: BottomTabBarProps) => <BottomTab {...props} />,
-    []
+    (props: BottomTabBarProps) =>
+      isAuthenticated ? <BottomTab {...props} /> : null,
+    [isAuthenticated]
   );
+
+  if (isLoading) return null;
 
   return (
     <NavigationContainer
@@ -67,7 +62,7 @@ export default function Navigation() {
     >
       <Tab.Navigator
         initialRouteName={isLoading ? "Loader" : "Root"}
-        tabBar={isAuthenticated ? renderTab : undefined}
+        tabBar={renderTab}
         screenOptions={{
           headerShown: false,
           headerStyle: {
@@ -75,8 +70,6 @@ export default function Navigation() {
           },
         }}
       >
-        {isLoading && <Tab.Screen name="Loader" component={LoaderScreen} />}
-
         {isAuthenticated ? (
           <>
             <Tab.Screen name="Root" component={Root} />

@@ -60,7 +60,10 @@ const Header = (props: {
 
   return (
     <View style={styles.container}>
-      <Ripple onPress={() => props.navigation.goBack()} style={{ padding: 10 }}>
+      <Ripple
+        onPress={() => props.navigation.replace("Timeline")}
+        style={{ padding: 10 }}
+      >
         <AntDesign name="arrowleft" size={20} color={"#fff"} />
       </Ripple>
 

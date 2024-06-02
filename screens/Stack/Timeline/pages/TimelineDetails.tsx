@@ -9,7 +9,6 @@ import Layout from "../../../../constants/Layout";
 import { AntDesign } from "@expo/vector-icons";
 import TimelineTodos from "../components/TimelineTodos";
 import LoaderSkeleton from "../components/LoaderSkeleton";
-import useGoBackOnBackPress from "../../../../utils/hooks/useGoBackOnBackPress";
 import Animated, {
   useAnimatedScrollHandler,
   useAnimatedStyle,
@@ -36,7 +35,7 @@ const styles = StyleSheet.create({
   },
   contentText: {
     fontSize: 20,
-    color: Color(Colors.primary).lighten(5).string(),
+    color: "rgba(255,255,255,0.7)",
   },
   timelineIdText: {
     color: Color(Colors.primary).lighten(4).string(),
@@ -70,7 +69,7 @@ export default function TimelineDetails({
   const scrollY = useSharedValue(0);
   const onScroll = useAnimatedScrollHandler({
     onScroll(event) {
-      scrollY.value = event.contentOffset.y;
+      if (scrollY.value) scrollY.value = event.contentOffset.y;
     },
   });
 
@@ -90,11 +89,11 @@ export default function TimelineDetails({
     transform: [
       {
         translateX:
-          scrollY.value > 40
+          scrollY?.value > 40
             ? withTiming(100, { duration: 250 })
             : withTiming(0, { duration: 250 }),
       },
-    ],
+    ] as any,
   }));
 
   const onFabPress = () => {
@@ -106,7 +105,7 @@ export default function TimelineDetails({
   };
 
   return (
-    <>
+    <View style={{ backgroundColor: Colors.primary }}>
       <TimelineHeader
         title={data?.title.slice(0, 18)}
         scrollY={scrollY}
@@ -153,6 +152,6 @@ export default function TimelineDetails({
       >
         <AntDesign name="edit" color={"#fff"} size={25} />
       </AnimatedRipple>
-    </>
+    </View>
   );
 }

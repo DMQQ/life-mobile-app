@@ -1,15 +1,20 @@
-import { randColor } from "@/constants/Colors";
+import Colors, { randColor } from "@/constants/Colors";
+import Layout from "@/constants/Layout";
 import { useAppSelector } from "@/utils/redux";
-import { Text, View } from "react-native";
+import Color from "color";
+import { FlatList, Text, View } from "react-native";
+
+const backgroundColor = Colors.primary_lighter;
 
 const Note = (props: { marginRight: number; text: string }) => (
   <View
     style={[
       {
-        backgroundColor: randColor(),
-        borderRadius: 15,
+        backgroundColor: Colors.primary,
+        borderRadius: 25,
         padding: 15,
         flex: 1,
+        width: Layout.screen.width * 0.7,
       },
       { marginRight: props.marginRight },
     ]}
@@ -25,7 +30,14 @@ const Note = (props: { marginRight: number; text: string }) => (
     >
       Pinned note
     </Text>
-    <Text numberOfLines={5} style={{ color: "#fff", fontSize: 18 }}>
+    <Text
+      numberOfLines={5}
+      style={{
+        color: "rgba(255,255,255,0.9)",
+        fontSize: 18,
+        width: "100%",
+      }}
+    >
       {props.text}
     </Text>
   </View>
@@ -34,17 +46,30 @@ const Note = (props: { marginRight: number; text: string }) => (
 export default function NoteWidget() {
   const { notes } = useAppSelector((st) => st.notes);
 
-  // change to actually pinned later
-  const areNotesSecure = notes.slice(0, 2).every((note) => note.secure);
+  const data = notes.slice(0, 5).filter((note) => !note.secure);
+
+  if (data.length === 0) return null;
 
   return (
-    <>
-      {notes.length >= 2 && !areNotesSecure && (
-        <View style={{ flexDirection: "row", marginTop: 15 }}>
-          <Note marginRight={15} text={notes[0].content} />
-          <Note marginRight={0} text={notes[1].content} />
-        </View>
-      )}
-    </>
+    <View
+      style={{
+        backgroundColor,
+        padding: 15,
+        borderRadius: 25,
+        marginTop: 15,
+      }}
+    >
+      <FlatList
+        horizontal
+        data={data}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item, index }) => (
+          <Note
+            marginRight={index === notes.length - 1 ? 0 : 10}
+            text={item.content}
+          />
+        )}
+      />
+    </View>
   );
 }
