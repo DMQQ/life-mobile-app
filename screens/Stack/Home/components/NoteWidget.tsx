@@ -10,7 +10,7 @@ const Note = (props: { marginRight: number; text: string }) => (
   <View
     style={[
       {
-        backgroundColor: "#ffffff15",
+        backgroundColor: Colors.primary,
         borderRadius: 25,
         padding: 15,
         flex: 1,

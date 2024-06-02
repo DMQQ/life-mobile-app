@@ -91,13 +91,27 @@ const GesturedImage = (props: { uri: string }) => {
     });
   }, [props.uri]);
 
-  const handleGesture = Gesture.Pinch()
+  const handlePinchGesture = Gesture.Pinch()
     .onUpdate((event) => {
       scale.value = event.scale;
+
       focalX.value = event.focalX;
       focalY.value = event.focalY;
     })
-    .onEnd(() => (scale.value = withTiming(1)));
+    .onEnd(() => {
+      if (scale.value < 1) {
+        scale.value = withTiming(1);
+      } else if (scale.value > 3) {
+        scale.value = withTiming(2);
+      }
+    });
+
+  const handlePanGesture = Gesture.Pan().onUpdate((event) => {
+    // focalX.value = event.translationX;
+    // focalY.value = event.translationY;
+  });
+
+  // .onEnd(() => (scale.value = withTiming(1)));
 
   const animatedDims = useAnimatedStyle(() => ({
     width: dimenstions.value.width,
@@ -109,14 +123,16 @@ const GesturedImage = (props: { uri: string }) => {
       { translateX: focalX.value },
       { translateY: focalY.value },
       { translateX: -Layout.window.width / 2 },
-      { translateY: -Layout.window.height / 2 },
+      { translateY: -Layout.window.height / 4 },
       { scale: scale.value },
       { translateX: -focalX.value },
       { translateY: -focalY.value },
       { translateX: Layout.window.width / 2 },
-      { translateY: Layout.window.height / 2 },
+      { translateY: Layout.window.height / 4 },
     ] as any,
   }));
+
+  const handleGesture = Gesture.Race(handlePinchGesture);
 
   return (
     <GestureDetector gesture={handleGesture}>

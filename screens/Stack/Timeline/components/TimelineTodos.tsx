@@ -99,14 +99,12 @@ export default function TimelineTodos(props: {
           </Ripple>
         </View>
 
-        <View style={{ paddingHorizontal: 7.5 }}>
-          {props.todos.map((todo) => (
-            <Todo timelineId={props.timelineId} key={todo.id} {...todo} />
-          ))}
-        </View>
+        {props.todos.map((todo) => (
+          <Todo timelineId={props.timelineId} key={todo.id} {...todo} />
+        ))}
 
         {show && (
-          <View style={{ marginTop: 5 }}>
+          <View style={{ marginTop: 15 }}>
             <Input
               autoFocus
               value={text}
