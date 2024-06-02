@@ -20,10 +20,9 @@ export default function LoginForm({
 }: LoginFormProps) {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
-  const navigation = useNavigation<any>();
-
   return (
     <Formik
+      validateOnChange
       onSubmit={onSubmit}
       validationSchema={validationSchema}
       initialValues={{
@@ -40,6 +39,7 @@ export default function LoginForm({
             placeholder="email"
             name="email"
             formik={f}
+            testID="email-input"
           />
           <ValidatedInput
             showLabel
@@ -60,9 +60,11 @@ export default function LoginForm({
             name="password"
             secureTextEntry={!isPasswordVisible}
             formik={f}
+            testID="password-input"
           />
 
           <Button
+            testID={"login-button"}
             disabled={!(f.isValid && f.dirty)}
             onPress={() => f.handleSubmit()}
             size="xl"
