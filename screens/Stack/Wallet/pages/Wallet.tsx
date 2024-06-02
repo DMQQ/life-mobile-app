@@ -10,7 +10,6 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
 } from "react-native-reanimated";
-import ActionTiles from "../components/ActionTiles";
 import BalanceAlertEditModal from "../components/BalanceAlertEditModal";
 import Skeleton from "../../../../components/SkeletonLoader/Skeleton";
 import { WalletScreens } from "../Main";
@@ -19,6 +18,7 @@ import CreateExpenseSheet from "../components/AddExpenseBottomSheet";
 import BottomSheet from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheet/BottomSheet";
 import WalletList from "../components/WalletList";
 import Color from "color";
+import FloatingButton from "../components/FloatingButton";
 
 const styles = StyleSheet.create({
   container: {
@@ -34,7 +34,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 60,
     fontWeight: "bold",
-    // color: Colors.secondary,
+
     color: "#fff",
     letterSpacing: 1,
   },
@@ -52,11 +52,9 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginTop: 10,
   },
-
-  expense_list: {},
 });
 
-export default function WalletScreen({ navigation }: WalletScreens<"Wallet">) {
+export default function WalletScreen({}: WalletScreens<"Wallet">) {
   const { data, loading } = useGetWallet();
 
   const wallet = data?.wallet;
@@ -88,7 +86,7 @@ export default function WalletScreen({ navigation }: WalletScreens<"Wallet">) {
           Extrapolate.CLAMP
         ),
       },
-    ],
+    ] as any,
   }));
 
   const balance = loading ? " ..." : (wallet?.balance || 0).toFixed(2);
@@ -112,12 +110,6 @@ export default function WalletScreen({ navigation }: WalletScreens<"Wallet">) {
           </Ripple>
         </Animated.View>
 
-        <ActionTiles
-          scrollY={scrollY}
-          onAddExpense={() => bottomSheetRef.current?.snapToIndex(0)}
-          //onAddExpense={() => navigation.navigate("CreateActivity")}
-        />
-
         {loading && (
           <Skeleton
             backgroundColor={Color(Colors.primary_lighter)
@@ -140,6 +132,8 @@ export default function WalletScreen({ navigation }: WalletScreens<"Wallet">) {
           </Skeleton>
         )}
       </View>
+
+      <FloatingButton onPress={() => bottomSheetRef.current?.snapToIndex(0)} />
 
       <WalletList
         scrollY={scrollY}

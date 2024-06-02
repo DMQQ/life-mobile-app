@@ -14,7 +14,6 @@ const Txt = (props: { children: ReactNode; size: number; color?: any }) => (
       fontSize: props.size,
       fontWeight: "bold",
       lineHeight: props.size + 5,
-      padding: 5,
     }}
   >
     {props.children}
@@ -33,7 +32,7 @@ export const WalletSheet = forwardRef<
       : selected?.amount.toFixed(2);
 
   return (
-    <BottomSheet ref={ref} snapPoints={["70%"]}>
+    <BottomSheet ref={ref} snapPoints={["50%"]}>
       <View style={{ paddingHorizontal: 15, flex: 1 }}>
         <View style={{ flex: 2 }}>
           <View style={{ marginBottom: 15 }}>
@@ -42,35 +41,28 @@ export const WalletSheet = forwardRef<
             </Txt>
           </View>
 
-          <Txt size={30} color="#fff">
+          <Txt size={25} color="#fff">
             {amount}
             <Text style={{ fontSize: 17 }}>zł</Text>
           </Txt>
 
-          <View style={{ marginTop: 15 }}>
-            <Txt size={18} color={"#fff"}>
-              Attached files
-            </Txt>
+          <Text style={{ fontSize: 15, marginTop: 10, color: "#fff" }}>
+            {new Date(selected?.date!).toLocaleDateString()}
+            {"-"}
+            {new Date(selected?.date!).toLocaleTimeString()}
+          </Text>
 
-            <View style={{ paddingVertical: 10, flexDirection: "row" }}>
-              {[0, 1, 2].map((key) => (
-                <View
-                  key={key.toString()}
-                  style={{
-                    height: 75,
-                    width: 125,
-                    backgroundColor: Colors.primary_darker,
-                    borderRadius: 10,
-                    marginRight: 10,
-                  }}
-                />
-              ))}
-            </View>
+          <Text style={{ fontSize: 15, marginTop: 10, color: "#fff" }}>
+            {selected?.category}
+          </Text>
 
-            <Txt size={18} color={"#fff"}>
-              Comment
-            </Txt>
-          </View>
+          <Text style={{ fontSize: 15, marginTop: 10, color: "#fff" }}>
+            Balance: {selected?.balanceBeforeInteraction.toFixed(2)}zł
+          </Text>
+
+          <Text style={{ fontSize: 15, marginTop: 10, color: "#fff" }}>
+            Type: {selected?.type}
+          </Text>
         </View>
 
         <SheetActionButtons
