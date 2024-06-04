@@ -1,7 +1,7 @@
 import { AntDesign } from "@expo/vector-icons";
-import { StackHeaderProps } from "@react-navigation/stack";
 import { StyleSheet, Text, View } from "react-native";
 import Ripple from "react-native-material-ripple";
+import { NativeStackHeaderProps } from "@react-navigation/native-stack";
 
 const styles = StyleSheet.create({
   header: {
@@ -20,7 +20,7 @@ const styles = StyleSheet.create({
 });
 
 export default function TimelineCreateHeader(
-  props: StackHeaderProps & {
+  props: NativeStackHeaderProps & {
     selectedDate: string;
     onToggleOptions: () => void;
     handleChangeDate: () => void;
@@ -32,9 +32,11 @@ export default function TimelineCreateHeader(
         <AntDesign name="arrowleft" color="#fff" size={23} />
       </Ripple>
 
-      <Ripple onPress={props.handleChangeDate}>
-        <Text style={styles.eventTitle}>{props.selectedDate}</Text>
-      </Ripple>
+      {props.selectedDate.split(";").length === 1 && (
+        <Ripple onPress={props.handleChangeDate}>
+          <Text style={styles.eventTitle}>{props.selectedDate}</Text>
+        </Ripple>
+      )}
       <Ripple style={{ padding: 10 }} onPress={props.onToggleOptions}>
         <AntDesign name="setting" color={"#fff"} size={23} />
       </Ripple>

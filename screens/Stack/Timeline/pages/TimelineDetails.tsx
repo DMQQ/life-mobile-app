@@ -39,15 +39,15 @@ const styles = StyleSheet.create({
   },
   timelineIdText: {
     color: Color(Colors.primary).lighten(4).string(),
-    marginTop: 10,
+    marginTop: 25,
     position: "absolute",
     bottom: 0,
   },
   fab: {
     padding: 10,
     position: "absolute",
-    right: 10,
-    bottom: 20,
+    right: 15,
+    bottom: 25,
     backgroundColor: Colors.secondary,
     width: 60,
     height: 60,
@@ -105,7 +105,7 @@ export default function TimelineDetails({
   };
 
   return (
-    <View style={{ backgroundColor: Colors.primary }}>
+    <View style={{ backgroundColor: Colors.primary, marginBottom: 50 }}>
       <TimelineHeader
         title={data?.title.slice(0, 18)}
         scrollY={scrollY}
@@ -115,6 +115,7 @@ export default function TimelineDetails({
       />
       <Animated.ScrollView
         style={{ padding: 10 }}
+        contentContainerStyle={{ paddingBottom: 50 }}
         onScroll={onScroll}
         showsVerticalScrollIndicator={false}
       >

@@ -52,7 +52,8 @@ export default function useSuggestedEvents(props: {
   const handleSubmit = async () => {
     if (time === undefined) return;
 
-    const title = selected.name + " - " + subCategory;
+    let title = selected.name as string;
+    if (subCategory) title += ` - ${subCategory}`;
 
     const _time = {
       begin: time?.toLocaleTimeString("pl-PL", {
