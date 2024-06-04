@@ -14,7 +14,7 @@ const AuthenticationScreens = () => (
       headerStyle: {
         backgroundColor: Colors.primary,
       },
-      animation: "simple_push",
+      animation: "fade",
     }}
   >
     <Stack.Screen
