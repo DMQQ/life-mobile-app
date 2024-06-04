@@ -1,4 +1,4 @@
-import { FormikProps, useFormik } from "formik";
+import { FormikHelpers, FormikProps, useFormik } from "formik";
 import Input from "../../../../components/ui/TextInput/TextInput";
 import { View, TextStyle, StyleProp } from "react-native";
 import ValidatedInput from "../../../../components/ui/ValidatedInput";
@@ -49,7 +49,10 @@ const AddExpenseBottomSheet = forwardRef<
     },
   });
 
-  const onSubmit = async (values: typeof initialValues, { resetForm }: any) => {
+  const onSubmit = async (
+    values: typeof initialValues,
+    { resetForm }: FormikHelpers<typeof initialValues>
+  ) => {
     await createExpense({
       variables: {
         amount: +values.amount,

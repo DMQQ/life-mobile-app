@@ -2,11 +2,12 @@ import BottomSheet from "@gorhom/bottom-sheet";
 import { Wallet } from "../../../../types";
 import WalletItem, { WalletElement, parseDateToText } from "./WalletItem";
 import { useState, useRef, useEffect } from "react";
-import { Text, NativeScrollEvent } from "react-native";
+import { Text, NativeScrollEvent, View } from "react-native";
 import { WalletSheet } from "../components/WalletSheet";
 import Animated, { SharedValue } from "react-native-reanimated";
 import { NativeSyntheticEvent } from "react-native";
 import moment from "moment";
+import Ripple from "react-native-material-ripple";
 
 export default function WalletList(props: {
   wallet: Wallet;
@@ -71,17 +72,28 @@ export default function WalletList(props: {
           return (
             <>
               {!areDatesEqual && (
-                <Text
+                <View
                   style={{
-                    color: "#fff",
-                    fontWeight: "bold",
-                    fontSize: 16,
-                    padding: 5,
+                    flexDirection: "row",
+                    justifyContent: "space-between",
                     marginTop: index === 0 ? 0 : 10,
+                    padding: 5,
                   }}
                 >
-                  {parseDateToText(item.date)}
-                </Text>
+                  <Text
+                    style={{
+                      color: "#fff",
+                      fontWeight: "bold",
+                      fontSize: 16,
+                    }}
+                  >
+                    {parseDateToText(item.date)}
+                  </Text>
+
+                  <Ripple>
+                    <Text style={{ color: "#fff" }}>Add</Text>
+                  </Ripple>
+                </View>
               )}
               <AnimatedWalletItem index={index} item={item as any} />
             </>

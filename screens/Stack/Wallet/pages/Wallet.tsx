@@ -122,18 +122,25 @@ export default function WalletScreen({}: WalletScreens<"Wallet">) {
             })}
           >
             <View>
-              <Skeleton.Item width={(w) => w - 20} height={65} />
-              <Skeleton.Item width={(w) => w - 20} height={65} />
-              <Skeleton.Item width={(w) => w - 20} height={65} />
-              <Skeleton.Item width={(w) => w - 20} height={65} />
-              <Skeleton.Item width={(w) => w - 20} height={65} />
-              <Skeleton.Item width={(w) => w - 20} height={65} />
+              <Skeleton.Item width={(w) => w / 3} height={25} />
+              <Skeleton.Item width={(w) => w - 20} height={55} />
+              <Skeleton.Item width={(w) => w - 20} height={55} />
+              <Skeleton.Item width={(w) => w - 20} height={55} />
+              <Skeleton.Item width={(w) => w / 3} height={25} marginTop={30} />
+              <Skeleton.Item width={(w) => w - 20} height={55} />
+              <Skeleton.Item width={(w) => w - 20} height={55} />
+              <Skeleton.Item width={(w) => w / 3} height={25} marginTop={30} />
+              <Skeleton.Item width={(w) => w - 20} height={55} />
+              <Skeleton.Item width={(w) => w - 20} height={55} />
             </View>
           </Skeleton>
         )}
       </View>
 
-      <FloatingButton onPress={() => bottomSheetRef.current?.snapToIndex(0)} />
+      <FloatingButton
+        scrollY={scrollY}
+        onPress={() => bottomSheetRef.current?.snapToIndex(0)}
+      />
 
       <WalletList
         scrollY={scrollY}

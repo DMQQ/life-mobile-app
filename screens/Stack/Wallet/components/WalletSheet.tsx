@@ -2,10 +2,23 @@ import BottomSheet, {
   BottomSheetGorhom,
 } from "@/components/ui/BottomSheet/BottomSheet";
 import { ReactNode, forwardRef } from "react";
-import { Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import Colors from "@/constants/Colors";
 import { WalletElement } from "./WalletItem";
 import SheetActionButtons from "./WalletSheetControls";
+
+const styles = StyleSheet.create({
+  text: {
+    fontSize: 15,
+    marginTop: 10,
+    color: "#fff",
+    backgroundColor: Colors.secondary_dark_1,
+    padding: 5,
+    paddingHorizontal: 15,
+    borderRadius: 100,
+    marginRight: 5,
+  },
+});
 
 const Txt = (props: { children: ReactNode; size: number; color?: any }) => (
   <Text
@@ -41,28 +54,36 @@ export const WalletSheet = forwardRef<
             </Txt>
           </View>
 
-          <Txt size={25} color="#fff">
+          <Txt size={30} color="#fff">
             {amount}
-            <Text style={{ fontSize: 17 }}>zł</Text>
+            <Text style={{ fontSize: 16 }}>zł</Text>
           </Txt>
 
-          <Text style={{ fontSize: 15, marginTop: 10, color: "#fff" }}>
-            {new Date(selected?.date!).toLocaleDateString()}
-            {"-"}
-            {new Date(selected?.date!).toLocaleTimeString()}
-          </Text>
+          <View
+            style={{
+              flexDirection: "row",
+              flexWrap: "wrap",
+              gap: 5,
+              marginTop: 10,
+            }}
+          >
+            <Text style={styles.text}>
+              {new Date(selected?.date!).toLocaleDateString()}
+              {" at "}
+              {new Date(selected?.date!).toLocaleTimeString("pl-PL", {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </Text>
 
-          <Text style={{ fontSize: 15, marginTop: 10, color: "#fff" }}>
-            {selected?.category}
-          </Text>
+            <Text style={styles.text}>{selected?.category}</Text>
 
-          <Text style={{ fontSize: 15, marginTop: 10, color: "#fff" }}>
-            Balance: {selected?.balanceBeforeInteraction.toFixed(2)}zł
-          </Text>
+            <Text style={styles.text}>
+              Balance: {selected?.balanceBeforeInteraction.toFixed(2)}zł
+            </Text>
 
-          <Text style={{ fontSize: 15, marginTop: 10, color: "#fff" }}>
-            Type: {selected?.type}
-          </Text>
+            <Text style={styles.text}>Type: {selected?.type}</Text>
+          </View>
         </View>
 
         <SheetActionButtons

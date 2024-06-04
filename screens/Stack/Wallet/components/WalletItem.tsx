@@ -48,7 +48,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: 10,
     width: 40,
-    backgroundColor: "rgba(255,0,0,0.15)",
   },
   date: {
     color: "#9f9f9f",
@@ -146,7 +145,7 @@ export const Icons = {
 
   none: {
     backgroundColor: Colors.primary,
-    icon: <Ionicons name="alert" color={Colors.secondary} size={24} />,
+    icon: <Ionicons name="add" color={Colors.secondary} size={24} />,
   },
 } as const;
 
@@ -154,11 +153,11 @@ export const CategoryIcon = (props: { category: keyof typeof Icons }) => (
   <View
     style={[
       styles.icon_container,
-      {
-        backgroundColor: Color(Icons[props.category || "none"]?.backgroundColor)
-          .darken(0.7)
-          .hex(),
-      },
+      // {
+      //   backgroundColor: Color(Icons[props.category || "none"]?.backgroundColor)
+      //     .darken(0.7)
+      //     .hex(),
+      // },
     ]}
   >
     {Icons[props.category || "none"]?.icon}
@@ -204,8 +203,8 @@ export default function WalletItem(
           </Text>
           <View style={{ flexDirection: "row" }}>
             <Text style={styles.date}>
+              {item.category ? `${item.category}, ` : ""}
               {parseDateToText(item.date)}
-              {item.category ? ", " + item.category : ""}
             </Text>
           </View>
         </View>
