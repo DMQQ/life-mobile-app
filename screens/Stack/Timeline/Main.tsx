@@ -33,9 +33,9 @@ export default function TimelineScreens({
     <Stack.Navigator
       initialRouteName="Timeline"
       screenOptions={{
-        animation: "simple_push",
+        animation: "fade",
         statusBarAnimation: "slide",
-        animationDuration: 100,
+        animationDuration: 10,
       }}
     >
       <Stack.Screen
