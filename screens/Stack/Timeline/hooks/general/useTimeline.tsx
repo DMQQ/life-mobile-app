@@ -3,7 +3,7 @@ import moment from "moment";
 import { useEffect, useMemo, useState } from "react";
 import useGetTimeLineQuery from "../query/useGetTimeLineQuery";
 import { TimelineScreenProps } from "../../types";
-import { InteractionManager } from "react-native";
+import { InteractionManager, ToastAndroid } from "react-native";
 
 export const GET_MONTHLY_EVENTS = gql`
   query GetMonthlyEvents($date: String!) {
@@ -31,10 +31,22 @@ export default function useTimeline({
 }: TimelineScreenProps<"Timeline">) {
   const { data, selected, setSelected, loading } = useGetTimeLineQuery();
 
-  const { data: monthData, refetch } = useQuery(GET_MONTHLY_EVENTS, {
-    variables: { date: moment().format("YYYY-MM-DD") },
+  const [fetchDate, setFetchDate] = useState(moment().format("YYYY-MM-DD"));
 
-    onError: (err) => console.log(JSON.stringify(err, null, 2)),
+  useEffect(() => {
+    const selectedMonth = moment(selected).month();
+    const currentMonth = moment(fetchDate).month();
+
+    if (selectedMonth !== currentMonth) {
+      setFetchDate(selected);
+    }
+  }, [selected]);
+
+  const { data: monthData, refetch } = useQuery(GET_MONTHLY_EVENTS, {
+    variables: { date: fetchDate },
+
+    onError: (err) =>
+      ToastAndroid.show("Oh! Something went wrong", ToastAndroid.SHORT),
   });
 
   const onDayPress = (day: { dateString: string }) =>

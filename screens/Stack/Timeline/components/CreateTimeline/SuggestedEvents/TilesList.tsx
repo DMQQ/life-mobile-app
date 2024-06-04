@@ -49,7 +49,9 @@ const Tile = ({ item, selected, ...props }: TileProps) => {
       style={[
         {
           backgroundColor:
-            selected?.name === item.name ? Colors.secondary : Colors.primary,
+            selected?.name === item.name
+              ? Colors.secondary
+              : Colors.primary_light,
         },
         styles.tile,
       ]}

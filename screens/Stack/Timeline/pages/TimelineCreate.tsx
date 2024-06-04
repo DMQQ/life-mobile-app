@@ -99,7 +99,7 @@ export default function CreateTimeLineEventModal({
         <ValidatedInput
           showLabel
           label="Event's content"
-          numberOfLines={10}
+          numberOfLines={f.values.desc.split("\n").length + 3}
           multiline
           placeholder="What you wanted to do"
           name="desc"
@@ -112,7 +112,7 @@ export default function CreateTimeLineEventModal({
         <ValidatedInput.Label error={false} text="Time range*" />
         <View style={styles.timeContainer}>
           <Ripple
-            style={{ flex: 1, padding: 10 }}
+            style={{ flex: 1, padding: 5 }}
             onPress={() => timePicker(f, "begin")}
           >
             <Text style={styles.timeText}>
@@ -120,10 +120,10 @@ export default function CreateTimeLineEventModal({
             </Text>
           </Ripple>
 
-          <Text style={{ color: "gray", padding: 10 }}>to</Text>
+          <Text style={{ color: "gray", padding: 5 }}>to</Text>
 
           <Ripple
-            style={{ flex: 1, padding: 10 }}
+            style={{ flex: 1, padding: 5 }}
             onPress={() => timePicker(f, "end")}
           >
             <Text style={styles.timeText}>
@@ -186,7 +186,7 @@ const SubmitButton = (props: SubmitButtonProps) =>
     <Animated.View
       entering={ZoomInDown}
       exiting={ZoomOutDown}
-      style={{ paddingTop: 10, flexDirection: "row" }}
+      style={{ paddingTop: 5, flexDirection: "row" }}
     >
       <IconButton
         onPress={() => {
@@ -194,11 +194,11 @@ const SubmitButton = (props: SubmitButtonProps) =>
           ToastAndroid.show("Form reseted", ToastAndroid.SHORT);
         }}
         style={{
-          padding: 10,
-          width: 55,
+          padding: 7.5,
+          width: 35,
           marginRight: 15,
         }}
-        icon={<Feather name="trash-2" color={Colors.error} size={22} />}
+        icon={<Feather name="trash-2" color="#fff" size={20} />}
       />
       <Button
         icon={
@@ -225,9 +225,9 @@ const SubmitButton = (props: SubmitButtonProps) =>
               : Colors.secondary,
           },
         ]}
-        fontStyle={{ letterSpacing: 1 }}
+        fontStyle={{ letterSpacing: 0.5, fontSize: 15 }}
       >
-        {props.isEditing ? "Edit event" : "Create event"}
+        {props.isEditing ? "Save changes" : "Create new event"}
       </Button>
     </Animated.View>
   ) : null;

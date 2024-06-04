@@ -46,11 +46,13 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary_lighter,
     padding: 15,
     paddingHorizontal: 20,
-    borderRadius: 10,
+    borderRadius: 15,
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 10,
     alignItems: "center",
+    flexWrap: "wrap",
+    gap: 5,
   },
 });
 

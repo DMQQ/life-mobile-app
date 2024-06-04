@@ -101,13 +101,19 @@ export default function Timeline({
         <ListHeaderComponent {...timeline} navigation={navigation} />
       }
       ListEmptyComponent={
-        timeline.loading ? <TimelineScreenLoader loading /> : <NotFound />
+        timeline.loading ? (
+          <TimelineScreenLoader loading />
+        ) : (
+          <View style={{ padding: 15 }}>
+            <NotFound />
+          </View>
+        )
       }
       contentContainerStyle={{
         padding: 10,
       }}
       data={(timeline.data?.timeline as GetTimelineQuery[]) || []}
-      initialNumToRender={4}
+      initialNumToRender={3}
       keyExtractor={(item) => item.id}
       getItem={(data, index) => data[index] as GetTimelineQuery}
       getItemCount={(data) => data.length}

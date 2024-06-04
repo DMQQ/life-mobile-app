@@ -1,6 +1,6 @@
 import Button from "@/components/ui/Button/Button";
 import Colors from "@/constants/Colors";
-import { FlatList, Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import Ripple from "react-native-material-ripple";
 import { InitialValuesType } from "../../../hooks/mutation/useCreateTimeline";
 import { StyleSheet } from "react-native";
@@ -80,7 +80,7 @@ export default function SuggestedEvents(props: SuggestedEventsProps) {
                 minute: "2-digit",
                 hour12: false,
               })}
-              {" - "}
+              {" to "}
               {endTime}
             </Text>
           </Ripple>
@@ -96,7 +96,7 @@ export default function SuggestedEvents(props: SuggestedEventsProps) {
           color: canSubmit ? "#fff" : Color(Colors.secondary).darken(0.5).hex(),
         }}
         style={{
-          marginTop: 20,
+          marginTop: 25,
           borderWidth: 1,
           backgroundColor: canSubmit ? Colors.secondary : "transparent",
         }}

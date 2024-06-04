@@ -142,7 +142,14 @@ export default function FileList({ timelineId }: FileListProps) {
         </Ripple>
         <UploadFileButton refetch={refetch} timelineId={timelineId} />
       </View>
-      {toggleView ? (
+
+      <GridImageView
+        data={data}
+        onRemovePhoto={removePhoto}
+        onShowPreview={handleShowPreview}
+      />
+
+      {/* {toggleView ? (  // app crashes here
         <GridImageView
           data={data}
           onRemovePhoto={removePhoto}
@@ -154,7 +161,7 @@ export default function FileList({ timelineId }: FileListProps) {
           onRemovePhoto={removePhoto}
           onShowPreview={handleShowPreview}
         />
-      )}
+      )} */}
     </View>
   );
 }
@@ -166,40 +173,64 @@ interface ImageDisplayViewProps {
 }
 
 const GridImageView = memo((props: ImageDisplayViewProps) => {
-  const renderImages = useCallback(
-    (item: IFile) => (
-      <Ripple
-        key={item.id}
-        onLongPress={() => props.onRemovePhoto(item.id)}
-        onPress={() => {
-          props.onShowPreview(item);
-        }}
-      >
-        <Animated.Image
-          //  sharedTransitionStyle={transition}
-          sharedTransitionTag={`image-${item.url}`}
-          key={item.id}
-          style={styles.img}
-          source={{
-            uri: Url.API + "/upload/images/" + item.url,
-            height: styles.img.height,
-            width: styles.img.width,
-          }}
-        />
-      </Ripple>
-    ),
-    [props.data]
-  );
+  // return (
+  //   <View
+  //     style={{
+  //       flexDirection: "row",
+  //       flexWrap: "wrap",
+  //       justifyContent: "space-between",
+  //     }}
+  //   >
+  //     {props.data?.images.map((item) => (
+  //       <Ripple
+  //         key={item.id}
+  //         onLongPress={() => props.onRemovePhoto(item.id)}
+  //         onPress={() => {
+  //           props.onShowPreview(item);
+  //         }}
+  //       >
+  //         <Animated.Image
+  //           sharedTransitionStyle={transition}
+  //           sharedTransitionTag={`image-${item.url}`}
+  //           key={item.id}
+  //           style={styles.img}
+  //           source={{
+  //             uri: Url.API + "/upload/images/" + item.url,
+  //             height: styles.img.height,
+  //             width: styles.img.width,
+  //           }}
+  //         />
+  //       </Ripple>
+  //     ))}
+  //   </View>
+  // );
+
   return (
-    <View
-      style={{
-        flexDirection: "row",
-        flexWrap: "wrap",
-        justifyContent: "space-between",
-      }}
-    >
-      {props.data?.images.map(renderImages)}
-    </View>
+    <FlatList
+      scrollEnabled={false}
+      numColumns={2}
+      initialNumToRender={4}
+      data={props.data?.images}
+      keyExtractor={(el) => el.id}
+      renderItem={({ item }) => (
+        <Ripple
+          style={{ marginBottom: 10 }}
+          onLongPress={() => props.onRemovePhoto(item.id)}
+          onPress={() => props.onShowPreview(item)}
+        >
+          <Animated.Image
+            sharedTransitionStyle={transition}
+            sharedTransitionTag={`image-${item.url}`}
+            style={styles.img}
+            source={{
+              uri: Url.API + "/upload/images/" + item.url,
+              height: styles.img.height,
+              width: styles.img.width,
+            }}
+          />
+        </Ripple>
+      )}
+    />
   );
 });
 
