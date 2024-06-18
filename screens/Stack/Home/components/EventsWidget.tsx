@@ -1,11 +1,4 @@
-import {
-  Pressable,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import TimelineItem from "../../Timeline/components/TimelineItem";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import Colors, { Sizing } from "../../../../constants/Colors";
 import { useNavigation } from "@react-navigation/native";
 import Ripple from "react-native-material-ripple";
@@ -71,7 +64,9 @@ const EventsList = (props: { data: GetTimelineQuery[] }) => {
               timelineId: timeline.id,
             })
           }
-          style={{ marginBottom: 20 }}
+          style={{
+            marginBottom: 20,
+          }}
           key={timeline.id}
         >
           <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 17 }}>

@@ -41,10 +41,10 @@ export default function NotFound() {
   return (
     <View style={{ flexDirection: "column", flex: 1, width: "100%" }}>
       <View style={styles.container}>
-        <Animated.View entering={FadeIn.delay(50)} style={{ marginRight: 10 }}>
+        <Animated.View entering={FadeIn.delay(50)} style={{ marginRight: 15 }}>
           <SVGImage width={Layout.screen.width / 5} height={100} />
         </Animated.View>
-        <View style={{ flex: 1 }}>
+        <View style={{ flex: 1, marginTop: 10 }}>
           <Animated.Text entering={FadeIn.delay(75)} style={styles.heading}>
             No events found
           </Animated.Text>
@@ -59,15 +59,8 @@ export default function NotFound() {
         </View>
       </View>
 
-      <Animated.View entering={FadeIn.delay(150)}>
-        <Button
-          onPress={onPress}
-          style={{
-            backgroundColor: Colors.primary,
-            borderRadius: 100,
-          }}
-          fontStyle={{ color: "#fff", fontSize: 16 }}
-        >
+      <Animated.View entering={FadeIn.delay(150)} style={{ marginTop: 10 }}>
+        <Button onPress={onPress} fontStyle={{ fontSize: 16 }}>
           Create event
         </Button>
       </Animated.View>
