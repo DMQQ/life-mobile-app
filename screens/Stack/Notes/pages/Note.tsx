@@ -1,6 +1,5 @@
 import { Text, View } from "react-native";
 import ScreenContainer from "../../../../components/ui/ScreenContainer";
-import { SharedElement } from "react-navigation-shared-element";
 import Colors from "../../../../constants/Colors";
 import { useAppSelector } from "../../../../utils/redux";
 import { useEffect } from "react";
@@ -45,17 +44,15 @@ export default function NoteScreen({ route, navigation }: any) {
         </Text>
       </Animated.View>
 
-      <SharedElement id={`note.desc.${route.params?.noteId as string}`}>
-        <Text
-          style={{
-            color: "#ffffff7b",
-            marginBottom: 5,
-            fontSize: 20,
-          }}
-        >
-          {note?.content}
-        </Text>
-      </SharedElement>
+      <Text
+        style={{
+          color: "#ffffff7b",
+          marginBottom: 5,
+          fontSize: 20,
+        }}
+      >
+        {note?.content}
+      </Text>
     </ScreenContainer>
   );
 }

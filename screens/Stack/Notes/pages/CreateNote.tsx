@@ -40,6 +40,8 @@ export default function CreateNoteScreen({ navigation, route }: any) {
     if (note.trim().length === 0 || existingNote?.content === note) return;
 
     if (typeof mode !== "undefined" && mode === "edit") {
+      console.log("edit note");
+
       dispatch(
         notesActions.editNote({
           noteId: noteId,

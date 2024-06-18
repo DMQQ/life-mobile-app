@@ -40,18 +40,20 @@ export const notesSlice = createSlice({
         payload,
       }: PayloadAction<{ noteId: number; content: string; secure: boolean }>
     ) {
-      let note = state.notes.findIndex((note) => note.id === payload.noteId);
+      state.notes = state.notes.map((n) => {
+        if (n.id === payload.noteId) {
+          return {
+            ...n,
+            content: payload.content,
+            secure: payload.secure,
+            updatedAt: new Date().toLocaleDateString(),
+          };
+        }
 
-      if (note > 0) {
-        state.notes[note] = {
-          ...state.notes[note],
-          id: payload.noteId,
-          content: payload.content,
-          secure: payload.secure,
-        };
+        return n;
+      });
 
-        SecureStore.setItemAsync("notes", JSON.stringify(state.notes));
-      }
+      SecureStore.setItemAsync("notes", JSON.stringify(state.notes));
     },
   },
 

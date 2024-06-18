@@ -11,7 +11,6 @@ import {
 import Colors from "../../../../constants/Colors";
 import Ripple from "react-native-material-ripple";
 import { useNavigation } from "@react-navigation/core";
-import { SharedElement } from "react-navigation-shared-element";
 import * as LocalAuthentication from "expo-local-authentication";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
@@ -144,9 +143,7 @@ export default function Note(props: NoteProps) {
       onLongPress={removeNote}
     >
       <View style={styles.header}>
-        <SharedElement id={`note.title.${props.noteId}`}>
-          <Text style={styles.title}>{noteTitle}</Text>
-        </SharedElement>
+        <Text style={styles.title}>{noteTitle}</Text>
 
         <View style={{ flexDirection: "row" }}>
           <Text style={styles.tag}>{props.createdAt!}</Text>
@@ -172,7 +169,7 @@ export default function Note(props: NoteProps) {
       </View>
 
       {!props.hideContent && (
-        <SharedElement id={`note.desc.${props.noteId}`}>
+        <>
           {props.secure && !isUnlocked ? (
             <View>
               <View style={styles.bar} />
@@ -189,7 +186,7 @@ export default function Note(props: NoteProps) {
               {props.text}
             </Text>
           )}
-        </SharedElement>
+        </>
       )}
     </Ripple>
   );
