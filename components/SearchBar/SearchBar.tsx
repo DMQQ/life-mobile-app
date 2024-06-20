@@ -99,7 +99,6 @@ export default function SearchBar({
   return (
     <View
       style={{
-        paddingHorizontal: 15,
         zIndex: isFocused ? 100 : 1,
         paddingTop: 7.5,
       }}

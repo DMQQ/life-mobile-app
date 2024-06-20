@@ -114,7 +114,7 @@ export default function TimelineDetails({
         navigation={navigation}
       />
       <Animated.ScrollView
-        style={{ padding: 10 }}
+        style={{ padding: 15 }}
         contentContainerStyle={{ paddingBottom: 50 }}
         onScroll={onScroll}
         showsVerticalScrollIndicator={false}

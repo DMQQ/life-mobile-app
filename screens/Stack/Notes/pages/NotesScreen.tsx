@@ -8,6 +8,7 @@ import { ScreenProps } from "../../../../types";
 import Layout from "../../../../constants/Layout";
 import { useAppSelector } from "../../../../utils/redux";
 import { TextInput } from "react-native-gesture-handler";
+import ScreenContainer from "@/components/ui/ScreenContainer";
 
 export default function NotesScreen({ navigation }: ScreenProps<any>) {
   const notes = useAppSelector((a) => a.notes);
@@ -28,7 +29,7 @@ export default function NotesScreen({ navigation }: ScreenProps<any>) {
   }, [navigation]);
 
   return (
-    <View style={{ flex: 1 }}>
+    <ScreenContainer>
       <SearchBar
         textInputRef={textInputRef}
         isFocused={isFocused}
@@ -61,6 +62,6 @@ export default function NotesScreen({ navigation }: ScreenProps<any>) {
           }}
         />
       )}
-    </View>
+    </ScreenContainer>
   );
 }

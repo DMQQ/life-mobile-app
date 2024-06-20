@@ -32,7 +32,7 @@ export default function ScreenContainer({
       style={[
         {
           flex: 1,
-          padding: 10,
+          padding: 15,
           backgroundColor: Colors.primary,
         },
 

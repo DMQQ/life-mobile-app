@@ -134,12 +134,11 @@ export default StyleSheet.create({
   },
 
   dateRow: {
-    padding: 5,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     position: "relative",
-    marginTop: 10,
+    marginTop: 15,
   },
   notFoundContainer: {
     flex: 1,
