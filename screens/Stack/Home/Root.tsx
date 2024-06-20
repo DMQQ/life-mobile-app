@@ -9,6 +9,7 @@ import { useAppSelector } from "@/utils/redux";
 import { ScrollView } from "react-native-gesture-handler";
 import Header from "./components/HomeHeader";
 import { GET_MAIN_SCREEN } from "@/utils/schemas/GET_MAIN_SCREEN";
+import ScreenContainer from "@/components/ui/ScreenContainer";
 
 export default function Root({ navigation }: ScreenProps<"Root">) {
   const workout = useAppSelector((s) => s.workout);
@@ -16,10 +17,9 @@ export default function Root({ navigation }: ScreenProps<"Root">) {
   const { data, loading } = useQuery(GET_MAIN_SCREEN);
 
   return (
-    <View style={{ flex: 1 }}>
+    <ScreenContainer>
       <Header />
       <ScrollView
-        style={{ flex: 1, paddingHorizontal: 10 }}
         contentContainerStyle={{
           paddingTop: 10,
         }}
@@ -35,6 +35,6 @@ export default function Root({ navigation }: ScreenProps<"Root">) {
 
         <AccountActions navigation={navigation} />
       </ScrollView>
-    </View>
+    </ScreenContainer>
   );
 }

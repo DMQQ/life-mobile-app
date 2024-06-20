@@ -94,7 +94,7 @@ export default function WalletScreen({}: WalletScreens<"Wallet">) {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <StatusBar backgroundColor={Colors.primary} />
-      <View style={{ padding: 10 }}>
+      <View style={{ padding: 15 }}>
         <Animated.View
           style={[
             styles.header,

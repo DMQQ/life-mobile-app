@@ -84,7 +84,7 @@ export default function CreateNoteScreen({ navigation, route }: any) {
   }, [secure]);
 
   return (
-    <ScreenContainer style={{ padding: 0 }}>
+    <ScreenContainer>
       <View style={{ flex: 1 }}>
         <NoteForm note={note} setNote={setNote} />
       </View>

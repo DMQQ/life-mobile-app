@@ -42,7 +42,7 @@ const ListHeaderComponent = (
       <Ripple
         onPress={t.onViewToggle}
         style={{
-          paddingHorizontal: 10,
+          paddingHorizontal: 5,
         }}
       >
         {t.switchView === "calendar" ? (
@@ -118,7 +118,7 @@ export default function Timeline({
         )
       }
       contentContainerStyle={{
-        padding: 10,
+        padding: 15,
       }}
       data={(timeline.data?.timeline as GetTimelineQuery[]) || []}
       initialNumToRender={3}
