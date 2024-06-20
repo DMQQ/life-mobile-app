@@ -1,4 +1,4 @@
-const isDev = true;
+const isDev = false;
 
 const API = isDev ? "http://192.168.0.25:3000" : "http://srv25.mikr.us:40034";
 

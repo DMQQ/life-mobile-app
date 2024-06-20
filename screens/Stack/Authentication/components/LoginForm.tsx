@@ -70,7 +70,7 @@ export default function LoginForm({
             size="xl"
             type="contained"
             color="ternary"
-            style={{ marginTop: 10, borderRadius: 100 }}
+            style={{ marginTop: 10 }}
           >
             LOGIN
           </Button>

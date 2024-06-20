@@ -186,7 +186,7 @@ const SubmitButton = (props: SubmitButtonProps) =>
     <Animated.View
       entering={ZoomInDown}
       exiting={ZoomOutDown}
-      style={{ paddingTop: 5, flexDirection: "row" }}
+      style={{ padding: 10, flexDirection: "row", paddingTop: 15 }}
     >
       <IconButton
         onPress={() => {
@@ -201,6 +201,7 @@ const SubmitButton = (props: SubmitButtonProps) =>
         icon={<Feather name="trash-2" color="#fff" size={20} />}
       />
       <Button
+        size="xl"
         icon={
           props.isLoading ? (
             <ActivityIndicator
@@ -225,7 +226,7 @@ const SubmitButton = (props: SubmitButtonProps) =>
               : Colors.secondary,
           },
         ]}
-        fontStyle={{ letterSpacing: 0.5, fontSize: 15 }}
+        fontStyle={{ letterSpacing: 0.5, fontSize: 18 }}
       >
         {props.isEditing ? "Save changes" : "Create new event"}
       </Button>

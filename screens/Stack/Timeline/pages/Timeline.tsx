@@ -104,7 +104,15 @@ export default function Timeline({
         timeline.loading ? (
           <TimelineScreenLoader loading />
         ) : (
-          <View style={{ padding: 15 }}>
+          <View
+            style={{
+              padding: 25,
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+              marginTop: 25,
+            }}
+          >
             <NotFound />
           </View>
         )

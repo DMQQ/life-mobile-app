@@ -60,7 +60,7 @@ export default StyleSheet.create({
     justifyContent: "space-around",
   },
   submitButton: {
-    paddingVertical: 15,
+    paddingVertical: 20,
     backgroundColor: Colors.secondary,
     flexDirection: "row-reverse",
     flex: 1,

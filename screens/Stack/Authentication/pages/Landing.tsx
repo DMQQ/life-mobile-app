@@ -19,6 +19,8 @@ export default function Landing({ navigation }: any) {
         Hi there!
       </Text>
 
+      <View style={{ flex: 1, justifyContent: "center" }}></View>
+
       <View
         style={{
           flex: 1,
@@ -27,28 +29,30 @@ export default function Landing({ navigation }: any) {
           width: Layout.screen.width,
           justifyContent: "center",
           padding: 15,
+          gap: 15,
         }}
       >
+        <Button
+          size="xl"
+          type="text"
+          fontStyle={{ fontSize: 16 }}
+          style={{ flex: 1 }}
+          onPress={() => navigation.navigate("Register")}
+        >
+          register now
+        </Button>
+
         <Button
           size="xl"
           type="contained"
           onPress={() => navigation.navigate("Login")}
           style={{
-            borderRadius: 100,
-            backgroundColor: secondary_candidates[2],
+            backgroundColor: Colors.secondary,
+            flex: 1,
           }}
           fontStyle={{ fontSize: 16 }}
         >
           login
-        </Button>
-        <Button
-          size="xl"
-          type="contained"
-          fontStyle={{ fontSize: 16 }}
-          style={{ marginTop: 10, borderRadius: 100 }}
-          onPress={() => navigation.navigate("Register")}
-        >
-          register now
         </Button>
       </View>
     </ScreenContainer>

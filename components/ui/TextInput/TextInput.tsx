@@ -131,7 +131,7 @@ export default function Input({
           backgroundColor: isFocused
             ? Colors.primary_lighter
             : Colors.primary_light,
-          borderRadius: 7.5,
+          borderRadius: 10,
           flexDirection: "row",
           width: (style as any)?.width || "100%", //(style as any)?.width ?? Layout.screen.width * 0.95,
           borderWidth: 2,
