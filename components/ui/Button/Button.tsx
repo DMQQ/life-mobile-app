@@ -46,9 +46,9 @@ export default function Button({
   type = "contained",
   variant = "ternary",
   badge,
-  size = "md",
+  size = "lg",
   disabled,
-  borderRadius = "full",
+  borderRadius = "lg",
   color,
   ...rest
 }: ButtonProps) {

@@ -82,7 +82,7 @@ export default function RegisterForm({
             size="xl"
             type="contained"
             color="ternary"
-            style={{ marginTop: 10, borderRadius: 100 }}
+            style={{ marginTop: 10 }}
           >
             Register now
           </Button>

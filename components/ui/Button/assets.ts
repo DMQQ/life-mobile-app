@@ -49,8 +49,8 @@ export const BUTTON_TYPES = {
 export const BUTTON_BORDER_RADIUS = {
   no: 0,
   sm: 5,
-  md: 8,
-  lg: 10,
+  md: 10,
+  lg: 15,
   full: 100,
 };
 
@@ -64,7 +64,10 @@ export const BUTTON_SIZE = {
   md: {
     padding: 10,
   },
-  xl: {
+  lg: {
     padding: 15,
+  },
+  xl: {
+    padding: 20,
   },
 };
