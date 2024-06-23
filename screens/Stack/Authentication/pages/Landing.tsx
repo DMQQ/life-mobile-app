@@ -16,10 +16,20 @@ export default function Landing({ navigation }: any) {
           fontWeight: "bold",
         }}
       >
-        Hi there!
+        Hello there!
       </Text>
 
-      <View style={{ flex: 1, justifyContent: "center" }}></View>
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <Image
+          source={require("@/assets/images/adaptive-icon.png")}
+          style={{
+            width: Layout.screen.width / 2,
+            height: undefined,
+            resizeMode: "cover",
+            aspectRatio: 1,
+          }}
+        />
+      </View>
 
       <View
         style={{
@@ -35,11 +45,11 @@ export default function Landing({ navigation }: any) {
         <Button
           size="xl"
           type="text"
-          fontStyle={{ fontSize: 16 }}
+          fontStyle={{ fontSize: 18 }}
           style={{ flex: 1 }}
           onPress={() => navigation.navigate("Register")}
         >
-          register now
+          CREATE ACCOUNT
         </Button>
 
         <Button
@@ -50,9 +60,9 @@ export default function Landing({ navigation }: any) {
             backgroundColor: Colors.secondary,
             flex: 1,
           }}
-          fontStyle={{ fontSize: 16 }}
+          fontStyle={{ fontSize: 18 }}
         >
-          login
+          LOGIN
         </Button>
       </View>
     </ScreenContainer>

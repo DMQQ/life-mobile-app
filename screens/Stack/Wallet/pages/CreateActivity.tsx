@@ -10,7 +10,7 @@ import SegmentedButtons from "../../../../components/ui/SegmentedButtons";
 import Color from "color";
 import Select from "@/components/ui/Select/Select";
 import Layout from "@/constants/Layout";
-import { Icons } from "../components/WalletItem";
+import { Icons } from "../components/Wallet/WalletItem";
 import useUser from "@/utils/hooks/useUser";
 import { gql, useMutation } from "@apollo/client";
 

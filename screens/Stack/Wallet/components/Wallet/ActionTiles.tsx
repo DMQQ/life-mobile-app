@@ -2,7 +2,7 @@ import { Feather } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { StyleSheet } from "react-native";
 import Ripple from "react-native-material-ripple";
-import Colors from "../../../../constants/Colors";
+import Colors from "@/constants/Colors";
 import Animated, { SharedValue } from "react-native-reanimated";
 
 const styles = StyleSheet.create({

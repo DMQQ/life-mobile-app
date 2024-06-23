@@ -9,12 +9,14 @@ const CREATE_EXPENSE = gql`
     $description: String!
     $type: String!
     $category: String!
+    $date: String!
   ) {
     createExpense(
       amount: $amount
       description: $description
       type: $type
       category: $category
+      date: $date
     ) {
       id
       amount

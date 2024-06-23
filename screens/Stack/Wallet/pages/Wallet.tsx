@@ -10,15 +10,14 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
 } from "react-native-reanimated";
-import BalanceAlertEditModal from "../components/BalanceAlertEditModal";
-import Skeleton from "../../../../components/SkeletonLoader/Skeleton";
+import BalanceAlertEditModal from "../components/Wallet/BalanceAlertEditModal";
 import { WalletScreens } from "../Main";
 import { StatusBar } from "expo-status-bar";
-import CreateExpenseSheet from "../components/AddExpenseBottomSheet";
+import CreateExpenseSheet from "../components/Wallet/AddExpenseBottomSheet";
 import BottomSheet from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheet/BottomSheet";
-import WalletList from "../components/WalletList";
-import Color from "color";
-import FloatingButton from "../components/FloatingButton";
+import WalletList from "../components/Wallet/WalletList";
+import FloatingButton from "../components/Wallet/FloatingButton";
+import ScreenLoader from "../components/Wallet/ScreenLoader";
 
 const styles = StyleSheet.create({
   container: {
@@ -110,31 +109,7 @@ export default function WalletScreen({}: WalletScreens<"Wallet">) {
           </Ripple>
         </Animated.View>
 
-        {loading && (
-          <Skeleton
-            backgroundColor={Color(Colors.primary_lighter)
-              .lighten(0.5)
-              .string()}
-            highlightColor={Colors.secondary}
-            size={(props) => ({
-              width: props.width - 20,
-              height: props.height,
-            })}
-          >
-            <View>
-              <Skeleton.Item width={(w) => w / 3} height={25} />
-              <Skeleton.Item width={(w) => w - 20} height={55} />
-              <Skeleton.Item width={(w) => w - 20} height={55} />
-              <Skeleton.Item width={(w) => w - 20} height={55} />
-              <Skeleton.Item width={(w) => w / 3} height={25} marginTop={30} />
-              <Skeleton.Item width={(w) => w - 20} height={55} />
-              <Skeleton.Item width={(w) => w - 20} height={55} />
-              <Skeleton.Item width={(w) => w / 3} height={25} marginTop={30} />
-              <Skeleton.Item width={(w) => w - 20} height={55} />
-              <Skeleton.Item width={(w) => w - 20} height={55} />
-            </View>
-          </Skeleton>
-        )}
+        {loading && <ScreenLoader />}
       </View>
 
       <FloatingButton
