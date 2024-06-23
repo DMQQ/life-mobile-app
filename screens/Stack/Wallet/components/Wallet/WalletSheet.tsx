@@ -4,8 +4,9 @@ import BottomSheet, {
 import { ReactNode, forwardRef } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import Colors from "@/constants/Colors";
-import { WalletElement } from "./WalletItem";
+import { CategoryIcon, WalletElement } from "./WalletItem";
 import SheetActionButtons from "./WalletSheetControls";
+import { AntDesign, MaterialIcons } from "@expo/vector-icons";
 
 const styles = StyleSheet.create({
   text: {
@@ -18,7 +19,19 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     marginRight: 5,
   },
+
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 10,
+    borderRadius: 10,
+    backgroundColor: Colors.primary_light,
+    marginTop: 10,
+  },
 });
+
+const capitalize = (s = "") => s.charAt(0).toUpperCase() + s.slice(1);
 
 const Txt = (props: { children: ReactNode; size: number; color?: any }) => (
   <Text
@@ -26,7 +39,7 @@ const Txt = (props: { children: ReactNode; size: number; color?: any }) => (
       color: props.color ?? Colors.secondary,
       fontSize: props.size,
       fontWeight: "bold",
-      lineHeight: props.size + 5,
+      lineHeight: props.size + 7.5,
     }}
   >
     {props.children}
@@ -45,44 +58,91 @@ export const WalletSheet = forwardRef<
       : selected?.amount.toFixed(2);
 
   return (
-    <BottomSheet ref={ref} snapPoints={["50%"]}>
-      <View style={{ paddingHorizontal: 15, flex: 1 }}>
+    <BottomSheet ref={ref} snapPoints={["70%", "80%"]}>
+      <View style={{ paddingHorizontal: 10, flex: 1 }}>
         <View style={{ flex: 2 }}>
-          <View style={{ marginBottom: 15 }}>
-            <Txt size={40} color={Colors.secondary}>
-              {selected?.description}
+          <View
+            style={[
+              styles.row,
+              { marginTop: 0, padding: 15, flexWrap: "wrap" },
+            ]}
+          >
+            <Txt size={30} color={"#fff"}>
+              {capitalize(selected?.description)}
+            </Txt>
+
+            <Txt size={20} color={Colors.secondary_light_2}>
+              {amount}
+              <Text style={{ fontSize: 16 }}>zł</Text>
             </Txt>
           </View>
 
-          <Txt size={30} color="#fff">
-            {amount}
-            <Text style={{ fontSize: 16 }}>zł</Text>
-          </Txt>
+          <View style={styles.row}>
+            <CategoryIcon category={selected?.category || "none"} />
 
-          <View
-            style={{
-              flexDirection: "row",
-              flexWrap: "wrap",
-              gap: 5,
-              marginTop: 10,
-            }}
-          >
-            <Text style={styles.text}>
-              {new Date(selected?.date!).toLocaleDateString()}
-              {" at "}
-              {new Date(selected?.date!).toLocaleTimeString("pl-PL", {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
+            <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>
+              {capitalize(selected?.category)}
             </Text>
+          </View>
 
-            <Text style={styles.text}>{selected?.category}</Text>
+          <View style={styles.row}>
+            <AntDesign
+              name="calendar"
+              size={24}
+              color={Colors.ternary}
+              style={{ paddingHorizontal: 7.5, padding: 2.5 }}
+            />
 
-            <Text style={styles.text}>
-              Balance: {selected?.balanceBeforeInteraction.toFixed(2)}zł
+            <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>
+              {
+                new Date(selected?.date || new Date())
+                  .toISOString()
+                  .split("T")[0]
+              }
             </Text>
+          </View>
+          <View style={styles.row}>
+            <AntDesign
+              name="clockcircle"
+              size={24}
+              color={Colors.ternary}
+              style={{ paddingHorizontal: 7.5, padding: 2.5 }}
+            />
 
-            <Text style={styles.text}>Type: {selected?.type}</Text>
+            <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>
+              {
+                new Date(selected?.date || new Date())
+                  .toISOString()
+                  .split("T")[1]
+                  .split(".")[0]
+              }
+            </Text>
+          </View>
+
+          <View style={styles.row}>
+            <MaterialIcons
+              name="money"
+              size={24}
+              color={Colors.ternary}
+              style={{ paddingHorizontal: 7.5, padding: 2.5 }}
+            />
+
+            <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>
+              {capitalize(selected?.type)}
+            </Text>
+          </View>
+
+          <View style={styles.row}>
+            <MaterialIcons
+              name="money"
+              size={24}
+              color={Colors.ternary}
+              style={{ paddingHorizontal: 7.5, padding: 2.5 }}
+            />
+
+            <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>
+              Balance before: {selected?.balanceBeforeInteraction} zł
+            </Text>
           </View>
         </View>
 

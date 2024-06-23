@@ -150,16 +150,7 @@ export const Icons = {
 } as const;
 
 export const CategoryIcon = (props: { category: keyof typeof Icons }) => (
-  <View
-    style={[
-      styles.icon_container,
-      // {
-      //   backgroundColor: Color(Icons[props.category || "none"]?.backgroundColor)
-      //     .darken(0.7)
-      //     .hex(),
-      // },
-    ]}
-  >
+  <View style={[styles.icon_container]}>
     {Icons[props.category || "none"]?.icon}
   </View>
 );

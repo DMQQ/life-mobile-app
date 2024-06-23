@@ -1,5 +1,4 @@
 import { gql, useMutation } from "@apollo/client";
-import useUser from "../../../../utils/hooks/useUser";
 import { GET_WALLET } from "./useGetWallet";
 import { Wallet } from "../../../../types";
 
@@ -58,6 +57,11 @@ export default function useCreateActivity(props: { onCompleted?: () => void }) {
                 walletCopy.balance =
                   walletCopy.balance + data.createExpense.amount;
               }
+
+              walletCopy.expenses = walletCopy.expenses.sort(
+                (a, b) =>
+                  new Date(b.date).getTime() - new Date(a.date).getTime()
+              );
 
               cache.writeQuery({
                 query: GET_WALLET,
