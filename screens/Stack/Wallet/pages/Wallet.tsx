@@ -13,7 +13,7 @@ import Animated, {
 import BalanceAlertEditModal from "../components/Wallet/BalanceAlertEditModal";
 import { WalletScreens } from "../Main";
 import { StatusBar } from "expo-status-bar";
-import CreateExpenseSheet from "../components/Wallet/AddExpenseBottomSheet";
+import CreateExpenseSheet from "../components/Wallet/CreateExpense/CreateExpenseSheet";
 import BottomSheet from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheet/BottomSheet";
 import WalletList from "../components/Wallet/WalletList";
 import FloatingButton from "../components/Wallet/FloatingButton";
