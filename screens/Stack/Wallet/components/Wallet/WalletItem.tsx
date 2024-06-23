@@ -6,7 +6,7 @@ import {
 } from "@expo/vector-icons";
 import moment from "moment";
 import Color from "color";
-import Colors from "../../../../constants/Colors";
+import Colors from "@/constants/Colors";
 import Ripple from "react-native-material-ripple";
 import Animated, {
   AnimatedStyleProp,

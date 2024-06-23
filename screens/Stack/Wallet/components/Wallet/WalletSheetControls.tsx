@@ -2,7 +2,7 @@ import Button from "@/components/ui/Button/Button";
 import Colors from "@/constants/Colors";
 import Color from "color";
 import { View } from "react-native";
-import useDeleteActivity from "../hooks/useDeleteActivity";
+import useDeleteActivity from "../../hooks/useDeleteActivity";
 import { WalletElement } from "./WalletItem";
 import { useNavigation } from "@react-navigation/native";
 
