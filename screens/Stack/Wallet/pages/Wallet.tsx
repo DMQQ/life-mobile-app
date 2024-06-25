@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
 });
 
 export default function WalletScreen({}: WalletScreens<"Wallet">) {
-  const { data, loading } = useGetWallet();
+  const { data, loading, refetch } = useGetWallet();
 
   const wallet = data?.wallet;
 
@@ -118,6 +118,7 @@ export default function WalletScreen({}: WalletScreens<"Wallet">) {
       />
 
       <WalletList
+        refetch={refetch}
         scrollY={scrollY}
         onScroll={onAnimatedScrollHandler}
         wallet={data?.wallet}

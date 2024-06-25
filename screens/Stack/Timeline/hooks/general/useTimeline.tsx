@@ -29,7 +29,7 @@ export default function useTimeline({
   route,
   navigation,
 }: TimelineScreenProps<"Timeline">) {
-  const { data, selected, setSelected, loading } = useGetTimeLineQuery();
+  const { data, selected, setSelected, loading, error } = useGetTimeLineQuery();
 
   const [fetchDate, setFetchDate] = useState(moment().format("YYYY-MM-DD"));
 
@@ -90,5 +90,6 @@ export default function useTimeline({
     switchView,
     setSwitchView,
     onViewToggle,
+    error,
   };
 }

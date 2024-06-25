@@ -11,79 +11,80 @@ import useTimeline from "../hooks/general/useTimeline";
 import { GetTimelineQuery } from "../hooks/query/useGetTimeLineQuery";
 import TimelineItem from "../components/TimelineItem";
 import Colors from "@/constants/Colors";
+import { memo } from "react";
 
 const iconColor = "#fff";
 
-const ListHeaderComponent = (
-  t: ReturnType<typeof useTimeline> & { navigation: any }
-) => (
-  <>
-    {t.switchView === "calendar" && (
-      <Calendar
-        selected={t.selected}
-        monthData={t.monthData}
-        refetch={t.refetch}
-        onDayPress={t.onDayPress}
-      />
-    )}
+const ListHeaderComponent = memo(
+  (t: ReturnType<typeof useTimeline> & { navigation: any }) => (
+    <>
+      {t.switchView === "calendar" && (
+        <Calendar
+          selected={t.selected}
+          monthData={t.monthData}
+          refetch={t.refetch}
+          onDayPress={t.onDayPress}
+        />
+      )}
 
-    {t.switchView === "date-list" && (
-      <DateList
-        onMenuPress={() => t.setSwitchView("calendar")}
-        dayEvents={t.dayEventsSorted}
-        selectedDate={t.selected}
-        setSelected={t.setSelected}
-      />
-    )}
+      {t.switchView === "date-list" && (
+        <DateList
+          onMenuPress={() => t.setSwitchView("calendar")}
+          dayEvents={t.dayEventsSorted}
+          selectedDate={t.selected}
+          setSelected={t.setSelected}
+        />
+      )}
 
-    <View style={timelineStyles.dateRow}>
-      <Text style={timelineStyles.dayHeader}>{t.displayDate}</Text>
-
-      <Ripple
-        onPress={t.onViewToggle}
-        style={{
-          paddingHorizontal: 5,
-        }}
-      >
-        {t.switchView === "calendar" ? (
-          <AntDesign name="calendar" color={iconColor} size={24} />
-        ) : (
-          <Ionicons name="list" size={24} color={iconColor} />
-        )}
-      </Ripple>
-    </View>
-
-    <View style={timelineStyles.listHeadingContainer}>
-      <View style={{ flexDirection: "row", alignItems: "center" }}>
-        <Text style={timelineStyles.listHeadingText}>My events</Text>
+      <View style={timelineStyles.dateRow}>
+        <Text style={timelineStyles.dayHeader}>{t.displayDate}</Text>
 
         <Ripple
-          style={{ padding: 2.5, marginLeft: 10 }}
-          onPress={() =>
-            t.navigation.navigate("Schedule", {
-              selectedDate: t.selected,
-            })
-          }
+          onPress={t.onViewToggle}
+          style={{
+            paddingHorizontal: 5,
+          }}
         >
-          <Entypo name="list" color={"#fff"} size={25} />
+          {t.switchView === "calendar" ? (
+            <AntDesign name="calendar" color={iconColor} size={24} />
+          ) : (
+            <Ionicons name="list" size={24} color={iconColor} />
+          )}
         </Ripple>
       </View>
 
-      <Ripple
-        style={{
-          padding: 7.5,
-          paddingHorizontal: 10,
-          backgroundColor: Colors.secondary,
-          borderRadius: 25,
-        }}
-        onPress={() => t.createTimeline()}
-      >
-        <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 13 }}>
-          CREATE EVENT
-        </Text>
-      </Ripple>
-    </View>
-  </>
+      <View style={timelineStyles.listHeadingContainer}>
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <Text style={timelineStyles.listHeadingText}>My events</Text>
+
+          <Ripple
+            style={{ padding: 2.5, marginLeft: 10 }}
+            onPress={() =>
+              t.navigation.navigate("Schedule", {
+                selectedDate: t.selected,
+              })
+            }
+          >
+            <Entypo name="list" color={"#fff"} size={25} />
+          </Ripple>
+        </View>
+
+        <Ripple
+          style={{
+            padding: 7.5,
+            paddingHorizontal: 7.5 * 2,
+            backgroundColor: Colors.secondary,
+            borderRadius: 25,
+          }}
+          onPress={() => t.createTimeline()}
+        >
+          <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 13 }}>
+            CREATE EVENT
+          </Text>
+        </Ripple>
+      </View>
+    </>
+  )
 );
 
 export default function Timeline({

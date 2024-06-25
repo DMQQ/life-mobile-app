@@ -128,7 +128,7 @@ const Form = ({ formik: f }: FormProps) => {
             />
             <Ripple
               onPress={() => {
-                setShowCalendar(!showCalendar);
+                setShowCalendar((prev) => !prev);
               }}
               style={[
                 {
