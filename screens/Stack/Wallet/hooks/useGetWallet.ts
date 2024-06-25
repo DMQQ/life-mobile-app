@@ -20,8 +20,5 @@ export const GET_WALLET = gql`
 `;
 
 export default function useGetWallet() {
-  const usr = useUser();
-
-  const { data, loading, error } = useQuery(GET_WALLET, {});
-  return { data, loading, error };
+  return useQuery(GET_WALLET, {});
 }

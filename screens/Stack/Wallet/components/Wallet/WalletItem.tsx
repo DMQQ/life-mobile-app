@@ -143,6 +143,11 @@ export const Icons = {
     icon: <Ionicons name="airplane-outline" size={24} color="#33ff57" />,
   },
 
+  edit: {
+    backgroundColor: Colors.primary,
+    icon: <Ionicons name="create" color="#fff" size={24} />,
+  },
+
   none: {
     backgroundColor: Colors.primary,
     icon: <Ionicons name="add" color={Colors.secondary} size={24} />,
@@ -168,7 +173,7 @@ export default function WalletItem(
       : item.amount.toFixed(2);
 
   const isBalanceEdit =
-    item.description === "Balance edit" && item.amount === 0;
+    item.description.includes("Balance edited") || item.amount === 0;
 
   return (
     <Animated.View
@@ -186,7 +191,7 @@ export default function WalletItem(
         style={[styles.expense_item]}
         onPress={() => item.handlePress()}
       >
-        {!isBalanceEdit && <CategoryIcon category={item.category} />}
+        <CategoryIcon category={isBalanceEdit ? "edit" : item.category} />
 
         <View style={{ height: "100%", justifyContent: "center", flex: 3 }}>
           <Text style={styles.title} numberOfLines={1}>

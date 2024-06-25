@@ -2,7 +2,13 @@ import BottomSheet from "@gorhom/bottom-sheet";
 import { Expense, Wallet } from "@/types";
 import WalletItem, { WalletElement, parseDateToText } from "./WalletItem";
 import { useState, useRef, useEffect, useMemo } from "react";
-import { Text, NativeScrollEvent, View, StyleSheet } from "react-native";
+import {
+  Text,
+  NativeScrollEvent,
+  View,
+  StyleSheet,
+  ActivityIndicator,
+} from "react-native";
 import { WalletSheet } from "./WalletSheet";
 import Animated, { SharedValue } from "react-native-reanimated";
 import { NativeSyntheticEvent } from "react-native";
@@ -11,15 +17,19 @@ import { gql, useQuery } from "@apollo/client";
 import { err } from "react-native-svg/lib/typescript/xml";
 import Colors from "@/constants/Colors";
 import Color from "color";
+import { RefreshControl } from "react-native-gesture-handler";
 
 export default function WalletList(props: {
   wallet: Wallet;
   scrollY: SharedValue<number>;
   onScroll: (event: NativeSyntheticEvent<NativeScrollEvent>) => void;
+  refetch: () => void;
 }) {
   const [selected, setSelected] = useState<WalletElement | undefined>(
     undefined
   );
+
+  const [refreshing, setRefreshing] = useState(false);
 
   const sheet = useRef<BottomSheet>(null);
 
@@ -59,6 +69,10 @@ export default function WalletList(props: {
   return (
     <>
       <Animated.FlatList
+        refreshing={refreshing}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={props.refetch} />
+        }
         removeClippedSubviews
         onScroll={props.onScroll}
         style={{ flex: 1 }}
