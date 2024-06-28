@@ -2,19 +2,12 @@ import BottomSheet from "@gorhom/bottom-sheet";
 import { Expense, Wallet } from "@/types";
 import WalletItem, { WalletElement, parseDateToText } from "./WalletItem";
 import { useState, useRef, useEffect, useMemo } from "react";
-import {
-  Text,
-  NativeScrollEvent,
-  View,
-  StyleSheet,
-  ActivityIndicator,
-} from "react-native";
+import { Text, NativeScrollEvent, View, StyleSheet } from "react-native";
 import { WalletSheet } from "./WalletSheet";
 import Animated, { SharedValue } from "react-native-reanimated";
 import { NativeSyntheticEvent } from "react-native";
 import moment from "moment";
 import { gql, useQuery } from "@apollo/client";
-import { err } from "react-native-svg/lib/typescript/xml";
 import Colors from "@/constants/Colors";
 import Color from "color";
 import { RefreshControl } from "react-native-gesture-handler";
