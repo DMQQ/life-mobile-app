@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useFormik } from "formik";
 import moment from "moment";
 import useCreateTimelineMutation from "../mutation/useCreateTimeline";
@@ -7,6 +7,8 @@ import useEditTimeline from "../mutation/useEditTimeline";
 import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 import TimelineCreateHeader from "../../components/CreateTimeline/TimelineCreateHeader";
 import { TimelineScreenProps } from "../../types";
+
+import BottomSheetType from "@gorhom/bottom-sheet";
 
 export default function useCreateTimeline({
   route,
@@ -20,6 +22,8 @@ export default function useCreateTimeline({
   } = useCreateTimelineMutation({
     selectedDate: route.params.selectedDate,
   });
+
+  const sheetRef = useRef<BottomSheetType>();
 
   const isEditing = route.params.mode === "edit";
 
@@ -89,16 +93,16 @@ export default function useCreateTimeline({
 
   useEffect(() => {
     navigation.setOptions({
-      header: (props) => (
+      header: (props: any) => (
         <TimelineCreateHeader
           {...props}
           handleChangeDate={handleChangeDate}
           selectedDate={route.params.selectedDate}
-          onToggleOptions={() => setOptionsVisible((p) => !p)}
+          onToggleOptions={() => sheetRef.current?.expand()}
         />
       ),
     });
-  }, [optionsVisible, f.values.date]);
+  }, [optionsVisible, f.values.date, sheetRef.current]);
 
   return {
     f,
@@ -110,5 +114,6 @@ export default function useCreateTimeline({
     initialEditFormValues,
     initialValues,
     handleSubmit,
+    sheetRef,
   };
 }
