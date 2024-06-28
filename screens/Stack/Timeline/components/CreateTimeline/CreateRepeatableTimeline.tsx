@@ -8,7 +8,9 @@ import { AntDesign } from "@expo/vector-icons";
 import Layout from "../../../../../constants/Layout";
 import Modal from "../../../../../components/ui/Modal";
 import Button from "../../../../../components/ui/Button/Button";
-import { memo } from "react";
+import { forwardRef, memo, useState } from "react";
+import BottomSheet from "@/components/ui/BottomSheet/BottomSheet";
+import BottomSheetType from "@gorhom/bottom-sheet";
 
 const styles = StyleSheet.create({
   arrow_button: {
@@ -28,7 +30,6 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingHorizontal: 10,
   },
   title: {
     color: Colors.secondary,
@@ -65,10 +66,6 @@ const styles = StyleSheet.create({
 
 interface CreateRepeatableTimelineProps {
   formik: any;
-
-  isVisible: boolean;
-
-  onClose: () => void;
 }
 
 const ArrowButton = (props: {
@@ -112,11 +109,10 @@ const Txt = (props: { text: string }) => (
   </Text>
 );
 
-function CreateRepeatableTimeline({
-  formik: f,
-  isVisible,
-  onClose,
-}: CreateRepeatableTimelineProps) {
+const CreateRepeatableTimeline = forwardRef<
+  BottomSheetType,
+  CreateRepeatableTimelineProps
+>(({ formik: f }, ref) => {
   const onClearFields = () => {
     f.setFieldValue("repeatCount", "");
     f.setFieldValue("repeatOn", "");
@@ -138,16 +134,7 @@ function CreateRepeatableTimeline({
   };
 
   return (
-    <Modal
-      useNativeDriver
-      useNativeDriverForBackdrop
-      hideModalContentWhileAnimating
-      isVisible={isVisible}
-      onBackButtonPress={onClose}
-      onBackdropPress={onClose}
-      animationIn={"slideInUp"}
-      animationOut={"slideOutDown"}
-    >
+    <BottomSheet snapPoints={["70%"]} ref={ref}>
       <View style={styles.modal_container}>
         <View style={styles.title_container}>
           <Text style={styles.title}>Options</Text>
@@ -162,7 +149,7 @@ function CreateRepeatableTimeline({
 
           <Input
             keyboardType="numeric"
-            style={{ flex: 1, width: Layout.screen.width - 70 }}
+            style={{ flex: 1, width: Layout.screen.width - 30 }}
             value={f.values.repeatCount}
             onChangeText={(t) => f.setFieldValue("repeatCount", t)}
             placeholder="Repeat count"
@@ -202,13 +189,9 @@ function CreateRepeatableTimeline({
         <Text style={styles.suggestion_text}>
           Leaving fields blank disables repeatition
         </Text>
-
-        <Button style={{ marginTop: 20 }} size="xl" onPress={onClose}>
-          Close
-        </Button>
       </View>
-    </Modal>
+    </BottomSheet>
   );
-}
+});
 
 export default memo(CreateRepeatableTimeline);
