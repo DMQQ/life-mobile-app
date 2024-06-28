@@ -90,15 +90,11 @@ export default function SuggestedEvents(props: SuggestedEventsProps) {
         onPress={() => handleSubmit()}
         disabled={!canSubmit}
         rippleColor={Colors.secondary}
-        type="outlined"
         fontStyle={{
-          fontSize: 15,
-          color: canSubmit ? "#fff" : Color(Colors.secondary).darken(0.5).hex(),
+          fontSize: 16,
         }}
         style={{
           marginTop: 25,
-          borderWidth: 1,
-          backgroundColor: canSubmit ? Colors.secondary : "transparent",
         }}
       >
         Create quick event

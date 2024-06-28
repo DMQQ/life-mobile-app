@@ -1,4 +1,4 @@
-import { AntDesign } from "@expo/vector-icons";
+import { AntDesign, Feather } from "@expo/vector-icons";
 import { StyleSheet, Text, View } from "react-native";
 import Ripple from "react-native-material-ripple";
 import { NativeStackHeaderProps } from "@react-navigation/native-stack";
@@ -38,7 +38,7 @@ export default function TimelineCreateHeader(
         </Ripple>
       )}
       <Ripple style={{ padding: 10 }} onPress={props.onToggleOptions}>
-        <AntDesign name="setting" color={"#fff"} size={23} />
+        <Feather name="trash" color={"#fff"} size={20} />
       </Ripple>
     </View>
   );
