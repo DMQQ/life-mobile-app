@@ -16,9 +16,14 @@ import Color from "color";
 import type { TimelineScreenProps } from "../types";
 import CreateRepeatableTimeline from "../components/CreateTimeline/CreateRepeatableTimeline";
 import useCreateTimeline from "../hooks/general/useCreateTimeline";
-import { Feather } from "@expo/vector-icons";
+import { AntDesign, Feather } from "@expo/vector-icons";
 import useKeyboard from "../../../../utils/hooks/useKeyboard";
-import Animated, { ZoomInDown, ZoomOutDown } from "react-native-reanimated";
+import Animated, {
+  FadeIn,
+  FadeOut,
+  ZoomInDown,
+  ZoomOutDown,
+} from "react-native-reanimated";
 import SegmentedButtons from "@/components/ui/SegmentedButtons";
 import Layout from "@/constants/Layout";
 import SuggestedEvents from "../components/CreateTimeline/SuggestedEvents/SuggestedEvents";
@@ -96,7 +101,6 @@ export default function CreateTimeLineEventModal({
             showLabel
             formik={f}
             helperStyle={{ marginLeft: 2.5 }}
-            style={inputStyle}
           />
           <ValidatedInput
             showLabel
@@ -108,7 +112,6 @@ export default function CreateTimeLineEventModal({
             formik={f}
             scrollEnabled
             textAlignVertical="top"
-            style={inputStyle}
           />
 
           <ValidatedInput.Label error={false} text="Time range*" />
@@ -161,6 +164,7 @@ export default function CreateTimeLineEventModal({
 
         <SubmitButton
           f={f}
+          openSheet={() => sheetRef.current?.expand()}
           isEditing={isEditing}
           isKeyboardOpen={isKeyboardOpen || false}
           isLoading={isLoading}
@@ -178,26 +182,25 @@ interface SubmitButtonProps {
   f: any;
 
   isEditing: boolean;
+
+  openSheet: () => void;
 }
 
 const SubmitButton = (props: SubmitButtonProps) =>
   !props.isKeyboardOpen ? (
     <Animated.View
-      entering={ZoomInDown}
-      exiting={ZoomOutDown}
+      entering={FadeIn}
+      exiting={FadeOut}
       style={{ padding: 5, flexDirection: "row", paddingTop: 15 }}
     >
       <IconButton
-        onPress={() => {
-          props.f.resetForm();
-          ToastAndroid.show("Form reseted", ToastAndroid.SHORT);
-        }}
+        onPress={props.openSheet}
         style={{
           padding: 7.5,
           width: 35,
           marginRight: 15,
         }}
-        icon={<Feather name="trash-2" color="#fff" size={20} />}
+        icon={<AntDesign name="calendar" color="#fff" size={20} />}
       />
       <Button
         icon={

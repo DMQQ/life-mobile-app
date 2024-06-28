@@ -9,6 +9,7 @@ import TimelineCreateHeader from "../../components/CreateTimeline/TimelineCreate
 import { TimelineScreenProps } from "../../types";
 
 import BottomSheetType from "@gorhom/bottom-sheet";
+import { ToastAndroid } from "react-native";
 
 export default function useCreateTimeline({
   route,
@@ -98,11 +99,14 @@ export default function useCreateTimeline({
           {...props}
           handleChangeDate={handleChangeDate}
           selectedDate={route.params.selectedDate}
-          onToggleOptions={() => sheetRef.current?.expand()}
+          onToggleOptions={() => {
+            f.resetForm();
+            ToastAndroid.show("Form reseted", ToastAndroid.SHORT);
+          }}
         />
       ),
     });
-  }, [optionsVisible, f.values.date, sheetRef.current]);
+  }, [optionsVisible, f.values.date]);
 
   return {
     f,
