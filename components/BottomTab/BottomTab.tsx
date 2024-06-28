@@ -51,7 +51,7 @@ export default function BottomTab({
       onPress={() => navigate(props.route)}
     >
       <Ionicons
-        size={IconSize.m}
+        size={22.5}
         name={props.iconName}
         color={activeRoute === props.route ? Colors.secondary_light_1 : "#fff"}
       />

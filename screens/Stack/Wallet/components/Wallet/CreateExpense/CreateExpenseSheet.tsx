@@ -17,6 +17,7 @@ import { AntDesign } from "@expo/vector-icons";
 import moment from "moment";
 import ChooseDate from "./ChooseDate";
 import FormFields from "./FormFields";
+import { useIsFocused } from "@react-navigation/native";
 
 const schema = yup.object().shape({
   name: yup.string().required("Name is required"),
@@ -82,6 +83,10 @@ const AddExpenseBottomSheet = forwardRef<
     initialValues: initialValues,
   });
 
+  const isFocused = useIsFocused();
+
+  if (!isFocused) return null;
+
   return (
     <BottomSheet
       onChange={(index) => {
@@ -101,7 +106,6 @@ interface FormProps {
 
 const Form = ({ formik: f }: FormProps) => {
   const { snapToIndex } = useBottomSheet();
-
   const [showCalendar, setShowCalendar] = useState(false);
 
   return (
@@ -166,14 +170,12 @@ const Form = ({ formik: f }: FormProps) => {
 
               <Button
                 disabled={!(f.isValid && f.dirty)}
-                type={!(f.isValid && f.dirty) ? "outlined" : "contained"}
-                color="primary"
+                fontStyle={{ fontSize: 16 }}
                 onPress={() => {
                   f.handleSubmit();
                 }}
                 style={{
                   marginTop: 20,
-                  paddingVertical: 15,
                 }}
               >
                 Create expense
