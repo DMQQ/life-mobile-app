@@ -1,29 +1,36 @@
 import "@testing-library/jest-dom";
 import React from "react";
-import { fireEvent, render, waitFor } from "@testing-library/react-native";
+import {
+  fireEvent,
+  render,
+  waitFor,
+  screen,
+} from "@testing-library/react-native";
 import Button from "../ui/Button/Button";
 import Colors from "@/constants/Colors";
 
 describe("Button", () => {
-  it("should render correctly", () => {
-    const { getByText } = render(<Button>Hello</Button>);
+  it("should render correctly", async () => {
+    render(<Button>Hello</Button>);
 
-    expect(getByText("Hello")).toBeTruthy();
+    const element = await screen.findByText(/Hello/gi);
+
+    expect(element).toBeTruthy();
   });
 
   it("should render correctly with primary variant", async () => {
     const onPress = jest.fn();
 
-    const { getByTestId } = render(
+    render(
       <Button variant="primary" onPress={onPress}>
         Hello
       </Button>
     );
 
-    await waitFor(() => {
-      fireEvent.press(getByTestId("Button"));
+    const element = await screen.findByText(/Hello/gi);
 
-      expect(onPress).toHaveBeenCalled();
-    });
+    fireEvent.press(element);
+
+    expect(onPress).toHaveBeenCalled();
   });
 });

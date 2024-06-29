@@ -11,8 +11,8 @@ const backgroundColor = Colors.primary_lighter;
 
 const styles = StyleSheet.create({
   dot: {
-    width: 10,
-    height: 10,
+    width: 7.5,
+    height: 7.5,
     borderRadius: 5,
     backgroundColor: "#fff",
     marginHorizontal: 5,
@@ -33,7 +33,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   balance: {
-    fontSize: 55,
+    fontSize: 60,
     color: "#fff",
     fontWeight: "bold",
     textShadowColor: "rgba(0, 0, 0, 0.25)",
@@ -47,23 +47,22 @@ const styles = StyleSheet.create({
   },
   list: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginTop: Padding.xs,
-
-    overflow: "hidden",
+    flexWrap: "wrap",
+    gap: 10,
   },
   expense_container: {
     flexDirection: "row",
     alignItems: "center",
-    marginRight: 5,
+    backgroundColor: Color(Colors.primary_lighter).lighten(0.5).string(),
+    padding: 5,
+    paddingHorizontal: 15,
+    borderRadius: 100,
   },
 });
 
-const ExpenseItem = (props: { text: string }) => (
+const ExpenseItem = (props: { text: string; amount: number }) => (
   <View style={styles.expense_container}>
-    <View style={styles.dot} />
-    <Text style={{ color: "#fff" }}>{props.text}</Text>
+    <Text style={{ color: "#fff", fontSize: 16 }}>{props.text}</Text>
   </View>
 );
 
@@ -73,7 +72,7 @@ export default function AvailableBalanceWidget(props: {
 }) {
   const navigation = useNavigation<any>();
 
-  const expenses = props?.data?.expenses?.slice(0, 4) || [];
+  const expenses = props?.data?.expenses?.slice(0, 3) || [];
 
   return (
     <View style={styles.container}>
@@ -121,12 +120,6 @@ export default function AvailableBalanceWidget(props: {
               {props?.data?.balance.toFixed(2)}
               <Text style={{ fontSize: 25 }}>zł</Text>
             </Text>
-          </View>
-
-          <View style={styles.list}>
-            {expenses.map((item: Expense) => (
-              <ExpenseItem key={item.id} text={item.description} />
-            ))}
           </View>
         </>
       )}

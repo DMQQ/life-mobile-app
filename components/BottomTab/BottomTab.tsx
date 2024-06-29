@@ -74,18 +74,18 @@ export default function BottomTab({
           borderTopWidth: 1,
         },
       ]}
-      entering={FadeInDown}
-      exiting={FadeOutDown}
+      // entering={FadeInDown}
+      // exiting={FadeOutDown}
     >
-      <Btn route="TimelineScreens" iconName={"calendar"} />
-
       <Btn route="NotesScreens" iconName={"clipboard"} />
-
-      <Btn route="Root" iconName={"home"} />
 
       <Btn route="WorkoutScreens" iconName={"barbell"} />
 
+      <Btn route="Root" iconName={"home"} />
+
       <Btn route="WalletScreens" iconName={"wallet"} />
+
+      <Btn route="TimelineScreens" iconName={"calendar"} />
     </Animated.View>
   );
 }
