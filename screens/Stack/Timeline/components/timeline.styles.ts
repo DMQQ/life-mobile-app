@@ -100,7 +100,7 @@ export default StyleSheet.create({
   status: {
     color: Colors.primary,
     fontWeight: "600",
-    marginTop: 10,
+    // marginTop: 10,
     backgroundColor: Colors.secondary,
     padding: 2.5,
     paddingHorizontal: 10,

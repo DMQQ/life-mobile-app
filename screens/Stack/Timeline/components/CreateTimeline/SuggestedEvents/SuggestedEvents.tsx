@@ -1,26 +1,33 @@
 import Button from "@/components/ui/Button/Button";
 import Colors from "@/constants/Colors";
-import { Text, View } from "react-native";
+import { ActivityIndicator, Text, View } from "react-native";
 import Ripple from "react-native-material-ripple";
-import { InitialValuesType } from "../../../hooks/mutation/useCreateTimeline";
 import { StyleSheet } from "react-native";
-import { CommonEvents } from "../CommonEvents.data";
-import Color from "color";
 import useSuggestedEvents from "./useSuggestedEvents";
 import TilesList from "./TilesList";
 import SubcategoryList from "./SubcategoryList";
-
-type EventType = (typeof CommonEvents)[number];
+import useCreateTimeline from "../../../hooks/general/useCreateTimeline";
+import { useNavigation } from "@react-navigation/native";
 
 interface SuggestedEventsProps {
   date: string;
-
-  createTimelineAsync: (input: InitialValuesType) => Promise<void>;
-
-  initialValues: InitialValuesType;
 }
 
 export default function SuggestedEvents(props: SuggestedEventsProps) {
+  const navigation = useNavigation<any>();
+  const {
+    handleSubmit: createTimeline,
+    initialValues,
+    isLoading,
+  } = useCreateTimeline({
+    route: {
+      params: {
+        selectedDate: props.date,
+        mode: "edit",
+      },
+    } as any,
+    navigation,
+  });
   const {
     endTime,
     handleSelectQuickOption,
@@ -31,8 +38,8 @@ export default function SuggestedEvents(props: SuggestedEventsProps) {
     subCategory,
     time,
   } = useSuggestedEvents({
-    createTimelineAsync: props.createTimelineAsync,
-    initialValues: props.initialValues,
+    createTimelineAsync: createTimeline,
+    initialValues: initialValues,
   });
 
   const canSubmit = selected.name !== undefined && time !== undefined;
@@ -42,10 +49,10 @@ export default function SuggestedEvents(props: SuggestedEventsProps) {
 
   return (
     <View style={styles.container}>
-      <Text style={{ color: "#fff", fontSize: 22, fontWeight: "bold" }}>
+      <Text style={{ color: "#fff", fontSize: 24, fontWeight: "bold" }}>
         Commonly used events
       </Text>
-      <Text style={{ color: "rgba(255,255,255,0.7)" }}>
+      <Text style={{ color: "rgba(255,255,255,0.6)", fontSize: 13 }}>
         Quick, premade events to use
       </Text>
 
@@ -54,16 +61,17 @@ export default function SuggestedEvents(props: SuggestedEventsProps) {
         selected={selected}
       />
 
-      <Text style={{ color: "rgba(255,255,255,0.7)", padding: 5 }}>
-        Press to use and set the options
-      </Text>
-
       {hasSubCategory && (
-        <SubcategoryList
-          handleSelectSubCategory={handleSelectSubCategory}
-          selected={selected || []}
-          subCategory={subCategory}
-        />
+        <>
+          <Text style={{ color: "rgba(255,255,255,0.6)", fontSize: 13 }}>
+            Press to set category
+          </Text>
+          <SubcategoryList
+            handleSelectSubCategory={handleSelectSubCategory}
+            selected={selected || []}
+            subCategory={subCategory}
+          />
+        </>
       )}
 
       {selected.name !== undefined &&
@@ -95,7 +103,17 @@ export default function SuggestedEvents(props: SuggestedEventsProps) {
         }}
         style={{
           marginTop: 25,
+          flexDirection: "row-reverse",
         }}
+        icon={
+          isLoading && (
+            <ActivityIndicator
+              style={{ marginHorizontal: 10 }}
+              size="small"
+              color="#fff"
+            />
+          )
+        }
       >
         Create quick event
       </Button>

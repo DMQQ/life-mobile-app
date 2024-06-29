@@ -1,12 +1,6 @@
 import ScreenContainer from "../../../../components/ui/ScreenContainer";
 import ValidatedInput from "../../../../components/ui/ValidatedInput";
-import {
-  ActivityIndicator,
-  Text,
-  ScrollView,
-  StyleSheet,
-  ToastAndroid,
-} from "react-native";
+import { ActivityIndicator, Text, ScrollView, StyleSheet } from "react-native";
 import Colors from "../../../../constants/Colors";
 import Button from "../../../../components/ui/Button/Button";
 import timelineStyles from "../components/timeline.styles";
@@ -16,16 +10,9 @@ import Color from "color";
 import type { TimelineScreenProps } from "../types";
 import CreateRepeatableTimeline from "../components/CreateTimeline/CreateRepeatableTimeline";
 import useCreateTimeline from "../hooks/general/useCreateTimeline";
-import { AntDesign, Feather } from "@expo/vector-icons";
+import { AntDesign } from "@expo/vector-icons";
 import useKeyboard from "../../../../utils/hooks/useKeyboard";
-import Animated, {
-  FadeIn,
-  FadeOut,
-  ZoomInDown,
-  ZoomOutDown,
-} from "react-native-reanimated";
 import SegmentedButtons from "@/components/ui/SegmentedButtons";
-import Layout from "@/constants/Layout";
 import SuggestedEvents from "../components/CreateTimeline/SuggestedEvents/SuggestedEvents";
 import IconButton from "@/components/ui/IconButton/IconButton";
 
@@ -61,38 +48,16 @@ export default function CreateTimeLineEventModal({
 }: TimelineScreenProps<"TimelineCreate">) {
   const isKeyboardOpen = useKeyboard();
 
-  const {
-    f,
-    isLoading,
-    optionsVisible,
-    setOptionsVisible,
-    timePicker,
-    isEditing,
-    initialValues,
-    handleSubmit,
-    sheetRef,
-  } = useCreateTimeline({ route, navigation });
-
-  const TOTAL_PADDING = 30;
-
-  const inputStyle = {
-    width: Layout.screen.width - TOTAL_PADDING,
-  };
+  const { f, isLoading, timePicker, isEditing, sheetRef } = useCreateTimeline({
+    route,
+    navigation,
+  });
 
   return (
     <>
       <ScreenContainer>
-        <ScrollView
-          style={{ flex: 1, padding: 5 }}
-          showsVerticalScrollIndicator={false}
-        >
-          {!isEditing && (
-            <SuggestedEvents
-              createTimelineAsync={handleSubmit}
-              initialValues={initialValues}
-              date={route.params.selectedDate}
-            />
-          )}
+        <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+          {!isEditing && <SuggestedEvents date={route.params.selectedDate} />}
 
           <ValidatedInput
             placeholder="Like  'take out the trash' etc.."
@@ -105,7 +70,11 @@ export default function CreateTimeLineEventModal({
           <ValidatedInput
             showLabel
             label="Event's content"
-            numberOfLines={f.values.desc.split("\n").length + 3}
+            numberOfLines={
+              isEditing
+                ? f.values.desc.split("\n").length + 10
+                : f.values.desc.split("\n").length + 3
+            }
             multiline
             placeholder="What you wanted to do"
             name="desc"
@@ -188,11 +157,7 @@ interface SubmitButtonProps {
 
 const SubmitButton = (props: SubmitButtonProps) =>
   !props.isKeyboardOpen ? (
-    <Animated.View
-      entering={FadeIn}
-      exiting={FadeOut}
-      style={{ padding: 5, flexDirection: "row", paddingTop: 15 }}
-    >
+    <View style={{ flexDirection: "row", paddingTop: 15 }}>
       <IconButton
         onPress={props.openSheet}
         style={{
@@ -231,5 +196,5 @@ const SubmitButton = (props: SubmitButtonProps) =>
       >
         {props.isEditing ? "Save changes" : "Create new event"}
       </Button>
-    </Animated.View>
+    </View>
   ) : null;
