@@ -57,7 +57,8 @@ export default function TimelineItem(
             ToastAndroid.show("Event deleted", ToastAndroid.SHORT);
           },
         },
-      ]
+      ],
+      { userInterfaceStyle: "dark", cancelable: true }
     );
   };
 
@@ -78,7 +79,12 @@ export default function TimelineItem(
     if (now.isAfter(start) && now.isBefore(end)) {
       return false;
     }
-  }, []);
+  }, [
+    timeline.date,
+    timeline.beginTime,
+    timeline.endTime,
+    timeline.isCompleted,
+  ]);
 
   return (
     <Ripple
@@ -112,7 +118,8 @@ export default function TimelineItem(
             flexWrap: "wrap",
             alignItems: "center",
             justifyContent: "flex-end",
-            marginTop: 5,
+            marginTop: 10,
+            gap: 10,
           }}
         >
           <Text
