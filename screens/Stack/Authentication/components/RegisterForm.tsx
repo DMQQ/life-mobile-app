@@ -79,7 +79,7 @@ export default function RegisterForm({
           <Button
             disabled={!(f.isValid && f.dirty)}
             onPress={() => f.handleSubmit()}
-            size="xl"
+            fontStyle={{ fontSize: 16 }}
             type="contained"
             color="ternary"
             style={{ marginTop: 10 }}

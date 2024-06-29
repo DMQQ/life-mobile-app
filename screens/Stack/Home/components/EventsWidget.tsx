@@ -8,6 +8,7 @@ import NotFound from "./NotFound";
 import { GetTimelineQuery } from "../../Timeline/hooks/query/useGetTimeLineQuery";
 import Skeleton from "@/components/SkeletonLoader/Skeleton";
 import Color from "color";
+import Button from "@/components/ui/Button/Button";
 
 const backgroundColor = Colors.primary_lighter;
 
@@ -23,7 +24,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 15,
+    marginBottom: 30,
   },
 
   heading: {
@@ -57,30 +58,44 @@ const EventsList = (props: { data: GetTimelineQuery[] }) => {
   const navigation = useNavigation<any>();
   return (
     <>
-      {props?.data?.slice(0, 3).map((timeline) => (
-        <Pressable
+      {props?.data?.slice(0, 3).map((timeline, index) => (
+        <Ripple
           onPress={() =>
             navigation.navigate("TimelineScreens", {
               timelineId: timeline.id,
             })
           }
           style={{
-            marginBottom: 20,
+            marginBottom: index === 2 ? 0 : 15,
+            padding: 10,
+            backgroundColor: Color(Colors.primary_lighter)
+              .lighten(0.5)
+              .string(),
+            borderRadius: 15,
+            paddingHorizontal: 15,
           }}
           key={timeline.id}
         >
-          <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 17 }}>
+          <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 20 }}>
             {timeline.title}
           </Text>
-          <Text style={{ color: "rgba(255,255,255,0.8)" }}>
+          <Text style={{ color: "rgba(255,255,255,0.7)", fontSize: 15 }}>
             {timeline.description.replaceAll("\n", "")}
           </Text>
 
           <Text style={{ color: "rgba(255,255,255,0.6)" }}>
             {timeline.beginTime} to {timeline.endTime}
           </Text>
-        </Pressable>
+        </Ripple>
       ))}
+
+      <Button
+        onPress={() => navigation.navigate("TimelineCreate")}
+        fontStyle={{ fontSize: 16 }}
+        style={{ marginTop: 15 }}
+      >
+        Create Event
+      </Button>
     </>
   );
 };

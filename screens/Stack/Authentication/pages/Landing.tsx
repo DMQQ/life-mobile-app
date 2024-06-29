@@ -43,9 +43,8 @@ export default function Landing({ navigation }: any) {
         }}
       >
         <Button
-          size="xl"
           type="text"
-          fontStyle={{ fontSize: 18 }}
+          fontStyle={{ fontSize: 16 }}
           style={{ flex: 1 }}
           onPress={() => navigation.navigate("Register")}
         >
@@ -53,14 +52,13 @@ export default function Landing({ navigation }: any) {
         </Button>
 
         <Button
-          size="xl"
           type="contained"
           onPress={() => navigation.navigate("Login")}
           style={{
             backgroundColor: Colors.secondary,
             flex: 1,
           }}
-          fontStyle={{ fontSize: 18 }}
+          fontStyle={{ fontSize: 16 }}
         >
           LOGIN
         </Button>

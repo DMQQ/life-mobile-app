@@ -32,8 +32,6 @@ export default function Root({ navigation }: ScreenProps<"Root">) {
         />
 
         {workout.isWorkoutPending && <WorkoutWidget />}
-
-        <AccountActions navigation={navigation} />
       </ScrollView>
     </ScreenContainer>
   );

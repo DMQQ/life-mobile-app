@@ -33,7 +33,7 @@ const DateList = memo(
     const today = moment(selectedDate);
     const [month, setMonth] = useState(moment.months()[today.month()]);
 
-    const [dates, setDates] = useState<string[]>(createDates(today));
+    const [dates, setDates] = useState<string[]>(createDates(moment()));
 
     const listRef = useRef<VirtualizedList<string>>(null);
 
