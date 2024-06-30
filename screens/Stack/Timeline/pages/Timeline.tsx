@@ -3,7 +3,7 @@ import Calendar from "../../../../components/Calendar/Calendar";
 import timelineStyles from "../components/timeline.styles";
 import Ripple from "react-native-material-ripple";
 import { TimelineScreenProps } from "../types";
-import { AntDesign, Entypo, Ionicons } from "@expo/vector-icons";
+import { AntDesign, Entypo, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import DateList from "../../../../components/DateList/DateList";
 import NotFound from "../../Home/components/NotFound";
 import { TimelineScreenLoader } from "../components/LoaderSkeleton";
@@ -12,6 +12,7 @@ import { GetTimelineQuery } from "../hooks/query/useGetTimeLineQuery";
 import TimelineItem from "../components/TimelineItem";
 import Colors from "@/constants/Colors";
 import { memo } from "react";
+import Color from "color";
 
 const iconColor = "#fff";
 
@@ -36,7 +37,7 @@ const ListHeaderComponent = memo(
         />
       )}
 
-      <View style={timelineStyles.dateRow}>
+      {/* <View style={timelineStyles.dateRow}>
         <Text style={timelineStyles.dayHeader}>{t.displayDate}</Text>
 
         <Ripple
@@ -51,22 +52,52 @@ const ListHeaderComponent = memo(
             <Ionicons name="list" size={24} color={iconColor} />
           )}
         </Ripple>
-      </View>
+      </View> */}
 
       <View style={timelineStyles.listHeadingContainer}>
         <View style={{ flexDirection: "row", alignItems: "center" }}>
-          <Text style={timelineStyles.listHeadingText}>My events</Text>
-
           <Ripple
-            style={{ padding: 2.5, marginLeft: 10 }}
+            onPress={t.onViewToggle}
+            style={[timelineStyles.toggleButton, { marginRight: 10 }]}
+          >
+            {t.switchView === "calendar" && (
+              <AntDesign name="calendar" color={"#fff"} size={23} />
+            )}
+            {t.switchView === "date-list" && (
+              <Ionicons name="list" size={23} color={"#fff"} />
+            )}
+          </Ripple>
+          <Ripple
+            onPress={() =>
+              t.navigation.navigate("Schedule", {
+                selectedDate: t.selected,
+              })
+            }
+            style={[timelineStyles.toggleButton]}
+          >
+            <Text
+              style={{
+                color: "rgba(255,255,255,0.8)",
+                fontSize: 16,
+                padding: 2.5,
+              }}
+            >
+              SCHEDULE
+            </Text>
+          </Ripple>
+
+          {/* <Ripple
+            style={timelineStyles.toggleButton}
             onPress={() =>
               t.navigation.navigate("Schedule", {
                 selectedDate: t.selected,
               })
             }
           >
-            <Entypo name="list" color={"#fff"} size={25} />
-          </Ripple>
+            <Text style={{ color: "#fff", fontWeight: "400", fontSize: 16 }}>
+              Schedule
+            </Text>
+          </Ripple> */}
         </View>
 
         <Ripple

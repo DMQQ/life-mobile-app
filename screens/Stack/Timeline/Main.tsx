@@ -33,7 +33,7 @@ export default function TimelineScreens({
     <Stack.Navigator
       initialRouteName="Timeline"
       screenOptions={{
-        animation: "fade",
+        animation: "default",
         statusBarAnimation: "slide",
         animationDuration: 10,
       }}
@@ -78,7 +78,10 @@ export default function TimelineScreens({
       <Stack.Screen
         name="Schedule"
         component={ScheduleScreen}
-        options={{ headerShown: false }}
+        options={({ route }) => ({
+          headerTitle: route.params.selected,
+          headerTitleAlign: "center",
+        })}
         initialParams={{
           selected: moment().format("YYYY-MM-DD"),
         }}

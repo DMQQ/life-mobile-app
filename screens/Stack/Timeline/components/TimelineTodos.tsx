@@ -59,26 +59,9 @@ const styles = StyleSheet.create({
 export default function TimelineTodos(props: {
   todos: Todos[];
   timelineId: string;
+
+  expandSheet: () => void;
 }) {
-  const { createTodo } = useCreateTodo(props.timelineId);
-
-  const [text, setText] = React.useState("");
-
-  const handleCreateTodo = async () => {
-    if (text.trim() === "") return;
-    await createTodo({
-      variables: {
-        title: text,
-        timelineId: props.timelineId,
-      },
-    });
-
-    setShow(false);
-    setText("");
-  };
-
-  const [show, setShow] = React.useState(false);
-
   const [dialog, setDialog] = useState(false);
   const [dialogText, setDialogText] = useState("");
 
@@ -92,7 +75,7 @@ export default function TimelineTodos(props: {
 
           <Ripple
             onLongPress={() => setDialog((p) => !p)}
-            onPress={() => setShow((s) => !s)}
+            onPress={() => props.expandSheet()}
             style={styles.createTodo}
           >
             <Text style={{ fontWeight: "bold", color: Colors.primary }}>
@@ -105,7 +88,7 @@ export default function TimelineTodos(props: {
           <Todo timelineId={props.timelineId} key={todo.id} {...todo} />
         ))}
 
-        {show && (
+        {/* {show && (
           <View style={{ marginTop: 15 }}>
             <Input
               autoFocus
@@ -126,7 +109,7 @@ export default function TimelineTodos(props: {
               Create task
             </Button>
           </View>
-        )}
+        )} */}
       </View>
 
       <Overlay
