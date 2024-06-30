@@ -25,7 +25,7 @@ export default function WalletScreens() {
         headerStyle: {
           backgroundColor: Colors.primary,
         },
-        animation: "fade",
+        animation: "default",
       }}
     >
       <Stack.Screen name="Wallet" component={Wallet} />

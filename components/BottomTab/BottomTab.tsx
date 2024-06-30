@@ -1,13 +1,13 @@
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet } from "react-native";
 import Layout from "../../constants/Layout";
 import Colors from "../../constants/Colors";
 import Ripple from "react-native-material-ripple";
 import { Ionicons } from "@expo/vector-icons";
 import useKeyboard from "../../utils/hooks/useKeyboard";
-import Animated, { FadeInDown, FadeOutDown } from "react-native-reanimated";
+import Animated from "react-native-reanimated";
 import { useTheme } from "../../utils/context/ThemeContext";
-import { IconSize, Padding, Rounded } from "@/constants/Values";
+import { Padding, Rounded } from "@/constants/Values";
 
 const styles = StyleSheet.create({
   container: {

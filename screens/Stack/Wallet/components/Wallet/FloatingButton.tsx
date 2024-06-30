@@ -30,6 +30,8 @@ export default function FloatingButton(props: {
 
   return (
     <AnimatedRipple
+      rippleColor={"#fff"}
+      rippleContainerBorderRadius={100}
       onPress={props.onPress}
       style={[
         {
@@ -40,9 +42,9 @@ export default function FloatingButton(props: {
           borderRadius: 100,
           backgroundColor: Colors.secondary,
 
-          zIndex: 250,
+          zIndex: 300,
 
-          shadowColor: "#000",
+          shadowColor: Colors.secondary,
 
           shadowOffset: {
             width: 0,
@@ -50,6 +52,8 @@ export default function FloatingButton(props: {
           },
           shadowOpacity: 0.25,
           shadowRadius: 3.84,
+
+          eklevation: 5,
         },
         animatedStyle,
       ]}

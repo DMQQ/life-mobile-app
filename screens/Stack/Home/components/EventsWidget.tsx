@@ -89,13 +89,15 @@ const EventsList = (props: { data: GetTimelineQuery[] }) => {
         </Ripple>
       ))}
 
-      <Button
-        onPress={() => navigation.navigate("TimelineCreate")}
-        fontStyle={{ fontSize: 16 }}
-        style={{ marginTop: 15 }}
-      >
-        Create Event
-      </Button>
+      {props?.data?.length > 0 && (
+        <Button
+          onPress={() => navigation.navigate("TimelineCreate")}
+          fontStyle={{ fontSize: 16 }}
+          style={{ marginTop: 15 }}
+        >
+          Create Event
+        </Button>
+      )}
     </>
   );
 };
