@@ -40,8 +40,6 @@ export default function CreateNoteScreen({ navigation, route }: any) {
     if (note.trim().length === 0 || existingNote?.content === note) return;
 
     if (typeof mode !== "undefined" && mode === "edit") {
-      console.log("edit note");
-
       dispatch(
         notesActions.editNote({
           noteId: noteId,
@@ -88,8 +86,12 @@ export default function CreateNoteScreen({ navigation, route }: any) {
       <View style={{ flex: 1 }}>
         <NoteForm note={note} setNote={setNote} />
       </View>
-      <Button size="xl" style={{ margin: 10 }} onPress={handleCreateNote}>
-        Save
+      <Button
+        fontStyle={{ fontSize: 16 }}
+        style={{ margin: 10 }}
+        onPress={handleCreateNote}
+      >
+        Save note as "{note.slice(0, 10)}"
       </Button>
     </ScreenContainer>
   );
