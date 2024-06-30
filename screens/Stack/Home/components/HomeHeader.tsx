@@ -1,11 +1,11 @@
 import Colors from "@/constants/Colors";
-import useUser from "@/utils/hooks/useUser";
 import { MaterialIcons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 import { Text, View } from "react-native";
 import Ripple from "react-native-material-ripple";
 
 export default function Header() {
-  const { removeUser } = useUser();
+  const navigation = useNavigation<any>();
 
   return (
     <View
@@ -18,10 +18,10 @@ export default function Header() {
       }}
     >
       <Text style={{ color: "#fff", fontSize: 24, fontWeight: "500" }}>
-        Hello Damian
+        Hello 🤟
       </Text>
 
-      <Ripple>
+      <Ripple onPress={() => navigation.navigate("Settings")}>
         <MaterialIcons name="settings" color={"#fff"} size={24} />
       </Ripple>
     </View>
