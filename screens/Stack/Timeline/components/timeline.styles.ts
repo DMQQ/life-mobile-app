@@ -146,4 +146,14 @@ export default StyleSheet.create({
     marginTop: 50,
     paddingHorizontal: 25,
   },
+
+  toggleButton: {
+    padding: 7.5,
+    gap: 5,
+    flexDirection: "row",
+    backgroundColor: Colors.primary_lighter,
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
+  },
 });
