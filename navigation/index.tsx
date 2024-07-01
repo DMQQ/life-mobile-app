@@ -29,7 +29,7 @@ const Tab = createBottomTabNavigator<RootStackParamList>();
 export default function Navigation() {
   const { isAuthenticated, loadUser, isLoading } = useUser();
 
-  const { sendTokenToServer } = useNotifications();
+  const { sendTokenToServer } = useNotifications(navigationRef);
 
   useEffect(() => {
     loadUser();
