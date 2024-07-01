@@ -3,11 +3,14 @@ import { Platform, ToastAndroid } from "react-native";
 import { gql, useMutation } from "@apollo/client";
 import Constants from "expo-constants";
 import { useEffect, useRef, useState } from "react";
-import { navigationRef } from "@/navigation";
+import { NavigationContainerRef } from "@react-navigation/native";
+import { RootStackParamList } from "@/types";
 
 const NOTIFICATION_KEY = "FitnessApp:notifications";
 
-export default function useNotifications() {
+export default function useNotifications(
+  navigationRef: React.RefObject<NavigationContainerRef<RootStackParamList>>
+) {
   const [notificationToken, setNotificationToken] = useState<string | null>(
     null
   );
