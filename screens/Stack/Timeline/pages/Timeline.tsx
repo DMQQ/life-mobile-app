@@ -3,7 +3,7 @@ import Calendar from "../../../../components/Calendar/Calendar";
 import timelineStyles from "../components/timeline.styles";
 import Ripple from "react-native-material-ripple";
 import { TimelineScreenProps } from "../types";
-import { AntDesign, Entypo, Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { Entypo, MaterialIcons } from "@expo/vector-icons";
 import DateList from "../../../../components/DateList/DateList";
 import NotFound from "../../Home/components/NotFound";
 import { TimelineScreenLoader } from "../components/LoaderSkeleton";
@@ -13,11 +13,22 @@ import TimelineItem from "../components/TimelineItem";
 import Colors from "@/constants/Colors";
 import { memo } from "react";
 import Color from "color";
-
-const iconColor = "#fff";
+import Animated, {
+  SharedValue,
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
+import Layout from "@/constants/Layout";
 
 const ListHeaderComponent = memo(
-  (t: ReturnType<typeof useTimeline> & { navigation: any }) => (
+  (
+    t: ReturnType<typeof useTimeline> & {
+      navigation: any;
+      translateY: SharedValue<number>;
+    }
+  ) => (
     <>
       {t.switchView === "calendar" && (
         <Calendar
@@ -34,71 +45,14 @@ const ListHeaderComponent = memo(
           dayEvents={t.dayEventsSorted}
           selectedDate={t.selected}
           setSelected={t.setSelected}
+          translateY={t.translateY}
         />
       )}
 
-      {/* <View style={timelineStyles.dateRow}>
-        <Text style={timelineStyles.dayHeader}>{t.displayDate}</Text>
-
-        <Ripple
-          onPress={t.onViewToggle}
-          style={{
-            paddingHorizontal: 5,
-          }}
-        >
-          {t.switchView === "calendar" ? (
-            <AntDesign name="calendar" color={iconColor} size={24} />
-          ) : (
-            <Ionicons name="list" size={24} color={iconColor} />
-          )}
-        </Ripple>
-      </View> */}
-
       <View style={timelineStyles.listHeadingContainer}>
-        <View style={{ flexDirection: "row", alignItems: "center" }}>
-          <Ripple
-            onPress={t.onViewToggle}
-            style={[timelineStyles.toggleButton, { marginRight: 10 }]}
-          >
-            {t.switchView === "calendar" && (
-              <AntDesign name="calendar" color={"#fff"} size={23} />
-            )}
-            {t.switchView === "date-list" && (
-              <Ionicons name="list" size={23} color={"#fff"} />
-            )}
-          </Ripple>
-          <Ripple
-            onPress={() =>
-              t.navigation.navigate("Schedule", {
-                selectedDate: t.selected,
-              })
-            }
-            style={[timelineStyles.toggleButton]}
-          >
-            <Text
-              style={{
-                color: "rgba(255,255,255,0.8)",
-                fontSize: 16,
-                padding: 2.5,
-              }}
-            >
-              SCHEDULE
-            </Text>
-          </Ripple>
-
-          {/* <Ripple
-            style={timelineStyles.toggleButton}
-            onPress={() =>
-              t.navigation.navigate("Schedule", {
-                selectedDate: t.selected,
-              })
-            }
-          >
-            <Text style={{ color: "#fff", fontWeight: "400", fontSize: 16 }}>
-              Schedule
-            </Text>
-          </Ripple> */}
-        </View>
+        <Text style={{ color: "#fff", fontSize: 18, fontWeight: "500" }}>
+          {t.displayDate}
+        </Text>
 
         <Ripple
           style={{
@@ -109,7 +63,7 @@ const ListHeaderComponent = memo(
           }}
           onPress={() => t.createTimeline()}
         >
-          <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 13 }}>
+          <Text style={{ color: "#fff", fontWeight: "500", fontSize: 13 }}>
             CREATE EVENT
           </Text>
         </Ripple>
@@ -117,6 +71,9 @@ const ListHeaderComponent = memo(
     </>
   )
 );
+
+const AnimatedVirtualizedList =
+  Animated.createAnimatedComponent(VirtualizedList);
 
 export default function Timeline({
   navigation,
@@ -127,49 +84,189 @@ export default function Timeline({
     route,
   });
 
+  const isVisible = useSharedValue(true);
+  const lastScrollY = useSharedValue(0);
+  const direction = useSharedValue(0);
+
+  const translateY = useSharedValue(0);
+
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      const currentScrollY = event.contentOffset.y;
+      translateY.value = currentScrollY;
+      direction.value = currentScrollY > lastScrollY.value ? 1 : -1;
+      lastScrollY.value = currentScrollY;
+
+      if (direction.value === -1) {
+        isVisible.value = true;
+      } else {
+        isVisible.value = false;
+      }
+    },
+  });
+
   return (
-    <VirtualizedList
-      ListHeaderComponent={
-        <ListHeaderComponent {...timeline} navigation={navigation} />
-      }
-      ListEmptyComponent={
-        timeline.loading ? (
-          <TimelineScreenLoader loading />
-        ) : (
-          <View
-            style={{
-              padding: 25,
-              flex: 1,
-              justifyContent: "center",
-              alignItems: "center",
-              marginTop: 25,
+    <>
+      <AnimatedVirtualizedList
+        ListHeaderComponent={
+          <ListHeaderComponent
+            translateY={translateY}
+            navigation={navigation}
+            {...timeline}
+          />
+        }
+        ListEmptyComponent={
+          timeline.loading ? (
+            <TimelineScreenLoader loading />
+          ) : (
+            <View
+              style={{
+                padding: 25,
+                flex: 1,
+                justifyContent: "center",
+                alignItems: "center",
+                marginTop: 25,
+              }}
+            >
+              <NotFound />
+            </View>
+          )
+        }
+        onScroll={scrollHandler}
+        contentContainerStyle={{
+          padding: 15,
+        }}
+        CellRendererComponent={({ index, style, ...rest }) => {
+          const newStyle = [style, { zIndex: -1 }];
+          return <View style={newStyle} {...rest} />;
+        }}
+        data={(timeline.data?.timeline as GetTimelineQuery[]) || []}
+        initialNumToRender={3}
+        keyExtractor={(item: any) => item.id}
+        getItem={(data, index) => data[index] as GetTimelineQuery}
+        getItemCount={(data) => data.length}
+        renderItem={({ item }: { item: GetTimelineQuery }): any => (
+          <TimelineItem
+            styles={{
+              backgroundColor: Colors.primary_lighter,
+              borderRadius: 15,
+              padding: 20,
+              marginBottom: 10,
+              zIndex: 1,
             }}
-          >
-            <NotFound />
-          </View>
-        )
-      }
-      contentContainerStyle={{
-        padding: 15,
-      }}
-      data={(timeline.data?.timeline as GetTimelineQuery[]) || []}
-      initialNumToRender={3}
-      keyExtractor={(item) => item.id}
-      getItem={(data, index) => data[index] as GetTimelineQuery}
-      getItemCount={(data) => data.length}
-      renderItem={({ item }: { item: GetTimelineQuery }) => (
-        <TimelineItem
-          styles={{
-            backgroundColor: Colors.primary_lighter,
-            borderRadius: 15,
-            padding: 20,
-            marginBottom: 10,
-          }}
-          key={item.id}
-          location="timeline"
-          {...item}
-        />
-      )}
-    />
+            key={item.id}
+            location="timeline"
+            {...item}
+          />
+        )}
+      />
+
+      <AnimatedPopNavigation
+        isVisible={isVisible}
+        onSchedulePress={() =>
+          navigation.navigate("Schedule", {
+            selectedDate: timeline.selected,
+          })
+        }
+        onViewToggle={timeline.onViewToggle}
+        onSearchPress={() => {}}
+      />
+    </>
   );
 }
+
+const AnimatedPopNavigation = ({
+  isVisible,
+  onSchedulePress,
+  onSearchPress,
+  onViewToggle,
+}: {
+  isVisible: SharedValue<boolean>;
+  onSchedulePress: () => void;
+  onViewToggle: () => void;
+  onSearchPress: () => void;
+}) => {
+  const Separator = () => (
+    <View
+      style={{
+        width: 1,
+        height: "100%",
+        backgroundColor: Color(Colors.primary).lighten(4).hex(),
+      }}
+    />
+  );
+
+  const TabButton = ({
+    icon,
+    text,
+    onPress,
+  }: {
+    icon: any;
+    text: string;
+    onPress: (...rest: any) => any;
+  }) => (
+    <Ripple
+      style={{ flexDirection: "row", gap: 5, alignItems: "center" }}
+      onPress={onPress}
+    >
+      {icon}
+      <Text style={{ color: "#fff", fontSize: 13 }}>{text}</Text>
+    </Ripple>
+  );
+
+  const translation = useAnimatedStyle(() => ({
+    transform: [
+      { translateY: isVisible.value ? withTiming(0) : withTiming(100) },
+    ],
+  }));
+
+  return (
+    <Animated.View
+      style={[
+        {
+          position: "absolute",
+          bottom: 10,
+          width: Layout.screen.width,
+          justifyContent: "center",
+          alignItems: "center",
+        },
+        translation,
+      ]}
+    >
+      <View
+        style={{
+          backgroundColor: Colors.primary_lighter,
+          borderRadius: 100,
+          padding: 10,
+          paddingHorizontal: 7.5 * 3,
+          borderWidth: 1,
+          borderColor: Color(Colors.primary_lighter).lighten(1).hex(),
+          flexDirection: "row",
+          gap: 15,
+        }}
+      >
+        <TabButton
+          onPress={onSchedulePress}
+          icon={<MaterialIcons name="event" size={15} color="#fff" />}
+          text="Schedule"
+        />
+
+        <Separator />
+
+        <TabButton
+          onPress={onViewToggle}
+          icon={<Entypo name="list" size={15} color="#fff" />}
+          text="Grid|List"
+        />
+
+        <Separator />
+
+        <TabButton
+          onPress={onSearchPress}
+          icon={<MaterialIcons name="search" size={15} color="#fff" />}
+          text="Search"
+        />
+      </View>
+    </Animated.View>
+  );
+};
