@@ -18,10 +18,11 @@ const styles = StyleSheet.create({
   },
 
   button: {
-    padding: Padding.l,
+    padding: 5,
+    paddingVertical: 10,
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: Rounded.full,
+    borderRadius: 15,
   },
 });
 
@@ -40,14 +41,21 @@ export default function BottomTab({
 
   const { theme } = useTheme();
 
-  const Btn = (props: { route: string; iconName: any }) => (
+  const Btn = (props: { route: string; iconName: any; label: string }) => (
     <Ripple
       rippleCentered
       rippleColor={theme.colors.secondary}
       onLongPress={
         props.route === "TimelineScreens" ? onCalendarLongPress : undefined
       }
-      style={[styles.button]}
+      style={[
+        styles.button,
+        {
+          width: Layout.screen.width / state.routes.length,
+          backgroundColor:
+            activeRoute === props.route ? Colors.primary_light : undefined,
+        },
+      ]}
       onPress={() => navigate(props.route)}
     >
       <Ionicons
@@ -55,6 +63,16 @@ export default function BottomTab({
         name={props.iconName}
         color={activeRoute === props.route ? Colors.secondary_light_1 : "#fff"}
       />
+
+      <Animated.Text
+        style={{
+          fontSize: 8,
+          color: Colors.secondary_light_1,
+          marginTop: 2.5,
+        }}
+      >
+        {activeRoute === props.route ? props.label : ""}
+      </Animated.Text>
     </Ripple>
   );
 
@@ -69,23 +87,24 @@ export default function BottomTab({
       style={[
         styles.container,
         {
-          paddingBottom: Padding.l + insets.bottom,
+          paddingBottom: Padding.s + insets.bottom,
           borderTopColor: Colors.primary_dark,
           borderTopWidth: 1,
+          paddingTop: insets.bottom + Padding.s,
         },
       ]}
       // entering={FadeInDown}
       // exiting={FadeOutDown}
     >
-      <Btn route="NotesScreens" iconName={"clipboard"} />
+      <Btn route="NotesScreens" label="Notes" iconName={"clipboard"} />
 
-      <Btn route="WorkoutScreens" iconName={"barbell"} />
+      <Btn route="WorkoutScreens" label="Training" iconName={"barbell"} />
 
-      <Btn route="Root" iconName={"home"} />
+      <Btn route="Root" label="Home" iconName={"home"} />
 
-      <Btn route="WalletScreens" iconName={"wallet"} />
+      <Btn route="WalletScreens" label="Wallet" iconName={"wallet"} />
 
-      <Btn route="TimelineScreens" iconName={"calendar"} />
+      <Btn route="TimelineScreens" label="Timeline" iconName={"calendar"} />
     </Animated.View>
   );
 }
