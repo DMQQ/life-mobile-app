@@ -33,19 +33,13 @@ export default function Landing({ navigation }: any) {
 
       <View
         style={{
-          flex: 1,
-          position: "absolute",
-          bottom: 0,
-          width: Layout.screen.width,
           justifyContent: "center",
-          padding: 15,
           gap: 15,
         }}
       >
         <Button
           type="text"
           fontStyle={{ fontSize: 16 }}
-          style={{ flex: 1 }}
           onPress={() => navigation.navigate("Register")}
         >
           CREATE ACCOUNT
@@ -54,10 +48,6 @@ export default function Landing({ navigation }: any) {
         <Button
           type="contained"
           onPress={() => navigation.navigate("Login")}
-          style={{
-            backgroundColor: Colors.secondary,
-            flex: 1,
-          }}
           fontStyle={{ fontSize: 16 }}
         >
           LOGIN

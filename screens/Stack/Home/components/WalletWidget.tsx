@@ -4,8 +4,9 @@ import Colors, { Sizing, randColor } from "../../../../constants/Colors";
 import { ViewMoreButton } from "../../../../components/ui/Button/Button";
 import { useNavigation } from "@react-navigation/native";
 import { Expense, Wallet } from "../../../../types";
-import { Padding, Rounded } from "../../../../constants/Layout";
+import Layout, { Padding, Rounded } from "../../../../constants/Layout";
 import Skeleton from "@/components/SkeletonLoader/Skeleton";
+import WalletItem from "../../Wallet/components/Wallet/WalletItem";
 
 const backgroundColor = Colors.primary_lighter;
 
@@ -43,7 +44,6 @@ const styles = StyleSheet.create({
   activity: {
     color: "#ffffff",
     fontSize: Sizing.tooltip,
-    fontWeight: "bold",
   },
   list: {
     flexDirection: "row",
@@ -59,12 +59,6 @@ const styles = StyleSheet.create({
     borderRadius: 100,
   },
 });
-
-const ExpenseItem = (props: { text: string; amount: number }) => (
-  <View style={styles.expense_container}>
-    <Text style={{ color: "#fff", fontSize: 16 }}>{props.text}</Text>
-  </View>
-);
 
 export default function AvailableBalanceWidget(props: {
   data: Wallet;
@@ -106,7 +100,7 @@ export default function AvailableBalanceWidget(props: {
         </Skeleton>
       ) : (
         <>
-          <View style={{ marginBottom: 10 }}>
+          <View>
             <View style={styles.title_row}>
               <Text style={styles.title}>Available Balance</Text>
 
@@ -120,6 +114,31 @@ export default function AvailableBalanceWidget(props: {
               {props?.data?.balance.toFixed(2)}
               <Text style={{ fontSize: 25 }}>zł</Text>
             </Text>
+
+            {props?.data?.expenses?.length > 0 && (
+              <>
+                <FlatList
+                  horizontal
+                  data={expenses}
+                  showsHorizontalScrollIndicator={false}
+                  style={{ height: 70, marginTop: 15 }}
+                  renderItem={({ item, index }) => (
+                    <WalletItem
+                      handlePress={() => navigation.navigate("WalletScreens")}
+                      containerStyle={{
+                        width: Layout.screen.width - 80,
+                        backgroundColor: Color(Colors.primary_lighter)
+                          .lighten(0.5)
+                          .string(),
+                        marginRight: index === expenses.length - 1 ? 0 : 10,
+                      }}
+                      index={index}
+                      {...(item as any)}
+                    />
+                  )}
+                />
+              </>
+            )}
           </View>
         </>
       )}
