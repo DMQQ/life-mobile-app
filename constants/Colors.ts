@@ -20,7 +20,7 @@ export const randColor = () =>
 
 const ternary = "#7B84FF";
 
-export default {
+const theme = {
   primary: primary,
   primary_light: Color(primary).lighten(0.25).string(),
   primary_lighter: Color(primary).lighten(0.4).string(),
@@ -44,11 +44,13 @@ export default {
 
   text_light: "#FAF8FF",
   text_dark: "gray",
-};
+} as const;
+
+export default theme;
 
 export const Sizing = {
   heading: 30,
   subHead: 22.5,
   text: 18,
   tooltip: 14,
-};
+} as const;

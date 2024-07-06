@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, StyleProp, ViewStyle } from "react-native";
 import {
   AntDesign,
   Ionicons,
@@ -165,6 +165,7 @@ export default function WalletItem(
     handlePress: Function;
     animatedStyle: AnimatedStyleProp<any>;
     index: number;
+    containerStyle?: StyleProp<ViewStyle>;
   }
 ) {
   const price =
@@ -188,7 +189,7 @@ export default function WalletItem(
     >
       <Ripple
         disabled={isBalanceEdit}
-        style={[styles.expense_item]}
+        style={[styles.expense_item, item.containerStyle]}
         onPress={() => item.handlePress()}
       >
         <CategoryIcon category={isBalanceEdit ? "edit" : item.category} />

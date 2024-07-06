@@ -14,6 +14,7 @@ export const GET_MAIN_SCREEN = gql`
     wallet {
       balance
       expenses {
+        category
         id
         amount
         description

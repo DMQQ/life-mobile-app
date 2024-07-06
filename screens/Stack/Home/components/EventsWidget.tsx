@@ -9,6 +9,7 @@ import { GetTimelineQuery } from "../../Timeline/hooks/query/useGetTimeLineQuery
 import Skeleton from "@/components/SkeletonLoader/Skeleton";
 import Color from "color";
 import Button from "@/components/ui/Button/Button";
+import TimelineItem from "../../Timeline/components/TimelineItem";
 
 const backgroundColor = Colors.primary_lighter;
 
@@ -59,34 +60,18 @@ const EventsList = (props: { data: GetTimelineQuery[] }) => {
   return (
     <>
       {props?.data?.slice(0, 3).map((timeline, index) => (
-        <Ripple
-          onPress={() =>
-            navigation.navigate("TimelineScreens", {
-              timelineId: timeline.id,
-            })
-          }
-          style={{
-            marginBottom: index === 2 ? 0 : 15,
-            padding: 10,
+        <TimelineItem
+          styles={{
             backgroundColor: Color(Colors.primary_lighter)
               .lighten(0.5)
               .string(),
             borderRadius: 15,
-            paddingHorizontal: 15,
+            padding: 20,
           }}
           key={timeline.id}
-        >
-          <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 20 }}>
-            {timeline.title}
-          </Text>
-          <Text style={{ color: "rgba(255,255,255,0.7)", fontSize: 15 }}>
-            {timeline.description.replaceAll("\n", "")}
-          </Text>
-
-          <Text style={{ color: "rgba(255,255,255,0.6)" }}>
-            {timeline.beginTime} to {timeline.endTime}
-          </Text>
-        </Ripple>
+          location="timeline"
+          {...timeline}
+        />
       ))}
 
       {props?.data?.length > 0 && (
