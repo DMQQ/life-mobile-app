@@ -14,7 +14,8 @@ export default function ScheduleScreen({
   navigation,
   route,
 }: TimelineScreenProps<"Schedule">) {
-  const { data, selected } = useGetTimeLineQuery(route?.params?.selected);
+  console.log(route.params);
+  const { data, selected } = useGetTimeLineQuery(route?.params?.selectedDate);
 
   const items = useMemo(
     () =>
@@ -92,6 +93,8 @@ export default function ScheduleScreen({
                   borderRadius: 5,
                   paddingHorizontal: 10,
                   paddingVertical: 5,
+                  overflow: "hidden",
+                  minHeight: 50,
                 },
               ]}
             >
@@ -106,7 +109,7 @@ export default function ScheduleScreen({
                 <Text
                   style={{
                     color: "#fff",
-                    fontSize: 18,
+                    fontSize: 15,
                     fontWeight: "bold",
                     letterSpacing: 0.5,
                   }}
@@ -117,19 +120,13 @@ export default function ScheduleScreen({
                 <Text
                   style={{
                     color: "#fff",
-                    fontSize: 14,
+                    fontSize: 10,
                   }}
                 >
                   {trimTime(props.item.timeline.beginTime)} to{" "}
                   {trimTime(props.item.timeline.endTime)}
                 </Text>
               </View>
-
-              {props.style.height > 50 && (
-                <Text style={{ color: "#fff" }} numberOfLines={5}>
-                  {props.item.timeline.description}
-                </Text>
-              )}
             </Ripple>
           )}
         />
