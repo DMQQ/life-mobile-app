@@ -4,6 +4,10 @@ import { Text } from "react-native";
 import { Icons } from "../WalletItem";
 import { FormikProps } from "formik";
 import { memo } from "react";
+import Ripple from "react-native-material-ripple";
+import Colors from "@/constants/Colors";
+
+import Select2 from "@/components/ui/Select/Select-2";
 
 const FormFields = ({
   f,
@@ -58,6 +62,7 @@ const FormFields = ({
         closeOnSelect
         maxSelectHeight={250}
         containerStyle={{ borderRadius: 10 }}
+        keyExtractor={(item) => item}
       />
     </>
   );

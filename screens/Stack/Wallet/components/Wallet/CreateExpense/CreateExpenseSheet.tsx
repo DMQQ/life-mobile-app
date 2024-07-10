@@ -156,7 +156,6 @@ const Form = ({ formik: f }: FormProps) => {
                   "date",
                   moment(date).add(2, "hours").toISOString()
                 );
-                console.log(moment(date).toISOString());
               }}
             />
           ) : (

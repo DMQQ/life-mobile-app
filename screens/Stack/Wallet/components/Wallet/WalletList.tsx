@@ -175,7 +175,7 @@ const ListItem = ({
   const areDatesEqual = (() => {
     if (!hasPrevious) return false;
 
-    if (index === 1) return false;
+    if (index === 0) return false;
 
     return moment(expenses[index - 1].date).isSame(item.date, "day");
   })();

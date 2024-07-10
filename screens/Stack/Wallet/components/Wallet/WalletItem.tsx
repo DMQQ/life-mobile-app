@@ -1,6 +1,8 @@
 import { View, Text, StyleSheet, StyleProp, ViewStyle } from "react-native";
 import {
   AntDesign,
+  Entypo,
+  FontAwesome5,
   Ionicons,
   MaterialCommunityIcons,
 } from "@expo/vector-icons";
@@ -43,15 +45,10 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 5,
   },
-  icon_container: {
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 10,
-    width: 40,
-  },
+  icon_container: {},
   date: {
     color: "#9f9f9f",
-    fontSize: 12,
+    fontSize: 10,
     marginLeft: 10,
     lineHeight: 15,
   },
@@ -148,15 +145,63 @@ export const Icons = {
     icon: <Ionicons name="create" color="#fff" size={24} />,
   },
 
+  income: {
+    backgroundColor: "",
+    icon: (
+      <FontAwesome5
+        name="dollar-sign"
+        size={24}
+        color={Colors.secondary_light_1}
+      />
+    ),
+  },
+
   none: {
     backgroundColor: Colors.primary,
     icon: <Ionicons name="add" color={Colors.secondary} size={24} />,
   },
 } as const;
 
-export const CategoryIcon = (props: { category: keyof typeof Icons }) => (
-  <View style={[styles.icon_container]}>
-    {Icons[props.category || "none"]?.icon}
+const makeColor = (color: string) => {
+  const [red, green, blue] = Color(color).rgb().array();
+
+  return `rgba(${red}, ${green}, ${blue}, 0.05)`;
+};
+
+export const CategoryIcon = (props: {
+  category: keyof typeof Icons;
+  type: "income" | "expense";
+  clear?: boolean;
+}) => (
+  <View style={[styles.icon_container, { position: "relative" }]}>
+    <View
+      style={{
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: !props.clear
+          ? makeColor(Icons[props.category || "none"]?.backgroundColor)
+          : undefined,
+        borderRadius: 10,
+        height: 50,
+        width: 50,
+      }}
+    >
+      {Icons[props.category || "none"]?.icon}
+
+      {props.category !== "none" && props.category !== "edit" && (
+        <Entypo
+          name={props.type === "income" ? "arrow-up" : "arrow-down"}
+          color={props.type === "income" ? "#05ad21" : "#ab0505"}
+          size={12}
+          style={{
+            position: "absolute",
+            left: 0,
+            ...(props.type === "income" ? { top: 0 } : { bottom: 0 }),
+          }}
+        />
+      )}
+    </View>
   </View>
 );
 
@@ -178,7 +223,6 @@ export default function WalletItem(
 
   return (
     <Animated.View
-      layout={Layout}
       style={[
         {
           marginBottom: 15,
@@ -192,7 +236,10 @@ export default function WalletItem(
         style={[styles.expense_item, item.containerStyle]}
         onPress={() => item.handlePress()}
       >
-        <CategoryIcon category={isBalanceEdit ? "edit" : item.category} />
+        <CategoryIcon
+          type={item.type as "income" | "expense"}
+          category={isBalanceEdit ? "edit" : item.category}
+        />
 
         <View style={{ height: "100%", justifyContent: "center", flex: 3 }}>
           <Text style={styles.title} numberOfLines={1}>
@@ -200,8 +247,8 @@ export default function WalletItem(
           </Text>
           <View style={{ flexDirection: "row" }}>
             <Text style={styles.date}>
-              {item.category ? `${item.category}, ` : ""}
-              {parseDateToText(item.date)}
+              {parseDateToText(item.date)} &#183;{" "}
+              {item.category ? `${item.category}` : ""}
             </Text>
           </View>
         </View>
