@@ -69,7 +69,7 @@ const EventsList = (props: { data: GetTimelineQuery[] }) => {
             padding: 20,
           }}
           key={timeline.id}
-          location="timeline"
+          location="root"
           {...timeline}
         />
       ))}
