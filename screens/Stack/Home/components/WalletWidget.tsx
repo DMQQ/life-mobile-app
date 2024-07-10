@@ -126,7 +126,7 @@ export default function AvailableBalanceWidget(props: {
                     <WalletItem
                       handlePress={() => navigation.navigate("WalletScreens")}
                       containerStyle={{
-                        width: Layout.screen.width - 80,
+                        width: Layout.screen.width - 80 - 40,
                         backgroundColor: Color(Colors.primary_lighter)
                           .lighten(0.5)
                           .string(),
