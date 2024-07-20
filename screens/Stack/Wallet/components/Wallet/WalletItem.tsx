@@ -165,7 +165,7 @@ export const Icons = {
 const makeColor = (color: string) => {
   const [red, green, blue] = Color(color).rgb().array();
 
-  return `rgba(${red}, ${green}, ${blue}, 0.05)`;
+  return `rgba(${red}, ${green}, ${blue}, 0.1)`;
 };
 
 export const CategoryIcon = (props: {
@@ -188,19 +188,6 @@ export const CategoryIcon = (props: {
       }}
     >
       {Icons[props.category || "none"]?.icon}
-
-      {props.category !== "none" && props.category !== "edit" && (
-        <Entypo
-          name={props.type === "income" ? "arrow-up" : "arrow-down"}
-          color={props.type === "income" ? "#05ad21" : "#ab0505"}
-          size={12}
-          style={{
-            position: "absolute",
-            left: 0,
-            ...(props.type === "income" ? { top: 0 } : { bottom: 0 }),
-          }}
-        />
-      )}
     </View>
   </View>
 );
@@ -254,7 +241,15 @@ export default function WalletItem(
         </View>
         {!isBalanceEdit && (
           <View style={[styles.price_container, { flexDirection: "row" }]}>
-            <Text style={[styles.price, { marginLeft: 5 }]}>
+            <Text
+              style={[
+                styles.price,
+                {
+                  marginLeft: 5,
+                  color: item.type === "expense" ? "#F07070" : "#66E875",
+                },
+              ]}
+            >
               {price}
               <Text style={{ fontSize: 14 }}>zł</Text>
             </Text>

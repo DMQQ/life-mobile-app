@@ -59,7 +59,7 @@ export const WalletSheet = forwardRef<
 
   return (
     <BottomSheet ref={ref} snapPoints={["70%", "80%"]}>
-      <View style={{ paddingHorizontal: 10, flex: 1 }}>
+      <View style={{ paddingHorizontal: 15, flex: 1 }}>
         <View style={{ flex: 2 }}>
           <View
             style={[
