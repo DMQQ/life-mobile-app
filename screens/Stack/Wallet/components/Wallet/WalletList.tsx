@@ -73,7 +73,7 @@ export default function WalletList(props: {
           padding: 15,
         }}
         data={data || []}
-        keyExtractor={(expense) => expense.month}
+        keyExtractor={(expense, idx) => expense.month + "_" + idx}
         renderItem={({ item }) => (
           <MonthExpenseList
             item={item}
@@ -95,9 +95,7 @@ const displayTotal = (data: { getMonthTotal: number }) => {
 };
 
 const totalTextColor = (data: { getMonthTotal: number }) => {
-  return data.getMonthTotal > 0
-    ? Colors.secondary_light_2
-    : Color(Colors.error).lighten(0.15).hex();
+  return data.getMonthTotal > 0 ? "#F07070" : "#66E875";
 };
 
 const MonthExpenseList = ({
