@@ -21,7 +21,7 @@ export default function NotesScreens() {
     <SharedStack.Navigator
       initialRouteName="Notes"
       screenOptions={{
-        animation: "fade",
+        animation: "default",
       }}
     >
       <SharedStack.Screen

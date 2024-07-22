@@ -8,6 +8,8 @@ import NotFound from "./NotFound";
 import { GetTimelineQuery } from "../../Timeline/hooks/query/useGetTimeLineQuery";
 import Skeleton from "@/components/SkeletonLoader/Skeleton";
 import Color from "color";
+import Button from "@/components/ui/Button/Button";
+import TimelineItem from "../../Timeline/components/TimelineItem";
 
 const backgroundColor = Colors.primary_lighter;
 
@@ -23,7 +25,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 15,
+    marginBottom: 30,
   },
 
   heading: {
@@ -57,30 +59,30 @@ const EventsList = (props: { data: GetTimelineQuery[] }) => {
   const navigation = useNavigation<any>();
   return (
     <>
-      {props?.data?.slice(0, 3).map((timeline) => (
-        <Pressable
-          onPress={() =>
-            navigation.navigate("TimelineScreens", {
-              timelineId: timeline.id,
-            })
-          }
-          style={{
-            marginBottom: 20,
+      {props?.data?.slice(0, 3).map((timeline, index) => (
+        <TimelineItem
+          styles={{
+            backgroundColor: Color(Colors.primary_lighter)
+              .lighten(0.5)
+              .string(),
+            borderRadius: 15,
+            padding: 20,
           }}
           key={timeline.id}
-        >
-          <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 17 }}>
-            {timeline.title}
-          </Text>
-          <Text style={{ color: "rgba(255,255,255,0.8)" }}>
-            {timeline.description.replaceAll("\n", "")}
-          </Text>
-
-          <Text style={{ color: "rgba(255,255,255,0.6)" }}>
-            {timeline.beginTime} to {timeline.endTime}
-          </Text>
-        </Pressable>
+          location="root"
+          {...timeline}
+        />
       ))}
+
+      {props?.data?.length > 0 && (
+        <Button
+          onPress={() => navigation.navigate("TimelineCreate")}
+          fontStyle={{ fontSize: 16 }}
+          style={{ marginTop: 15 }}
+        >
+          Create Event
+        </Button>
+      )}
     </>
   );
 };

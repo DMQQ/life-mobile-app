@@ -2,7 +2,7 @@ import Button from "@/components/ui/Button/Button";
 import Colors from "@/constants/Colors";
 import Color from "color";
 import { View } from "react-native";
-import useDeleteActivity from "../hooks/useDeleteActivity";
+import useDeleteActivity from "../../hooks/useDeleteActivity";
 import { WalletElement } from "./WalletItem";
 import { useNavigation } from "@react-navigation/native";
 
@@ -30,48 +30,34 @@ const SheetActionButtons = (props: {
   return (
     <View
       style={{
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
         marginBottom: 20,
+        gap: 15,
       }}
     >
-      <Button
-        onPress={() =>
-          navigation.navigate("CreateActivity", {
-            edit: {
-              ...props.selectedExpense,
-            },
-          })
-        }
-        type="contained"
-        fontStyle={{ color: Colors.secondary, textTransform: "none" }}
-        style={{
-          backgroundColor: Color(Colors.secondary).alpha(0.05).string(),
-          flexDirection: "row-reverse",
-          flex: 1,
-          marginLeft: 10,
-          borderRadius: 5,
-        }}
-      >
-        Edit
-      </Button>
-
       <Button
         onPress={onRemove}
         type="contained"
         fontStyle={{
           color: Colors.error,
-          textTransform: "none",
+          fontSize: 16,
         }}
         style={{
-          backgroundColor: Color(Colors.error).alpha(0.05).string(),
-          flex: 1,
-          flexDirection: "row-reverse",
-          borderRadius: 5,
+          backgroundColor: Color(Colors.error).alpha(0.025).string(),
         }}
       >
         Remove
+      </Button>
+
+      <Button
+        onPress={() =>
+          navigation.navigate("CreateActivity", {
+            edit: props.selectedExpense,
+          })
+        }
+        type="contained"
+        fontStyle={{ fontSize: 16 }}
+      >
+        Edit
       </Button>
     </View>
   );

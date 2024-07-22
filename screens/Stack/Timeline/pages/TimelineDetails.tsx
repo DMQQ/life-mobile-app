@@ -16,9 +16,12 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import CompletionBar from "../components/CompletionBar";
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
 import useCompleteTimeline from "../hooks/mutation/useCompleteTimeline";
 import TimelineHeader from "../components/TimelineHeader";
+import BottomSheetType from "@gorhom/bottom-sheet";
+
+import CreateTaskSheet from "../components/CreateTaskSheet";
 
 const AnimatedRipple = Animated.createAnimatedComponent(Ripple);
 
@@ -104,6 +107,8 @@ export default function TimelineDetails({
     });
   };
 
+  const taskRef = useRef<BottomSheetType>(null);
+
   return (
     <View style={{ backgroundColor: Colors.primary, marginBottom: 50 }}>
       <TimelineHeader
@@ -131,7 +136,11 @@ export default function TimelineDetails({
               {data?.description || "(no content)"}
             </Text>
 
-            <TimelineTodos timelineId={data?.id} todos={data?.todos || []} />
+            <TimelineTodos
+              expandSheet={() => taskRef.current?.snapToIndex(0)}
+              timelineId={data?.id}
+              todos={data?.todos || []}
+            />
             {data?.todos.length > 0 && (
               <View style={{ marginTop: 10 }}>
                 <CompletionBar percentage={taskCompletionProgressBar} />
@@ -153,6 +162,8 @@ export default function TimelineDetails({
       >
         <AntDesign name="edit" color={"#fff"} size={25} />
       </AnimatedRipple>
+
+      <CreateTaskSheet ref={taskRef} timelineId={data?.id} />
     </View>
   );
 }

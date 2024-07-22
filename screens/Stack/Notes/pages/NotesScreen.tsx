@@ -37,7 +37,7 @@ export default function NotesScreen({ navigation }: ScreenProps<any>) {
       />
 
       <FlatList
-        contentContainerStyle={{ padding: 15 }}
+        style={{ marginTop: 15 }}
         data={notes.notes}
         keyExtractor={(i) => i.id.toString()}
         renderItem={({ item: n }) => (

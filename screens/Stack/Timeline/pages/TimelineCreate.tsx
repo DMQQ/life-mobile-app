@@ -1,12 +1,6 @@
 import ScreenContainer from "../../../../components/ui/ScreenContainer";
 import ValidatedInput from "../../../../components/ui/ValidatedInput";
-import {
-  ActivityIndicator,
-  Text,
-  ScrollView,
-  StyleSheet,
-  ToastAndroid,
-} from "react-native";
+import { ActivityIndicator, Text, ScrollView, StyleSheet } from "react-native";
 import Colors from "../../../../constants/Colors";
 import Button from "../../../../components/ui/Button/Button";
 import timelineStyles from "../components/timeline.styles";
@@ -16,11 +10,9 @@ import Color from "color";
 import type { TimelineScreenProps } from "../types";
 import CreateRepeatableTimeline from "../components/CreateTimeline/CreateRepeatableTimeline";
 import useCreateTimeline from "../hooks/general/useCreateTimeline";
-import { Feather } from "@expo/vector-icons";
+import { AntDesign } from "@expo/vector-icons";
 import useKeyboard from "../../../../utils/hooks/useKeyboard";
-import Animated, { ZoomInDown, ZoomOutDown } from "react-native-reanimated";
 import SegmentedButtons from "@/components/ui/SegmentedButtons";
-import Layout from "@/constants/Layout";
 import SuggestedEvents from "../components/CreateTimeline/SuggestedEvents/SuggestedEvents";
 import IconButton from "@/components/ui/IconButton/IconButton";
 
@@ -56,120 +48,100 @@ export default function CreateTimeLineEventModal({
 }: TimelineScreenProps<"TimelineCreate">) {
   const isKeyboardOpen = useKeyboard();
 
-  const {
-    f,
-    isLoading,
-    optionsVisible,
-    setOptionsVisible,
-    timePicker,
-    isEditing,
-    initialValues,
-    handleSubmit,
-  } = useCreateTimeline({ route, navigation });
-
-  const TOTAL_PADDING = 30;
-
-  const inputStyle = {
-    width: Layout.screen.width - TOTAL_PADDING,
-  };
+  const { f, isLoading, timePicker, isEditing, sheetRef } = useCreateTimeline({
+    route,
+    navigation,
+  });
 
   return (
-    <ScreenContainer>
-      <ScrollView
-        style={{ flex: 1, padding: 5 }}
-        showsVerticalScrollIndicator={false}
-      >
-        {!isEditing && (
-          <SuggestedEvents
-            createTimelineAsync={handleSubmit}
-            initialValues={initialValues}
-            date={route.params.selectedDate}
+    <>
+      <ScreenContainer>
+        <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+          {!isEditing && <SuggestedEvents date={route.params.selectedDate} />}
+
+          <ValidatedInput
+            placeholder="Like  'take out the trash' etc.."
+            name="title"
+            label="Event's title*"
+            showLabel
+            formik={f}
+            helperStyle={{ marginLeft: 2.5 }}
           />
-        )}
-
-        <ValidatedInput
-          placeholder="Like  'take out the trash' etc.."
-          name="title"
-          label="Event's title*"
-          showLabel
-          formik={f}
-          helperStyle={{ marginLeft: 2.5 }}
-          style={inputStyle}
-        />
-        <ValidatedInput
-          showLabel
-          label="Event's content"
-          numberOfLines={f.values.desc.split("\n").length + 3}
-          multiline
-          placeholder="What you wanted to do"
-          name="desc"
-          formik={f}
-          scrollEnabled
-          textAlignVertical="top"
-          style={inputStyle}
-        />
-
-        <ValidatedInput.Label error={false} text="Time range*" />
-        <View style={styles.timeContainer}>
-          <Ripple
-            style={{ flex: 1, padding: 5 }}
-            onPress={() => timePicker(f, "begin")}
-          >
-            <Text style={styles.timeText}>
-              {f.values.begin.split(":").slice(0, 2).join(":")}
-            </Text>
-          </Ripple>
-
-          <Text style={{ color: "gray", padding: 5 }}>to</Text>
-
-          <Ripple
-            style={{ flex: 1, padding: 5 }}
-            onPress={() => timePicker(f, "end")}
-          >
-            <Text style={styles.timeText}>
-              {f.values.end.split(":").slice(0, 2).join(":")}
-            </Text>
-          </Ripple>
-        </View>
-
-        <CreateRepeatableTimeline
-          onClose={() => setOptionsVisible(false)}
-          isVisible={optionsVisible}
-          formik={f}
-        />
-
-        <View style={{ marginTop: 10 }}>
-          <ValidatedInput.Label
-            error={false}
-            text="How to send you notifications?"
+          <ValidatedInput
+            showLabel
+            label="Event's content"
+            numberOfLines={
+              isEditing
+                ? f.values.desc.split("\n").length + 10
+                : f.values.desc.split("\n").length + 3
+            }
+            multiline
+            placeholder="What you wanted to do"
+            name="desc"
+            formik={f}
+            scrollEnabled
+            textAlignVertical="top"
           />
-          <SegmentedButtons
-            containerStyle={{
-              borderRadius: 15,
-              backgroundColor: Colors.primary_light,
-            }}
-            buttonTextStyle={{ fontWeight: "400" }}
-            buttonStyle={{
-              margin: 10,
-              height: 40,
-            }}
-            buttons={radioOptions.map((prev) => ({
-              text: prev.label,
-              value: prev.value,
-            }))}
-            value={f.values.notification}
-            onChange={(val) => f.setFieldValue("notification", val)}
-          />
-        </View>
-      </ScrollView>
 
-      <SubmitButton
-        f={f}
-        isEditing={isEditing}
-        isKeyboardOpen={isKeyboardOpen || false}
-        isLoading={isLoading}
-      />
-    </ScreenContainer>
+          <ValidatedInput.Label error={false} text="Time range*" />
+          <View style={styles.timeContainer}>
+            <Ripple
+              style={{ flex: 1, padding: 5 }}
+              onPress={() => timePicker(f, "begin")}
+            >
+              <Text style={styles.timeText}>
+                {f.values.begin.split(":").slice(0, 2).join(":")}
+              </Text>
+            </Ripple>
+
+            <Text style={{ color: "gray", padding: 5 }}>to</Text>
+
+            <Ripple
+              style={{ flex: 1, padding: 5 }}
+              onPress={() => timePicker(f, "end")}
+            >
+              <Text style={styles.timeText}>
+                {f.values.end.split(":").slice(0, 2).join(":")}
+              </Text>
+            </Ripple>
+          </View>
+
+          <View style={{ marginTop: 10 }}>
+            <ValidatedInput.Label
+              error={false}
+              text="How to send you notifications?"
+            />
+            <SegmentedButtons
+              containerStyle={{
+                borderRadius: 15,
+                backgroundColor: Colors.primary_light,
+              }}
+              buttonTextStyle={{ fontWeight: "400" }}
+              buttonStyle={{
+                margin: 10,
+                height: 40,
+              }}
+              buttons={radioOptions.map((prev) => ({
+                text: prev.label,
+                value: prev.value,
+              }))}
+              value={f.values.notification}
+              onChange={(val) => f.setFieldValue("notification", val)}
+            />
+          </View>
+        </ScrollView>
+
+        <SubmitButton
+          f={f}
+          openSheet={() => sheetRef.current?.expand()}
+          isEditing={isEditing}
+          isKeyboardOpen={isKeyboardOpen || false}
+          isLoading={isLoading}
+        />
+      </ScreenContainer>
+
+      <CreateRepeatableTimeline formik={f} ref={sheetRef as any} />
+    </>
   );
 }
 
@@ -179,29 +151,23 @@ interface SubmitButtonProps {
   f: any;
 
   isEditing: boolean;
+
+  openSheet: () => void;
 }
 
 const SubmitButton = (props: SubmitButtonProps) =>
   !props.isKeyboardOpen ? (
-    <Animated.View
-      entering={ZoomInDown}
-      exiting={ZoomOutDown}
-      style={{ padding: 10, flexDirection: "row", paddingTop: 15 }}
-    >
+    <View style={{ flexDirection: "row", paddingTop: 15 }}>
       <IconButton
-        onPress={() => {
-          props.f.resetForm();
-          ToastAndroid.show("Form reseted", ToastAndroid.SHORT);
-        }}
+        onPress={props.openSheet}
         style={{
           padding: 7.5,
           width: 35,
           marginRight: 15,
         }}
-        icon={<Feather name="trash-2" color="#fff" size={20} />}
+        icon={<AntDesign name="calendar" color="#fff" size={20} />}
       />
       <Button
-        size="xl"
         icon={
           props.isLoading ? (
             <ActivityIndicator
@@ -226,9 +192,9 @@ const SubmitButton = (props: SubmitButtonProps) =>
               : Colors.secondary,
           },
         ]}
-        fontStyle={{ letterSpacing: 0.5, fontSize: 18 }}
+        fontStyle={{ fontSize: 16 }}
       >
         {props.isEditing ? "Save changes" : "Create new event"}
       </Button>
-    </Animated.View>
+    </View>
   ) : null;

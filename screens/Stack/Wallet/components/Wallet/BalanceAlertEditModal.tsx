@@ -1,12 +1,12 @@
-import Modal from "../../../../components/ui/Modal";
+import Modal from "@/components/ui/Modal";
 import { Text, View, KeyboardAvoidingView } from "react-native";
-import Colors from "../../../../constants/Colors";
-import Input from "../../../../components/ui/TextInput/TextInput";
-import Button from "../../../../components/ui/Button/Button";
+import Colors from "@/constants/Colors";
+import Input from "@/components/ui/TextInput/TextInput";
+import Button from "@/components/ui/Button/Button";
 
 import { useState } from "react";
 import Animated from "react-native-reanimated";
-import useEditWallet from "../hooks/useEditWallet";
+import useEditWallet from "../../hooks/useEditWallet";
 
 interface BalanceAlertEditModalProps {
   visible: boolean;

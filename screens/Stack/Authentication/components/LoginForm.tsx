@@ -67,7 +67,7 @@ export default function LoginForm({
             testID={"login-button"}
             disabled={!(f.isValid && f.dirty)}
             onPress={() => f.handleSubmit()}
-            size="xl"
+            fontStyle={{ fontSize: 16 }}
             type="contained"
             color="ternary"
             style={{ marginTop: 10 }}

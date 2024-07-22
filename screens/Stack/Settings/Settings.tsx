@@ -2,20 +2,17 @@ import Button from "../../../components/ui/Button/Button";
 import ScreenContainer from "../../../components/ui/ScreenContainer";
 import { Pressable, Text, View } from "react-native";
 
-import { secondary_candidates } from "../../../constants/Colors";
+import Colors, { secondary_candidates } from "../../../constants/Colors";
 import Ripple from "react-native-material-ripple";
 import Color from "color";
+import useUser from "@/utils/hooks/useUser";
 
 const SettingsTile = (props: {
   label: string;
   onPress: Function;
   state: string;
 }) => (
-  <View style={{ padding: 10 }}>
-    <Text style={{ color: "#fff", fontSize: 50, fontWeight: "bold" }}>
-      {props.label}
-    </Text>
-
+  <View>
     <View style={{ flexDirection: "row", padding: 10 }}>
       {secondary_candidates.map((color) => (
         <Ripple
@@ -34,9 +31,38 @@ const SettingsTile = (props: {
 );
 
 export default function Settings() {
+  const { removeUser, user } = useUser();
+
   return (
     <ScreenContainer>
-      <SettingsTile label="Color theme" onPress={() => {}} state="NotPressed" />
+      <View style={{ flex: 1 }}>
+        <Text
+          style={{
+            color: "#fff",
+            fontSize: 25,
+            fontWeight: "bold",
+          }}
+        >
+          Signed as
+        </Text>
+        <Text
+          style={{
+            color: "rgba(255,255,255,0.6)",
+            fontSize: 20,
+            fontWeight: "bold",
+          }}
+        >
+          {user?.email}
+        </Text>
+      </View>
+
+      <Button
+        fontStyle={{ fontSize: 16 }}
+        onPress={() => removeUser()}
+        style={{ backgroundColor: Colors.error }}
+      >
+        Signout 👋
+      </Button>
     </ScreenContainer>
   );
 }

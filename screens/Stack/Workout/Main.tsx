@@ -18,7 +18,7 @@ export default function WorkoutScreens() {
         headerStyle: {
           backgroundColor: Colors.primary,
         },
-        animation: "fade",
+        animation: "default",
       }}
     >
       <Stack.Screen
