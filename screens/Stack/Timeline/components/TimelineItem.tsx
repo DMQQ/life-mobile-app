@@ -57,14 +57,15 @@ export default function TimelineItem(
             ToastAndroid.show("Event deleted", ToastAndroid.SHORT);
           },
         },
-      ]
+      ],
+      { userInterfaceStyle: "dark", cancelable: true }
     );
   };
 
   const isExpired = useMemo(() => {
     const now = moment();
 
-    if (moment(timeline.date).isBefore(now, "day")) return true;
+    if (moment(timeline.date).isAfter(now)) return false;
 
     if (timeline.isCompleted) return false;
 
@@ -78,7 +79,12 @@ export default function TimelineItem(
     if (now.isAfter(start) && now.isBefore(end)) {
       return false;
     }
-  }, []);
+  }, [
+    timeline.date,
+    timeline.beginTime,
+    timeline.endTime,
+    timeline.isCompleted,
+  ]);
 
   return (
     <Ripple
@@ -112,7 +118,8 @@ export default function TimelineItem(
             flexWrap: "wrap",
             alignItems: "center",
             justifyContent: "flex-end",
-            marginTop: 5,
+            marginTop: 10,
+            gap: 10,
           }}
         >
           <Text
@@ -125,23 +132,22 @@ export default function TimelineItem(
           >
             {timeline.description}
           </Text>
-          {timeline.location === "timeline" && (
-            <Text
-              style={[
-                timelineStyles.status,
-                {
-                  backgroundColor: timeline.isCompleted
-                    ? "lightgreen"
-                    : isExpired
-                    ? "#BA4343"
-                    : Colors.secondary,
-                  alignSelf: "flex-end",
-                },
-              ]}
-            >
-              {timeline.isCompleted ? "Finished" : isExpired ? "Late" : "To do"}
-            </Text>
-          )}
+
+          <Text
+            style={[
+              timelineStyles.status,
+              {
+                backgroundColor: timeline.isCompleted
+                  ? "lightgreen"
+                  : isExpired
+                  ? "#BA4343"
+                  : Colors.secondary,
+                alignSelf: "flex-end",
+              },
+            ]}
+          >
+            {timeline.isCompleted ? "Finished" : isExpired ? "Late" : "To do"}
+          </Text>
         </View>
       </View>
     </Ripple>

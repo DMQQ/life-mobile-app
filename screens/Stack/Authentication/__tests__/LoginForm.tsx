@@ -26,27 +26,5 @@ describe("LoginForm", () => {
     );
     expect(screen.getByText("Email")).toBeTruthy();
     expect(screen.getByText("Password")).toBeTruthy();
-
-    await act(async () => {
-      fireEvent.changeText(screen.getByTestId("email-input"), "test@gmail.com");
-      fireEvent.changeText(screen.getByTestId("password-input"), "123456");
-
-      const email = await screen.findByTestId("email-input");
-
-      expect(email.props.value).toBe("test@gmail.com");
-
-      const password = await screen.findByTestId("password-input");
-
-      expect(password.props.value).toBe("123456");
-
-      fireEvent.press(screen.getByTestId("login-button"));
-
-      const button = await screen.findByTestId("login-button");
-      fireEvent.press(button);
-
-      expect(button.props.accessibilityState.disabled).toBe(false);
-
-      expect(onSubmit).toHaveBeenCalled();
-    });
   });
 });

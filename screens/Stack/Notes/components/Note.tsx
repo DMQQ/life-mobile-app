@@ -33,17 +33,19 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     marginBottom: Gap,
+    flexWrap: "wrap",
+    gap: 10,
   },
 
   title: {
     color: Colors.secondary,
-    fontSize: 25,
+    fontSize: 20,
     fontWeight: "bold",
   },
   tag: {
     backgroundColor: Colors.secondary,
     color: "#fff",
-    paddingHorizontal: 10,
+    paddingHorizontal: 15,
     padding: 5,
     borderRadius: 100,
     marginRight: 5,
@@ -121,16 +123,21 @@ export default function Note(props: NoteProps) {
   const dispatch = useDispatch();
 
   const removeNote = () => {
-    Alert.alert("Remove", "Action cannot be reversed", [
-      {
-        onPress: () => dispatch(notesActions.removeNote(+props.noteId)),
-        text: "Remove",
-      },
-      {
-        onPress: () => null,
-        text: "cancel",
-      },
-    ]);
+    Alert.alert(
+      "Remove",
+      "Action cannot be reversed",
+      [
+        {
+          onPress: () => dispatch(notesActions.removeNote(+props.noteId)),
+          text: "Remove",
+        },
+        {
+          onPress: () => null,
+          text: "cancel",
+        },
+      ],
+      { userInterfaceStyle: "dark" }
+    );
   };
 
   const noteTitle =

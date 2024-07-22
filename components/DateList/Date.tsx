@@ -65,7 +65,7 @@ const DateComponent = (props: DateProps) => {
   );
 
   const dateItemBg = props.isSelected
-    ? Colors.secondary
+    ? Color(Colors.secondary).opaquer(0.5).hex()
     : props.date === moment().format("YYYY-MM-DD")
     ? Color(bg).lighten(0.5).hex()
     : bg;

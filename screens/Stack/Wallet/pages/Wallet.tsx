@@ -1,24 +1,27 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { StyleSheet, Text, View, SafeAreaView } from "react-native";
 import useGetWallet from "../hooks/useGetWallet";
 import Ripple from "react-native-material-ripple";
 import Colors from "../../../../constants/Colors";
 import Animated, {
   Extrapolate,
+  Extrapolation,
   interpolate,
   useAnimatedScrollHandler,
   useAnimatedStyle,
   useSharedValue,
 } from "react-native-reanimated";
-import BalanceAlertEditModal from "../components/BalanceAlertEditModal";
-import Skeleton from "../../../../components/SkeletonLoader/Skeleton";
+import BalanceAlertEditModal from "../components/Wallet/BalanceAlertEditModal";
 import { WalletScreens } from "../Main";
 import { StatusBar } from "expo-status-bar";
-import CreateExpenseSheet from "../components/AddExpenseBottomSheet";
+import CreateExpenseSheet from "../components/Wallet/CreateExpense/CreateExpenseSheet";
 import BottomSheet from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheet/BottomSheet";
-import WalletList from "../components/WalletList";
-import Color from "color";
-import FloatingButton from "../components/FloatingButton";
+import WalletList from "../components/Wallet/WalletList";
+import FloatingButton from "../components/Wallet/FloatingButton";
+import ScreenLoader from "../components/Wallet/ScreenLoader";
+import ExpenseFiltersSheet from "../components/Wallet/ExpenseFiltersSheet";
+import { AntDesign, Ionicons } from "@expo/vector-icons";
+import Layout from "@/constants/Layout";
 
 const styles = StyleSheet.create({
   container: {
@@ -26,9 +29,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   header: {
-    width: "100%",
+    width: Layout.screen.width,
     height: 150,
-    justifyContent: "center",
     alignItems: "center",
   },
   title: {
@@ -55,13 +57,14 @@ const styles = StyleSheet.create({
 });
 
 export default function WalletScreen({}: WalletScreens<"Wallet">) {
-  const { data, loading } = useGetWallet();
+  const { data, loading, refetch, filters, dispatch } = useGetWallet();
 
   const wallet = data?.wallet;
 
   const [modalVisible, setModalVisible] = useState(false);
 
   const bottomSheetRef = useRef<BottomSheet | null>(null);
+  const filtersRef = useRef<BottomSheet | null>(null);
 
   const scrollY = useSharedValue<number>(0);
 
@@ -72,21 +75,21 @@ export default function WalletScreen({}: WalletScreens<"Wallet">) {
   });
 
   const animatedContainerStyle = useAnimatedStyle(() => ({
-    height: interpolate(scrollY.value, [0, 200], [150, 60], Extrapolate.CLAMP),
+    height: interpolate(
+      scrollY.value,
+      [0, 200],
+      [150, 40],
+      Extrapolation.CLAMP
+    ),
   }));
 
   const animatedBalanceStyle = useAnimatedStyle(() => ({
-    fontSize: interpolate(scrollY.value, [0, 200], [70, 30], Extrapolate.CLAMP),
-    transform: [
-      {
-        translateX: interpolate(
-          scrollY.value,
-          [0, 200],
-          [0, -110],
-          Extrapolate.CLAMP
-        ),
-      },
-    ] as any,
+    fontSize: interpolate(
+      scrollY.value,
+      [0, 200],
+      [70, 30],
+      Extrapolation.CLAMP
+    ),
   }));
 
   const balance = loading ? " ..." : (wallet?.balance || 0).toFixed(2);
@@ -98,7 +101,12 @@ export default function WalletScreen({}: WalletScreens<"Wallet">) {
         <Animated.View
           style={[
             styles.header,
-            { backgroundColor: Colors.primary },
+            {
+              backgroundColor: Colors.primary,
+              flexDirection: "row",
+              paddingHorizontal: 10,
+              justifyContent: "space-between",
+            },
             animatedContainerStyle,
           ]}
         >
@@ -108,33 +116,16 @@ export default function WalletScreen({}: WalletScreens<"Wallet">) {
               <Text style={{ color: "#ffffff97", fontSize: 20 }}>zł </Text>
             </Animated.Text>
           </Ripple>
+
+          <Ripple
+            style={{ padding: 10, marginRight: 10 }}
+            onPress={() => filtersRef.current?.snapToIndex(0)}
+          >
+            <Ionicons name="menu" color={"#fff"} size={20} />
+          </Ripple>
         </Animated.View>
 
-        {loading && (
-          <Skeleton
-            backgroundColor={Color(Colors.primary_lighter)
-              .lighten(0.5)
-              .string()}
-            highlightColor={Colors.secondary}
-            size={(props) => ({
-              width: props.width - 20,
-              height: props.height,
-            })}
-          >
-            <View>
-              <Skeleton.Item width={(w) => w / 3} height={25} />
-              <Skeleton.Item width={(w) => w - 20} height={55} />
-              <Skeleton.Item width={(w) => w - 20} height={55} />
-              <Skeleton.Item width={(w) => w - 20} height={55} />
-              <Skeleton.Item width={(w) => w / 3} height={25} marginTop={30} />
-              <Skeleton.Item width={(w) => w - 20} height={55} />
-              <Skeleton.Item width={(w) => w - 20} height={55} />
-              <Skeleton.Item width={(w) => w / 3} height={25} marginTop={30} />
-              <Skeleton.Item width={(w) => w - 20} height={55} />
-              <Skeleton.Item width={(w) => w - 20} height={55} />
-            </View>
-          </Skeleton>
-        )}
+        {loading && <ScreenLoader />}
       </View>
 
       <FloatingButton
@@ -143,6 +134,7 @@ export default function WalletScreen({}: WalletScreens<"Wallet">) {
       />
 
       <WalletList
+        refetch={refetch}
         scrollY={scrollY}
         onScroll={onAnimatedScrollHandler}
         wallet={data?.wallet}
@@ -151,6 +143,12 @@ export default function WalletScreen({}: WalletScreens<"Wallet">) {
       <BalanceAlertEditModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
+      />
+
+      <ExpenseFiltersSheet
+        ref={filtersRef}
+        filters={filters}
+        dispatch={dispatch}
       />
 
       <CreateExpenseSheet onCompleted={() => {}} ref={bottomSheetRef} />

@@ -9,6 +9,8 @@ import ScheduleScreen from "./pages/Schedule";
 import type { RootStackScreenProps } from "@/types";
 import moment from "moment";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { Colors } from "react-native/Libraries/NewAppScreen";
+import { View } from "react-native";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -33,7 +35,7 @@ export default function TimelineScreens({
     <Stack.Navigator
       initialRouteName="Timeline"
       screenOptions={{
-        animation: "fade",
+        animation: "default",
         statusBarAnimation: "slide",
         animationDuration: 10,
       }}
@@ -78,7 +80,13 @@ export default function TimelineScreens({
       <Stack.Screen
         name="Schedule"
         component={ScheduleScreen}
-        options={{ headerShown: false }}
+        options={({ route }) => ({
+          headerTitle: route.params.selectedDate,
+          headerTitleAlign: "center",
+          headerBackground: () => (
+            <View style={{ backgroundColor: Colors.primary }}></View>
+          ),
+        })}
         initialParams={{
           selected: moment().format("YYYY-MM-DD"),
         }}

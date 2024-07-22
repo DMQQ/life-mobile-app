@@ -60,7 +60,6 @@ export default StyleSheet.create({
     justifyContent: "space-around",
   },
   submitButton: {
-    paddingVertical: 20,
     backgroundColor: Colors.secondary,
     flexDirection: "row-reverse",
     flex: 1,
@@ -101,7 +100,7 @@ export default StyleSheet.create({
   status: {
     color: Colors.primary,
     fontWeight: "600",
-    marginTop: 10,
+    // marginTop: 10,
     backgroundColor: Colors.secondary,
     padding: 2.5,
     paddingHorizontal: 10,
@@ -146,5 +145,15 @@ export default StyleSheet.create({
     alignItems: "center",
     marginTop: 50,
     paddingHorizontal: 25,
+  },
+
+  toggleButton: {
+    padding: 7.5,
+    gap: 5,
+    flexDirection: "row",
+    backgroundColor: Colors.primary_lighter,
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

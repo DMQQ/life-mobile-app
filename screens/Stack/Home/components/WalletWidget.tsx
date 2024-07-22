@@ -4,15 +4,16 @@ import Colors, { Sizing, randColor } from "../../../../constants/Colors";
 import { ViewMoreButton } from "../../../../components/ui/Button/Button";
 import { useNavigation } from "@react-navigation/native";
 import { Expense, Wallet } from "../../../../types";
-import { Padding, Rounded } from "../../../../constants/Layout";
+import Layout, { Padding, Rounded } from "../../../../constants/Layout";
 import Skeleton from "@/components/SkeletonLoader/Skeleton";
+import WalletItem from "../../Wallet/components/Wallet/WalletItem";
 
 const backgroundColor = Colors.primary_lighter;
 
 const styles = StyleSheet.create({
   dot: {
-    width: 10,
-    height: 10,
+    width: 7.5,
+    height: 7.5,
     borderRadius: 5,
     backgroundColor: "#fff",
     marginHorizontal: 5,
@@ -33,7 +34,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   balance: {
-    fontSize: 55,
+    fontSize: 60,
     color: "#fff",
     fontWeight: "bold",
     textShadowColor: "rgba(0, 0, 0, 0.25)",
@@ -43,29 +44,21 @@ const styles = StyleSheet.create({
   activity: {
     color: "#ffffff",
     fontSize: Sizing.tooltip,
-    fontWeight: "bold",
   },
   list: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginTop: Padding.xs,
-
-    overflow: "hidden",
+    flexWrap: "wrap",
+    gap: 10,
   },
   expense_container: {
     flexDirection: "row",
     alignItems: "center",
-    marginRight: 5,
+    backgroundColor: Color(Colors.primary_lighter).lighten(0.5).string(),
+    padding: 5,
+    paddingHorizontal: 15,
+    borderRadius: 100,
   },
 });
-
-const ExpenseItem = (props: { text: string }) => (
-  <View style={styles.expense_container}>
-    <View style={styles.dot} />
-    <Text style={{ color: "#fff" }}>{props.text}</Text>
-  </View>
-);
 
 export default function AvailableBalanceWidget(props: {
   data: Wallet;
@@ -73,7 +66,7 @@ export default function AvailableBalanceWidget(props: {
 }) {
   const navigation = useNavigation<any>();
 
-  const expenses = props?.data?.expenses?.slice(0, 4) || [];
+  const expenses = props?.data?.expenses?.slice(0, 3) || [];
 
   return (
     <View style={styles.container}>
@@ -107,7 +100,7 @@ export default function AvailableBalanceWidget(props: {
         </Skeleton>
       ) : (
         <>
-          <View style={{ marginBottom: 10 }}>
+          <View>
             <View style={styles.title_row}>
               <Text style={styles.title}>Available Balance</Text>
 
@@ -121,12 +114,31 @@ export default function AvailableBalanceWidget(props: {
               {props?.data?.balance.toFixed(2)}
               <Text style={{ fontSize: 25 }}>zł</Text>
             </Text>
-          </View>
 
-          <View style={styles.list}>
-            {expenses.map((item: Expense) => (
-              <ExpenseItem key={item.id} text={item.description} />
-            ))}
+            {props?.data?.expenses?.length > 0 && (
+              <>
+                <FlatList
+                  horizontal
+                  data={expenses}
+                  showsHorizontalScrollIndicator={false}
+                  style={{ height: 70, marginTop: 15 }}
+                  renderItem={({ item, index }) => (
+                    <WalletItem
+                      handlePress={() => navigation.navigate("WalletScreens")}
+                      containerStyle={{
+                        width: Layout.screen.width - 80 - 40,
+                        backgroundColor: Color(Colors.primary_lighter)
+                          .lighten(0.5)
+                          .string(),
+                        marginRight: index === expenses.length - 1 ? 0 : 10,
+                      }}
+                      index={index}
+                      {...(item as any)}
+                    />
+                  )}
+                />
+              </>
+            )}
           </View>
         </>
       )}

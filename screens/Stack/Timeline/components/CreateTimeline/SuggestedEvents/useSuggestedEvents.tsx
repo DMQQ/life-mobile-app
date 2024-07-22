@@ -72,8 +72,6 @@ export default function useSuggestedEvents(props: {
       date: moment().format("YYYY-MM-DD"),
     };
 
-    console.log(finalData);
-
     await props.createTimelineAsync({ ...props.initialValues, ...finalData });
 
     setTime(undefined);

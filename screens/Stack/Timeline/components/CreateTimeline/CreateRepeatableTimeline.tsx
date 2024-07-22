@@ -1,34 +1,33 @@
-import { View, Text, StyleSheet } from "react-native";
-import Input from "../../../../../components/ui/TextInput/TextInput";
-import Colors from "../../../../../constants/Colors";
-import SegmentedButtons from "../../../../../components/ui/SegmentedButtons";
+import { View, Text, StyleSheet, KeyboardAvoidingView } from "react-native";
+import Input from "@/components/ui/TextInput/TextInput";
+import Colors from "@/constants/Colors";
+import SegmentedButtons from "@/components/ui/SegmentedButtons";
 import Ripple from "react-native-material-ripple";
 import Color from "color";
 import { AntDesign } from "@expo/vector-icons";
-import Layout from "../../../../../constants/Layout";
-import Modal from "../../../../../components/ui/Modal";
-import Button from "../../../../../components/ui/Button/Button";
-import { memo } from "react";
+import Layout from "@/constants/Layout";
+import Button from "@/components/ui/Button/Button";
+import { forwardRef, memo, useMemo, useState } from "react";
+import BottomSheet from "@/components/ui/BottomSheet/BottomSheet";
+import BottomSheetType from "@gorhom/bottom-sheet";
+import ThemedCalendar from "@/components/ui/ThemedCalendar/ThemedCalendar";
 
 const styles = StyleSheet.create({
   arrow_button: {
     backgroundColor: Colors.primary_lighter,
     justifyContent: "center",
     alignItems: "center",
-    padding: 10,
+    padding: 5,
     borderRadius: 5,
   },
   modal_container: {
-    backgroundColor: Colors.primary,
-    borderRadius: 15,
     padding: 15,
-    paddingVertical: 20,
+    flex: 1,
   },
   title_container: {
     marginBottom: 15,
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingHorizontal: 10,
   },
   title: {
     color: Colors.secondary,
@@ -65,10 +64,6 @@ const styles = StyleSheet.create({
 
 interface CreateRepeatableTimelineProps {
   formik: any;
-
-  isVisible: boolean;
-
-  onClose: () => void;
 }
 
 const ArrowButton = (props: {
@@ -112,11 +107,10 @@ const Txt = (props: { text: string }) => (
   </Text>
 );
 
-function CreateRepeatableTimeline({
-  formik: f,
-  isVisible,
-  onClose,
-}: CreateRepeatableTimelineProps) {
+const CreateRepeatableTimeline = forwardRef<
+  BottomSheetType,
+  CreateRepeatableTimelineProps
+>(({ formik: f }, ref) => {
   const onClearFields = () => {
     f.setFieldValue("repeatCount", "");
     f.setFieldValue("repeatOn", "");
@@ -137,78 +131,109 @@ function CreateRepeatableTimeline({
     f.setFieldValue("repeatCount", (+f.values.repeatCount - 1).toString());
   };
 
+  const [view, setView] = useState<"form" | "calendar">("form");
+
+  const markedDates = useMemo(() => {
+    const dates = {} as Record<
+      string,
+      { selected: boolean; selectedColor: string }
+    >;
+    const repeatCount = Number(f.values.repeatCount);
+    const repeatEveryNth = Number(f.values.repeatEveryNth);
+    const repeatOn = f.values.repeatOn;
+    if (repeatCount && repeatEveryNth && repeatOn) {
+      for (let i = 0; i < repeatCount; i++) {
+        const date = new Date();
+        date.setDate(date.getDate() + i * repeatEveryNth);
+        dates[date.toISOString().split("T")[0]] = {
+          selected: true,
+          selectedColor: Colors.secondary,
+        };
+      }
+    }
+    return dates;
+  }, [f.values.repeatCount, f.values.repeatOn, f.values.repeatEveryNth]);
+
   return (
-    <Modal
-      useNativeDriver
-      useNativeDriverForBackdrop
-      hideModalContentWhileAnimating
-      isVisible={isVisible}
-      onBackButtonPress={onClose}
-      onBackdropPress={onClose}
-      animationIn={"slideInUp"}
-      animationOut={"slideOutDown"}
-    >
-      <View style={styles.modal_container}>
-        <View style={styles.title_container}>
-          <Text style={styles.title}>Options</Text>
+    <BottomSheet snapPoints={["70%"]} ref={ref}>
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
+        <View style={styles.modal_container}>
+          {view === "form" && (
+            <View style={{ flex: 1, gap: 10 }}>
+              <View style={styles.title_container}>
+                <Text style={styles.title}>Options</Text>
 
-          <Ripple onPress={onClearFields} style={styles.clear_button}>
-            <Text style={styles.clear_button_text}>CLEAR</Text>
-          </Ripple>
+                <Ripple onPress={onClearFields} style={styles.clear_button}>
+                  <Text style={styles.clear_button_text}>CLEAR</Text>
+                </Ripple>
+              </View>
+
+              <View>
+                <Txt text="Number of events" />
+
+                <Input
+                  keyboardType="numeric"
+                  style={{ flex: 1, width: Layout.screen.width - 30 }}
+                  value={f.values.repeatCount}
+                  onChangeText={(t) => f.setFieldValue("repeatCount", t)}
+                  placeholder="Repeat count"
+                  placeholderTextColor={"gray"}
+                  left={
+                    <ArrowButton
+                      disabled={
+                        Number(f.values.repeatCount) === 0 ||
+                        f.values.repeatCount === ""
+                      }
+                      arrow="arrowdown"
+                      onPress={onArrowDownPress}
+                    />
+                  }
+                  right={
+                    <ArrowButton arrow="arrowup" onPress={onArrowUpPress} />
+                  }
+                />
+              </View>
+
+              <View>
+                <Txt text="Repeat variants" />
+                <SegmentedButtons
+                  value={f.values.repeatOn}
+                  onChange={(value) => f.setFieldValue("repeatOn", value)}
+                  buttons={REPEAT_VARIANTS}
+                  containerStyle={{ borderRadius: 10 }}
+                />
+              </View>
+
+              <View>
+                <Txt text="Repeat every nth day" />
+                <SegmentedButtons
+                  containerStyle={{ borderRadius: 10 }}
+                  value={f.values.repeatEveryNth}
+                  onChange={(value) => f.setFieldValue("repeatEveryNth", value)}
+                  buttons={segmentedButtons}
+                />
+              </View>
+            </View>
+          )}
+
+          {view === "calendar" && (
+            <View style={{ flex: 1 }}>
+              <ThemedCalendar markedDates={markedDates} />
+            </View>
+          )}
+
+          <Button
+            fontStyle={{ fontSize: 16 }}
+            onPress={() => {
+              setView((prev) => (prev === "form" ? "calendar" : "form"));
+            }}
+          >
+            {view === "form" ? "View dates in calendar" : "Go back to form"}
+          </Button>
         </View>
-
-        <View>
-          <Txt text="Number of events" />
-
-          <Input
-            keyboardType="numeric"
-            style={{ flex: 1, width: Layout.screen.width - 70 }}
-            value={f.values.repeatCount}
-            onChangeText={(t) => f.setFieldValue("repeatCount", t)}
-            placeholder="Repeat count"
-            placeholderTextColor={"gray"}
-            left={
-              <ArrowButton
-                disabled={
-                  Number(f.values.repeatCount) === 0 ||
-                  f.values.repeatCount === ""
-                }
-                arrow="arrowdown"
-                onPress={onArrowDownPress}
-              />
-            }
-            right={<ArrowButton arrow="arrowup" onPress={onArrowUpPress} />}
-          />
-        </View>
-
-        <View>
-          <Txt text="Repeat variants" />
-          <SegmentedButtons
-            value={f.values.repeatOn}
-            onChange={(value) => f.setFieldValue("repeatOn", value)}
-            buttons={REPEAT_VARIANTS}
-          />
-        </View>
-
-        <View>
-          <Txt text="Repeat every nth day" />
-          <SegmentedButtons
-            value={f.values.repeatEveryNth}
-            onChange={(value) => f.setFieldValue("repeatEveryNth", value)}
-            buttons={segmentedButtons}
-          />
-        </View>
-
-        <Text style={styles.suggestion_text}>
-          Leaving fields blank disables repeatition
-        </Text>
-
-        <Button style={{ marginTop: 20 }} size="xl" onPress={onClose}>
-          Close
-        </Button>
-      </View>
-    </Modal>
+      </KeyboardAvoidingView>
+    </BottomSheet>
   );
-}
+});
 
 export default memo(CreateRepeatableTimeline);

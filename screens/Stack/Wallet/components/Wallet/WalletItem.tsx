@@ -1,12 +1,14 @@
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, StyleProp, ViewStyle } from "react-native";
 import {
   AntDesign,
+  Entypo,
+  FontAwesome5,
   Ionicons,
   MaterialCommunityIcons,
 } from "@expo/vector-icons";
 import moment from "moment";
 import Color from "color";
-import Colors from "../../../../constants/Colors";
+import Colors from "@/constants/Colors";
 import Ripple from "react-native-material-ripple";
 import Animated, {
   AnimatedStyleProp,
@@ -43,15 +45,10 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 5,
   },
-  icon_container: {
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 10,
-    width: 40,
-  },
+  icon_container: {},
   date: {
     color: "#9f9f9f",
-    fontSize: 12,
+    fontSize: 10,
     marginLeft: 10,
     lineHeight: 15,
   },
@@ -143,24 +140,55 @@ export const Icons = {
     icon: <Ionicons name="airplane-outline" size={24} color="#33ff57" />,
   },
 
+  edit: {
+    backgroundColor: Colors.primary,
+    icon: <Ionicons name="create" color="#fff" size={24} />,
+  },
+
+  income: {
+    backgroundColor: "",
+    icon: (
+      <FontAwesome5
+        name="dollar-sign"
+        size={24}
+        color={Colors.secondary_light_1}
+      />
+    ),
+  },
+
   none: {
     backgroundColor: Colors.primary,
     icon: <Ionicons name="add" color={Colors.secondary} size={24} />,
   },
 } as const;
 
-export const CategoryIcon = (props: { category: keyof typeof Icons }) => (
-  <View
-    style={[
-      styles.icon_container,
-      // {
-      //   backgroundColor: Color(Icons[props.category || "none"]?.backgroundColor)
-      //     .darken(0.7)
-      //     .hex(),
-      // },
-    ]}
-  >
-    {Icons[props.category || "none"]?.icon}
+const makeColor = (color: string) => {
+  const [red, green, blue] = Color(color).rgb().array();
+
+  return `rgba(${red}, ${green}, ${blue}, 0.1)`;
+};
+
+export const CategoryIcon = (props: {
+  category: keyof typeof Icons;
+  type: "income" | "expense";
+  clear?: boolean;
+}) => (
+  <View style={[styles.icon_container, { position: "relative" }]}>
+    <View
+      style={{
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: !props.clear
+          ? makeColor(Icons[props.category || "none"]?.backgroundColor)
+          : undefined,
+        borderRadius: 10,
+        height: 50,
+        width: 50,
+      }}
+    >
+      {Icons[props.category || "none"]?.icon}
+    </View>
   </View>
 );
 
@@ -169,6 +197,7 @@ export default function WalletItem(
     handlePress: Function;
     animatedStyle: AnimatedStyleProp<any>;
     index: number;
+    containerStyle?: StyleProp<ViewStyle>;
   }
 ) {
   const price =
@@ -177,11 +206,10 @@ export default function WalletItem(
       : item.amount.toFixed(2);
 
   const isBalanceEdit =
-    item.description === "Balance edit" && item.amount === 0;
+    item.description.includes("Balance edited") || item.amount === 0;
 
   return (
     <Animated.View
-      layout={Layout}
       style={[
         {
           marginBottom: 15,
@@ -192,10 +220,13 @@ export default function WalletItem(
     >
       <Ripple
         disabled={isBalanceEdit}
-        style={[styles.expense_item]}
+        style={[styles.expense_item, item.containerStyle]}
         onPress={() => item.handlePress()}
       >
-        {!isBalanceEdit && <CategoryIcon category={item.category} />}
+        <CategoryIcon
+          type={item.type as "income" | "expense"}
+          category={isBalanceEdit ? "edit" : item.category}
+        />
 
         <View style={{ height: "100%", justifyContent: "center", flex: 3 }}>
           <Text style={styles.title} numberOfLines={1}>
@@ -203,14 +234,22 @@ export default function WalletItem(
           </Text>
           <View style={{ flexDirection: "row" }}>
             <Text style={styles.date}>
-              {item.category ? `${item.category}, ` : ""}
-              {parseDateToText(item.date)}
+              {parseDateToText(item.date)} &#183;{" "}
+              {item.category ? `${item.category}` : ""}
             </Text>
           </View>
         </View>
         {!isBalanceEdit && (
           <View style={[styles.price_container, { flexDirection: "row" }]}>
-            <Text style={[styles.price, { marginLeft: 5 }]}>
+            <Text
+              style={[
+                styles.price,
+                {
+                  marginLeft: 5,
+                  color: item.type === "expense" ? "#F07070" : "#66E875",
+                },
+              ]}
+            >
               {price}
               <Text style={{ fontSize: 14 }}>zł</Text>
             </Text>

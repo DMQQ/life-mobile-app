@@ -1,6 +1,6 @@
 import { gql, useMutation } from "@apollo/client";
 import useUser from "../../../../../utils/hooks/useUser";
-import { GET_MONTHLY_EVENTS } from "../../pages/Timeline";
+import { GET_MONTHLY_EVENTS } from "../general/useTimeline";
 import moment from "moment";
 
 const REMOVE_TIMELINE_EVENT_MUTATION = gql`
