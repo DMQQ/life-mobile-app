@@ -3,14 +3,14 @@ import { Expense, Wallet } from "@/types";
 import WalletItem, { WalletElement, parseDateToText } from "./WalletItem";
 import { useState, useRef, useEffect, useMemo } from "react";
 import { Text, NativeScrollEvent, View, StyleSheet } from "react-native";
-import { WalletSheet } from "./WalletSheet";
+import { WalletSheet } from "../Sheets/WalletSheet";
 import Animated, { SharedValue } from "react-native-reanimated";
 import { NativeSyntheticEvent } from "react-native";
 import moment from "moment";
 import { gql, useQuery } from "@apollo/client";
-import Colors from "@/constants/Colors";
-import Color from "color";
 import { RefreshControl } from "react-native-gesture-handler";
+import Ripple from "react-native-material-ripple";
+import { useWalletContext } from "../WalletContext";
 
 export default function WalletList(props: {
   wallet: Wallet;
@@ -27,7 +27,6 @@ export default function WalletList(props: {
   const sheet = useRef<BottomSheet>(null);
 
   useEffect(() => {
-    // or just replace it
     setSelected(undefined);
     sheet.current?.close();
   }, [props?.wallet?.expenses]);
@@ -83,7 +82,7 @@ export default function WalletList(props: {
         )}
       />
 
-      <WalletSheet sheet={sheet as any} selected={selected} ref={sheet} />
+      <WalletSheet selected={selected} ref={sheet} />
     </>
   );
 }
@@ -95,7 +94,7 @@ const displayTotal = (data: { getMonthTotal: number }) => {
 };
 
 const totalTextColor = (data: { getMonthTotal: number }) => {
-  return data.getMonthTotal > 0 ? "#F07070" : "#66E875";
+  return data.getMonthTotal < 0 ? "#F07070" : "#66E875";
 };
 
 const MonthExpenseList = ({
@@ -126,7 +125,7 @@ const MonthExpenseList = ({
   );
 
   return (
-    <View style={{ marginBottom: 10 }}>
+    <View style={{ marginBottom: 30 }}>
       <View style={styles.monthRow}>
         <Text style={styles.monthText}>{item.month}</Text>
 
@@ -135,6 +134,7 @@ const MonthExpenseList = ({
             style={{
               color: totalTextColor(data),
               fontSize: 15,
+              marginBottom: 5,
             }}
           >
             {displayTotal(data)}
@@ -149,7 +149,7 @@ const MonthExpenseList = ({
           index={i}
           handlePress={() => {
             setSelected(expense as any);
-            sheet.current?.expand();
+            sheet.current?.snapToIndex(0);
           }}
         />
       ))}
@@ -170,20 +170,28 @@ const ListItem = ({
 }) => {
   const hasPrevious = expenses?.[index - 1] !== undefined;
 
-  const areDatesEqual = (() => {
-    if (!hasPrevious) return false;
-
-    if (index === 0) return false;
-
+  const areDatesEqual = useMemo(() => {
+    if (!hasPrevious || index === 0) return false;
     return moment(expenses[index - 1].date).isSame(item.date, "day");
-  })();
+  }, [expenses, index]);
+
+  const {
+    refs: { bottomSheetRef },
+    calendar: { setCalendarDate },
+  } = useWalletContext();
 
   return (
     <>
       {!areDatesEqual && (
-        <View style={styles.dateTextContainer}>
+        <Ripple
+          onPress={() => {
+            setCalendarDate(moment(item.date).toDate());
+            bottomSheetRef.current?.snapToIndex(0);
+          }}
+          style={[styles.dateTextContainer, { marginBottom: 5 }]}
+        >
           <Text style={styles.dateText}>{parseDateToText(item.date)}</Text>
-        </View>
+        </Ripple>
       )}
       <WalletItem index={index} handlePress={handlePress} {...(item as any)} />
     </>
@@ -194,7 +202,7 @@ const styles = StyleSheet.create({
   monthText: {
     color: "#fff",
     fontWeight: "bold",
-    fontSize: 16,
+    fontSize: 20,
     marginBottom: 10,
     paddingHorizontal: 5,
   },
@@ -206,9 +214,9 @@ const styles = StyleSheet.create({
   },
 
   dateText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
+    color: "rgba(255,255,255,0.7)",
+    fontWeight: "400",
+    fontSize: 15,
   },
 
   monthRow: {

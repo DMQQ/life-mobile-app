@@ -90,7 +90,9 @@ const reducer = (state: typeof init, action: Action) => {
 export default function useGetWallet() {
   const [filters, dispatch] = useReducer(reducer, init);
 
-  const st = useQuery(GET_WALLET, {});
+  const st = useQuery(GET_WALLET, {
+    onError: (er) => console.log(JSON.stringify(er, null, 2)),
+  });
 
   useEffect(() => {
     let timeout = setTimeout(async () => {

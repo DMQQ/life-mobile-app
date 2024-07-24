@@ -6,7 +6,7 @@ import Input from "@/components/ui/TextInput/TextInput";
 import Layout from "@/constants/Layout";
 import { forwardRef } from "react";
 import { KeyboardAvoidingView, Text, View } from "react-native";
-import { Icons } from "./WalletItem";
+import { Icons } from "../Wallet/WalletItem";
 import type { Action, Filters } from "../../hooks/useGetWallet";
 import Button from "@/components/ui/Button/Button";
 import { useBottomSheet } from "@gorhom/bottom-sheet";

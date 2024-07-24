@@ -1,7 +1,9 @@
+import Button from "@/components/ui/Button/Button";
 import ThemedCalendar from "@/components/ui/ThemedCalendar/ThemedCalendar";
 import Colors from "@/constants/Colors";
 import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
-import { memo, useState } from "react";
+import moment from "moment";
+import { memo, useEffect, useState } from "react";
 import { View } from "react-native";
 
 const ChooseDate = memo(
@@ -15,6 +17,10 @@ const ChooseDate = memo(
     date: string;
   }) => {
     const [selectedDate, setSelectedDate] = useState(date);
+
+    useEffect(() => {
+      setSelectedDate(moment(date).format("YYYY-MM-DD"));
+    }, [date]);
 
     const onDayPress = (day: { dateString: string }) => {
       setSelectedDate(day.dateString);
@@ -43,6 +49,14 @@ const ChooseDate = memo(
             },
           }}
         />
+
+        <Button
+          onPress={onDismissCalendar}
+          fontStyle={{ fontSize: 16 }}
+          style={{ marginTop: 25 }}
+        >
+          Close Calendar
+        </Button>
       </View>
     );
   },
