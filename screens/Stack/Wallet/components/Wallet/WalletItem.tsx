@@ -59,8 +59,8 @@ const styles = StyleSheet.create({
   },
   price: {
     color: "#fff",
-    fontSize: 18,
-    fontWeight: "bold",
+    fontSize: 16,
+    fontWeight: "600",
   },
   button: {
     padding: 5,
@@ -146,7 +146,7 @@ export const Icons = {
   },
 
   income: {
-    backgroundColor: "",
+    backgroundColor: Colors.secondary_light_1,
     icon: (
       <FontAwesome5
         name="dollar-sign"
@@ -165,7 +165,7 @@ export const Icons = {
 const makeColor = (color: string) => {
   const [red, green, blue] = Color(color).rgb().array();
 
-  return `rgba(${red}, ${green}, ${blue}, 0.1)`;
+  return `rgba(${red}, ${green}, ${blue}, 0.15)`;
 };
 
 export const CategoryIcon = (props: {
@@ -180,14 +180,21 @@ export const CategoryIcon = (props: {
         justifyContent: "center",
         alignItems: "center",
         backgroundColor: !props.clear
-          ? makeColor(Icons[props.category || "none"]?.backgroundColor)
+          ? makeColor(
+              Icons[
+                props.type === "income" ? "income" : props.category || "none"
+              ]?.backgroundColor
+            )
           : undefined,
         borderRadius: 10,
         height: 50,
         width: 50,
       }}
     >
-      {Icons[props.category || "none"]?.icon}
+      {
+        Icons[props.type === "income" ? "income" : props.category || "none"]
+          ?.icon
+      }
     </View>
   </View>
 );
@@ -245,7 +252,9 @@ export default function WalletItem(
               style={[
                 styles.price,
                 {
-                  marginLeft: 5,
+                  marginHorizontal: 5,
+                  width: "100%",
+                  textAlign: "right",
                   color: item.type === "expense" ? "#F07070" : "#66E875",
                 },
               ]}

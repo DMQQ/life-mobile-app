@@ -32,49 +32,46 @@ export default function useCreateActivity(props: { onCompleted?: () => void }) {
   const [createExpense, { data, loading, error, called, reset }] = useMutation(
     CREATE_EXPENSE,
     {
-      update(cache, { data }) {
-        cache.modify({
-          fields: {
-            wallet() {
-              const wallet = cache.readQuery({
-                query: GET_WALLET,
-              }) as { wallet: Wallet };
+      refetchQueries: [{ query: GET_WALLET }],
+      // update(cache, { data }) {
+      //   cache.modify({
+      //     fields: {
+      //       wallet() {
+      //         const wallet = cache.readQuery({
+      //           query: GET_WALLET,
+      //         }) as { wallet: Wallet };
 
-              const walletCopy = {
-                ...wallet.wallet,
-                expenses: [...wallet.wallet.expenses],
-              };
+      //         const walletCopy = {
+      //           ...wallet.wallet,
+      //           expenses: [data.createExpense, ...wallet.wallet.expenses],
+      //         };
 
-              walletCopy.expenses = [
-                data.createExpense,
-                ...walletCopy.expenses,
-              ];
+      //         if (data.createExpense.type === "expense") {
+      //           walletCopy.balance =
+      //             walletCopy.balance - data.createExpense.amount;
+      //         } else {
+      //           walletCopy.balance =
+      //             walletCopy.balance + data.createExpense.amount;
+      //         }
 
-              if (data.createExpense.type === "expense") {
-                walletCopy.balance =
-                  walletCopy.balance - data.createExpense.amount;
-              } else {
-                walletCopy.balance =
-                  walletCopy.balance + data.createExpense.amount;
-              }
+      //         walletCopy.expenses = walletCopy.expenses.sort(
+      //           (a, b) =>
+      //             new Date(b.date).getTime() - new Date(a.date).getTime()
+      //         );
 
-              walletCopy.expenses = walletCopy.expenses.sort(
-                (a, b) =>
-                  new Date(b.date).getTime() - new Date(a.date).getTime()
-              );
+      //         cache.writeQuery({
+      //           query: GET_WALLET,
+      //           data: { wallet: walletCopy },
+      //         });
 
-              cache.writeQuery({
-                query: GET_WALLET,
-                data: { wallet: walletCopy },
-              });
-
-              return walletCopy;
-            },
-          },
-        });
-      },
+      //         return walletCopy;
+      //       },
+      //     },
+      //   });
+      // },
 
       onError(err) {
+        console.log("useCreateActivity ERROR");
         console.log(JSON.stringify(err, null, 2));
       },
 

@@ -7,7 +7,7 @@ import SegmentedButtons from "@/components/ui/SegmentedButtons";
 import BottomSheet, {
   BottomSheetGorhom,
 } from "@/components/ui/BottomSheet/BottomSheet";
-import { forwardRef, useState } from "react";
+import { forwardRef, useEffect, useState, useTransition } from "react";
 import { useBottomSheet } from "@gorhom/bottom-sheet";
 import Colors from "@/constants/Colors";
 import Layout from "@/constants/Layout";
@@ -17,7 +17,7 @@ import { AntDesign } from "@expo/vector-icons";
 import moment from "moment";
 import ChooseDate from "./ChooseDate";
 import FormFields from "./FormFields";
-import { useIsFocused } from "@react-navigation/native";
+import { useWalletContext } from "../../WalletContext";
 
 const schema = yup.object().shape({
   name: yup.string().required("Name is required"),
@@ -54,6 +54,10 @@ const AddExpenseBottomSheet = forwardRef<
     },
   });
 
+  const {
+    calendar: { date },
+  } = useWalletContext();
+
   const onSubmit = async (
     values: typeof initialValues,
     { resetForm }: FormikHelpers<typeof initialValues>
@@ -80,12 +84,15 @@ const AddExpenseBottomSheet = forwardRef<
   const f = useFormik({
     validationSchema: schema,
     onSubmit: onSubmit,
-    initialValues: initialValues,
+    initialValues: {
+      ...initialValues,
+      date: moment(date).add(2, "hours").toISOString(),
+    },
   });
 
-  const isFocused = useIsFocused();
-
-  if (!isFocused) return null;
+  useEffect(() => {
+    f.setFieldValue("date", moment(date).add(2, "hours").toISOString());
+  }, [date]);
 
   return (
     <BottomSheet
@@ -107,6 +114,8 @@ interface FormProps {
 const Form = ({ formik: f }: FormProps) => {
   const { snapToIndex } = useBottomSheet();
   const [showCalendar, setShowCalendar] = useState(false);
+
+  const [, startTransition] = useTransition();
 
   return (
     <View style={{ flex: 1 }}>
@@ -132,7 +141,7 @@ const Form = ({ formik: f }: FormProps) => {
             />
             <Ripple
               onPress={() => {
-                setShowCalendar((prev) => !prev);
+                startTransition(() => setShowCalendar((prev) => !prev));
               }}
               style={[
                 {
@@ -149,7 +158,7 @@ const Form = ({ formik: f }: FormProps) => {
 
           {showCalendar ? (
             <ChooseDate
-              date={moment(f.values.date).format("YYYY-MM-DD")}
+              date={f.values.date}
               onDismissCalendar={() => setShowCalendar(false)}
               setDateField={(date) => {
                 f.setFieldValue(
@@ -174,7 +183,7 @@ const Form = ({ formik: f }: FormProps) => {
                   f.handleSubmit();
                 }}
                 style={{
-                  marginTop: 20,
+                  marginTop: f.values.type === "expense" ? 60 : 150,
                 }}
               >
                 Create expense
