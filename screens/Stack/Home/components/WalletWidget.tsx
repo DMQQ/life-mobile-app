@@ -1,12 +1,11 @@
 import Color from "color";
-import { FlatList, StyleSheet, Text, View } from "react-native";
-import Colors, { Sizing, randColor } from "../../../../constants/Colors";
+import { StyleSheet, Text, View } from "react-native";
+import Colors, { Sizing } from "../../../../constants/Colors";
 import { ViewMoreButton } from "../../../../components/ui/Button/Button";
 import { useNavigation } from "@react-navigation/native";
-import { Expense, Wallet } from "../../../../types";
-import Layout, { Padding, Rounded } from "../../../../constants/Layout";
+import { Wallet } from "../../../../types";
+import { Padding, Rounded } from "../../../../constants/Layout";
 import Skeleton from "@/components/SkeletonLoader/Skeleton";
-import WalletItem from "../../Wallet/components/Wallet/WalletItem";
 
 const backgroundColor = Colors.primary_lighter;
 
@@ -66,8 +65,6 @@ export default function AvailableBalanceWidget(props: {
 }) {
   const navigation = useNavigation<any>();
 
-  const expenses = props?.data?.expenses?.slice(0, 3) || [];
-
   return (
     <View style={styles.container}>
       {props.loading ? (
@@ -114,31 +111,6 @@ export default function AvailableBalanceWidget(props: {
               {props?.data?.balance.toFixed(2)}
               <Text style={{ fontSize: 25 }}>zł</Text>
             </Text>
-
-            {props?.data?.expenses?.length > 0 && (
-              <>
-                <FlatList
-                  horizontal
-                  data={expenses}
-                  showsHorizontalScrollIndicator={false}
-                  style={{ height: 70, marginTop: 15 }}
-                  renderItem={({ item, index }) => (
-                    <WalletItem
-                      handlePress={() => navigation.navigate("WalletScreens")}
-                      containerStyle={{
-                        width: Layout.screen.width - 80 - 40,
-                        backgroundColor: Color(Colors.primary_lighter)
-                          .lighten(0.5)
-                          .string(),
-                        marginRight: index === expenses.length - 1 ? 0 : 10,
-                      }}
-                      index={index}
-                      {...(item as any)}
-                    />
-                  )}
-                />
-              </>
-            )}
           </View>
         </>
       )}

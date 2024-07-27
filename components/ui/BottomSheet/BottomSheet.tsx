@@ -32,7 +32,7 @@ const BottomSheet = forwardRef<
       snapPoints={props.snapPoints}
       ref={ref}
       onChange={(index) => {
-        index === -1 && Keyboard.dismiss();
+        // index === -1 && Keyboard.dismiss();
         props.onChange?.(index);
       }}
       handleIndicatorStyle={{
