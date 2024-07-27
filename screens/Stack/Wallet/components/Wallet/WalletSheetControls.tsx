@@ -1,10 +1,10 @@
 import Button from "@/components/ui/Button/Button";
 import Colors from "@/constants/Colors";
-import Color from "color";
 import { View } from "react-native";
 import useDeleteActivity from "../../hooks/useDeleteActivity";
 import { WalletElement } from "./WalletItem";
 import { useNavigation } from "@react-navigation/native";
+import lowOpacity from "@/utils/functions/lowOpacity";
 
 const SheetActionButtons = (props: {
   selectedExpense: WalletElement | undefined;
@@ -42,7 +42,7 @@ const SheetActionButtons = (props: {
           fontSize: 16,
         }}
         style={{
-          backgroundColor: Color(Colors.error).alpha(0.025).string(),
+          backgroundColor: lowOpacity(Colors.error, 10),
         }}
       >
         Remove
@@ -55,7 +55,10 @@ const SheetActionButtons = (props: {
           })
         }
         type="contained"
-        fontStyle={{ fontSize: 16 }}
+        style={{
+          backgroundColor: lowOpacity(Colors.secondary, 30),
+        }}
+        fontStyle={{ fontSize: 16, color: Colors.secondary_light_2 }}
       >
         Edit
       </Button>

@@ -11,10 +11,12 @@ import Color from "color";
 import Colors from "@/constants/Colors";
 import Ripple from "react-native-material-ripple";
 import Animated, {
+  AnimatedStyle,
   AnimatedStyleProp,
   FadeInUp,
   Layout,
 } from "react-native-reanimated";
+import lowOpacity from "@/utils/functions/lowOpacity";
 
 export interface WalletElement {
   description: string;
@@ -71,6 +73,14 @@ const styles = StyleSheet.create({
     color: Colors.secondary,
     fontSize: 20,
     fontWeight: "bold",
+  },
+  iconContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 10,
+    height: 50,
+    width: 50,
   },
 });
 
@@ -162,47 +172,36 @@ export const Icons = {
   },
 } as const;
 
-const makeColor = (color: string) => {
-  const [red, green, blue] = Color(color).rgb().array();
-
-  return `rgba(${red}, ${green}, ${blue}, 0.15)`;
-};
-
 export const CategoryIcon = (props: {
   category: keyof typeof Icons;
   type: "income" | "expense";
   clear?: boolean;
-}) => (
-  <View style={[styles.icon_container, { position: "relative" }]}>
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: !props.clear
-          ? makeColor(
-              Icons[
-                props.type === "income" ? "income" : props.category || "none"
-              ]?.backgroundColor
-            )
-          : undefined,
-        borderRadius: 10,
-        height: 50,
-        width: 50,
-      }}
-    >
-      {
-        Icons[props.type === "income" ? "income" : props.category || "none"]
-          ?.icon
-      }
+}) => {
+  const category =
+    props.type === "income" && props.category !== "edit"
+      ? "income"
+      : props.category || "none";
+  return (
+    <View style={[styles.icon_container, { position: "relative" }]}>
+      <View
+        style={[
+          styles.iconContainer,
+          {
+            backgroundColor: !props.clear
+              ? lowOpacity(Icons[category]?.backgroundColor, 15)
+              : undefined,
+          },
+        ]}
+      >
+        {Icons[category]?.icon}
+      </View>
     </View>
-  </View>
-);
-
+  );
+};
 export default function WalletItem(
   item: WalletItemProps & {
     handlePress: Function;
-    animatedStyle: AnimatedStyleProp<any>;
+    animatedStyle: AnimatedStyle;
     index: number;
     containerStyle?: StyleProp<ViewStyle>;
   }
