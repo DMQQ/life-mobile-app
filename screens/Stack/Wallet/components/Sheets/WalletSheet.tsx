@@ -4,9 +4,10 @@ import BottomSheet, {
 import { ReactNode, forwardRef } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import Colors from "@/constants/Colors";
-import { CategoryIcon, WalletElement } from "./WalletItem";
-import SheetActionButtons from "./WalletSheetControls";
+import { CategoryIcon, WalletElement } from "../Wallet/WalletItem";
+import SheetActionButtons from "../Wallet/WalletSheetControls";
 import { AntDesign, MaterialIcons } from "@expo/vector-icons";
+import { parseDate } from "@/utils/functions/parseDate";
 
 const styles = StyleSheet.create({
   text: {
@@ -58,7 +59,7 @@ export const WalletSheet = forwardRef<
       : selected?.amount.toFixed(2);
 
   return (
-    <BottomSheet ref={ref} snapPoints={["70%", "80%"]}>
+    <BottomSheet ref={ref} snapPoints={["60%", "80%"]}>
       <View style={{ paddingHorizontal: 15, flex: 1 }}>
         <View style={{ flex: 2 }}>
           <View
@@ -78,7 +79,11 @@ export const WalletSheet = forwardRef<
           </View>
 
           <View style={styles.row}>
-            <CategoryIcon category={selected?.category || "none"} />
+            <CategoryIcon
+              type={selected?.type as "expense" | "income"}
+              category={selected?.category || "none"}
+              clear
+            />
 
             <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>
               {capitalize(selected?.category)}
@@ -94,11 +99,7 @@ export const WalletSheet = forwardRef<
             />
 
             <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>
-              {
-                new Date(selected?.date || new Date())
-                  .toISOString()
-                  .split("T")[0]
-              }
+              {parseDate(selected?.date || "")}
             </Text>
           </View>
           <View style={styles.row}>

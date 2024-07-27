@@ -1,8 +1,9 @@
 import Colors from "@/constants/Colors";
+import { memo } from "react";
 import { StyleSheet } from "react-native";
 import { Calendar } from "react-native-calendars";
 
-export default function ThemedCalendar(props: any) {
+function ThemedCalendar(props: any) {
   return (
     <Calendar
       {...props}
@@ -11,6 +12,8 @@ export default function ThemedCalendar(props: any) {
     />
   );
 }
+
+export default memo(ThemedCalendar);
 
 const styles = StyleSheet.create({
   calendar: {

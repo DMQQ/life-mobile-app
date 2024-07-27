@@ -13,6 +13,8 @@ import Layout from "@/constants/Layout";
 import { Icons } from "../components/Wallet/WalletItem";
 import useUser from "@/utils/hooks/useUser";
 import { gql, useMutation } from "@apollo/client";
+import moment from "moment";
+import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 
 const schema = yup.object().shape({
   name: yup.string().required("Name is required"),
@@ -42,6 +44,7 @@ const useEditExpense = () => {
         $type: String!
         $category: String!
         $expenseId: ID!
+        $date: String!
       ) {
         editExpense(
           amount: $amount
@@ -49,6 +52,7 @@ const useEditExpense = () => {
           type: $type
           category: $category
           expenseId: $expenseId
+          date: $date
         ) {
           id
         }
@@ -77,6 +81,7 @@ export default function CreateActivity({ navigation, route: { params } }: any) {
         type: values.type,
         category: values.category,
         expenseId: params.edit.id,
+        date: values.date,
       },
     });
 
@@ -107,6 +112,7 @@ export default function CreateActivity({ navigation, route: { params } }: any) {
           amount: params.edit.amount,
           type: params.edit.type,
           category: params.edit.category,
+          date: params.edit.date,
         }}
       >
         {(f) => (
@@ -175,6 +181,33 @@ export default function CreateActivity({ navigation, route: { params } }: any) {
                 closeOnSelect
                 maxSelectHeight={250}
               />
+              <Button
+                onPress={() =>
+                  DateTimePickerAndroid.open({
+                    value: new Date(f.values.date),
+                    mode: "date",
+                    is24Hour: true,
+                    onChange: (e, date) => {
+                      if (date) {
+                        f.setFieldValue(
+                          "date",
+                          moment(date).format("YYYY-MM-DD")
+                        );
+                      }
+                    },
+                  })
+                }
+                color="text"
+                style={{
+                  marginTop: 10,
+                  borderWidth: 0.5,
+                  borderColor: Colors.secondary,
+                  backgroundColor: Color(Colors.secondary).alpha(0.1).string(),
+                }}
+                fontStyle={{ fontSize: 16, color: Colors.secondary }}
+              >
+                Change date: "{moment(f.values.date).format("YYYY-MM-DD")}"
+              </Button>
             </View>
 
             <Button

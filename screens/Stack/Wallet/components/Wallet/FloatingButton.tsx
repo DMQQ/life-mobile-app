@@ -2,17 +2,17 @@ import Colors from "@/constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
 import Ripple from "react-native-material-ripple";
 import Animated, {
-  Extrapolate,
+  Extrapolation,
   SharedValue,
   interpolate,
   useAnimatedStyle,
 } from "react-native-reanimated";
 
-const AnimatedRipple = Animated.createAnimatedComponent(Ripple);
-
 export default function FloatingButton(props: {
   onPress: () => void;
   scrollY?: SharedValue<number>;
+  position?: number;
+  children?: React.ReactNode;
 }) {
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [
@@ -21,7 +21,7 @@ export default function FloatingButton(props: {
           props.scrollY?.value ?? 0,
           [0, 250],
           [0, 150],
-          Extrapolate.CLAMP
+          Extrapolation.CLAMP
         ),
       },
     ],
@@ -29,36 +29,43 @@ export default function FloatingButton(props: {
   }));
 
   return (
-    <AnimatedRipple
-      rippleColor={"#fff"}
-      rippleContainerBorderRadius={100}
-      onPress={props.onPress}
+    <Animated.View
       style={[
         {
           position: "absolute",
-          right: 15,
-          bottom: 20,
-          padding: 12.5,
-          borderRadius: 100,
-          backgroundColor: Colors.secondary,
-
-          zIndex: 300,
-
-          shadowColor: Colors.secondary,
-
-          shadowOffset: {
-            width: 0,
-            height: 2,
-          },
-          shadowOpacity: 0.25,
-          shadowRadius: 3.84,
-
-          eklevation: 5,
+          right: 15 + (props.position || 0) * 6, // TypeError: Cannot assign to read-only property 'validated'
+          bottom: (props?.position || 0) * 70 + 15, // TypeError: Cannot assign to read-only property 'validated'
         },
         animatedStyle,
       ]}
     >
-      <Ionicons color={"#fff"} size={30} name={"add"} />
-    </AnimatedRipple>
+      <Ripple
+        rippleColor={"#fff"}
+        rippleContainerBorderRadius={100}
+        onPress={props.onPress}
+        style={[
+          {
+            padding: 12.5,
+            borderRadius: 100,
+            backgroundColor: Colors.secondary,
+
+            zIndex: 300,
+
+            shadowColor: Colors.secondary,
+
+            shadowOffset: {
+              width: 0,
+              height: 2,
+            },
+            shadowOpacity: 0.25,
+            shadowRadius: 3.84,
+
+            eklevation: 5,
+          },
+        ]}
+      >
+        <>{props.children}</>
+      </Ripple>
+    </Animated.View>
   );
 }
