@@ -4,10 +4,6 @@ import { Text } from "react-native";
 import { Icons } from "../WalletItem";
 import { FormikProps } from "formik";
 import { memo } from "react";
-import Ripple from "react-native-material-ripple";
-import Colors from "@/constants/Colors";
-
-import Select2 from "@/components/ui/Select/Select-2";
 
 const FormFields = ({
   f,
@@ -60,7 +56,7 @@ const FormFields = ({
             Category
           </Text>
           <Select
-            placeholderText="Choose category or create your own"
+            placeholderText="Choose category"
             onFocusChange={onFocusChange}
             selected={[f.values.category]}
             setSelected={([selected]) => f.setFieldValue("category", selected)}

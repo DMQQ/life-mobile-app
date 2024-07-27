@@ -14,7 +14,7 @@ import Colors from "../../../constants/Colors";
 import Color from "color";
 import { useState, useCallback, ReactNode, useLayoutEffect } from "react";
 import Ripple from "react-native-material-ripple";
-import { AntDesign } from "@expo/vector-icons";
+import { AntDesign, Entypo } from "@expo/vector-icons";
 import Reanimated, {
   FadeIn,
   FadeInDown,
@@ -25,6 +25,7 @@ import Reanimated, {
   withTiming,
 } from "react-native-reanimated";
 import { FlatList } from "react-native-gesture-handler";
+import lowOpacity from "@/utils/functions/lowOpacity";
 
 const MIN_TOP_DISTANCE = 65;
 
@@ -72,7 +73,7 @@ const styles = StyleSheet.create({
     width: Layout.screen.width * 0.95,
     borderWidth: 2,
     borderColor: Colors.secondary,
-    borderRadius: 5,
+    borderRadius: 10,
     left: -1,
     zIndex: 1100,
     backgroundColor,
@@ -147,7 +148,9 @@ export default function Select({
             justifyContent: "space-between",
             borderBottomColor:
               options.length - 1 === index ? "transparent" : Colors.secondary,
-            backgroundColor: isSelected ? Colors.secondary : undefined,
+            backgroundColor: isSelected
+              ? lowOpacity(Colors.secondary, 20)
+              : undefined,
           }}
         >
           <Text
@@ -174,7 +177,6 @@ export default function Select({
     transform: [
       {
         translateY: withTiming(buttonHeight.value, {
-          // buttonHeight.value + 10 to make space between selected and dropdown
           duration: 100,
         }),
       },
@@ -193,14 +195,16 @@ export default function Select({
     rest.onFocusChange?.(isFocused);
   }, [isFocused]);
 
+  const handleDismiss = () => {
+    setIsFocused(false);
+    onClose?.();
+  };
+
   return (
     <>
       {isFocused && (
         <Pressable
-          onPress={() => {
-            setIsFocused(false);
-            onClose?.();
-          }}
+          onPress={handleDismiss}
           style={[
             styles.overlay,
             {
@@ -232,7 +236,19 @@ export default function Select({
             justifyContent: "space-between",
           }}
         >
-          <View style={{ flex: 15, justifyContent: "center" }}>
+          <View
+            style={{ flex: 15, justifyContent: "center", flexDirection: "row" }}
+          >
+            <View>
+              <Entypo
+                name="chevron-down"
+                color={isFocused ? Colors.secondary : "#fff"}
+                size={25}
+                style={{
+                  transform: [{ rotate: isFocused ? "180deg" : "0deg" }],
+                }}
+              />
+            </View>
             {!!rest.renderCustomSelected ? (
               rest.renderCustomSelected
             ) : (
@@ -240,10 +256,19 @@ export default function Select({
                 numberOfLines={1}
                 style={{
                   fontSize: 18,
-                  color: isFocused ? Colors.secondary : "gray",
+                  color: isFocused
+                    ? Colors.secondary
+                    : selected.some((v) => v.trim().length > 0)
+                    ? "#fff"
+                    : "gray",
+                  flex: 1,
+                  paddingHorizontal: 20,
                 }}
               >
-                {selected.length > 0 ? selected.join(", ") : placeholderText}
+                {selected.length > 0 &&
+                selected.some((v) => v.trim().length > 0)
+                  ? selected.join(", ")
+                  : placeholderText}
               </Text>
             )}
           </View>
@@ -257,8 +282,6 @@ export default function Select({
               styles.list,
               {
                 height: maxSelectHeight || ABS_LIST_HEIGHT,
-                borderTopRightRadius: 0 /* 4 props below are optional set for testing */,
-                borderTopLeftRadius: 0,
                 left: -2,
                 top:
                   rest.anchor === "top"

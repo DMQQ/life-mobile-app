@@ -4,22 +4,50 @@ import BottomSheet, {
 import Select from "@/components/ui/Select/Select";
 import Input from "@/components/ui/TextInput/TextInput";
 import Layout from "@/constants/Layout";
-import { forwardRef } from "react";
-import { KeyboardAvoidingView, Text, View } from "react-native";
+import { forwardRef, useRef } from "react";
+import { Text, View } from "react-native";
 import { Icons } from "../Wallet/WalletItem";
 import type { Action, Filters } from "../../hooks/useGetWallet";
 import Button from "@/components/ui/Button/Button";
 import { useBottomSheet } from "@gorhom/bottom-sheet";
+import SegmentedButtons from "@/components/ui/SegmentedButtons";
 
 interface ExpenseFiltersProps {
   filters: Filters;
   dispatch: (action: Action) => void;
 }
 
+const HelperText = ({
+  text,
+  marginTop = 2.5,
+}: {
+  text: string;
+  marginTop?: number;
+}) => (
+  <Text
+    style={{
+      color: "gray",
+      marginTop,
+      fontSize: 12,
+      paddingBottom: 5,
+      borderBottomWidth: 1,
+      borderBottomColor: "rgba(255,255,255,0.2)",
+    }}
+  >
+    {text.trim()}
+  </Text>
+);
+
 export default forwardRef<BottomSheetGorhom, ExpenseFiltersProps>(
   (props, ref) => {
     return (
-      <BottomSheet snapPoints={["60%", "75%"]} ref={ref}>
+      <BottomSheet
+        onChange={(index) => {
+          //  index < 0 && Keyboard.dismiss();
+        }}
+        snapPoints={["15%", "30%", "50%", "65%", "95%"]}
+        ref={ref}
+      >
         <Forms {...props} />
       </BottomSheet>
     );
@@ -27,11 +55,10 @@ export default forwardRef<BottomSheetGorhom, ExpenseFiltersProps>(
 );
 
 const Forms = (props: ExpenseFiltersProps) => {
-  const { expand, animatedIndex, snapToIndex, collapse, close } =
-    useBottomSheet();
+  const { close } = useBottomSheet();
 
   const onFocus = () => {
-    animatedIndex.value > 0 ? collapse() : expand();
+    // animatedIndex.value > 0 ? collapse() : expand();
   };
 
   const onQueryTextChange = (text: string) => {
@@ -39,15 +66,12 @@ const Forms = (props: ExpenseFiltersProps) => {
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior="position"
-      style={{ flex: 1, paddingHorizontal: 15, marginTop: 10 }}
-    >
+    <View style={{ flex: 1, paddingHorizontal: 15, marginTop: 10 }}>
       <Input
         value={props?.filters?.query}
         onChangeText={onQueryTextChange}
         placeholder="Search for a transaction"
-        onFocus={() => onFocus(1)}
+        onFocus={() => onFocus()}
         placeholderTextColor="gray"
       />
 
@@ -59,7 +83,7 @@ const Forms = (props: ExpenseFiltersProps) => {
         }}
       >
         <Input
-          name="date.from"
+          name="amount.from"
           label="Amount Min"
           value={props.filters.amount.min.toString()}
           placeholder="From"
@@ -73,7 +97,7 @@ const Forms = (props: ExpenseFiltersProps) => {
           }
         />
         <Input
-          name="date.to"
+          name="amount.to"
           label="Amount Max"
           value={props.filters.amount.max.toString()}
           placeholder="to"
@@ -87,23 +111,91 @@ const Forms = (props: ExpenseFiltersProps) => {
           }
         />
       </View>
-      <Text style={{ color: "gray" }}>
-        Leaving the amount fields empty will ignore them, setting only one will
-        filter by that amount only.
-      </Text>
+      <HelperText
+        text="Leaving the amount fields empty will ignore them, setting only one will
+        filter by that amount only."
+      />
+
+      <View
+        style={{
+          flexDirection: "row",
+          width: "100%",
+          gap: 10,
+          marginTop: 15,
+        }}
+      >
+        <Input
+          name="date.from"
+          label="Date Min"
+          value={props.filters.date.from}
+          placeholder="From"
+          style={{ width: (Layout.screen.width - 30) / 2 - 5 }}
+          onFocus={() => onFocus()}
+          onChangeText={(text) =>
+            props.dispatch({ type: "SET_DATE_MIN", payload: text })
+          }
+        />
+        <Input
+          name="date.to"
+          label="Date Max"
+          value={props.filters.date.to}
+          placeholder="To"
+          style={{ width: (Layout.screen.width - 30) / 2 - 5 }}
+          onFocus={() => onFocus()}
+          onChangeText={(text) =>
+            props.dispatch({ type: "SET_DATE_MAX", payload: text })
+          }
+        />
+      </View>
+
+      <HelperText
+        text=" Leaving the amount fields empty will ignore them, setting only one will
+        filter by that amount only."
+      />
+
+      <SegmentedButtons
+        containerStyle={{
+          marginTop: 15,
+          borderRadius: 12.5,
+          width: Layout.screen.width - 30,
+        }}
+        buttonStyle={{ height: 45, borderRadius: 10, padding: 5 }}
+        buttonTextStyle={{ fontSize: 14 }}
+        buttons={[
+          { text: "All", value: "all" },
+          { text: "Income", value: "income" },
+          { text: "Expense", value: "expense" },
+        ]}
+        value="all"
+        onChange={(value) => {
+          console.log(value);
+        }}
+      />
+      <HelperText
+        marginTop={0}
+        text="Select the type of transactions you want to see"
+      />
 
       <Select
-        placeholderText="Choose category or create your own"
+        anchor="top"
+        placeholderText="Choose category"
         onFocusChange={() => onFocus()}
         selected={props?.filters?.category || []}
         multiSelect
-        setSelected={(selected) => {}}
+        setSelected={(selected) => {
+          props.dispatch({ type: "SET_CATEGORY", payload: selected });
+        }}
         options={Object.keys(Icons)}
         transparentOverlay
-        closeOnSelect
-        maxSelectHeight={200}
+        closeOnSelect={false}
+        maxSelectHeight={300}
         containerStyle={{ borderRadius: 10, marginTop: 15 }}
         keyExtractor={(item) => item}
+      />
+
+      <HelperText
+        text="Select the categories you want to see, leaving it empty will show all,
+        you can select multiple categories"
       />
 
       <Button
@@ -111,8 +203,8 @@ const Forms = (props: ExpenseFiltersProps) => {
         fontStyle={{ fontSize: 16 }}
         style={{ marginTop: 20 }}
       >
-        Apply filters!
+        Close Filters
       </Button>
-    </KeyboardAvoidingView>
+    </View>
   );
 };

@@ -40,7 +40,8 @@ export type Action =
   | { type: "SET_AMOUNT_MIN"; payload: number }
   | { type: "SET_AMOUNT_MAX"; payload: number }
   | { type: "SET_DATE_MIN"; payload: string }
-  | { type: "SET_DATE_MAX"; payload: string };
+  | { type: "SET_DATE_MAX"; payload: string }
+  | { type: "SET_CATEGORY"; payload: string[] };
 
 const reducer = (state: typeof init, action: Action) => {
   if (action.type === "SET_QUERY") {
@@ -81,6 +82,12 @@ const reducer = (state: typeof init, action: Action) => {
         ...state.date,
         to: action.payload,
       },
+    };
+  }
+  if (action.type === "SET_CATEGORY") {
+    return {
+      ...state,
+      category: action.payload,
     };
   }
 

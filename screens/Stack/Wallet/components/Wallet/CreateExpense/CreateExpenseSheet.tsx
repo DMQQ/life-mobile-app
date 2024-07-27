@@ -18,6 +18,7 @@ import moment from "moment";
 import ChooseDate from "./ChooseDate";
 import FormFields from "./FormFields";
 import { useWalletContext } from "../../WalletContext";
+import NumbersPad from "../NumbersPad";
 
 const schema = yup.object().shape({
   name: yup.string().required("Name is required"),
