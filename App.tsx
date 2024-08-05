@@ -15,10 +15,8 @@ import ThemeContextProvider from "./utils/context/ThemeContext";
 import * as Notifications from "expo-notifications";
 import Url from "./constants/Url";
 import Colors from "./constants/Colors";
-
-import { onError } from "@apollo/client/link/error";
 import { setContext } from "@apollo/client/link/context";
-import { getItemAsync, deleteItemAsync } from "expo-secure-store";
+import { getItemAsync } from "expo-secure-store";
 import { STORE_KEY } from "./utils/hooks/useUser";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
