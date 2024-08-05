@@ -12,7 +12,7 @@
     "preset": "jest-expo"
   },
   "dependencies": {
-    "@apollo/client": "^3.10.4",
+    "@apollo/client": "^3.11.2",
     "@expo/vector-icons": "^14.0.0",
     "@gorhom/bottom-sheet": "^4.6.3",
     "@react-native-community/datetimepicker": "7.7.0",
@@ -54,6 +54,7 @@
     "react-native-gesture-handler": "~2.14.0",
     "react-native-material-ripple": "^0.9.1",
     "react-native-modal": "^13.0.1",
+    "react-native-modal-datetime-picker": "^17.1.0",
     "react-native-reanimated": "~3.6.2",
     "react-native-safe-area-context": "4.8.2",
     "react-native-screens": "~3.29.0",
