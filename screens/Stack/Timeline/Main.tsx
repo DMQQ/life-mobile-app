@@ -10,7 +10,7 @@ import type { RootStackScreenProps } from "@/types";
 import moment from "moment";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { Colors } from "react-native/Libraries/NewAppScreen";
-import { View } from "react-native";
+import { Platform, View } from "react-native";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -36,8 +36,11 @@ export default function TimelineScreens({
       initialRouteName="Timeline"
       screenOptions={{
         animation: "default",
-        statusBarAnimation: "slide",
+        // statusBarAnimation: "slide",
         animationDuration: 10,
+        gestureEnabled: Platform.OS === "ios",
+        gestureDirection: "horizontal",
+        
       }}
     >
       <Stack.Screen

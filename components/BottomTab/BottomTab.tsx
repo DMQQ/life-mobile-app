@@ -1,5 +1,5 @@
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
-import { StyleSheet } from "react-native";
+import { Platform, StyleSheet } from "react-native";
 import Layout from "../../constants/Layout";
 import Colors from "../../constants/Colors";
 import Ripple from "react-native-material-ripple";
@@ -80,6 +80,8 @@ export default function BottomTab({
 
   const isOpenSubScreen = (state.routes[state.index].state?.index || 0) > 0;
 
+  console.log({ keyboard, isOpenSubScreen });
+
   if (isOpenSubScreen || keyboard) return null;
 
   return (
@@ -87,10 +89,12 @@ export default function BottomTab({
       style={[
         styles.container,
         {
-          paddingBottom: Padding.s + insets.bottom,
+          paddingBottom:
+            Platform.OS === "android" ? Padding.s + insets.bottom : Padding.xxl,
           borderTopColor: Colors.primary_dark,
           borderTopWidth: 1,
-          paddingTop: insets.bottom + Padding.s,
+          paddingTop:
+            Platform.OS === "android" ? insets.bottom + Padding.s : Padding.s,
         },
       ]}
       // entering={FadeInDown}

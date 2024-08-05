@@ -26,18 +26,8 @@ export default function useSuggestedEvents(props: {
     setSubCategory((prev) => (prev === sub ? "" : sub));
   };
 
-  const handleSetTime = () => {
-    DateTimePickerAndroid.open({
-      value: new Date(), // i need only time so no need to have correct date
-      display: "default",
-
-      is24Hour: true,
-      mode: "time",
-
-      onChange(event, date) {
-        setTime(date);
-      },
-    });
+  const handleSetTime = (date:Date) => {
+   setTime(date)
   };
 
   const endTime = moment(time)

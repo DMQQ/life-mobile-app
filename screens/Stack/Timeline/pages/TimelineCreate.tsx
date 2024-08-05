@@ -15,6 +15,8 @@ import useKeyboard from "../../../../utils/hooks/useKeyboard";
 import SegmentedButtons from "@/components/ui/SegmentedButtons";
 import SuggestedEvents from "../components/CreateTimeline/SuggestedEvents/SuggestedEvents";
 import IconButton from "@/components/ui/IconButton/IconButton";
+import DateTimePicker from "react-native-modal-datetime-picker";
+import { useState } from "react";
 
 const styles = StyleSheet.create({
   timeContainer: {
@@ -53,95 +55,104 @@ export default function CreateTimeLineEventModal({
     navigation,
   });
 
+  const [datePicker,setDatePicker] = useState<'begin' | 'end' | ''>('')
+
   return (
-    <>
-      <ScreenContainer>
-        <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
-          {!isEditing && <SuggestedEvents date={route.params.selectedDate} />}
+    <ScreenContainer>
+      <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+        {!isEditing && <SuggestedEvents date={route.params.selectedDate} />}
 
-          <ValidatedInput
-            placeholder="Like  'take out the trash' etc.."
-            name="title"
-            label="Event's title*"
-            showLabel
-            formik={f}
-            helperStyle={{ marginLeft: 2.5 }}
-          />
-          <ValidatedInput
-            showLabel
-            label="Event's content"
-            numberOfLines={
-              isEditing
-                ? f.values.desc.split("\n").length + 10
-                : f.values.desc.split("\n").length + 3
-            }
-            multiline
-            placeholder="What you wanted to do"
-            name="desc"
-            formik={f}
-            scrollEnabled
-            textAlignVertical="top"
-          />
-
-          <ValidatedInput.Label error={false} text="Time range*" />
-          <View style={styles.timeContainer}>
-            <Ripple
-              style={{ flex: 1, padding: 5 }}
-              onPress={() => timePicker(f, "begin")}
-            >
-              <Text style={styles.timeText}>
-                {f.values.begin.split(":").slice(0, 2).join(":")}
-              </Text>
-            </Ripple>
-
-            <Text style={{ color: "gray", padding: 5 }}>to</Text>
-
-            <Ripple
-              style={{ flex: 1, padding: 5 }}
-              onPress={() => timePicker(f, "end")}
-            >
-              <Text style={styles.timeText}>
-                {f.values.end.split(":").slice(0, 2).join(":")}
-              </Text>
-            </Ripple>
-          </View>
-
-          <View style={{ marginTop: 10 }}>
-            <ValidatedInput.Label
-              error={false}
-              text="How to send you notifications?"
-            />
-            <SegmentedButtons
-              containerStyle={{
-                borderRadius: 15,
-                backgroundColor: Colors.primary_light,
-              }}
-              buttonTextStyle={{ fontWeight: "400" }}
-              buttonStyle={{
-                margin: 10,
-                height: 40,
-              }}
-              buttons={radioOptions.map((prev) => ({
-                text: prev.label,
-                value: prev.value,
-              }))}
-              value={f.values.notification}
-              onChange={(val) => f.setFieldValue("notification", val)}
-            />
-          </View>
-        </ScrollView>
-
-        <SubmitButton
-          f={f}
-          openSheet={() => sheetRef.current?.expand()}
-          isEditing={isEditing}
-          isKeyboardOpen={isKeyboardOpen || false}
-          isLoading={isLoading}
+        <ValidatedInput
+          placeholder="Like  'take out the trash' etc.."
+          name="title"
+          label="Event's title*"
+          showLabel
+          formik={f}
+          helperStyle={{ marginLeft: 2.5 }}
         />
-      </ScreenContainer>
+        <ValidatedInput
+          showLabel
+          label="Event's content"
+          numberOfLines={
+            isEditing
+              ? f.values.desc.split("\n").length + 10
+              : f.values.desc.split("\n").length + 3
+          }
+          multiline
+          placeholder="What you wanted to do"
+          name="desc"
+          formik={f}
+          scrollEnabled
+          textAlignVertical="top"
+        />
 
+        <ValidatedInput.Label error={false} text="Time range*" />
+        <View style={styles.timeContainer}>
+          <Ripple
+            style={{ flex: 1, padding: 5 }}
+            onPress={() => setDatePicker('begin') }
+          >
+            <Text style={styles.timeText}>
+              {f.values.begin.split(":").slice(0, 2).join(":")}
+            </Text>
+          </Ripple>
+
+          <Text style={{ color: "gray", padding: 5 }}>to</Text>
+
+          <Ripple
+            style={{ flex: 1, padding: 5 }}
+            onPress={() => setDatePicker('end') }
+
+          >
+            <Text style={styles.timeText}>
+              {f.values.end.split(":").slice(0, 2).join(":")}
+            </Text>
+          </Ripple>
+        </View>
+
+        <View style={{ marginTop: 10 }}>
+          <ValidatedInput.Label
+            error={false}
+            text="How to send you notifications?"
+          />
+          <SegmentedButtons
+            containerStyle={{
+              borderRadius: 15,
+              backgroundColor: Colors.primary_light,
+            }}
+            buttonTextStyle={{ fontWeight: "400" }}
+            buttonStyle={{
+              margin: 10,
+              height: 40,
+            }}
+            buttons={radioOptions.map((prev) => ({
+              text: prev.label,
+              value: prev.value,
+            }))}
+            value={f.values.notification}
+            onChange={(val) => f.setFieldValue("notification", val)}
+          />
+        </View>
+
+        <TimePickerModal
+          isVisible={!!datePicker}
+          onConfirm={(date) => {
+            timePicker(date,datePicker as 'begin' | 'end')
+            setDatePicker('')
+          }}
+          onCancel={() => setDatePicker('')}
+        />
+      </ScrollView>
+
+      <SubmitButton
+        f={f}
+        openSheet={() => sheetRef.current?.expand()}
+        isEditing={isEditing}
+        isKeyboardOpen={isKeyboardOpen || false}
+        isLoading={isLoading}
+      />
       <CreateRepeatableTimeline formik={f} ref={sheetRef as any} />
-    </>
+    </ScreenContainer>
   );
 }
 
@@ -198,3 +209,17 @@ const SubmitButton = (props: SubmitButtonProps) =>
       </Button>
     </View>
   ) : null;
+
+
+  const TimePickerModal = (props:{
+    isVisible:boolean
+    onConfirm:(date:Date)=>void
+    onCancel:()=>void
+  }) => {
+    return <DateTimePicker
+      mode='time'
+      isVisible={props.isVisible}
+      onConfirm={props.onConfirm}
+      onCancel={props.onCancel}
+    />
+  }

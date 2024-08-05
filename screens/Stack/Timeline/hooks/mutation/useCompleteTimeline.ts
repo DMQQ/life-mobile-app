@@ -43,7 +43,7 @@ export default function useCompleteTimeline(timelineId: string) {
     },
 
     onError(err) {
-      console.log(JSON.stringify(err, null, 2));
+      console.log("useCompleteTimeline: ", JSON.stringify(err, null, 2));
     },
   });
 }

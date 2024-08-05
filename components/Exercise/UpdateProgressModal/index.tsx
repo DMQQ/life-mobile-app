@@ -60,7 +60,7 @@ export default function UpdateProgressModal({
       backdropOpacity={0.9}
       onBackdropPress={rest.onDismiss}
       avoidKeyboard
-      statusBarTranslucent
+      // statusBarTranslucent
       deviceHeight={Layout.screen.height}
       useNativeDriver
       hideModalContentWhileAnimating

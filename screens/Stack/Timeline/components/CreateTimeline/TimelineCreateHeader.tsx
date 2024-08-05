@@ -1,7 +1,8 @@
 import { AntDesign, Feather } from "@expo/vector-icons";
-import { StyleSheet, Text, View } from "react-native";
+import { Platform, StyleSheet, Text, View } from "react-native";
 import Ripple from "react-native-material-ripple";
 import { NativeStackHeaderProps } from "@react-navigation/native-stack";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const styles = StyleSheet.create({
   header: {
@@ -26,8 +27,11 @@ export default function TimelineCreateHeader(
     handleChangeDate: () => void;
   }
 ) {
+  const safeareas = useSafeAreaInsets()
   return (
-    <View style={styles.header}>
+    <View style={[styles.header,{
+       marginTop: Platform.OS === "ios" ? safeareas.top : 0,
+    }]}>
       <Ripple style={{ padding: 10 }} onPress={props.navigation.goBack}>
         <AntDesign name="arrowleft" color="#fff" size={23} />
       </Ripple>
