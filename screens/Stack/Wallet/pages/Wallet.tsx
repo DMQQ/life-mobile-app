@@ -1,4 +1,3 @@
-import { useState, useRef } from "react";
 import { StyleSheet, Text, View, SafeAreaView } from "react-native";
 import useGetWallet from "../hooks/useGetWallet";
 import Ripple from "react-native-material-ripple";
@@ -10,9 +9,7 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
 } from "react-native-reanimated";
-import BalanceAlertEditModal from "../components/Wallet/BalanceAlertEditModal";
 import { WalletScreens } from "../Main";
-import { StatusBar } from "expo-status-bar";
 import CreateExpenseSheet from "../components/Wallet/CreateExpense/CreateExpenseSheet";
 import WalletList from "../components/Wallet/WalletList";
 import FloatingButton from "../components/Wallet/FloatingButton";
@@ -113,7 +110,7 @@ function WalletScreen({}: WalletScreens<"Wallet">) {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <StatusBar backgroundColor={Colors.primary} />
+      {/* <StatusBar backgroundColor={Colors.primary} /> */}
       <View style={{ padding: 15 }}>
         <Animated.View style={[styles.header, animatedContainerStyle]}>
           <Ripple onLongPress={handleShowEditSheet}>

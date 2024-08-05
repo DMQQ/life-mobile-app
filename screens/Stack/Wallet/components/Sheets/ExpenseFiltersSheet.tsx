@@ -83,6 +83,8 @@ const Forms = (props: ExpenseFiltersProps) => {
         }}
       >
         <Input
+          keyboardAppearance="dark"
+          keyboardType="numeric"
           name="amount.from"
           label="Amount Min"
           value={props.filters.amount.min.toString()}
@@ -97,6 +99,8 @@ const Forms = (props: ExpenseFiltersProps) => {
           }
         />
         <Input
+          keyboardAppearance="dark"
+          keyboardType="numeric"
           name="amount.to"
           label="Amount Max"
           value={props.filters.amount.max.toString()}
@@ -166,9 +170,13 @@ const Forms = (props: ExpenseFiltersProps) => {
           { text: "Income", value: "income" },
           { text: "Expense", value: "expense" },
         ]}
-        value="all"
+        value={props.filters.type || "all"}
         onChange={(value) => {
-          console.log(value);
+          if (value === "all") {
+            props.dispatch({ type: "SET_TYPE", payload: undefined });
+            return;
+          }
+          props.dispatch({ type: "SET_TYPE", payload: value });
         }}
       />
       <HelperText
