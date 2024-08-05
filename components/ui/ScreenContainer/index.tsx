@@ -1,4 +1,10 @@
-import { ScrollView, StyleProp, View, ViewStyle } from "react-native";
+import {
+  SafeAreaView,
+  ScrollView,
+  StyleProp,
+  View,
+  ViewStyle,
+} from "react-native";
 import Colors from "../../../constants/Colors";
 
 interface ScreenContainerProps {
@@ -19,33 +25,35 @@ export default function ScreenContainer({
   const Component = scroll ? ScrollView : View;
 
   return (
-    <Component
-      contentContainerStyle={[
-        centered &&
-          scroll && {
-            justifyContent: "center",
-            alignItems: "center",
+    <SafeAreaView style={{ flex: 1 }}>
+      <Component
+        contentContainerStyle={[
+          centered &&
+            scroll && {
+              justifyContent: "center",
+              alignItems: "center",
+              flex: 1,
+            },
+        ]}
+        scrollEnabled={scroll}
+        style={[
+          {
             flex: 1,
-          },
-      ]}
-      scrollEnabled={scroll}
-      style={[
-        {
-          flex: 1,
-          padding: 15,
-          backgroundColor: Colors.primary,
-        },
-
-        centered &&
-          !scroll && {
-            justifyContent: "center",
-            alignItems: "center",
+            padding: 15,
+            backgroundColor: Colors.primary,
           },
 
-        style,
-      ]}
-    >
-      {children}
-    </Component>
+          centered &&
+            !scroll && {
+              justifyContent: "center",
+              alignItems: "center",
+            },
+
+          style,
+        ]}
+      >
+        {children}
+      </Component>
+    </SafeAreaView>
   );
 }

@@ -51,7 +51,7 @@ export default function useEditTimeline(
   timelineId: string,
   isEditing: boolean
 ) {
-  const { data } = useGetTimelineById(timelineId || "", {
+  const { data} = useGetTimelineById(timelineId || "", {
     skip: !isEditing,
   });
 

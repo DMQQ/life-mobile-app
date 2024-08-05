@@ -35,7 +35,7 @@ export default function useGetTimelineById(id: string, headers?: Object) {
       id,
     },
     onError(err) {
-      console.log(JSON.stringify(err, null, 2));
+      console.log(`useGetTimelineById: ${id}, ${JSON.stringify(headers)}`, JSON.stringify(err, null, 2));
     },
     ...headers,
   });

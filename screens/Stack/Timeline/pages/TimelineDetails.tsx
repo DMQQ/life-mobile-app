@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from "react-native";
+import { Platform, StyleSheet, Text, View } from "react-native";
 import { StackScreenProps } from "../../../../types";
 import Colors from "../../../../constants/Colors";
 import Color from "color";
@@ -22,6 +22,7 @@ import TimelineHeader from "../components/TimelineHeader";
 import BottomSheetType from "@gorhom/bottom-sheet";
 
 import CreateTaskSheet from "../components/CreateTaskSheet";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const AnimatedRipple = Animated.createAnimatedComponent(Ripple);
 
@@ -109,8 +110,12 @@ export default function TimelineDetails({
 
   const taskRef = useRef<BottomSheetType>(null);
 
+  const safearea = useSafeAreaInsets()
+
   return (
-    <View style={{ backgroundColor: Colors.primary, marginBottom: 50 }}>
+    <View style={{ backgroundColor: Colors.primary, marginBottom: 50, 
+      marginTop: Platform.OS === 'ios' ? safearea.top : 0
+     }}>
       <TimelineHeader
         title={data?.title.slice(0, 18)}
         scrollY={scrollY}

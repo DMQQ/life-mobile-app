@@ -35,7 +35,7 @@ export default function Modal({
       deviceHeight={Layout.screen.height}
       deviceWidth={width || Layout.screen.width}
       hardwareAccelerated
-      statusBarTranslucent
+      // statusBarTranslucent
       {...rest}
     >
       {showInnerContent ? (

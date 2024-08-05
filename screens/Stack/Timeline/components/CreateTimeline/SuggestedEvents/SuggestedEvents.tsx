@@ -8,6 +8,8 @@ import TilesList from "./TilesList";
 import SubcategoryList from "./SubcategoryList";
 import useCreateTimeline from "../../../hooks/general/useCreateTimeline";
 import { useNavigation } from "@react-navigation/native";
+import { useState } from "react";
+import DateTimePicker from "react-native-modal-datetime-picker";
 
 interface SuggestedEventsProps {
   date: string;
@@ -47,6 +49,8 @@ export default function SuggestedEvents(props: SuggestedEventsProps) {
   const hasSubCategory =
     !!selected.name && (selected?.categories?.length || 0) > 0;
 
+    const [isVisible,setIsVisible] = useState(false)
+
   return (
     <View style={styles.container}>
       <Text style={{ color: "#fff", fontSize: 24, fontWeight: "bold" }}>
@@ -78,8 +82,8 @@ export default function SuggestedEvents(props: SuggestedEventsProps) {
         ((selected?.categories?.length || 0) > 0 ? subCategory : true) && (
           <Ripple
             style={styles.time}
-            onPress={handleSetTime}
-            onLayout={() => handleSetTime()}
+            onPress={() => setIsVisible(true)}
+            onLayout={() => setIsVisible(true)}
           >
             <Text style={{ color: "#fff", fontSize: 17 }}>Set time</Text>
             <Text style={{ color: "#fff", fontSize: 17 }}>
@@ -93,6 +97,16 @@ export default function SuggestedEvents(props: SuggestedEventsProps) {
             </Text>
           </Ripple>
         )}
+
+        <DateTimePicker
+          mode="time"
+          isVisible={isVisible}
+          onConfirm={(date) => {
+            handleSetTime(date)
+            setIsVisible(false)
+          }}
+          onCancel={() => setIsVisible(false)}
+        />
 
       <Button
         onPress={() => handleSubmit()}

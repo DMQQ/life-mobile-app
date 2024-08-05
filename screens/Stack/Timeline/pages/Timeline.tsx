@@ -1,4 +1,4 @@
-import { View, Text, VirtualizedList } from "react-native";
+import { View, Text, VirtualizedList, SafeAreaView } from "react-native";
 import Calendar from "../../../../components/Calendar/Calendar";
 import timelineStyles from "../components/timeline.styles";
 import Ripple from "react-native-material-ripple";
@@ -106,7 +106,7 @@ export default function Timeline({
   });
 
   return (
-    <>
+    <SafeAreaView style={{ flex: 1 }}>
       <AnimatedVirtualizedList
         ListHeaderComponent={
           <ListHeaderComponent
@@ -171,7 +171,7 @@ export default function Timeline({
         onViewToggle={timeline.onViewToggle}
         onSearchPress={() => {}}
       />
-    </>
+    </SafeAreaView>
   );
 }
 
