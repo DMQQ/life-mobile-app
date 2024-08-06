@@ -4,13 +4,17 @@ import BottomSheet, {
 import Select from "@/components/ui/Select/Select";
 import Input from "@/components/ui/TextInput/TextInput";
 import Layout from "@/constants/Layout";
-import { forwardRef, useRef } from "react";
+import { forwardRef, useRef, useState } from "react";
 import { Text, View } from "react-native";
 import { Icons } from "../Wallet/WalletItem";
 import type { Action, Filters } from "../../hooks/useGetWallet";
 import Button from "@/components/ui/Button/Button";
 import { useBottomSheet } from "@gorhom/bottom-sheet";
 import SegmentedButtons from "@/components/ui/SegmentedButtons";
+import DateTimePicker from "react-native-modal-datetime-picker";
+import { formatDate } from "@/utils/functions/parseDate";
+import moment from "moment";
+import Ripple from "react-native-material-ripple";
 
 interface ExpenseFiltersProps {
   filters: Filters;
@@ -120,37 +124,7 @@ const Forms = (props: ExpenseFiltersProps) => {
         filter by that amount only."
       />
 
-      <View
-        style={{
-          flexDirection: "row",
-          width: "100%",
-          gap: 10,
-          marginTop: 15,
-        }}
-      >
-        <Input
-          name="date.from"
-          label="Date Min"
-          value={props.filters.date.from}
-          placeholder="From"
-          style={{ width: (Layout.screen.width - 30) / 2 - 5 }}
-          onFocus={() => onFocus()}
-          onChangeText={(text) =>
-            props.dispatch({ type: "SET_DATE_MIN", payload: text })
-          }
-        />
-        <Input
-          name="date.to"
-          label="Date Max"
-          value={props.filters.date.to}
-          placeholder="To"
-          style={{ width: (Layout.screen.width - 30) / 2 - 5 }}
-          onFocus={() => onFocus()}
-          onChangeText={(text) =>
-            props.dispatch({ type: "SET_DATE_MAX", payload: text })
-          }
-        />
-      </View>
+      <ChooseDateRange dispatch={props.dispatch} filters={props.filters} />
 
       <HelperText
         text=" Leaving the amount fields empty will ignore them, setting only one will
@@ -213,6 +187,74 @@ const Forms = (props: ExpenseFiltersProps) => {
       >
         Close Filters
       </Button>
+    </View>
+  );
+};
+
+const ChooseDateRange = (props: {
+  filters: Filters;
+  dispatch: (action: Action) => void;
+}) => {
+  const [datePicker, setDatePicker] = useState<"from" | "to" | "">("");
+
+  return (
+    <View style={{ marginTop: 15, marginBottom: 10 }}>
+      <Text style={{ color: "#fff", fontSize: 16, fontWeight: "bold" }}>
+        Date range
+      </Text>
+      <View style={{ flexDirection: "row", gap: 10, marginTop: 10 }}>
+        <Button
+          onPress={() => setDatePicker("from")}
+          style={{ flex: 1 }}
+          color="secondary"
+          fontStyle={{
+            fontSize: 16,
+            color: !!props.filters.date.from ? "white" : "gray",
+          }}
+        >
+          {props.filters.date.from || "Date start"}
+        </Button>
+        <Text
+          style={{
+            color: "gray",
+            fontSize: 16,
+            alignSelf: "center",
+            marginHorizontal: 10,
+          }}
+        >
+          to
+        </Text>
+        <Button
+          onPress={() => setDatePicker("to")}
+          style={{
+            flex: 1,
+            backgroundColor: moment(props.filters.date.from).isAfter(
+              moment(props.filters.date.to)
+            )
+              ? "red"
+              : "transparent",
+          }}
+          color="secondary"
+          fontStyle={{
+            fontSize: 16,
+            color: !!props.filters.date.to ? "white" : "gray",
+          }}
+        >
+          {props.filters.date.to || "Date end"}
+        </Button>
+      </View>
+
+      <DateTimePicker
+        isVisible={!!datePicker}
+        onCancel={() => setDatePicker("")}
+        onConfirm={(date) => {
+          props.dispatch({
+            type: datePicker === "from" ? "SET_DATE_MIN" : "SET_DATE_MAX",
+            payload: formatDate(date),
+          });
+          setDatePicker("");
+        }}
+      />
     </View>
   );
 };
