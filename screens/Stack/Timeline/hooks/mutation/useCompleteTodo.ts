@@ -1,14 +1,11 @@
 import { gql, useMutation } from "@apollo/client";
-import useUser from "../../../../../utils/hooks/useUser";
 import { GET_TIMELINE } from "../query/useGetTimelineById";
 
 export default function useCompleteTodo(props: {
   todoId: string;
   timelineId: string;
 }) {
-  const { token } = useUser();
-
-  const [completeTodo, state] = useMutation(
+  const [completeTodo] = useMutation(
     gql`
       mutation CompleteTodo($todoId: ID!) {
         completeTimelineTodo(id: $todoId) {
@@ -23,16 +20,18 @@ export default function useCompleteTodo(props: {
           variables: { id: props.timelineId },
         }) as any;
 
-        const todos = data?.timelineById.todos.map((todo: any) => {
-          if (todo.id === props.todoId) {
-            return {
-              ...todo,
-              isCompleted: true,
-            };
-          }
+        const todos = data?.timelineById.todos
+          .map((todo: any) => {
+            if (todo.id === props.todoId) {
+              return {
+                ...todo,
+                isCompleted: true,
+              };
+            }
 
-          return todo;
-        });
+            return todo;
+          })
+          .sort((a: any, b: any) => a.isCompleted - b.isCompleted);
 
         cache.writeQuery({
           query: GET_TIMELINE,

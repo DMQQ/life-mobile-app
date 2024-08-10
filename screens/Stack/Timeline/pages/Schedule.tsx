@@ -14,7 +14,6 @@ export default function ScheduleScreen({
   navigation,
   route,
 }: TimelineScreenProps<"Schedule">) {
-  console.log(route.params);
   const { data, selected } = useGetTimeLineQuery(route?.params?.selectedDate);
 
   const items = useMemo(

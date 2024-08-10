@@ -61,6 +61,9 @@ export interface InputProps extends TextInputProps {
    * hint text style
    **/
   helperStyle?: StyleProp<TextStyle>;
+
+  containerStyle?: StyleProp<ViewStyle>;
+
   /**
    * Is error state
    **/
@@ -114,7 +117,7 @@ export default function Input({
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, rest.containerStyle]}>
       {typeof name !== "undefined" && (
         <Input.Label
           error={error}
