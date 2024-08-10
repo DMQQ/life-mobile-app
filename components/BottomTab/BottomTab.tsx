@@ -80,8 +80,6 @@ export default function BottomTab({
 
   const isOpenSubScreen = (state.routes[state.index].state?.index || 0) > 0;
 
-  console.log({ keyboard, isOpenSubScreen });
-
   if (isOpenSubScreen || keyboard) return null;
 
   return (

@@ -2,23 +2,10 @@ import BottomSheet from "@/components/ui/BottomSheet/BottomSheet";
 import Button from "@/components/ui/Button/Button";
 import Input from "@/components/ui/TextInput/TextInput";
 import useKeyboard from "@/utils/hooks/useKeyboard";
-import { AntDesign, Feather } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
 import BottomSheetType, { useBottomSheet } from "@gorhom/bottom-sheet";
-import {
-  forwardRef,
-  useCallback,
-  useEffect,
-  useReducer,
-  useRef,
-  useState,
-} from "react";
-import {
-  ActivityIndicator,
-  Keyboard,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { forwardRef, useEffect, useReducer, useState } from "react";
+import { ActivityIndicator, Keyboard, Text, View } from "react-native";
 import Ripple from "react-native-material-ripple";
 import useCreateTodo from "../hooks/mutation/useCreateTodo";
 
@@ -191,6 +178,16 @@ const TodoInput = ({
   length: number;
 }) => {
   const [text, setText] = useState<string>("");
+
+  useEffect(() => {
+    let timeout = setTimeout(() => {
+      onAddTodo(text);
+    }, 1000);
+
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [text]);
 
   return (
     <Input

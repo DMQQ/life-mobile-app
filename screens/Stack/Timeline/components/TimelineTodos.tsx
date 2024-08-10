@@ -4,7 +4,7 @@ import Colors from "../../../../constants/Colors";
 import Color from "color";
 import Ripple from "react-native-material-ripple";
 import Button from "../../../../components/ui/Button/Button";
-import React, { useState } from "react";
+import { useState } from "react";
 import Input from "../../../../components/ui/TextInput/TextInput";
 import CompleteTodoButton from "./CompleteTodoButton";
 
@@ -87,29 +87,6 @@ export default function TimelineTodos(props: {
         {props.todos.map((todo) => (
           <Todo timelineId={props.timelineId} key={todo.id} {...todo} />
         ))}
-
-        {/* {show && (
-          <View style={{ marginTop: 15 }}>
-            <Input
-              autoFocus
-              value={text}
-              setValue={setText}
-              placeholder="todo's name"
-              placeholderTextColor={"gray"}
-              onSubmitEditing={handleCreateTodo}
-            />
-
-            <Button
-              disabled={text.trim().length === 0}
-              onPress={handleCreateTodo}
-              fontStyle={styles.buttonText}
-              type="outlined"
-              style={{ borderRadius: 10 }}
-            >
-              Create task
-            </Button>
-          </View>
-        )} */}
       </View>
 
       <Overlay
@@ -173,7 +150,6 @@ import Animated, {
   Layout,
 } from "react-native-reanimated";
 import Overlay from "@/components/ui/Overlay/Overlay";
-import useCreateTodo from "../hooks/mutation/useCreateTodo";
 import useTransferTodos from "../hooks/mutation/useTransferTodos";
 import useRemoveTodo from "../hooks/mutation/useRemoveTodo";
 
@@ -186,11 +162,28 @@ const Todo = (todo: Todos & { timelineId: string }) => {
       entering={FadeInDown}
       exiting={FadeOutUp}
     >
-      <Pressable onLongPress={() => removeTodo()} style={styles.todo}>
+      <Pressable
+        onLongPress={() => removeTodo()}
+        style={[
+          styles.todo,
+          {
+            backgroundColor: todo.isCompleted
+              ? Colors.primary_dark
+              : Colors.primary_lighter,
+          },
+        ]}
+      >
         <View style={{ flexDirection: "row", alignItems: "center" }}>
           <Dot color={todo.isCompleted ? Colors.secondary : "red"} />
 
-          <Text style={{ color: "#fff", marginLeft: 15, fontSize: 16 }}>
+          <Text
+            style={{
+              color: todo.isCompleted ? "gray" : "#fff",
+              marginLeft: 15,
+              fontSize: 16,
+              textDecorationLine: todo.isCompleted ? "line-through" : "none",
+            }}
+          >
             {todo.title}
           </Text>
         </View>
