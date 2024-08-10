@@ -107,7 +107,6 @@ export default function useNotifications(
 
       // ToastAndroid.show("Token: " + token, ToastAndroid.SHORT);
     } catch (error) {
-      console.log("Error: ", error);
       ToastAndroid.show(
         "Notifcations disabled: Couln't upload token \n" + token,
         ToastAndroid.SHORT

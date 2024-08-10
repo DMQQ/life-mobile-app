@@ -4,7 +4,7 @@ import BottomSheet, {
 import Select from "@/components/ui/Select/Select";
 import Input from "@/components/ui/TextInput/TextInput";
 import Layout from "@/constants/Layout";
-import { forwardRef, useRef, useState } from "react";
+import { forwardRef, useState } from "react";
 import { Text, View } from "react-native";
 import { Icons } from "../Wallet/WalletItem";
 import type { Action, Filters } from "../../hooks/useGetWallet";
@@ -14,7 +14,6 @@ import SegmentedButtons from "@/components/ui/SegmentedButtons";
 import DateTimePicker from "react-native-modal-datetime-picker";
 import { formatDate } from "@/utils/functions/parseDate";
 import moment from "moment";
-import Ripple from "react-native-material-ripple";
 
 interface ExpenseFiltersProps {
   filters: Filters;
@@ -82,8 +81,8 @@ const Forms = (props: ExpenseFiltersProps) => {
       <View
         style={{
           flexDirection: "row",
-          width: "100%",
           gap: 10,
+          alignItems: "center",
         }}
       >
         <Input
@@ -93,8 +92,10 @@ const Forms = (props: ExpenseFiltersProps) => {
           label="Amount Min"
           value={props.filters.amount.min.toString()}
           placeholder="From"
-          style={{ width: (Layout.screen.width - 30) / 2 - 5 }}
+          containerStyle={{ flex: 1 }}
           onFocus={() => onFocus()}
+          right={<Text style={{ color: "#fff" }}>zł</Text>}
+          style={{ textAlign: "center" }}
           onChangeText={(text) =>
             props.dispatch({
               type: "SET_AMOUNT_MIN",
@@ -102,14 +103,27 @@ const Forms = (props: ExpenseFiltersProps) => {
             })
           }
         />
+        <Text
+          style={{
+            color: "gray",
+            fontSize: 16,
+            alignSelf: "center",
+            marginHorizontal: 10,
+            marginTop: 15,
+          }}
+        >
+          to
+        </Text>
         <Input
+          right={<Text style={{ color: "#fff" }}>zł</Text>}
           keyboardAppearance="dark"
           keyboardType="numeric"
           name="amount.to"
           label="Amount Max"
           value={props.filters.amount.max.toString()}
           placeholder="to"
-          style={{ width: (Layout.screen.width - 30) / 2 - 5 }}
+          containerStyle={{ flex: 1 }}
+          style={{ textAlign: "center" }}
           onFocus={() => onFocus()}
           onChangeText={(text) =>
             props.dispatch({
