@@ -21,6 +21,7 @@ import WalletContextProvider, {
   useWalletContext,
 } from "../components/WalletContext";
 import EditBalanceSheet from "../components/Sheets/EditBalanceSheet";
+import Charts from "../components/Wallet/Charts";
 
 const styles = StyleSheet.create({
   container: {
@@ -138,6 +139,8 @@ function WalletScreen({}: WalletScreens<"Wallet">) {
       >
         <AntDesign name="plus" size={30} color="#fff" />
       </FloatingButton>
+
+      {/* <Charts data={data} /> */}
 
       <WalletList
         refetch={refetch}
