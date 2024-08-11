@@ -3,43 +3,44 @@ import { useMemo } from "react";
 import { View } from "react-native";
 import { BarChart } from "react-native-gifted-charts";
 import Colors from "@/constants/Colors";
+import Color from "color";
+import Layout from "@/constants/Layout";
 
 interface ChartsProps {
-  data: { wallet: Wallet };
+  data: any[];
 }
 
 export default function Charts({ data }: ChartsProps) {
-  const barData = useMemo(() => {
-    const mapped = data.wallet.expenses.reduce((acc, curr) => {
-      const key = curr.category;
-
-      if (!key || curr.description.startsWith("Balance")) return acc;
-
-      if (!acc[key]) {
-        acc[key] = 0;
-      }
-      acc[key] += curr.amount;
-      return acc;
-    }, {} as Record<string, number>);
-
-    return Object.entries(mapped).map(([key, value]) => ({
-      value,
-      label: key,
-    })) as { value: number; label: string }[];
-  }, []);
-
   return (
-    <View style={{ flex: 1 }}>
-      <BarChart
-        barWidth={20}
-        noOfSections={3}
-        barBorderRadius={4}
-        frontColor={Colors.secondary}
-        data={barData}
-        yAxisThickness={0}
-        xAxisThickness={0}
-        isAnimated
-      />
-    </View>
+    <BarChart
+      width={Layout.screen.width - 60}
+      height={Layout.screen.height / 3.5}
+      sideColor={"#fff"}
+      barWidth={20}
+      noOfSections={3}
+      barBorderRadius={4}
+      frontColor={Colors.secondary}
+      yAxisTextStyle={{ color: "#fff" }}
+      rulesColor={Color(Colors.primary).lighten(1.5).string()}
+      data={data.map((item) => ({
+        ...item,
+        frontColor: item.color,
+        labelComponent: () => (
+          <View
+            style={{
+              width: 10,
+              height: 10,
+              backgroundColor: item.color,
+              borderRadius: 15,
+              marginLeft: 15,
+              marginTop: 5,
+            }}
+          />
+        ),
+      }))}
+      yAxisThickness={0}
+      xAxisThickness={0}
+      isAnimated
+    />
   );
 }

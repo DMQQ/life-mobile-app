@@ -64,7 +64,7 @@ export default function Wallet(props: WalletScreens<"Wallet">) {
   );
 }
 
-function WalletScreen({}: WalletScreens<"Wallet">) {
+function WalletScreen({ navigation }: WalletScreens<"Wallet">) {
   const { data, loading, refetch, filters, dispatch } = useGetWallet();
 
   const {
@@ -120,7 +120,11 @@ function WalletScreen({}: WalletScreens<"Wallet">) {
         buttons={[
           {
             onPress: () => filtersRef.current?.snapToIndex(0),
-            icon: <Ionicons name="filter" size={20} color="#fff" />,
+            icon: <Ionicons name="search" size={20} color="#fff" />,
+          },
+          {
+            onPress: () => navigation.navigate("Charts"),
+            icon: <Ionicons name="stats-chart" size={20} color="#fff" />,
           },
           {
             onPress: () => bottomSheetRef.current?.snapToIndex(0),

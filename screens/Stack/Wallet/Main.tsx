@@ -5,10 +5,12 @@ import { ParamListBase } from "@react-navigation/native";
 import { StackScreenProps } from "../../../types";
 import Watchlist from "./pages/Watchlist";
 import Colors from "@/constants/Colors";
+import WalletCharts from "./pages/WalletCharts";
 
 interface WalletRootStack extends ParamListBase {
   Wallet: undefined;
   Watchlist: undefined;
+  Charts: undefined;
 }
 
 export type WalletScreens<Screen extends keyof WalletRootStack> =
@@ -46,6 +48,8 @@ export default function WalletScreens() {
           title: "",
         }}
       />
+
+      <Stack.Screen name="Charts" component={WalletCharts} />
     </Stack.Navigator>
   );
 }
