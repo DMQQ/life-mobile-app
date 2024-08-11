@@ -8,7 +8,7 @@ import TilesList from "./TilesList";
 import SubcategoryList from "./SubcategoryList";
 import useCreateTimeline from "../../../hooks/general/useCreateTimeline";
 import { useNavigation } from "@react-navigation/native";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import DateTimePicker from "react-native-modal-datetime-picker";
 
 interface SuggestedEventsProps {
