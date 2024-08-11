@@ -24,6 +24,7 @@ const ChooseDate = memo(
 
     const onDayPress = (day: { dateString: string }) => {
       setSelectedDate(day.dateString);
+
       DateTimePickerAndroid.open({
         value: new Date(day.dateString),
         mode: "time",

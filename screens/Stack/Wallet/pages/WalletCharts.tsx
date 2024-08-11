@@ -20,10 +20,15 @@ import lowOpacity from "@/utils/functions/lowOpacity";
 import Color from "color";
 import Button from "@/components/ui/Button/Button";
 import moment, { Moment } from "moment";
+import { WalletSheet } from "../components/Sheets/WalletSheet";
+import { Expense } from "@/types";
+import BottomSheet from "@gorhom/bottom-sheet";
+
+const blueText = Color(Colors.primary).lighten(10).string();
 
 const styles = StyleSheet.create({
   chartInnerText: {
-    color: "#fff",
+    color: blueText,
     fontSize: 14,
     fontWeight: "bold",
     textAlign: "center",
@@ -74,7 +79,7 @@ const styles = StyleSheet.create({
   },
   chartTotal: {
     color: "#fff",
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: "bold",
   },
   button: {
@@ -84,8 +89,6 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary_light,
   },
 });
-
-const blueText = Color(Colors.primary).lighten(10).string();
 
 const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
 
@@ -98,6 +101,12 @@ export default function WalletCharts() {
 
   const barData = useMemo(() => {
     const mapped = data.wallet.expenses.reduce((acc, curr) => {
+      if (
+        !curr.category ||
+        curr.description.startsWith("Balance") ||
+        curr.type === "income"
+      )
+        return acc;
       const key = curr.category;
 
       if (!key || curr.description.startsWith("Balance")) return acc;
@@ -109,12 +118,18 @@ export default function WalletCharts() {
       return acc;
     }, {} as Record<string, number>);
 
-    return Object.entries(mapped).map(([key, value], index) => ({
-      value,
-      label: key,
-      color: secondary_candidates[index],
-      selected: key === selected,
-    })) as any[];
+    return Object.entries(mapped)
+      .map(([key, value], index) => ({
+        value,
+        label: key,
+        color: secondary_candidates[index],
+        selected: key === selected,
+      }))
+      .sort((a, b) => b.value - a.value) as {
+      label: string;
+      value: number;
+      color: string;
+    }[];
   }, [data.wallet.expenses]);
 
   const sumOfExpenses = useMemo(() => {
@@ -123,15 +138,21 @@ export default function WalletCharts() {
     }, 0);
   }, [data.wallet.expenses]);
 
+  const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
+
+  const expenseSheetRef = useRef<BottomSheet>(null);
+
   const Legend = () => (
     <View style={styles.tilesContainer}>
       {barData.map((item, index) => (
         <Ripple
           onPress={() => {
-            setSelected(item.label);
-            setTimeout(() => {
-              listRef.current?.scrollToIndex({ index: 0 });
-            }, 100);
+            setSelected((prev) => (prev === item.label ? "" : item.label));
+            if (selected !== item.label) {
+              setTimeout(() => {
+                listRef.current?.scrollToIndex({ index: 0 });
+              }, 100);
+            }
           }}
           key={index}
           style={[
@@ -152,10 +173,10 @@ export default function WalletCharts() {
           <Text style={styles.totalText}>
             {Math.trunc(item.value)}zł
             <Text style={{ color: "gray" }}>
-              <Text style={{ fontSize: 13 }}>
+              <Text style={{ fontSize: 12 }}>
                 {"  "} / {"  "}
               </Text>
-              <Text style={{ fontSize: 13 }}>
+              <Text style={{ fontSize: 12 }}>
                 {((item.value / sumOfExpenses) * 100).toFixed(2)}%
               </Text>
             </Text>
@@ -212,6 +233,7 @@ export default function WalletCharts() {
                     }) => {
                       setSelected(item.label);
                     }}
+                    animationDuration={1000}
                     innerCircleColor={Colors.primary}
                     showGradient
                     donut
@@ -254,9 +276,17 @@ export default function WalletCharts() {
         removeClippedSubviews
         initialNumToRender={5}
         renderItem={({ item }) => (
-          <WalletItem handlePress={() => {}} {...item} />
+          <WalletItem
+            handlePress={() => {
+              setSelectedExpense(item);
+              expenseSheetRef.current?.expand();
+            }}
+            {...item}
+          />
         )}
       />
+
+      <WalletSheet selected={selectedExpense} ref={expenseSheetRef} />
     </SafeAreaView>
   );
 }
@@ -266,10 +296,10 @@ const DateRangePicker = (props: {
   dispatch: React.Dispatch<Action>;
 }) => {
   const DateRanges = [
-    ["Today", [moment(), moment()]],
-    ["Yesterday", [moment().subtract(1, "day"), moment().subtract(1, "day")]],
-    ["Last 7 days", [moment().subtract(6, "days"), moment()]],
-    ["Last 30 days", [moment().subtract(29, "days"), moment()]],
+    ["Today", [moment().subtract(1, "day"), moment().add(1, "day")]],
+    ["Yesterday", [moment().subtract(2, "day"), moment()]],
+    ["Last 7 days", [moment().subtract(7, "days"), moment().add(1, "day")]],
+    ["Last 30 days", [moment().subtract(30, "days"), moment()]],
     ["This month", [moment().startOf("month"), moment().endOf("month")]],
     [
       "Last month",
@@ -281,9 +311,15 @@ const DateRangePicker = (props: {
     ["This year", [moment().startOf("year"), moment().endOf("year")]],
   ].reverse() as [string, [Moment, Moment]][];
 
-  const [selected, setSelected] = useState("Today");
+  const [selected, setSelected] = useState("This year");
 
   const onDateChange = (label: string, from: Moment, to: Moment) => {
+    if (label === selected) {
+      props.dispatch({ type: "SET_DATE_MAX", payload: "" });
+      props.dispatch({ type: "SET_DATE_MIN", payload: "" });
+      setSelected("");
+      return;
+    }
     props.dispatch({
       type: "SET_DATE_MIN",
       payload: from.format("YYYY-MM-DD"),
@@ -312,11 +348,13 @@ const DateRangePicker = (props: {
           style={[
             styles.button,
             {
+              borderWidth: 0.5,
+              borderColor: Colors.primary,
               marginRight: 10,
               ...(selected === label && {
                 backgroundColor: lowOpacity(Colors.secondary, 0.15),
                 borderWidth: 0.5,
-                borderColor: lowOpacity(Colors.secondary, 0.75),
+                borderColor: lowOpacity(Colors.secondary, 0.5),
               }),
             },
           ]}
