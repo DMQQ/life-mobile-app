@@ -1,7 +1,6 @@
 import moment from "moment";
 import { useState } from "react";
 import { CommonEvents } from "../CommonEvents.data";
-import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 import { InitialValuesType } from "../../../hooks/mutation/useCreateTimeline";
 
 type EventType = (typeof CommonEvents)[0];
@@ -26,8 +25,8 @@ export default function useSuggestedEvents(props: {
     setSubCategory((prev) => (prev === sub ? "" : sub));
   };
 
-  const handleSetTime = (date:Date) => {
-   setTime(date)
+  const handleSetTime = (date: Date) => {
+    setTime(date);
   };
 
   const endTime = moment(time)

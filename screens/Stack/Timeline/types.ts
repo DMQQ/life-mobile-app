@@ -5,7 +5,7 @@ export type TimelineRootStack = {
   TimelineDetails: { timelineId: string };
   TimelineCreate: {
     selectedDate: string;
-    mode: "create" | "edit";
+    mode: "create" | "edit" | "shopping-list";
     timelineId?: string;
   };
   ImagesPreview: { selectedImage: string; timelineId: string };

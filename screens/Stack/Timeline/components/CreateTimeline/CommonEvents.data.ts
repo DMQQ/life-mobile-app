@@ -1,5 +1,9 @@
 export const CommonEvents = [
   {
+    name: "Shopping list",
+    content: "Create a shopping list",
+  },
+  {
     name: "Working out - Gym",
     content: "Exercise for at least 60 minutes",
     categories: ["FBW", "Home workout", "With working module", "Cardio"],
