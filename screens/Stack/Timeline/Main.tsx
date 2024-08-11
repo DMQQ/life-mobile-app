@@ -22,11 +22,12 @@ export default function TimelineScreens({
   useEffect(() => {
     if (!!route.params?.timelineId) {
       (navigation as any).navigate("TimelineDetails", {
+        ...route.params,
         timelineId: route.params.timelineId,
       });
     } else if (route.params?.selectedDate !== undefined) {
       navigation.navigate("TimelineCreate", {
-        selectedDate: route.params.selectedDate,
+        ...route.params,
       });
     }
   }, [route.params]);
@@ -40,7 +41,6 @@ export default function TimelineScreens({
         animationDuration: 10,
         gestureEnabled: Platform.OS === "ios",
         gestureDirection: "horizontal",
-        
       }}
     >
       <Stack.Screen
