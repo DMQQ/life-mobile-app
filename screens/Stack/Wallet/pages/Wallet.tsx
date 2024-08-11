@@ -84,7 +84,7 @@ function WalletScreen({}: WalletScreens<"Wallet">) {
     height: interpolate(
       scrollY.value,
       [0, 200],
-      [150, 25],
+      [150, 30],
       Extrapolation.CLAMP
     ),
     transform: [

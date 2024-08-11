@@ -1,18 +1,18 @@
 import BottomSheet from "@/components/ui/BottomSheet/BottomSheet";
 import Button from "@/components/ui/Button/Button";
 import Input from "@/components/ui/TextInput/TextInput";
-import useKeyboard from "@/utils/hooks/useKeyboard";
 import Colors from "@/constants/Colors";
+import useKeyboard from "@/utils/hooks/useKeyboard";
+import { AntDesign } from "@expo/vector-icons";
 import BottomSheetType, { useBottomSheet } from "@gorhom/bottom-sheet";
-import { forwardRef, useCallback, useEffect, useRef, useState } from "react";
+import Color from "color";
+import { forwardRef, useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Keyboard, Text, View } from "react-native";
 import Ripple from "react-native-material-ripple";
 import useTodos, {
   Action,
   TodoInput as ITodoInput,
 } from "../hooks/general/useTodos";
-import { AntDesign } from "@expo/vector-icons";
-import Color from "color";
 
 export default forwardRef<
   BottomSheetType,
@@ -148,12 +148,13 @@ export const TodoInput = ({
   };
 
   useEffect(() => {
+    if (ref.current === null || text.trim() === "") return;
     let timeout = setTimeout(() => {
       ref.current.focus();
     }, 1);
 
     return () => clearTimeout(timeout);
-  });
+  }, [text]);
 
   return (
     <Input
@@ -164,7 +165,6 @@ export const TodoInput = ({
           <AntDesign name="plus" size={20} color="gray" />
         </Ripple>
       }
-      autoFocus
       placeholderTextColor={"gray"}
       value={text}
       onChangeText={setText}
