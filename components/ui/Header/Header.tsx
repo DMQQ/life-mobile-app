@@ -52,7 +52,7 @@ export default function Header(props: {
           flex: 1,
           justifyContent: "flex-end",
           flexDirection: "row",
-          gap: 5,
+          gap: 10,
         }}
       >
         {props.buttons.map((button, index) => (
