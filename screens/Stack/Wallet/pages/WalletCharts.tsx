@@ -3,13 +3,23 @@ import Colors, { secondary_candidates } from "@/constants/Colors";
 import Layout from "@/constants/Layout";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useMemo, useRef, useState } from "react";
-import { StyleSheet, Text, View, VirtualizedList } from "react-native";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  VirtualizedList,
+} from "react-native";
 import { PieChart } from "react-native-gifted-charts";
 import Ripple from "react-native-material-ripple";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Charts from "../components/Wallet/Charts";
 import WalletItem from "../components/Wallet/WalletItem";
-import useGetWallet from "../hooks/useGetWallet";
+import useGetWallet, { Action, Filters } from "../hooks/useGetWallet";
+import lowOpacity from "@/utils/functions/lowOpacity";
+import Color from "color";
+import Button from "@/components/ui/Button/Button";
+import moment, { Moment } from "moment";
 
 const styles = StyleSheet.create({
   chartInnerText: {
@@ -51,10 +61,36 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 15,
   },
+  totalText: {
+    color: "#fff",
+    fontSize: 22,
+    fontWeight: "bold",
+  },
+  listHeader: {
+    flex: 1,
+    paddingHorizontal: 15,
+    alignItems: "center",
+    marginBottom: 30,
+  },
+  chartTotal: {
+    color: "#fff",
+    fontSize: 24,
+    fontWeight: "bold",
+  },
+  button: {
+    padding: 10,
+    paddingHorizontal: 15,
+    borderRadius: 7.5,
+    backgroundColor: Colors.primary_light,
+  },
 });
 
+const blueText = Color(Colors.primary).lighten(10).string();
+
+const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
+
 export default function WalletCharts() {
-  const { data } = useGetWallet();
+  const { data, dispatch, filters } = useGetWallet();
   const listRef = useRef<VirtualizedList<any> | null>(null);
   const [selected, setSelected] = useState("");
 
@@ -79,13 +115,13 @@ export default function WalletCharts() {
       color: secondary_candidates[index],
       selected: key === selected,
     })) as any[];
-  }, []);
+  }, [data.wallet.expenses]);
 
   const sumOfExpenses = useMemo(() => {
     return data.wallet.expenses.reduce((acc, curr) => {
       return curr.type === "income" ? acc : acc + curr.amount;
     }, 0);
-  }, []);
+  }, [data.wallet.expenses]);
 
   const Legend = () => (
     <View style={styles.tilesContainer}>
@@ -99,28 +135,27 @@ export default function WalletCharts() {
           }}
           key={index}
           style={[
+            styles.tile,
+
             {
               width:
                 barData.length - 1 === index && barData.length % 2 === 1
                   ? "100%"
                   : (Layout.screen.width - 30) / 2 - 5,
+              backgroundColor:
+                selected === item.label
+                  ? Color(Colors.primary_light).lighten(0.4).string()
+                  : Colors.primary_light,
             },
-            styles.tile,
           ]}
         >
-          <Text
-            style={{
-              color: "#fff",
-              fontSize: 22.5,
-              fontWeight: "bold",
-            }}
-          >
+          <Text style={styles.totalText}>
             {Math.trunc(item.value)}zł
             <Text style={{ color: "gray" }}>
-              <Text style={{ fontSize: 14 }}>
+              <Text style={{ fontSize: 13 }}>
                 {"  "} / {"  "}
               </Text>
-              <Text style={{ fontSize: 14 }}>
+              <Text style={{ fontSize: 13 }}>
                 {((item.value / sumOfExpenses) * 100).toFixed(2)}%
               </Text>
             </Text>
@@ -128,7 +163,7 @@ export default function WalletCharts() {
 
           <View style={styles.tileText}>
             <View style={[styles.dot, { backgroundColor: item.color }]} />
-            <Text style={{ color: "#fff" }}>{item.label}</Text>
+            <Text style={{ color: blueText }}>{capitalize(item.label)}</Text>
           </View>
         </Ripple>
       ))}
@@ -166,14 +201,7 @@ export default function WalletCharts() {
         ref={listRef}
         ListHeaderComponent={
           <>
-            <View
-              style={{
-                flex: 1,
-                paddingHorizontal: 15,
-                alignItems: "center",
-                marginBottom: 30,
-              }}
-            >
+            <View style={styles.listHeader}>
               <View style={{ height: Layout.screen.height / 3 }}>
                 {chartType === "pie" ? (
                   <PieChart
@@ -195,15 +223,7 @@ export default function WalletCharts() {
                     innerRadius={70}
                     centerLabelComponent={() => (
                       <View>
-                        <Text
-                          style={{
-                            color: "#fff",
-                            fontSize: 24,
-                            fontWeight: "bold",
-                          }}
-                        >
-                          {sumOfExpenses}zł
-                        </Text>
+                        <Text style={styles.chartTotal}>{sumOfExpenses}zł</Text>
                         <Text style={styles.chartInnerText}>Total</Text>
                       </View>
                     )}
@@ -212,10 +232,17 @@ export default function WalletCharts() {
                   <Charts data={barData} />
                 )}
               </View>
+
+              <DateRangePicker filters={filters} dispatch={dispatch} />
+
               <Legend />
             </View>
 
-            {selected && <Text style={styles.expenseTitle}>{selected}</Text>}
+            {selected && (
+              <Text style={styles.expenseTitle}>
+                {capitalize(selected) || "Income"}
+              </Text>
+            )}
           </>
         }
         data={data.wallet.expenses.filter((item) => item.category === selected)}
@@ -233,3 +260,70 @@ export default function WalletCharts() {
     </SafeAreaView>
   );
 }
+
+const DateRangePicker = (props: {
+  filters: Filters;
+  dispatch: React.Dispatch<Action>;
+}) => {
+  const DateRanges = [
+    ["Today", [moment(), moment()]],
+    ["Yesterday", [moment().subtract(1, "day"), moment().subtract(1, "day")]],
+    ["Last 7 days", [moment().subtract(6, "days"), moment()]],
+    ["Last 30 days", [moment().subtract(29, "days"), moment()]],
+    ["This month", [moment().startOf("month"), moment().endOf("month")]],
+    [
+      "Last month",
+      [
+        moment().subtract(1, "month").startOf("month"),
+        moment().subtract(1, "month").endOf("month"),
+      ],
+    ],
+    ["This year", [moment().startOf("year"), moment().endOf("year")]],
+  ].reverse() as [string, [Moment, Moment]][];
+
+  const [selected, setSelected] = useState("Today");
+
+  const onDateChange = (label: string, from: Moment, to: Moment) => {
+    props.dispatch({
+      type: "SET_DATE_MIN",
+      payload: from.format("YYYY-MM-DD"),
+    });
+    props.dispatch({ type: "SET_DATE_MAX", payload: to.format("YYYY-MM-DD") });
+    setSelected(label);
+  };
+
+  return (
+    <ScrollView
+      showsHorizontalScrollIndicator={false}
+      horizontal
+      style={{
+        width: Layout.screen.width - 30,
+      }}
+    >
+      {DateRanges.map(([label, [from, to]]) => (
+        <Button
+          variant="text"
+          key={label.toString()}
+          onPress={() => onDateChange(label, from, to)}
+          fontStyle={{
+            fontSize: 14,
+            color: selected === label ? Colors.secondary : blueText,
+          }}
+          style={[
+            styles.button,
+            {
+              marginRight: 10,
+              ...(selected === label && {
+                backgroundColor: lowOpacity(Colors.secondary, 0.15),
+                borderWidth: 0.5,
+                borderColor: lowOpacity(Colors.secondary, 0.75),
+              }),
+            },
+          ]}
+        >
+          {label}
+        </Button>
+      ))}
+    </ScrollView>
+  );
+};
