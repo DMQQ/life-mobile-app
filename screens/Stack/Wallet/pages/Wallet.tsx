@@ -1,7 +1,8 @@
-import { StyleSheet, Text, View, SafeAreaView } from "react-native";
-import useGetWallet from "../hooks/useGetWallet";
+import Header from "@/components/ui/Header/Header";
+import Layout from "@/constants/Layout";
+import { AntDesign, Ionicons } from "@expo/vector-icons";
+import { SafeAreaView, StyleSheet, Text, View } from "react-native";
 import Ripple from "react-native-material-ripple";
-import Colors from "../../../../constants/Colors";
 import Animated, {
   Extrapolation,
   interpolate,
@@ -10,18 +11,15 @@ import Animated, {
   useSharedValue,
 } from "react-native-reanimated";
 import { WalletScreens } from "../Main";
-import CreateExpenseSheet from "../components/Wallet/CreateExpense/CreateExpenseSheet";
-import WalletList from "../components/Wallet/WalletList";
-import FloatingButton from "../components/Wallet/FloatingButton";
-import ScreenLoader from "../components/Wallet/ScreenLoader";
+import EditBalanceSheet from "../components/Sheets/EditBalanceSheet";
 import ExpenseFiltersSheet from "../components/Sheets/ExpenseFiltersSheet";
-import { AntDesign, Ionicons } from "@expo/vector-icons";
-import Layout from "@/constants/Layout";
+import CreateExpenseSheet from "../components/Wallet/CreateExpense/CreateExpenseSheet";
+import ScreenLoader from "../components/Wallet/ScreenLoader";
+import WalletList from "../components/Wallet/WalletList";
 import WalletContextProvider, {
   useWalletContext,
 } from "../components/WalletContext";
-import EditBalanceSheet from "../components/Sheets/EditBalanceSheet";
-import Charts from "../components/Wallet/Charts";
+import useGetWallet from "../hooks/useGetWallet";
 
 const styles = StyleSheet.create({
   container: {
@@ -32,11 +30,8 @@ const styles = StyleSheet.create({
     width: Layout.screen.width,
     height: 150,
     alignItems: "center",
-
-    backgroundColor: Colors.primary,
     flexDirection: "row",
     paddingHorizontal: 10,
-    justifyContent: "space-between",
   },
   title: {
     fontSize: 60,
@@ -69,7 +64,7 @@ export default function Wallet(props: WalletScreens<"Wallet">) {
   );
 }
 
-function WalletScreen({}: WalletScreens<"Wallet">) {
+function WalletScreen({ navigation }: WalletScreens<"Wallet">) {
   const { data, loading, refetch, filters, dispatch } = useGetWallet();
 
   const {
@@ -89,16 +84,26 @@ function WalletScreen({}: WalletScreens<"Wallet">) {
     height: interpolate(
       scrollY.value,
       [0, 200],
-      [150, 40],
+      [150, 30],
       Extrapolation.CLAMP
     ),
+    transform: [
+      {
+        translateY: interpolate(
+          scrollY.value,
+          [0, 200],
+          [0, -40],
+          Extrapolation.CLAMP
+        ),
+      },
+    ],
   }));
 
   const animatedBalanceStyle = useAnimatedStyle(() => ({
     fontSize: interpolate(
       scrollY.value,
       [0, 200],
-      [70, 30],
+      [70, 25],
       Extrapolation.CLAMP
     ),
   }));
@@ -111,8 +116,25 @@ function WalletScreen({}: WalletScreens<"Wallet">) {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      {/* <StatusBar backgroundColor={Colors.primary} /> */}
-      <View style={{ padding: 15 }}>
+      <Header
+        buttons={[
+          {
+            onPress: () => filtersRef.current?.snapToIndex(0),
+            icon: <Ionicons name="search" size={20} color="#fff" />,
+          },
+          {
+            onPress: () => navigation.navigate("Charts"),
+            icon: <Ionicons name="stats-chart" size={20} color="#fff" />,
+          },
+          {
+            onPress: () => bottomSheetRef.current?.snapToIndex(0),
+            icon: <AntDesign name="plus" size={20} color="#fff" />,
+          },
+        ]}
+        goBack={false}
+      />
+
+      <View style={{ paddingHorizontal: 15 }}>
         <Animated.View style={[styles.header, animatedContainerStyle]}>
           <Ripple onLongPress={handleShowEditSheet}>
             <Animated.Text style={[styles.title, animatedBalanceStyle]}>
@@ -124,23 +146,6 @@ function WalletScreen({}: WalletScreens<"Wallet">) {
 
         {loading && <ScreenLoader />}
       </View>
-
-      <FloatingButton
-        scrollY={scrollY}
-        position={1}
-        onPress={() => filtersRef.current?.snapToIndex(0)}
-      >
-        <Ionicons name="filter" size={18} color="#fff" />
-      </FloatingButton>
-
-      <FloatingButton
-        scrollY={scrollY}
-        onPress={() => bottomSheetRef.current?.snapToIndex(0)}
-      >
-        <AntDesign name="plus" size={30} color="#fff" />
-      </FloatingButton>
-
-      {/* <Charts data={data} /> */}
 
       <WalletList
         refetch={refetch}

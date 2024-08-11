@@ -4,14 +4,11 @@ import moment from "moment";
 import useCreateTimelineMutation from "../mutation/useCreateTimeline";
 import useGetTimelineById from "../query/useGetTimelineById";
 import useEditTimeline from "../mutation/useEditTimeline";
-// import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 import TimelineCreateHeader from "../../components/CreateTimeline/TimelineCreateHeader";
 import { TimelineScreenProps } from "../../types";
 
-import Datetimepicker from 'react-native-modal-datetime-picker'
-
 import BottomSheetType from "@gorhom/bottom-sheet";
-import { ToastAndroid } from "react-native";
+import { Platform, ToastAndroid } from "react-native";
 import { DATE_FORMAT } from "@/utils/functions/parseDate";
 
 export default function useCreateTimeline({
@@ -64,36 +61,12 @@ export default function useCreateTimeline({
     enableReinitialize: isEditing,
   });
 
-  const timePicker = (date:Date, type: "begin" | "end") => {
-    // DateTimePickerAndroid.open({
-    //   value: new Date(),
-    //   mode: "time",
-    //   display: "default",
-
-    //   is24Hour: true,
-
-    //   onChange: (_, date) =>
-    //     formik.setFieldValue(type, moment(date).format("HH:mm:ss")),
-    // });
-
+  const timePicker = (date: Date, type: "begin" | "end") => {
     f.setFieldValue(type, moment(date).format("HH:mm:ss"));
   };
 
-  const handleChangeDate = (date:Date) => {
+  const handleChangeDate = (date: Date) => {
     f.setFieldValue("date", moment(date).format(DATE_FORMAT));
-    // DateTimePickerAndroid.open({
-    //   value: moment(route.params.selectedDate).toDate(),
-    //   mode: "date",
-
-    //   is24Hour: true,
-
-    //   onChange(_, date) {
-    //     navigation.setParams({
-    //       selectedDate: moment(date).format("YYYY-MM-DD"),
-    //     });
-    //     f.setFieldValue("date", moment(date).format("YYYY-MM-DD"));
-    //   },
-    // });
   };
 
   const [optionsVisible, setOptionsVisible] = useState(false);
@@ -107,7 +80,8 @@ export default function useCreateTimeline({
           selectedDate={route.params.selectedDate}
           onToggleOptions={() => {
             f.resetForm();
-            ToastAndroid.show("Form reseted", ToastAndroid.SHORT);
+            Platform.OS === "android" &&
+              ToastAndroid.show("Form reseted", ToastAndroid.SHORT);
           }}
         />
       ),
