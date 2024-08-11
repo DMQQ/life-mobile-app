@@ -14,13 +14,15 @@ export type Action =
 
 const initialValues = {
   index: 0,
-  todos: [{ index: 0, value: "" }],
+  todos: [] as TodoInput[],
 };
+
+const MAX_TODOS = 8;
 
 const reducer = (state: typeof initialValues, action: Action) => {
   switch (action.type) {
     case "add":
-      if (state.todos.length + 1 > 6 || action.payload.trim() === "")
+      if (state.todos.length > MAX_TODOS || action.payload.trim() === "")
         return state;
       const index = state.index + 1;
       return {
@@ -33,13 +35,12 @@ const reducer = (state: typeof initialValues, action: Action) => {
       );
       return {
         ...state,
-        todos:
-          filtered.length > 0 ? filtered : [{ index: state.index, value: "" }],
+        todos: filtered,
       };
     case "clear":
       return {
         ...state,
-        todos: [{ index: state.index, value: "" }],
+        todos: [],
       };
     default:
       return state;
@@ -60,8 +61,6 @@ export default function useTodos(
   const onSaveTodos = async () => {
     if (loading || !timelineId || state.todos.length === 0) return;
 
-    Keyboard.dismiss();
-
     const filteredTodos = state.todos.filter(
       (todo) => todo.value.trim().length > 0
     );
@@ -76,7 +75,6 @@ export default function useTodos(
       console.log("error", error);
     } finally {
       dispatch({ type: "clear", payload: undefined });
-      //   (ref as any).current?.close();
       onSuccessfulSave?.();
     }
   };
