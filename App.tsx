@@ -75,7 +75,7 @@ export default function App() {
         <ApolloProvider client={apolloClient}>
           <SafeAreaView style={{ flex: 1, backgroundColor: Colors.primary }}>
             <Provider store={store}>
-              <StatusBar translucent />
+              <StatusBar backgroundColor={Colors.primary} />
               <Navigation />
             </Provider>
           </SafeAreaView>

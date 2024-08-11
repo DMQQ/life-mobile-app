@@ -3,7 +3,7 @@ import moment from "moment";
 import { useEffect, useMemo, useState } from "react";
 import useGetTimeLineQuery from "../query/useGetTimeLineQuery";
 import { TimelineScreenProps } from "../../types";
-import { InteractionManager, ToastAndroid } from "react-native";
+import { ToastAndroid } from "react-native";
 
 export const GET_MONTHLY_EVENTS = gql`
   query GetMonthlyEvents($date: String!) {

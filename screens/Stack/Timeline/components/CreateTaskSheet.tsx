@@ -1,10 +1,12 @@
 import BottomSheet from "@/components/ui/BottomSheet/BottomSheet";
 import Button from "@/components/ui/Button/Button";
 import Input from "@/components/ui/TextInput/TextInput";
+import Colors from "@/constants/Colors";
 import useKeyboard from "@/utils/hooks/useKeyboard";
-import { Feather } from "@expo/vector-icons";
+import { AntDesign } from "@expo/vector-icons";
 import BottomSheetType, { useBottomSheet } from "@gorhom/bottom-sheet";
-import { forwardRef, useEffect, useState } from "react";
+import Color from "color";
+import { forwardRef, useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Keyboard, Text, View } from "react-native";
 import Ripple from "react-native-material-ripple";
 import useTodos, {
@@ -87,84 +89,88 @@ const TodosList = ({
 
   return (
     <View style={{ marginTop: 15 }}>
-      {todos.map((todo, index) => (
-        <TodoInput
-          key={todo.index}
-          index={index}
-          onAddTodo={(value) => onAddTodo(value)}
-          onRemoveTodo={() => onRemoveTodo(todo)}
-          length={todos.length}
-        />
-      ))}
+      <TodoInput onAddTodo={onAddTodo} />
+      <View style={{ marginVertical: 10 }}>
+        {todos.map((todo, index) => (
+          <Todo
+            key={todo.index}
+            {...todo}
+            onRemove={() => onRemoveTodo(todo)}
+          />
+        ))}
+      </View>
     </View>
   );
 };
 
+const Todo = (
+  todo: ITodoInput & {
+    onRemove: () => any;
+  }
+) => (
+  <View
+    style={{
+      flexDirection: "row",
+      alignItems: "center",
+      marginBottom: 10,
+      backgroundColor: Colors.primary_light,
+      padding: 10,
+      borderWidth: 1,
+      borderColor: Color(Colors.primary_lighter).lighten(0.5).hex(),
+      justifyContent: "space-between",
+      borderRadius: 10,
+    }}
+  >
+    <Text style={{ color: "#fff", fontSize: 16, marginLeft: 10 }}>
+      {todo.value}
+    </Text>
+
+    <Ripple onPress={todo.onRemove}>
+      <AntDesign name="close" size={20} color={Colors.error} />
+    </Ripple>
+  </View>
+);
+
 export const TodoInput = ({
-  index,
   onAddTodo,
-  onRemoveTodo,
-  length,
 }: {
-  index: number;
   onAddTodo: (value: string) => any;
-  onRemoveTodo: () => any;
-  length: number;
 }) => {
   const [text, setText] = useState<string>("");
 
-  useEffect(() => {
-    let timeout = setTimeout(() => {
-      onAddTodo(text);
-    }, 1000);
+  const ref = useRef<any>();
 
-    return () => {
-      clearTimeout(timeout);
-    };
+  const onSubmit = () => {
+    if (text.trim().length > 0) {
+      onAddTodo(text);
+      setText("");
+    }
+  };
+
+  useEffect(() => {
+    if (ref.current === null || text.trim() === "") return;
+    let timeout = setTimeout(() => {
+      ref.current.focus();
+    }, 1);
+
+    return () => clearTimeout(timeout);
   }, [text]);
 
   return (
     <Input
-      autoFocus={index === 0 && length > 1}
-      editable={index === 0}
-      left={
-        <Text
-          style={{
-            color: "#fff",
-            fontWeight: "bold",
-            fontSize: 18,
-            padding: 5,
-          }}
-        >
-          {index + 1}
-        </Text>
-      }
-      right={({ isFocused, theme }) => (
-        <Ripple
-          style={{ padding: 5 }}
-          onPress={() => (isFocused ? onAddTodo(text) : onRemoveTodo())}
-        >
-          <Feather
-            size={18}
-            name={isFocused ? "check" : "trash"}
-            color={isFocused ? theme.colors.secondary : "#fff"}
-          />
+      inputRef={ref}
+      style={{ margin: 0 }}
+      right={
+        <Ripple onPress={onSubmit}>
+          <AntDesign name="plus" size={20} color="gray" />
         </Ripple>
-      )}
+      }
       placeholderTextColor={"gray"}
       value={text}
       onChangeText={setText}
       placeholder="Enter todo"
-      onSubmitEditing={() => {
-        if (text.trim().length > 0) {
-          onAddTodo(text);
-        } else {
-          onRemoveTodo();
-        }
-      }}
-      onEndEditing={() => {
-        if (text.trim().length === 0) onRemoveTodo();
-      }}
+      onSubmitEditing={onSubmit}
+      onEndEditing={onSubmit}
     />
   );
 };

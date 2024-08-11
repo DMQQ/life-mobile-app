@@ -3,7 +3,7 @@ import Calendar from "../../../../components/Calendar/Calendar";
 import timelineStyles from "../components/timeline.styles";
 import Ripple from "react-native-material-ripple";
 import { TimelineScreenProps } from "../types";
-import { Entypo, MaterialIcons } from "@expo/vector-icons";
+import { AntDesign, Entypo, MaterialIcons } from "@expo/vector-icons";
 import DateList from "../../../../components/DateList/DateList";
 import NotFound from "../../Home/components/NotFound";
 import { TimelineScreenLoader } from "../components/LoaderSkeleton";
@@ -14,6 +14,7 @@ import Colors from "@/constants/Colors";
 import { memo } from "react";
 import Color from "color";
 import Animated, {
+  interpolate,
   SharedValue,
   useAnimatedScrollHandler,
   useAnimatedStyle,
@@ -21,6 +22,8 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import Layout from "@/constants/Layout";
+import Header from "@/components/ui/Header/Header";
+import moment from "moment";
 
 const ListHeaderComponent = memo(
   (
@@ -29,7 +32,7 @@ const ListHeaderComponent = memo(
       translateY: SharedValue<number>;
     }
   ) => (
-    <>
+    <View style={{ marginBottom: 25 }}>
       {t.switchView === "calendar" && (
         <Calendar
           selected={t.selected}
@@ -48,27 +51,7 @@ const ListHeaderComponent = memo(
           translateY={t.translateY}
         />
       )}
-
-      <View style={timelineStyles.listHeadingContainer}>
-        <Text style={{ color: "#fff", fontSize: 18, fontWeight: "500" }}>
-          {t.displayDate}
-        </Text>
-
-        <Ripple
-          style={{
-            padding: 7.5,
-            paddingHorizontal: 7.5 * 2,
-            backgroundColor: Colors.secondary,
-            borderRadius: 25,
-          }}
-          onPress={() => t.createTimeline()}
-        >
-          <Text style={{ color: "#fff", fontWeight: "500", fontSize: 13 }}>
-            CREATE EVENT
-          </Text>
-        </Ripple>
-      </View>
-    </>
+    </View>
   )
 );
 
@@ -84,84 +67,106 @@ export default function Timeline({
     route,
   });
 
-  const isVisible = useSharedValue(true);
-  const lastScrollY = useSharedValue(0);
-  const direction = useSharedValue(0);
-
   const translateY = useSharedValue(0);
 
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
       const currentScrollY = event.contentOffset.y;
       translateY.value = currentScrollY;
-      direction.value = currentScrollY > lastScrollY.value ? 1 : -1;
-      lastScrollY.value = currentScrollY;
-
-      if (direction.value === -1) {
-        isVisible.value = true;
-      } else {
-        isVisible.value = false;
-      }
     },
   });
 
-  return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <AnimatedVirtualizedList
-        ListHeaderComponent={
-          <ListHeaderComponent
-            translateY={translateY}
-            navigation={navigation}
-            {...timeline}
-          />
-        }
-        ListEmptyComponent={
-          timeline.loading ? (
-            <TimelineScreenLoader loading />
-          ) : (
-            <View
-              style={{
-                padding: 25,
-                flex: 1,
-                justifyContent: "center",
-                alignItems: "center",
-                marginTop: 25,
-              }}
-            >
-              <NotFound />
-            </View>
-          )
-        }
-        onScroll={scrollHandler}
-        contentContainerStyle={{
-          padding: 15,
-        }}
-        CellRendererComponent={({ index, style, ...rest }) => {
-          const newStyle = [style, { zIndex: -1 }];
-          return <View style={newStyle} {...rest} />;
-        }}
-        data={(timeline.data?.timeline as GetTimelineQuery[]) || []}
-        initialNumToRender={3}
-        keyExtractor={(item: any) => item.id}
-        getItem={(data, index) => data[index] as GetTimelineQuery}
-        getItemCount={(data) => data.length}
-        renderItem={({ item }: { item: GetTimelineQuery }): any => (
-          <TimelineItem
-            styles={{
-              backgroundColor: Colors.primary_lighter,
-              borderRadius: 15,
-              padding: 20,
-              marginBottom: 10,
-              zIndex: 1,
-            }}
-            key={item.id}
-            location="timeline"
-            {...item}
-          />
-        )}
-      />
+  const animatedTitleStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(translateY.value, [0, 50], [0, 1]),
+  }));
 
-      <AnimatedPopNavigation
+  return (
+    <>
+      <SafeAreaView style={{ flex: 1 }}>
+        <Header
+          title={new Intl.DateTimeFormat("en-US", {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          }).format(moment(timeline.selected).toDate())}
+          titleAnimatedStyle={animatedTitleStyle}
+          buttons={[
+            {
+              onPress: () => navigation.navigate("Search"),
+              icon: <MaterialIcons name="search" size={20} color="#fff" />,
+            },
+            {
+              onPress: timeline.onViewToggle,
+              icon: (
+                <MaterialIcons
+                  name={timeline.switchView === "calendar" ? "list" : "event"}
+                  size={20}
+                  color="#fff"
+                />
+              ),
+            },
+            {
+              icon: <AntDesign name="plus" size={20} color="#fff" />,
+              onPress: () => timeline.createTimeline(),
+            },
+          ]}
+        />
+        <AnimatedVirtualizedList
+          ListHeaderComponent={
+            <ListHeaderComponent
+              translateY={translateY}
+              navigation={navigation}
+              {...timeline}
+            />
+          }
+          ListEmptyComponent={
+            timeline.loading ? (
+              <TimelineScreenLoader loading />
+            ) : (
+              <View
+                style={{
+                  padding: 25,
+                  flex: 1,
+                  justifyContent: "center",
+                  alignItems: "center",
+                  marginTop: 25,
+                }}
+              >
+                <NotFound />
+              </View>
+            )
+          }
+          onScroll={scrollHandler}
+          contentContainerStyle={{
+            paddingHorizontal: 15,
+          }}
+          CellRendererComponent={({ index, style, ...rest }) => {
+            const newStyle = [style, { zIndex: -1 }];
+            return <View style={newStyle} {...rest} />;
+          }}
+          data={(timeline.data?.timeline as GetTimelineQuery[]) || []}
+          initialNumToRender={3}
+          keyExtractor={(item: any) => item.id}
+          getItem={(data, index) => data[index] as GetTimelineQuery}
+          getItemCount={(data) => data.length}
+          renderItem={({ item }: { item: GetTimelineQuery }): any => (
+            <TimelineItem
+              styles={{
+                backgroundColor: Colors.primary_lighter,
+                borderRadius: 15,
+                padding: 20,
+                marginBottom: 10,
+                zIndex: 1,
+              }}
+              key={item.id}
+              location="timeline"
+              {...item}
+            />
+          )}
+        />
+
+        {/* <AnimatedPopNavigation
         isVisible={isVisible}
         onSchedulePress={() =>
           navigation.navigate("Schedule", {
@@ -170,8 +175,9 @@ export default function Timeline({
         }
         onViewToggle={timeline.onViewToggle}
         onSearchPress={() => {}}
-      />
-    </SafeAreaView>
+      /> */}
+      </SafeAreaView>
+    </>
   );
 }
 
