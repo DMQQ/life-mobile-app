@@ -23,6 +23,7 @@ const styles = StyleSheet.create({
   modal_container: {
     padding: 15,
     flex: 1,
+    paddingBottom: 50,
   },
   title_container: {
     marginBottom: 15,
@@ -155,7 +156,7 @@ const CreateRepeatableTimeline = forwardRef<
   }, [f.values.repeatCount, f.values.repeatOn, f.values.repeatEveryNth]);
 
   return (
-    <BottomSheet snapPoints={["70%"]} ref={ref}>
+    <BottomSheet snapPoints={["55%"]} ref={ref}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
         <View style={styles.modal_container}>
           {view === "form" && (
