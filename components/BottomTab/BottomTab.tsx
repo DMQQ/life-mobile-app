@@ -7,7 +7,8 @@ import { Ionicons } from "@expo/vector-icons";
 import useKeyboard from "../../utils/hooks/useKeyboard";
 import Animated from "react-native-reanimated";
 import { useTheme } from "../../utils/context/ThemeContext";
-import { Padding, Rounded } from "@/constants/Values";
+import { Padding } from "@/constants/Values";
+import lowOpacity from "@/utils/functions/lowOpacity";
 
 const styles = StyleSheet.create({
   container: {
@@ -33,10 +34,6 @@ export default function BottomTab({
 }: BottomTabBarProps) {
   const navigate = (route: string) => navigation.navigate(route);
 
-  const onCalendarLongPress = () => {
-    navigation.navigate("TimelineScreens", { screen: "Timeline" });
-  };
-
   const activeRoute = state.routes[state.index].name;
 
   const { theme } = useTheme();
@@ -45,15 +42,14 @@ export default function BottomTab({
     <Ripple
       rippleCentered
       rippleColor={theme.colors.secondary}
-      onLongPress={
-        props.route === "TimelineScreens" ? onCalendarLongPress : undefined
-      }
       style={[
         styles.button,
         {
           width: Layout.screen.width / state.routes.length,
           backgroundColor:
-            activeRoute === props.route ? Colors.primary_light : undefined,
+            activeRoute === props.route
+              ? lowOpacity(theme.colors.secondary, 0.075)
+              : undefined,
         },
       ]}
       onPress={() => navigate(props.route)}
@@ -80,6 +76,8 @@ export default function BottomTab({
 
   const isOpenSubScreen = (state.routes[state.index].state?.index || 0) > 0;
 
+  console.log("isOpenSubScreen", isOpenSubScreen);
+
   if (isOpenSubScreen || keyboard) return null;
 
   return (
@@ -91,12 +89,11 @@ export default function BottomTab({
             Platform.OS === "android" ? Padding.s + insets.bottom : Padding.xxl,
           borderTopColor: Colors.primary_dark,
           borderTopWidth: 1,
+
           paddingTop:
             Platform.OS === "android" ? insets.bottom + Padding.s : Padding.s,
         },
       ]}
-      // entering={FadeInDown}
-      // exiting={FadeOutDown}
     >
       <Btn route="NotesScreens" label="Notes" iconName={"clipboard"} />
 

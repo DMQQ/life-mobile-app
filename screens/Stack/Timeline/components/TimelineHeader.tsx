@@ -58,24 +58,21 @@ const Header = (props: {
       : {}
   );
 
+  const handleBack = () => {
+    props.navigation.canGoBack() && props.navigation.goBack();
+  };
+
   return (
     <View style={styles.container}>
-      <Ripple
-        onPress={() => props.navigation.replace("Timeline")}
-        style={{ padding: 10 }}
-      >
+      <Ripple onPress={handleBack} style={{ padding: 10 }}>
         <AntDesign name="arrowleft" size={20} color={"#fff"} />
       </Ripple>
 
-      <Animated.Text
-        layout={LayoutAnim}
-        style={[styles.title, titleAnimatedStyle]}
-      >
+      <Animated.Text style={[styles.title, titleAnimatedStyle]}>
         {props.title}
       </Animated.Text>
 
       <AnimatedRipple
-        layout={LayoutAnim}
         disabled={props.isCompleted}
         onPress={() => props.onTaskToggle()}
         style={styles.button}

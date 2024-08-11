@@ -16,9 +16,8 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function TimelineScreens({
   route,
+  navigation,
 }: RootStackScreenProps<"TimelineScreens">) {
-  const navigation = useNavigation<any>();
-
   useEffect(() => {
     if (!!route.params?.timelineId) {
       (navigation as any).navigate("TimelineDetails", {
@@ -26,7 +25,7 @@ export default function TimelineScreens({
         timelineId: route.params.timelineId,
       });
     } else if (route.params?.selectedDate !== undefined) {
-      navigation.navigate("TimelineCreate", {
+      (navigation as any).navigate("TimelineCreate", {
         ...route.params,
       });
     }
@@ -36,9 +35,6 @@ export default function TimelineScreens({
     <Stack.Navigator
       initialRouteName="Timeline"
       screenOptions={{
-        animation: "default",
-        // statusBarAnimation: "slide",
-        animationDuration: 10,
         gestureEnabled: Platform.OS === "ios",
         gestureDirection: "horizontal",
       }}
@@ -68,7 +64,6 @@ export default function TimelineScreens({
         options={{
           headerTitle: "",
           headerTransparent: true,
-          animationTypeForReplace: "pop",
           animation: "none",
           presentation: "transparentModal",
         }}
@@ -86,9 +81,6 @@ export default function TimelineScreens({
         options={({ route }) => ({
           headerTitle: route.params.selectedDate,
           headerTitleAlign: "center",
-          headerBackground: () => (
-            <View style={{ backgroundColor: Colors.primary }}></View>
-          ),
         })}
         initialParams={{
           selected: moment().format("YYYY-MM-DD"),
