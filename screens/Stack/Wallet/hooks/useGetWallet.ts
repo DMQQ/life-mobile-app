@@ -1,3 +1,4 @@
+import { Wallet } from "@/types";
 import { gql, useQuery } from "@apollo/client";
 import { useEffect, useReducer } from "react";
 
@@ -149,5 +150,5 @@ export default function useGetWallet() {
     return () => clearTimeout(timeout);
   }, [filters]);
 
-  return { ...st, filters, dispatch };
+  return { ...st, data: st.data as { wallet: Wallet }, filters, dispatch };
 }
