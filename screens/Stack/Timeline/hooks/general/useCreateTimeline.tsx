@@ -28,8 +28,10 @@ export default function useCreateTimeline({
 
   const isEditing = route.params.mode === "edit";
 
+  console.log("isEditing", isEditing, route.params);
+
   const { data } = useGetTimelineById(route.params.timelineId || "", {
-    skip: !isEditing,
+    skip: !isEditing || route?.params?.timelineId === undefined,
   });
 
   const { editTimeline, initialFormProps: initialEditFormValues } =
