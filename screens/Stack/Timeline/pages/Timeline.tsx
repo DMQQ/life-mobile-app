@@ -1,29 +1,24 @@
-import { View, Text, VirtualizedList, SafeAreaView } from "react-native";
-import Calendar from "../../../../components/Calendar/Calendar";
-import timelineStyles from "../components/timeline.styles";
-import Ripple from "react-native-material-ripple";
-import { TimelineScreenProps } from "../types";
-import { AntDesign, Entypo, MaterialIcons } from "@expo/vector-icons";
-import DateList from "../../../../components/DateList/DateList";
-import NotFound from "../../Home/components/NotFound";
-import { TimelineScreenLoader } from "../components/LoaderSkeleton";
-import useTimeline from "../hooks/general/useTimeline";
-import { GetTimelineQuery } from "../hooks/query/useGetTimeLineQuery";
-import TimelineItem from "../components/TimelineItem";
+import Header from "@/components/ui/Header/Header";
 import Colors from "@/constants/Colors";
+import { AntDesign, MaterialIcons } from "@expo/vector-icons";
+import moment from "moment";
 import { memo } from "react";
-import Color from "color";
+import { SafeAreaView, View, VirtualizedList } from "react-native";
 import Animated, {
   interpolate,
   SharedValue,
   useAnimatedScrollHandler,
   useAnimatedStyle,
   useSharedValue,
-  withTiming,
 } from "react-native-reanimated";
-import Layout from "@/constants/Layout";
-import Header from "@/components/ui/Header/Header";
-import moment from "moment";
+import Calendar from "../../../../components/Calendar/Calendar";
+import DateList from "../../../../components/DateList/DateList";
+import NotFound from "../../Home/components/NotFound";
+import { TimelineScreenLoader } from "../components/LoaderSkeleton";
+import TimelineItem from "../components/TimelineItem";
+import useTimeline from "../hooks/general/useTimeline";
+import { GetTimelineQuery } from "../hooks/query/useGetTimeLineQuery";
+import { TimelineScreenProps } from "../types";
 
 const ListHeaderComponent = memo(
   (
@@ -133,7 +128,7 @@ export default function Timeline({
                   marginTop: 25,
                 }}
               >
-                <NotFound />
+                <NotFound selectedDate={timeline.selected} />
               </View>
             )
           }
@@ -165,114 +160,7 @@ export default function Timeline({
             />
           )}
         />
-
-        {/* <AnimatedPopNavigation
-        isVisible={isVisible}
-        onSchedulePress={() =>
-          navigation.navigate("Schedule", {
-            selectedDate: timeline.selected,
-          })
-        }
-        onViewToggle={timeline.onViewToggle}
-        onSearchPress={() => {}}
-      /> */}
       </SafeAreaView>
     </>
   );
 }
-
-const AnimatedPopNavigation = ({
-  isVisible,
-  onSchedulePress,
-  onSearchPress,
-  onViewToggle,
-}: {
-  isVisible: SharedValue<boolean>;
-  onSchedulePress: () => void;
-  onViewToggle: () => void;
-  onSearchPress: () => void;
-}) => {
-  const Separator = () => (
-    <View
-      style={{
-        width: 1,
-        height: "100%",
-        backgroundColor: Color(Colors.primary).lighten(4).hex(),
-      }}
-    />
-  );
-
-  const TabButton = ({
-    icon,
-    text,
-    onPress,
-  }: {
-    icon: any;
-    text: string;
-    onPress: (...rest: any) => any;
-  }) => (
-    <Ripple
-      style={{ flexDirection: "row", gap: 5, alignItems: "center" }}
-      onPress={onPress}
-    >
-      {icon}
-      <Text style={{ color: "#fff", fontSize: 13 }}>{text}</Text>
-    </Ripple>
-  );
-
-  const translation = useAnimatedStyle(() => ({
-    transform: [
-      { translateY: isVisible.value ? withTiming(0) : withTiming(100) },
-    ],
-  }));
-
-  return (
-    <Animated.View
-      style={[
-        {
-          position: "absolute",
-          bottom: 10,
-          width: Layout.screen.width,
-          justifyContent: "center",
-          alignItems: "center",
-        },
-        translation,
-      ]}
-    >
-      <View
-        style={{
-          backgroundColor: Colors.primary_lighter,
-          borderRadius: 100,
-          padding: 10,
-          paddingHorizontal: 7.5 * 3,
-          borderWidth: 1,
-          borderColor: Color(Colors.primary_lighter).lighten(1).hex(),
-          flexDirection: "row",
-          gap: 15,
-        }}
-      >
-        <TabButton
-          onPress={onSchedulePress}
-          icon={<MaterialIcons name="event" size={15} color="#fff" />}
-          text="Schedule"
-        />
-
-        <Separator />
-
-        <TabButton
-          onPress={onViewToggle}
-          icon={<Entypo name="list" size={15} color="#fff" />}
-          text="Grid|List"
-        />
-
-        <Separator />
-
-        <TabButton
-          onPress={onSearchPress}
-          icon={<MaterialIcons name="search" size={15} color="#fff" />}
-          text="Search"
-        />
-      </View>
-    </Animated.View>
-  );
-};
