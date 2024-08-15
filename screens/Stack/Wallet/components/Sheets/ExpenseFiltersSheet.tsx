@@ -44,7 +44,7 @@ const HelperText = ({
 export default forwardRef<BottomSheetGorhom, ExpenseFiltersProps>(
   (props, ref) => {
     return (
-      <BottomSheet snapPoints={["90%"]} ref={ref}>
+      <BottomSheet snapPoints={["95%"]} ref={ref}>
         <Forms {...props} />
       </BottomSheet>
     );
