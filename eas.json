@@ -3,7 +3,14 @@
     "preview": {
       "android": {
         "buildType": "apk",
-        "image":"latest"
+        "image": "latest"
+      }
+    },
+    "development-simulator": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "ios": {
+        "simulator": true
       }
     },
     "preview2": {

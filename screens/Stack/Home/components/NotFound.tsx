@@ -29,12 +29,12 @@ const styles = StyleSheet.create({
   },
 });
 
-export default function NotFound() {
+export default function NotFound({ selectedDate }: { selectedDate: string }) {
   const navigation = useNavigation<any>();
 
   const onPress = () => {
     navigation.navigate("TimelineScreens", {
-      selectedDate: moment().format("YYYY-MM-DD"),
+      selectedDate: selectedDate || moment().format("YYYY-MM-DD"),
     });
   };
 

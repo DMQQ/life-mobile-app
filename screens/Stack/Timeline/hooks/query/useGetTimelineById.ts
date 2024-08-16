@@ -1,7 +1,5 @@
 import { gql, useLazyQuery, useQuery } from "@apollo/client";
 
-import useUser from "../../../../../utils/hooks/useUser";
-
 export const GET_TIMELINE = gql`
   query GetTimeline($id: String!) {
     timelineById(id: $id) {
@@ -34,10 +32,8 @@ export default function useGetTimelineById(id: string, headers?: Object) {
     variables: {
       id,
     },
-    onError(err) {
-      console.log(`useGetTimelineById: ${id}, ${JSON.stringify(headers)}`, JSON.stringify(err, null, 2));
-    },
     ...headers,
+    skip: !id,
   });
 
   return { data: data?.timelineById, refetch, loading };
