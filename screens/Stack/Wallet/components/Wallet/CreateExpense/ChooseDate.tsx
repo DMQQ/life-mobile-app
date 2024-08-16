@@ -4,7 +4,7 @@ import Colors from "@/constants/Colors";
 import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 import moment from "moment";
 import { memo, useEffect, useState } from "react";
-import { View } from "react-native";
+import { Platform, View } from "react-native";
 
 const ChooseDate = memo(
   ({
@@ -22,21 +22,28 @@ const ChooseDate = memo(
       setSelectedDate(moment(date).format("YYYY-MM-DD"));
     }, [date]);
 
-    const onDayPress = (day: { dateString: string }) => {
+    const onDayPress = (day: { dateString: string; timestamp: number }) => {
       setSelectedDate(day.dateString);
 
-      DateTimePickerAndroid.open({
-        value: new Date(day.dateString),
-        mode: "time",
-        display: "clock",
-        onChange: (event, date) => {
-          if (event.type === "set" && date instanceof Date) {
-            setDateField(date);
-            onDismissCalendar();
-            DateTimePickerAndroid.dismiss("time");
-          }
-        },
-      });
+      console.log(day);
+
+      if (Platform.OS === "ios") {
+        setDateField(new Date(day.timestamp));
+        onDismissCalendar();
+      } else {
+        DateTimePickerAndroid.open({
+          value: new Date(day.dateString),
+          mode: "time",
+          display: "clock",
+          onChange: (event, date) => {
+            if (event.type === "set" && date instanceof Date) {
+              setDateField(date);
+              onDismissCalendar();
+              DateTimePickerAndroid.dismiss("time");
+            }
+          },
+        });
+      }
     };
 
     return (

@@ -1,24 +1,23 @@
-import { FormikHelpers, FormikProps, useFormik } from "formik";
-import { View, StyleSheet } from "react-native";
-import Button from "@/components/ui/Button/Button";
-import useCreateActivity from "../../../hooks/useCreateActivity";
-import * as yup from "yup";
-import SegmentedButtons from "@/components/ui/SegmentedButtons";
 import BottomSheet, {
   BottomSheetGorhom,
 } from "@/components/ui/BottomSheet/BottomSheet";
-import { forwardRef, useEffect, useState, useTransition } from "react";
-import { useBottomSheet } from "@gorhom/bottom-sheet";
+import Button from "@/components/ui/Button/Button";
+import SegmentedButtons from "@/components/ui/SegmentedButtons";
 import Colors from "@/constants/Colors";
 import Layout from "@/constants/Layout";
+import { AntDesign } from "@expo/vector-icons";
+import { useBottomSheet } from "@gorhom/bottom-sheet";
+import { FormikHelpers, FormikProps, useFormik } from "formik";
+import moment from "moment";
+import { forwardRef, useEffect, useState, useTransition } from "react";
+import { StyleSheet, View } from "react-native";
 import Ripple from "react-native-material-ripple";
 import Animated from "react-native-reanimated";
-import { AntDesign } from "@expo/vector-icons";
-import moment from "moment";
+import * as yup from "yup";
+import useCreateActivity from "../../../hooks/useCreateActivity";
+import { useWalletContext } from "../../WalletContext";
 import ChooseDate from "./ChooseDate";
 import FormFields from "./FormFields";
-import { useWalletContext } from "../../WalletContext";
-import NumbersPad from "../NumbersPad";
 
 const schema = yup.object().shape({
   name: yup.string().required("Name is required"),

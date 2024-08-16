@@ -1,16 +1,15 @@
-import { View, Text, StyleSheet, KeyboardAvoidingView } from "react-native";
-import Input from "@/components/ui/TextInput/TextInput";
-import Colors from "@/constants/Colors";
-import SegmentedButtons from "@/components/ui/SegmentedButtons";
-import Ripple from "react-native-material-ripple";
-import Color from "color";
-import { AntDesign } from "@expo/vector-icons";
-import Layout from "@/constants/Layout";
-import Button from "@/components/ui/Button/Button";
-import { forwardRef, memo, useMemo, useState } from "react";
 import BottomSheet from "@/components/ui/BottomSheet/BottomSheet";
-import BottomSheetType from "@gorhom/bottom-sheet";
+import Button from "@/components/ui/Button/Button";
+import SegmentedButtons from "@/components/ui/SegmentedButtons";
+import Input from "@/components/ui/TextInput/TextInput";
 import ThemedCalendar from "@/components/ui/ThemedCalendar/ThemedCalendar";
+import Colors from "@/constants/Colors";
+import Layout from "@/constants/Layout";
+import { AntDesign } from "@expo/vector-icons";
+import BottomSheetType from "@gorhom/bottom-sheet";
+import { forwardRef, memo, useMemo, useState } from "react";
+import { KeyboardAvoidingView, StyleSheet, Text, View } from "react-native";
+import Ripple from "react-native-material-ripple";
 
 const styles = StyleSheet.create({
   arrow_button: {
@@ -156,7 +155,7 @@ const CreateRepeatableTimeline = forwardRef<
   }, [f.values.repeatCount, f.values.repeatOn, f.values.repeatEveryNth]);
 
   return (
-    <BottomSheet snapPoints={["55%"]} ref={ref}>
+    <BottomSheet snapPoints={["70%"]} ref={ref}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
         <View style={styles.modal_container}>
           {view === "form" && (

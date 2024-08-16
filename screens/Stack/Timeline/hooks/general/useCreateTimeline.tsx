@@ -29,7 +29,7 @@ export default function useCreateTimeline({
   const isEditing = route.params.mode === "edit";
 
   const { data } = useGetTimelineById(route.params.timelineId || "", {
-    skip: !isEditing,
+    skip: !isEditing || route?.params?.timelineId === undefined,
   });
 
   const { editTimeline, initialFormProps: initialEditFormValues } =

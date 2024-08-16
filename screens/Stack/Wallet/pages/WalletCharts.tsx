@@ -296,8 +296,8 @@ const DateRangePicker = (props: {
   dispatch: React.Dispatch<Action>;
 }) => {
   const DateRanges = [
-    ["Today", [moment().subtract(1, "day"), moment().add(1, "day")]],
-    ["Yesterday", [moment().subtract(2, "day"), moment()]],
+    ["Today", [moment(), moment().add(1, "day")]],
+    ["Yesterday", [moment().subtract(1, "day"), moment()]],
     ["Last 7 days", [moment().subtract(7, "days"), moment().add(1, "day")]],
     ["Last 30 days", [moment().subtract(30, "days"), moment()]],
     ["This month", [moment().startOf("month"), moment().endOf("month")]],

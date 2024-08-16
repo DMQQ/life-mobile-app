@@ -23,6 +23,7 @@ import SuggestedEvents from "../components/CreateTimeline/SuggestedEvents/Sugges
 import IconButton from "@/components/ui/IconButton/IconButton";
 import DateTimePicker from "react-native-modal-datetime-picker";
 import { useState } from "react";
+import moment from "moment";
 
 const styles = StyleSheet.create({
   timeContainer: {
@@ -149,8 +150,33 @@ export default function CreateTimeLineEventModal({
 
           <TimePickerModal
             isVisible={!!datePicker}
-            onConfirm={(date) => {
-              timePicker(date, datePicker as "begin" | "end");
+            onConfirm={(currentlySelectedTime) => {
+              let finalDate = moment(currentlySelectedTime);
+
+              if (datePicker === "begin") {
+                // Set the begin time and if the end time is before the begin time, add 1 hour to the end time
+                f.setFieldValue("begin", finalDate.format("HH:mm"));
+
+                if (finalDate.isAfter(moment(f.values.end, "HH:mm"))) {
+                  f.setFieldValue(
+                    "end",
+                    finalDate.add(1, "hours").format("HH:mm")
+                  );
+                }
+              }
+
+              if (datePicker === "end") {
+                // Set the end time and if the end time is before the begin time, add 1 hour to the end time
+                f.setFieldValue("end", finalDate.format("HH:mm"));
+
+                if (finalDate.isBefore(moment(f.values.begin, "HH:mm"))) {
+                  f.setFieldValue(
+                    "begin",
+                    finalDate.subtract(1, "hours").format("HH:mm")
+                  );
+                }
+              }
+
               setDatePicker("");
             }}
             onCancel={() => setDatePicker("")}
