@@ -69,13 +69,12 @@ export default function useNotifications(
         Notifications.addNotificationResponseReceivedListener((response) => {
           const request = response.notification.request as any;
 
-          const allowedTypes = ["product_update", "daily_sale", "new_product"];
+          console.log("Notification received", request);
 
-          if (allowedTypes.includes(request.content.data.type)) {
-            navigationRef.current?.navigate("TimelineScreens", {
-              timelineId: request.content.data.timelineId,
-            });
-          }
+          navigationRef.current?.navigate("TimelineScreens", {
+            screen: "TimelineDetails",
+            params: { timelineId: request.content.data.eventId },
+          });
         });
       });
 
