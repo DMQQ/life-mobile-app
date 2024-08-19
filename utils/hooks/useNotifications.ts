@@ -60,6 +60,24 @@ export default function useNotifications(
   const notificationListener = useRef<any>();
   const responseListener = useRef<any>();
 
+  const lastNotification = Notifications.useLastNotificationResponse();
+
+  useEffect(() => {
+    if (
+      lastNotification?.notification?.request?.content?.data?.eventId &&
+      lastNotification?.actionIdentifier ===
+        Notifications.DEFAULT_ACTION_IDENTIFIER
+    ) {
+      navigationRef.current?.navigate("TimelineScreens", {
+        screen: "TimelineDetails",
+        params: {
+          timelineId:
+            lastNotification?.notification?.request?.content?.data?.eventId,
+        },
+      });
+    }
+  }, [lastNotification?.notification]);
+
   useEffect(() => {
     registerForPushNotificationsAsync().then((token) => {
       if (token) setNotificationToken(token);
@@ -68,8 +86,6 @@ export default function useNotifications(
       Notifications.addNotificationReceivedListener((notification: any) => {
         Notifications.addNotificationResponseReceivedListener((response) => {
           const request = response.notification.request as any;
-
-          console.log("Notification received", request);
 
           navigationRef.current?.navigate("TimelineScreens", {
             screen: "TimelineDetails",
