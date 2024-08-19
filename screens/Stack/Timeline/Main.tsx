@@ -1,16 +1,15 @@
+import type { RootStackScreenProps } from "@/types";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import moment from "moment";
+import { useEffect } from "react";
+import { Platform } from "react-native";
+import ImagesPreview from "./pages/ImagesPreview";
+import ScheduleScreen from "./pages/Schedule";
+import Search from "./pages/Search";
+import Timeline from "./pages/Timeline";
 import CreateTimeLineEventModal from "./pages/TimelineCreate";
 import TimelineDetails from "./pages/TimelineDetails";
-import Timeline from "./pages/Timeline";
-import { useNavigation } from "@react-navigation/native";
-import ImagesPreview from "./pages/ImagesPreview";
-import { useEffect } from "react";
 import type { TimelineRootStack as RootStackParamList } from "./types";
-import ScheduleScreen from "./pages/Schedule";
-import type { RootStackScreenProps } from "@/types";
-import moment from "moment";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { Colors } from "react-native/Libraries/NewAppScreen";
-import { Platform, View } from "react-native";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -19,6 +18,8 @@ export default function TimelineScreens({
   navigation,
 }: RootStackScreenProps<"TimelineScreens">) {
   useEffect(() => {
+    console.log(route.params);
+
     if (!!route.params?.timelineId) {
       (navigation as any).navigate("TimelineDetails", {
         ...route.params,
@@ -84,6 +85,14 @@ export default function TimelineScreens({
         })}
         initialParams={{
           selected: moment().format("YYYY-MM-DD"),
+        }}
+      />
+
+      <Stack.Screen
+        name="Search"
+        component={Search}
+        options={{
+          headerShown: false,
         }}
       />
     </Stack.Navigator>
