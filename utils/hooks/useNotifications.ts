@@ -63,6 +63,7 @@ export default function useNotifications(
   const lastNotification = Notifications.useLastNotificationResponse();
 
   useEffect(() => {
+    console.log(lastNotification?.notification?.request);
     if (
       lastNotification?.notification?.request?.content?.data?.eventId &&
       lastNotification?.actionIdentifier ===

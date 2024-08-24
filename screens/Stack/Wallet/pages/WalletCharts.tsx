@@ -245,7 +245,9 @@ export default function WalletCharts() {
                     innerRadius={70}
                     centerLabelComponent={() => (
                       <View>
-                        <Text style={styles.chartTotal}>{sumOfExpenses}zł</Text>
+                        <Text style={styles.chartTotal}>
+                          {sumOfExpenses.toFixed(2)}zł
+                        </Text>
                         <Text style={styles.chartInnerText}>Total</Text>
                       </View>
                     )}
