@@ -25,8 +25,6 @@ const ChooseDate = memo(
     const onDayPress = (day: { dateString: string; timestamp: number }) => {
       setSelectedDate(day.dateString);
 
-      console.log(day);
-
       if (Platform.OS === "ios") {
         setDateField(new Date(day.timestamp));
         onDismissCalendar();
