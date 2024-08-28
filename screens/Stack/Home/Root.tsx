@@ -35,8 +35,6 @@ export default function Root({ navigation }: ScreenProps<"Root">) {
       >
         <AvailableBalanceWidget data={data?.wallet} loading={loading} />
 
-        <QuickEvent />
-
         <TodaysTimelineEvents
           data={data?.timelineByCurrentDate}
           loading={loading}
