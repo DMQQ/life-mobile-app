@@ -1,13 +1,13 @@
-import { Wallet } from "@/types";
+import { Expense, Wallet } from "@/types";
 import { gql, useQuery } from "@apollo/client";
-import { useEffect, useReducer } from "react";
+import { useEffect, useReducer, useState } from "react";
 
 export const GET_WALLET = gql`
-  query GetWallet($filters: GetWalletFilters) {
-    wallet(filters: $filters) {
+  query GetWallet($filters: GetWalletFilters, $skip: Int, $take: Int) {
+    wallet {
       id
       balance
-      expenses {
+      expenses(filters: $filters, take: $take, skip: $skip) {
         id
         amount
         date
@@ -19,6 +19,8 @@ export const GET_WALLET = gql`
     }
   }
 `;
+
+const PAGINATION_TAKE = 10;
 
 const init = {
   query: "",
@@ -34,6 +36,10 @@ const init = {
   category: [] as string[],
 
   type: undefined as string | undefined,
+
+  skip: 0,
+
+  take: PAGINATION_TAKE,
 };
 
 export type Filters = typeof init;
@@ -46,7 +52,8 @@ export type Action =
   | { type: "SET_DATE_MAX"; payload: string }
   | { type: "SET_CATEGORY"; payload: string[] }
   | { type: "SET_TYPE"; payload: string | undefined }
-  | { type: "TOGGLE_CATEGORY"; payload: string };
+  | { type: "TOGGLE_CATEGORY"; payload: string }
+  | { type: "SET_SKIP"; payload?: number };
 
 const reducer = (state: typeof init, action: Action) => {
   if (action.type === "SET_QUERY") {
@@ -116,19 +123,89 @@ const reducer = (state: typeof init, action: Action) => {
     };
   }
 
+  if (action.type === "SET_SKIP") {
+    return {
+      ...state,
+      skip: state.take + (action.payload || state.skip),
+    };
+  }
+
   return state;
 };
 
 export default function useGetWallet() {
   const [filters, dispatch] = useReducer(reducer, init);
 
+  const [skip, setSkip] = useState(PAGINATION_TAKE);
+  const [endReached, setEndReached] = useState(false);
+
   const st = useQuery(GET_WALLET, {
-    onError: (er) => console.log(JSON.stringify(er, null, 2)),
+    variables: {
+      filters: {
+        title: filters.query,
+        amount: {
+          from: filters.amount.min,
+          to: filters.amount.max,
+        },
+        date: {
+          from: filters.date.from,
+          to: filters.date.to,
+        },
+        category: filters.category,
+        ...(filters.type && { type: filters.type }),
+      },
+      take: PAGINATION_TAKE,
+    },
   });
+
+  const onEndReached = async () => {
+    if (st.loading || endReached) return;
+
+    setSkip((p) => p + PAGINATION_TAKE);
+
+    await st.fetchMore({
+      variables: {
+        skip: skip + PAGINATION_TAKE,
+        take: PAGINATION_TAKE,
+        filters: {
+          title: filters.query,
+          amount: {
+            from: filters.amount.min,
+            to: filters.amount.max,
+          },
+          date: {
+            from: filters.date.from,
+            to: filters.date.to,
+          },
+          category: filters.category,
+          ...(filters.type && { type: filters.type }),
+        },
+      },
+      updateQuery(previousQueryResult, { fetchMoreResult }) {
+        if (!fetchMoreResult) {
+          setEndReached(true);
+          return previousQueryResult;
+        }
+
+        const mergeExpenses = (previousExpenses: Expense[], newExpenses: Expense[]): Expense[] =>
+          Array.from(new Map([...previousExpenses, ...newExpenses].map((exp) => [exp.id, exp])).values());
+
+        return {
+          wallet: {
+            ...previousQueryResult.wallet,
+            expenses: mergeExpenses(previousQueryResult.wallet.expenses, fetchMoreResult.wallet.expenses),
+          },
+        };
+      },
+    });
+  };
 
   useEffect(() => {
     let timeout = setTimeout(async () => {
+      setSkip(0);
       await st.refetch({
+        skip: 0,
+        take: PAGINATION_TAKE,
         filters: {
           title: filters.query,
           amount: {
@@ -145,10 +222,8 @@ export default function useGetWallet() {
       });
     }, 1000);
 
-    console.log("filters", filters);
-
     return () => clearTimeout(timeout);
   }, [filters]);
 
-  return { ...st, data: st.data as { wallet: Wallet }, filters, dispatch };
+  return { ...st, data: st.data as { wallet: Wallet }, filters, dispatch, onEndReached, endReached };
 }
