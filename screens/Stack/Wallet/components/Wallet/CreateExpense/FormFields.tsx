@@ -1,6 +1,6 @@
 import Select from "@/components/ui/Select/Select";
 import ValidatedInput from "@/components/ui/ValidatedInput";
-import { Text } from "react-native";
+import { Text, View } from "react-native";
 import { Icons } from "../WalletItem";
 import { FormikProps } from "formik";
 import { memo } from "react";
@@ -63,7 +63,7 @@ const FormFields = ({
             options={Object.keys(Icons)}
             transparentOverlay
             closeOnSelect
-            maxSelectHeight={250}
+            maxSelectHeight={360}
             containerStyle={{ borderRadius: 10 }}
             keyExtractor={(item) => item}
           />
