@@ -1,6 +1,6 @@
 import { Expense, Wallet } from "@/types";
 import { gql, useQuery } from "@apollo/client";
-import { useEffect, useReducer, useState } from "react";
+import { useEffect, useMemo, useReducer, useState } from "react";
 
 export const GET_WALLET = gql`
   query GetWallet($filters: GetWalletFilters, $skip: Int, $take: Int) {
@@ -133,7 +133,7 @@ const reducer = (state: typeof init, action: Action) => {
   return state;
 };
 
-export default function useGetWallet() {
+export default function useGetWallet(options?: { fetchAll: boolean }) {
   const [filters, dispatch] = useReducer(reducer, init);
 
   const [skip, setSkip] = useState(PAGINATION_TAKE);
@@ -154,7 +154,7 @@ export default function useGetWallet() {
         category: filters.category,
         ...(filters.type && { type: filters.type }),
       },
-      take: PAGINATION_TAKE,
+      take: options?.fetchAll ? 99999 : PAGINATION_TAKE,
     },
   });
 
@@ -165,8 +165,7 @@ export default function useGetWallet() {
 
     await st.fetchMore({
       variables: {
-        skip: skip + PAGINATION_TAKE,
-        take: PAGINATION_TAKE,
+        ...(options?.fetchAll ? { take: 99999, skip: 0 } : { skip: skip + PAGINATION_TAKE, take: PAGINATION_TAKE }),
         filters: {
           title: filters.query,
           amount: {
@@ -202,10 +201,9 @@ export default function useGetWallet() {
 
   useEffect(() => {
     let timeout = setTimeout(async () => {
-      setSkip(0);
+      !options?.fetchAll && setSkip(0);
       await st.refetch({
-        skip: 0,
-        take: PAGINATION_TAKE,
+        ...(options?.fetchAll ? { take: 99999, skip: 0 } : { skip: 0, take: PAGINATION_TAKE }),
         filters: {
           title: filters.query,
           amount: {
@@ -225,5 +223,7 @@ export default function useGetWallet() {
     return () => clearTimeout(timeout);
   }, [filters]);
 
-  return { ...st, data: st.data as { wallet: Wallet }, filters, dispatch, onEndReached, endReached };
+  const filtersActive = useMemo(() => JSON.stringify(filters) !== JSON.stringify(init), [filters]);
+
+  return { ...st, data: st.data as { wallet: Wallet }, filters, dispatch, onEndReached, endReached, filtersActive };
 }

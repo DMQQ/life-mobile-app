@@ -12,13 +12,31 @@ export const GET_MAIN_SCREEN = gql`
       isCompleted
     }
     wallet {
+      id
       balance
-      expenses {
+      expenses(skip: 0, take: 3) {
         category
         id
         amount
         description
       }
     }
+
+    weeklySpendings: getStatistics(type: "week") {
+      ...Stats
+    }
+  }
+
+  fragment Stats on WalletStatisticsRange {
+    total
+    average
+    max
+    min
+    count
+    theMostCommonCategory
+    theLeastCommonCategory
+    lastBalance
+    income
+    expense
   }
 `;
