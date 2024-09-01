@@ -57,7 +57,7 @@ export default function Wallet(props: WalletScreens<"Wallet">) {
 }
 
 function WalletScreen({ navigation }: WalletScreens<"Wallet">) {
-  const { data, loading, refetch, filters, dispatch, onEndReached, endReached } = useGetWallet();
+  const { data, loading, refetch, filters, dispatch, onEndReached, endReached, filtersActive } = useGetWallet();
 
   const {
     refs: { bottomSheetRef, filtersRef, editBalanceRef },
@@ -125,6 +125,7 @@ function WalletScreen({ navigation }: WalletScreens<"Wallet">) {
       </View>
 
       <WalletList
+        filtersActive={filtersActive}
         isLocked={loading || !data || endReached}
         refetch={refetch}
         scrollY={scrollY}

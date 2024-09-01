@@ -7,9 +7,10 @@ import { WalletSheet } from "../Sheets/WalletSheet";
 import Animated, { SharedValue } from "react-native-reanimated";
 import { NativeSyntheticEvent } from "react-native";
 import moment from "moment";
-import { gql, useQuery } from "@apollo/client";
+import Colors from "@/constants/Colors";
 import Ripple from "react-native-material-ripple";
 import { useWalletContext } from "../WalletContext";
+import Color from "color";
 
 const AnimatedList = Animated.createAnimatedComponent(VirtualizedList);
 
@@ -20,6 +21,7 @@ export default function WalletList(props: {
   refetch: () => void;
   onEndReached: () => void;
   isLocked: boolean;
+  filtersActive: boolean;
 }) {
   const [selected, setSelected] = useState<WalletElement | undefined>(undefined);
   const sheet = useRef<BottomSheet>(null);
@@ -55,9 +57,9 @@ export default function WalletList(props: {
 
   const renderItem = useCallback(
     ({ item }: { item: { month: string; expenses: Expense[] } }) => (
-      <MonthExpenseList showTotal item={item} setSelected={setSelected} sheet={sheet} />
+      <MonthExpenseList showTotal={!props.filtersActive} item={item} setSelected={setSelected} sheet={sheet} />
     ),
-    []
+    [props.filtersActive]
   );
 
   return (
@@ -85,16 +87,6 @@ export default function WalletList(props: {
   );
 }
 
-const displayTotal = (data: { getMonthTotal: number }) => {
-  const total = Math.trunc(data.getMonthTotal);
-
-  return `${total > 0 ? `+${total}` : total} zł`;
-};
-
-const totalTextColor = (data: { getMonthTotal: number }) => {
-  return data.getMonthTotal < 0 ? "#F07070" : "#66E875";
-};
-
 const MonthExpenseList = ({
   item,
   setSelected,
@@ -106,36 +98,31 @@ const MonthExpenseList = ({
   sheet: React.RefObject<BottomSheet>;
   showTotal: boolean;
 }) => {
-  const date = useMemo(() => moment(item.expenses?.[0].date).format("YYYY-MM-DD"), []);
-
-  const { data, loading } = useQuery(
-    gql`
-      query GetMonthlyDiff($date: String!) {
-        getMonthTotal(date: $date)
+  const [expense, income] = useMemo(() => {
+    let income = 0;
+    let expense = 0;
+    item.expenses.forEach((item) => {
+      if (item.type === "income") {
+        income += item.amount;
+      } else {
+        expense += item.amount;
       }
-    `,
-    {
-      variables: {
-        date: date,
-      },
-    }
-  );
+    });
+    return [expense * -1, income] as const;
+  }, [item.expenses]);
 
   return (
     <View style={{ marginBottom: 30 }}>
       <View style={styles.monthRow}>
         <Text style={styles.monthText}>{item.month}</Text>
 
-        {!loading && data.getMonthTotal !== 0 && showTotal && (
-          <Text
-            style={{
-              color: totalTextColor(data),
-              fontSize: 15,
-              marginBottom: 5,
-            }}
-          >
-            {displayTotal(data)}
-          </Text>
+        {showTotal && income !== 0 && expense !== 0 && (
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <Text style={{ color: "#66E875" }}> +{income.toFixed(0)}</Text>
+            <Text style={{ color: Color(Colors.primary_lighter).lighten(5).hex() }}> / </Text>
+            <Text style={{ color: "#F07070" }}>{expense.toFixed(0)}</Text>
+            <Text style={{ color: Color(Colors.primary_lighter).lighten(5).hex() }}> zł</Text>
+          </View>
         )}
       </View>
       {item?.expenses.map((expense, i) => (
@@ -200,7 +187,7 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
     fontSize: 20,
-    marginBottom: 10,
+    marginBottom: 15,
     paddingHorizontal: 5,
   },
 
