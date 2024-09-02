@@ -108,19 +108,20 @@ const MonthExpenseList = ({
         expense += item.amount;
       }
     });
+
     return [expense * -1, income] as const;
-  }, [item.expenses]);
+  }, [item.expenses, item.month]);
 
   return (
     <View style={{ marginBottom: 30 }}>
       <View style={styles.monthRow}>
         <Text style={styles.monthText}>{item.month}</Text>
 
-        {showTotal && income !== 0 && expense !== 0 && (
+        {showTotal && (
           <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <Text style={{ color: "#66E875" }}> +{income.toFixed(0)}</Text>
-            <Text style={{ color: Color(Colors.primary_lighter).lighten(5).hex() }}> / </Text>
-            <Text style={{ color: "#F07070" }}>{expense.toFixed(0)}</Text>
+            {income !== 0 && <Text style={{ color: "#66E875" }}> +{income.toFixed(0)}</Text>}
+            {expense !== 0 && income !== 0 && <Text style={{ color: Color(Colors.primary_lighter).lighten(5).hex() }}> / </Text>}
+            {expense !== 0 && <Text style={{ color: "#F07070" }}>{expense.toFixed(0)}</Text>}
             <Text style={{ color: Color(Colors.primary_lighter).lighten(5).hex() }}> zł</Text>
           </View>
         )}
