@@ -22,7 +22,7 @@ export const GET_WALLET = gql`
 
 const PAGINATION_TAKE = 10;
 
-const init = {
+export const init = {
   query: "",
   amount: {
     min: 0,
