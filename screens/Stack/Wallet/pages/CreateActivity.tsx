@@ -15,6 +15,7 @@ import useUser from "@/utils/hooks/useUser";
 import { gql, useMutation } from "@apollo/client";
 import moment from "moment";
 import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
+import ThemedCalendar from "@/components/ui/ThemedCalendar/ThemedCalendar";
 
 const schema = yup.object().shape({
   name: yup.string().required("Name is required"),
@@ -91,7 +92,10 @@ export default function CreateActivity({ navigation, route: { params } }: any) {
   };
 
   return (
-    <ScreenContainer style={{ paddingHorizontal: 15, paddingVertical: 0 }}>
+    <ScreenContainer
+      style={{ paddingHorizontal: 15, paddingVertical: 0 }}
+      scroll
+    >
       <Text
         style={{
           color: "#fff",
@@ -181,33 +185,21 @@ export default function CreateActivity({ navigation, route: { params } }: any) {
                 closeOnSelect
                 maxSelectHeight={250}
               />
-              <Button
-                onPress={() =>
-                  DateTimePickerAndroid.open({
-                    value: new Date(f.values.date),
-                    mode: "date",
-                    is24Hour: true,
-                    onChange: (e, date) => {
-                      if (date) {
-                        f.setFieldValue(
-                          "date",
-                          moment(date).format("YYYY-MM-DD")
-                        );
-                      }
-                    },
-                  })
-                }
-                color="text"
-                style={{
-                  marginTop: 10,
-                  borderWidth: 0.5,
-                  borderColor: Colors.secondary,
-                  backgroundColor: Color(Colors.secondary).alpha(0.1).string(),
+
+              <ThemedCalendar
+                style={{ marginVertical: 20 }}
+                onDayPress={(day) => f.setFieldValue("date", day.dateString)}
+                markedDates={{
+                  [params.edit.date]: {
+                    selected: false,
+                    selectedColor: Colors.secondary,
+                  },
+                  [f.values.date]: {
+                    selected: true,
+                    selectedColor: Colors.secondary,
+                  },
                 }}
-                fontStyle={{ fontSize: 16, color: Colors.secondary }}
-              >
-                Change date: "{moment(f.values.date).format("YYYY-MM-DD")}"
-              </Button>
+              />
             </View>
 
             <Button

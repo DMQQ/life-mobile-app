@@ -9,6 +9,7 @@ import { ScrollView } from "react-native-gesture-handler";
 import WorkoutWidget from "../Workout/components/WorkoutWidget";
 import Header from "@/components/ui/Header/Header";
 import { AntDesign } from "@expo/vector-icons";
+import QuickEvent from "@/components/QuickEvent";
 
 export default function Root({ navigation }: ScreenProps<"Root">) {
   const workout = useAppSelector((s) => s.workout);

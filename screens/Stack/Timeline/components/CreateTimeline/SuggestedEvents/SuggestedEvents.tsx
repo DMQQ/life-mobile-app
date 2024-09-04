@@ -107,30 +107,30 @@ export default function SuggestedEvents(props: SuggestedEventsProps) {
         }}
         onCancel={() => setIsVisible(false)}
       />
-
-      <Button
-        onPress={() => handleSubmit()}
-        disabled={!canSubmit}
-        rippleColor={Colors.secondary}
-        fontStyle={{
-          fontSize: 16,
-        }}
-        style={{
-          marginTop: 25,
-          flexDirection: "row-reverse",
-        }}
-        icon={
-          isLoading && (
-            <ActivityIndicator
-              style={{ marginHorizontal: 10 }}
-              size="small"
-              color="#fff"
-            />
-          )
-        }
-      >
-        Create quick event
-      </Button>
+      {canSubmit && (
+        <Button
+          onPress={() => handleSubmit()}
+          rippleColor={Colors.secondary}
+          fontStyle={{
+            fontSize: 16,
+          }}
+          style={{
+            marginTop: 25,
+            flexDirection: "row-reverse",
+          }}
+          icon={
+            isLoading && (
+              <ActivityIndicator
+                style={{ marginHorizontal: 10 }}
+                size="small"
+                color="#fff"
+              />
+            )
+          }
+        >
+          Create quick event
+        </Button>
+      )}
     </View>
   );
 }

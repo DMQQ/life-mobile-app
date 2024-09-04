@@ -1,29 +1,29 @@
 import BottomSheet from "@gorhom/bottom-sheet";
 import { Expense, Wallet } from "@/types";
 import WalletItem, { WalletElement, parseDateToText } from "./WalletItem";
-import { useState, useRef, useEffect, useMemo } from "react";
-import { Text, NativeScrollEvent, View, StyleSheet } from "react-native";
+import { useState, useRef, useEffect, useMemo, useCallback } from "react";
+import { Text, NativeScrollEvent, View, StyleSheet, VirtualizedList } from "react-native";
 import { WalletSheet } from "../Sheets/WalletSheet";
 import Animated, { SharedValue } from "react-native-reanimated";
 import { NativeSyntheticEvent } from "react-native";
 import moment from "moment";
-import { gql, useQuery } from "@apollo/client";
-import { RefreshControl } from "react-native-gesture-handler";
+import Colors from "@/constants/Colors";
 import Ripple from "react-native-material-ripple";
 import { useWalletContext } from "../WalletContext";
+import Color from "color";
+
+const AnimatedList = Animated.createAnimatedComponent(VirtualizedList);
 
 export default function WalletList(props: {
   wallet: Wallet;
   scrollY: SharedValue<number>;
   onScroll: (event: NativeSyntheticEvent<NativeScrollEvent>) => void;
   refetch: () => void;
+  onEndReached: () => void;
+  isLocked: boolean;
+  filtersActive: boolean;
 }) {
-  const [selected, setSelected] = useState<WalletElement | undefined>(
-    undefined
-  );
-
-  const [refreshing, setRefreshing] = useState(false);
-
+  const [selected, setSelected] = useState<WalletElement | undefined>(undefined);
   const sheet = useRef<BottomSheet>(null);
 
   useEffect(() => {
@@ -42,10 +42,7 @@ export default function WalletList(props: {
     for (const expense of props.wallet.expenses) {
       const previous = sorted[sorted.length - 1];
 
-      if (
-        previous &&
-        moment(previous?.expenses[0]?.date).isSame(expense.date, "month")
-      ) {
+      if (previous && moment(previous?.expenses[0]?.date).isSame(expense.date, "month")) {
         previous.expenses.push(expense);
       } else {
         sorted.push({
@@ -58,13 +55,19 @@ export default function WalletList(props: {
     return sorted;
   }, [props?.wallet?.expenses]);
 
+  const renderItem = useCallback(
+    ({ item }: { item: { month: string; expenses: Expense[] } }) => (
+      <MonthExpenseList showTotal={!props.filtersActive} item={item} setSelected={setSelected} sheet={sheet} />
+    ),
+    [props.filtersActive]
+  );
+
   return (
     <>
-      <Animated.FlatList
-        refreshing={refreshing}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={props.refetch} />
-        }
+      <AnimatedList
+        onEndReached={!props.isLocked ? props.onEndReached : () => {}}
+        onEndReachedThreshold={0.5}
+        scrollEventThrottle={16}
         removeClippedSubviews
         onScroll={props.onScroll}
         style={{ flex: 1 }}
@@ -72,14 +75,11 @@ export default function WalletList(props: {
           padding: 15,
         }}
         data={data || []}
-        keyExtractor={(expense, idx) => expense.month + "_" + idx}
-        renderItem={({ item }) => (
-          <MonthExpenseList
-            item={item}
-            setSelected={setSelected}
-            sheet={sheet}
-          />
-        )}
+        keyExtractor={(expense: any, idx) => expense.month + "_" + idx}
+        renderItem={renderItem as any}
+        getItem={(data, index) => data[index]}
+        getItemCount={(data) => data.length}
+        // ListFooterComponent={<Button onPress={props.onEndReached}>Load more</Button>}
       />
 
       <WalletSheet selected={selected} ref={sheet} />
@@ -87,58 +87,42 @@ export default function WalletList(props: {
   );
 }
 
-const displayTotal = (data: { getMonthTotal: number }) => {
-  const total = Math.trunc(data.getMonthTotal);
-
-  return `${total > 0 ? `+${total}` : total} zł`;
-};
-
-const totalTextColor = (data: { getMonthTotal: number }) => {
-  return data.getMonthTotal < 0 ? "#F07070" : "#66E875";
-};
-
 const MonthExpenseList = ({
   item,
   setSelected,
   sheet,
+  showTotal = true,
 }: {
   item: { month: string; expenses: Expense[] };
   setSelected: (expense: WalletElement) => void;
   sheet: React.RefObject<BottomSheet>;
+  showTotal: boolean;
 }) => {
-  const date = useMemo(
-    () => moment(item.expenses?.[0].date).format("YYYY-MM-DD"),
-    []
-  );
-
-  const { data, loading } = useQuery(
-    gql`
-      query GetMonthlyDiff($date: String!) {
-        getMonthTotal(date: $date)
+  const [expense, income] = useMemo(() => {
+    let income = 0;
+    let expense = 0;
+    item.expenses.forEach((item) => {
+      if (item.type === "income") {
+        income += item.amount;
+      } else {
+        expense += item.amount;
       }
-    `,
-    {
-      variables: {
-        date: date,
-      },
-    }
-  );
+    });
+    return [expense * -1, income] as const;
+  }, [item.expenses]);
 
   return (
     <View style={{ marginBottom: 30 }}>
       <View style={styles.monthRow}>
         <Text style={styles.monthText}>{item.month}</Text>
 
-        {!loading && data.getMonthTotal !== 0 && (
-          <Text
-            style={{
-              color: totalTextColor(data),
-              fontSize: 15,
-              marginBottom: 5,
-            }}
-          >
-            {displayTotal(data)}
-          </Text>
+        {showTotal && income !== 0 && expense !== 0 && (
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <Text style={{ color: "#66E875" }}> +{income.toFixed(0)}</Text>
+            <Text style={{ color: Color(Colors.primary_lighter).lighten(5).hex() }}> / </Text>
+            <Text style={{ color: "#F07070" }}>{expense.toFixed(0)}</Text>
+            <Text style={{ color: Color(Colors.primary_lighter).lighten(5).hex() }}> zł</Text>
+          </View>
         )}
       </View>
       {item?.expenses.map((expense, i) => (
@@ -203,7 +187,7 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
     fontSize: 20,
-    marginBottom: 10,
+    marginBottom: 15,
     paddingHorizontal: 5,
   },
 

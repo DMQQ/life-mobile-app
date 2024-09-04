@@ -4,7 +4,7 @@ import { GET_TIMELINE_QUERY } from "../query/useGetTimeLineQuery";
 import { Timeline } from "../../../../../types";
 import { useNavigation } from "@react-navigation/native";
 
-import { ToastAndroid } from "react-native";
+import { Platform, ToastAndroid } from "react-native";
 
 import * as Yup from "yup";
 import { GET_MONTHLY_EVENTS } from "../general/useTimeline";
@@ -83,11 +83,12 @@ export default function useCreateTimeline(props: { selectedDate: string }) {
       },
 
       onError: (err) => {
-        ToastAndroid.show("Could not create timeline", ToastAndroid.LONG);
+        Platform.OS === "android" &&
+          ToastAndroid.show("Could not create timeline", ToastAndroid.LONG);
       },
     });
 
-    navigation.replace("TimelineDetails", {
+    navigation.navigate("TimelineScreens", {
       timelineId: (data?.createTimeline as Timeline).id,
     });
   };

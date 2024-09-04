@@ -10,6 +10,7 @@ export type TimelineRootStack = {
   };
   ImagesPreview: { selectedImage: string; timelineId: string };
   Schedule: { selected: string; selectedDate: string };
+  Search: undefined;
 };
 
 export type TimelineScreenProps<Key extends keyof TimelineRootStack> =

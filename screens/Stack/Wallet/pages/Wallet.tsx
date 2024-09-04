@@ -3,22 +3,14 @@ import Layout from "@/constants/Layout";
 import { AntDesign, Ionicons } from "@expo/vector-icons";
 import { SafeAreaView, StyleSheet, Text, View } from "react-native";
 import Ripple from "react-native-material-ripple";
-import Animated, {
-  Extrapolation,
-  interpolate,
-  useAnimatedScrollHandler,
-  useAnimatedStyle,
-  useSharedValue,
-} from "react-native-reanimated";
+import Animated, { Extrapolation, interpolate, useAnimatedScrollHandler, useAnimatedStyle, useSharedValue } from "react-native-reanimated";
 import { WalletScreens } from "../Main";
 import EditBalanceSheet from "../components/Sheets/EditBalanceSheet";
 import ExpenseFiltersSheet from "../components/Sheets/ExpenseFiltersSheet";
 import CreateExpenseSheet from "../components/Wallet/CreateExpense/CreateExpenseSheet";
 import ScreenLoader from "../components/Wallet/ScreenLoader";
 import WalletList from "../components/Wallet/WalletList";
-import WalletContextProvider, {
-  useWalletContext,
-} from "../components/WalletContext";
+import WalletContextProvider, { useWalletContext } from "../components/WalletContext";
 import useGetWallet from "../hooks/useGetWallet";
 
 const styles = StyleSheet.create({
@@ -65,7 +57,7 @@ export default function Wallet(props: WalletScreens<"Wallet">) {
 }
 
 function WalletScreen({ navigation }: WalletScreens<"Wallet">) {
-  const { data, loading, refetch, filters, dispatch } = useGetWallet();
+  const { data, loading, refetch, filters, dispatch, onEndReached, endReached, filtersActive } = useGetWallet();
 
   const {
     refs: { bottomSheetRef, filtersRef, editBalanceRef },
@@ -81,31 +73,16 @@ function WalletScreen({ navigation }: WalletScreens<"Wallet">) {
   });
 
   const animatedContainerStyle = useAnimatedStyle(() => ({
-    height: interpolate(
-      scrollY.value,
-      [0, 200],
-      [150, 30],
-      Extrapolation.CLAMP
-    ),
+    height: interpolate(scrollY.value, [0, 200], [150, 30], Extrapolation.CLAMP),
     transform: [
       {
-        translateY: interpolate(
-          scrollY.value,
-          [0, 200],
-          [0, -40],
-          Extrapolation.CLAMP
-        ),
+        translateY: interpolate(scrollY.value, [0, 200], [0, -40], Extrapolation.CLAMP),
       },
     ],
   }));
 
   const animatedBalanceStyle = useAnimatedStyle(() => ({
-    fontSize: interpolate(
-      scrollY.value,
-      [0, 200],
-      [70, 25],
-      Extrapolation.CLAMP
-    ),
+    fontSize: interpolate(scrollY.value, [0, 200], [70, 25], Extrapolation.CLAMP),
   }));
 
   const balance = loading ? " ..." : (wallet?.balance || 0).toFixed(2);
@@ -148,17 +125,16 @@ function WalletScreen({ navigation }: WalletScreens<"Wallet">) {
       </View>
 
       <WalletList
+        filtersActive={filtersActive}
+        isLocked={loading || !data || endReached}
         refetch={refetch}
         scrollY={scrollY}
         onScroll={onAnimatedScrollHandler}
         wallet={data?.wallet}
+        onEndReached={onEndReached}
       />
 
-      <ExpenseFiltersSheet
-        ref={filtersRef}
-        filters={filters}
-        dispatch={dispatch}
-      />
+      <ExpenseFiltersSheet ref={filtersRef} filters={filters} dispatch={dispatch} />
 
       <CreateExpenseSheet onCompleted={() => {}} ref={bottomSheetRef} />
 
