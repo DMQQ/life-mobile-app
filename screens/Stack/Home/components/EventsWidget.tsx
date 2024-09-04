@@ -10,6 +10,7 @@ import Skeleton from "@/components/SkeletonLoader/Skeleton";
 import Color from "color";
 import Button from "@/components/ui/Button/Button";
 import TimelineItem from "../../Timeline/components/TimelineItem";
+import lowOpacity from "@/utils/functions/lowOpacity";
 
 const backgroundColor = Colors.primary_lighter;
 
@@ -62,9 +63,7 @@ const EventsList = (props: { data: GetTimelineQuery[] }) => {
       {props?.data?.slice(0, 3).map((timeline, index) => (
         <TimelineItem
           styles={{
-            backgroundColor: Color(Colors.primary_lighter)
-              .lighten(0.5)
-              .string(),
+            backgroundColor: Colors.primary,
             borderRadius: 15,
             padding: 20,
           }}
@@ -77,8 +76,13 @@ const EventsList = (props: { data: GetTimelineQuery[] }) => {
       {props?.data?.length > 0 && (
         <Button
           onPress={() => navigation.navigate("TimelineCreate")}
-          fontStyle={{ fontSize: 16 }}
-          style={{ marginTop: 15 }}
+          fontStyle={{ fontSize: 16, color: Colors.secondary_light_1 }}
+          style={{
+            marginTop: 15,
+            backgroundColor: lowOpacity(Colors.secondary_dark_2, 0.4),
+            borderWidth: 1,
+            borderColor: Colors.secondary,
+          }}
         >
           Create Event
         </Button>

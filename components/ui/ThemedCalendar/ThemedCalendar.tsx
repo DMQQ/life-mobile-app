@@ -8,7 +8,7 @@ function ThemedCalendar(props: any) {
     <Calendar
       {...props}
       theme={styles.calendar}
-      style={[styles.calendarContainer]}
+      style={[styles.calendarContainer, props.style]}
     />
   );
 }

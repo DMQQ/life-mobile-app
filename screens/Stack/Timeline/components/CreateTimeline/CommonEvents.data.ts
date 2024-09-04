@@ -2,6 +2,7 @@ export const CommonEvents = [
   {
     name: "Shopping list",
     content: "Create a shopping list",
+    autoCreate: true,
   },
   {
     name: "Working out - Gym",
@@ -13,7 +14,7 @@ export const CommonEvents = [
     content: "Buy groceries and essentials",
     //prettier-ignore
     categories: [
-      'Electronics','Books','Food','Essentials','Cleaning','School Stuff',''
+      'Electronics', 'Books', 'Food', 'Essentials', 'Cleaning', 'School Stuff', ''
     ],
   },
   {
@@ -26,7 +27,7 @@ export const CommonEvents = [
     content: "Dedicate time for learning and studying",
     // prettier-ignore
     categories: [
-      'Matura','Biology','IT','Math','English','Polish','German','Different'
+      'Matura', 'Biology', 'IT', 'Math', 'English', 'Polish', 'German', 'Different'
     ],
   },
   {
@@ -60,11 +61,11 @@ export const CommonEvents = [
     name: "Hobby",
     content: "Engage in a favorite hobby or activity",
     //prettier-ignore
-    categories: ["Reading books", "Playing games", "Working out",'Making food','Coding'],
+    categories: ["Reading books", "Playing games", "Working out", 'Making food', 'Coding'],
   },
   {
     name: "Reflection",
     content: "Reflect on the day or set goals",
     categories: [],
   },
-];
+] as const;
