@@ -1,9 +1,14 @@
 import Select from "@/components/ui/Select/Select";
 import ValidatedInput from "@/components/ui/ValidatedInput";
 import { Text, View } from "react-native";
-import { Icons } from "../WalletItem";
+import { CategoryIcon, Icons } from "../WalletItem";
 import { FormikProps } from "formik";
 import { memo } from "react";
+import Ripple from "react-native-material-ripple";
+import Colors from "@/constants/Colors";
+import Color from "color";
+import lowOpacity from "@/utils/functions/lowOpacity";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 const FormFields = ({
   f,
@@ -25,9 +30,7 @@ const FormFields = ({
         label="Purchase's name"
         placeholder="Like 'new phone', 'christmas gift'..."
         name="name"
-        left={(props) => (
-          <ValidatedInput.Icon Icon="AntDesign" name="wallet" {...props} />
-        )}
+        left={(props) => <ValidatedInput.Icon Icon="AntDesign" name="wallet" {...props} />}
         formik={f}
       />
 
@@ -36,9 +39,7 @@ const FormFields = ({
         label="Amount (zł)"
         placeholder="How much have you spent?"
         name="amount"
-        left={(props) => (
-          <ValidatedInput.Icon Icon="Ionicons" name="cash-outline" {...props} />
-        )}
+        left={(props) => <ValidatedInput.Icon Icon="Ionicons" name="cash-outline" {...props} />}
         keyboardType="numeric"
         formik={f}
       />
@@ -66,6 +67,26 @@ const FormFields = ({
             maxSelectHeight={360}
             containerStyle={{ borderRadius: 10 }}
             keyExtractor={(item) => item}
+            renderDefaultItem={false}
+            renderItem={(item) => (
+              <Ripple
+                onPress={() => f.setFieldValue("category", item.item)}
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  borderBottomWidth: 0.5,
+                  borderBottomColor: Color(Colors.primary).lighten(4).hex(),
+                  padding: 5,
+                  backgroundColor: f.values.category === item.item ? lowOpacity(Colors.secondary, 0.2) : Colors.primary_lighter,
+                }}
+              >
+                <CategoryIcon type="expense" category={item.item} clear />
+                <Text style={{ color: "#fff", fontSize: 16, marginLeft: 10, fontWeight: "bold" }}>{item.item}</Text>
+                {f.values.category === item.item && (
+                  <MaterialCommunityIcons name="check" size={25} color={Colors.secondary} style={{ position: "absolute", right: 25 }} />
+                )}
+              </Ripple>
+            )}
           />
         </>
       )}

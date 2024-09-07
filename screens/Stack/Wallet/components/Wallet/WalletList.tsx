@@ -119,9 +119,9 @@ const MonthExpenseList = ({
 
         {showTotal && (
           <View style={{ flexDirection: "row", alignItems: "center" }}>
-            {income !== 0 && <Text style={{ color: "#66E875" }}> +{income.toFixed(0)}</Text>}
+            {income !== 0 && <Text style={{ color: "#66E875", fontSize: 18 }}> +{income.toFixed(0)}</Text>}
             {expense !== 0 && income !== 0 && <Text style={{ color: Color(Colors.primary_lighter).lighten(5).hex() }}> / </Text>}
-            {expense !== 0 && <Text style={{ color: "#F07070" }}>{expense.toFixed(0)}</Text>}
+            {expense !== 0 && <Text style={{ color: "#F07070", fontSize: 18 }}>{expense.toFixed(0)}</Text>}
             <Text style={{ color: Color(Colors.primary_lighter).lighten(5).hex() }}> zł</Text>
           </View>
         )}
@@ -187,8 +187,7 @@ const styles = StyleSheet.create({
   monthText: {
     color: "#fff",
     fontWeight: "bold",
-    fontSize: 20,
-    marginBottom: 15,
+    fontSize: 25,
     paddingHorizontal: 5,
   },
 
@@ -208,5 +207,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    marginBottom: 20,
   },
 });

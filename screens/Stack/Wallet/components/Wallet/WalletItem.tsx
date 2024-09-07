@@ -1,21 +1,10 @@
 import { View, Text, StyleSheet, StyleProp, ViewStyle } from "react-native";
-import {
-  AntDesign,
-  Entypo,
-  FontAwesome5,
-  Ionicons,
-  MaterialCommunityIcons,
-} from "@expo/vector-icons";
+import { AntDesign, Entypo, FontAwesome5, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import moment from "moment";
 import Color from "color";
 import Colors from "@/constants/Colors";
 import Ripple from "react-native-material-ripple";
-import Animated, {
-  AnimatedStyle,
-  AnimatedStyleProp,
-  FadeInUp,
-  Layout,
-} from "react-native-reanimated";
+import Animated, { AnimatedStyle, AnimatedStyleProp, FadeInUp, Layout } from "react-native-reanimated";
 import lowOpacity from "@/utils/functions/lowOpacity";
 
 export interface WalletElement {
@@ -112,24 +101,36 @@ export const Icons = {
     icon: <Ionicons name="fast-food-outline" color={"#5733FF"} size={25} />,
     backgroundColor: "#5733FF",
   },
+  drinks: {
+    icon: <Ionicons name="beer-outline" color={"#5733FF"} size={25} />,
+    backgroundColor: "#5733FF",
+  },
+  shopping: {
+    icon: <MaterialCommunityIcons name="shopping" size={25} color={"#ff5733"} />,
+    backgroundColor: "#ff5733",
+  },
+  addictions: {
+    icon: <MaterialCommunityIcons name="smoking" size={25} color={"#ff5733"} />,
+    backgroundColor: "#ff5733",
+  },
+  work: {
+    icon: <MaterialCommunityIcons name="briefcase" size={25} color={"#5733ff"} />,
+    backgroundColor: "#5733FF",
+  },
+  clothes: {
+    icon: <MaterialCommunityIcons name="tshirt-crew" size={25} color={"#ff5733"} />,
+    backgroundColor: "#ff5733",
+  },
   health: {
     icon: <MaterialCommunityIcons name="pill" size={25} color={"#07bab4"} />,
     backgroundColor: "#07bab4",
   },
   entertainment: {
-    icon: (
-      <MaterialCommunityIcons name="movie-open" size={24} color={"#990583"} />
-    ),
+    icon: <MaterialCommunityIcons name="movie-open" size={24} color={"#990583"} />,
     backgroundColor: "#990583",
   },
   utilities: {
-    icon: (
-      <MaterialCommunityIcons
-        name="power-plug-outline"
-        size={24}
-        color={"#5733ff"}
-      />
-    ),
+    icon: <MaterialCommunityIcons name="power-plug-outline" size={24} color={"#5733ff"} />,
     backgroundColor: "#5733FF",
   },
   debt: {
@@ -157,13 +158,12 @@ export const Icons = {
 
   income: {
     backgroundColor: Colors.secondary_light_1,
-    icon: (
-      <FontAwesome5
-        name="dollar-sign"
-        size={24}
-        color={Colors.secondary_light_1}
-      />
-    ),
+    icon: <FontAwesome5 name="dollar-sign" size={24} color={Colors.secondary_light_1} />,
+  },
+
+  animals: {
+    backgroundColor: "#ff5733",
+    icon: <FontAwesome5 name="dog" size={24} color="#ff5733" />,
   },
 
   none: {
@@ -172,24 +172,15 @@ export const Icons = {
   },
 } as const;
 
-export const CategoryIcon = (props: {
-  category: keyof typeof Icons;
-  type: "income" | "expense";
-  clear?: boolean;
-}) => {
-  const category =
-    props.type === "income" && props.category !== "edit"
-      ? "income"
-      : props.category || "none";
+export const CategoryIcon = (props: { category: keyof typeof Icons; type: "income" | "expense"; clear?: boolean }) => {
+  const category = props.type === "income" && props.category !== "edit" ? "income" : props.category || "none";
   return (
     <View style={[styles.icon_container, { position: "relative" }]}>
       <View
         style={[
           styles.iconContainer,
           {
-            backgroundColor: !props.clear
-              ? lowOpacity(Icons[category]?.backgroundColor, 15)
-              : undefined,
+            backgroundColor: !props.clear ? lowOpacity(Icons[category]?.backgroundColor, 15) : undefined,
           },
         ]}
       >
@@ -206,13 +197,9 @@ export default function WalletItem(
     containerStyle?: StyleProp<ViewStyle>;
   }
 ) {
-  const price =
-    item.type === "expense"
-      ? (item.amount * -1).toFixed(2)
-      : item.amount.toFixed(2);
+  const price = item.type === "expense" ? (item.amount * -1).toFixed(2) : item.amount.toFixed(2);
 
-  const isBalanceEdit =
-    item.description.includes("Balance edited") || item.amount === 0;
+  const isBalanceEdit = item.description.includes("Balance edited") || item.amount === 0;
 
   return (
     <Animated.View
@@ -224,15 +211,8 @@ export default function WalletItem(
         item.animatedStyle,
       ]}
     >
-      <Ripple
-        disabled={isBalanceEdit}
-        style={[styles.expense_item, item.containerStyle]}
-        onPress={() => item.handlePress()}
-      >
-        <CategoryIcon
-          type={item.type as "income" | "expense"}
-          category={isBalanceEdit ? "edit" : item.category}
-        />
+      <Ripple disabled={isBalanceEdit} style={[styles.expense_item, item.containerStyle]} onPress={() => item.handlePress()}>
+        <CategoryIcon type={item.type as "income" | "expense"} category={isBalanceEdit ? "edit" : item.category} />
 
         <View style={{ height: "100%", justifyContent: "center", flex: 3 }}>
           <Text style={styles.title} numberOfLines={1}>
@@ -240,8 +220,7 @@ export default function WalletItem(
           </Text>
           <View style={{ flexDirection: "row" }}>
             <Text style={styles.date}>
-              {parseDateToText(item.date)} &#183;{" "}
-              {item.category ? `${item.category}` : ""}
+              {parseDateToText(item.date)} &#183; {item.category ? `${item.category}` : ""}
             </Text>
           </View>
         </View>
