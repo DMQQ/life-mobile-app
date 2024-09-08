@@ -1,11 +1,18 @@
 import Color from "color";
-import { StyleSheet, Text, View } from "react-native";
+import { FlatList, ScrollView, StyleSheet, Text, View } from "react-native";
 import Colors, { Sizing } from "../../../../constants/Colors";
 import { ViewMoreButton } from "../../../../components/ui/Button/Button";
 import { useNavigation } from "@react-navigation/native";
 import { Wallet } from "../../../../types";
-import { Padding, Rounded } from "../../../../constants/Layout";
+import Layout, { Padding, Rounded } from "../../../../constants/Layout";
 import Skeleton from "@/components/SkeletonLoader/Skeleton";
+import { gql, useQuery } from "@apollo/client";
+import moment from "moment";
+import { WalletStatisticsResponse } from "../../Wallet/hooks/useGetStatistics";
+import { Item } from "../../Wallet/components/WalletChart/StatisticsSummary";
+import { useMemo } from "react";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import WalletItem from "../../Wallet/components/Wallet/WalletItem";
 
 const backgroundColor = Colors.primary_lighter;
 
@@ -39,6 +46,7 @@ const styles = StyleSheet.create({
     textShadowColor: "rgba(0, 0, 0, 0.25)",
     textShadowOffset: { width: 2, height: 2 },
     textShadowRadius: 10,
+    marginTop: 10,
   },
   activity: {
     color: "#ffffff",
@@ -59,11 +67,64 @@ const styles = StyleSheet.create({
   },
 });
 
+interface StatisticsSummaryProps {
+  thisMonth?: WalletStatisticsResponse["statistics"];
+  lastMonth?: WalletStatisticsResponse["statistics"];
+}
+
+const useStatistics = () => {
+  const thisMonth = [moment().startOf("month").format("YYYY-MM-DD"), moment().endOf("month").format("YYYY-MM-DD")];
+
+  const lastMonth = [
+    moment().subtract(1, "month").startOf("month").format("YYYY-MM-DD"),
+    moment().subtract(1, "month").endOf("month").format("YYYY-MM-DD"),
+  ];
+
+  const query = useQuery<StatisticsSummaryProps>(
+    gql`
+      query GetStatisticsHome($thisMonth: [String!]!, $lastMonth: [String!]!) {
+        thisMonth: getStatistics(range: $thisMonth) {
+          ...Stats
+        }
+
+        lastMonth: getStatistics(range: $lastMonth) {
+          ...Stats
+        }
+      }
+
+      fragment Stats on WalletStatisticsRange {
+        total
+        average
+        max
+        min
+        count
+        theMostCommonCategory
+        theLeastCommonCategory
+        lastBalance
+        income
+        expense
+      }
+    `,
+    { variables: { thisMonth, lastMonth } }
+  );
+
+  return query;
+};
+
 export default function AvailableBalanceWidget(props: {
-  data: Wallet;
+  data: {
+    wallet: Wallet;
+    statistics: {
+      thisMonth?: any;
+      lastMonth?: any;
+      weeklySpendings: any;
+    };
+  };
   loading: boolean;
 }) {
   const navigation = useNavigation<any>();
+
+  // const diff = useStatistics();
 
   return (
     <View style={styles.container}>
@@ -81,16 +142,8 @@ export default function AvailableBalanceWidget(props: {
             <Skeleton.Item width={(w) => w - 70} height={100} marginTop={10} />
 
             <View style={{ flexDirection: "row", marginTop: 0 }}>
-              <Skeleton.Item
-                width={(w) => (w - 70) / 3 - 5}
-                height={20}
-                marginRight={5}
-              />
-              <Skeleton.Item
-                width={(w) => (w - 70) / 3 - 5}
-                height={20}
-                marginRight={5}
-              />
+              <Skeleton.Item width={(w) => (w - 70) / 3 - 5} height={20} marginRight={5} />
+              <Skeleton.Item width={(w) => (w - 70) / 3 - 5} height={20} marginRight={5} />
               <Skeleton.Item width={(w) => (w - 70) / 3} height={20} />
             </View>
           </View>
@@ -101,16 +154,55 @@ export default function AvailableBalanceWidget(props: {
             <View style={styles.title_row}>
               <Text style={styles.title}>Available Balance</Text>
 
-              <ViewMoreButton
-                bg="#fff"
-                text="See more"
-                onPress={() => navigation.navigate("WalletScreens")}
-              />
+              <ViewMoreButton bg="#fff" text="See more" onPress={() => navigation.navigate("WalletScreens")} />
             </View>
             <Text style={styles.balance}>
-              {props?.data?.balance.toFixed(2)}
+              {props?.data?.wallet?.balance.toFixed(2)}
               <Text style={{ fontSize: 25 }}>zł</Text>
             </Text>
+
+            <Text style={{ color: "#fff", fontSize: 18, fontWeight: "bold", marginTop: 15, marginBottom: 5 }}>Last three transactions</Text>
+
+            <FlatList
+              pagingEnabled
+              horizontal
+              data={props.data.wallet.expenses}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => (
+                <WalletItem
+                  containerStyle={{
+                    width: Layout.screen.width - 80,
+                    backgroundColor: Colors.primary_light,
+                  }}
+                  handlePress={() => navigation.navigate("WalletScreens")}
+                  {...(item as any)}
+                />
+              )}
+            />
+
+            <Text style={{ color: "#fff", fontSize: 18, fontWeight: "bold", marginTop: 15, marginBottom: 5 }}>Weekly Spendings</Text>
+            <ScrollView horizontal contentContainerStyle={{ gap: 10 }}>
+              <Item
+                label="Spent this week"
+                value={props.data.statistics.weeklySpendings?.expense}
+                icon={<MaterialCommunityIcons name="calendar-week" size={30} color="#fff" />}
+              />
+              <Item
+                label="Income"
+                value={props.data.statistics.weeklySpendings?.income}
+                icon={<MaterialCommunityIcons name="cash" size={30} color="#fff" />}
+              />
+              <Item
+                label="Expense"
+                value={props.data.statistics.weeklySpendings?.expense}
+                icon={<MaterialCommunityIcons name="cash-remove" size={30} color="#fff" />}
+              />
+              <Item
+                label="Average"
+                value={props.data.statistics.weeklySpendings?.average}
+                icon={<MaterialCommunityIcons name="cash-multiple" size={30} color="#fff" />}
+              />
+            </ScrollView>
           </View>
         </>
       )}
