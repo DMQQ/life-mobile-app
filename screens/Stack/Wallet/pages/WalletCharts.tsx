@@ -6,7 +6,7 @@ import { useMemo, useRef, useState } from "react";
 import { StyleSheet, Text, View, VirtualizedList } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Charts from "../components/Wallet/Charts";
-import WalletItem from "../components/Wallet/WalletItem";
+import WalletItem, { WalletElement } from "../components/Wallet/WalletItem";
 import useGetWallet from "../hooks/useGetWallet";
 import { WalletSheet } from "../components/Sheets/WalletSheet";
 import { Expense } from "@/types";
@@ -15,6 +15,8 @@ import PieChart from "../components/WalletChart/PieChart";
 import wrapWithFunction from "@/utils/functions/wrapFn";
 import DateRangePicker from "../components/WalletChart/DateRangePicker";
 import Legend from "../components/WalletChart/Legend";
+import useGetStatistics from "../hooks/useGetStatistics";
+import StatisticsSummary from "../components/WalletChart/StatisticsSummary";
 
 const styles = StyleSheet.create({
   tilesContainer: {
@@ -62,10 +64,10 @@ const styles = StyleSheet.create({
   },
 });
 
-const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
-
 export default function WalletCharts() {
   const { data = { wallet: { expenses: [] } }, dispatch, filters } = useGetWallet({ fetchAll: true });
+  const { data: stats } = useGetStatistics([filters.date.from, filters.date.to]);
+
   const listRef = useRef<VirtualizedList<any> | null>(null);
   const [selected, setSelected] = useState("");
 
@@ -106,7 +108,7 @@ export default function WalletCharts() {
     }, 0);
   }, [data?.wallet?.expenses]);
 
-  const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
+  const [selectedExpense, setSelectedExpense] = useState<WalletElement | undefined>(undefined);
 
   const expenseSheetRef = useRef<BottomSheet>(null);
 
@@ -117,6 +119,8 @@ export default function WalletCharts() {
         listRef.current?.scrollToIndex({ index: 0 });
       }, 100);
   };
+
+  const selectedCategoryData = data?.wallet?.expenses.filter((item) => item.category === selected) || [];
 
   const ListHeaderComponent = useMemo(
     () => (
@@ -133,9 +137,16 @@ export default function WalletCharts() {
           <DateRangePicker filters={filters} dispatch={wrapWithFunction(dispatch, () => setSelected(""))} />
 
           <Legend totalSum={sumOfExpenses} selected={selected} data={barData} onPress={onLegendItemPress} />
-        </View>
 
-        {selected && <Text style={styles.expenseTitle}>{capitalize(selected) || "Income"}</Text>}
+          <StatisticsSummary dates={filters.date} data={stats?.statistics} />
+
+          {selectedCategoryData.length > 0 && (
+            <View style={{ width: Layout.screen.width - 30, marginTop: 25 }}>
+              <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 18 }}>Selected category: {selected || "income"}</Text>
+              <Text style={{ color: "gray", marginTop: 5 }}>List of transactions</Text>
+            </View>
+          )}
+        </View>
       </>
     ),
     [sumOfExpenses, barData, filters, dispatch, chartType, selected]
@@ -161,7 +172,7 @@ export default function WalletCharts() {
       <VirtualizedList
         ref={listRef}
         ListHeaderComponent={ListHeaderComponent}
-        data={data?.wallet?.expenses.filter((item) => item.category === selected)}
+        data={selectedCategoryData}
         getItem={(data, index) => data[index]}
         getItemCount={(data) => data.length}
         keyExtractor={(item) => item.id}

@@ -31,7 +31,7 @@ const styles = StyleSheet.create({
   },
   title: {
     color: "#fff",
-    fontSize: 18,
+    fontSize: 17,
     marginLeft: 10,
     fontWeight: "bold",
     marginBottom: 5,
@@ -230,7 +230,7 @@ export default function WalletItem(
               style={[
                 styles.price,
                 {
-                  marginHorizontal: 5,
+                  marginRight: 10,
                   width: "100%",
                   textAlign: "right",
                   color: item.type === "expense" ? "#F07070" : "#66E875",
