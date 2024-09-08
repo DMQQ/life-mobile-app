@@ -9,12 +9,19 @@ import { ScrollView } from "react-native-gesture-handler";
 import WorkoutWidget from "../Workout/components/WorkoutWidget";
 import Header from "@/components/ui/Header/Header";
 import { AntDesign } from "@expo/vector-icons";
-import QuickEvent from "@/components/QuickEvent";
+import moment from "moment";
 
 export default function Root({ navigation }: ScreenProps<"Root">) {
   const workout = useAppSelector((s) => s.workout);
 
-  const { data, loading } = useQuery(GET_MAIN_SCREEN);
+  const { data, loading } = useQuery(GET_MAIN_SCREEN, {
+    variables: {
+      range: [
+        moment().subtract(1, "day").startOf("week").format("YYYY-MM-DD"),
+        moment().subtract(1, "day").endOf("week").format("YYYY-MM-DD"),
+      ],
+    },
+  });
 
   return (
     <ScreenContainer style={{ padding: 0 }}>
@@ -33,12 +40,17 @@ export default function Root({ navigation }: ScreenProps<"Root">) {
           padding: 15,
         }}
       >
-        <AvailableBalanceWidget data={data?.wallet} loading={loading} />
-
-        <TodaysTimelineEvents
-          data={data?.timelineByCurrentDate}
+        <AvailableBalanceWidget
+          data={{
+            wallet: data?.wallet,
+            statistics: {
+              weeklySpendings: data?.weeklySpendings,
+            },
+          }}
           loading={loading}
         />
+
+        <TodaysTimelineEvents data={data?.timelineByCurrentDate} loading={loading} />
 
         {workout.isWorkoutPending && <WorkoutWidget />}
       </ScrollView>

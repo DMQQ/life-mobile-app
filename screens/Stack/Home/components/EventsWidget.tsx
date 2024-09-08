@@ -11,6 +11,7 @@ import Color from "color";
 import Button from "@/components/ui/Button/Button";
 import TimelineItem from "../../Timeline/components/TimelineItem";
 import lowOpacity from "@/utils/functions/lowOpacity";
+import { DATE_FORMAT } from "@/utils/functions/parseDate";
 
 const backgroundColor = Colors.primary_lighter;
 
@@ -63,7 +64,7 @@ const EventsList = (props: { data: GetTimelineQuery[] }) => {
       {props?.data?.slice(0, 3).map((timeline, index) => (
         <TimelineItem
           styles={{
-            backgroundColor: Colors.primary,
+            backgroundColor: Colors.primary_lighter,
             borderRadius: 15,
             padding: 20,
           }}
@@ -91,10 +92,7 @@ const EventsList = (props: { data: GetTimelineQuery[] }) => {
   );
 };
 
-export default function TodaysTimelineEvents(props: {
-  data: any[];
-  loading: boolean;
-}) {
+export default function TodaysTimelineEvents(props: { data: any[]; loading: boolean }) {
   const navigation = useNavigation<any>();
 
   const date = moment();
@@ -105,10 +103,7 @@ export default function TodaysTimelineEvents(props: {
         <Text style={styles.heading}>
           {moment.weekdays()[date.day()]} {date.format("DD.MM")}
         </Text>
-        <Ripple
-          onPress={() => navigation.navigate("TimelineScreens")}
-          style={styles.button}
-        >
+        <Ripple onPress={() => navigation.navigate("TimelineScreens")} style={styles.button}>
           <Text style={styles.buttonText}>See more</Text>
         </Ripple>
       </View>
@@ -133,7 +128,7 @@ export default function TodaysTimelineEvents(props: {
         </Skeleton>
       )}
 
-      {props?.data?.length === 0 && !props.loading && <NotFound />}
+      {props?.data?.length === 0 && !props.loading && <NotFound selectedDate={date.format(DATE_FORMAT)} />}
     </View>
   );
 }
