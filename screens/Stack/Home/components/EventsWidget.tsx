@@ -58,13 +58,12 @@ const styles = StyleSheet.create({
 });
 
 const EventsList = (props: { data: GetTimelineQuery[] }) => {
-  const navigation = useNavigation<any>();
   return (
     <>
       {props?.data?.slice(0, 3).map((timeline, index) => (
         <TimelineItem
           styles={{
-            backgroundColor: Colors.primary_lighter,
+            backgroundColor: Colors.primary_light,
             borderRadius: 15,
             padding: 20,
           }}
@@ -73,21 +72,6 @@ const EventsList = (props: { data: GetTimelineQuery[] }) => {
           {...timeline}
         />
       ))}
-
-      {props?.data?.length > 0 && (
-        <Button
-          onPress={() => navigation.navigate("TimelineCreate")}
-          fontStyle={{ fontSize: 16, color: Colors.secondary_light_1 }}
-          style={{
-            marginTop: 15,
-            backgroundColor: lowOpacity(Colors.secondary_dark_2, 0.4),
-            borderWidth: 1,
-            borderColor: Colors.secondary,
-          }}
-        >
-          Create Event
-        </Button>
-      )}
     </>
   );
 };

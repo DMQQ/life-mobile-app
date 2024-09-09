@@ -1,4 +1,5 @@
 import { gql, useQuery } from "@apollo/client";
+import { useEffect } from "react";
 
 export interface WalletStatisticsResponse {
   statistics: {
@@ -39,6 +40,12 @@ export default function useGetStatistics(range: [any, any]) {
     `,
     { variables: { range } }
   );
+
+  useEffect(() => {
+    console.log("useGetStatistics", range);
+
+    query.refetch({ range });
+  }, range);
 
   return query;
 }

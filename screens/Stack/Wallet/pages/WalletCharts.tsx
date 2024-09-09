@@ -3,13 +3,12 @@ import Colors, { secondary_candidates } from "@/constants/Colors";
 import Layout from "@/constants/Layout";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useMemo, useRef, useState } from "react";
-import { StyleSheet, Text, View, VirtualizedList } from "react-native";
+import { Alert, StyleSheet, Text, View, VirtualizedList } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Charts from "../components/Wallet/Charts";
 import WalletItem, { WalletElement } from "../components/Wallet/WalletItem";
 import useGetWallet from "../hooks/useGetWallet";
 import { WalletSheet } from "../components/Sheets/WalletSheet";
-import { Expense } from "@/types";
 import BottomSheet from "@gorhom/bottom-sheet";
 import PieChart from "../components/WalletChart/PieChart";
 import wrapWithFunction from "@/utils/functions/wrapFn";
@@ -122,15 +121,20 @@ export default function WalletCharts() {
 
   const selectedCategoryData = data?.wallet?.expenses.filter((item) => item.category === selected) || [];
 
+  const onChartPress = (e: any) => {
+    setSelected(e.label);
+    e.label !== undefined && Alert.alert(`Category ${e.label} is`, e.value.toFixed(2));
+  };
+
   const ListHeaderComponent = useMemo(
     () => (
       <>
         <View style={styles.listHeader}>
           <View style={{ height: Layout.screen.height / 3 }}>
             {chartType === "pie" ? (
-              <PieChart data={barData} totalSum={sumOfExpenses} onPress={(e) => setSelected(e.label)} />
+              <PieChart data={barData} totalSum={sumOfExpenses} onPress={onChartPress} />
             ) : (
-              <Charts data={barData} />
+              <Charts data={barData} onPress={onChartPress} />
             )}
           </View>
 
@@ -142,7 +146,13 @@ export default function WalletCharts() {
 
           {selectedCategoryData.length > 0 && (
             <View style={{ width: Layout.screen.width - 30, marginTop: 25 }}>
-              <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 18 }}>Selected category: {selected || "income"}</Text>
+              <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 18 }}>
+                Selected category:{" "}
+                <Text style={{ color: barData.find((c) => c.label === selected)?.color, fontSize: 18, textTransform: "capitalize" }}>
+                  {" "}
+                  {selected || "income"}
+                </Text>
+              </Text>
               <Text style={{ color: "gray", marginTop: 5 }}>List of transactions</Text>
             </View>
           )}
