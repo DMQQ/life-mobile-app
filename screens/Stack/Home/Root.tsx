@@ -14,6 +14,8 @@ import moment from "moment";
 export default function Root({ navigation }: ScreenProps<"Root">) {
   const workout = useAppSelector((s) => s.workout);
 
+  const user = useAppSelector((s) => s.user);
+
   const { data, loading } = useQuery(GET_MAIN_SCREEN, {
     variables: {
       range: [
@@ -27,7 +29,7 @@ export default function Root({ navigation }: ScreenProps<"Root">) {
     <ScreenContainer style={{ padding: 0 }}>
       <Header
         titleAnimatedStyle={{}}
-        title="Hello :)"
+        title={`Hello, ${user?.user?.email.split("@")[0]}`}
         buttons={[
           {
             icon: <AntDesign name="setting" size={20} color="#fff" />,

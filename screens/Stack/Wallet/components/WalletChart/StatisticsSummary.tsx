@@ -1,9 +1,10 @@
 import { Text, View } from "react-native";
-import { WalletStatisticsResponse } from "../../hooks/useGetStatistics";
+import useGetStatistics, { WalletStatisticsResponse } from "../../hooks/useGetStatistics";
 import Layout from "@/constants/Layout";
 import { FontAwesome5, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import Colors from "@/constants/Colors";
-import { ReactNode } from "react";
+import { ReactNode, useMemo } from "react";
+import moment from "moment";
 
 interface StatisticsSummaryProps {
   data: WalletStatisticsResponse["statistics"] | undefined;
@@ -47,6 +48,51 @@ export const Item = ({ label, value, icon, formatValue = true, width }: ItemProp
 export default function StatisticsSummary(props: StatisticsSummaryProps) {
   if (!props.data) return null;
 
+  const oppositeRange = useMemo(() => {
+    let currentSize = Math.abs(moment(props.dates.from).diff(props.dates.to)) / (1000 * 60 * 60 * 24);
+
+    const [from, to] = [
+      moment(props.dates.from).subtract(currentSize, "days").format("YYYY-MM-DD"),
+      moment(props.dates.to)
+        .subtract(currentSize - 2, "days")
+        .format("YYYY-MM-DD"),
+    ];
+
+    return [from, to] as [string, string];
+  }, [props.dates]);
+
+  const lastRangeStatistics = useGetStatistics(oppositeRange);
+
+  const percentDiff = (key: keyof WalletStatisticsResponse["statistics"]) => {
+    const current = props.data?.[key];
+    const previous = lastRangeStatistics.data?.statistics?.[key];
+
+    if (typeof previous !== "number" || typeof current !== "number") return 0;
+
+    if (previous === 0) return current === 0 ? 0 : 100;
+    const percent = ((current - previous) / previous) * 100;
+
+    if (percent < 0) return percent.toFixed(2) + "%";
+
+    return "+" + percent.toFixed(2) + "%";
+  };
+
+  const getValue = (key: keyof WalletStatisticsResponse["statistics"], t: string = "zł") => {
+    let value = lastRangeStatistics.data?.statistics?.[key];
+
+    if (typeof value === "number") value = value.toFixed(2) + " " + (t || "");
+
+    return "\n" + value;
+  };
+
+  const omitFields = ["lastBalance"];
+
+  const isEmptyOppositeRange = Object.entries(lastRangeStatistics.data?.statistics || {})
+    .filter(([key]) => !omitFields.includes(key))
+    .every(([_, value]) => {
+      return typeof value === "number" && value === 0;
+    });
+
   return (
     <View style={{ width: Layout.screen.width - 30, marginTop: 25, marginBottom: 25 }}>
       <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 18 }}>Statistics Summary</Text>
@@ -78,6 +124,64 @@ export default function StatisticsSummary(props: StatisticsSummaryProps) {
           icon={<MaterialIcons name="category" size={24} color="white" />}
         />
       </View>
+
+      {lastRangeStatistics.data && !isEmptyOppositeRange && (
+        <>
+          <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 18, marginTop: 25 }}>Percentage difference in spendings</Text>
+          <Text style={{ color: "gray", marginTop: 5 }}>
+            Statistics in the previous daterange {"\n"}
+            {oppositeRange[0]} to {oppositeRange[1]}
+          </Text>
+          <View style={{ flexDirection: "row", justifyContent: "space-between", flexWrap: "wrap", gap: 10, marginTop: 15 }}>
+            <Item
+              label={"Total expenses: " + getValue("expense")}
+              formatValue={false}
+              value={percentDiff("expense")}
+              icon={<Text style={{ fontSize: 25, color: "red", marginRight: 2.5 }}>%</Text>}
+            />
+            <Item
+              label={"Total income" + getValue("income")}
+              formatValue={false}
+              value={percentDiff("income")}
+              icon={<Text style={{ fontSize: 25, color: "lightgreen", marginRight: 2.5 }}>%</Text>}
+            />
+            <Item
+              label={"Min expense" + getValue("min")}
+              formatValue={false}
+              value={percentDiff("min")}
+              icon={<Text style={{ fontSize: 25, color: "red", marginRight: 2.5 }}>%</Text>}
+            />
+            <Item
+              label={"Max expense" + getValue("max")}
+              formatValue={false}
+              value={percentDiff("max")}
+              icon={<Text style={{ fontSize: 25, color: "lightgreen", marginRight: 2.5 }}>%</Text>}
+            />
+            <Item
+              label={"Average purchase" + getValue("average")}
+              formatValue={false}
+              value={percentDiff("average")}
+              icon={<Text style={{ fontSize: 25, color: "red", marginRight: 2.5 }}>%</Text>}
+            />
+            <Item
+              label={"Total count" + getValue("count", "")}
+              formatValue={false}
+              value={percentDiff("count")}
+              icon={<Text style={{ fontSize: 25, color: "lightgreen", marginRight: 2.5 }}>%</Text>}
+            />
+            <Item
+              label="Top category"
+              value={lastRangeStatistics.data.statistics.theMostCommonCategory}
+              icon={<MaterialIcons name="category" size={24} color="white" />}
+            />
+            <Item
+              label="Meh category"
+              value={lastRangeStatistics.data.statistics.theLeastCommonCategory}
+              icon={<MaterialIcons name="category" size={24} color="white" />}
+            />
+          </View>
+        </>
+      )}
     </View>
   );
 }
