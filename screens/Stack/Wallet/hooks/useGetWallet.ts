@@ -1,4 +1,5 @@
 import { Expense, Wallet } from "@/types";
+import useOffline from "@/utils/hooks/useOffline";
 import { gql, useQuery } from "@apollo/client";
 import { useEffect, useMemo, useReducer, useState } from "react";
 
@@ -139,6 +140,8 @@ export default function useGetWallet(options?: { fetchAll: boolean }) {
   const [skip, setSkip] = useState(PAGINATION_TAKE);
   const [endReached, setEndReached] = useState(false);
 
+  const offline = useOffline<Wallet>("wallet");
+
   const st = useQuery(GET_WALLET, {
     variables: {
       filters: {
@@ -155,6 +158,10 @@ export default function useGetWallet(options?: { fetchAll: boolean }) {
         ...(filters.type && { type: filters.type }),
       },
       take: options?.fetchAll ? 99999 : PAGINATION_TAKE,
+    },
+
+    onCompleted(data) {
+      offline.save("wallet", data.wallet);
     },
   });
 

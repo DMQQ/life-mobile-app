@@ -4,11 +4,11 @@ import { Text, View } from "react-native";
 import { CategoryIcon, Icons } from "../WalletItem";
 import { FormikProps } from "formik";
 import { memo } from "react";
-import Ripple from "react-native-material-ripple";
 import Colors from "@/constants/Colors";
 import Color from "color";
 import lowOpacity from "@/utils/functions/lowOpacity";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import Layout from "@/constants/Layout";
 
 const FormFields = ({
   f,
@@ -64,13 +64,12 @@ const FormFields = ({
             options={Object.keys(Icons)}
             transparentOverlay
             closeOnSelect
-            maxSelectHeight={360}
+            maxSelectHeight={Layout.screen.height * 0.35}
             containerStyle={{ borderRadius: 10 }}
             keyExtractor={(item) => item}
             renderDefaultItem={false}
             renderItem={(item) => (
-              <Ripple
-                onPress={() => f.setFieldValue("category", item.item)}
+              <View
                 style={{
                   flexDirection: "row",
                   alignItems: "center",
@@ -85,7 +84,7 @@ const FormFields = ({
                 {f.values.category === item.item && (
                   <MaterialCommunityIcons name="check" size={25} color={Colors.secondary} style={{ position: "absolute", right: 25 }} />
                 )}
-              </Ripple>
+              </View>
             )}
           />
         </>
