@@ -20,6 +20,7 @@ const FormFields = ({
     type: string;
     category: string;
     date: string;
+    schedule: boolean;
   }>;
   onFocusChange: (focused: boolean) => void;
 }) => {

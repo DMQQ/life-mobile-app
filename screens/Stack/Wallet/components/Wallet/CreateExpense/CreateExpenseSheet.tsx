@@ -1,6 +1,4 @@
-import BottomSheet, {
-  BottomSheetGorhom,
-} from "@/components/ui/BottomSheet/BottomSheet";
+import BottomSheet, { BottomSheetGorhom } from "@/components/ui/BottomSheet/BottomSheet";
 import Button from "@/components/ui/Button/Button";
 import SegmentedButtons from "@/components/ui/SegmentedButtons";
 import Colors from "@/constants/Colors";
@@ -42,12 +40,10 @@ const initialValues = {
   type: "",
   category: "",
   date: moment().add(2, "hours").toISOString(),
+  schedule: false,
 };
 
-const AddExpenseBottomSheet = forwardRef<
-  BottomSheetGorhom,
-  { onCompleted: Function }
->((props, ref) => {
+const AddExpenseBottomSheet = forwardRef<BottomSheetGorhom, { onCompleted: Function }>((props, ref) => {
   const { createExpense, reset } = useCreateActivity({
     onCompleted() {
       props.onCompleted();
@@ -58,10 +54,7 @@ const AddExpenseBottomSheet = forwardRef<
     calendar: { date },
   } = useWalletContext();
 
-  const onSubmit = async (
-    values: typeof initialValues,
-    { resetForm }: FormikHelpers<typeof initialValues>
-  ) => {
+  const onSubmit = async (values: typeof initialValues, { resetForm }: FormikHelpers<typeof initialValues>) => {
     try {
       await createExpense({
         variables: {
@@ -70,6 +63,7 @@ const AddExpenseBottomSheet = forwardRef<
           type: values.type,
           category: values.category,
           date: values.date,
+          schedule: values.schedule,
         },
       });
 
@@ -140,14 +134,10 @@ const Form = ({ formik: f }: FormProps) => {
               buttonTextStyle={{ fontSize: 14 }}
             />
             <Ripple
-              onPress={() => {
-                startTransition(() => setShowCalendar((prev) => !prev));
-              }}
+              onPress={() => startTransition(() => setShowCalendar((prev) => !prev))}
               style={[
                 {
-                  backgroundColor: showCalendar
-                    ? Colors.secondary
-                    : Colors.primary_light,
+                  backgroundColor: showCalendar ? Colors.secondary : Colors.primary_light,
                 },
                 styles.calendarButton,
               ]}
@@ -158,13 +148,12 @@ const Form = ({ formik: f }: FormProps) => {
 
           {showCalendar ? (
             <ChooseDate
+              schedule={f.values.schedule}
+              onScheduleToggle={() => f.handleChange("schedule")({ target: { value: !f.values.schedule } } as any)}
               date={f.values.date}
               onDismissCalendar={() => setShowCalendar(false)}
               setDateField={(date) => {
-                f.setFieldValue(
-                  "date",
-                  moment(date).add(2, "hours").toISOString()
-                );
+                f.setFieldValue("date", moment(date).add(2, "hours").toISOString());
               }}
             />
           ) : (

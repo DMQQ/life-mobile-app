@@ -6,11 +6,7 @@ import { useNavigation } from "@react-navigation/native";
 import { Wallet } from "../../../../types";
 import Layout, { Padding, Rounded } from "../../../../constants/Layout";
 import Skeleton from "@/components/SkeletonLoader/Skeleton";
-import { gql, useQuery } from "@apollo/client";
-import moment from "moment";
-import { WalletStatisticsResponse } from "../../Wallet/hooks/useGetStatistics";
 import { Item } from "../../Wallet/components/WalletChart/StatisticsSummary";
-import { useMemo } from "react";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import WalletItem from "../../Wallet/components/Wallet/WalletItem";
 
@@ -67,50 +63,6 @@ const styles = StyleSheet.create({
   },
 });
 
-interface StatisticsSummaryProps {
-  thisMonth?: WalletStatisticsResponse["statistics"];
-  lastMonth?: WalletStatisticsResponse["statistics"];
-}
-
-const useStatistics = () => {
-  const thisMonth = [moment().startOf("month").format("YYYY-MM-DD"), moment().endOf("month").format("YYYY-MM-DD")];
-
-  const lastMonth = [
-    moment().subtract(1, "month").startOf("month").format("YYYY-MM-DD"),
-    moment().subtract(1, "month").endOf("month").format("YYYY-MM-DD"),
-  ];
-
-  const query = useQuery<StatisticsSummaryProps>(
-    gql`
-      query GetStatisticsHome($thisMonth: [String!]!, $lastMonth: [String!]!) {
-        thisMonth: getStatistics(range: $thisMonth) {
-          ...Stats
-        }
-
-        lastMonth: getStatistics(range: $lastMonth) {
-          ...Stats
-        }
-      }
-
-      fragment Stats on WalletStatisticsRange {
-        total
-        average
-        max
-        min
-        count
-        theMostCommonCategory
-        theLeastCommonCategory
-        lastBalance
-        income
-        expense
-      }
-    `,
-    { variables: { thisMonth, lastMonth } }
-  );
-
-  return query;
-};
-
 export default function AvailableBalanceWidget(props: {
   data: {
     wallet: Wallet;
@@ -123,8 +75,6 @@ export default function AvailableBalanceWidget(props: {
   loading: boolean;
 }) {
   const navigation = useNavigation<any>();
-
-  // const diff = useStatistics();
 
   return (
     <View style={styles.container}>
@@ -166,7 +116,7 @@ export default function AvailableBalanceWidget(props: {
             <FlatList
               pagingEnabled
               horizontal
-              data={props.data.wallet.expenses}
+              data={props?.data?.wallet?.expenses}
               keyExtractor={(item) => item.id}
               renderItem={({ item }) => (
                 <WalletItem
