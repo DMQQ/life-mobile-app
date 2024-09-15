@@ -73,7 +73,7 @@ function WalletScreen({ navigation }: WalletScreens<"Wallet">) {
   });
 
   const animatedContainerStyle = useAnimatedStyle(() => ({
-    height: interpolate(scrollY.value, [0, 200], [150, 25], Extrapolation.CLAMP),
+    height: interpolate(scrollY.value, [0, 200], [150, 35], Extrapolation.CLAMP),
     width: interpolate(scrollY.value, [0, 200], [Layout.screen.width, 200], Extrapolation.CLAMP),
     transform: [
       {
