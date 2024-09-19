@@ -8,6 +8,7 @@ import { AntDesign, Entypo } from "@expo/vector-icons";
 import Reanimated, { FadeIn, FadeInDown, FadeInUp, FadeOut, useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { FlatList } from "react-native-gesture-handler";
 import lowOpacity from "@/utils/functions/lowOpacity";
+import Animated from "react-native-reanimated";
 
 const MIN_TOP_DISTANCE = 65;
 
@@ -190,11 +191,11 @@ export default function Select({
           ]}
         />
       )}
-      <View
+      <Animated.View
         style={[
           styles.container,
           {
-            zIndex: isFocused ? 1000 : 100,
+            zIndex: isFocused ? 10000 : 100,
             borderColor: isFocused ? Colors.secondary : Colors.primary_light,
             backgroundColor: isFocused ? Colors.primary_lighter : backgroundColor,
           },
@@ -266,7 +267,7 @@ export default function Select({
             }
           />
         )}
-      </View>
+      </Animated.View>
     </>
   );
 }

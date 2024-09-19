@@ -1,4 +1,5 @@
 import { gql, useApolloClient, useMutation } from "@apollo/client";
+import { ToastAndroid } from "react-native";
 
 const CREATE_EXPENSE = gql`
   mutation CreateExpense($amount: Float!, $description: String!, $type: String!, $category: String!, $date: String!, $schedule: Boolean) {
@@ -29,6 +30,8 @@ export default function useCreateActivity(props: { onCompleted?: () => void }) {
         client?.refetchQueries({
           include: ["GetWallet"],
         });
+      } else {
+        ToastAndroid.show("Expense has been scheduled", ToastAndroid.SHORT);
       }
     },
   });
