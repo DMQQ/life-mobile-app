@@ -1,13 +1,11 @@
 import Button from "@/components/ui/Button/Button";
-import Radio, { RadioGroup } from "@/components/ui/Radio/Radio";
 import ThemedCalendar from "@/components/ui/ThemedCalendar/ThemedCalendar";
 import Colors from "@/constants/Colors";
-import { AntDesign } from "@expo/vector-icons";
 import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 import moment from "moment";
 import { memo, useEffect, useState } from "react";
 import { Platform, Text, View } from "react-native";
-import Ripple from "react-native-material-ripple";
+import Animated, { SlideInDown, SlideInUp, SlideOutDown } from "react-native-reanimated";
 
 interface ChooseDateProps {
   onDismissCalendar: () => void;
@@ -15,7 +13,7 @@ interface ChooseDateProps {
   date: string;
 
   schedule: boolean;
-  onScheduleToggle: () => void;
+  onScheduleToggle: (isScheduled: boolean) => void;
 }
 
 const ChooseDate = memo(({ onDismissCalendar, setDateField, date, schedule, onScheduleToggle }: ChooseDateProps) => {
@@ -45,10 +43,14 @@ const ChooseDate = memo(({ onDismissCalendar, setDateField, date, schedule, onSc
         },
       });
     }
+
+    const isScheduled = moment(day.dateString).isAfter(moment());
+
+    onScheduleToggle(isScheduled);
   };
 
   return (
-    <View style={{ marginTop: 10 }}>
+    <Animated.View style={{ marginTop: 10 }} entering={SlideInDown} exiting={SlideOutDown}>
       <ThemedCalendar
         onDayPress={onDayPress}
         markedDates={{
@@ -58,39 +60,16 @@ const ChooseDate = memo(({ onDismissCalendar, setDateField, date, schedule, onSc
           },
         }}
       />
-
-      <Ripple
-        onPress={onScheduleToggle}
-        style={{
-          marginTop: 15,
-          backgroundColor: Colors.primary_lighter,
-          padding: 15,
-          borderRadius: 15,
-          flexDirection: "row",
-          gap: 15,
-          alignItems: "center",
-        }}
-      >
-        <AntDesign name={schedule ? "checkcircle" : "checkcircleo"} size={24} color="#fff" />
-        <Text style={{ color: "#fff", fontSize: 16 }}>
-          Schedule expense for: {"  "}
-          <Text
-            style={{
-              fontWeight: "bold",
-              color: Colors.secondary,
-              borderRadius: 30,
-              fontSize: 18,
-            }}
-          >
-            {moment(selectedDate).format("YYYY-MM-DD")}
-          </Text>
-        </Text>
-      </Ripple>
+      <Text style={{ color: "gray", marginTop: 15, fontSize: 12 }}>
+        Selecting a date will also select the time of the day. You can change the time by selecting the date again.
+        {"\n\n"}
+        If you want to schedule the expense for a specific date and time that is greater than the current date and time,
+      </Text>
 
       <Button onPress={onDismissCalendar} fontStyle={{ fontSize: 16 }} style={{ marginTop: 25 }}>
         Close Calendar
       </Button>
-    </View>
+    </Animated.View>
   );
 });
 

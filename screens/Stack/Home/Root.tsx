@@ -10,20 +10,26 @@ import WorkoutWidget from "../Workout/components/WorkoutWidget";
 import Header from "@/components/ui/Header/Header";
 import { AntDesign } from "@expo/vector-icons";
 import moment from "moment";
+import useOffline from "@/utils/hooks/useOffline";
 
 export default function Root({ navigation }: ScreenProps<"Root">) {
   const workout = useAppSelector((s) => s.workout);
 
   const user = useAppSelector((s) => s.user);
 
-  const { data, loading } = useQuery(GET_MAIN_SCREEN, {
+  const offline = useOffline("RootScreen");
+
+  const { data: gql, loading } = useQuery(GET_MAIN_SCREEN, {
     variables: {
       range: [
         moment().subtract(1, "day").startOf("week").format("YYYY-MM-DD"),
         moment().subtract(1, "day").endOf("week").format("YYYY-MM-DD"),
       ],
     },
+    onCompleted: (data) => offline.save("RootScreen", data),
   });
+
+  const data = offline.isOffline ? offline.data || {} : gql;
 
   return (
     <ScreenContainer style={{ padding: 0 }}>

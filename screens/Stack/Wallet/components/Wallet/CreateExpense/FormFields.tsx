@@ -9,6 +9,8 @@ import Color from "color";
 import lowOpacity from "@/utils/functions/lowOpacity";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import Layout from "@/constants/Layout";
+import Animated, { FadeInDown, SlideInDown, SlideOutDown } from "react-native-reanimated";
+import Button from "@/components/ui/Button/Button";
 
 const FormFields = ({
   f,
@@ -25,7 +27,7 @@ const FormFields = ({
   onFocusChange: (focused: boolean) => void;
 }) => {
   return (
-    <>
+    <Animated.View entering={SlideInDown} exiting={SlideOutDown}>
       <ValidatedInput
         showLabel
         label="Purchase's name"
@@ -46,7 +48,7 @@ const FormFields = ({
       />
 
       {f.values.type === "expense" && (
-        <>
+        <Animated.View entering={SlideInDown} exiting={SlideOutDown} style={{ zIndex: 1000 }}>
           <Text
             style={{
               color: "#fff",
@@ -88,9 +90,23 @@ const FormFields = ({
               </View>
             )}
           />
-        </>
+        </Animated.View>
       )}
-    </>
+      {f.isValid && f.dirty && (
+        <Animated.View entering={SlideInDown} exiting={SlideOutDown} style={{ marginTop: 10 }}>
+          <Button
+            disabled={!(f.isValid && f.dirty)}
+            fontStyle={{ fontSize: 16 }}
+            style={{ marginTop: 15 }}
+            onPress={() => {
+              f.handleSubmit();
+            }}
+          >
+            Create expense
+          </Button>
+        </Animated.View>
+      )}
+    </Animated.View>
   );
 };
 

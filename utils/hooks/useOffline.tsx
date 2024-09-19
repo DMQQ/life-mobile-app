@@ -25,7 +25,7 @@ export default function useOffline<T>(key?: string) {
   };
 
   useEffect(() => {
-    if (key) get(key);
+    if (key && !isOnline) get(key);
   }, [key]);
 
   return { data, save, get, isOffline: !isOnline };

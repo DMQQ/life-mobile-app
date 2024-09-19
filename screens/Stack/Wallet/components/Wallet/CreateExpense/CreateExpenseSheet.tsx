@@ -94,7 +94,7 @@ const AddExpenseBottomSheet = forwardRef<BottomSheetGorhom, { onCompleted: Funct
         index === -1 && f.resetForm();
       }}
       ref={ref}
-      snapPoints={["70%", "95%"]}
+      snapPoints={["75%", "95%"]}
     >
       <Form formik={f} />
     </BottomSheet>
@@ -149,7 +149,7 @@ const Form = ({ formik: f }: FormProps) => {
           {showCalendar ? (
             <ChooseDate
               schedule={f.values.schedule}
-              onScheduleToggle={() => f.handleChange("schedule")({ target: { value: !f.values.schedule } } as any)}
+              onScheduleToggle={(isScheduled) => f.handleChange("schedule")({ target: { value: isScheduled } } as any)}
               date={f.values.date}
               onDismissCalendar={() => setShowCalendar(false)}
               setDateField={(date) => {
@@ -157,27 +157,12 @@ const Form = ({ formik: f }: FormProps) => {
               }}
             />
           ) : (
-            <>
-              <FormFields
-                onFocusChange={(focused) => {
-                  snapToIndex(focused ? 1 : 0);
-                }}
-                f={f}
-              />
-
-              <Button
-                disabled={!(f.isValid && f.dirty)}
-                fontStyle={{ fontSize: 16 }}
-                onPress={() => {
-                  f.handleSubmit();
-                }}
-                style={{
-                  marginTop: f.values.type === "expense" ? 60 : 150,
-                }}
-              >
-                Create expense
-              </Button>
-            </>
+            <FormFields
+              onFocusChange={(focused) => {
+                snapToIndex(focused ? 1 : 0);
+              }}
+              f={f}
+            />
           )}
         </View>
       </Animated.View>
