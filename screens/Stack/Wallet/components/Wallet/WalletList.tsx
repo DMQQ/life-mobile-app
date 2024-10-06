@@ -11,6 +11,7 @@ import Colors from "@/constants/Colors";
 import Ripple from "react-native-material-ripple";
 import { useWalletContext } from "../WalletContext";
 import Color from "color";
+import { gql, useQuery } from "@apollo/client";
 
 const AnimatedList = Animated.createAnimatedComponent(VirtualizedList);
 
@@ -46,7 +47,7 @@ export default function WalletList(props: {
         previous.expenses.push(expense);
       } else {
         sorted.push({
-          month: moment(expense.date).format("MMMM YYYY"),
+          month: expense.date,
           expenses: [expense],
         });
       }
@@ -98,30 +99,28 @@ const MonthExpenseList = ({
   sheet: React.RefObject<BottomSheet>;
   showTotal: boolean;
 }) => {
-  const [expense, income] = useMemo(() => {
-    let income = 0;
-    let expense = 0;
-    item.expenses.forEach((item) => {
-      if (item.type === "income") {
-        income += item.amount;
-      } else {
-        expense += item.amount;
+  const diff = useQuery(
+    gql`
+      query getMonthTotal($date: String!) {
+        getMonthTotal(date: $date)
       }
-    });
+    `,
+    { variables: { date: item.month } }
+  );
 
-    return [expense * -1, income] as const;
-  }, [item.expenses, item.month]);
+  const amount = diff.data?.getMonthTotal || 0;
 
   return (
     <View style={{ marginBottom: 30 }}>
       <View style={styles.monthRow}>
-        <Text style={styles.monthText}>{item.month}</Text>
+        <Text style={styles.monthText}>{moment(item.month).format("MMMM YYYY")}</Text>
 
         {showTotal && (
           <View style={{ flexDirection: "row", alignItems: "center" }}>
-            {income !== 0 && <Text style={{ color: "#66E875", fontSize: 18 }}> +{income.toFixed(0)}</Text>}
-            {expense !== 0 && income !== 0 && <Text style={{ color: Color(Colors.primary_lighter).lighten(5).hex() }}> / </Text>}
-            {expense !== 0 && <Text style={{ color: "#F07070", fontSize: 18 }}>{expense.toFixed(0)}</Text>}
+            <Text style={{ color: amount > 0 ? "#66E875" : "#F07070", fontSize: 18 }}>
+              {amount > 0 ? `+${amount.toFixed(2)}` : amount.toFixed(2)}
+            </Text>
+
             <Text style={{ color: Color(Colors.primary_lighter).lighten(5).hex() }}> zł</Text>
           </View>
         )}
