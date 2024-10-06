@@ -159,10 +159,6 @@ export default function useGetWallet(options?: { fetchAll: boolean }) {
       },
       take: options?.fetchAll ? 99999 : PAGINATION_TAKE,
     },
-
-    onCompleted(data) {
-      offline.save("WalletScreen", data);
-    },
   });
 
   const onEndReached = async () => {
@@ -203,8 +199,6 @@ export default function useGetWallet(options?: { fetchAll: boolean }) {
           },
         };
 
-        offline.save("WalletScreen", finalData.wallet);
-
         return finalData;
       },
     });
@@ -233,6 +227,10 @@ export default function useGetWallet(options?: { fetchAll: boolean }) {
 
     return () => clearTimeout(timeout);
   }, [filters]);
+
+  useEffect(() => {
+    if (!offline.isOffline) offline.save("WalletScreen", st.data);
+  }, []);
 
   const filtersActive = useMemo(() => JSON.stringify(filters) !== JSON.stringify(init), [filters]);
 
