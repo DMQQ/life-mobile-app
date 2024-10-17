@@ -19,7 +19,7 @@ import FormFields from "./FormFields";
 
 const schema = yup.object().shape({
   name: yup.string().required("Name is required"),
-  amount: yup.number().positive().required("Amount is required"),
+  amount: yup.number().positive("Amount cannot be negative number").required("Amount is required").typeError("Value must be a number"),
   type: yup.string().required("Type is required"),
 });
 

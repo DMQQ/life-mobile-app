@@ -11,6 +11,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import Layout from "@/constants/Layout";
 import Animated, { FadeInDown, SlideInDown, SlideOutDown } from "react-native-reanimated";
 import Button from "@/components/ui/Button/Button";
+import CategorySelect from "../CategorySelect";
 
 const FormFields = ({
   f,
@@ -59,36 +60,12 @@ const FormFields = ({
           >
             Category
           </Text>
-          <Select
-            placeholderText="Choose category"
-            onFocusChange={onFocusChange}
+
+          <CategorySelect
             selected={[f.values.category]}
+            onFocusChange={onFocusChange}
             setSelected={([selected]) => f.setFieldValue("category", selected)}
-            options={Object.keys(Icons)}
-            transparentOverlay
-            closeOnSelect
-            maxSelectHeight={Layout.screen.height * 0.35}
-            containerStyle={{ borderRadius: 10 }}
-            keyExtractor={(item) => item}
-            renderDefaultItem={false}
-            renderItem={(item) => (
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  borderBottomWidth: 0.5,
-                  borderBottomColor: Color(Colors.primary).lighten(4).hex(),
-                  padding: 5,
-                  backgroundColor: f.values.category === item.item ? lowOpacity(Colors.secondary, 0.2) : Colors.primary_lighter,
-                }}
-              >
-                <CategoryIcon type="expense" category={item.item} clear />
-                <Text style={{ color: "#fff", fontSize: 16, marginLeft: 10, fontWeight: "bold" }}>{item.item}</Text>
-                {f.values.category === item.item && (
-                  <MaterialCommunityIcons name="check" size={25} color={Colors.secondary} style={{ position: "absolute", right: 25 }} />
-                )}
-              </View>
-            )}
+            isActive={(category) => f.values.category === category}
           />
         </Animated.View>
       )}

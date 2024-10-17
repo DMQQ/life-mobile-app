@@ -27,11 +27,7 @@ const styles = StyleSheet.create({
   },
 });
 
-export default function BottomTab({
-  navigation,
-  state,
-  insets,
-}: BottomTabBarProps) {
+export default function BottomTab({ navigation, state, insets }: BottomTabBarProps) {
   const navigate = (route: string) => navigation.navigate(route);
 
   const activeRoute = state.routes[state.index].name;
@@ -46,10 +42,7 @@ export default function BottomTab({
         styles.button,
         {
           width: Layout.screen.width / state.routes.length,
-          backgroundColor:
-            activeRoute === props.route
-              ? lowOpacity(theme.colors.secondary, 0.075)
-              : undefined,
+          backgroundColor: activeRoute === props.route ? lowOpacity(theme.colors.secondary, 0.075) : undefined,
         },
       ]}
       onPress={() => navigate(props.route)}
@@ -58,17 +51,8 @@ export default function BottomTab({
         size={22.5}
         name={props.iconName}
         color={activeRoute === props.route ? Colors.secondary_light_1 : "#fff"}
+        style={{ marginBottom: 2.5, paddingVertical: 7.5 }}
       />
-
-      <Animated.Text
-        style={{
-          fontSize: 8,
-          color: Colors.secondary_light_1,
-          marginTop: 2.5,
-        }}
-      >
-        {activeRoute === props.route ? props.label : ""}
-      </Animated.Text>
     </Ripple>
   );
 
@@ -85,13 +69,11 @@ export default function BottomTab({
       style={[
         styles.container,
         {
-          paddingBottom:
-            Platform.OS === "android" ? Padding.s + insets.bottom : Padding.xxl,
+          paddingBottom: Platform.OS === "android" ? Padding.s + insets.bottom : Padding.xxl,
           borderTopColor: Colors.primary_dark,
           borderTopWidth: 1,
 
-          paddingTop:
-            Platform.OS === "android" ? insets.bottom + Padding.s : Padding.s,
+          paddingTop: Platform.OS === "android" ? insets.bottom + Padding.s : Padding.s,
         },
       ]}
     >

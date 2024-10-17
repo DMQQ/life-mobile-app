@@ -10,12 +10,15 @@ import SegmentedButtons from "../../../../components/ui/SegmentedButtons";
 import Color from "color";
 import Select from "@/components/ui/Select/Select";
 import Layout from "@/constants/Layout";
-import { Icons } from "../components/Wallet/WalletItem";
+import { CategoryIcon, Icons } from "../components/Wallet/WalletItem";
 import useUser from "@/utils/hooks/useUser";
 import { gql, useMutation } from "@apollo/client";
 import moment from "moment";
 import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 import ThemedCalendar from "@/components/ui/ThemedCalendar/ThemedCalendar";
+import lowOpacity from "@/utils/functions/lowOpacity";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import CategorySelect from "../components/Wallet/CategorySelect";
 
 const schema = yup.object().shape({
   name: yup.string().required("Name is required"),
@@ -39,22 +42,8 @@ const useEditExpense = () => {
 
   const [editExpense, { error }] = useMutation(
     gql`
-      mutation EditExpense(
-        $amount: Float!
-        $description: String!
-        $type: String!
-        $category: String!
-        $expenseId: ID!
-        $date: String!
-      ) {
-        editExpense(
-          amount: $amount
-          description: $description
-          type: $type
-          category: $category
-          expenseId: $expenseId
-          date: $date
-        ) {
+      mutation EditExpense($amount: Float!, $description: String!, $type: String!, $category: String!, $expenseId: ID!, $date: String!) {
+        editExpense(amount: $amount, description: $description, type: $type, category: $category, expenseId: $expenseId, date: $date) {
           id
         }
       }
@@ -92,10 +81,7 @@ export default function CreateActivity({ navigation, route: { params } }: any) {
   };
 
   return (
-    <ScreenContainer
-      style={{ paddingHorizontal: 15, paddingVertical: 0 }}
-      scroll
-    >
+    <ScreenContainer style={{ paddingHorizontal: 15, paddingVertical: 0 }} scroll>
       <Text
         style={{
           color: "#fff",
@@ -140,9 +126,7 @@ export default function CreateActivity({ navigation, route: { params } }: any) {
                 label="Purchase's name"
                 placeholder="Like 'shopping', 'new phone' ..."
                 name="name"
-                left={(props) => (
-                  <Input.Icon Icon="AntDesign" name="wallet" {...props} />
-                )}
+                left={(props) => <Input.Icon Icon="AntDesign" name="wallet" {...props} />}
                 formik={f}
                 style={{
                   width: Layout.screen.width - 30,
@@ -154,9 +138,7 @@ export default function CreateActivity({ navigation, route: { params } }: any) {
                 label="Amount (zł)"
                 placeholder="How much you spent? "
                 name="amount"
-                left={(props) => (
-                  <Input.Icon Icon="Ionicons" name="cash-outline" {...props} />
-                )}
+                left={(props) => <Input.Icon Icon="Ionicons" name="cash-outline" {...props} />}
                 keyboardType="numeric"
                 formik={f}
                 style={{
@@ -174,16 +156,11 @@ export default function CreateActivity({ navigation, route: { params } }: any) {
               >
                 Category
               </Text>
-              <Select
-                placeholderText="Choose category or create your own"
+
+              <CategorySelect
                 selected={[f.values.category]}
-                setSelected={([selected]) =>
-                  f.setFieldValue("category", selected)
-                }
-                options={Object.keys(Icons)}
-                transparentOverlay
-                closeOnSelect
-                maxSelectHeight={250}
+                setSelected={([selected]) => f.setFieldValue("category", selected)}
+                isActive={(category) => f.values.category === category}
               />
 
               <ThemedCalendar
@@ -213,9 +190,7 @@ export default function CreateActivity({ navigation, route: { params } }: any) {
               style={{
                 marginTop: 20,
                 paddingVertical: 15,
-                backgroundColor: !(f.isValid && f.dirty)
-                  ? Color(Colors.secondary).alpha(0.2).string()
-                  : Colors.secondary,
+                backgroundColor: !(f.isValid && f.dirty) ? Color(Colors.secondary).alpha(0.2).string() : Colors.secondary,
               }}
             >
               Save changes
