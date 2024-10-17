@@ -49,13 +49,9 @@ export default function StatisticsSummary(props: StatisticsSummaryProps) {
   if (!props.data) return null;
 
   const oppositeRange = useMemo(() => {
-    let currentSize = Math.abs(moment(props.dates.from).diff(props.dates.to)) / (1000 * 60 * 60 * 24);
-
     const [from, to] = [
-      moment(props.dates.from).subtract(currentSize, "days").format("YYYY-MM-DD"),
-      moment(props.dates.to)
-        .subtract(currentSize - 2, "days")
-        .format("YYYY-MM-DD"),
+      moment(props.dates.from).subtract(1, "month").format("YYYY-MM-DD"),
+      moment(props.dates.to).subtract(1, "month").format("YYYY-MM-DD"),
     ];
 
     return [from, to] as [string, string];

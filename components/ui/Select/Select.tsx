@@ -12,7 +12,7 @@ import Animated from "react-native-reanimated";
 
 const MIN_TOP_DISTANCE = 65;
 
-interface Props<T> {
+export interface Props<T> {
   options: T[];
 
   multiSelect?: boolean;
@@ -56,10 +56,13 @@ const styles = StyleSheet.create({
     width: Layout.screen.width * 0.95,
     borderWidth: 2,
     borderColor: Colors.secondary,
-    borderRadius: 10,
+    // borderRadius: 10,
+    borderBottomLeftRadius: 10,
+    borderBottomRightRadius: 10,
     left: -1,
     zIndex: 1100,
     backgroundColor,
+    padding: 5,
   },
   container: {
     width: "100%",
@@ -112,7 +115,9 @@ export default function Select({
       return;
     }
     setSelected([item]);
-    if (closeOnSelect) setIsFocused(false);
+    if (closeOnSelect) {
+      setIsFocused(false);
+    }
   };
 
   const ABS_LIST_HEIGHT = SINGLE_TILE_HEIGHT * options.length;
@@ -195,9 +200,12 @@ export default function Select({
         style={[
           styles.container,
           {
-            zIndex: isFocused ? 10000 : 100,
-            borderColor: isFocused ? Colors.secondary : Colors.primary_light,
+            zIndex: isFocused ? 1101 : 100,
+            borderColor: isFocused ? Colors.secondary : Color(Colors.primary_light).lighten(2).hex(),
             backgroundColor: isFocused ? Colors.primary_lighter : backgroundColor,
+            borderBottomRightRadius: isFocused ? 0 : 10,
+            borderBottomLeftRadius: isFocused ? 0 : 10,
+            borderBottomColor: isFocused ? Colors.secondary : Color(Colors.primary_light).lighten(2).hex(),
           },
           containerStyle,
         ]}
@@ -243,14 +251,14 @@ export default function Select({
 
         {isFocused && (
           <AnimatedGesturedFlatList
-            entering={FadeIn.duration(100)}
-            exiting={FadeOut.duration(100)}
+            entering={FadeIn.duration(150)}
+            exiting={FadeOut.duration(150)}
             style={[
               styles.list,
               {
                 height: maxSelectHeight || ABS_LIST_HEIGHT,
                 left: -2,
-                top: rest.anchor === "top" ? -1 * buttonHeight.value - 10 - (maxSelectHeight || ABS_LIST_HEIGHT) : 10,
+                top: rest.anchor === "top" ? -1 * buttonHeight.value - (maxSelectHeight || ABS_LIST_HEIGHT) : 0,
               },
               flatListTransformStyle,
             ]}

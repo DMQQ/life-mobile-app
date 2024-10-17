@@ -1,12 +1,4 @@
-import {
-  View,
-  TextInput,
-  Text,
-  StyleProp,
-  ViewStyle,
-  TextInputProps,
-  TextStyle,
-} from "react-native";
+import { View, TextInput, Text, StyleProp, ViewStyle, TextInputProps, TextStyle } from "react-native";
 import styles from "./styles";
 import React, { useState } from "react";
 import Layout from "../../../constants/Layout";
@@ -121,36 +113,22 @@ export default function Input({
       {typeof name !== "undefined" && (
         <Input.Label
           error={error}
-          text={
-            (rest?.label || name) +
-            " " +
-            (rest.label && helperText ? `(${helperText})` : "")
-          }
+          text={(rest?.label || name) + " " + (rest.label && helperText ? `(${helperText})` : "")}
           labelStyle={labelStyle}
         />
       )}
       <View
         style={{
-          backgroundColor: isFocused
-            ? Colors.primary_lighter
-            : Colors.primary_light,
+          backgroundColor: isFocused ? Colors.primary_lighter : Colors.primary_light,
           borderRadius: 10,
           flexDirection: "row",
           width: (style as any)?.width || "100%", //(style as any)?.width ?? Layout.screen.width * 0.95,
           borderWidth: 2,
-          borderColor: error
-            ? Colors.error
-            : isFocused
-            ? Colors.secondary
-            : Colors.primary_light,
+          borderColor: error ? Colors.error : isFocused ? Colors.secondary : Color(Colors.primary).lighten(2).hex(),
           alignItems: "center",
         }}
       >
-        {!!left && (
-          <View style={{ paddingHorizontal: 7.5 }}>
-            {typeof left === "function" ? left(renderComponentProps) : left}
-          </View>
-        )}
+        {!!left && <View style={{ paddingHorizontal: 7.5 }}>{typeof left === "function" ? left(renderComponentProps) : left}</View>}
         <TextInput
           value={value}
           onChangeText={setValue}
@@ -160,11 +138,7 @@ export default function Input({
             style,
             {
               borderWidth: 0,
-              color: error
-                ? "#ff3030"
-                : isFocused
-                ? theme.colors.secondary
-                : "white",
+              color: error ? "#ff3030" : isFocused ? theme.colors.secondary : "white",
             },
           ]}
           {...rest}
@@ -178,11 +152,7 @@ export default function Input({
             onBlur?.(event);
           }}
         />
-        {!!right && (
-          <View style={{ paddingHorizontal: 7.5 }}>
-            {typeof right === "function" ? right(renderComponentProps) : right}
-          </View>
-        )}
+        {!!right && <View style={{ paddingHorizontal: 7.5 }}>{typeof right === "function" ? right(renderComponentProps) : right}</View>}
       </View>
       {typeof helperText !== "undefined" && !rest.label && (
         <Text
@@ -223,23 +193,13 @@ Input.Icon = ({
       <Component
         {...props}
         size={props.size || 25}
-        color={
-          props.isError
-            ? Colors.error
-            : props.isFocused
-            ? props.theme.colors.secondary
-            : "#fff"
-        }
+        color={props.isError ? Colors.error : props.isFocused ? props.theme.colors.secondary : "#fff"}
       />
     </Ripple>
   );
 };
 
-Input.Label = (props: {
-  text: string;
-  labelStyle?: StyleProp<TextStyle>;
-  error: boolean;
-}) => (
+Input.Label = (props: { text: string; labelStyle?: StyleProp<TextStyle>; error: boolean }) => (
   <Text
     style={[
       styles.label,
