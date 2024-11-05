@@ -49,13 +49,42 @@ export default function StatisticsSummary(props: StatisticsSummaryProps) {
   if (!props.data) return null;
 
   const oppositeRange = useMemo(() => {
-    const [from, to] = [
-      moment(props.dates.from).subtract(1, "month").format("YYYY-MM-DD"),
-      moment(props.dates.to).subtract(1, "month").format("YYYY-MM-DD"),
-    ];
+    const size = moment(props.dates.to).diff(moment(props.dates.from), "days");
 
-    return [from, to] as [string, string];
-  }, [props.dates]);
+    console.log(size);
+
+    if (size === 1)
+      return [
+        moment(props.dates.from).subtract(1, "day").format("YYYY-MM-DD"),
+        moment(props.dates.to).subtract(1, "day").format("YYYY-MM-DD"),
+      ];
+
+    if (size === 2)
+      return [
+        moment(props.dates.from).subtract(2, "day").format("YYYY-MM-DD"),
+        moment(props.dates.to).subtract(2, "day").format("YYYY-MM-DD"),
+      ];
+
+    if (size >= 7 && size <= 10)
+      return [
+        moment(props.dates.from).subtract(1, "week").format("YYYY-MM-DD"),
+        moment(props.dates.to).subtract(1, "week").format("YYYY-MM-DD"),
+      ];
+
+    if (size >= 28 && size <= 31)
+      return [
+        moment(props.dates.from).subtract(1, "month").format("YYYY-MM-DD"),
+        moment(props.dates.to).subtract(1, "month").format("YYYY-MM-DD"),
+      ];
+
+    if (size >= 365)
+      return [
+        moment(props.dates.from).subtract(1, "year").format("YYYY-MM-DD"),
+        moment(props.dates.to).subtract(1, "year").format("YYYY-MM-DD"),
+      ];
+
+    return ["", ""];
+  }, [props.dates]) as [string, string];
 
   const lastRangeStatistics = useGetStatistics(oppositeRange);
 

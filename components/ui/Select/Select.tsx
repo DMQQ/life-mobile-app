@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 10,
     borderBottomRightRadius: 10,
     left: -1,
-    zIndex: 1100,
+    zIndex: 1,
     backgroundColor,
     padding: 5,
   },
@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     width: Layout.screen.width,
     height: Layout.screen.height,
-    zIndex: 101,
+    zIndex: 1,
   },
 });
 
@@ -200,7 +200,7 @@ export default function Select({
         style={[
           styles.container,
           {
-            zIndex: isFocused ? 1101 : 100,
+            zIndex: isFocused ? 1101 : 1,
             borderColor: isFocused ? Colors.secondary : Color(Colors.primary_light).lighten(2).hex(),
             backgroundColor: isFocused ? Colors.primary_lighter : backgroundColor,
             borderBottomRightRadius: isFocused ? 0 : 10,
