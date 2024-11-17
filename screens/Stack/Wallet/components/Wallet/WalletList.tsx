@@ -28,7 +28,7 @@ export default function WalletList(props: {
   const route = useRoute<any>();
 
   const [selected, setSelected] = useState<WalletElement | undefined>(
-    props?.wallet?.expenses?.find((expense) => expense.id === route.params.expenseId) as WalletElement | undefined
+    props?.wallet?.expenses?.find((expense) => expense.id === route?.params?.expenseId) as WalletElement | undefined
   );
   const sheet = useRef<BottomSheet>(null);
 
