@@ -58,7 +58,7 @@ export const WalletSheet = forwardRef<
       <View style={{ paddingHorizontal: 15, flex: 1 }}>
         <View style={{ flex: 2 }}>
           <View style={[styles.row, { marginTop: 0, padding: 15, flexWrap: "wrap" }]}>
-            <Txt size={30} color={"#fff"}>
+            <Txt size={20} color={"#fff"}>
               {capitalize(selected?.description)}
             </Txt>
 
