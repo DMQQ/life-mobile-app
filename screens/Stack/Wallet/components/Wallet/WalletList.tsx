@@ -1,10 +1,10 @@
 import BottomSheet from "@gorhom/bottom-sheet";
 import { Expense, Wallet } from "@/types";
 import WalletItem, { WalletElement, parseDateToText } from "./WalletItem";
-import { useState, useRef, useEffect, useMemo, useCallback } from "react";
+import { useState, useRef, useEffect, useMemo, useCallback, useTransition } from "react";
 import { Text, NativeScrollEvent, View, StyleSheet, VirtualizedList } from "react-native";
 import { WalletSheet } from "../Sheets/WalletSheet";
-import Animated, { SharedValue } from "react-native-reanimated";
+import Animated, { LinearTransition, SharedValue } from "react-native-reanimated";
 import { NativeSyntheticEvent } from "react-native";
 import moment from "moment";
 import Colors from "@/constants/Colors";
@@ -12,6 +12,7 @@ import Ripple from "react-native-material-ripple";
 import { useWalletContext } from "../WalletContext";
 import Color from "color";
 import { gql, useQuery } from "@apollo/client";
+import { useFocusEffect, useNavigation, useRoute } from "@react-navigation/native";
 
 const AnimatedList = Animated.createAnimatedComponent(VirtualizedList);
 
@@ -24,13 +25,32 @@ export default function WalletList(props: {
   isLocked: boolean;
   filtersActive: boolean;
 }) {
-  const [selected, setSelected] = useState<WalletElement | undefined>(undefined);
+  const route = useRoute<any>();
+
+  const [selected, setSelected] = useState<WalletElement | undefined>(
+    props?.wallet?.expenses?.find((expense) => expense.id === route.params.expenseId) as WalletElement | undefined
+  );
   const sheet = useRef<BottomSheet>(null);
 
   useEffect(() => {
-    setSelected(undefined);
-    sheet.current?.close();
-  }, [props?.wallet?.expenses]);
+    if (props.wallet?.expenses?.length === undefined) return;
+
+    if (route?.params?.expenseId && props?.wallet?.expenses?.length > 0) {
+      const expense = props.wallet.expenses.find((expense) => expense.id === route?.params?.expenseId);
+
+      if (!expense) return;
+
+      setSelected(expense as WalletElement);
+
+      const timeout = setTimeout(() => {
+        sheet.current?.snapToIndex(0);
+      }, 150);
+
+      return () => {
+        clearTimeout(timeout);
+      };
+    }
+  }, [route?.params, props?.wallet?.expenses?.length]);
 
   const data = useMemo(() => {
     const sorted = [] as {

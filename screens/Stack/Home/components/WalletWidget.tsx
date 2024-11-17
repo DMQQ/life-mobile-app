@@ -1,161 +1,229 @@
-import Color from "color";
-import { FlatList, ScrollView, StyleSheet, Text, View } from "react-native";
-import Colors, { Sizing } from "../../../../constants/Colors";
-import { ViewMoreButton } from "../../../../components/ui/Button/Button";
-import { useNavigation } from "@react-navigation/native";
-import { Wallet } from "../../../../types";
-import Layout, { Padding, Rounded } from "../../../../constants/Layout";
-import Skeleton from "@/components/SkeletonLoader/Skeleton";
-import { Item } from "../../Wallet/components/WalletChart/StatisticsSummary";
+import React from "react";
+import { StyleSheet, Text, View, FlatList, ScrollView, Dimensions } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import Color from "color";
+import { useNavigation } from "@react-navigation/native";
 import WalletItem from "../../Wallet/components/Wallet/WalletItem";
+import Button from "@/components/ui/Button/Button";
+import lowOpacity from "@/utils/functions/lowOpacity";
 
-const backgroundColor = Colors.primary_lighter;
+import Colors from "@/constants/Colors";
+import Ripple from "react-native-material-ripple";
 
-const styles = StyleSheet.create({
-  dot: {
-    width: 7.5,
-    height: 7.5,
-    borderRadius: 5,
-    backgroundColor: "#fff",
-    marginHorizontal: 5,
-  },
-  container: {
-    padding: Padding.xxl,
-    backgroundColor,
-    borderRadius: Rounded.xxl,
-  },
-  title_row: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  title: {
-    color: "#ffffff",
-    fontSize: Sizing.subHead,
-    fontWeight: "bold",
-  },
-  balance: {
-    fontSize: 60,
-    color: "#fff",
-    fontWeight: "bold",
-    textShadowColor: "rgba(0, 0, 0, 0.25)",
-    textShadowOffset: { width: 2, height: 2 },
-    textShadowRadius: 10,
-    marginTop: 10,
-  },
-  activity: {
-    color: "#ffffff",
-    fontSize: Sizing.tooltip,
-  },
-  list: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 10,
-  },
-  expense_container: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: Color(Colors.primary_lighter).lighten(0.5).string(),
-    padding: 5,
-    paddingHorizontal: 15,
-    borderRadius: 100,
-  },
-});
+const Sizing = {
+  heading: 30,
+  subHead: 22.5,
+  text: 18,
+  tooltip: 14,
+};
 
-export default function AvailableBalanceWidget(props: {
+interface TransactionItem {
+  id: string;
+  amount: number;
+  category: string;
+  date: string;
+  type: "income" | "expense";
+  description: string;
+}
+
+interface Props {
   data: {
-    wallet: Wallet;
+    wallet: {
+      balance: number;
+      expenses: TransactionItem[];
+    };
     statistics: {
-      thisMonth?: any;
-      lastMonth?: any;
-      weeklySpendings: any;
+      weeklySpendings: {
+        expense: number;
+        income: number;
+        average: number;
+      };
     };
   };
   loading: boolean;
-}) {
+}
+
+const StatItem = ({ label, value, icon, color }: { label: string; value: number; icon: string; color: string }) => (
+  <View style={[styles.statItem, { backgroundColor: Color(color).alpha(0.1).string() }]}>
+    <View style={{ flexDirection: "row", gap: 10 }}>
+      <MaterialCommunityIcons name={icon as any} size={30} color={color} />
+      <Text style={[styles.statValue, { color }]}>{value?.toFixed(2)} zł</Text>
+    </View>
+    <Text style={styles.statLabel}>{label}</Text>
+  </View>
+);
+
+const AvailableBalanceWidget = ({ data, loading }: Props) => {
   const navigation = useNavigation<any>();
+
+  if (loading) {
+    return <View style={styles.loadingContainer} />;
+  }
 
   return (
     <View style={styles.container}>
-      {props.loading ? (
-        <Skeleton
-          size={({ width }) => ({
-            width,
-            height: 175,
-          })}
-          backgroundColor={Color(Colors.primary_lighter).lighten(0.5).string()}
-          highlightColor={Colors.secondary}
-        >
-          <View>
-            <Skeleton.Item width={(w) => w - 70} height={25} />
-            <Skeleton.Item width={(w) => w - 70} height={100} marginTop={10} />
+      {/* Balance Header */}
+      <View style={styles.header}>
+        <View>
+          <Text style={styles.balance}>
+            {data?.wallet?.balance?.toFixed(2)}
+            <Text style={styles.currency}> zł</Text>
+          </Text>
+        </View>
+        <Ripple style={styles.actionButton} onPress={() => navigation.navigate("WalletScreens")}>
+          <Text style={styles.actionButtonText}>See more</Text>
+          <MaterialCommunityIcons name="chevron-right" size={20} color={Colors.secondary} />
+        </Ripple>
+      </View>
 
-            <View style={{ flexDirection: "row", marginTop: 0 }}>
-              <Skeleton.Item width={(w) => (w - 70) / 3 - 5} height={20} marginRight={5} />
-              <Skeleton.Item width={(w) => (w - 70) / 3 - 5} height={20} marginRight={5} />
-              <Skeleton.Item width={(w) => (w - 70) / 3} height={20} />
-            </View>
-          </View>
-        </Skeleton>
-      ) : (
-        <>
-          <View>
-            <View style={styles.title_row}>
-              <Text style={styles.title}>Available Balance</Text>
+      {/* Weekly Statistics */}
+      <View style={styles.statsSection}>
+        <Text style={styles.sectionTitle}>Weekly Overview</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.statsContainer}>
+          <StatItem label="Weekly Spent" value={data.statistics?.weeklySpendings?.expense} icon="calendar-week" color="#8685EF" />
+          <StatItem label="Income" value={data.statistics?.weeklySpendings?.income} icon="cash-plus" color="#00C896" />
+          <StatItem label="Average" value={data.statistics?.weeklySpendings?.average} icon="chart-line" color="#34A3FA" />
+        </ScrollView>
+      </View>
 
-              <ViewMoreButton bg="#fff" text="See more" onPress={() => navigation.navigate("WalletScreens")} />
-            </View>
-            <Text style={styles.balance}>
-              {props?.data?.wallet?.balance.toFixed(2)}
-              <Text style={{ fontSize: 25 }}>zł</Text>
-            </Text>
+      {/* Recent Transactions */}
+      <View style={styles.transactionsSection}>
+        <Text style={styles.sectionTitle}>Recent Transactions</Text>
 
-            <Text style={{ color: "#fff", fontSize: 18, fontWeight: "bold", marginTop: 15, marginBottom: 5 }}>Last three transactions</Text>
-
-            <FlatList
-              pagingEnabled
-              horizontal
-              data={props?.data?.wallet?.expenses}
-              keyExtractor={(item) => item.id}
-              renderItem={({ item }) => (
-                <WalletItem
-                  containerStyle={{
-                    width: Layout.screen.width - 80,
-                    backgroundColor: Colors.primary_light,
-                  }}
-                  handlePress={() => navigation.navigate("WalletScreens")}
-                  {...(item as any)}
-                />
-              )}
-            />
-
-            <Text style={{ color: "#fff", fontSize: 18, fontWeight: "bold", marginTop: 15, marginBottom: 5 }}>Weekly Spendings</Text>
-            <ScrollView horizontal contentContainerStyle={{ gap: 10 }}>
-              <Item
-                label="Spent this week"
-                value={props.data.statistics.weeklySpendings?.expense}
-                icon={<MaterialCommunityIcons name="calendar-week" size={30} color="#fff" />}
-              />
-              <Item
-                label="Income"
-                value={props.data.statistics.weeklySpendings?.income}
-                icon={<MaterialCommunityIcons name="cash" size={30} color="#fff" />}
-              />
-              <Item
-                label="Expense"
-                value={props.data.statistics.weeklySpendings?.expense}
-                icon={<MaterialCommunityIcons name="cash-remove" size={30} color="#fff" />}
-              />
-              <Item
-                label="Average"
-                value={props.data.statistics.weeklySpendings?.average}
-                icon={<MaterialCommunityIcons name="cash-multiple" size={30} color="#fff" />}
-              />
-            </ScrollView>
-          </View>
-        </>
-      )}
+        {data?.wallet?.expenses.slice(0, 3).map((expense) => (
+          <WalletItem
+            handlePress={() =>
+              navigation.navigate("WalletScreens", {
+                screen: "Wallet",
+                params: { expenseId: expense.id },
+              })
+            }
+            {...(expense as any)}
+            key={expense.id}
+          />
+        ))}
+      </View>
     </View>
   );
-}
+};
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 0,
+    backgroundColor: Colors.primary,
+    borderRadius: 24,
+    gap: 20,
+  },
+  loadingContainer: {
+    height: 400,
+    backgroundColor: Colors.primary,
+    borderRadius: 24,
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-end",
+  },
+  title: {
+    fontSize: Sizing.text,
+    color: "#fff",
+    fontWeight: "600",
+  },
+  balance: {
+    fontSize: 48,
+    fontWeight: "bold",
+    color: Colors.text_light,
+    marginTop: 8,
+  },
+  currency: {
+    fontSize: 24,
+  },
+  actionButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: Color(Colors.secondary).alpha(0.1).string(),
+    padding: 8,
+    paddingLeft: 12,
+    borderRadius: 20,
+    marginBottom: 10,
+  },
+  actionButtonText: {
+    color: Colors.secondary,
+    marginRight: 4,
+    fontSize: Sizing.tooltip,
+  },
+  sectionTitle: {
+    fontSize: Sizing.text,
+    fontWeight: "600",
+    color: Colors.text_light,
+    marginBottom: 12,
+  },
+  statsSection: {
+    marginTop: 8,
+  },
+  statsContainer: {
+    gap: 12,
+    paddingRight: 20,
+  },
+  statItem: {
+    padding: 20,
+    borderRadius: 15,
+    width: Dimensions.get("window").width * 0.4,
+    alignItems: "center",
+  },
+  statLabel: {
+    color: "#fff",
+    opacity: 0.9,
+    fontSize: 12,
+    marginTop: 8,
+  },
+  statValue: {
+    fontSize: Sizing.text,
+    fontWeight: "bold",
+    marginTop: 4,
+  },
+  transactionsSection: {
+    marginTop: 8,
+  },
+  transactionsList: {
+    gap: 12,
+    paddingRight: 20,
+  },
+  transactionCard: {
+    backgroundColor: Colors.primary_lighter,
+    padding: 16,
+    borderRadius: 16,
+    width: Dimensions.get("window").width * 0.75,
+  },
+  transactionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  categoryContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  iconContainer: {
+    padding: 8,
+    borderRadius: 12,
+  },
+  categoryText: {
+    color: Colors.text_light,
+    fontSize: Sizing.text,
+    fontWeight: "600",
+  },
+  amount: {
+    fontSize: Sizing.text,
+    fontWeight: "bold",
+  },
+  transactionDate: {
+    color: Colors.text_light,
+    opacity: 0.7,
+    fontSize: Sizing.tooltip,
+  },
+});
+
+export default AvailableBalanceWidget;

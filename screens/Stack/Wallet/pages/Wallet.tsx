@@ -12,6 +12,7 @@ import ScreenLoader from "../components/Wallet/ScreenLoader";
 import WalletList from "../components/Wallet/WalletList";
 import WalletContextProvider, { useWalletContext } from "../components/WalletContext";
 import useGetWallet from "../hooks/useGetWallet";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const styles = StyleSheet.create({
   container: {
@@ -23,7 +24,7 @@ const styles = StyleSheet.create({
     height: 150,
     alignItems: "center",
     flexDirection: "row",
-    paddingHorizontal: 10,
+    paddingHorizontal: 20,
   },
   title: {
     fontSize: 60,
@@ -56,7 +57,7 @@ export default function Wallet(props: WalletScreens<"Wallet">) {
   );
 }
 
-function WalletScreen({ navigation }: WalletScreens<"Wallet">) {
+function WalletScreen({ navigation, route }: WalletScreens<"Wallet">) {
   const { data, loading, refetch, filters, dispatch, onEndReached, endReached, filtersActive } = useGetWallet();
 
   const {
@@ -72,6 +73,8 @@ function WalletScreen({ navigation }: WalletScreens<"Wallet">) {
     },
   });
 
+  const insets = useSafeAreaInsets();
+
   const animatedContainerStyle = useAnimatedStyle(() => ({
     height: interpolate(scrollY.value, [0, 200], [150, 35], Extrapolation.CLAMP),
     width: interpolate(scrollY.value, [0, 200], [Layout.screen.width, 200], Extrapolation.CLAMP),
@@ -80,6 +83,8 @@ function WalletScreen({ navigation }: WalletScreens<"Wallet">) {
         translateY: interpolate(scrollY.value, [0, 200], [0, -40], Extrapolation.CLAMP),
       },
     ],
+
+    ...(scrollY.value > 200 ? { position: "absolute", top: insets.top + 50 } : { position: "relative", top: 0 }),
   }));
 
   const animatedBalanceStyle = useAnimatedStyle(() => ({
@@ -93,7 +98,7 @@ function WalletScreen({ navigation }: WalletScreens<"Wallet">) {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1, position: "relative" }}>
       <Header
         buttons={[
           {
@@ -112,20 +117,16 @@ function WalletScreen({ navigation }: WalletScreens<"Wallet">) {
         goBack={false}
       />
 
-      <View style={{ paddingHorizontal: 15 }}>
-        <Animated.View style={[styles.header, animatedContainerStyle]}>
-          <Ripple onLongPress={handleShowEditSheet}>
-            <Animated.Text style={[styles.title, animatedBalanceStyle]}>
-              {balance}
-              <Text style={{ color: "#ffffff97", fontSize: 18 }}>zł </Text>
-            </Animated.Text>
-          </Ripple>
-        </Animated.View>
+      <Animated.View style={[styles.header, animatedContainerStyle]}>
+        <Ripple onLongPress={handleShowEditSheet}>
+          <Animated.Text style={[styles.title, animatedBalanceStyle]}>
+            {balance}
+            <Text style={{ color: "#ffffff97", fontSize: 18 }}>zł </Text>
+          </Animated.Text>
+        </Ripple>
+      </Animated.View>
 
-        {/* <Statistics /> */}
-
-        {loading && <ScreenLoader />}
-      </View>
+      {loading && <ScreenLoader />}
 
       <WalletList
         filtersActive={filtersActive}

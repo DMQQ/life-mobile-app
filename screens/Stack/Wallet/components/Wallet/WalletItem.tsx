@@ -23,7 +23,7 @@ interface WalletItemProps extends WalletElement {}
 
 const styles = StyleSheet.create({
   expense_item: {
-    height: 70,
+    height: 65,
     borderRadius: 15,
     padding: 10,
     flexDirection: "row",
@@ -31,12 +31,15 @@ const styles = StyleSheet.create({
   },
   title: {
     color: "#fff",
-    fontSize: 17,
+    fontSize: 15,
     marginLeft: 10,
     fontWeight: "bold",
     marginBottom: 5,
   },
-  icon_container: {},
+  icon_container: {
+    padding: 7.5,
+    justifyContent: "center",
+  },
   date: {
     color: "#9f9f9f",
     fontSize: 10,
@@ -64,12 +67,11 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   iconContainer: {
-    flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: 10,
-    height: 50,
-    width: 50,
+    borderRadius: 100,
+    height: 40,
+    width: 40,
   },
 });
 
@@ -90,85 +92,85 @@ export function parseDateToText(date: string) {
 
 export const Icons = {
   housing: {
-    icon: <AntDesign name="home" size={25} color={"#05ad21"} />,
+    icon: <AntDesign name="home" size={20} color={"#05ad21"} />,
     backgroundColor: "#05ad21",
   },
   transportation: {
-    icon: <AntDesign name="car" size={25} color={"#ab0505"} />,
+    icon: <AntDesign name="car" size={20} color={"#ab0505"} />,
     backgroundColor: "#ab0505",
   },
   food: {
-    icon: <Ionicons name="fast-food-outline" color={"#5733FF"} size={25} />,
+    icon: <Ionicons name="fast-food-outline" color={"#5733FF"} size={20} />,
     backgroundColor: "#5733FF",
   },
   drinks: {
-    icon: <Ionicons name="beer-outline" color={"#5733FF"} size={25} />,
+    icon: <Ionicons name="beer-outline" color={"#5733FF"} size={20} />,
     backgroundColor: "#5733FF",
   },
   shopping: {
-    icon: <MaterialCommunityIcons name="shopping" size={25} color={"#ff5733"} />,
+    icon: <MaterialCommunityIcons name="shopping" size={20} color={"#ff5733"} />,
     backgroundColor: "#ff5733",
   },
   addictions: {
-    icon: <MaterialCommunityIcons name="smoking" size={25} color={"#ff5733"} />,
+    icon: <MaterialCommunityIcons name="smoking" size={20} color={"#ff5733"} />,
     backgroundColor: "#ff5733",
   },
   work: {
-    icon: <MaterialCommunityIcons name="briefcase" size={25} color={"#5733ff"} />,
+    icon: <MaterialCommunityIcons name="briefcase" size={20} color={"#5733ff"} />,
     backgroundColor: "#5733FF",
   },
   clothes: {
-    icon: <MaterialCommunityIcons name="tshirt-crew" size={25} color={"#ff5733"} />,
+    icon: <MaterialCommunityIcons name="tshirt-crew" size={20} color={"#ff5733"} />,
     backgroundColor: "#ff5733",
   },
   health: {
-    icon: <MaterialCommunityIcons name="pill" size={25} color={"#07bab4"} />,
+    icon: <MaterialCommunityIcons name="pill" size={20} color={"#07bab4"} />,
     backgroundColor: "#07bab4",
   },
   entertainment: {
-    icon: <MaterialCommunityIcons name="movie-open" size={24} color={"#990583"} />,
+    icon: <MaterialCommunityIcons name="movie-open" size={20} color={"#990583"} />,
     backgroundColor: "#990583",
   },
   utilities: {
-    icon: <MaterialCommunityIcons name="power-plug-outline" size={24} color={"#5733ff"} />,
+    icon: <MaterialCommunityIcons name="power-plug-outline" size={20} color={"#5733ff"} />,
     backgroundColor: "#5733FF",
   },
   debt: {
-    icon: <AntDesign name="creditcard" size={24} color={"#ff5733"} />,
+    icon: <AntDesign name="creditcard" size={20} color={"#ff5733"} />,
     backgroundColor: "#FF5733",
   },
   education: {
-    icon: <AntDesign name="book" size={24} color={"#cc9a1b"} />,
+    icon: <AntDesign name="book" size={20} color={"#cc9a1b"} />,
     backgroundColor: "#cc9a1b",
   },
   savings: {
-    icon: <Ionicons name="cash-outline" size={24} color="#cf0a80" />,
+    icon: <Ionicons name="cash-outline" size={20} color="#cf0a80" />,
     backgroundColor: "#cf0a80",
   },
 
   travel: {
     backgroundColor: "#33FF57",
-    icon: <Ionicons name="airplane-outline" size={24} color="#33ff57" />,
+    icon: <Ionicons name="airplane-outline" size={20} color="#33ff57" />,
   },
 
   edit: {
     backgroundColor: Colors.primary,
-    icon: <Ionicons name="create" color="#fff" size={24} />,
+    icon: <Ionicons name="create" color="#fff" size={20} />,
   },
 
   income: {
     backgroundColor: Colors.secondary_light_1,
-    icon: <FontAwesome5 name="dollar-sign" size={24} color={Colors.secondary_light_1} />,
+    icon: <FontAwesome5 name="dollar-sign" size={20} color={Colors.secondary_light_1} />,
   },
 
   animals: {
     backgroundColor: "#ff5733",
-    icon: <FontAwesome5 name="dog" size={24} color="#ff5733" />,
+    icon: <FontAwesome5 name="dog" size={20} color="#ff5733" />,
   },
 
   none: {
     backgroundColor: Colors.primary,
-    icon: <Ionicons name="add" color={Colors.secondary} size={24} />,
+    icon: <Ionicons name="add" color={Colors.secondary} size={20} />,
   },
 } as const;
 

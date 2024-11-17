@@ -13,8 +13,7 @@ interface WalletRootStack extends ParamListBase {
   Charts: undefined;
 }
 
-export type WalletScreens<Screen extends keyof WalletRootStack> =
-  StackScreenProps<WalletRootStack, Screen>;
+export type WalletScreens<Screen extends keyof WalletRootStack> = StackScreenProps<WalletRootStack, Screen>;
 
 const Stack = createNativeStackNavigator<WalletRootStack>();
 
