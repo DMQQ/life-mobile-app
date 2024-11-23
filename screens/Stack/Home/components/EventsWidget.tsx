@@ -12,22 +12,20 @@ import Button from "@/components/ui/Button/Button";
 import TimelineItem from "../../Timeline/components/TimelineItem";
 import lowOpacity from "@/utils/functions/lowOpacity";
 import { DATE_FORMAT } from "@/utils/functions/parseDate";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 const backgroundColor = Colors.primary_lighter;
 
 const styles = StyleSheet.create({
   container: {
-    padding: Padding.xxl,
-    marginTop: 15,
-    backgroundColor,
-    borderRadius: Rounded.xxl,
+    marginTop: 50,
   },
 
   headContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 30,
+    marginBottom: 20,
   },
 
   heading: {
@@ -55,11 +53,49 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#fff",
   },
+
+  actionButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: Color(Colors.secondary).alpha(0.1).string(),
+    padding: 8,
+    paddingLeft: 12,
+    borderRadius: 20,
+    marginBottom: 10,
+  },
+  actionButtonText: {
+    color: Colors.secondary,
+    marginRight: 4,
+    fontSize: Sizing.tooltip,
+  },
 });
 
-const EventsList = (props: { data: GetTimelineQuery[] }) => {
+export default function TodaysTimelineEvents(props: { data: any[]; loading: boolean }) {
+  const navigation = useNavigation<any>();
+
+  const date = moment();
+
+  const isEmpty = props.data.length === 0 && !props.loading;
+
+  if (isEmpty)
+    return (
+      <View style={styles.container}>
+        <Text style={[styles.heading, { marginBottom: 10 }]}>Daily events</Text>
+        <NotFound selectedDate={date.format(DATE_FORMAT)} />
+      </View>
+    );
+
   return (
-    <>
+    <View style={styles.container}>
+      <View style={styles.headContainer}>
+        <Text style={styles.heading}>For today</Text>
+
+        <Ripple style={styles.actionButton} onPress={() => navigation.navigate("TimelineScreens")}>
+          <Text style={styles.actionButtonText}>See more</Text>
+          <MaterialCommunityIcons name="chevron-right" size={20} color={Colors.secondary} />
+        </Ripple>
+      </View>
+
       {props?.data?.slice(0, 3).map((timeline, index) => (
         <TimelineItem
           styles={{
@@ -72,47 +108,15 @@ const EventsList = (props: { data: GetTimelineQuery[] }) => {
           {...timeline}
         />
       ))}
-    </>
-  );
-};
 
-export default function TodaysTimelineEvents(props: { data: any[]; loading: boolean }) {
-  const navigation = useNavigation<any>();
+      <View style={[styles.headContainer, { marginTop: 20 }]}>
+        <Text style={styles.heading}>Missed events</Text>
 
-  const date = moment();
-
-  return (
-    <View style={styles.container}>
-      <View style={styles.headContainer}>
-        <Text style={styles.heading}>
-          {moment.weekdays()[date.day()]} {date.format("DD.MM")}
-        </Text>
-        <Ripple onPress={() => navigation.navigate("TimelineScreens")} style={styles.button}>
-          <Text style={styles.buttonText}>See more</Text>
+        <Ripple style={styles.actionButton} onPress={() => navigation.navigate("TimelineScreens")}>
+          <Text style={styles.actionButtonText}>See more</Text>
+          <MaterialCommunityIcons name="chevron-right" size={20} color={Colors.secondary} />
         </Ripple>
       </View>
-
-      <EventsList data={props.data || []} />
-
-      {props.loading && (
-        <Skeleton
-          size={({ width, height }) => ({
-            height: 150,
-            width,
-          })}
-          backgroundColor={Color(Colors.primary_lighter).lighten(0.5).string()}
-          highlightColor={Colors.secondary}
-        >
-          <View>
-            <Skeleton.Item width={(w) => w - 70} height={40} />
-            <Skeleton.Item width={(w) => w - 70} height={40} />
-            <Skeleton.Item width={(w) => w - 70} height={40} />
-            <Skeleton.Item width={(w) => w - 70} height={40} />
-          </View>
-        </Skeleton>
-      )}
-
-      {props?.data?.length === 0 && !props.loading && <NotFound selectedDate={date.format(DATE_FORMAT)} />}
     </View>
   );
 }
