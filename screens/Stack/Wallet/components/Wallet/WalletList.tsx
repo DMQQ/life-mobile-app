@@ -7,7 +7,7 @@ import { WalletSheet } from "../Sheets/WalletSheet";
 import Animated, { LinearTransition, SharedValue } from "react-native-reanimated";
 import { NativeSyntheticEvent } from "react-native";
 import moment from "moment";
-import Colors from "@/constants/Colors";
+import Colors, { Sizing } from "@/constants/Colors";
 import Ripple from "react-native-material-ripple";
 import { useWalletContext } from "../WalletContext";
 import Color from "color";
@@ -204,10 +204,9 @@ const ListItem = ({
 
 const styles = StyleSheet.create({
   monthText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 25,
-    paddingHorizontal: 5,
+    fontSize: Sizing.text,
+    fontWeight: "600",
+    color: Colors.text_light,
   },
 
   dateTextContainer: {

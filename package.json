@@ -45,6 +45,7 @@
     "expo-status-bar": "~1.11.1",
     "expo-system-ui": "~2.9.4",
     "expo-task-manager": "~11.7.3",
+    "expo-updates": "~0.24.13",
     "expo-web-browser": "~12.8.2",
     "formik": "^2.4.6",
     "gifted-charts-core": "^0.1.29",
