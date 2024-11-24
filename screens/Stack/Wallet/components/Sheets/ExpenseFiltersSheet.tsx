@@ -1,6 +1,4 @@
-import BottomSheet, {
-  BottomSheetGorhom,
-} from "@/components/ui/BottomSheet/BottomSheet";
+import BottomSheet, { BottomSheetGorhom } from "@/components/ui/BottomSheet/BottomSheet";
 import Select from "@/components/ui/Select/Select";
 import Input from "@/components/ui/TextInput/TextInput";
 import Layout from "@/constants/Layout";
@@ -14,19 +12,17 @@ import SegmentedButtons from "@/components/ui/SegmentedButtons";
 import DateTimePicker from "react-native-modal-datetime-picker";
 import { formatDate } from "@/utils/functions/parseDate";
 import moment from "moment";
+import CategorySelect from "../Wallet/CategorySelect";
+import { ScrollView } from "react-native-gesture-handler";
+import Color from "color";
+import Colors from "@/constants/Colors";
 
 interface ExpenseFiltersProps {
   filters: Filters;
   dispatch: (action: Action) => void;
 }
 
-const HelperText = ({
-  text,
-  marginTop = 2.5,
-}: {
-  text: string;
-  marginTop?: number;
-}) => (
+const HelperText = ({ text, marginTop = 2.5 }: { text: string; marginTop?: number }) => (
   <Text
     style={{
       color: "gray",
@@ -41,15 +37,13 @@ const HelperText = ({
   </Text>
 );
 
-export default forwardRef<BottomSheetGorhom, ExpenseFiltersProps>(
-  (props, ref) => {
-    return (
-      <BottomSheet snapPoints={["95%"]} ref={ref}>
-        <Forms {...props} />
-      </BottomSheet>
-    );
-  }
-);
+export default forwardRef<BottomSheetGorhom, ExpenseFiltersProps>((props, ref) => {
+  return (
+    <BottomSheet snapPoints={["95%"]} ref={ref}>
+      <Forms {...props} />
+    </BottomSheet>
+  );
+});
 
 const Forms = (props: ExpenseFiltersProps) => {
   const { close } = useBottomSheet();
@@ -63,7 +57,7 @@ const Forms = (props: ExpenseFiltersProps) => {
   };
 
   return (
-    <View style={{ flex: 1, paddingHorizontal: 15, marginTop: 10 }}>
+    <ScrollView style={{ flex: 1, paddingHorizontal: 15, marginTop: 10, height: Layout.screen.height }}>
       <Input
         value={props?.filters?.query}
         onChangeText={onQueryTextChange}
@@ -161,26 +155,18 @@ const Forms = (props: ExpenseFiltersProps) => {
           props.dispatch({ type: "SET_TYPE", payload: value });
         }}
       />
-      <HelperText
-        marginTop={0}
-        text="Select the type of transactions you want to see"
-      />
+      <HelperText marginTop={0} text="Select the type of transactions you want to see" />
 
-      <Select
-        anchor="top"
-        placeholderText="Choose category"
+      <CategorySelect
+        maxSelectHeight={250}
+        multiSelect
+        closeOnSelect={false}
         onFocusChange={() => onFocus()}
         selected={props?.filters?.category || []}
-        multiSelect
         setSelected={(selected) => {
           props.dispatch({ type: "SET_CATEGORY", payload: selected });
         }}
-        options={Object.keys(Icons)}
-        transparentOverlay
-        closeOnSelect={false}
-        maxSelectHeight={300}
-        containerStyle={{ borderRadius: 10, marginTop: 15 }}
-        keyExtractor={(item) => item}
+        isActive={(category) => props.filters.category.includes(category)}
       />
 
       <HelperText
@@ -188,32 +174,23 @@ const Forms = (props: ExpenseFiltersProps) => {
         you can select multiple categories"
       />
 
-      <Button
-        onPress={() => close()}
-        fontStyle={{ fontSize: 16 }}
-        style={{ marginTop: 20 }}
-      >
+      <Button onPress={() => close()} fontStyle={{ fontSize: 16 }} style={{ marginTop: 20 }}>
         Close Filters
       </Button>
-    </View>
+    </ScrollView>
   );
 };
 
-const ChooseDateRange = (props: {
-  filters: Filters;
-  dispatch: (action: Action) => void;
-}) => {
+const ChooseDateRange = (props: { filters: Filters; dispatch: (action: Action) => void }) => {
   const [datePicker, setDatePicker] = useState<"from" | "to" | "">("");
 
   return (
     <View style={{ marginTop: 15, marginBottom: 10 }}>
-      <Text style={{ color: "#fff", fontSize: 16, fontWeight: "bold" }}>
-        Date range
-      </Text>
+      <Text style={{ color: "#fff", fontSize: 16, fontWeight: "bold" }}>Date range</Text>
       <View style={{ flexDirection: "row", gap: 10, marginTop: 10 }}>
         <Button
           onPress={() => setDatePicker("from")}
-          style={{ flex: 1 }}
+          style={{ flex: 1, borderWidth: 2, borderColor: Color(Colors.primary).lighten(2).hex(), borderRadius: 10 }}
           color="secondary"
           fontStyle={{
             fontSize: 16,
@@ -234,14 +211,7 @@ const ChooseDateRange = (props: {
         </Text>
         <Button
           onPress={() => setDatePicker("to")}
-          style={{
-            flex: 1,
-            backgroundColor: moment(props.filters.date.from).isAfter(
-              moment(props.filters.date.to)
-            )
-              ? "red"
-              : "transparent",
-          }}
+          style={{ flex: 1, borderWidth: 2, borderColor: Color(Colors.primary).lighten(2).hex(), borderRadius: 10 }}
           color="secondary"
           fontStyle={{
             fontSize: 16,

@@ -25,16 +25,8 @@ const SIGNUP_USER_MUTATION = gql`
 
 export const validationSchema = (variant: string) =>
   yup.object().shape({
-    email: yup
-      .string()
-      .email("Email must contain @")
-      .required("Email is required")
-      .trim(),
-    password: yup
-      .string()
-      .min(6, "Password must be at least 6 characters")
-      .required("Password is required")
-      .trim(),
+    email: yup.string().email("Email must contain @").required("Email is required").trim(),
+    password: yup.string().min(6, "Password must be at least 6 characters").required("Password is required").trim(),
 
     ...(variant === "register" && {
       confirm_password: yup
@@ -49,8 +41,7 @@ export const validationSchema = (variant: string) =>
 export default function useAuthForm(variant: "login" | "register") {
   const { saveUser } = useUser();
 
-  const schema =
-    variant === "login" ? LOGIN_USER_MUTATION : SIGNUP_USER_MUTATION;
+  const schema = variant === "login" ? LOGIN_USER_MUTATION : SIGNUP_USER_MUTATION;
 
   const [error, setError] = useState({
     statusCode: 0,
@@ -60,8 +51,7 @@ export default function useAuthForm(variant: "login" | "register") {
 
   const [onSubmit, state] = useMutation(schema, {
     onCompleted: async (response) => {
-      const result =
-        response[variant === "login" ? "loginAccount" : "createAccount"];
+      const result = response[variant === "login" ? "loginAccount" : "createAccount"];
 
       await saveUser({
         token: result.token,
@@ -74,8 +64,7 @@ export default function useAuthForm(variant: "login" | "register") {
     onError: (error: any) => {
       setError({
         message: error.graphQLErrors[0].message,
-        statusCode:
-          error.graphQLErrors[0]?.extensions?.response?.statusCode || 400,
+        statusCode: error.graphQLErrors[0]?.extensions?.response?.statusCode || 400,
         error: "Authentication failed",
       });
     },
@@ -87,10 +76,7 @@ export default function useAuthForm(variant: "login" | "register") {
     password: "",
   });
 
-  const handleSubmit = async (variables: {
-    email: string;
-    password: string;
-  }) => {
+  const handleSubmit = async (variables: { email: string; password: string }) => {
     setCredentails({
       email: variables.email.trim(),
       password: variables.password.trim(),

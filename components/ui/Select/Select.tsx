@@ -1,35 +1,18 @@
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  ListRenderItem,
-  StyleProp,
-  ViewStyle,
-  Pressable,
-  LayoutChangeEvent,
-  StyleSheet,
-} from "react-native";
+import { View, Text, TouchableOpacity, ListRenderItem, StyleProp, ViewStyle, Pressable, LayoutChangeEvent, StyleSheet } from "react-native";
 import Layout from "../../../constants/Layout";
 import Colors from "../../../constants/Colors";
 import Color from "color";
 import { useState, useCallback, ReactNode, useLayoutEffect } from "react";
 import Ripple from "react-native-material-ripple";
 import { AntDesign, Entypo } from "@expo/vector-icons";
-import Reanimated, {
-  FadeIn,
-  FadeInDown,
-  FadeInUp,
-  FadeOut,
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from "react-native-reanimated";
+import Reanimated, { FadeIn, FadeInDown, FadeInUp, FadeOut, useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { FlatList } from "react-native-gesture-handler";
 import lowOpacity from "@/utils/functions/lowOpacity";
+import Animated from "react-native-reanimated";
 
 const MIN_TOP_DISTANCE = 65;
 
-interface Props<T> {
+export interface Props<T> {
   options: T[];
 
   multiSelect?: boolean;
@@ -73,10 +56,13 @@ const styles = StyleSheet.create({
     width: Layout.screen.width * 0.95,
     borderWidth: 2,
     borderColor: Colors.secondary,
-    borderRadius: 10,
+    // borderRadius: 10,
+    borderBottomLeftRadius: 10,
+    borderBottomRightRadius: 10,
     left: -1,
-    zIndex: 1100,
+    zIndex: 1,
     backgroundColor,
+    padding: 5,
   },
   container: {
     width: "100%",
@@ -89,7 +75,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     width: Layout.screen.width,
     height: Layout.screen.height,
-    zIndex: 101,
+    zIndex: 1,
   },
 });
 
@@ -129,7 +115,9 @@ export default function Select({
       return;
     }
     setSelected([item]);
-    if (closeOnSelect) setIsFocused(false);
+    if (closeOnSelect) {
+      setIsFocused(false);
+    }
   };
 
   const ABS_LIST_HEIGHT = SINGLE_TILE_HEIGHT * options.length;
@@ -146,11 +134,8 @@ export default function Select({
             flexDirection: "row",
             alignItems: "center",
             justifyContent: "space-between",
-            borderBottomColor:
-              options.length - 1 === index ? "transparent" : Colors.secondary,
-            backgroundColor: isSelected
-              ? lowOpacity(Colors.secondary, 20)
-              : undefined,
+            borderBottomColor: options.length - 1 === index ? "transparent" : Colors.secondary,
+            backgroundColor: isSelected ? lowOpacity(Colors.secondary, 20) : undefined,
           }}
         >
           <Text
@@ -161,9 +146,7 @@ export default function Select({
           >
             {item}
           </Text>
-          {selected.includes(item) && (
-            <AntDesign name="check" size={25} color={Colors.secondary} />
-          )}
+          {selected.includes(item) && <AntDesign name="check" size={25} color={Colors.secondary} />}
         </Ripple>
       ) as any;
     },
@@ -213,15 +196,16 @@ export default function Select({
           ]}
         />
       )}
-      <View
+      <Animated.View
         style={[
           styles.container,
           {
-            zIndex: isFocused ? 1000 : 100,
-            borderColor: isFocused ? Colors.secondary : Colors.primary_light,
-            backgroundColor: isFocused
-              ? Colors.primary_lighter
-              : backgroundColor,
+            zIndex: isFocused ? 1101 : 1,
+            borderColor: isFocused ? Colors.secondary : Color(Colors.primary_light).lighten(2).hex(),
+            backgroundColor: isFocused ? Colors.primary_lighter : backgroundColor,
+            borderBottomRightRadius: isFocused ? 0 : 10,
+            borderBottomLeftRadius: isFocused ? 0 : 10,
+            borderBottomColor: isFocused ? Colors.secondary : Color(Colors.primary_light).lighten(2).hex(),
           },
           containerStyle,
         ]}
@@ -236,9 +220,7 @@ export default function Select({
             justifyContent: "space-between",
           }}
         >
-          <View
-            style={{ flex: 15, justifyContent: "center", flexDirection: "row" }}
-          >
+          <View style={{ flex: 15, justifyContent: "center", flexDirection: "row" }}>
             <View>
               <Entypo
                 name="chevron-down"
@@ -256,19 +238,12 @@ export default function Select({
                 numberOfLines={1}
                 style={{
                   fontSize: 18,
-                  color: isFocused
-                    ? Colors.secondary
-                    : selected.some((v) => v.trim().length > 0)
-                    ? "#fff"
-                    : "gray",
+                  color: isFocused ? Colors.secondary : selected.some((v) => v.trim().length > 0) ? "#fff" : "gray",
                   flex: 1,
                   paddingHorizontal: 20,
                 }}
               >
-                {selected.length > 0 &&
-                selected.some((v) => v.trim().length > 0)
-                  ? selected.join(", ")
-                  : placeholderText}
+                {selected.length > 0 && selected.some((v) => v.trim().length > 0) ? selected.join(", ") : placeholderText}
               </Text>
             )}
           </View>
@@ -276,19 +251,14 @@ export default function Select({
 
         {isFocused && (
           <AnimatedGesturedFlatList
-            entering={FadeIn.duration(100)}
-            exiting={FadeOut.duration(100)}
+            entering={FadeIn.duration(150)}
+            exiting={FadeOut.duration(150)}
             style={[
               styles.list,
               {
                 height: maxSelectHeight || ABS_LIST_HEIGHT,
                 left: -2,
-                top:
-                  rest.anchor === "top"
-                    ? -1 * buttonHeight.value -
-                      10 -
-                      (maxSelectHeight || ABS_LIST_HEIGHT)
-                    : 10,
+                top: rest.anchor === "top" ? -1 * buttonHeight.value - (maxSelectHeight || ABS_LIST_HEIGHT) : 0,
               },
               flatListTransformStyle,
             ]}
@@ -298,10 +268,14 @@ export default function Select({
             data={options as any}
             keyExtractor={keyExtractor || ((item, index) => index.toString())}
             //@ts-ignore
-            renderItem={renderDefaultItem ? DefaultRenderItem : renderItem}
+            renderItem={
+              renderDefaultItem
+                ? DefaultRenderItem
+                : (props) => <Ripple onPress={() => addSelectedItem(props.item)}>{renderItem?.(props)}</Ripple>
+            }
           />
         )}
-      </View>
+      </Animated.View>
     </>
   );
 }

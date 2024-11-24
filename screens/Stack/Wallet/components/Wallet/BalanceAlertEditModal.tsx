@@ -13,10 +13,7 @@ interface BalanceAlertEditModalProps {
   onClose: () => void;
 }
 
-export default function BalanceAlertEditModal({
-  onClose,
-  visible,
-}: BalanceAlertEditModalProps) {
+export default function BalanceAlertEditModal({ onClose, visible }: BalanceAlertEditModalProps) {
   const [balance, setBalance] = useState("");
 
   const { editBalance } = useEditWallet(onClose);
@@ -85,9 +82,7 @@ export default function BalanceAlertEditModal({
             style={{ marginTop: 25 }}
             size="xl"
             onPress={onSubmit}
-            disabled={
-              balance.trim() === "" || Number.isNaN(Number(balance.trim()))
-            }
+            disabled={balance.trim() === "" || Number.isNaN(Number(balance.trim()))}
             type="contained"
             color="ternary"
           >

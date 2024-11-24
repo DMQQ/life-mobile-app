@@ -6,6 +6,7 @@ import { StackScreenProps } from "../../../types";
 import Watchlist from "./pages/Watchlist";
 import Colors from "@/constants/Colors";
 import WalletCharts from "./pages/WalletCharts";
+import CreateExpenseModal from "./pages/CreateExpense";
 
 interface WalletRootStack extends ParamListBase {
   Wallet: undefined;
@@ -13,8 +14,7 @@ interface WalletRootStack extends ParamListBase {
   Charts: undefined;
 }
 
-export type WalletScreens<Screen extends keyof WalletRootStack> =
-  StackScreenProps<WalletRootStack, Screen>;
+export type WalletScreens<Screen extends keyof WalletRootStack> = StackScreenProps<WalletRootStack, Screen>;
 
 const Stack = createNativeStackNavigator<WalletRootStack>();
 
@@ -49,7 +49,30 @@ export default function WalletScreens() {
         }}
       />
 
-      <Stack.Screen name="Charts" component={WalletCharts} />
+      <Stack.Screen
+        name="Charts"
+        component={WalletCharts}
+        options={{
+          presentation: "modal",
+        }}
+      />
+
+      <Stack.Screen
+        name={"CreateExpense"}
+        component={CreateExpenseModal}
+        options={{
+          presentation: "modal",
+        }}
+        initialParams={{
+          type: "expense",
+          amount: 0,
+          category: "",
+          date: "",
+          description: "",
+
+          isEditing: false,
+        }}
+      />
     </Stack.Navigator>
   );
 }

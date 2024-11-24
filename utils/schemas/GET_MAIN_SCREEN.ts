@@ -1,7 +1,7 @@
 import { gql } from "@apollo/client";
 
 export const GET_MAIN_SCREEN = gql`
-  query GetRootView {
+  query GetRootView($range: [String!]!) {
     timelineByCurrentDate {
       id
       title
@@ -19,10 +19,11 @@ export const GET_MAIN_SCREEN = gql`
         id
         amount
         description
+        type
       }
     }
 
-    weeklySpendings: getStatistics(type: "week") {
+    weeklySpendings: getStatistics(range: $range) {
       ...Stats
     }
   }

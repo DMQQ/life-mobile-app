@@ -51,6 +51,7 @@ const DateRangePicker = (props: { filters: Filters; dispatch: React.Dispatch<Act
       horizontal
       style={{
         width: Layout.screen.width - 30,
+        marginBottom: 10,
       }}
     >
       {DateRanges.map(([label, [from, to]]) => (
