@@ -110,7 +110,8 @@ function WalletScreen({ navigation, route }: WalletScreens<"Wallet">) {
             icon: <Ionicons name="stats-chart" size={20} color="#fff" />,
           },
           {
-            onPress: () => bottomSheetRef.current?.snapToIndex(0),
+            // onPress: () => bottomSheetRef.current?.snapToIndex(0),
+            onPress: () => navigation.navigate("CreateExpense"),
             icon: <AntDesign name="plus" size={20} color="#fff" />,
           },
         ]}

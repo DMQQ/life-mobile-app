@@ -6,6 +6,7 @@ import { StackScreenProps } from "../../../types";
 import Watchlist from "./pages/Watchlist";
 import Colors from "@/constants/Colors";
 import WalletCharts from "./pages/WalletCharts";
+import CreateExpenseModal from "./pages/CreateExpense";
 
 interface WalletRootStack extends ParamListBase {
   Wallet: undefined;
@@ -49,6 +50,14 @@ export default function WalletScreens() {
       />
 
       <Stack.Screen name="Charts" component={WalletCharts} />
+
+      <Stack.Screen
+        name={"CreateExpense"}
+        component={CreateExpenseModal}
+        options={{
+          presentation: "modal",
+        }}
+      />
     </Stack.Navigator>
   );
 }
