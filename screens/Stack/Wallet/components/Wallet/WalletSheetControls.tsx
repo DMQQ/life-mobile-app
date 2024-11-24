@@ -6,10 +6,7 @@ import { WalletElement } from "./WalletItem";
 import { useNavigation } from "@react-navigation/native";
 import lowOpacity from "@/utils/functions/lowOpacity";
 
-const SheetActionButtons = (props: {
-  selectedExpense: WalletElement | undefined;
-  onCompleted: Function;
-}) => {
+const SheetActionButtons = (props: { selectedExpense: WalletElement | undefined; onCompleted: Function }) => {
   const { deleteActivity } = useDeleteActivity();
 
   const onRemove = async () => {
@@ -50,8 +47,13 @@ const SheetActionButtons = (props: {
 
       <Button
         onPress={() =>
-          navigation.navigate("CreateActivity", {
-            edit: props.selectedExpense,
+          // navigation.navigate("CreateActivity", {
+          //   edit: props.selectedExpense,
+          // })
+
+          navigation.navigate("CreateExpense", {
+            ...props.selectedExpense,
+            isEditing: true,
           })
         }
         type="contained"
