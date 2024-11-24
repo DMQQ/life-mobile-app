@@ -5,7 +5,7 @@ import Colors from "../../constants/Colors";
 import Ripple from "react-native-material-ripple";
 import { Ionicons } from "@expo/vector-icons";
 import useKeyboard from "../../utils/hooks/useKeyboard";
-import Animated from "react-native-reanimated";
+import Animated, { FadeInDown } from "react-native-reanimated";
 import { useTheme } from "../../utils/context/ThemeContext";
 import { Padding } from "@/constants/Values";
 import lowOpacity from "@/utils/functions/lowOpacity";
@@ -60,8 +60,6 @@ export default function BottomTab({ navigation, state, insets }: BottomTabBarPro
 
   const isOpenSubScreen = (state.routes[state.index].state?.index || 0) > 0;
 
-  console.log("isOpenSubScreen", isOpenSubScreen);
-
   if (isOpenSubScreen || keyboard) return null;
 
   return (
@@ -76,6 +74,8 @@ export default function BottomTab({ navigation, state, insets }: BottomTabBarPro
           paddingTop: Platform.OS === "android" ? insets.bottom + Padding.s : Padding.s,
         },
       ]}
+      entering={FadeInDown}
+      exiting={FadeInDown}
     >
       <Btn route="NotesScreens" label="Notes" iconName={"clipboard"} />
 

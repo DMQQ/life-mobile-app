@@ -46,8 +46,6 @@ export const Item = ({ label, value, icon, formatValue = true, width }: ItemProp
 );
 
 export default function StatisticsSummary(props: StatisticsSummaryProps) {
-  if (!props.data) return null;
-
   const oppositeRange = useMemo(() => {
     const size = moment(props.dates.to).diff(moment(props.dates.from), "days");
 
@@ -117,6 +115,8 @@ export default function StatisticsSummary(props: StatisticsSummaryProps) {
     .every(([_, value]) => {
       return typeof value === "number" && value === 0;
     });
+
+  if (!props.data) return null;
 
   return (
     <View style={{ width: Layout.screen.width - 30, marginTop: 25, marginBottom: 25 }}>

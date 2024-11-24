@@ -37,7 +37,7 @@ const SegmentVariants = [
   },
 ];
 
-const useEditExpense = () => {
+export const useEditExpense = () => {
   const user = useUser();
 
   const [editExpense, { error }] = useMutation(

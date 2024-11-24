@@ -49,13 +49,28 @@ export default function WalletScreens() {
         }}
       />
 
-      <Stack.Screen name="Charts" component={WalletCharts} />
+      <Stack.Screen
+        name="Charts"
+        component={WalletCharts}
+        options={{
+          presentation: "modal",
+        }}
+      />
 
       <Stack.Screen
         name={"CreateExpense"}
         component={CreateExpenseModal}
         options={{
           presentation: "modal",
+        }}
+        initialParams={{
+          type: "expense",
+          amount: 0,
+          category: "",
+          date: "",
+          description: "",
+
+          isEditing: false,
         }}
       />
     </Stack.Navigator>
