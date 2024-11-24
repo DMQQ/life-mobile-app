@@ -8,11 +8,13 @@ import Layout from "@/constants/Layout";
 
 interface ChartsProps {
   data: any[];
+  onPress: (dt: { label: string; value: number; color: string }) => void;
 }
 
-export default function Charts({ data }: ChartsProps) {
+export default function Charts({ data, onPress }: ChartsProps) {
   return (
     <BarChart
+      onPress={onPress}
       width={Layout.screen.width - 60}
       height={Layout.screen.height / 3.5}
       sideColor={"#fff"}

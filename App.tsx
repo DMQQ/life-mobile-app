@@ -3,14 +3,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Provider } from "react-redux";
 import Navigation from "./navigation";
 import { store } from "./utils/redux";
-import {
-  ApolloProvider,
-  InMemoryCache,
-  ApolloClient,
-  ApolloLink,
-  from,
-  createHttpLink,
-} from "@apollo/client";
+import { ApolloProvider, InMemoryCache, ApolloClient, ApolloLink, from, createHttpLink } from "@apollo/client";
 import ThemeContextProvider from "./utils/context/ThemeContext";
 import * as Notifications from "expo-notifications";
 import Url from "./constants/Url";
@@ -39,8 +32,7 @@ const withToken = setContext(async () => {
 
     if (token) return { token };
 
-    if (user !== undefined && typeof user?.token === "string")
-      token = user.token;
+    if (user !== undefined && typeof user?.token === "string") token = user.token;
 
     return { token };
   });
@@ -63,8 +55,26 @@ const httpLink = createHttpLink({
 
 const link = from([withToken, authMiddleware.concat(httpLink)]);
 
+const cache = new InMemoryCache({
+  // typePolicies: {
+  //   WalletEntity: {
+  //     keyFields: ["id"], // Ensure it uses 'id' as the unique key
+  //     fields: {
+  //       expenses: {
+  //         merge(existing = [], incoming) {
+  //           return [...existing, ...incoming];
+  //         },
+  //       },
+  //     },
+  //   },
+  //   ExpenseEntity: {
+  //     keyFields: ["id"],
+  //   },
+  // },
+});
+
 const apolloClient = new ApolloClient({
-  cache: new InMemoryCache(),
+  cache,
   link,
 });
 

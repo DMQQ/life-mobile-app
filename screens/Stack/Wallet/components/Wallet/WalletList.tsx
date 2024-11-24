@@ -1,16 +1,18 @@
 import BottomSheet from "@gorhom/bottom-sheet";
 import { Expense, Wallet } from "@/types";
 import WalletItem, { WalletElement, parseDateToText } from "./WalletItem";
-import { useState, useRef, useEffect, useMemo, useCallback } from "react";
+import { useState, useRef, useEffect, useMemo, useCallback, useTransition } from "react";
 import { Text, NativeScrollEvent, View, StyleSheet, VirtualizedList } from "react-native";
 import { WalletSheet } from "../Sheets/WalletSheet";
-import Animated, { SharedValue } from "react-native-reanimated";
+import Animated, { LinearTransition, SharedValue } from "react-native-reanimated";
 import { NativeSyntheticEvent } from "react-native";
 import moment from "moment";
-import Colors from "@/constants/Colors";
+import Colors, { Sizing } from "@/constants/Colors";
 import Ripple from "react-native-material-ripple";
 import { useWalletContext } from "../WalletContext";
 import Color from "color";
+import { gql, useQuery } from "@apollo/client";
+import { useFocusEffect, useNavigation, useRoute } from "@react-navigation/native";
 
 const AnimatedList = Animated.createAnimatedComponent(VirtualizedList);
 
@@ -23,13 +25,32 @@ export default function WalletList(props: {
   isLocked: boolean;
   filtersActive: boolean;
 }) {
-  const [selected, setSelected] = useState<WalletElement | undefined>(undefined);
+  const route = useRoute<any>();
+
+  const [selected, setSelected] = useState<WalletElement | undefined>(
+    props?.wallet?.expenses?.find((expense) => expense.id === route?.params?.expenseId) as WalletElement | undefined
+  );
   const sheet = useRef<BottomSheet>(null);
 
   useEffect(() => {
-    setSelected(undefined);
-    sheet.current?.close();
-  }, [props?.wallet?.expenses]);
+    if (props.wallet?.expenses?.length === undefined) return;
+
+    if (route?.params?.expenseId && props?.wallet?.expenses?.length > 0) {
+      const expense = props.wallet.expenses.find((expense) => expense.id === route?.params?.expenseId);
+
+      if (!expense) return;
+
+      setSelected(expense as WalletElement);
+
+      const timeout = setTimeout(() => {
+        sheet.current?.snapToIndex(0);
+      }, 150);
+
+      return () => {
+        clearTimeout(timeout);
+      };
+    }
+  }, [route?.params, props?.wallet?.expenses?.length]);
 
   const data = useMemo(() => {
     const sorted = [] as {
@@ -46,7 +67,7 @@ export default function WalletList(props: {
         previous.expenses.push(expense);
       } else {
         sorted.push({
-          month: moment(expense.date).format("MMMM YYYY"),
+          month: expense.date,
           expenses: [expense],
         });
       }
@@ -98,29 +119,28 @@ const MonthExpenseList = ({
   sheet: React.RefObject<BottomSheet>;
   showTotal: boolean;
 }) => {
-  const [expense, income] = useMemo(() => {
-    let income = 0;
-    let expense = 0;
-    item.expenses.forEach((item) => {
-      if (item.type === "income") {
-        income += item.amount;
-      } else {
-        expense += item.amount;
+  const diff = useQuery(
+    gql`
+      query getMonthTotal($date: String!) {
+        getMonthTotal(date: $date)
       }
-    });
-    return [expense * -1, income] as const;
-  }, [item.expenses]);
+    `,
+    { variables: { date: item.month } }
+  );
+
+  const amount = diff.data?.getMonthTotal || 0;
 
   return (
     <View style={{ marginBottom: 30 }}>
       <View style={styles.monthRow}>
-        <Text style={styles.monthText}>{item.month}</Text>
+        <Text style={styles.monthText}>{moment(item.month).format("MMMM YYYY")}</Text>
 
-        {showTotal && income !== 0 && expense !== 0 && (
+        {showTotal && (
           <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <Text style={{ color: "#66E875" }}> +{income.toFixed(0)}</Text>
-            <Text style={{ color: Color(Colors.primary_lighter).lighten(5).hex() }}> / </Text>
-            <Text style={{ color: "#F07070" }}>{expense.toFixed(0)}</Text>
+            <Text style={{ color: amount > 0 ? "#66E875" : "#F07070", fontSize: 18 }}>
+              {amount > 0 ? `+${amount.toFixed(2)}` : amount.toFixed(2)}
+            </Text>
+
             <Text style={{ color: Color(Colors.primary_lighter).lighten(5).hex() }}> zł</Text>
           </View>
         )}
@@ -184,11 +204,9 @@ const ListItem = ({
 
 const styles = StyleSheet.create({
   monthText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 20,
-    marginBottom: 15,
-    paddingHorizontal: 5,
+    fontSize: Sizing.text,
+    fontWeight: "600",
+    color: Colors.text_light,
   },
 
   dateTextContainer: {
@@ -207,5 +225,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    marginBottom: 20,
   },
 });

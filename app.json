@@ -63,7 +63,10 @@
             "cleartextTrafficPermitted": true
           }
         }
-      ]
+      ],
+      "expo-asset",
+      "expo-font",
+      "expo-secure-store"
     ],
     "extra": {
       "eas": {

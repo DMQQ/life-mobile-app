@@ -1,4 +1,5 @@
 import { Expense, Wallet } from "@/types";
+import useOffline from "@/utils/hooks/useOffline";
 import { gql, useQuery } from "@apollo/client";
 import { useEffect, useMemo, useReducer, useState } from "react";
 
@@ -22,7 +23,7 @@ export const GET_WALLET = gql`
 
 const PAGINATION_TAKE = 10;
 
-const init = {
+export const init = {
   query: "",
   amount: {
     min: 0,
@@ -139,6 +140,8 @@ export default function useGetWallet(options?: { fetchAll: boolean }) {
   const [skip, setSkip] = useState(PAGINATION_TAKE);
   const [endReached, setEndReached] = useState(false);
 
+  const offline = useOffline<Wallet>("WalletScreen");
+
   const st = useQuery(GET_WALLET, {
     variables: {
       filters: {
@@ -189,12 +192,14 @@ export default function useGetWallet(options?: { fetchAll: boolean }) {
         const mergeExpenses = (previousExpenses: Expense[], newExpenses: Expense[]): Expense[] =>
           Array.from(new Map([...previousExpenses, ...newExpenses].map((exp) => [exp.id, exp])).values());
 
-        return {
+        const finalData = {
           wallet: {
             ...previousQueryResult.wallet,
             expenses: mergeExpenses(previousQueryResult.wallet.expenses, fetchMoreResult.wallet.expenses),
           },
         };
+
+        return finalData;
       },
     });
   };
@@ -223,7 +228,13 @@ export default function useGetWallet(options?: { fetchAll: boolean }) {
     return () => clearTimeout(timeout);
   }, [filters]);
 
+  useEffect(() => {
+    if (!offline.isOffline) offline.save("WalletScreen", st.data);
+  }, []);
+
   const filtersActive = useMemo(() => JSON.stringify(filters) !== JSON.stringify(init), [filters]);
 
-  return { ...st, data: st.data as { wallet: Wallet }, filters, dispatch, onEndReached, endReached, filtersActive };
+  const data = (offline.isOffline ? offline.data || {} : st.data) as { wallet: Wallet };
+
+  return { ...st, data: data, filters, dispatch, onEndReached, endReached, filtersActive };
 }

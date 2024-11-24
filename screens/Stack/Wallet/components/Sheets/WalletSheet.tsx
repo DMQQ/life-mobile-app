@@ -1,6 +1,4 @@
-import BottomSheet, {
-  BottomSheetGorhom,
-} from "@/components/ui/BottomSheet/BottomSheet";
+import BottomSheet, { BottomSheetGorhom } from "@/components/ui/BottomSheet/BottomSheet";
 import { ReactNode, forwardRef } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import Colors from "@/constants/Colors";
@@ -53,22 +51,14 @@ export const WalletSheet = forwardRef<
     selected: WalletElement | undefined;
   }
 >(({ selected }, ref) => {
-  const amount =
-    selected?.type === "expense"
-      ? (selected.amount * -1).toFixed(2)
-      : selected?.amount.toFixed(2);
+  const amount = selected?.type === "expense" ? (selected.amount * -1).toFixed(2) : selected?.amount.toFixed(2);
 
   return (
     <BottomSheet ref={ref} snapPoints={["60%", "80%"]}>
       <View style={{ paddingHorizontal: 15, flex: 1 }}>
         <View style={{ flex: 2 }}>
-          <View
-            style={[
-              styles.row,
-              { marginTop: 0, padding: 15, flexWrap: "wrap" },
-            ]}
-          >
-            <Txt size={30} color={"#fff"}>
+          <View style={[styles.row, { marginTop: 0, padding: 15, flexWrap: "wrap" }]}>
+            <Txt size={20} color={"#fff"}>
               {capitalize(selected?.description)}
             </Txt>
 
@@ -78,72 +68,37 @@ export const WalletSheet = forwardRef<
             </Txt>
           </View>
 
+          {selected?.type !== "income" && (
+            <View style={styles.row}>
+              <CategoryIcon type={selected?.type as "expense" | "income"} category={selected?.category || "none"} clear />
+
+              <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>{capitalize(selected?.category)}</Text>
+            </View>
+          )}
+
           <View style={styles.row}>
-            <CategoryIcon
-              type={selected?.type as "expense" | "income"}
-              category={selected?.category || "none"}
-              clear
-            />
+            <AntDesign name="calendar" size={24} color={Colors.ternary} style={{ paddingHorizontal: 7.5, padding: 2.5 }} />
+
+            <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>{parseDate(selected?.date || "")}</Text>
+          </View>
+          <View style={styles.row}>
+            <AntDesign name="clockcircle" size={24} color={Colors.ternary} style={{ paddingHorizontal: 7.5, padding: 2.5 }} />
 
             <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>
-              {capitalize(selected?.category)}
+              {new Date(selected?.date || new Date()).toISOString().split("T")[1].split(".")[0]}
             </Text>
           </View>
 
           <View style={styles.row}>
-            <AntDesign
-              name="calendar"
-              size={24}
-              color={Colors.ternary}
-              style={{ paddingHorizontal: 7.5, padding: 2.5 }}
-            />
+            <MaterialIcons name="money" size={24} color={Colors.ternary} style={{ paddingHorizontal: 7.5, padding: 2.5 }} />
 
-            <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>
-              {parseDate(selected?.date || "")}
-            </Text>
-          </View>
-          <View style={styles.row}>
-            <AntDesign
-              name="clockcircle"
-              size={24}
-              color={Colors.ternary}
-              style={{ paddingHorizontal: 7.5, padding: 2.5 }}
-            />
-
-            <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>
-              {
-                new Date(selected?.date || new Date())
-                  .toISOString()
-                  .split("T")[1]
-                  .split(".")[0]
-              }
-            </Text>
+            <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>{capitalize(selected?.type)}</Text>
           </View>
 
           <View style={styles.row}>
-            <MaterialIcons
-              name="money"
-              size={24}
-              color={Colors.ternary}
-              style={{ paddingHorizontal: 7.5, padding: 2.5 }}
-            />
+            <MaterialIcons name="money" size={24} color={Colors.ternary} style={{ paddingHorizontal: 7.5, padding: 2.5 }} />
 
-            <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>
-              {capitalize(selected?.type)}
-            </Text>
-          </View>
-
-          <View style={styles.row}>
-            <MaterialIcons
-              name="money"
-              size={24}
-              color={Colors.ternary}
-              style={{ paddingHorizontal: 7.5, padding: 2.5 }}
-            />
-
-            <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>
-              Balance before: {selected?.balanceBeforeInteraction} zł
-            </Text>
+            <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>Balance before: {selected?.balanceBeforeInteraction} zł</Text>
           </View>
         </View>
 

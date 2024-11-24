@@ -19,39 +19,44 @@ interface LegendProps {
 
 const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
 
-const Legend = (props: LegendProps) => (
-  <View style={styles.tilesContainer}>
-    {props.data.map((item, index) => (
-      <Ripple
-        onPress={() => props.onPress(item)}
-        key={index}
-        style={[
-          styles.tile,
+const Legend = (props: LegendProps) =>
+  props.data.length === 0 ? null : (
+    <View style={styles.tilesContainer}>
+      <View style={{ width: "100%", marginBottom: 10 }}>
+        <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 18 }}>Chart legend</Text>
+        <Text style={{ color: "gray", marginTop: 5 }}>Detailed percentage of your expenses</Text>
+      </View>
+      {props.data.map((item, index) => (
+        <Ripple
+          onPress={() => props.onPress(item)}
+          key={index}
+          style={[
+            styles.tile,
 
-          {
-            width: props.data.length - 1 === index && props.data.length % 2 === 1 ? "100%" : (Layout.screen.width - 30) / 2 - 5,
-            backgroundColor: props.selected === item.label ? Color(Colors.primary_light).lighten(0.4).string() : Colors.primary_light,
-          },
-        ]}
-      >
-        <Text style={styles.totalText}>
-          {Math.trunc(item.value)}zł
-          <Text style={{ color: "gray" }}>
-            <Text style={{ fontSize: 12 }}>
-              {"  "} / {"  "}
+            {
+              width: props.data.length - 1 === index && props.data.length % 2 === 1 ? "100%" : (Layout.screen.width - 30) / 2 - 5,
+              backgroundColor: props.selected === item.label ? Color(Colors.primary_light).lighten(0.4).string() : Colors.primary_light,
+            },
+          ]}
+        >
+          <Text style={styles.totalText}>
+            {Math.trunc(item.value)}zł
+            <Text style={{ color: "gray" }}>
+              <Text style={{ fontSize: 12 }}>
+                {"  "} / {"  "}
+              </Text>
+              <Text style={{ fontSize: 12 }}>{((item.value / props.totalSum) * 100).toFixed(2)}%</Text>
             </Text>
-            <Text style={{ fontSize: 12 }}>{((item.value / props.totalSum) * 100).toFixed(2)}%</Text>
           </Text>
-        </Text>
 
-        <View style={styles.tileText}>
-          <View style={[styles.dot, { backgroundColor: item.color }]} />
-          <Text style={{ color: blueText }}>{capitalize(item.label)}</Text>
-        </View>
-      </Ripple>
-    ))}
-  </View>
-);
+          <View style={styles.tileText}>
+            <View style={[styles.dot, { backgroundColor: item.color }]} />
+            <Text style={{ color: blueText }}>{capitalize(item.label)}</Text>
+          </View>
+        </Ripple>
+      ))}
+    </View>
+  );
 
 const blueText = Color(Colors.primary).lighten(10).string();
 

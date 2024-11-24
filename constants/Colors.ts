@@ -9,14 +9,20 @@ export const secondary_candidates = [
   "#FF1A56",
   "#BE15A8",
   "#008CFF",
+  "#F9F156",
+  "#F95656",
+  "#DB56F9",
+  "#6056F9",
+  "#56E4F9",
+  "#34FA85",
+  "#34A3FA",
 ];
 
 const primary = "#0d0f14";
 
 const secondary = secondary_candidates[secondary_candidates.length - 1];
 
-export const randColor = () =>
-  secondary_candidates[Math.floor(Math.random() * secondary_candidates.length)];
+export const randColor = () => secondary_candidates[Math.floor(Math.random() * secondary_candidates.length)];
 
 const ternary = "#7B84FF";
 

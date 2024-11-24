@@ -1,6 +1,4 @@
-import BottomSheet, {
-  BottomSheetGorhom,
-} from "@/components/ui/BottomSheet/BottomSheet";
+import BottomSheet, { BottomSheetGorhom } from "@/components/ui/BottomSheet/BottomSheet";
 import Button from "@/components/ui/Button/Button";
 import SegmentedButtons from "@/components/ui/SegmentedButtons";
 import Colors from "@/constants/Colors";
@@ -21,7 +19,7 @@ import FormFields from "./FormFields";
 
 const schema = yup.object().shape({
   name: yup.string().required("Name is required"),
-  amount: yup.number().positive().required("Amount is required"),
+  amount: yup.number().positive("Amount cannot be negative number").required("Amount is required").typeError("Value must be a number"),
   type: yup.string().required("Type is required"),
 });
 
@@ -42,12 +40,10 @@ const initialValues = {
   type: "",
   category: "",
   date: moment().add(2, "hours").toISOString(),
+  schedule: false,
 };
 
-const AddExpenseBottomSheet = forwardRef<
-  BottomSheetGorhom,
-  { onCompleted: Function }
->((props, ref) => {
+const AddExpenseBottomSheet = forwardRef<BottomSheetGorhom, { onCompleted: Function }>((props, ref) => {
   const { createExpense, reset } = useCreateActivity({
     onCompleted() {
       props.onCompleted();
@@ -58,10 +54,7 @@ const AddExpenseBottomSheet = forwardRef<
     calendar: { date },
   } = useWalletContext();
 
-  const onSubmit = async (
-    values: typeof initialValues,
-    { resetForm }: FormikHelpers<typeof initialValues>
-  ) => {
+  const onSubmit = async (values: typeof initialValues, { resetForm }: FormikHelpers<typeof initialValues>) => {
     try {
       await createExpense({
         variables: {
@@ -70,6 +63,7 @@ const AddExpenseBottomSheet = forwardRef<
           type: values.type,
           category: values.category,
           date: values.date,
+          schedule: values.schedule,
         },
       });
 
@@ -100,7 +94,7 @@ const AddExpenseBottomSheet = forwardRef<
         index === -1 && f.resetForm();
       }}
       ref={ref}
-      snapPoints={["70%", "95%"]}
+      snapPoints={["75%", "95%"]}
     >
       <Form formik={f} />
     </BottomSheet>
@@ -140,14 +134,10 @@ const Form = ({ formik: f }: FormProps) => {
               buttonTextStyle={{ fontSize: 14 }}
             />
             <Ripple
-              onPress={() => {
-                startTransition(() => setShowCalendar((prev) => !prev));
-              }}
+              onPress={() => startTransition(() => setShowCalendar((prev) => !prev))}
               style={[
                 {
-                  backgroundColor: showCalendar
-                    ? Colors.secondary
-                    : Colors.primary_light,
+                  backgroundColor: showCalendar ? Colors.secondary : Colors.primary_light,
                 },
                 styles.calendarButton,
               ]}
@@ -158,37 +148,21 @@ const Form = ({ formik: f }: FormProps) => {
 
           {showCalendar ? (
             <ChooseDate
+              schedule={f.values.schedule}
+              onScheduleToggle={(isScheduled) => f.handleChange("schedule")({ target: { value: isScheduled } } as any)}
               date={f.values.date}
               onDismissCalendar={() => setShowCalendar(false)}
               setDateField={(date) => {
-                f.setFieldValue(
-                  "date",
-                  moment(date).add(2, "hours").toISOString()
-                );
+                f.setFieldValue("date", moment(date).add(2, "hours").toISOString());
               }}
             />
           ) : (
-            <>
-              <FormFields
-                onFocusChange={(focused) => {
-                  snapToIndex(focused ? 1 : 0);
-                }}
-                f={f}
-              />
-
-              <Button
-                disabled={!(f.isValid && f.dirty)}
-                fontStyle={{ fontSize: 16 }}
-                onPress={() => {
-                  f.handleSubmit();
-                }}
-                style={{
-                  marginTop: f.values.type === "expense" ? 60 : 150,
-                }}
-              >
-                Create expense
-              </Button>
-            </>
+            <FormFields
+              onFocusChange={(focused) => {
+                snapToIndex(focused ? 1 : 0);
+              }}
+              f={f}
+            />
           )}
         </View>
       </Animated.View>

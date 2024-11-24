@@ -1,5 +1,5 @@
 import { PieChart as GFTPieChart } from "react-native-gifted-charts";
-import Colors from "@/constants/Colors";
+import Colors, { secondary_candidates } from "@/constants/Colors";
 import Layout from "@/constants/Layout";
 import { Text, View } from "react-native";
 import Color from "color";
@@ -21,7 +21,7 @@ export default function PieChart(props: PieChartProps) {
       showGradient
       donut
       radius={(Layout.screen.width - 30) / 3}
-      data={props.data}
+      data={props.data.length !== 0 ? props.data : [{ label: "No data", value: 1, color: secondary_candidates[0] }]}
       showText
       isAnimated
       focusOnPress
