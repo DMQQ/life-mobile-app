@@ -3,6 +3,7 @@ import IconButton from "../IconButton/IconButton";
 import { AntDesign } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { View } from "react-native";
+import throttle from "@/utils/functions/throttle";
 
 export default function Header(props: {
   buttons: {
@@ -12,6 +13,8 @@ export default function Header(props: {
   title?: string;
   goBack?: boolean;
   titleAnimatedStyle?: AnimatedStyle;
+
+  backIcon?: JSX.Element;
 }) {
   const navigation = useNavigation();
   return (
@@ -26,8 +29,8 @@ export default function Header(props: {
     >
       {props.goBack && (
         <IconButton
-          onPress={() => navigation.canGoBack() && navigation.goBack()}
-          icon={<AntDesign name="arrowleft" size={24} color="#fff" />}
+          onPress={throttle(() => navigation.canGoBack() && navigation.goBack(), 250)}
+          icon={props.backIcon || <AntDesign name="arrowleft" size={24} color="#fff" />}
         />
       )}
 
@@ -56,7 +59,7 @@ export default function Header(props: {
         }}
       >
         {props.buttons.map((button, index) => (
-          <IconButton key={index} onPress={button.onPress} icon={button.icon} />
+          <IconButton key={index} onPress={throttle(button.onPress, 250)} icon={button.icon} />
         ))}
       </View>
     </View>

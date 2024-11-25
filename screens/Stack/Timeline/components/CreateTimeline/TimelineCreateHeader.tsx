@@ -24,14 +24,11 @@ export default function TimelineCreateHeader(
   props: NativeStackHeaderProps & {
     selectedDate: string;
     onToggleOptions: () => void;
-    handleChangeDate: () => void;
+    handleChangeDate: (...rest: any) => void;
   }
 ) {
-  const safeareas = useSafeAreaInsets()
   return (
-    <View style={[styles.header,{
-       marginTop: Platform.OS === "ios" ? safeareas.top : 0,
-    }]}>
+    <View style={[styles.header]}>
       <Ripple style={{ padding: 10 }} onPress={props.navigation.goBack}>
         <AntDesign name="arrowleft" color="#fff" size={23} />
       </Ripple>

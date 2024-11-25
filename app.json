@@ -13,7 +13,8 @@
       "backgroundColor": "#151421"
     },
     "updates": {
-      "fallbackToCacheTimeout": 0
+      "fallbackToCacheTimeout": 0,
+      "url": "https://u.expo.dev/5596a83c-661a-4477-806f-ee4c8a125f7e"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -73,6 +74,7 @@
         "projectId": "5596a83c-661a-4477-806f-ee4c8a125f7e"
       }
     },
-    "owner": "dmq"
+    "owner": "dmq",
+    "runtimeVersion": "1.0.0"
   }
 }

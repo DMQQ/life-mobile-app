@@ -49,16 +49,8 @@ const styles = StyleSheet.create({
   },
 });
 
-export default function Wallet(props: WalletScreens<"Wallet">) {
-  return (
-    <WalletContextProvider>
-      <WalletScreen {...props} />
-    </WalletContextProvider>
-  );
-}
-
-function WalletScreen({ navigation, route }: WalletScreens<"Wallet">) {
-  const { data, loading, refetch, filters, dispatch, onEndReached, endReached, filtersActive } = useGetWallet();
+export default function WalletScreen({ navigation, route }: WalletScreens<"Wallet">) {
+  const { data, loading, refetch, onEndReached, endReached, filtersActive } = useGetWallet();
 
   const {
     refs: { bottomSheetRef, filtersRef, editBalanceRef },
@@ -102,7 +94,7 @@ function WalletScreen({ navigation, route }: WalletScreens<"Wallet">) {
       <Header
         buttons={[
           {
-            onPress: () => filtersRef.current?.snapToIndex(0),
+            onPress: () => navigation.navigate("Filters"),
             icon: <Ionicons name="search" size={20} color="#fff" />,
           },
           {
@@ -139,7 +131,7 @@ function WalletScreen({ navigation, route }: WalletScreens<"Wallet">) {
         onEndReached={onEndReached}
       />
 
-      <ExpenseFiltersSheet ref={filtersRef} filters={filters} dispatch={dispatch} />
+      {/* <ExpenseFiltersSheet ref={filtersRef} filters={filters} dispatch={dispatch} /> */}
 
       <CreateExpenseSheet onCompleted={() => {}} ref={bottomSheetRef} />
 

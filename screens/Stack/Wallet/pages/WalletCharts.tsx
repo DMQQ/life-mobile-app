@@ -1,7 +1,7 @@
 import Header from "@/components/ui/Header/Header";
 import Colors, { secondary_candidates } from "@/constants/Colors";
 import Layout from "@/constants/Layout";
-import { MaterialIcons } from "@expo/vector-icons";
+import { AntDesign, MaterialIcons } from "@expo/vector-icons";
 import { useMemo, useRef, useState } from "react";
 import { Alert, StyleSheet, Text, View, VirtualizedList } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -177,8 +177,8 @@ export default function WalletCharts() {
   );
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <Header buttons={headerButtons} goBack />
+    <SafeAreaView style={{ flex: 1, paddingTop: 15 }}>
+      <Header buttons={headerButtons} goBack backIcon={<AntDesign name="close" size={24} color="white" />} />
       <VirtualizedList
         ref={listRef}
         ListHeaderComponent={ListHeaderComponent}
