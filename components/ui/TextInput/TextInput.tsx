@@ -124,7 +124,7 @@ export default function Input({
           flexDirection: "row",
           width: (style as any)?.width || "100%", //(style as any)?.width ?? Layout.screen.width * 0.95,
           borderWidth: 2,
-          borderColor: error ? Colors.error : isFocused ? Colors.secondary : Color(Colors.primary).lighten(2).hex(),
+          borderColor: error ? Colors.error : isFocused ? Colors.secondary : Color(Colors.primary).lighten(0.5).hex(),
           alignItems: "center",
         }}
       >

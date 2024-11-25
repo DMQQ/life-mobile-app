@@ -201,11 +201,11 @@ export default function Select({
           styles.container,
           {
             zIndex: isFocused ? 1101 : 1,
-            borderColor: isFocused ? Colors.secondary : Color(Colors.primary_light).lighten(2).hex(),
+            borderColor: isFocused ? Colors.secondary : Color(Colors.primary_light).lighten(0.5).hex(),
             backgroundColor: isFocused ? Colors.primary_lighter : backgroundColor,
             borderBottomRightRadius: isFocused ? 0 : 10,
             borderBottomLeftRadius: isFocused ? 0 : 10,
-            borderBottomColor: isFocused ? Colors.secondary : Color(Colors.primary_light).lighten(2).hex(),
+            borderBottomColor: isFocused ? Colors.secondary : Color(Colors.primary_light).lighten(0.5).hex(),
           },
           containerStyle,
         ]}

@@ -1,21 +1,30 @@
 import moment from "moment";
-import { FlatList, Keyboard, ScrollView, StyleSheet, Text, TextInput, Touchable, TouchableWithoutFeedback, View } from "react-native";
+import { Keyboard, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View } from "react-native";
 import Colors from "../../../../constants/Colors";
-import { useState } from "react";
+import { memo, useCallback, useState } from "react";
 import Ripple from "react-native-material-ripple";
 import Layout from "@/constants/Layout";
 import { Icons } from "../components/Wallet/WalletItem";
-import Color from "color";
-import Button from "@/components/ui/Button/Button";
-import { AntDesign, Entypo, FontAwesome5 } from "@expo/vector-icons";
+import { AntDesign, Entypo } from "@expo/vector-icons";
 import lowOpacity from "@/utils/functions/lowOpacity";
-import Animated, { FadeIn, FadeInDown, FadeInUp, FadeOutDown, FadeOutUp, LinearTransition } from "react-native-reanimated";
+import Animated, {
+  FadeIn,
+  FadeInDown,
+  LinearTransition,
+  useSharedValue,
+  withSequence,
+  withSpring,
+  useAnimatedStyle,
+  cancelAnimation,
+} from "react-native-reanimated";
 import useCreateActivity from "../hooks/useCreateActivity";
 import DateTimePicker from "react-native-modal-datetime-picker";
 import { useEditExpense } from "./CreateActivity";
+import IconButton from "@/components/ui/IconButton/IconButton";
+import { parse } from "@babel/core";
 
 export default function CreateExpenseModal({ navigation, route: { params } }: any) {
-  const { createExpense, reset } = useCreateActivity({
+  const { createExpense } = useCreateActivity({
     onCompleted() {
       navigation.goBack();
     },
@@ -30,11 +39,45 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
   const [name, setName] = useState(params?.description || "");
   const [type, setType] = useState<"expense" | "income">(params?.type || "expense");
 
+  const transformX = useSharedValue(0);
+
+  const isAnimating = useSharedValue(false);
+
+  const shake = () => {
+    if (isAnimating.value) return;
+
+    isAnimating.value = true;
+    cancelAnimation(transformX);
+    transformX.value = withSpring(15, { damping: 2, stiffness: 200, mass: 0.5 });
+
+    setTimeout(() => {
+      transformX.value = withSpring(-15, { damping: 2, stiffness: 200, mass: 0.5 });
+      setTimeout(() => {
+        transformX.value = withSpring(0, { damping: 2, stiffness: 200, mass: 0.5 }, (finished) => {
+          if (finished) isAnimating.value = false;
+        });
+      }, 50);
+    }, 50);
+  };
+
   const handleSubmit = async () => {
+    const parseAmount = (amount: string) => {
+      if (amount.endsWith(".")) return +amount.slice(0, -1);
+
+      if (amount.includes(".")) {
+        const [int, dec] = amount.split(".");
+        if (dec.length > 2) {
+          return +int + +`0.${dec.slice(0, 2)}`;
+        }
+      }
+
+      return +amount;
+    };
+
     if (params?.isEditing) {
       await editExpense({
         variables: {
-          amount: +amount,
+          amount: parseAmount(amount),
           description: name,
           type: type,
           category: category,
@@ -49,7 +92,7 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
     }
     await createExpense({
       variables: {
-        amount: +amount,
+        amount: parseAmount(amount),
         description: name,
         type: type,
         category: category,
@@ -59,17 +102,24 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
     });
   };
 
-  const handleAmountChange = (value: string) => {
+  const handleAmountChange = useCallback((value: string) => {
     return setAmount((prev) => {
       if (value === "C") {
         const val = prev.toString().slice(0, -1);
 
         return val.length === 0 ? "0" : val;
       }
+
+      if (typeof +value === "number" && prev.includes(".") && prev.split(".")[1].length === 2) {
+        shake();
+        return prev;
+      }
+
       if (prev.length === 1 && prev === "0" && value !== ".") {
         return value;
       }
       if (prev.includes(".") && value === ".") {
+        shake();
         return prev;
       }
       if (prev.length === 0 && value === ".") {
@@ -77,25 +127,29 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
       }
       return prev + value;
     });
-  };
+  }, []);
 
-  const isValid = category !== "none" && name !== "" && amount !== "";
+  const isValid = (type === "income" ? true : category !== "none") && name !== "" && amount !== "";
+
+  const animatedAmount = useAnimatedStyle(() => ({
+    transform: [{ translateX: transformX.value }],
+  }));
 
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-      <>
+      <View style={{ flex: 1 }}>
         <View style={styles.container}>
-          <View style={{ width: "100%", justifyContent: "center", alignItems: "center" }}>
-            <View style={{ width: 80, height: 5, backgroundColor: Colors.secondary, borderRadius: 100 }} />
-          </View>
-
           <View style={{ flexDirection: "row", gap: 15, justifyContent: "space-between" }}>
-            <Ripple
-              onPress={() => setDate(null)}
-              style={{ padding: 7.5, paddingHorizontal: 22.5, backgroundColor: Colors.primary_lighter, borderRadius: 100 }}
-            >
-              <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 14 }}>{date ?? moment().format("YYYY-MM-DD")}</Text>
-            </Ripple>
+            <View style={{ flexDirection: "row", gap: 15, justifyContent: "space-between" }}>
+              <IconButton onPress={() => navigation.goBack()} icon={<AntDesign name="close" size={24} color="#fff" />} />
+
+              <Ripple
+                onPress={() => setDate(null)}
+                style={{ padding: 7.5, paddingHorizontal: 22.5, backgroundColor: Colors.primary_lighter, borderRadius: 100 }}
+              >
+                <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 14 }}>{date ?? moment().format("YYYY-MM-DD")}</Text>
+              </Ripple>
+            </View>
 
             <Ripple
               onPress={() => setType((p) => (p === "expense" ? "income" : "expense"))}
@@ -126,10 +180,10 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
               paddingHorizontal: 15,
             }}
           >
-            <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 80 }}>
+            <Animated.Text style={[{ color: "#fff", fontWeight: "bold", fontSize: 80 }, animatedAmount]}>
               {amount}
               <Text style={{ fontSize: 20 }}>zł</Text>
-            </Text>
+            </Animated.Text>
           </View>
 
           <View style={{ marginTop: 20, flex: 1, gap: 15, maxHeight: Layout.screen.height / 2 - 5 }}>
@@ -146,7 +200,7 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
               {!changeView && (
                 <Animated.View
                   entering={FadeIn}
-                  exiting={FadeOutUp}
+                  // exiting={FadeOutUp}
                   style={{
                     flexDirection: "row",
                     justifyContent: "space-between",
@@ -196,7 +250,7 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
                 <Animated.FlatList
                   layout={LinearTransition}
                   entering={FadeInDown}
-                  exiting={FadeOutDown}
+                  // exiting={FadeOutDown}
                   style={{ width: "100%", height: Layout.screen.height / 2.25 }}
                   data={Object.entries(Icons)}
                   keyExtractor={(item) => item[0]}
@@ -225,44 +279,7 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
                   )}
                 />
               )}
-              {!changeView && (
-                <Animated.View
-                  layout={LinearTransition}
-                  entering={FadeInDown}
-                  exiting={FadeOutDown}
-                  style={{ flex: 1, gap: 15, borderRadius: 35, marginTop: 15 }}
-                >
-                  {[
-                    [1, 2, 3],
-                    [4, 5, 6],
-                    [7, 8, 9],
-                    [".", 0, "C"],
-                  ].map((row, index, array) => (
-                    <View style={{ flexDirection: "row", gap: 15 }} key={row.toString()}>
-                      {row.map((num) => (
-                        <Ripple
-                          rippleCentered
-                          rippleColor={Colors.secondary}
-                          onPress={() => handleAmountChange(num.toString())}
-                          key={num}
-                          style={{
-                            width: "30%",
-                            height: 75,
-                            justifyContent: "center",
-                            alignItems: "center",
-                          }}
-                        >
-                          {num === "C" ? (
-                            <Entypo name="chevron-left" size={40} color="#fff" />
-                          ) : (
-                            <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 24 }}>{num}</Text>
-                          )}
-                        </Ripple>
-                      ))}
-                    </View>
-                  ))}
-                </Animated.View>
-              )}
+              {!changeView && <NumbersPad handleAmountChange={handleAmountChange} />}
             </View>
           </View>
         </View>
@@ -274,10 +291,50 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
           }}
           onCancel={() => setDate(moment().format("YYYY-MM-DD"))}
         />
-      </>
+      </View>
     </TouchableWithoutFeedback>
   );
 }
+
+const NumbersPad = memo(({ handleAmountChange }: { handleAmountChange: (val: string) => void }) => {
+  return (
+    <Animated.View
+      entering={FadeInDown}
+      // exiting={FadeOutDown}
+      style={{ flex: 1, gap: 15, borderRadius: 35, marginTop: 15 }}
+    >
+      {[
+        [1, 2, 3],
+        [4, 5, 6],
+        [7, 8, 9],
+        [".", 0, "C"],
+      ].map((row, index, array) => (
+        <View style={{ flexDirection: "row", gap: 15 }} key={row.toString()}>
+          {row.map((num) => (
+            <Ripple
+              rippleCentered
+              rippleColor={Colors.secondary}
+              onPress={() => handleAmountChange(num.toString())}
+              key={num}
+              style={{
+                width: "30%",
+                height: 75,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              {num === "C" ? (
+                <Entypo name="chevron-left" size={40} color="#fff" />
+              ) : (
+                <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 24 }}>{num}</Text>
+              )}
+            </Ripple>
+          ))}
+        </View>
+      ))}
+    </Animated.View>
+  );
+});
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 15, gap: 15 },

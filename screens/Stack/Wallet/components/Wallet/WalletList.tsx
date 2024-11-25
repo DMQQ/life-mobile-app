@@ -27,6 +27,8 @@ export default function WalletList(props: {
 }) {
   const route = useRoute<any>();
 
+  const navigation = useNavigation<any>();
+
   const [selected, setSelected] = useState<WalletElement | undefined>(
     props?.wallet?.expenses?.find((expense) => expense.id === route?.params?.expenseId) as WalletElement | undefined
   );
@@ -40,14 +42,18 @@ export default function WalletList(props: {
 
       if (!expense) return;
 
-      setSelected(expense as WalletElement);
+      // setSelected(expense as WalletElement);
 
-      const timeout = setTimeout(() => {
-        sheet.current?.snapToIndex(0);
-      }, 150);
+      navigation.navigate("Expense", {
+        expense: expense,
+      });
+
+      // const timeout = setTimeout(() => {
+      //   sheet.current?.snapToIndex(0);
+      // }, 150);
 
       return () => {
-        clearTimeout(timeout);
+        // clearTimeout(timeout);
       };
     }
   }, [route?.params, props?.wallet?.expenses?.length]);
@@ -78,7 +84,16 @@ export default function WalletList(props: {
 
   const renderItem = useCallback(
     ({ item }: { item: { month: string; expenses: Expense[] } }) => (
-      <MonthExpenseList showTotal={!props.filtersActive} item={item} setSelected={setSelected} sheet={sheet} />
+      <MonthExpenseList
+        showTotal={!props.filtersActive}
+        item={item}
+        setSelected={(expense) => {
+          navigation.navigate("Expense", {
+            expense: expense,
+          });
+        }}
+        sheet={sheet}
+      />
     ),
     [props.filtersActive]
   );
@@ -103,7 +118,7 @@ export default function WalletList(props: {
         // ListFooterComponent={<Button onPress={props.onEndReached}>Load more</Button>}
       />
 
-      <WalletSheet selected={selected} ref={sheet} />
+      {/* <WalletSheet selected={selected} ref={sheet} /> */}
     </>
   );
 }
