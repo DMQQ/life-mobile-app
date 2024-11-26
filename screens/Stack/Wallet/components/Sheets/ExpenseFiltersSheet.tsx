@@ -134,21 +134,14 @@ const Forms = (props: ExpenseFiltersProps) => {
             }
           />
         </View>
-        <HelperText
-          text="Leaving the amount fields empty will ignore them, setting only one will
-        filter by that amount only."
-        />
 
         <ChooseDateRange dispatch={props.dispatch} filters={props.filters} />
 
-        <HelperText
-          text=" Leaving the amount fields empty will ignore them, setting only one will
-        filter by that amount only."
-        />
+        <Input.Label text="Description" error={false} labelStyle={{ marginTop: 15 }} />
 
         <SegmentedButtons
           containerStyle={{
-            marginTop: 15,
+            marginTop: 5,
             borderRadius: 12.5,
             width: Layout.screen.width - 30,
           }}
@@ -168,7 +161,8 @@ const Forms = (props: ExpenseFiltersProps) => {
             props.dispatch({ type: "SET_TYPE", payload: value });
           }}
         />
-        <HelperText marginTop={0} text="Select the type of transactions you want to see" />
+
+        <Input.Label text="Category" error={false} />
 
         <CategorySelect
           maxSelectHeight={250}
@@ -181,16 +175,13 @@ const Forms = (props: ExpenseFiltersProps) => {
           }}
           isActive={(category) => props.filters.category.includes(category)}
         />
-
-        <HelperText
-          text="Select the categories you want to see, leaving it empty will show all,
-        you can select multiple categories"
-        />
       </View>
 
-      <Button onPress={() => navigation.goBack()} fontStyle={{ fontSize: 16 }} style={{ marginTop: 20 }}>
-        Close Filters
-      </Button>
+      <View style={{ padding: 15 }}>
+        <Button onPress={() => navigation.goBack()} fontStyle={{ fontSize: 16 }} style={{ marginTop: 20 }}>
+          Close Filters
+        </Button>
+      </View>
     </ScrollView>
   );
 };
@@ -199,9 +190,9 @@ const ChooseDateRange = (props: { filters: Filters; dispatch: (action: Action) =
   const [datePicker, setDatePicker] = useState<"from" | "to" | "">("");
 
   return (
-    <View style={{ marginTop: 15, marginBottom: 10 }}>
-      <Text style={{ color: "#fff", fontSize: 16, fontWeight: "bold" }}>Date range</Text>
-      <View style={{ flexDirection: "row", gap: 10, marginTop: 10 }}>
+    <View style={{ marginTop: 15 }}>
+      <Input.Label text="Date range" error={false} />
+      <View style={{ flexDirection: "row", gap: 10, marginTop: 5 }}>
         <Button
           onPress={() => setDatePicker("from")}
           style={{ flex: 1, borderWidth: 2, borderColor: Color(Colors.primary).lighten(0.5).hex(), borderRadius: 10 }}

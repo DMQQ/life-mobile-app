@@ -61,7 +61,7 @@ export default function WalletScreens() {
             presentation: "modal",
           }}
           initialParams={{
-            type: "expense",
+            type: null,
             amount: 0,
             category: "",
             date: "",
