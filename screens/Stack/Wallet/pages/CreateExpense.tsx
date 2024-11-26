@@ -16,12 +16,16 @@ import Animated, {
   withSpring,
   useAnimatedStyle,
   cancelAnimation,
+  withTiming,
 } from "react-native-reanimated";
 import useCreateActivity from "../hooks/useCreateActivity";
 import DateTimePicker from "react-native-modal-datetime-picker";
 import { useEditExpense } from "./CreateActivity";
 import IconButton from "@/components/ui/IconButton/IconButton";
 import { parse } from "@babel/core";
+import { useNavigation } from "@react-navigation/native";
+
+const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
 
 export default function CreateExpenseModal({ navigation, route: { params } }: any) {
   const { createExpense } = useCreateActivity({
@@ -37,7 +41,7 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
   const [changeView, setChangeView] = useState(false);
   const [category, setCategory] = useState<keyof typeof Icons>(params.category || "none");
   const [name, setName] = useState(params?.description || "");
-  const [type, setType] = useState<"expense" | "income">(params?.type || "expense");
+  const [type, setType] = useState<"expense" | "income" | null>(params?.type || null);
 
   const transformX = useSharedValue(0);
 
@@ -90,6 +94,7 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
 
       return;
     }
+
     await createExpense({
       variables: {
         amount: parseAmount(amount),
@@ -97,7 +102,7 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
         type: type,
         category: category,
         date: date ?? moment().format("YYYY-MM-DD"),
-        schedule: false,
+        schedule: moment(date).isAfter(moment()),
       },
     });
   };
@@ -129,11 +134,21 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
     });
   }, []);
 
-  const isValid = (type === "income" ? true : category !== "none") && name !== "" && amount !== "";
+  const isValid = (type === "income" ? true : category !== "none") && name !== "" && amount !== "" && type !== null;
 
-  const animatedAmount = useAnimatedStyle(() => ({
-    transform: [{ translateX: transformX.value }],
-  }));
+  const scale = (n: number) => {
+    "worklet";
+    return Math.max(90 - n * 3.5, 35);
+  };
+
+  const animatedAmount = useAnimatedStyle(
+    () => ({
+      transform: [{ translateX: transformX.value }],
+
+      fontSize: withTiming(scale(amount.length), { duration: 100 }),
+    }),
+    [amount]
+  );
 
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
@@ -161,13 +176,31 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
                 flexDirection: "row",
                 gap: 5,
                 paddingLeft: 30,
+                alignItems: "center",
               }}
             >
               <View style={{ position: "absolute", left: 10, top: 2.5 }}>
-                <Entypo name="chevron-up" color="#fff" size={15} />
-                <Entypo name="chevron-down" color="#fff" size={15} style={{ transform: [{ translateY: -8 }] }} />
+                {type == null ? (
+                  <>
+                    <Entypo name="chevron-up" color="#fff" size={15} style={{ transform: [{ translateY: 3 }] }} />
+                    <Entypo name="chevron-down" color="#fff" size={15} style={{ transform: [{ translateY: -5 }] }} />
+                  </>
+                ) : type === "expense" ? (
+                  <AntDesign name="arrowdown" size={15} color={Colors.error} style={{ transform: [{ translateY: 7 }] }} />
+                ) : (
+                  <AntDesign name="arrowup" size={15} color={Colors.secondary} style={{ transform: [{ translateY: 7 }] }} />
+                )}
               </View>
-              <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 14 }}>{type === "expense" ? "Expense" : "Income"}</Text>
+
+              <Text
+                style={{
+                  color: type == null ? "#fff" : type === "expense" ? Colors.error : Colors.secondary,
+                  fontWeight: "bold",
+                  fontSize: 14,
+                }}
+              >
+                {type == null ? "Select type" : type === "expense" ? "Expense" : "Income"}
+              </Text>
             </Ripple>
           </View>
           <View
@@ -180,10 +213,18 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
               paddingHorizontal: 15,
             }}
           >
-            <Animated.Text style={[{ color: "#fff", fontWeight: "bold", fontSize: 80 }, animatedAmount]}>
+            <Animated.Text style={[{ color: "#fff", fontWeight: "bold" }, animatedAmount]}>
               {amount}
               <Text style={{ fontSize: 20 }}>zł</Text>
             </Animated.Text>
+
+            {moment(date).isAfter(moment()) && type && amount != "0" && (
+              <View style={{ position: "absolute", justifyContent: "center", alignItems: "center", bottom: -15 }}>
+                <Text style={{ color: "#fff", fontWeight: "600", fontSize: 13, textAlign: "center" }}>
+                  {capitalize(type || "")} of {amount}zł will be scheduled for {"\n"} {moment(date).format("DD MMMM YYYY")}
+                </Text>
+              </View>
+            )}
           </View>
 
           <View style={{ marginTop: 20, flex: 1, gap: 15, maxHeight: Layout.screen.height / 2 - 5 }}>
@@ -279,7 +320,7 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
                   )}
                 />
               )}
-              {!changeView && <NumbersPad handleAmountChange={handleAmountChange} />}
+              {!changeView && <NumbersPad rotateBackButton={amount === "0"} handleAmountChange={handleAmountChange} />}
             </View>
           </View>
         </View>
@@ -296,45 +337,88 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
   );
 }
 
-const NumbersPad = memo(({ handleAmountChange }: { handleAmountChange: (val: string) => void }) => {
-  return (
-    <Animated.View
-      entering={FadeInDown}
-      // exiting={FadeOutDown}
-      style={{ flex: 1, gap: 15, borderRadius: 35, marginTop: 15 }}
-    >
-      {[
-        [1, 2, 3],
-        [4, 5, 6],
-        [7, 8, 9],
-        [".", 0, "C"],
-      ].map((row, index, array) => (
-        <View style={{ flexDirection: "row", gap: 15 }} key={row.toString()}>
-          {row.map((num) => (
-            <Ripple
-              rippleCentered
-              rippleColor={Colors.secondary}
-              onPress={() => handleAmountChange(num.toString())}
-              key={num}
-              style={{
-                width: "30%",
-                height: 75,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              {num === "C" ? (
-                <Entypo name="chevron-left" size={40} color="#fff" />
-              ) : (
-                <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 24 }}>{num}</Text>
-              )}
-            </Ripple>
-          ))}
-        </View>
-      ))}
-    </Animated.View>
+const NumbersPad = memo(
+  ({ handleAmountChange, rotateBackButton }: { handleAmountChange: (val: string) => void; rotateBackButton: boolean }) => {
+    const navigation = useNavigation();
+
+    return (
+      <Animated.View
+        entering={FadeInDown}
+        // exiting={FadeOutDown}
+        style={{ flex: 1, gap: 15, borderRadius: 35, marginTop: 15 }}
+      >
+        {[
+          [1, 2, 3],
+          [4, 5, 6],
+          [7, 8, 9],
+          [".", 0, "C"],
+        ].map((row, index, array) => (
+          <View style={{ flexDirection: "row", gap: 15 }} key={row.toString()}>
+            {row.map((num) => (
+              <NumpadNumber
+                navigation={navigation}
+                rotateBackButton={rotateBackButton}
+                num={num}
+                key={num.toString()}
+                onPress={() => handleAmountChange(num.toString())}
+              />
+            ))}
+          </View>
+        ))}
+      </Animated.View>
+    );
+  }
+);
+
+const AnimatedRipple = Animated.createAnimatedComponent(Ripple);
+
+const NumpadNumber = (props: { onPress: VoidFunction; num: string | number; rotateBackButton: boolean; navigation: any }) => {
+  const scale = useSharedValue(1);
+
+  const onPress = () => {
+    props.num === "C" && props.rotateBackButton ? props.navigation.goBack() : props.onPress();
+
+    scale.value = withSequence(withSpring(1.5, { duration: 200 }), withSpring(1, { duration: 200 }));
+  };
+
+  const animatedScale = useAnimatedStyle(
+    () => ({
+      transform: [
+        { scale: scale.value },
+        {
+          rotate: withTiming(props.num === "C" && props.rotateBackButton ? "-90deg" : "0deg", { duration: 150 }),
+        },
+      ],
+    }),
+    [props.rotateBackButton]
   );
-});
+
+  return (
+    <View style={{ width: "30%", height: 75, overflow: "hidden", borderRadius: 100 }}>
+      <AnimatedRipple
+        rippleCentered
+        rippleColor={Colors.secondary}
+        rippleSize={50}
+        onPress={onPress}
+        style={[
+          {
+            justifyContent: "center",
+            alignItems: "center",
+            width: "100%",
+            height: "100%",
+          },
+          animatedScale,
+        ]}
+      >
+        {props.num === "C" ? (
+          <Entypo name="chevron-left" size={40} color="#fff" />
+        ) : (
+          <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 24 }}>{props.num}</Text>
+        )}
+      </AnimatedRipple>
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 15, gap: 15 },
