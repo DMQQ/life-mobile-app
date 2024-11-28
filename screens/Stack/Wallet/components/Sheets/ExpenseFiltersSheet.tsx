@@ -19,7 +19,7 @@ import Colors from "@/constants/Colors";
 import { useNavigation } from "@react-navigation/native";
 import useGetWallet from "../../hooks/useGetWallet";
 import Header from "@/components/ui/Header/Header";
-import { AntDesign } from "@expo/vector-icons";
+import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons";
 
 interface ExpenseFiltersProps {
   filters: Filters;
@@ -69,7 +69,19 @@ const Forms = (props: ExpenseFiltersProps) => {
 
   return (
     <ScrollView style={{ flex: 1, height: Layout.screen.height, paddingTop: 15 }}>
-      <Header goBack backIcon={<AntDesign name="close" size={24} color="white" />} buttons={[]} />
+      <Header
+        goBack
+        backIcon={<AntDesign name="close" size={24} color="white" />}
+        buttons={[
+          {
+            icon: <MaterialCommunityIcons size={24} name="trash-can-outline" color={"#fff"} />,
+            onPress: () => {
+              props.dispatch({ type: "RESET" });
+              navigation.goBack();
+            },
+          },
+        ]}
+      />
       <View style={{ flex: 1, paddingHorizontal: 15, marginTop: 15 }}>
         <Input
           value={props?.filters?.query}

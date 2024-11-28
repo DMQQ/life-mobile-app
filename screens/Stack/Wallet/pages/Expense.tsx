@@ -7,6 +7,8 @@ import { AntDesign, MaterialIcons } from "@expo/vector-icons";
 import { parseDate } from "@/utils/functions/parseDate";
 import Layout from "@/constants/Layout";
 import Header from "@/components/ui/Header/Header";
+import Ripple from "react-native-material-ripple";
+import Animated, { LinearTransition } from "react-native-reanimated";
 
 const capitalize = (s = "") => s.charAt(0).toUpperCase() + s.slice(1);
 
@@ -75,9 +77,80 @@ export default function Expense({ route: { params }, navigation }: any) {
 
           <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>Balance before: {selected?.balanceBeforeInteraction} zł</Text>
         </View>
+
+        <View
+          style={[{ marginTop: 30, flexDirection: "column", backgroundColor: styles.row.backgroundColor, padding: styles.row.padding }]}
+        >
+          <View style={[styles.row, { marginTop: 0, padding: 0, width: "100%" }]}>
+            <MaterialIcons
+              name="check-box-outline-blank"
+              size={24}
+              color={Colors.ternary}
+              style={{ paddingHorizontal: 7.5, padding: 2.5 }}
+            />
+            <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>Subscription</Text>
+          </View>
+          {false && (
+            <Animated.View layout={LinearTransition}>
+              <View style={[styles.row, { marginTop: 15 }]}>
+                <Text style={{ color: "gray", fontSize: 15 }}>Next payment: 2024-12-11</Text>
+                <Text style={{ color: "gray", fontSize: 15 }}>99zł</Text>
+              </View>
+              <View style={[styles.row]}>
+                <Text style={{ color: "gray", fontSize: 15 }}>Subscribed at 2024-06-11</Text>
+                <Text style={{ color: "gray", fontSize: 15 }}>6 payments made</Text>
+              </View>
+            </Animated.View>
+          )}
+
+          {/* <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+            <Ripple>
+              <View
+                style={{
+                  padding: 10,
+                  paddingHorizontal: 15,
+                  borderRadius: 5,
+                  marginTop: 15,
+                  width: "100%",
+                  alignItems: "center",
+                }}
+              >
+                <Text style={{ color: "#fff", fontSize: 15 }}>Unsubscribe</Text>
+              </View>
+            </Ripple>
+            <Ripple>
+              <View
+                style={{
+                  padding: 10,
+                  paddingHorizontal: 15,
+                  borderRadius: 5,
+                  marginTop: 15,
+                  width: "100%",
+                  alignItems: "center",
+                }}
+              >
+                <Text style={{ color: "#fff", fontSize: 15 }}>Notify before next payment</Text>
+              </View>
+            </Ripple>
+          </View> */}
+        </View>
+
+        <View
+          style={[{ marginTop: 15, flexDirection: "column", backgroundColor: styles.row.backgroundColor, padding: styles.row.padding }]}
+        >
+          <View style={[styles.row, { marginTop: 0, padding: 0, width: "100%" }]}>
+            <MaterialIcons
+              name="check-box-outline-blank"
+              size={24}
+              color={Colors.ternary}
+              style={{ paddingHorizontal: 7.5, padding: 2.5 }}
+            />
+            <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>Refund expense</Text>
+          </View>
+        </View>
       </View>
 
-      <View style={{ padding: 15 }}>
+      <View style={{ padding: 15, paddingTop: 5 }}>
         <SheetActionButtons
           onCompleted={() => {
             navigation.goBack();

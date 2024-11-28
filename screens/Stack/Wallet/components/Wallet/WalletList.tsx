@@ -29,9 +29,6 @@ export default function WalletList(props: {
 
   const navigation = useNavigation<any>();
 
-  const [selected, setSelected] = useState<WalletElement | undefined>(
-    props?.wallet?.expenses?.find((expense) => expense.id === route?.params?.expenseId) as WalletElement | undefined
-  );
   const sheet = useRef<BottomSheet>(null);
 
   useEffect(() => {
@@ -42,21 +39,13 @@ export default function WalletList(props: {
 
       if (!expense) return;
 
-      // setSelected(expense as WalletElement);
+      navigation.setParams({ expenseId: null });
 
       navigation.navigate("Expense", {
         expense: expense,
       });
-
-      // const timeout = setTimeout(() => {
-      //   sheet.current?.snapToIndex(0);
-      // }, 150);
-
-      return () => {
-        // clearTimeout(timeout);
-      };
     }
-  }, [route?.params, props?.wallet?.expenses?.length]);
+  }, [props?.wallet?.expenses.length]);
 
   const data = useMemo(() => {
     const sorted = [] as {

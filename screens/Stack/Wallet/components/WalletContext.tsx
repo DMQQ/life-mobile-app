@@ -13,7 +13,8 @@ export type Action =
   | { type: "SET_CATEGORY"; payload: string[] }
   | { type: "SET_TYPE"; payload: string | undefined }
   | { type: "TOGGLE_CATEGORY"; payload: string }
-  | { type: "SET_SKIP"; payload?: number };
+  | { type: "SET_SKIP"; payload?: number }
+  | { type: "RESET" };
 
 const reducer = (state: typeof init, action: Action) => {
   if (action.type === "SET_QUERY") {
@@ -89,6 +90,10 @@ const reducer = (state: typeof init, action: Action) => {
       ...state,
       skip: state.take + (action.payload || state.skip),
     };
+  }
+
+  if (action.type === "RESET") {
+    return init;
   }
 
   return state;
