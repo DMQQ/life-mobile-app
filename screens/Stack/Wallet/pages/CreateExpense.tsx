@@ -1,7 +1,7 @@
 import moment from "moment";
 import { Keyboard, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View } from "react-native";
 import Colors from "../../../../constants/Colors";
-import { memo, useCallback, useState } from "react";
+import { memo, useCallback, useRef, useState } from "react";
 import Ripple from "react-native-material-ripple";
 import Layout from "@/constants/Layout";
 import { Icons } from "../components/Wallet/WalletItem";
@@ -255,6 +255,8 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
                       padding: 15,
                       backgroundColor: lowOpacity(Icons[category].backgroundColor, 0.25),
                       borderRadius: 100,
+                      width: 50,
+                      height: 50,
                     }}
                   >
                     {Icons[category].icon}
@@ -296,27 +298,48 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
                   data={Object.entries(Icons)}
                   keyExtractor={(item) => item[0]}
                   renderItem={({ item }) => (
-                    <Ripple
-                      onPress={() => {
-                        setCategory(item[0] as keyof typeof Icons);
-                        setChangeView(false);
-                      }}
+                    <View
                       style={{
-                        paddingVertical: 15,
-                        paddingHorizontal: 5.5,
                         flexDirection: "row",
-                        gap: 15,
+                        justifyContent: "space-between",
                         borderBottomWidth: 0.5,
                         borderBottomColor: "rgba(255,255,255,0.15)",
-                        alignItems: "center",
+                        ...((item[0] === category && { backgroundColor: Colors.primary_light }) || {}),
+                        paddingRight: 15,
                       }}
                     >
-                      <View style={{ padding: 10, borderRadius: 100, backgroundColor: lowOpacity(item[1].backgroundColor, 0.25) }}>
-                        {item[1].icon}
-                      </View>
+                      <Ripple
+                        onPress={() => {
+                          setCategory(item[0] as keyof typeof Icons);
+                          setChangeView(false);
+                        }}
+                        style={{
+                          paddingVertical: 15,
+                          paddingHorizontal: 5.5,
+                          flexDirection: "row",
+                          gap: 15,
 
-                      <Text style={{ color: "#fff", fontSize: 18, textTransform: "capitalize", fontWeight: "600" }}>{item[0]}</Text>
-                    </Ripple>
+                          alignItems: "center",
+                          flex: 1,
+                        }}
+                      >
+                        <View style={{ padding: 10, borderRadius: 100, backgroundColor: lowOpacity(item[1].backgroundColor, 0.25) }}>
+                          {item[1].icon}
+                        </View>
+
+                        <Text style={{ color: "#fff", fontSize: 18, textTransform: "capitalize", fontWeight: "600" }}>{item[0]}</Text>
+                      </Ripple>
+
+                      {item[0] === category && (
+                        <IconButton
+                          onPress={() => {
+                            setCategory("none");
+                            setChangeView(false);
+                          }}
+                          icon={<AntDesign name="close" color={"#fff"} size={24} />}
+                        />
+                      )}
+                    </View>
                   )}
                 />
               )}
@@ -393,6 +416,8 @@ const NumpadNumber = (props: { onPress: VoidFunction; num: string | number; rota
     [props.rotateBackButton]
   );
 
+  const interval = useRef<NodeJS.Timeout | null>(null);
+
   return (
     <View style={{ width: "30%", height: 75, overflow: "hidden", borderRadius: 100 }}>
       <AnimatedRipple
@@ -400,6 +425,14 @@ const NumpadNumber = (props: { onPress: VoidFunction; num: string | number; rota
         rippleColor={Colors.secondary}
         rippleSize={50}
         onPress={onPress}
+        onLongPress={() => {
+          interval.current = setInterval(() => {
+            onPress();
+          }, 50);
+        }}
+        onPressOut={() => {
+          clearInterval(interval.current!);
+        }}
         style={[
           {
             justifyContent: "center",
