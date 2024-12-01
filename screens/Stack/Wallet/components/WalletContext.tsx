@@ -105,7 +105,7 @@ export const init = {
   query: "",
   amount: {
     min: 0,
-    max: 99999,
+    max: 999999999,
   },
   date: {
     from: "",
