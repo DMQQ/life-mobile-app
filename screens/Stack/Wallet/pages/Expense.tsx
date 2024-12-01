@@ -1,14 +1,14 @@
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import Colors from "@/constants/Colors";
 import { CategoryIcon, WalletElement } from "../components/Wallet/WalletItem";
 import SheetActionButtons from "../components/Wallet/WalletSheetControls";
 import { AntDesign, MaterialIcons } from "@expo/vector-icons";
 import { parseDate } from "@/utils/functions/parseDate";
-import Layout from "@/constants/Layout";
 import Header from "@/components/ui/Header/Header";
 import Ripple from "react-native-material-ripple";
-import Animated, { LinearTransition } from "react-native-reanimated";
+import useRefund from "../hooks/useRefundExpense";
+import moment from "moment";
 
 const capitalize = (s = "") => s.charAt(0).toUpperCase() + s.slice(1);
 
@@ -26,9 +26,20 @@ const Txt = (props: { children: ReactNode; size: number; color?: any }) => (
 );
 
 export default function Expense({ route: { params }, navigation }: any) {
-  const { expense: selected } = params as { expense: WalletElement };
+  const { expense } = params as { expense: WalletElement };
+
+  const [selected, setSelected] = useState(expense);
 
   const amount = selected?.type === "expense" ? (selected.amount * -1).toFixed(2) : selected?.amount.toFixed(2);
+
+  const [refund, { loading }] = useRefund((data) => {
+    if (data.refundExpense.type !== "refunded") return;
+
+    setSelected({
+      ...selected,
+      type: "refunded",
+    });
+  });
 
   return (
     <View style={{ flex: 1, paddingTop: 15 }}>
@@ -45,8 +56,8 @@ export default function Expense({ route: { params }, navigation }: any) {
           </Txt>
         </View>
 
-        {selected?.type !== "income" && (
-          <View style={styles.row}>
+        {selected?.category && (
+          <View style={[styles.row, { padding: 0, paddingRight: 10, paddingLeft: 0 }]}>
             <CategoryIcon type={selected?.type as "expense" | "income"} category={selected?.category || "none"} clear />
 
             <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>{capitalize(selected?.category)}</Text>
@@ -77,11 +88,11 @@ export default function Expense({ route: { params }, navigation }: any) {
 
           <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>Balance before: {selected?.balanceBeforeInteraction} zł</Text>
         </View>
-
+        {/* 
         <View
           style={[{ marginTop: 30, flexDirection: "column", backgroundColor: styles.row.backgroundColor, padding: styles.row.padding }]}
         >
-          <View style={[styles.row, { marginTop: 0, padding: 0, width: "100%" }]}>
+           <View style={[styles.row, { marginTop: 0, padding: 0, width: "100%" }]}>
             <MaterialIcons
               name="check-box-outline-blank"
               size={24}
@@ -101,9 +112,9 @@ export default function Expense({ route: { params }, navigation }: any) {
                 <Text style={{ color: "gray", fontSize: 15 }}>6 payments made</Text>
               </View>
             </Animated.View>
-          )}
+          )} 
 
-          {/* <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+           <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
             <Ripple>
               <View
                 style={{
@@ -132,21 +143,35 @@ export default function Expense({ route: { params }, navigation }: any) {
                 <Text style={{ color: "#fff", fontSize: 15 }}>Notify before next payment</Text>
               </View>
             </Ripple>
-          </View> */}
-        </View>
+          </View> 
+        </View> */}
 
         <View
-          style={[{ marginTop: 15, flexDirection: "column", backgroundColor: styles.row.backgroundColor, padding: styles.row.padding }]}
+          style={[
+            {
+              marginTop: 15,
+              flexDirection: "column",
+              backgroundColor: styles.row.backgroundColor,
+              padding: styles.row.padding,
+              opacity: selected?.type === "refunded" ? 0.5 : 1,
+            },
+          ]}
         >
-          <View style={[styles.row, { marginTop: 0, padding: 0, width: "100%" }]}>
+          <Ripple
+            disabled={loading || selected?.type === "refunded"}
+            onPress={() => refund({ variables: { expenseId: selected.id } })}
+            style={[styles.row, { marginTop: 0, padding: 0, width: "100%" }]}
+          >
             <MaterialIcons
-              name="check-box-outline-blank"
+              name={selected?.type === "refunded" ? "check-box" : "check-box-outline-blank"}
               size={24}
               color={Colors.ternary}
               style={{ paddingHorizontal: 7.5, padding: 2.5 }}
             />
-            <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>Refund expense</Text>
-          </View>
+            <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }} numberOfLines={1}>
+              {selected?.type === "refunded" ? selected?.note ?? `Refunded at ${moment().format("YYYY MM DD HH:SS")}` : "Refund"}
+            </Text>
+          </Ripple>
         </View>
       </View>
 

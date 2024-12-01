@@ -187,19 +187,28 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
                   </>
                 ) : type === "expense" ? (
                   <AntDesign name="arrowdown" size={15} color={Colors.error} style={{ transform: [{ translateY: 7 }] }} />
-                ) : (
+                ) : type === "income" ? (
                   <AntDesign name="arrowup" size={15} color={Colors.secondary} style={{ transform: [{ translateY: 7 }] }} />
+                ) : (
+                  <Entypo name="back-in-time" size={15} color="#fff" style={{ transform: [{ translateY: 7 }] }} />
                 )}
               </View>
 
               <Text
                 style={{
-                  color: type == null ? "#fff" : type === "expense" ? Colors.error : Colors.secondary,
+                  color:
+                    type == null
+                      ? "#fff"
+                      : type === "expense"
+                      ? Colors.error
+                      : type === "income"
+                      ? Colors.secondary
+                      : Colors.secondary_light_2,
                   fontWeight: "bold",
                   fontSize: 14,
                 }}
               >
-                {type == null ? "Select type" : type === "expense" ? "Expense" : "Income"}
+                {type == null ? "Select type" : type === "expense" ? "Expense" : type === "income" ? "Income" : "Refunded"}
               </Text>
             </Ripple>
           </View>
