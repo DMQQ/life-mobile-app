@@ -17,6 +17,8 @@ export const GET_WALLET = gql`
         type
         category
         balanceBeforeInteraction
+        refunded
+        note
       }
     }
   }

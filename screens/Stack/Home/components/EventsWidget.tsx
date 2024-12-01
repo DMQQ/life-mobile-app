@@ -75,7 +75,7 @@ export default function TodaysTimelineEvents(props: { data: any[]; loading: bool
 
   const date = moment();
 
-  const isEmpty = props.data.length === 0 && !props.loading;
+  const isEmpty = props?.data?.length === 0 && !props.loading;
 
   if (isEmpty)
     return (

@@ -42,8 +42,6 @@ export default function useGetStatistics(range: [any, any]) {
   );
 
   useEffect(() => {
-    console.log("useGetStatistics", range);
-
     query.refetch({ range });
   }, range);
 

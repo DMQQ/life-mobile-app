@@ -17,6 +17,8 @@ export interface WalletElement {
   balanceBeforeInteraction: number;
 
   category: keyof typeof Icons;
+
+  note?: string;
 }
 
 interface WalletItemProps extends WalletElement {}
@@ -154,7 +156,7 @@ export const Icons = {
   },
 
   edit: {
-    backgroundColor: Colors.primary,
+    backgroundColor: "gray",
     icon: <Ionicons name="create" color="#fff" size={20} />,
   },
 
@@ -172,10 +174,27 @@ export const Icons = {
     backgroundColor: Colors.primary,
     icon: <Ionicons name="add" color={Colors.secondary} size={20} />,
   },
+
+  refunded: {
+    backgroundColor: Colors.secondary_light_1,
+    icon: <Entypo name="back-in-time" color={Colors.secondary_light_2} size={20} />,
+  },
 } as const;
 
-export const CategoryIcon = (props: { category: keyof typeof Icons; type: "income" | "expense"; clear?: boolean }) => {
-  const category = props.type === "income" && props.category !== "edit" ? "income" : props.category || "none";
+export const CategoryIcon = (props: { category: keyof typeof Icons; type: "income" | "expense" | "refunded"; clear?: boolean }) => {
+  // const category =
+  //   props.type === "income" && props.category !== "edit" ? "income" : props.category || props.type === "refunded" ? "refunded" : "none";
+
+  let category = props.category || "none";
+
+  if (props.category === "edit") {
+    category = "edit";
+  } else if (props.type === "income") {
+    category = "income";
+  } else if (props.type === "refunded") {
+    category = "refunded";
+  }
+
   return (
     <View style={[styles.icon_container, { position: "relative" }]}>
       <View
@@ -214,7 +233,7 @@ export default function WalletItem(
       ]}
     >
       <Ripple disabled={isBalanceEdit} style={[styles.expense_item, item.containerStyle]} onPress={() => item.handlePress()}>
-        <CategoryIcon type={item.type as "income" | "expense"} category={isBalanceEdit ? "edit" : item.category} />
+        <CategoryIcon type={item.type as "income" | "expense" | "refunded"} category={isBalanceEdit ? "edit" : item.category} />
 
         <View style={{ height: "100%", justifyContent: "center", flex: 3 }}>
           <Text style={styles.title} numberOfLines={1}>
@@ -235,7 +254,8 @@ export default function WalletItem(
                   marginRight: 10,
                   width: "100%",
                   textAlign: "right",
-                  color: item.type === "expense" ? "#F07070" : "#66E875",
+                  color: item.type === "refunded" ? Colors.secondary_light_2 : item.type === "expense" ? "#F07070" : "#66E875",
+                  ...(item.type === "refunded" ? { textDecorationLine: "line-through" } : {}),
                 },
               ]}
             >
