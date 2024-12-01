@@ -170,14 +170,14 @@ export const Icons = {
     icon: <FontAwesome5 name="dog" size={20} color="#ff5733" />,
   },
 
-  none: {
-    backgroundColor: Colors.primary,
-    icon: <Ionicons name="add" color={Colors.secondary} size={20} />,
-  },
-
   refunded: {
     backgroundColor: Colors.secondary_light_1,
     icon: <Entypo name="back-in-time" color={Colors.secondary_light_2} size={20} />,
+  },
+
+  none: {
+    backgroundColor: Colors.primary,
+    icon: <Ionicons name="add" color={Colors.secondary} size={20} />,
   },
 } as const;
 
