@@ -17,7 +17,6 @@ export const GET_WALLET = gql`
         type
         category
         balanceBeforeInteraction
-        refunded
         note
       }
     }
@@ -50,6 +49,9 @@ export default function useGetWallet(options?: { fetchAll: boolean }) {
         ...(filters.type && { type: filters.type }),
       },
       take: options?.fetchAll ? 99999 : PAGINATION_TAKE,
+    },
+    onError: (err) => {
+      console.log(JSON.stringify(err, null, 2));
     },
   });
 
