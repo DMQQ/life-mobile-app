@@ -22,7 +22,6 @@ import useCreateActivity from "../hooks/useCreateActivity";
 import DateTimePicker from "react-native-modal-datetime-picker";
 import { useEditExpense } from "./CreateActivity";
 import IconButton from "@/components/ui/IconButton/IconButton";
-import { parse } from "@babel/core";
 import { useNavigation } from "@react-navigation/native";
 
 const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
@@ -266,6 +265,8 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
                       borderRadius: 100,
                       width: 50,
                       height: 50,
+                      justifyContent: "center",
+                      alignItems: "center",
                     }}
                   >
                     {Icons[category].icon}
@@ -302,7 +303,7 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
                 <Animated.FlatList
                   layout={LinearTransition}
                   entering={FadeInDown}
-                  // exiting={FadeOutDown}
+                  // dont use exiting animation, breaks the modal closing and many other ui issues
                   style={{ width: "100%", height: Layout.screen.height / 2.25 }}
                   data={Object.entries(Icons)}
                   keyExtractor={(item) => item[0]}
@@ -327,12 +328,21 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
                           paddingHorizontal: 5.5,
                           flexDirection: "row",
                           gap: 15,
-
                           alignItems: "center",
                           flex: 1,
                         }}
                       >
-                        <View style={{ padding: 10, borderRadius: 100, backgroundColor: lowOpacity(item[1].backgroundColor, 0.25) }}>
+                        <View
+                          style={{
+                            padding: 10,
+                            borderRadius: 100,
+                            backgroundColor: lowOpacity(item[1].backgroundColor, 0.25),
+                            width: 40,
+                            height: 40,
+                            justifyContent: "center",
+                            alignItems: "center",
+                          }}
+                        >
                           {item[1].icon}
                         </View>
 

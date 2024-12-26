@@ -1,5 +1,4 @@
 import { gql, useMutation } from "@apollo/client";
-import { WalletElement } from "../components/Wallet/WalletItem";
 
 export const REFUND_EXPENSE = gql`
   mutation refundExpense($expenseId: ID!) {

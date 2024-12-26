@@ -8,16 +8,10 @@ import Colors from "../../../../constants/Colors";
 import * as yup from "yup";
 import SegmentedButtons from "../../../../components/ui/SegmentedButtons";
 import Color from "color";
-import Select from "@/components/ui/Select/Select";
 import Layout from "@/constants/Layout";
-import { CategoryIcon, Icons } from "../components/Wallet/WalletItem";
 import useUser from "@/utils/hooks/useUser";
 import { gql, useMutation } from "@apollo/client";
-import moment from "moment";
-import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 import ThemedCalendar from "@/components/ui/ThemedCalendar/ThemedCalendar";
-import lowOpacity from "@/utils/functions/lowOpacity";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
 import CategorySelect from "../components/Wallet/CategorySelect";
 
 const schema = yup.object().shape({
@@ -38,9 +32,7 @@ const SegmentVariants = [
 ];
 
 export const useEditExpense = () => {
-  const user = useUser();
-
-  const [editExpense, { error }] = useMutation(
+  const [editExpense] = useMutation(
     gql`
       mutation EditExpense($amount: Float!, $description: String!, $type: String!, $category: String!, $expenseId: ID!, $date: String!) {
         editExpense(amount: $amount, description: $description, type: $type, category: $category, expenseId: $expenseId, date: $date) {
