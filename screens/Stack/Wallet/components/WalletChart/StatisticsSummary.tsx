@@ -49,8 +49,6 @@ export default function StatisticsSummary(props: StatisticsSummaryProps) {
   const oppositeRange = useMemo(() => {
     const size = moment(props.dates.to).diff(moment(props.dates.from), "days");
 
-    console.log(size);
-
     if (size === 1)
       return [
         moment(props.dates.from).subtract(1, "day").format("YYYY-MM-DD"),

@@ -1,12 +1,11 @@
 import ScreenContainer from "@/components/ui/ScreenContainer";
-import Layout from "@/constants/Layout";
 import { Text, View, StyleSheet, FlatList } from "react-native";
 import Colors from "@/constants/Colors";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import lowOpacity from "@/utils/functions/lowOpacity";
 import Color from "color";
 import Button from "@/components/ui/Button/Button";
-import { AntDesign, Entypo } from "@expo/vector-icons";
+import { Entypo } from "@expo/vector-icons";
 
 const styles = StyleSheet.create({
   list: {
@@ -73,18 +72,9 @@ const TEST_DATA = [
   },
 ] as WatchlistItemProps[];
 
-const ItemRow = (props: {
-  color: string;
-  list: string[];
-  sign: string;
-  title: string;
-}) => (
-  <View
-    style={[styles.row, { backgroundColor: lowOpacity(props.color, 0.05) }]}
-  >
-    <Text style={[styles.advdisTitle, { color: props.color }]}>
-      {props.title}
-    </Text>
+const ItemRow = (props: { color: string; list: string[]; sign: string; title: string }) => (
+  <View style={[styles.row, { backgroundColor: lowOpacity(props.color, 0.05) }]}>
+    <Text style={[styles.advdisTitle, { color: props.color }]}>{props.title}</Text>
 
     <View style={{ marginTop: 10 }}>
       {props.list.map((advantage, index) => (
@@ -96,10 +86,7 @@ const ItemRow = (props: {
   </View>
 );
 
-const ItemInfoItem = (props: {
-  title: string;
-  value: string | number | { title: string; value: string | number };
-}) => (
+const ItemInfoItem = (props: { title: string; value: string | number | { title: string; value: string | number } }) => (
   <View
     style={{
       flexDirection: "row",
@@ -118,9 +105,7 @@ const ItemInfoItem = (props: {
       {props.title}:
     </Text>
 
-    <Text style={{ fontWeight: "600", color: "#fff" }}>
-      {typeof props.value === "object" ? props.value.value : props.value}
-    </Text>
+    <Text style={{ fontWeight: "600", color: "#fff" }}>{typeof props.value === "object" ? props.value.value : props.value}</Text>
   </View>
 );
 
@@ -149,21 +134,9 @@ const WatchlistItem = (props: WatchlistItemProps) => {
       </View>
 
       <View style={{ marginTop: 10, gap: 10, flexDirection: "row" }}>
-        {props.advantages.length > 0 && (
-          <ItemRow
-            title="Advantages"
-            sign="+"
-            color="lightgreen"
-            list={props.advantages}
-          />
-        )}
+        {props.advantages.length > 0 && <ItemRow title="Advantages" sign="+" color="lightgreen" list={props.advantages} />}
         {props.disadvantages.length > 0 && (
-          <ItemRow
-            title="Disadvantages"
-            sign="-"
-            color={Color(Colors.error).lighten(0.05).hex()}
-            list={props.disadvantages}
-          />
+          <ItemRow title="Disadvantages" sign="-" color={Color(Colors.error).lighten(0.05).hex()} list={props.disadvantages} />
         )}
       </View>
 

@@ -1,10 +1,9 @@
 import BottomSheet from "@gorhom/bottom-sheet";
 import { Expense, Wallet } from "@/types";
 import WalletItem, { WalletElement, parseDateToText } from "./WalletItem";
-import { useState, useRef, useEffect, useMemo, useCallback, useTransition } from "react";
+import { useRef, useEffect, useMemo, useCallback } from "react";
 import { Text, NativeScrollEvent, View, StyleSheet, VirtualizedList } from "react-native";
-import { WalletSheet } from "../Sheets/WalletSheet";
-import Animated, { LinearTransition, SharedValue } from "react-native-reanimated";
+import Animated, { SharedValue } from "react-native-reanimated";
 import { NativeSyntheticEvent } from "react-native";
 import moment from "moment";
 import Colors, { Sizing } from "@/constants/Colors";
@@ -12,7 +11,7 @@ import Ripple from "react-native-material-ripple";
 import { useWalletContext } from "../WalletContext";
 import Color from "color";
 import { gql, useQuery } from "@apollo/client";
-import { useFocusEffect, useNavigation, useRoute } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 
 const AnimatedList = Animated.createAnimatedComponent(VirtualizedList);
 
@@ -88,27 +87,22 @@ export default function WalletList(props: {
   );
 
   return (
-    <>
-      <AnimatedList
-        onEndReached={!props.isLocked ? props.onEndReached : () => {}}
-        onEndReachedThreshold={0.5}
-        scrollEventThrottle={16}
-        removeClippedSubviews
-        onScroll={props.onScroll}
-        style={{ flex: 1 }}
-        contentContainerStyle={{
-          padding: 15,
-        }}
-        data={data || []}
-        keyExtractor={(expense: any, idx) => expense.month + "_" + idx}
-        renderItem={renderItem as any}
-        getItem={(data, index) => data[index]}
-        getItemCount={(data) => data.length}
-        // ListFooterComponent={<Button onPress={props.onEndReached}>Load more</Button>}
-      />
-
-      {/* <WalletSheet selected={selected} ref={sheet} /> */}
-    </>
+    <AnimatedList
+      onEndReached={!props.isLocked ? props.onEndReached : () => {}}
+      onEndReachedThreshold={0.5}
+      scrollEventThrottle={16}
+      removeClippedSubviews
+      onScroll={props.onScroll}
+      style={{ flex: 1 }}
+      contentContainerStyle={{
+        padding: 15,
+      }}
+      data={data || []}
+      keyExtractor={(expense: any, idx) => expense.month + "_" + idx}
+      renderItem={renderItem as any}
+      getItem={(data, index) => data[index]}
+      getItemCount={(data) => data.length}
+    />
   );
 }
 

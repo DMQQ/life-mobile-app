@@ -6,13 +6,13 @@ import Ripple from "react-native-material-ripple";
 import Animated, { Extrapolation, interpolate, useAnimatedScrollHandler, useAnimatedStyle, useSharedValue } from "react-native-reanimated";
 import { WalletScreens } from "../Main";
 import EditBalanceSheet from "../components/Sheets/EditBalanceSheet";
-import ExpenseFiltersSheet from "../components/Sheets/ExpenseFiltersSheet";
 import CreateExpenseSheet from "../components/Wallet/CreateExpense/CreateExpenseSheet";
 import ScreenLoader from "../components/Wallet/ScreenLoader";
 import WalletList from "../components/Wallet/WalletList";
-import WalletContextProvider, { useWalletContext } from "../components/WalletContext";
+import { useWalletContext } from "../components/WalletContext";
 import useGetWallet from "../hooks/useGetWallet";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import InitializeWallet from "../components/InitializeWallet";
 
 const styles = StyleSheet.create({
   container: {
@@ -49,11 +49,11 @@ const styles = StyleSheet.create({
   },
 });
 
-export default function WalletScreen({ navigation, route }: WalletScreens<"Wallet">) {
-  const { data, loading, refetch, onEndReached, endReached, filtersActive } = useGetWallet();
+export default function WalletScreen({ navigation }: WalletScreens<"Wallet">) {
+  const { data, loading, refetch, onEndReached, endReached, filtersActive, error } = useGetWallet();
 
   const {
-    refs: { bottomSheetRef, filtersRef, editBalanceRef },
+    refs: { bottomSheetRef, editBalanceRef },
   } = useWalletContext();
   const wallet = data?.wallet;
 
@@ -88,6 +88,21 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
   const handleShowEditSheet = () => {
     editBalanceRef.current?.expand();
   };
+
+  if (
+    (Array.isArray(error?.cause?.extensions)
+      ? //@ts-ignore
+
+        error?.cause?.extensions?.[0]?.response?.statusCode
+      : //@ts-ignore
+
+        error?.cause?.extensions?.response?.statusCode) === 404
+  )
+    return (
+      <SafeAreaView style={{ flex: 1 }}>
+        <InitializeWallet />
+      </SafeAreaView>
+    );
 
   return (
     <SafeAreaView style={{ flex: 1, position: "relative" }}>
@@ -130,8 +145,6 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
         wallet={data?.wallet}
         onEndReached={onEndReached}
       />
-
-      {/* <ExpenseFiltersSheet ref={filtersRef} filters={filters} dispatch={dispatch} /> */}
 
       <CreateExpenseSheet onCompleted={() => {}} ref={bottomSheetRef} />
 

@@ -1,5 +1,4 @@
 import { gql, useMutation } from "@apollo/client";
-import useUser from "../../../../utils/hooks/useUser";
 
 const DELETE_ACTIVITY = gql`
   mutation DeleteActivity($id: ID!) {
@@ -8,16 +7,9 @@ const DELETE_ACTIVITY = gql`
 `;
 
 export default function useDeleteActivity() {
-  const usr = useUser();
-
-  const [deleteActivity, { data, loading, error }] = useMutation(
-    DELETE_ACTIVITY,
-    {
-      refetchQueries: ["GetWallet"],
-
-      onCompleted(data) {},
-    }
-  );
+  const [deleteActivity, { data, loading, error }] = useMutation(DELETE_ACTIVITY, {
+    refetchQueries: ["GetWallet"],
+  });
 
   return { deleteActivity, data, loading, error };
 }
