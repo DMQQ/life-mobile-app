@@ -5,9 +5,21 @@ import ScreenContainer from "../../../components/ui/ScreenContainer";
 import useUser from "@/utils/hooks/useUser";
 import Colors from "../../../constants/Colors";
 import Header from "@/components/ui/Header/Header";
+import { useApolloClient } from "@apollo/client";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Settings() {
   const { removeUser, user } = useUser();
+  const client = useApolloClient();
+
+  const handleSignout = async () => {
+    await removeUser();
+
+    await client.clearStore();
+
+    const keys = await AsyncStorage.getAllKeys();
+    await AsyncStorage.multiRemove(keys);
+  };
 
   return (
     <ScreenContainer style={{ padding: 0 }}>
@@ -34,11 +46,7 @@ export default function Settings() {
           </Text>
         </View>
 
-        <Button
-          fontStyle={{ fontSize: 16 }}
-          onPress={() => removeUser()}
-          style={{ backgroundColor: Colors.error }}
-        >
+        <Button fontStyle={{ fontSize: 16 }} onPress={handleSignout} style={{ backgroundColor: Colors.error }}>
           Signout 👋
         </Button>
       </View>

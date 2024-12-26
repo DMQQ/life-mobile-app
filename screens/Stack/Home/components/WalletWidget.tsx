@@ -1,12 +1,8 @@
-import React from "react";
-import { StyleSheet, Text, View, FlatList, ScrollView, Dimensions } from "react-native";
+import { StyleSheet, Text, View, ScrollView, Dimensions } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import Color from "color";
 import { useNavigation } from "@react-navigation/native";
 import WalletItem from "../../Wallet/components/Wallet/WalletItem";
-import Button from "@/components/ui/Button/Button";
-import lowOpacity from "@/utils/functions/lowOpacity";
-
 import Colors from "@/constants/Colors";
 import Ripple from "react-native-material-ripple";
 
@@ -66,8 +62,8 @@ const AvailableBalanceWidget = ({ data, loading }: Props) => {
       <View style={styles.header}>
         <View>
           <Text style={styles.balance}>
-            {data?.wallet?.balance?.toFixed(2)}
-            <Text style={styles.currency}> zł</Text>
+            {data?.wallet?.balance?.toFixed(2) || "Balance unavailable"}
+            {data?.wallet?.balance && <Text style={styles.currency}> zł</Text>}
           </Text>
         </View>
         <Ripple style={styles.actionButton} onPress={() => navigation.navigate("WalletScreens")}>
@@ -77,32 +73,36 @@ const AvailableBalanceWidget = ({ data, loading }: Props) => {
       </View>
 
       {/* Weekly Statistics */}
-      <View style={styles.statsSection}>
-        <Text style={styles.sectionTitle}>Weekly Overview</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.statsContainer}>
-          <StatItem label="Weekly Spent" value={data.statistics?.weeklySpendings?.expense} icon="calendar-week" color="#8685EF" />
-          <StatItem label="Income" value={data.statistics?.weeklySpendings?.income} icon="cash-plus" color="#00C896" />
-          <StatItem label="Average" value={data.statistics?.weeklySpendings?.average} icon="chart-line" color="#34A3FA" />
-        </ScrollView>
-      </View>
+      {data.statistics && (
+        <View style={styles.statsSection}>
+          <Text style={styles.sectionTitle}>Weekly Overview</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.statsContainer}>
+            <StatItem label="Weekly Spent" value={data.statistics?.weeklySpendings?.expense} icon="calendar-week" color="#8685EF" />
+            <StatItem label="Income" value={data.statistics?.weeklySpendings?.income} icon="cash-plus" color="#00C896" />
+            <StatItem label="Average" value={data.statistics?.weeklySpendings?.average} icon="chart-line" color="#34A3FA" />
+          </ScrollView>
+        </View>
+      )}
 
       {/* Recent Transactions */}
-      <View style={styles.transactionsSection}>
-        <Text style={styles.sectionTitle}>Recent Transactions</Text>
+      {data.wallet?.expenses?.length > 0 && (
+        <View style={styles.transactionsSection}>
+          <Text style={styles.sectionTitle}>Recent Transactions</Text>
 
-        {data?.wallet?.expenses.slice(0, 3).map((expense) => (
-          <WalletItem
-            handlePress={() =>
-              navigation.navigate("WalletScreens", {
-                screen: "Wallet",
-                params: { expenseId: expense.id },
-              })
-            }
-            {...(expense as any)}
-            key={expense.id}
-          />
-        ))}
-      </View>
+          {data?.wallet?.expenses.slice(0, 3).map((expense) => (
+            <WalletItem
+              handlePress={() =>
+                navigation.navigate("WalletScreens", {
+                  screen: "Wallet",
+                  params: { expenseId: expense.id },
+                })
+              }
+              {...(expense as any)}
+              key={expense.id}
+            />
+          ))}
+        </View>
+      )}
     </View>
   );
 };
