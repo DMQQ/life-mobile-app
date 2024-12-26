@@ -14,10 +14,7 @@ interface LoginFormProps {
   onSubmit(values: { email: string; password: string }): void;
 }
 
-export default function LoginForm({
-  validationSchema,
-  onSubmit,
-}: LoginFormProps) {
+export default function LoginForm({ validationSchema, onSubmit }: LoginFormProps) {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   return (
@@ -40,6 +37,7 @@ export default function LoginForm({
             name="email"
             formik={f}
             testID="email-input"
+            autoCapitalize="none"
           />
           <ValidatedInput
             showLabel
@@ -48,19 +46,15 @@ export default function LoginForm({
             right={(props) => (
               <IconButton
                 onPress={() => setIsPasswordVisible(!isPasswordVisible)}
-                icon={
-                  <Input.Icon
-                    {...props}
-                    name={isPasswordVisible ? "eyeo" : "eye"}
-                  />
-                }
+                icon={<Input.Icon {...props} name={isPasswordVisible ? "eyeo" : "eye"} />}
               />
             )}
             placeholder="********"
             name="password"
-            secureTextEntry={!isPasswordVisible}
+            // secureTextEntry={!isPasswordVisible}
             formik={f}
             testID="password-input"
+            autoCapitalize="none"
           />
 
           <Button
@@ -75,10 +69,7 @@ export default function LoginForm({
             LOGIN
           </Button>
 
-          <ChangeButton
-            displayText="Or sign up instead"
-            navigateTo="Register"
-          />
+          <ChangeButton displayText="Or sign up instead" navigateTo="Register" />
         </View>
       )}
     </Formik>
