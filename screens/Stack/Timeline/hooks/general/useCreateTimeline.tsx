@@ -43,6 +43,7 @@ export default function useCreateTimeline({ route, navigation }: TimelineScreenP
         };
 
   const formikSubmitForm = async (input: typeof initialFormValues) => {
+    console.log("form submit", isEditing);
     if (isEditing) {
       await editTimeline(input, route.params.selectedDate);
     } else {

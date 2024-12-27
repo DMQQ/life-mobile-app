@@ -2,6 +2,7 @@ import moment from "moment";
 import { useEffect, useState } from "react";
 import { CommonEvents } from "../CommonEvents.data";
 import { InitialValuesType } from "../../../hooks/mutation/useCreateTimeline";
+import { useNavigation } from "@react-navigation/native";
 
 type EventType = (typeof CommonEvents)[0];
 
@@ -10,7 +11,7 @@ export default function useSuggestedEvents(props: {
   initialValues: InitialValuesType;
 }) {
   const [selected, setSelected] = useState<Partial<EventType>>({});
-
+  const navigation = useNavigation<any>();
   const [subCategory, setSubCategory] = useState<string>("");
 
   const [time, setTime] = useState<Date>();
@@ -29,14 +30,11 @@ export default function useSuggestedEvents(props: {
     setTime(date);
   };
 
-  const endTime = moment(time)
-    .add(1, "hour")
-    .toDate()
-    .toLocaleTimeString("pl-PL", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-    });
+  const endTime = moment(time).add(1, "hour").toDate().toLocaleTimeString("pl-PL", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
 
   const handleSubmit = async () => {
     if (time === undefined) return;
