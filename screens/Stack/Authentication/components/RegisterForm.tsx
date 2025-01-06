@@ -13,10 +13,7 @@ interface RegisterFormProps {
   onSubmit(values: { email: string; password: string }): void;
 }
 
-export default function RegisterForm({
-  onSubmit,
-  validationSchema,
-}: RegisterFormProps) {
+export default function RegisterForm({ onSubmit, validationSchema }: RegisterFormProps) {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   const navigation = useNavigation<any>();
@@ -40,6 +37,7 @@ export default function RegisterForm({
             placeholder="eg john.doe@gmail.com"
             name="email"
             formik={f}
+            autoCapitalize="none"
           />
           <ValidatedInput
             showLabel
@@ -56,7 +54,9 @@ export default function RegisterForm({
             placeholder="*******"
             name="password"
             formik={f}
-            secureTextEntry={!isPasswordVisible}
+            autoCapitalize="none"
+
+            // secureTextEntry={!isPasswordVisible}
           />
           <ValidatedInput
             showLabel
@@ -73,7 +73,9 @@ export default function RegisterForm({
             placeholder="*******"
             name="confirm_password"
             formik={f}
-            secureTextEntry={!isPasswordVisible}
+            autoCapitalize="none"
+
+            // secureTextEntry={!isPasswordVisible}
           />
 
           <Button
