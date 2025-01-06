@@ -15,8 +15,6 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function TimelineScreens({ route, navigation }: RootStackScreenProps<"TimelineScreens">) {
   useEffect(() => {
-    console.log(route.params);
-
     if (!!route.params?.timelineId) {
       (navigation as any).navigate("TimelineDetails", {
         ...route.params,

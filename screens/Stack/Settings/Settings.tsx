@@ -17,7 +17,8 @@ export default function Settings() {
 
     await client.clearStore();
 
-    const keys = await AsyncStorage.getAllKeys();
+    let keys = await AsyncStorage.getAllKeys();
+    keys = keys.filter((key) => !key.startsWith("FlashCard_"));
     await AsyncStorage.multiRemove(keys);
   };
 
