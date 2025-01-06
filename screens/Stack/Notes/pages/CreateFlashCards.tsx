@@ -1,4 +1,4 @@
-import { KeyboardAvoidingView, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, KeyboardAvoidingView, ScrollView, Text, View } from "react-native";
 import * as DocumentPicker from "expo-document-picker";
 import Button from "@/components/ui/Button/Button";
 import Input from "@/components/ui/TextInput/TextInput";
@@ -12,6 +12,8 @@ import { useFormik } from "formik";
 export default function CreateFlashCards({ navigation, route }: any) {
   const groupId = route.params?.groupId;
 
+  const [loading, setLoading] = useState(false);
+
   const handleFilePicker = async () => {
     const file = await DocumentPicker.getDocumentAsync({
       multiple: false,
@@ -20,6 +22,8 @@ export default function CreateFlashCards({ navigation, route }: any) {
 
     if (file.canceled === false) {
       const assets = file.assets[0];
+
+      setLoading(true);
 
       const fileContent = await fetch(assets.uri).then((res) => res.json());
 
@@ -45,6 +49,8 @@ export default function CreateFlashCards({ navigation, route }: any) {
       await Promise.all(flashCards);
 
       navigation.navigate("FlashCards", { groupId });
+
+      setLoading(false);
     }
   };
 
@@ -68,12 +74,16 @@ export default function CreateFlashCards({ navigation, route }: any) {
       return;
     }
 
+    setLoading(true);
+
     try {
       const flashCards = parsedText.map((item: any) => createFlashCard(item));
 
       await Promise.all(flashCards);
 
-      navigation.navigate("FlashCards", { groupId });
+      setLoading(false);
+
+      navigation.navigate("FlashCard", { groupId });
     } catch (error) {
       console.log(error);
     }
@@ -112,7 +122,12 @@ export default function CreateFlashCards({ navigation, route }: any) {
           )}
         </View>
 
-        <Button disabled={!!!text} onPress={handleSubmit} style={{ marginTop: 15 }}>
+        <Button
+          icon={loading && <ActivityIndicator size="small" color={"#fff"} />}
+          disabled={!!!text}
+          onPress={handleSubmit}
+          style={{ marginTop: 15, flexDirection: "row", alignItems: "center", gap: 5, justifyContent: "center" }}
+        >
           Create Flashcards
         </Button>
 
