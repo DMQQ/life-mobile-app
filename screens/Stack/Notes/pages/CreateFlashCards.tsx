@@ -39,7 +39,7 @@ export default function CreateFlashCards({ navigation, route }: any) {
 
       const firstItem = fileContent[0];
 
-      if (!firstItem.question || !firstItem.answer || !firstItem.explanation) {
+      if (!firstItem.question || !firstItem.answer) {
         alert("Invalid JSON file");
         return;
       }
