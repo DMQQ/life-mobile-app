@@ -3,7 +3,7 @@ import { gql, useQuery, useMutation, ApolloError } from "@apollo/client";
 import { useState, useCallback } from "react";
 
 // Types
-interface Group {
+export interface Group {
   id: string;
   name: string;
   description?: string;
@@ -334,6 +334,12 @@ export const useGroups = (): UseGroupsReturn => {
     updateGroup,
     deleteGroup,
   };
+};
+
+export const useGroupStats = (groupId: string) => {
+  return useQuery<GroupStatsQueryResponse>(GET_GROUP_STATS, {
+    variables: { groupId },
+  });
 };
 
 // Flashcards Hook

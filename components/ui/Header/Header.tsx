@@ -2,11 +2,12 @@ import Animated, { AnimatedStyle } from "react-native-reanimated";
 import IconButton from "../IconButton/IconButton";
 import { AntDesign } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import { View } from "react-native";
+import { View, ViewStyle } from "react-native";
 import throttle from "@/utils/functions/throttle";
+import { StyleProp } from "react-native";
 
 export default function Header(props: {
-  buttons: {
+  buttons?: {
     onPress: () => void;
     icon: JSX.Element | React.ReactNode;
   }[];
@@ -15,17 +16,24 @@ export default function Header(props: {
   titleAnimatedStyle?: AnimatedStyle;
 
   backIcon?: JSX.Element;
+
+  children?: JSX.Element;
+
+  containerStyle?: StyleProp<ViewStyle>;
 }) {
   const navigation = useNavigation();
   return (
     <View
-      style={{
-        flexDirection: "row",
-        padding: 10,
-        paddingHorizontal: 15,
-        justifyContent: "space-between",
-        alignItems: "center",
-      }}
+      style={[
+        {
+          flexDirection: "row",
+          padding: 10,
+          paddingHorizontal: 15,
+          justifyContent: "space-between",
+          alignItems: "center",
+        },
+        props.containerStyle,
+      ]}
     >
       {props.goBack && (
         <IconButton
@@ -50,6 +58,8 @@ export default function Header(props: {
         </Animated.Text>
       )}
 
+      {props.children}
+
       <View
         style={{
           flex: 1,
@@ -58,7 +68,7 @@ export default function Header(props: {
           gap: 10,
         }}
       >
-        {props.buttons.map((button, index) => (
+        {(props.buttons || []).map((button, index) => (
           <IconButton key={index} onPress={throttle(button.onPress, 250)} icon={button.icon} />
         ))}
       </View>

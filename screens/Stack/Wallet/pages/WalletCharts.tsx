@@ -76,7 +76,7 @@ export default function WalletCharts() {
     if (!data?.wallet?.expenses) return [];
 
     const mapped = data.wallet.expenses.reduce((acc, curr) => {
-      if (!curr.category || curr.description.startsWith("Balance") || curr.type === "income") return acc;
+      if (!curr.category || curr.description.startsWith("Balance") || curr.type === "income" || curr.type === "refunded") return acc;
       const key = curr.category;
 
       if (!acc[key]) acc[key] = 0;

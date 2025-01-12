@@ -22,6 +22,8 @@ interface ItemProps {
   width?: number;
 }
 
+const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
 export const Item = ({ label, value, icon, formatValue = true, width }: ItemProps) => (
   <View
     style={{
@@ -138,12 +140,12 @@ export default function StatisticsSummary(props: StatisticsSummaryProps) {
         />
         <Item
           label="Top category"
-          value={props.data.theMostCommonCategory}
+          value={capitalize(props.data.theMostCommonCategory)}
           icon={<MaterialIcons name="category" size={24} color="white" />}
         />
         <Item
-          label="Meh category"
-          value={props.data.theLeastCommonCategory}
+          label="Uncommon category"
+          value={capitalize(props.data.theLeastCommonCategory)}
           icon={<MaterialIcons name="category" size={24} color="white" />}
         />
       </View>
