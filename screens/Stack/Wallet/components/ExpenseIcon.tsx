@@ -86,6 +86,44 @@ export const Icons = {
     icon: <Entypo name="back-in-time" color={Colors.secondary_light_2} size={20} />,
   },
 
+  gifts: {
+    backgroundColor: "#33FF57",
+    icon: <MaterialCommunityIcons name="gift" size={20} color="#33ff57" />,
+  },
+
+  subscriptions: {
+    icon: <MaterialCommunityIcons name="refresh" size={20} color="#8033ff" />,
+    backgroundColor: "#8033ff",
+  },
+  investments: {
+    icon: <MaterialCommunityIcons name="chart-line" size={20} color="#33ff89" />,
+    backgroundColor: "#33ff89",
+  },
+  maintenance: {
+    icon: <MaterialCommunityIcons name="tools" size={20} color="#ff8c33" />,
+    backgroundColor: "#ff8c33",
+  },
+  insurance: {
+    icon: <MaterialCommunityIcons name="shield-check" size={20} color="#3357ff" />,
+    backgroundColor: "#3357ff",
+  },
+  taxes: {
+    icon: <MaterialCommunityIcons name="file-document" size={20} color="#ff3333" />,
+    backgroundColor: "#ff3333",
+  },
+  children: {
+    icon: <MaterialCommunityIcons name="baby-face" size={20} color="#ff33d1" />,
+    backgroundColor: "#ff33d1",
+  },
+  donations: {
+    icon: <MaterialCommunityIcons name="hand-heart" size={20} color="#33ffd4" />,
+    backgroundColor: "#33ffd4",
+  },
+  beauty: {
+    icon: <MaterialCommunityIcons name="face-woman" size={20} color="#ff33a1" />,
+    backgroundColor: "#ff33a1",
+  },
+
   none: {
     backgroundColor: Colors.primary,
     icon: <Ionicons name="add" color={Colors.secondary} size={20} />,

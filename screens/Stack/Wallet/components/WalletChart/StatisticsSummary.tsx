@@ -3,8 +3,9 @@ import useGetStatistics, { WalletStatisticsResponse } from "../../hooks/useGetSt
 import Layout from "@/constants/Layout";
 import { FontAwesome5, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import Colors from "@/constants/Colors";
-import { ReactNode, useMemo } from "react";
+import { ReactNode, useEffect, useMemo, useState } from "react";
 import moment from "moment";
+import { Expense, Wallet } from "@/types";
 
 interface StatisticsSummaryProps {
   data: WalletStatisticsResponse["statistics"] | undefined;
@@ -22,7 +23,7 @@ interface ItemProps {
   width?: number;
 }
 
-const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+const capitalize = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : "");
 
 export const Item = ({ label, value, icon, formatValue = true, width }: ItemProps) => (
   <View
