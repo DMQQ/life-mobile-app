@@ -7,7 +7,7 @@ import { Alert, StyleSheet, Text, View, VirtualizedList } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Charts from "../components/Wallet/Charts";
 import WalletItem, { WalletElement } from "../components/Wallet/WalletItem";
-import useGetWallet from "../hooks/useGetWallet";
+import useGetWallet, { useGetBalance } from "../hooks/useGetWallet";
 import { WalletSheet } from "../components/Sheets/WalletSheet";
 import BottomSheet from "@gorhom/bottom-sheet";
 import PieChart from "../components/WalletChart/PieChart";
@@ -16,6 +16,10 @@ import DateRangePicker from "../components/WalletChart/DateRangePicker";
 import Legend from "../components/WalletChart/Legend";
 import useGetStatistics from "../hooks/useGetStatistics";
 import StatisticsSummary from "../components/WalletChart/StatisticsSummary";
+import SpendingsByDay from "../components/WalletChart/SpendingsByDayOfWeek";
+import { Expense } from "@/types";
+import FutureProjection from "../components/WalletChart/FutureProjection";
+import DailySpendingChart from "../components/WalletChart/DailySpendingChart";
 
 const styles = StyleSheet.create({
   tilesContainer: {
@@ -76,7 +80,14 @@ export default function WalletCharts() {
     if (!data?.wallet?.expenses) return [];
 
     const mapped = data.wallet.expenses.reduce((acc, curr) => {
-      if (!curr.category || curr.description.startsWith("Balance") || curr.type === "income" || curr.type === "refunded") return acc;
+      if (
+        !curr.category ||
+        curr.description.startsWith("Balance") ||
+        curr.type === "income" ||
+        curr.type === "refunded" ||
+        curr.category === "refunded"
+      )
+        return acc;
       const key = curr.category;
 
       if (!acc[key]) acc[key] = 0;
@@ -103,7 +114,9 @@ export default function WalletCharts() {
     if (!data?.wallet?.expenses) return 0;
 
     return data.wallet.expenses.reduce((acc, curr) => {
-      return curr.type === "income" ? acc : acc + curr.amount;
+      if (curr.type === "income" || curr.type === "refunded") return acc;
+
+      return acc + curr.amount;
     }, 0);
   }, [data?.wallet?.expenses]);
 
@@ -119,12 +132,14 @@ export default function WalletCharts() {
       }, 100);
   };
 
-  const selectedCategoryData = data?.wallet?.expenses.filter((item) => item.category === selected) || [];
+  const selectedCategoryData = data?.wallet?.expenses.filter((item) => item.category === selected && item.type !== "refunded") || [];
 
   const onChartPress = (e: any) => {
     setSelected(e.label);
     e.label !== undefined && Alert.alert(`Category ${e.label} is`, e.value.toFixed(2));
   };
+
+  const currentBalance = useGetBalance();
 
   const ListHeaderComponent = useMemo(
     () => (
@@ -137,13 +152,12 @@ export default function WalletCharts() {
               <Charts data={barData} onPress={onChartPress} />
             )}
           </View>
-
           <DateRangePicker filters={filters} dispatch={wrapWithFunction(dispatch, () => setSelected(""))} />
-
           <Legend totalSum={sumOfExpenses} selected={selected} data={barData} onPress={onLegendItemPress} />
-
           <StatisticsSummary dates={filters.date} data={stats?.statistics} />
-
+          <SpendingsByDay data={data?.wallet?.expenses || ([] as Expense[])} />
+          <FutureProjection data={data?.wallet?.expenses || ([] as Expense[])} income={5500} currentBalance={currentBalance} />
+          <DailySpendingChart data={data?.wallet?.expenses || ([] as Expense[])} />
           {selectedCategoryData.length > 0 && (
             <View style={{ width: Layout.screen.width - 30, marginTop: 25 }}>
               <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 18 }}>

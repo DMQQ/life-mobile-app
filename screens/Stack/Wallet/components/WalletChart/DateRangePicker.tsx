@@ -26,6 +26,8 @@ const DateRangePicker = (props: { filters: Filters; dispatch: React.Dispatch<Act
     ["This month", [moment().startOf("month"), moment().endOf("month")]],
     ["Last month", [moment().subtract(1, "month").startOf("month"), moment().subtract(1, "month").endOf("month")]],
     ["This year", [moment().startOf("year"), moment().endOf("year")]],
+    ["Last year", [moment().subtract(1, "year").startOf("year"), moment().subtract(1, "year").endOf("year")]],
+    ["All time", [moment("2020-01-01"), moment()]],
   ] as [string, [Moment, Moment]][];
 
   useEffect(() => {

@@ -132,3 +132,9 @@ export default function useGetWallet(options?: { fetchAll: boolean }) {
 
   return { ...st, data: data, filters, dispatch, onEndReached, endReached, filtersActive };
 }
+
+export const useGetBalance = () => {
+  const { data } = useGetWallet({ fetchAll: true });
+
+  return data?.wallet?.balance || 0;
+};
