@@ -32,8 +32,8 @@ export default function DailySpendingChart({ data }: Props) {
       .map(([date, total]) => ({
         value: Math.round(total),
         label: moment(date).format("DD"),
-        labelTextStyle: { color: "#333" },
-        dataPointText: total > 0 ? `$${Math.round(total)}` : "",
+        labelTextStyle: { color: "#fff" },
+        dataPointText: total > 0 ? `${Math.round(total)}zł` : "",
       }));
   }, [data]);
 
@@ -42,13 +42,15 @@ export default function DailySpendingChart({ data }: Props) {
   const averageSpending = totalSpending / chartData.length;
 
   return (
-    <View style={{ padding: 16, gap: 5 }}>
-      <Text style={{ color: "#fff", fontSize: 20, fontWeight: "bold" }}>Daily spendings</Text>
-      <Text style={{ color: "gray", fontSize: 16, marginBottom: 15 }}>Sum of expenses for each day shown on a chart</Text>
+    <View style={{ padding: 20, gap: 5 }}>
+      <View style={{ width: "100%", marginBottom: 10 }}>
+        <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 18 }}>Daily spendings</Text>
+        <Text style={{ color: "gray", marginTop: 5 }}>Sum of expenses for each day shown on a chart</Text>
+      </View>
 
       <View style={{ height: 300 }}>
         <LineChart
-          width={Layout.screen.width - 30}
+          width={Layout.screen.width - 60}
           data={chartData}
           height={280}
           spacing={40}
@@ -59,12 +61,12 @@ export default function DailySpendingChart({ data }: Props) {
           dataPointsColor="#2563eb"
           xAxisColor="#666"
           yAxisColor="#666"
-          yAxisTextStyle={{ color: "#333" }}
-          xAxisLabelTextStyle={{ color: "#333" }}
+          yAxisTextStyle={{ color: "#fff" }}
+          xAxisLabelTextStyle={{ color: "#fff" }}
           hideRules
           yAxisTextNumberOfLines={1}
           yAxisLabelWidth={60}
-          showDataPointOnPress
+          yAxisLabelSuffix="zł"
           focusEnabled
           curved
         />

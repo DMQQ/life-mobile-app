@@ -9,6 +9,8 @@ import Animated, { FadeInDown } from "react-native-reanimated";
 import { useTheme } from "../../utils/context/ThemeContext";
 import { Padding } from "@/constants/Values";
 import lowOpacity from "@/utils/functions/lowOpacity";
+import { CommonActions } from "@react-navigation/native";
+import moment from "moment";
 
 const styles = StyleSheet.create({
   container: {
@@ -34,15 +36,15 @@ export default function BottomTab({ navigation, state, insets }: BottomTabBarPro
 
   const { theme } = useTheme();
 
-  const Btn = (props: { route: string; iconName: any; label: string }) => (
+  const Btn = (props: { route: string; iconName: any; label: string; onLongPress?: any }) => (
     <Ripple
+      onLongPress={props.onLongPress}
       rippleCentered
       rippleColor={theme.colors.secondary}
       style={[
         styles.button,
         {
           width: Layout.screen.width / state.routes.length,
-          backgroundColor: activeRoute === props.route ? lowOpacity(theme.colors.secondary, 0.075) : undefined,
         },
       ]}
       onPress={() => navigate(props.route)}
@@ -50,7 +52,7 @@ export default function BottomTab({ navigation, state, insets }: BottomTabBarPro
       <Ionicons
         size={22.5}
         name={props.iconName}
-        color={activeRoute === props.route ? Colors.secondary_light_1 : "#fff"}
+        color={activeRoute === props.route ? Colors.secondary : "rgba(255,255,255,0.8)"}
         style={{ marginBottom: 2.5, paddingVertical: 7.5 }}
       />
     </Ripple>
@@ -83,9 +85,33 @@ export default function BottomTab({ navigation, state, insets }: BottomTabBarPro
 
       <Btn route="Root" label="Home" iconName={"home"} />
 
-      <Btn route="WalletScreens" label="Wallet" iconName={"wallet"} />
+      <Btn
+        onLongPress={() => {
+          navigation.navigate({
+            name: "WalletScreens",
+            params: {
+              expenseId: null,
+            },
+          });
+        }}
+        route="WalletScreens"
+        label="Wallet"
+        iconName={"wallet"}
+      />
 
-      <Btn route="TimelineScreens" label="Timeline" iconName={"calendar"} />
+      <Btn
+        onLongPress={() => {
+          navigation.navigate({
+            name: "TimelineScreens",
+            params: {
+              selectedDate: moment(new Date()).format("YYYY-MM-DD"),
+            },
+          });
+        }}
+        route="TimelineScreens"
+        label="Timeline"
+        iconName={"calendar-number"}
+      />
     </Animated.View>
   );
 }

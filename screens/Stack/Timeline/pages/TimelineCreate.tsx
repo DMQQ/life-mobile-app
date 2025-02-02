@@ -20,6 +20,7 @@ import { useState } from "react";
 import moment from "moment";
 import Header from "@/components/ui/Header/Header";
 import TimelineCreateHeader from "../components/CreateTimeline/TimelineCreateHeader";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const styles = StyleSheet.create({
   timeContainer: {
@@ -60,7 +61,7 @@ export default function CreateTimeLineEventModal({ route, navigation }: Timeline
   const numberOfLines = f.values.desc.split("\n").length;
 
   return (
-    <>
+    <View style={{ flex: 1 }}>
       <TimelineCreateHeader
         navigation={navigation}
         handleChangeDate={handleChangeDate}
@@ -170,7 +171,7 @@ export default function CreateTimeLineEventModal({ route, navigation }: Timeline
         isKeyboardOpen={isKeyboardOpen || false}
         isLoading={isLoading}
       />
-    </>
+    </View>
   );
 }
 

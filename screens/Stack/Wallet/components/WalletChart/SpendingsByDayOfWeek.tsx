@@ -17,6 +17,16 @@ const button = {
 };
 
 const getSpendingsByDay = (input: Expense[], type: "total" | "avg" | "median") => {
+  // Move these helper functions outside the if block
+  const total = (arr: number[]) => arr.reduce((a, b) => a + b, 0) || 0; // Added || 0 for empty arrays
+  const avg = (arr: number[]) => (arr.length ? total(arr) / arr.length : 0);
+  const median = (arr: number[]) => {
+    if (!arr.length) return 0;
+    const sorted = [...arr].sort((a, b) => a - b);
+    const mid = Math.floor(sorted.length / 2);
+    return sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+  };
+
   const result: Record<string, { category: string; value: number[] }> = {
     Monday: { category: "", value: [] },
     Tuesday: { category: "", value: [] },
@@ -27,39 +37,28 @@ const getSpendingsByDay = (input: Expense[], type: "total" | "avg" | "median") =
     Sunday: { category: "", value: [] },
   };
 
-  if (!input) {
-    return result;
+  if (!input?.length) {
+    return Object.entries(result).map(([key, value], index) => ({
+      label: key[0] + key[1].toLowerCase(),
+      value: type === "total" ? total(value.value) : type === "avg" ? avg(value.value) : median(value.value),
+      frontColor: secondary_candidates[index % 3],
+      labelTextStyle: { color: "#fff" },
+    }));
   }
 
   input.forEach((item) => {
-    const dayOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][moment(item.date).day()];
-
+    const dayOfWeek = moment(item.date).format("dddd");
     if (result[dayOfWeek]) {
       result[dayOfWeek].value.push(item.amount);
-    } else {
-      result[dayOfWeek] = {
-        category: item.category,
-        value: [item.amount],
-      };
     }
   });
-
-  const total = (arr: number[]) => arr.reduce((a, b) => a + b, 0);
-
-  const avg = (arr: number[]) => total(arr) / arr.length;
-
-  const median = (arr: number[]) => {
-    arr.sort((a, b) => a - b);
-    const mid = Math.floor(arr.length / 2);
-    return arr.length % 2 !== 0 ? arr[mid] : (arr[mid - 1] + arr[mid]) / 2;
-  };
 
   return Object.entries(result).map(([key, value], index) => ({
     label: key[0] + key[1].toLowerCase(),
     value: type === "total" ? total(value.value) : type === "avg" ? avg(value.value) : median(value.value),
-    frontColor: secondary_candidates[index % 3],
+    frontColor: secondary_candidates[index],
     labelTextStyle: { color: "#fff" },
-  })) as barDataItem[];
+  }));
 };
 
 const blueText = Color(Colors.primary).lighten(10).string();
@@ -74,16 +73,12 @@ const SpendingsByDay = (props: { data: Expense[] }) => {
       <Text style={{ color: "#fff", fontSize: 20, fontWeight: "bold", marginBottom: 5 }}>{type.toUpperCase()} by day of week</Text>
       <Text style={{ color: "gray", fontSize: 16, marginBottom: 5 }}>This chart shows your spendings by day of week</Text>
 
-      <View style={{ flexDirection: "row", gap: 5, marginTop: 15 }}>
+      <View style={{ flexDirection: "row", gap: 5, marginTop: 15, marginBottom: 15 }}>
         {["total", "avg", "median"].map((item) => (
           <Button
             variant="text"
-            key={item.toString()}
-            onPress={() => setType(item as any)}
-            fontStyle={{
-              fontSize: 14,
-              color: type === item ? Colors.secondary : blueText,
-            }}
+            key={item}
+            onPress={() => setType(item as "total" | "avg" | "median")}
             style={[
               button,
               {
@@ -98,26 +93,36 @@ const SpendingsByDay = (props: { data: Expense[] }) => {
               },
             ]}
           >
-            {item}
+            <Text
+              style={{
+                fontSize: 14,
+                color: type === item ? Colors.secondary : blueText,
+              }}
+            >
+              {item}
+            </Text>
           </Button>
         ))}
       </View>
-      <BarChart
-        horizontal
-        width={Layout.screen.width - 60}
-        height={Layout.screen.height / 3.5}
-        sideColor={"#fff"}
-        barWidth={20}
-        noOfSections={3}
-        barBorderRadius={4}
-        frontColor={Colors.secondary}
-        yAxisTextStyle={{ color: "#fff" }}
-        rulesColor={Color(Colors.primary).lighten(1.5).string()}
-        data={days as any}
-        yAxisThickness={0}
-        xAxisThickness={0}
-        isAnimated
-      />
+      {type && (
+        <BarChart
+          key={type}
+          width={Layout.screen.width - 60}
+          height={Layout.screen.height / 3.5}
+          sideColor={"#fff"}
+          barWidth={30}
+          noOfSections={5}
+          barBorderRadius={5}
+          frontColor={Colors.secondary}
+          yAxisTextStyle={{ color: "#fff" }}
+          rulesColor={Color(Colors.primary).lighten(1.5).string()}
+          data={days}
+          yAxisThickness={0}
+          xAxisThickness={0}
+          yAxisLabelSuffix="zł"
+          yAxisLabelWidth={50}
+        />
+      )}
     </View>
   );
 };

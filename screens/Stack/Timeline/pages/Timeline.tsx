@@ -1,16 +1,10 @@
 import Header from "@/components/ui/Header/Header";
 import Colors from "@/constants/Colors";
-import { AntDesign, MaterialIcons } from "@expo/vector-icons";
+import { AntDesign, FontAwesome, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import moment from "moment";
 import { memo } from "react";
 import { SafeAreaView, View, VirtualizedList } from "react-native";
-import Animated, {
-  interpolate,
-  SharedValue,
-  useAnimatedScrollHandler,
-  useAnimatedStyle,
-  useSharedValue,
-} from "react-native-reanimated";
+import Animated, { interpolate, SharedValue, useAnimatedScrollHandler, useAnimatedStyle, useSharedValue } from "react-native-reanimated";
 import Calendar from "../../../../components/Calendar/Calendar";
 import DateList from "../../../../components/DateList/DateList";
 import NotFound from "../../Home/components/NotFound";
@@ -29,12 +23,7 @@ const ListHeaderComponent = memo(
   ) => (
     <View style={{ marginBottom: 25 }}>
       {t.switchView === "calendar" && (
-        <Calendar
-          selected={t.selected}
-          monthData={t.monthData}
-          refetch={t.refetch}
-          onDayPress={t.onDayPress}
-        />
+        <Calendar selected={t.selected} monthData={t.monthData} refetch={t.refetch} onDayPress={t.onDayPress} />
       )}
 
       {t.switchView === "date-list" && (
@@ -50,13 +39,9 @@ const ListHeaderComponent = memo(
   )
 );
 
-const AnimatedVirtualizedList =
-  Animated.createAnimatedComponent(VirtualizedList);
+const AnimatedVirtualizedList = Animated.createAnimatedComponent(VirtualizedList);
 
-export default function Timeline({
-  navigation,
-  route,
-}: TimelineScreenProps<"Timeline">) {
+export default function Timeline({ navigation, route }: TimelineScreenProps<"Timeline">) {
   const timeline = useTimeline({
     navigation,
     route,
@@ -87,19 +72,18 @@ export default function Timeline({
           }).format(moment(timeline.selected).toDate())}
           titleAnimatedStyle={animatedTitleStyle}
           buttons={[
-            {
-              onPress: () => navigation.navigate("Search"),
-              icon: <MaterialIcons name="search" size={20} color="#fff" />,
-            },
+            // {
+            //   onPress: () => navigation.navigate("Search"),
+            //   icon: <MaterialIcons name="search" size={20} color="#fff" />,
+            // },
             {
               onPress: timeline.onViewToggle,
-              icon: (
-                <MaterialIcons
-                  name={timeline.switchView === "calendar" ? "list" : "event"}
-                  size={20}
-                  color="#fff"
-                />
-              ),
+              icon:
+                timeline.switchView === "calendar" ? (
+                  <Ionicons name={"calendar-number"} size={20} color="#fff" />
+                ) : (
+                  <FontAwesome name="list-alt" size={20} color="#fff" />
+                ),
             },
             {
               icon: <AntDesign name="plus" size={20} color="#fff" />,
@@ -108,13 +92,7 @@ export default function Timeline({
           ]}
         />
         <AnimatedVirtualizedList
-          ListHeaderComponent={
-            <ListHeaderComponent
-              translateY={translateY}
-              navigation={navigation}
-              {...timeline}
-            />
-          }
+          ListHeaderComponent={<ListHeaderComponent translateY={translateY} navigation={navigation} {...timeline} />}
           ListEmptyComponent={
             timeline.loading ? (
               <TimelineScreenLoader loading />
