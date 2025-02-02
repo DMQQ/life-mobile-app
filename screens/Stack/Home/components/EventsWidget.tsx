@@ -19,6 +19,7 @@ const backgroundColor = Colors.primary_lighter;
 const styles = StyleSheet.create({
   container: {
     marginTop: 50,
+    padding: 10,
   },
 
   headContainer: {
@@ -30,8 +31,8 @@ const styles = StyleSheet.create({
 
   heading: {
     color: "#fff",
-    fontSize: Sizing.subHead,
-    fontWeight: "bold",
+    fontSize: 18,
+    fontWeight: "600",
   },
   button: {
     borderRadius: 100,

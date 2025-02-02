@@ -23,6 +23,8 @@ import DateTimePicker from "react-native-modal-datetime-picker";
 import { useEditExpense } from "./CreateActivity";
 import IconButton from "@/components/ui/IconButton/IconButton";
 import { useNavigation } from "@react-navigation/native";
+import Button from "@/components/ui/Button/Button";
+import Color from "color";
 
 const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
 
@@ -235,7 +237,7 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
             )}
           </View>
 
-          <View style={{ marginTop: 20, flex: 1, gap: 15, maxHeight: Layout.screen.height / 2 - 5 }}>
+          <View style={{ marginTop: 20, flex: 1, gap: 15, maxHeight: Layout.screen.height / 1.85 - 5 }}>
             <View
               style={{
                 borderWidth: 1,
@@ -273,29 +275,13 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
                   </Ripple>
 
                   <TextInput
+                    autoFocus
                     placeholder="Expense name"
                     style={styles.input}
                     placeholderTextColor={"gray"}
                     value={name}
                     onChangeText={setName}
                   />
-
-                  {isValid && (
-                    <Ripple
-                      onPress={() => handleSubmit()}
-                      style={{
-                        padding: 15,
-                        paddingHorizontal: 20,
-                        backgroundColor: Colors.secondary,
-                        borderRadius: 35,
-                        flexDirection: "row",
-                        gap: 10,
-                        alignItems: "center",
-                      }}
-                    >
-                      <Text style={{ fontWeight: "600", color: "#fff", fontSize: 16 }}>{params?.isEditing ? "Save" : "Create"}</Text>
-                    </Ripple>
-                  )}
                 </Animated.View>
               )}
 
@@ -363,6 +349,19 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
                 />
               )}
               {!changeView && <NumbersPad rotateBackButton={amount === "0"} handleAmountChange={handleAmountChange} />}
+
+              <Button
+                disabled={!isValid}
+                onPress={handleSubmit}
+                style={{
+                  marginTop: 15,
+                  backgroundColor: isValid ? Color(Colors.secondary).hex() : lowOpacity(Colors.secondary, 0.1),
+                  borderRadius: 100,
+                  paddingVertical: 17.5,
+                }}
+              >
+                {params?.isEditing ? "Save editing" : "Create activity"}
+              </Button>
             </View>
           </View>
         </View>

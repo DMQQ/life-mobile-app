@@ -20,6 +20,7 @@ import SpendingsByDay from "../components/WalletChart/SpendingsByDayOfWeek";
 import { Expense } from "@/types";
 import FutureProjection from "../components/WalletChart/FutureProjection";
 import DailySpendingChart from "../components/WalletChart/DailySpendingChart";
+import WalletContextProvider from "../components/WalletContext";
 
 const styles = StyleSheet.create({
   tilesContainer: {
@@ -67,7 +68,14 @@ const styles = StyleSheet.create({
   },
 });
 
-export default function WalletCharts() {
+// use this context to fix the data ovveride issue in Wallet
+export default () => (
+  <WalletContextProvider>
+    <WalletCharts />
+  </WalletContextProvider>
+);
+
+function WalletCharts() {
   const { data = { wallet: { expenses: [] } }, dispatch, filters } = useGetWallet({ fetchAll: true });
   const { data: stats } = useGetStatistics([filters.date.from, filters.date.to]);
 
@@ -141,6 +149,10 @@ export default function WalletCharts() {
 
   const currentBalance = useGetBalance();
 
+  const filteredExpenses = useMemo(() => {
+    return data?.wallet?.expenses.filter((item) => item.type === "expense") || [];
+  }, [data?.wallet?.expenses]);
+
   const ListHeaderComponent = useMemo(
     () => (
       <>
@@ -155,9 +167,9 @@ export default function WalletCharts() {
           <DateRangePicker filters={filters} dispatch={wrapWithFunction(dispatch, () => setSelected(""))} />
           <Legend totalSum={sumOfExpenses} selected={selected} data={barData} onPress={onLegendItemPress} />
           <StatisticsSummary dates={filters.date} data={stats?.statistics} />
-          <SpendingsByDay data={data?.wallet?.expenses || ([] as Expense[])} />
-          <FutureProjection data={data?.wallet?.expenses || ([] as Expense[])} income={5500} currentBalance={currentBalance} />
-          <DailySpendingChart data={data?.wallet?.expenses || ([] as Expense[])} />
+          <SpendingsByDay data={filteredExpenses} />
+          <FutureProjection data={filteredExpenses} income={5500} currentBalance={currentBalance} />
+          <DailySpendingChart data={filteredExpenses} />
           {selectedCategoryData.length > 0 && (
             <View style={{ width: Layout.screen.width - 30, marginTop: 25 }}>
               <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 18 }}>
@@ -173,7 +185,7 @@ export default function WalletCharts() {
         </View>
       </>
     ),
-    [sumOfExpenses, barData, filters, dispatch, chartType, selected]
+    [sumOfExpenses, barData, filters, dispatch, chartType, selected, filteredExpenses.length]
   );
 
   const headerButtons = useMemo(
@@ -191,7 +203,7 @@ export default function WalletCharts() {
   );
 
   return (
-    <SafeAreaView style={{ flex: 1, paddingTop: 15 }}>
+    <View style={{ paddingTop: 15 }}>
       <Header buttons={headerButtons} goBack backIcon={<AntDesign name="close" size={24} color="white" />} />
       <VirtualizedList
         ref={listRef}
@@ -216,6 +228,6 @@ export default function WalletCharts() {
       />
 
       <WalletSheet selected={selectedExpense} ref={expenseSheetRef} />
-    </SafeAreaView>
+    </View>
   );
 }

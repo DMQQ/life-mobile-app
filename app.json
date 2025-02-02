@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "myLife",
+    "name": "MyLifeFlow",
     "slug": "mylife-mobile",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
@@ -16,10 +16,9 @@
       "fallbackToCacheTimeout": 0,
       "url": "https://u.expo.dev/5596a83c-661a-4477-806f-ee4c8a125f7e"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
+      "buildNumber": "20250102",
       "supportsTablet": true,
       "infoPlist": {
         "NSFaceIDUsageDescription": "Allow $(PRODUCT_NAME) to use Face ID."
@@ -32,11 +31,7 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#151421"
       },
-      "permissions": [
-        "android.permission.RECORD_AUDIO",
-        "android.permission.USE_BIOMETRIC",
-        "android.permission.USE_FINGERPRINT"
-      ],
+      "permissions": ["android.permission.RECORD_AUDIO", "android.permission.USE_BIOMETRIC", "android.permission.USE_FINGERPRINT"],
       "package": "com.dmq.mylifemobile"
     },
     "web": {
@@ -56,15 +51,7 @@
           "faceIDPermission": "Allow $(PRODUCT_NAME) to use Face ID."
         }
       ],
-      [
-        "expo-build-properties",
-        {
-          "android": {
-            "usesCleartextTraffic": true,
-            "cleartextTrafficPermitted": true
-          }
-        }
-      ],
+
       "expo-asset",
       "expo-font",
       "expo-secure-store"

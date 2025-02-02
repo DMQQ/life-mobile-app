@@ -57,7 +57,7 @@ export default function FutureProjection({ data, income, currentBalance: current
 
     const averageMonthlyExpense = totalWeight ? weightedSum / totalWeight : 0;
 
-    const projectionMonths = 12;
+    const projectionMonths = 9;
     let currentBalance = currentBalanceProps;
 
     return Array.from({ length: projectionMonths }, (_, i) => {
@@ -71,28 +71,43 @@ export default function FutureProjection({ data, income, currentBalance: current
     }) as barDataItem[];
   }, [data, income, currentBalanceProps]);
   return (
-    <View style={{ padding: 20, gap: 16 }}>
-      <Text style={{ color: "#fff", fontSize: 20, fontWeight: "bold", marginBottom: 5 }}>Balance projection</Text>
-      <Text style={{ color: "gray", fontSize: 16, marginBottom: 5 }}>Takes current spending avarage and calculates the balance</Text>
+    <View style={{ padding: 20, overflow: "hidden" }}>
+      <View style={{ width: "100%", marginBottom: 10 }}>
+        <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 18 }}>Balance projection</Text>
+        <Text style={{ color: "gray", marginTop: 5 }}>Takes current spending avarage and calculates the balance</Text>
+      </View>
 
       <View style={{ height: 300 }}>
         <LineChart
           width={Layout.screen.width - 60}
           data={projectionData}
           height={230}
-          spacing={40}
-          initialSpacing={20}
+          spacing={50}
+          initialSpacing={5}
           color="#2563eb"
           thickness={2}
           hideDataPoints={false}
           dataPointsColor="#2563eb"
           xAxisColor="#666"
           yAxisColor="#666"
-          yAxisTextStyle={{ color: "#333" }}
-          xAxisLabelTextStyle={{ color: "#333" }}
+          // Adding gradient
+          areaChart
+          startFillColor="rgba(37, 99, 235, 0.3)"
+          endFillColor="rgba(37, 99, 235, 0.01)"
+          startOpacity={0.9}
+          endOpacity={0.2}
+          // Enhanced data points
+          dataPointsHeight={8}
+          dataPointsWidth={8}
+          dataPointsRadius={4}
+          dataPointsShape="circle"
+          // Text styles
+          yAxisTextStyle={{ color: "#fff" }}
+          xAxisLabelTextStyle={{ color: "#fff" }}
           hideRules
           yAxisTextNumberOfLines={1}
           yAxisLabelWidth={60}
+          yAxisLabelSuffix="zł"
         />
       </View>
 
