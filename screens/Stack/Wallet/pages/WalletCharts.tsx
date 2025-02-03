@@ -18,6 +18,7 @@ import { Expense, ScreenProps } from "@/types";
 import FutureProjection from "../components/WalletChart/FutureProjection";
 import DailySpendingChart from "../components/WalletChart/DailySpendingChart";
 import WalletContextProvider from "../components/WalletContext";
+import Ripple from "react-native-material-ripple";
 
 const styles = StyleSheet.create({
   tilesContainer: {
@@ -127,6 +128,7 @@ function WalletCharts({ navigation }: any) {
 
   const onLegendItemPress = (item: { label: string }) => {
     setSelected((prev) => (prev === item.label ? "" : item.label));
+    setStep(5);
     if (selected !== item.label)
       setTimeout(() => {
         listRef.current?.scrollToIndex({ index: 0 });
@@ -191,13 +193,15 @@ function WalletCharts({ navigation }: any) {
     [chartType]
   );
 
+  const [step, setStep] = useState(5);
+
   return (
-    <View style={{ paddingTop: 15 }}>
+    <View style={{ paddingTop: 15, paddingBottom: 120 }}>
       <Header buttons={headerButtons} goBack backIcon={<AntDesign name="close" size={24} color="white" />} />
       <VirtualizedList
         ref={listRef}
         ListHeaderComponent={ListHeaderComponent}
-        data={selectedCategoryData}
+        data={selectedCategoryData.slice(0, step)}
         getItem={(data, index) => data[index]}
         getItemCount={(data) => data.length}
         keyExtractor={(item) => item.id}
@@ -217,6 +221,11 @@ function WalletCharts({ navigation }: any) {
         )}
         ListFooterComponent={
           <>
+            {selectedCategoryData.length > step && (
+              <Ripple onPress={() => setStep(selectedCategoryData.length)}>
+                <Text style={{ color: Colors.secondary, textAlign: "center", marginTop: 10 }}>View all</Text>
+              </Ripple>
+            )}
             <StatisticsSummary dates={filters.date} data={stats?.statistics} />
             <SpendingsByDay data={filteredExpenses} />
             <FutureProjection data={filteredExpenses} income={5500} currentBalance={currentBalance} />
