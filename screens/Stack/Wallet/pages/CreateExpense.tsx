@@ -135,7 +135,7 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
     });
   }, []);
 
-  const isValid = (type === "income" ? true : category !== "none") && name !== "" && amount !== "" && type !== null;
+  const isValid = (type === "income" ? true : category !== "none") && name !== "" && amount !== "" && type !== null && amount != "0";
 
   const scale = (n: number) => {
     "worklet";
@@ -275,7 +275,6 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
                   </Ripple>
 
                   <TextInput
-                    autoFocus
                     placeholder="Expense name"
                     style={styles.input}
                     placeholderTextColor={"gray"}

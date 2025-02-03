@@ -4,12 +4,9 @@ import Layout from "@/constants/Layout";
 import { AntDesign, MaterialIcons } from "@expo/vector-icons";
 import { useMemo, useRef, useState } from "react";
 import { Alert, StyleSheet, Text, View, VirtualizedList } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import Charts from "../components/Wallet/Charts";
 import WalletItem, { WalletElement } from "../components/Wallet/WalletItem";
 import useGetWallet, { useGetBalance } from "../hooks/useGetWallet";
-import { WalletSheet } from "../components/Sheets/WalletSheet";
-import BottomSheet from "@gorhom/bottom-sheet";
 import PieChart from "../components/WalletChart/PieChart";
 import wrapWithFunction from "@/utils/functions/wrapFn";
 import DateRangePicker from "../components/WalletChart/DateRangePicker";
@@ -17,7 +14,7 @@ import Legend from "../components/WalletChart/Legend";
 import useGetStatistics from "../hooks/useGetStatistics";
 import StatisticsSummary from "../components/WalletChart/StatisticsSummary";
 import SpendingsByDay from "../components/WalletChart/SpendingsByDayOfWeek";
-import { Expense } from "@/types";
+import { Expense, ScreenProps } from "@/types";
 import FutureProjection from "../components/WalletChart/FutureProjection";
 import DailySpendingChart from "../components/WalletChart/DailySpendingChart";
 import WalletContextProvider from "../components/WalletContext";
@@ -69,13 +66,13 @@ const styles = StyleSheet.create({
 });
 
 // use this context to fix the data ovveride issue in Wallet
-export default () => (
+export default (props: any) => (
   <WalletContextProvider>
-    <WalletCharts />
+    <WalletCharts {...props} />
   </WalletContextProvider>
 );
 
-function WalletCharts() {
+function WalletCharts({ navigation }: any) {
   const { data = { wallet: { expenses: [] } }, dispatch, filters } = useGetWallet({ fetchAll: true });
   const { data: stats } = useGetStatistics([filters.date.from, filters.date.to]);
 
@@ -128,10 +125,6 @@ function WalletCharts() {
     }, 0);
   }, [data?.wallet?.expenses]);
 
-  const [selectedExpense, setSelectedExpense] = useState<WalletElement | undefined>(undefined);
-
-  const expenseSheetRef = useRef<BottomSheet>(null);
-
   const onLegendItemPress = (item: { label: string }) => {
     setSelected((prev) => (prev === item.label ? "" : item.label));
     if (selected !== item.label)
@@ -166,10 +159,7 @@ function WalletCharts() {
           </View>
           <DateRangePicker filters={filters} dispatch={wrapWithFunction(dispatch, () => setSelected(""))} />
           <Legend totalSum={sumOfExpenses} selected={selected} data={barData} onPress={onLegendItemPress} />
-          <StatisticsSummary dates={filters.date} data={stats?.statistics} />
-          <SpendingsByDay data={filteredExpenses} />
-          <FutureProjection data={filteredExpenses} income={5500} currentBalance={currentBalance} />
-          <DailySpendingChart data={filteredExpenses} />
+
           {selectedCategoryData.length > 0 && (
             <View style={{ width: Layout.screen.width - 30, marginTop: 25 }}>
               <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 18 }}>
@@ -179,7 +169,6 @@ function WalletCharts() {
                   {selected || "income"}
                 </Text>
               </Text>
-              <Text style={{ color: "gray", marginTop: 5 }}>List of transactions</Text>
             </View>
           )}
         </View>
@@ -219,15 +208,22 @@ function WalletCharts() {
         renderItem={({ item }) => (
           <WalletItem
             handlePress={() => {
-              setSelectedExpense(item);
-              expenseSheetRef.current?.expand();
+              navigation.navigate("Expense", {
+                expense: item as Expense,
+              });
             }}
             {...item}
           />
         )}
+        ListFooterComponent={
+          <>
+            <StatisticsSummary dates={filters.date} data={stats?.statistics} />
+            <SpendingsByDay data={filteredExpenses} />
+            <FutureProjection data={filteredExpenses} income={5500} currentBalance={currentBalance} />
+            <DailySpendingChart data={filteredExpenses} />
+          </>
+        }
       />
-
-      <WalletSheet selected={selectedExpense} ref={expenseSheetRef} />
     </View>
   );
 }
