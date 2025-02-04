@@ -8,8 +8,15 @@ import Colors from "@/constants/Colors";
 import WalletCharts from "./pages/WalletCharts";
 import CreateExpenseModal from "./pages/CreateExpense";
 
+import ExpoenseFiltersSheet from "./components/Sheets/ExpenseFiltersSheet";
+import WalletContextProvider from "./components/WalletContext";
+import Expense from "./pages/Expense";
+import { useEffect } from "react";
+
 interface WalletRootStack extends ParamListBase {
-  Wallet: undefined;
+  Wallet: {
+    expenseId?: string;
+  };
   Watchlist: undefined;
   Charts: undefined;
 }
@@ -18,7 +25,13 @@ export type WalletScreens<Screen extends keyof WalletRootStack> = StackScreenPro
 
 const Stack = createNativeStackNavigator<WalletRootStack>();
 
-export default function WalletScreens() {
+export default function WalletScreens({ navigation, route }: WalletScreens<"Wallet">) {
+  useEffect(() => {
+    if (route.params?.expenseId !== undefined && route.params?.expenseId == null) {
+      navigation.navigate("CreateExpense");
+    }
+  }, [route.params?.expenseId]);
+
   return (
     <Stack.Navigator
       initialRouteName="Wallet"
@@ -30,7 +43,6 @@ export default function WalletScreens() {
         animation: "default",
       }}
     >
-      <Stack.Screen name="Wallet" component={Wallet} />
       <Stack.Screen
         name="Watchlist"
         component={Watchlist}
@@ -50,27 +62,46 @@ export default function WalletScreens() {
       />
 
       <Stack.Screen
-        name="Charts"
-        component={WalletCharts}
-        options={{
-          presentation: "modal",
-        }}
-      />
-
-      <Stack.Screen
         name={"CreateExpense"}
         component={CreateExpenseModal}
         options={{
           presentation: "modal",
         }}
         initialParams={{
-          type: "expense",
+          type: null,
           amount: 0,
           category: "",
           date: "",
           description: "",
 
           isEditing: false,
+        }}
+      />
+
+      <Stack.Screen
+        name="Expense"
+        component={Expense}
+        options={{
+          presentation: "modal",
+        }}
+      />
+
+      <Stack.Screen
+        name="Charts"
+        component={WalletCharts}
+        options={{
+          presentation: "modal",
+          headerShown: false,
+        }}
+      />
+
+      <Stack.Screen name="Wallet" component={Wallet} />
+
+      <Stack.Screen
+        name="Filters"
+        component={ExpoenseFiltersSheet}
+        options={{
+          presentation: "modal",
         }}
       />
     </Stack.Navigator>

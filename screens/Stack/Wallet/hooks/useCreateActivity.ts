@@ -1,5 +1,5 @@
 import { gql, useApolloClient, useMutation } from "@apollo/client";
-import { ToastAndroid } from "react-native";
+import { Platform, ToastAndroid } from "react-native";
 
 const CREATE_EXPENSE = gql`
   mutation CreateExpense($amount: Float!, $description: String!, $type: String!, $category: String!, $date: String!, $schedule: Boolean) {
@@ -19,10 +19,6 @@ const CREATE_EXPENSE = gql`
 export default function useCreateActivity(props: { onCompleted?: () => void }) {
   const client = useApolloClient();
   const [createExpense, { data, loading, error, called, reset }] = useMutation(CREATE_EXPENSE, {
-    onError(err) {
-      console.log("useCreateActivity ERROR");
-      console.log(JSON.stringify(err, null, 2));
-    },
     onCompleted(data) {
       props.onCompleted?.();
 
@@ -30,7 +26,7 @@ export default function useCreateActivity(props: { onCompleted?: () => void }) {
         client?.refetchQueries({
           include: ["GetWallet"],
         });
-      } else {
+      } else if (Platform.OS === "android") {
         ToastAndroid.show("Expense has been scheduled", ToastAndroid.SHORT);
       }
     },

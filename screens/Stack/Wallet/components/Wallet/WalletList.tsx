@@ -1,10 +1,9 @@
 import BottomSheet from "@gorhom/bottom-sheet";
 import { Expense, Wallet } from "@/types";
 import WalletItem, { WalletElement, parseDateToText } from "./WalletItem";
-import { useState, useRef, useEffect, useMemo, useCallback, useTransition } from "react";
+import { useRef, useEffect, useMemo, useCallback } from "react";
 import { Text, NativeScrollEvent, View, StyleSheet, VirtualizedList } from "react-native";
-import { WalletSheet } from "../Sheets/WalletSheet";
-import Animated, { LinearTransition, SharedValue } from "react-native-reanimated";
+import Animated, { SharedValue } from "react-native-reanimated";
 import { NativeSyntheticEvent } from "react-native";
 import moment from "moment";
 import Colors, { Sizing } from "@/constants/Colors";
@@ -12,7 +11,7 @@ import Ripple from "react-native-material-ripple";
 import { useWalletContext } from "../WalletContext";
 import Color from "color";
 import { gql, useQuery } from "@apollo/client";
-import { useFocusEffect, useNavigation, useRoute } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 
 const AnimatedList = Animated.createAnimatedComponent(VirtualizedList);
 
@@ -27,9 +26,8 @@ export default function WalletList(props: {
 }) {
   const route = useRoute<any>();
 
-  const [selected, setSelected] = useState<WalletElement | undefined>(
-    props?.wallet?.expenses?.find((expense) => expense.id === route?.params?.expenseId) as WalletElement | undefined
-  );
+  const navigation = useNavigation<any>();
+
   const sheet = useRef<BottomSheet>(null);
 
   useEffect(() => {
@@ -40,17 +38,13 @@ export default function WalletList(props: {
 
       if (!expense) return;
 
-      setSelected(expense as WalletElement);
+      navigation.setParams({ expenseId: null });
 
-      const timeout = setTimeout(() => {
-        sheet.current?.snapToIndex(0);
-      }, 150);
-
-      return () => {
-        clearTimeout(timeout);
-      };
+      navigation.navigate("Expense", {
+        expense: expense,
+      });
     }
-  }, [route?.params, props?.wallet?.expenses?.length]);
+  }, [props?.wallet?.expenses.length]);
 
   const data = useMemo(() => {
     const sorted = [] as {
@@ -78,33 +72,37 @@ export default function WalletList(props: {
 
   const renderItem = useCallback(
     ({ item }: { item: { month: string; expenses: Expense[] } }) => (
-      <MonthExpenseList showTotal={!props.filtersActive} item={item} setSelected={setSelected} sheet={sheet} />
+      <MonthExpenseList
+        showTotal={!props.filtersActive}
+        item={item}
+        setSelected={(expense) => {
+          navigation.navigate("Expense", {
+            expense: expense,
+          });
+        }}
+        sheet={sheet}
+      />
     ),
     [props.filtersActive]
   );
 
   return (
-    <>
-      <AnimatedList
-        onEndReached={!props.isLocked ? props.onEndReached : () => {}}
-        onEndReachedThreshold={0.5}
-        scrollEventThrottle={16}
-        removeClippedSubviews
-        onScroll={props.onScroll}
-        style={{ flex: 1 }}
-        contentContainerStyle={{
-          padding: 15,
-        }}
-        data={data || []}
-        keyExtractor={(expense: any, idx) => expense.month + "_" + idx}
-        renderItem={renderItem as any}
-        getItem={(data, index) => data[index]}
-        getItemCount={(data) => data.length}
-        // ListFooterComponent={<Button onPress={props.onEndReached}>Load more</Button>}
-      />
-
-      <WalletSheet selected={selected} ref={sheet} />
-    </>
+    <AnimatedList
+      onEndReached={!props.isLocked ? props.onEndReached : () => {}}
+      onEndReachedThreshold={0.5}
+      scrollEventThrottle={16}
+      removeClippedSubviews
+      onScroll={props.onScroll}
+      style={{ flex: 1 }}
+      contentContainerStyle={{
+        padding: 15,
+      }}
+      data={data || []}
+      keyExtractor={(expense: any, idx) => expense.month + "_" + idx}
+      renderItem={renderItem as any}
+      getItem={(data, index) => data[index]}
+      getItemCount={(data) => data.length}
+    />
   );
 }
 

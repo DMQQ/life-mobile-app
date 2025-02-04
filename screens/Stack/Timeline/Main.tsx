@@ -13,13 +13,8 @@ import type { TimelineRootStack as RootStackParamList } from "./types";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-export default function TimelineScreens({
-  route,
-  navigation,
-}: RootStackScreenProps<"TimelineScreens">) {
+export default function TimelineScreens({ route, navigation }: RootStackScreenProps<"TimelineScreens">) {
   useEffect(() => {
-    console.log(route.params);
-
     if (!!route.params?.timelineId) {
       (navigation as any).navigate("TimelineDetails", {
         ...route.params,
@@ -40,11 +35,7 @@ export default function TimelineScreens({
         gestureDirection: "horizontal",
       }}
     >
-      <Stack.Screen
-        name="Timeline"
-        component={Timeline}
-        options={{ headerShown: false }}
-      />
+      <Stack.Screen name="Timeline" component={Timeline} options={{ headerShown: false }} />
       <Stack.Screen
         name="TimelineDetails"
         component={TimelineDetails}
@@ -59,6 +50,10 @@ export default function TimelineScreens({
         initialParams={{
           selectedDate: moment().format("YYYY-MM-DD"),
           mode: "create",
+        }}
+        options={{
+          presentation: "modal",
+          headerShown: false,
         }}
       />
       <Stack.Screen
