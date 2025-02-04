@@ -3,17 +3,18 @@ import moment from "moment";
 import ScreenContainer from "@/components/ui/ScreenContainer";
 import Header from "@/components/ui/Header/Header";
 import Input from "@/components/ui/TextInput/TextInput";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import IconButton from "@/components/ui/IconButton/IconButton";
-import { AntDesign } from "@expo/vector-icons";
+import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useGoal } from "../hooks/hooks";
 import Layout from "@/constants/Layout";
 import Colors from "@/constants/Colors";
 import Color from "color";
 import DayEntry from "../components/GoalEntry";
+import Button from "@/components/ui/Button/Button";
 
 // Updated Goal component
-export default function Goal({ route, navigation }) {
+export default function Goal({ route, navigation }: any) {
   const { id } = route.params;
   const { goals, upsertStats } = useGoal();
   const goal = goals.find((goal) => goal.id === id);
@@ -32,26 +33,52 @@ export default function Goal({ route, navigation }) {
     setValue("");
   };
 
+  const data = useMemo(() => {
+    const hasTodayEntry = goal?.entries.some((entry) => moment(entry.date).isSame(moment(), "day"));
+
+    if (!hasTodayEntry) {
+      return [
+        {
+          id: "new",
+          date: moment().toISOString(),
+          value: "0",
+        },
+        ...goal?.entries,
+      ];
+    }
+
+    return goal?.entries;
+  }, [goals.length]);
+
   return (
     <ScreenContainer style={{ padding: 0 }}>
       <Header goBack />
       <View style={{ padding: 15, flex: 1 }}>
-        <View style={styles.inputContainer}>
-          <Input
-            placeholder="Update your stats"
-            style={{ flex: 1, width: Layout.screen.width - 30 }}
-            label="Update your stats"
-            value={value}
-            onChangeText={setValue}
-            keyboardType="numeric"
-            right={<IconButton icon={<AntDesign name="plus" size={24} color="#fff" />} onPress={handleSubmit} />}
-          />
+        <View
+          style={{
+            justifyContent: "center",
+            alignItems: "center",
+            marginBottom: 30,
+          }}
+        >
+          <View style={styles.iconContainer}>
+            <MaterialCommunityIcons name={goal?.icon || "close"} size={90} color={Colors.secondary} />
+          </View>
         </View>
 
         <FlatList
-          data={goal?.entries}
+          data={data}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }) => <DayEntry entry={{ ...item, ...goal }} />}
+          renderItem={({ item, index }) => (
+            <View
+              style={{
+                marginBottom: index === data.length - 1 ? 0 : 6,
+              }}
+            >
+              {index === 0 && <Text style={{ color: "#fff", fontSize: 18, fontWeight: "500", marginBottom: 10 }}>Today!</Text>}
+              <DayEntry index={index} entry={{ ...item, ...goal }} />
+            </View>
+          )}
           contentContainerStyle={styles.list}
           showsVerticalScrollIndicator={false}
           ListHeaderComponent={
@@ -62,6 +89,14 @@ export default function Goal({ route, navigation }) {
           }
           ListEmptyComponent={<Text style={styles.emptyText}>No entries yet</Text>}
         />
+        <Button
+          onPress={() => {
+            navigation.navigate("UpdateGoalEntry", { id });
+          }}
+          style={{ borderRadius: 100, padding: 17.5 }}
+        >
+          Update today's entry
+        </Button>
       </View>
     </ScreenContainer>
   );
@@ -115,5 +150,16 @@ const styles = StyleSheet.create({
     color: "#666",
     textAlign: "center",
     marginTop: 20,
+  },
+
+  iconContainer: {
+    padding: 20,
+    borderRadius: 100,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: Colors.primary_lighter,
+    marginBottom: 20,
+    width: 130,
+    height: 130,
   },
 });
