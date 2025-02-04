@@ -81,7 +81,7 @@ export default function BottomTab({ navigation, state, insets }: BottomTabBarPro
     >
       <Btn route="NotesScreens" label="Notes" iconName={"clipboard"} />
 
-      <Btn route="WorkoutScreens" label="Training" iconName={"barbell"} />
+      <Btn route="GoalsScreens" label="Training" iconName={"barbell"} />
 
       <Btn route="Root" label="Home" iconName={"home"} />
 
