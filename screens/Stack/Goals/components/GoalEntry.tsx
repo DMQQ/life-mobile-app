@@ -2,6 +2,7 @@ import Color from "color";
 import moment from "moment";
 import { StyleSheet, Text, View } from "react-native";
 import Colors from "@/constants/Colors";
+import lowOpacity from "@/utils/functions/lowOpacity";
 
 interface Entry {
   id: string;
@@ -15,9 +16,11 @@ interface Entry {
 
 interface DayEntryProps {
   entry: Entry;
+
+  index: number;
 }
 
-const DayEntry = ({ entry }: DayEntryProps) => {
+const DayEntry = ({ entry, index }: DayEntryProps) => {
   const date = moment(entry.date);
   const isCurrentDay = date.isSame(moment(), "day");
 
@@ -36,7 +39,16 @@ const DayEntry = ({ entry }: DayEntryProps) => {
   };
 
   return (
-    <View style={styles.dayContainer}>
+    <View
+      style={[
+        styles.dayContainer,
+        index === 0 && {
+          borderWidth: 2,
+          borderColor: lowOpacity(Colors.secondary, 0.7),
+          backgroundColor: lowOpacity(Colors.secondary, 0.15),
+        },
+      ]}
+    >
       <View style={styles.dateSection}>
         <Text style={[styles.day, isCurrentDay && styles.currentDay]}>{date.format("D")}</Text>
         <Text style={styles.month}>{date.format("MMM")}</Text>
@@ -79,8 +91,15 @@ const DayEntry = ({ entry }: DayEntryProps) => {
       </View>
 
       <View style={[styles.valueContainer, { alignSelf: "center" }]}>
-        <Text style={{ color: "#fff", fontWeight: "bold", width: 110 }}>
-          {entry.value > (entry?.target || 0) ? "🎉  Good Job!" : isCurrentDay ? "👀 Keep trying" : "Ugh"}
+        <Text
+          style={{
+            color: entry.value > (entry?.target || 0) ? "#4CAF50" : isCurrentDay ? "#FFC107" : "#F44336",
+            fontWeight: "bold",
+            width: 110,
+            textAlign: "center",
+          }}
+        >
+          {entry.value > (entry?.target || 0) ? "🎉  Good Job!" : isCurrentDay ? "👀 Keep trying" : "You didn't meet your goal"}
         </Text>
       </View>
     </View>

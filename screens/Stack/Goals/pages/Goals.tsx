@@ -1,15 +1,25 @@
 import ScreenContainer from "@/components/ui/ScreenContainer";
 import { useGoal } from "../hooks/hooks";
-import Button from "@/components/ui/Button/Button";
 import { FlatList } from "react-native";
 import { GoalCategory } from "../components/GoalCategory";
+import Header from "@/components/ui/Header/Header";
+import { AntDesign } from "@expo/vector-icons";
 
-export default function Goals({ navigation }) {
-  const { goal, goals } = useGoal();
+export default function Goals({ navigation }: any) {
+  const { goals } = useGoal();
 
   return (
-    <ScreenContainer>
+    <ScreenContainer style={{ padding: 0 }}>
+      <Header
+        buttons={[
+          {
+            onPress: () => navigation.navigate("CreateGoal"),
+            icon: <AntDesign name="plus" size={20} color="#fff" />,
+          },
+        ]}
+      />
       <FlatList
+        contentContainerStyle={{ padding: 15 }}
         data={goals}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
@@ -21,7 +31,6 @@ export default function Goals({ navigation }) {
           />
         )}
       />
-      <Button onPress={() => navigation.navigate("CreateGoal")}>Create Goal</Button>
     </ScreenContainer>
   );
 }

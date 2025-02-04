@@ -132,6 +132,8 @@ const IncomeExpenseBar = memo(() => {
 
   const income = data?.statistics?.income || 0;
 
+  if ((expense === 0 && income === 0) || Number.isNaN(expense) || Number.isNaN(income)) return null;
+
   const total = expense + income;
 
   const incomeWidth = (income / total) * totalWidth;
