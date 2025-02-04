@@ -1,21 +1,24 @@
 import Header from "@/components/ui/Header/Header";
 import Colors, { secondary_candidates } from "@/constants/Colors";
 import Layout from "@/constants/Layout";
-import { MaterialIcons } from "@expo/vector-icons";
+import { AntDesign, MaterialIcons } from "@expo/vector-icons";
 import { useMemo, useRef, useState } from "react";
 import { Alert, StyleSheet, Text, View, VirtualizedList } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import Charts from "../components/Wallet/Charts";
 import WalletItem, { WalletElement } from "../components/Wallet/WalletItem";
-import useGetWallet from "../hooks/useGetWallet";
-import { WalletSheet } from "../components/Sheets/WalletSheet";
-import BottomSheet from "@gorhom/bottom-sheet";
+import useGetWallet, { useGetBalance } from "../hooks/useGetWallet";
 import PieChart from "../components/WalletChart/PieChart";
 import wrapWithFunction from "@/utils/functions/wrapFn";
 import DateRangePicker from "../components/WalletChart/DateRangePicker";
 import Legend from "../components/WalletChart/Legend";
 import useGetStatistics from "../hooks/useGetStatistics";
 import StatisticsSummary from "../components/WalletChart/StatisticsSummary";
+import SpendingsByDay from "../components/WalletChart/SpendingsByDayOfWeek";
+import { Expense, ScreenProps } from "@/types";
+import FutureProjection from "../components/WalletChart/FutureProjection";
+import DailySpendingChart from "../components/WalletChart/DailySpendingChart";
+import WalletContextProvider from "../components/WalletContext";
+import Ripple from "react-native-material-ripple";
 
 const styles = StyleSheet.create({
   tilesContainer: {
@@ -63,7 +66,14 @@ const styles = StyleSheet.create({
   },
 });
 
-export default function WalletCharts() {
+// use this context to fix the data ovveride issue in Wallet
+export default (props: any) => (
+  <WalletContextProvider>
+    <WalletCharts {...props} />
+  </WalletContextProvider>
+);
+
+function WalletCharts({ navigation }: any) {
   const { data = { wallet: { expenses: [] } }, dispatch, filters } = useGetWallet({ fetchAll: true });
   const { data: stats } = useGetStatistics([filters.date.from, filters.date.to]);
 
@@ -76,7 +86,14 @@ export default function WalletCharts() {
     if (!data?.wallet?.expenses) return [];
 
     const mapped = data.wallet.expenses.reduce((acc, curr) => {
-      if (!curr.category || curr.description.startsWith("Balance") || curr.type === "income") return acc;
+      if (
+        !curr.category ||
+        curr.description.startsWith("Balance") ||
+        curr.type === "income" ||
+        curr.type === "refunded" ||
+        curr.category === "refunded"
+      )
+        return acc;
       const key = curr.category;
 
       if (!acc[key]) acc[key] = 0;
@@ -103,28 +120,33 @@ export default function WalletCharts() {
     if (!data?.wallet?.expenses) return 0;
 
     return data.wallet.expenses.reduce((acc, curr) => {
-      return curr.type === "income" ? acc : acc + curr.amount;
+      if (curr.type === "income" || curr.type === "refunded") return acc;
+
+      return acc + curr.amount;
     }, 0);
   }, [data?.wallet?.expenses]);
 
-  const [selectedExpense, setSelectedExpense] = useState<WalletElement | undefined>(undefined);
-
-  const expenseSheetRef = useRef<BottomSheet>(null);
-
   const onLegendItemPress = (item: { label: string }) => {
     setSelected((prev) => (prev === item.label ? "" : item.label));
+    setStep(5);
     if (selected !== item.label)
       setTimeout(() => {
         listRef.current?.scrollToIndex({ index: 0 });
       }, 100);
   };
 
-  const selectedCategoryData = data?.wallet?.expenses.filter((item) => item.category === selected) || [];
+  const selectedCategoryData = data?.wallet?.expenses.filter((item) => item.category === selected && item.type !== "refunded") || [];
 
   const onChartPress = (e: any) => {
     setSelected(e.label);
     e.label !== undefined && Alert.alert(`Category ${e.label} is`, e.value.toFixed(2));
   };
+
+  const currentBalance = useGetBalance();
+
+  const filteredExpenses = useMemo(() => {
+    return data?.wallet?.expenses.filter((item) => item.type === "expense") || [];
+  }, [data?.wallet?.expenses]);
 
   const ListHeaderComponent = useMemo(
     () => (
@@ -137,12 +159,8 @@ export default function WalletCharts() {
               <Charts data={barData} onPress={onChartPress} />
             )}
           </View>
-
           <DateRangePicker filters={filters} dispatch={wrapWithFunction(dispatch, () => setSelected(""))} />
-
           <Legend totalSum={sumOfExpenses} selected={selected} data={barData} onPress={onLegendItemPress} />
-
-          <StatisticsSummary dates={filters.date} data={stats?.statistics} />
 
           {selectedCategoryData.length > 0 && (
             <View style={{ width: Layout.screen.width - 30, marginTop: 25 }}>
@@ -153,13 +171,12 @@ export default function WalletCharts() {
                   {selected || "income"}
                 </Text>
               </Text>
-              <Text style={{ color: "gray", marginTop: 5 }}>List of transactions</Text>
             </View>
           )}
         </View>
       </>
     ),
-    [sumOfExpenses, barData, filters, dispatch, chartType, selected]
+    [sumOfExpenses, barData, filters, dispatch, chartType, selected, filteredExpenses.length]
   );
 
   const headerButtons = useMemo(
@@ -176,13 +193,15 @@ export default function WalletCharts() {
     [chartType]
   );
 
+  const [step, setStep] = useState(5);
+
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <Header buttons={headerButtons} goBack />
+    <View style={{ paddingTop: 15, paddingBottom: 120 }}>
+      <Header buttons={headerButtons} goBack backIcon={<AntDesign name="close" size={24} color="white" />} />
       <VirtualizedList
         ref={listRef}
         ListHeaderComponent={ListHeaderComponent}
-        data={selectedCategoryData}
+        data={selectedCategoryData.slice(0, step)}
         getItem={(data, index) => data[index]}
         getItemCount={(data) => data.length}
         keyExtractor={(item) => item.id}
@@ -193,15 +212,27 @@ export default function WalletCharts() {
         renderItem={({ item }) => (
           <WalletItem
             handlePress={() => {
-              setSelectedExpense(item);
-              expenseSheetRef.current?.expand();
+              navigation.navigate("Expense", {
+                expense: item as Expense,
+              });
             }}
             {...item}
           />
         )}
+        ListFooterComponent={
+          <>
+            {selectedCategoryData.length > step && (
+              <Ripple onPress={() => setStep(selectedCategoryData.length)}>
+                <Text style={{ color: Colors.secondary, textAlign: "center", marginTop: 10 }}>View all</Text>
+              </Ripple>
+            )}
+            <StatisticsSummary dates={filters.date} data={stats?.statistics} />
+            <SpendingsByDay data={filteredExpenses} />
+            <FutureProjection data={filteredExpenses} income={5500} currentBalance={currentBalance} />
+            <DailySpendingChart data={filteredExpenses} />
+          </>
+        }
       />
-
-      <WalletSheet selected={selectedExpense} ref={expenseSheetRef} />
-    </SafeAreaView>
+    </View>
   );
 }

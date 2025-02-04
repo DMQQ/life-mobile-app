@@ -6,8 +6,6 @@ interface LineChartProps {
   data: { label: string; value: number; color: string }[];
 }
 export default function LineChart(props: LineChartProps) {
-  console.log("LineChartProps", props);
-
   return (
     <LineChartGifted width={Layout.screen.width} height={300} data={props.data || []} color={"#fff"} thickness={3} dataPointsColor="blue" />
   );

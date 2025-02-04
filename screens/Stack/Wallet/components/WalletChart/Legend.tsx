@@ -3,6 +3,7 @@ import { StyleSheet, Text, View } from "react-native";
 import Ripple from "react-native-material-ripple";
 import Colors from "@/constants/Colors";
 import Color from "color";
+import Animated, { LinearTransition } from "react-native-reanimated";
 
 interface ICategory {
   label: string;
@@ -21,7 +22,7 @@ const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
 
 const Legend = (props: LegendProps) =>
   props.data.length === 0 ? null : (
-    <View style={styles.tilesContainer}>
+    <Animated.View style={styles.tilesContainer} layout={LinearTransition}>
       <View style={{ width: "100%", marginBottom: 10 }}>
         <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 18 }}>Chart legend</Text>
         <Text style={{ color: "gray", marginTop: 5 }}>Detailed percentage of your expenses</Text>
@@ -49,13 +50,23 @@ const Legend = (props: LegendProps) =>
             </Text>
           </Text>
 
+          <View
+            style={{
+              width: (((item.value / props.totalSum) * 100).toFixed(2) + "%") as any,
+              height: 5,
+              backgroundColor: item.color,
+              borderRadius: 10,
+              marginTop: 10,
+            }}
+          />
+
           <View style={styles.tileText}>
             <View style={[styles.dot, { backgroundColor: item.color }]} />
             <Text style={{ color: blueText }}>{capitalize(item.label)}</Text>
           </View>
         </Ripple>
       ))}
-    </View>
+    </Animated.View>
   );
 
 const blueText = Color(Colors.primary).lighten(10).string();

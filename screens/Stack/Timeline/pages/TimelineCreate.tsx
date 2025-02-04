@@ -1,12 +1,6 @@
 import ScreenContainer from "../../../../components/ui/ScreenContainer";
 import ValidatedInput from "../../../../components/ui/ValidatedInput";
-import {
-  ActivityIndicator,
-  Text,
-  ScrollView,
-  StyleSheet,
-  Platform,
-} from "react-native";
+import { ActivityIndicator, Text, ScrollView, StyleSheet, Platform } from "react-native";
 import Colors from "../../../../constants/Colors";
 import Button from "../../../../components/ui/Button/Button";
 import timelineStyles from "../components/timeline.styles";
@@ -24,6 +18,9 @@ import IconButton from "@/components/ui/IconButton/IconButton";
 import DateTimePicker from "react-native-modal-datetime-picker";
 import { useState } from "react";
 import moment from "moment";
+import Header from "@/components/ui/Header/Header";
+import TimelineCreateHeader from "../components/CreateTimeline/TimelineCreateHeader";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const styles = StyleSheet.create({
   timeContainer: {
@@ -51,13 +48,10 @@ const radioOptions = [
   { label: "Repeatable", value: "repeatable" },
 ];
 
-export default function CreateTimeLineEventModal({
-  route,
-  navigation,
-}: TimelineScreenProps<"TimelineCreate">) {
+export default function CreateTimeLineEventModal({ route, navigation }: TimelineScreenProps<"TimelineCreate">) {
   const isKeyboardOpen = useKeyboard();
 
-  const { f, isLoading, timePicker, isEditing, sheetRef } = useCreateTimeline({
+  const { f, isLoading, timePicker, isEditing, sheetRef, handleChangeDate } = useCreateTimeline({
     route,
     navigation,
   });
@@ -67,7 +61,15 @@ export default function CreateTimeLineEventModal({
   const numberOfLines = f.values.desc.split("\n").length;
 
   return (
-    <>
+    <View style={{ flex: 1 }}>
+      <TimelineCreateHeader
+        navigation={navigation}
+        handleChangeDate={handleChangeDate}
+        selectedDate={route.params.selectedDate}
+        onToggleOptions={() => {
+          f.resetForm();
+        }}
+      />
       <ScreenContainer scroll>
         <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
           {!isEditing && <SuggestedEvents date={route.params.selectedDate} />}
@@ -83,11 +85,7 @@ export default function CreateTimeLineEventModal({
           <ValidatedInput
             showLabel
             label="Event's content"
-            numberOfLines={
-              isEditing
-                ? f.values.desc.split("\n").length + 10
-                : f.values.desc.split("\n").length + 3
-            }
+            numberOfLines={isEditing ? f.values.desc.split("\n").length + 10 : f.values.desc.split("\n").length + 3}
             style={{
               ...(Platform.OS === "ios" && {
                 minHeight: (numberOfLines <= 5 ? 5 : numberOfLines) * 20,
@@ -103,32 +101,19 @@ export default function CreateTimeLineEventModal({
 
           <ValidatedInput.Label error={false} text="Time range*" />
           <View style={styles.timeContainer}>
-            <Ripple
-              style={{ flex: 1, padding: 5 }}
-              onPress={() => setDatePicker("begin")}
-            >
-              <Text style={styles.timeText}>
-                {f.values.begin.split(":").slice(0, 2).join(":")}
-              </Text>
+            <Ripple style={{ flex: 1, padding: 5 }} onPress={() => setDatePicker("begin")}>
+              <Text style={styles.timeText}>{f.values.begin.split(":").slice(0, 2).join(":")}</Text>
             </Ripple>
 
             <Text style={{ color: "gray", padding: 5 }}>to</Text>
 
-            <Ripple
-              style={{ flex: 1, padding: 5 }}
-              onPress={() => setDatePicker("end")}
-            >
-              <Text style={styles.timeText}>
-                {f.values.end.split(":").slice(0, 2).join(":")}
-              </Text>
+            <Ripple style={{ flex: 1, padding: 5 }} onPress={() => setDatePicker("end")}>
+              <Text style={styles.timeText}>{f.values.end.split(":").slice(0, 2).join(":")}</Text>
             </Ripple>
           </View>
 
           <View style={{ marginTop: 10 }}>
-            <ValidatedInput.Label
-              error={false}
-              text="How to send you notifications?"
-            />
+            <ValidatedInput.Label error={false} text="How to send you notifications?" />
             <SegmentedButtons
               containerStyle={{
                 borderRadius: 15,
@@ -158,10 +143,7 @@ export default function CreateTimeLineEventModal({
                 f.setFieldValue("begin", finalDate.format("HH:mm"));
 
                 if (finalDate.isAfter(moment(f.values.end, "HH:mm"))) {
-                  f.setFieldValue(
-                    "end",
-                    finalDate.add(1, "hours").format("HH:mm")
-                  );
+                  f.setFieldValue("end", finalDate.add(1, "hours").format("HH:mm"));
                 }
               }
 
@@ -170,10 +152,7 @@ export default function CreateTimeLineEventModal({
                 f.setFieldValue("end", finalDate.format("HH:mm"));
 
                 if (finalDate.isBefore(moment(f.values.begin, "HH:mm"))) {
-                  f.setFieldValue(
-                    "begin",
-                    finalDate.subtract(1, "hours").format("HH:mm")
-                  );
+                  f.setFieldValue("begin", finalDate.subtract(1, "hours").format("HH:mm"));
                 }
               }
 
@@ -192,7 +171,7 @@ export default function CreateTimeLineEventModal({
         isKeyboardOpen={isKeyboardOpen || false}
         isLoading={isLoading}
       />
-    </>
+    </View>
   );
 }
 
@@ -219,26 +198,14 @@ const SubmitButton = (props: SubmitButtonProps) =>
         icon={<AntDesign name="calendar" color="#fff" size={20} />}
       />
       <Button
-        icon={
-          props.isLoading ? (
-            <ActivityIndicator
-              style={{ marginRight: 5 }}
-              size={18}
-              color={"#fff"}
-            />
-          ) : null
-        }
+        icon={props.isLoading ? <ActivityIndicator style={{ marginRight: 5 }} size={18} color={"#fff"} /> : null}
         disabled={!(props.f.isValid && !props.f.isSubmitting && props.f.dirty)}
         type="contained"
         callback={() => props.f.handleSubmit()}
         style={[
           timelineStyles.submitButton,
           {
-            backgroundColor: !(
-              props.f.isValid &&
-              !props.f.isSubmitting &&
-              props.f.dirty
-            )
+            backgroundColor: !(props.f.isValid && !props.f.isSubmitting && props.f.dirty)
               ? Color(Colors.secondary).alpha(0.1).string()
               : Colors.secondary,
           },
@@ -250,17 +217,6 @@ const SubmitButton = (props: SubmitButtonProps) =>
     </View>
   ) : null;
 
-const TimePickerModal = (props: {
-  isVisible: boolean;
-  onConfirm: (date: Date) => void;
-  onCancel: () => void;
-}) => {
-  return (
-    <DateTimePicker
-      mode="time"
-      isVisible={props.isVisible}
-      onConfirm={props.onConfirm}
-      onCancel={props.onCancel}
-    />
-  );
+const TimePickerModal = (props: { isVisible: boolean; onConfirm: (date: Date) => void; onCancel: () => void }) => {
+  return <DateTimePicker mode="time" isVisible={props.isVisible} onConfirm={props.onConfirm} onCancel={props.onCancel} />;
 };

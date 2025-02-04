@@ -3,8 +3,9 @@ import useGetStatistics, { WalletStatisticsResponse } from "../../hooks/useGetSt
 import Layout from "@/constants/Layout";
 import { FontAwesome5, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import Colors from "@/constants/Colors";
-import { ReactNode, useMemo } from "react";
+import { ReactNode, useEffect, useMemo, useState } from "react";
 import moment from "moment";
+import { Expense, Wallet } from "@/types";
 
 interface StatisticsSummaryProps {
   data: WalletStatisticsResponse["statistics"] | undefined;
@@ -21,6 +22,8 @@ interface ItemProps {
   formatValue?: boolean;
   width?: number;
 }
+
+const capitalize = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : "");
 
 export const Item = ({ label, value, icon, formatValue = true, width }: ItemProps) => (
   <View
@@ -48,8 +51,6 @@ export const Item = ({ label, value, icon, formatValue = true, width }: ItemProp
 export default function StatisticsSummary(props: StatisticsSummaryProps) {
   const oppositeRange = useMemo(() => {
     const size = moment(props.dates.to).diff(moment(props.dates.from), "days");
-
-    console.log(size);
 
     if (size === 1)
       return [
@@ -140,12 +141,12 @@ export default function StatisticsSummary(props: StatisticsSummaryProps) {
         />
         <Item
           label="Top category"
-          value={props.data.theMostCommonCategory}
+          value={capitalize(props.data.theMostCommonCategory)}
           icon={<MaterialIcons name="category" size={24} color="white" />}
         />
         <Item
-          label="Meh category"
-          value={props.data.theLeastCommonCategory}
+          label="Uncommon category"
+          value={capitalize(props.data.theLeastCommonCategory)}
           icon={<MaterialIcons name="category" size={24} color="white" />}
         />
       </View>

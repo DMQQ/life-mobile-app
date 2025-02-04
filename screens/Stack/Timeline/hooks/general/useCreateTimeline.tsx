@@ -11,10 +11,7 @@ import BottomSheetType from "@gorhom/bottom-sheet";
 import { Platform, ToastAndroid } from "react-native";
 import { DATE_FORMAT } from "@/utils/functions/parseDate";
 
-export default function useCreateTimeline({
-  route,
-  navigation,
-}: TimelineScreenProps<"TimelineCreate">) {
+export default function useCreateTimeline({ route, navigation }: TimelineScreenProps<"TimelineCreate">) {
   const {
     handleSubmit,
     initialValues,
@@ -32,8 +29,7 @@ export default function useCreateTimeline({
     skip: !isEditing || route?.params?.timelineId === undefined,
   });
 
-  const { editTimeline, initialFormProps: initialEditFormValues } =
-    useEditTimeline(route.params.timelineId || "", isEditing);
+  const { editTimeline, initialFormProps: initialEditFormValues } = useEditTimeline(route.params.timelineId || "", isEditing);
 
   const initialFormValues =
     isEditing && data !== undefined
@@ -71,22 +67,22 @@ export default function useCreateTimeline({
 
   const [optionsVisible, setOptionsVisible] = useState(false);
 
-  useEffect(() => {
-    navigation.setOptions({
-      header: (props: any) => (
-        <TimelineCreateHeader
-          {...props}
-          handleChangeDate={handleChangeDate}
-          selectedDate={route.params.selectedDate}
-          onToggleOptions={() => {
-            f.resetForm();
-            Platform.OS === "android" &&
-              ToastAndroid.show("Form reseted", ToastAndroid.SHORT);
-          }}
-        />
-      ),
-    });
-  }, [optionsVisible, f.values.date]);
+  // useEffect(() => {
+  //   navigation.setOptions({
+  //     header: (props: any) => (
+  //       <TimelineCreateHeader
+  //         {...props}
+  //         handleChangeDate={handleChangeDate}
+  //         selectedDate={route.params.selectedDate}
+  //         onToggleOptions={() => {
+  //           f.resetForm();
+  //           Platform.OS === "android" &&
+  //             ToastAndroid.show("Form reseted", ToastAndroid.SHORT);
+  //         }}
+  //       />
+  //     ),
+  //   });
+  // }, [optionsVisible, f.values.date]);
 
   return {
     f,
@@ -99,5 +95,6 @@ export default function useCreateTimeline({
     initialValues,
     handleSubmit,
     sheetRef,
+    handleChangeDate,
   };
 }

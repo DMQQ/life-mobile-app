@@ -83,14 +83,17 @@ export default function useCreateTimeline(props: { selectedDate: string }) {
       },
 
       onError: (err) => {
-        Platform.OS === "android" &&
-          ToastAndroid.show("Could not create timeline", ToastAndroid.LONG);
+        Platform.OS === "android" && ToastAndroid.show("Could not create timeline", ToastAndroid.LONG);
       },
     });
 
-    navigation.navigate("TimelineScreens", {
-      timelineId: (data?.createTimeline as Timeline).id,
-    });
+    navigation.goBack();
+
+    setTimeout(() => {
+      navigation.navigate("TimelineScreens", {
+        timelineId: (data?.createTimeline as Timeline).id,
+      });
+    }, 150);
   };
 
   return { initialValues, handleSubmit, validationSchema, state };

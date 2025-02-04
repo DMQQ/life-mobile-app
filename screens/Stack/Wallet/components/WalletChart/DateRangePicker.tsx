@@ -1,6 +1,6 @@
 import moment, { Moment } from "moment";
 import { Action, Filters } from "../../hooks/useGetWallet";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ScrollView } from "react-native";
 import Layout from "@/constants/Layout";
 import Button from "@/components/ui/Button/Button";
@@ -26,7 +26,15 @@ const DateRangePicker = (props: { filters: Filters; dispatch: React.Dispatch<Act
     ["This month", [moment().startOf("month"), moment().endOf("month")]],
     ["Last month", [moment().subtract(1, "month").startOf("month"), moment().subtract(1, "month").endOf("month")]],
     ["This year", [moment().startOf("year"), moment().endOf("year")]],
-  ].reverse() as [string, [Moment, Moment]][];
+    ["Last year", [moment().subtract(1, "year").startOf("year"), moment().subtract(1, "year").endOf("year")]],
+    ["All time", [moment("2020-01-01"), moment()]],
+  ] as [string, [Moment, Moment]][];
+
+  useEffect(() => {
+    if (!(props.filters.date.from && props.filters.date.to)) {
+      onDateChange("Last 7 days", moment().subtract(7, "days"), moment().add(1, "day"));
+    }
+  }, [props.filters?.date.from, props.filters?.date.to]);
 
   const [selected, setSelected] = useState("This year");
 
