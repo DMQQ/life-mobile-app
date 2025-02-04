@@ -5,7 +5,7 @@ import { SafeAreaView, StyleSheet, Text, View } from "react-native";
 import Ripple from "react-native-material-ripple";
 import Animated, {
   Extrapolation,
-  FadeIn,
+  FadeOut,
   interpolate,
   useAnimatedScrollHandler,
   useAnimatedStyle,
@@ -20,7 +20,7 @@ import { useWalletContext } from "../components/WalletContext";
 import useGetWallet from "../hooks/useGetWallet";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import InitializeWallet from "../components/InitializeWallet";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 
 const styles = StyleSheet.create({
@@ -105,6 +105,18 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
     editBalanceRef.current?.expand();
   };
 
+  const [isLoaderVisible, setIsLoaderVisible] = useState(true);
+
+  useEffect(() => {
+    if (!loading) {
+      const timeout = setTimeout(() => {
+        setIsLoaderVisible(false);
+      }, 1000);
+
+      return () => clearTimeout(timeout);
+    }
+  }, [loading]);
+
   if (
     (Array.isArray(error?.cause?.extensions)
       ? //@ts-ignore
@@ -120,53 +132,65 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
       </SafeAreaView>
     );
 
-  if (loading) return <SafeAreaView style={{ flex: 1, marginTop: insets.top }}>{<ScreenLoader />}</SafeAreaView>;
-
   return (
-    <Animated.View style={{ flex: 1 }} entering={FadeIn.delay(200)}>
-      <SafeAreaView style={{ flex: 1, position: "relative" }}>
-        <Header
-          buttons={[
-            {
-              onPress: () => navigation.navigate("Filters"),
-              icon: <Ionicons name="search" size={20} color="#fff" />,
-            },
-            {
-              onPress: () => navigation.navigate("Charts"),
-              icon: <Ionicons name="stats-chart" size={20} color="#fff" />,
-            },
-            {
-              // onPress: () => bottomSheetRef.current?.snapToIndex(0),
-              onPress: () => navigation.navigate("CreateExpense"),
-              icon: <AntDesign name="plus" size={20} color="#fff" />,
-            },
-          ]}
-          goBack={false}
-        />
-
-        <Animated.View style={[styles.header, animatedContainerStyle]}>
-          <Ripple onLongPress={handleShowEditSheet}>
-            <Animated.Text style={[styles.title, animatedBalanceStyle]}>
-              {balance}
-              <Text style={{ color: "#ffffff97", fontSize: 18 }}>zł </Text>
-            </Animated.Text>
-          </Ripple>
+    <SafeAreaView style={{ flex: 1, position: "relative" }}>
+      {isLoaderVisible && (
+        <Animated.View
+          exiting={FadeOut.duration(500)}
+          style={{
+            flex: 1,
+            width: Layout.screen.width,
+            height: Layout.screen.height,
+            position: "absolute",
+            zIndex: 1000,
+            backgroundColor: "#000",
+          }}
+        >
+          <ScreenLoader />
         </Animated.View>
+      )}
 
-        <WalletList
-          filtersActive={filtersActive}
-          isLocked={loading || !data || endReached}
-          refetch={refetch}
-          scrollY={scrollY}
-          onScroll={onAnimatedScrollHandler}
-          wallet={data?.wallet}
-          onEndReached={onEndReached}
-        />
+      <Header
+        buttons={[
+          {
+            onPress: () => navigation.navigate("Filters"),
+            icon: <Ionicons name="search" size={20} color="#fff" />,
+          },
+          {
+            onPress: () => navigation.navigate("Charts"),
+            icon: <Ionicons name="stats-chart" size={20} color="#fff" />,
+          },
+          {
+            // onPress: () => bottomSheetRef.current?.snapToIndex(0),
+            onPress: () => navigation.navigate("CreateExpense"),
+            icon: <AntDesign name="plus" size={20} color="#fff" />,
+          },
+        ]}
+        goBack={false}
+      />
 
-        <CreateExpenseSheet onCompleted={() => {}} ref={bottomSheetRef} />
+      <Animated.View style={[styles.header, animatedContainerStyle]}>
+        <Ripple onLongPress={handleShowEditSheet}>
+          <Animated.Text style={[styles.title, animatedBalanceStyle]}>
+            {balance}
+            <Text style={{ color: "#ffffff97", fontSize: 18 }}>zł </Text>
+          </Animated.Text>
+        </Ripple>
+      </Animated.View>
 
-        <EditBalanceSheet />
-      </SafeAreaView>
-    </Animated.View>
+      <WalletList
+        filtersActive={filtersActive}
+        isLocked={loading || !data || endReached}
+        refetch={refetch}
+        scrollY={scrollY}
+        onScroll={onAnimatedScrollHandler}
+        wallet={data?.wallet}
+        onEndReached={onEndReached}
+      />
+
+      <CreateExpenseSheet onCompleted={() => {}} ref={bottomSheetRef} />
+
+      <EditBalanceSheet />
+    </SafeAreaView>
   );
 }
