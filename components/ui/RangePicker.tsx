@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Animated, View } from "react-native";
 import { PanGestureHandler } from "react-native-gesture-handler";
 
-interface RangSliderProps {
+interface RangeSliderProps {
   range: number[];
   defaultValues?: number[];
   barHeight?: number;
@@ -16,7 +16,7 @@ interface RangSliderProps {
 
 function RangeSlider({
   range = [0, 100],
-  defaultValues = [0, 0],
+  defaultValues = [20, 80], // Changed to provide distinct default values
   barHeight = 30,
   barStyle = {},
   fillStyle = {},
@@ -24,7 +24,7 @@ function RangeSlider({
   handleStyle = {},
   onChange = () => {},
   vibrate = false,
-}: RangSliderProps) {
+}: RangeSliderProps) {
   const [barWidth, setBarWidth] = useState(300);
   const minValueRef = useRef(defaultValues[0]);
   const maxValueRef = useRef(defaultValues[1]);
@@ -33,12 +33,21 @@ function RangeSlider({
   const minTouchX = useRef(new Animated.Value(0)).current;
   const maxTouchX = useRef(new Animated.Value(0)).current;
   const fillWidth = useRef(new Animated.Value(0)).current;
-  const unusedTouchX = useRef(new Animated.Value(0)).current;
-  // const ReactNativeHapticFeedback = vibrate ? require("react-native-haptic-feedback").default : undefined;
-  const ReactNativeHapticFeedback = undefined;
+
+  // Import haptic feedback conditionally
+  let ReactNativeHapticFeedback;
+  if (vibrate) {
+    try {
+      // Use dynamic import or require within try/catch
+      ReactNativeHapticFeedback = require("react-native-haptic-feedback").default;
+    } catch (e) {
+      console.warn("react-native-haptic-feedback is not available");
+    }
+  }
 
   const onBarLayout = ({ nativeEvent }: any) => {
-    setBarWidth(nativeEvent.layout.width);
+    const newBarWidth = nativeEvent.layout.width;
+    setBarWidth(newBarWidth);
   };
 
   const triggerVibration = () => {
@@ -50,17 +59,20 @@ function RangeSlider({
     }
   };
 
-  const pixelRatio = () => {
-    return (range[1] - range[0]) / (barWidth - handleSize);
-  };
+  // No longer using this function with the new approach
+  // const pixelRatio = () => {
+  //   return (range[1] - range[0]) / (barWidth - handleSize);
+  // };
 
   const onMinValueChange = ({ nativeEvent }: any) => {
-    const { absoluteX } = nativeEvent;
-    const value = Math.round(absoluteX * pixelRatio()) + range[0];
-    if (value >= range[0] && value <= maxValueRef.current && value != minValueRef.current) {
-      minPosX.current = absoluteX;
+    // Adjust for handle offset - subtract half the handle width
+    const adjustedX = Math.max(0, Math.min(nativeEvent.absoluteX - handleSize / 2, barWidth - handleSize));
+
+    const value = Math.round((adjustedX / (barWidth - handleSize)) * (range[1] - range[0])) + range[0];
+    if (value >= range[0] && value <= maxValueRef.current && value !== minValueRef.current) {
+      minPosX.current = adjustedX;
       minValueRef.current = value;
-      minTouchX.setValue(absoluteX);
+      minTouchX.setValue(adjustedX);
       fillWidth.setValue(maxPosX.current - minPosX.current);
       if (vibrate) triggerVibration();
       onChange([minValueRef.current, maxValueRef.current]);
@@ -68,37 +80,31 @@ function RangeSlider({
   };
 
   const onMaxValueChange = ({ nativeEvent }: any) => {
-    const { absoluteX } = nativeEvent;
-    const value = Math.round(absoluteX * pixelRatio()) + range[0];
-    if (value <= range[1] && value >= minValueRef.current && value != maxValueRef.current) {
-      maxPosX.current = absoluteX;
+    // Adjust for handle offset - subtract half the handle width
+    const adjustedX = Math.max(0, Math.min(nativeEvent.absoluteX - handleSize / 2, barWidth - handleSize));
+
+    const value = Math.round((adjustedX / (barWidth - handleSize)) * (range[1] - range[0])) + range[0];
+    if (value <= range[1] && value >= minValueRef.current && value !== maxValueRef.current) {
+      maxPosX.current = adjustedX;
       maxValueRef.current = value;
-      maxTouchX.setValue(absoluteX);
+      maxTouchX.setValue(adjustedX);
       fillWidth.setValue(maxPosX.current - minPosX.current);
       if (vibrate) triggerVibration();
       onChange([minValueRef.current, maxValueRef.current]);
     }
   };
 
-  const onMinPanGestureEvent = Animated.event([{ nativeEvent: { translationX: unusedTouchX } }], {
-    useNativeDriver: true,
-    listener: onMinValueChange,
-  });
-
-  const onMaxPanGestureEvent = Animated.event([{ nativeEvent: { translationX: unusedTouchX } }], {
-    useNativeDriver: true,
-    listener: onMaxValueChange,
-  });
-
+  // Handle initial setup and changes to range or defaultValues
   useEffect(() => {
-    const min = (minValueRef.current - range[0]) / pixelRatio();
-    const max = (maxValueRef.current - range[0]) / pixelRatio();
+    const min = ((minValueRef.current - range[0]) / (range[1] - range[0])) * (barWidth - handleSize);
+    const max = ((maxValueRef.current - range[0]) / (range[1] - range[0])) * (barWidth - handleSize);
+
     minPosX.current = min;
     maxPosX.current = max;
     minTouchX.setValue(min);
     maxTouchX.setValue(max);
     fillWidth.setValue(max - min);
-  }, [barWidth]);
+  }, [barWidth, range, minValueRef.current, maxValueRef.current]);
 
   const renderFill = (minTranslateX: any) => {
     return (
@@ -140,15 +146,16 @@ function RangeSlider({
     );
   };
 
+  // Constraining the translation to stay within the visible area
   const minTranslateX = minTouchX.interpolate({
-    inputRange: [0, barWidth],
-    outputRange: [0, barWidth],
+    inputRange: [0, barWidth - handleSize],
+    outputRange: [0, barWidth - handleSize],
     extrapolate: "clamp",
   });
 
   const maxTranslateX = maxTouchX.interpolate({
-    inputRange: [0, barWidth],
-    outputRange: [0, barWidth],
+    inputRange: [0, barWidth - handleSize],
+    outputRange: [0, barWidth - handleSize],
     extrapolate: "clamp",
   });
 
@@ -166,8 +173,25 @@ function RangeSlider({
         }}
       >
         {renderFill(minTranslateX)}
-        <PanGestureHandler onGestureEvent={onMinPanGestureEvent}>{renderHandle(minTranslateX)}</PanGestureHandler>
-        <PanGestureHandler onGestureEvent={onMaxPanGestureEvent}>{renderHandle(maxTranslateX)}</PanGestureHandler>
+        <PanGestureHandler
+          onGestureEvent={Animated.event([{ nativeEvent: { absoluteX: minTouchX } }], {
+            useNativeDriver: false,
+            listener: onMinValueChange,
+          })}
+          activateAfterLongPress={0}
+        >
+          {renderHandle(minTranslateX)}
+        </PanGestureHandler>
+
+        <PanGestureHandler
+          onGestureEvent={Animated.event([{ nativeEvent: { absoluteX: maxTouchX } }], {
+            useNativeDriver: false,
+            listener: onMaxValueChange,
+          })}
+          activateAfterLongPress={0}
+        >
+          {renderHandle(maxTranslateX)}
+        </PanGestureHandler>
       </Animated.View>
     </View>
   );

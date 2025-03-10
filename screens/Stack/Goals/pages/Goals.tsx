@@ -22,8 +22,9 @@ export default function Goals({ navigation }: any) {
         contentContainerStyle={{ padding: 15 }}
         data={goals}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
+        renderItem={({ item, index }) => (
           <GoalCategory
+            index={index}
             onPress={() => {
               navigation.navigate("Goal", { id: item.id });
             }}

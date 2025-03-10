@@ -135,11 +135,11 @@ const MonthExpenseList = ({
 
         {showTotal && (
           <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <Text style={{ color: amount > 0 ? "#66E875" : "#F07070", fontSize: 18 }}>
+            <Text style={{ color: amount > 0 ? "#66E875" : "#F07070", fontSize: 15 }}>
               {amount > 0 ? `+${amount.toFixed(2)}` : amount.toFixed(2)}
             </Text>
 
-            <Text style={{ color: Color(Colors.primary_lighter).lighten(5).hex() }}> zł</Text>
+            <Text style={{ color: amount > 0 ? "#66E875" : "#F07070", fontSize: 13 }}>zł</Text>
           </View>
         )}
       </View>

@@ -1,17 +1,61 @@
-import Button from "@/components/ui/Button/Button";
-import Header from "@/components/ui/Header/Header";
-import ScreenContainer from "@/components/ui/ScreenContainer";
-import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons";
-import { StyleSheet, Text, TextInput } from "react-native";
-import { View } from "react-native";
-import { useGoal } from "../hooks/hooks";
-import { useState } from "react";
-import Colors from "@/constants/Colors";
-import Layout from "@/constants/Layout";
-import IconButton from "@/components/ui/IconButton/IconButton";
 import moment from "moment";
+import { Keyboard, StyleSheet, Text, View, TouchableWithoutFeedback } from "react-native";
+import Colors from "@/constants/Colors";
+import { memo, useCallback, useRef, useState } from "react";
+import Ripple from "react-native-material-ripple";
+import Layout from "@/constants/Layout";
+import { AntDesign, Entypo, MaterialCommunityIcons } from "@expo/vector-icons";
+import lowOpacity from "@/utils/functions/lowOpacity";
+import Animated, {
+  FadeIn,
+  FadeInDown,
+  useSharedValue,
+  withSequence,
+  withSpring,
+  useAnimatedStyle,
+  cancelAnimation,
+  withTiming,
+} from "react-native-reanimated";
+import IconButton from "@/components/ui/IconButton/IconButton";
+import Button from "@/components/ui/Button/Button";
+import { useGoal } from "../hooks/hooks";
+import Color from "color";
 
-const quickActions = {
+// Types
+interface QuickAction {
+  label: string;
+  value: number;
+}
+
+type QuickActionsMap = {
+  [key: string]: QuickAction[];
+};
+
+interface AddGoalEntryProps {
+  route: {
+    params: {
+      id: string;
+    };
+  };
+  navigation: {
+    goBack: () => void;
+    navigate: (screen: string, params?: any) => void;
+  };
+}
+
+interface Goal {
+  id: string;
+  name: string;
+  icon: string;
+  unit: string;
+  min: number;
+  max: number;
+  target: number;
+  description?: string;
+}
+
+// Quick actions map
+const quickActions: QuickActionsMap = {
   target: [{ label: "1 goal", value: 1 }],
   dumbbell: [
     { label: "30 mins", value: 30 },
@@ -104,149 +148,332 @@ const quickActions = {
     { label: "Dose", value: 1 },
     { label: "Day", value: 1 },
   ],
-} as const;
-export default function AddGoalEntry({ route, navigation }: any) {
+};
+
+export default function AddGoalEntry({ route, navigation }: AddGoalEntryProps) {
   const { id } = route.params;
   const { goals, upsertStats } = useGoal();
-  const goal = goals.find((goal) => goal.id === id);
-  const [value, setValue] = useState("");
+  const goal = goals.find((goal: Goal) => goal.id === id);
+  const [amount, setAmount] = useState<string>("0");
+  const [date] = useState<string>(moment().format("YYYY-MM-DD"));
+  const [selectedQuickValue, setSelectedQuickValue] = useState<number | null>(null);
 
-  // @ts-ignore
-  const quickValues = quickActions[goal?.icon as any] || [];
+  const transformX = useSharedValue(0);
+  const isAnimating = useSharedValue(false);
 
-  const handleSubmit = () => {
-    if (!goal || !value) return;
+  const shake = () => {
+    if (isAnimating.value) return;
 
-    upsertStats({
+    isAnimating.value = true;
+    cancelAnimation(transformX);
+    transformX.value = withSpring(15, { damping: 2, stiffness: 200, mass: 0.5 });
+
+    setTimeout(() => {
+      transformX.value = withSpring(-15, { damping: 2, stiffness: 200, mass: 0.5 });
+      setTimeout(() => {
+        transformX.value = withSpring(0, { damping: 2, stiffness: 200, mass: 0.5 }, (finished) => {
+          if (finished) isAnimating.value = false;
+        });
+      }, 50);
+    }, 50);
+  };
+
+  const handleSubmit = async () => {
+    if (!goal || !amount || amount === "0") return;
+
+    const parseAmount = (amount: string) => {
+      if (amount.endsWith(".")) return +amount.slice(0, -1);
+
+      if (amount.includes(".")) {
+        const [int, dec] = amount.split(".");
+        if (dec.length > 2) {
+          return +int + +`0.${dec.slice(0, 2)}`;
+        }
+      }
+
+      return +amount;
+    };
+
+    await upsertStats({
       variables: {
         goalsId: goal.id,
-        value: +value,
-        date: moment().format("YYYY-MM-DD"),
+        value: parseAmount(amount),
+        date: date,
       },
       refetchQueries: ["GetGoals"],
-      onError: (error) => console.error(JSON.stringify(error, null, 2)),
       onCompleted: () => navigation.goBack(),
+      onError: (error) => console.error(JSON.stringify(error, null, 2)),
     });
   };
 
+  const handleAmountChange = useCallback((value: string) => {
+    return setAmount((prev) => {
+      if (value === "C") {
+        const val = prev.toString().slice(0, -1);
+        return val.length === 0 ? "0" : val;
+      }
+
+      if (typeof +value === "number" && prev.includes(".") && prev.split(".")[1].length === 2) {
+        shake();
+        return prev;
+      }
+
+      if (prev.length === 1 && prev === "0" && value !== ".") {
+        return value;
+      }
+      if (prev.includes(".") && value === ".") {
+        shake();
+        return prev;
+      }
+      if (prev.length === 0 && value === ".") {
+        return "0.";
+      }
+      return prev + value;
+    });
+  }, []);
+
+  const quickValues = goal?.icon ? quickActions[goal.icon] || [] : [];
+
+  const handleQuickValuePress = (value: number) => {
+    setAmount(value.toString());
+    setSelectedQuickValue(value);
+  };
+
+  const scale = (n: number) => {
+    "worklet";
+    return Math.max(90 - n * 3.5, 35);
+  };
+
+  const animatedAmount = useAnimatedStyle(
+    () => ({
+      transform: [{ translateX: transformX.value }],
+      fontSize: withTiming(scale(amount.length), { duration: 100 }),
+    }),
+    [amount]
+  );
+
   return (
-    <ScreenContainer style={{ padding: 0 }}>
-      <Header goBack title="Add Entry" />
-
-      <View style={styles.container}>
-        <View style={{ flex: 1, alignItems: "center" }}>
-          <View style={{ width: Layout.screen.width, justifyContent: "center", alignItems: "center" }}>
-            <View
-              style={{
-                padding: 20,
-                borderRadius: 100,
-                justifyContent: "center",
-                alignItems: "center",
-                backgroundColor: Colors.primary_lighter,
-                marginBottom: 20,
-                width: 130,
-                height: 130,
-              }}
-            >
-              <MaterialCommunityIcons name={goal?.icon || "close"} size={90} color={Colors.secondary} style={styles.icon} />
-            </View>
-          </View>
-
-          <View style={{ marginBottom: 30 }}>
-            <Text style={styles.title}>{goal?.name}</Text>
-            <Text style={[styles.unit, { textAlign: "center" }]}>{goal?.unit}</Text>
+    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+      <View style={{ flex: 1 }}>
+        <View style={styles.container}>
+          <View style={{ position: "absolute", top: 15, left: 15, zIndex: 100 }}>
+            <IconButton onPress={() => navigation.goBack()} icon={<AntDesign name="close" size={24} color="rgba(255,255,255,0.7)" />} />
           </View>
 
           <View
-            style={[
-              styles.inputContainer,
-              {
-                backgroundColor: Colors.primary_lighter,
-                borderRadius: 60,
-                borderWidth: 2,
-                borderColor: Colors.secondary,
-                position: "relative",
-              },
-            ]}
+            style={{
+              height: 250,
+              justifyContent: "center",
+              width: "100%",
+              alignItems: "center",
+              flexDirection: "row",
+              paddingHorizontal: 15,
+            }}
           >
-            <TextInput
-              placeholderTextColor={Colors.secondary}
-              placeholder="Enter value"
-              value={value}
-              onChangeText={setValue}
-              keyboardType="numeric"
-              style={{
-                width: Layout.screen.width / 1.8,
-                fontSize: 18,
-                textAlign: "center",
-                padding: 15,
-                color: Colors.secondary,
-              }}
-            />
-            <IconButton
-              style={{ backgroundColor: Colors.secondary, padding: 10, borderRadius: 100, position: "absolute", right: 0 }}
-              icon={<AntDesign size={30} name="save" color="#fff" />}
-            />
+            {/* Goal icon and value display */}
+            <View style={{ alignItems: "center" }}>
+              <View style={{ flexDirection: "row", gap: 15, alignItems: "center" }}>
+                <Animated.Text style={[{ color: "#fff", fontWeight: "bold" }, animatedAmount]}>
+                  {amount}
+                  <Text style={{ fontSize: 16, color: "rgba(255,255,255,0.7)" }}> {goal?.unit}</Text>
+                </Animated.Text>
+              </View>
+              <View style={{ flexDirection: "row", gap: 5 }}>
+                <MaterialCommunityIcons name={goal?.icon || "progress-check"} size={22.5} color={Colors.secondary} />
+
+                <Text style={{ color: "rgba(255,255,255,0.7)", marginBottom: 15, fontSize: 18 }}>{goal?.name}</Text>
+              </View>
+            </View>
           </View>
 
-          <View style={styles.quickValues}>
-            {quickValues.map((item) => (
-              <Button key={item.label} onPress={() => setValue(item.value.toString())} variant="primary" style={styles.quickButton}>
-                {item.label}
-              </Button>
-            ))}
+          <View style={{ marginTop: 20, flex: 1, gap: 15, maxHeight: Layout.screen.height / 1.85 - 5 }}>
+            <View
+              style={{
+                borderRadius: 35,
+                flex: 1,
+              }}
+            >
+              <Animated.View entering={FadeIn} style={{ gap: 10 }}>
+                {/* Quick Values */}
+                {quickValues.length > 0 && (
+                  <View>
+                    <Text style={{ color: "rgba(255,255,255,0.7)", fontSize: 16, marginBottom: 10, fontWeight: "500" }}>Quick Values</Text>
+                    <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10, justifyContent: "flex-start" }}>
+                        {quickValues.map((item, index) => (
+                          <Ripple
+                            key={`${item.label}-${index}`}
+                            style={[styles.quickValueButton, selectedQuickValue === item.value && styles.quickValueButtonActive]}
+                            onPress={() => handleQuickValuePress(item.value)}
+                          >
+                            <Text style={[styles.quickValueText, selectedQuickValue === item.value && styles.quickValueTextActive]}>
+                              {item.label}
+                            </Text>
+                          </Ripple>
+                        ))}
+                      </View>
+                      <Button
+                        onPress={handleSubmit}
+                        style={{
+                          borderRadius: 10,
+                          padding: 15,
+                          paddingVertical: 5,
+                          opacity: amount === "0" ? 0.5 : 1,
+                        }}
+                        disabled={amount === "0"}
+                        fontStyle={{ fontSize: 14 }}
+                      >
+                        Save
+                      </Button>
+                    </View>
+                  </View>
+                )}
+              </Animated.View>
+
+              {/* Keypad */}
+              <NumbersPad rotateBackButton={amount === "0"} handleAmountChange={handleAmountChange} navigation={navigation} />
+            </View>
           </View>
         </View>
-
-        <Button onPress={handleSubmit} style={styles.button}>
-          Save Entry
-        </Button>
       </View>
-    </ScreenContainer>
+    </TouchableWithoutFeedback>
   );
 }
 
+const NumbersPad = memo(
+  ({
+    handleAmountChange,
+    rotateBackButton,
+    navigation,
+  }: {
+    handleAmountChange: (val: string) => void;
+    rotateBackButton: boolean;
+    navigation: any;
+  }) => {
+    return (
+      <Animated.View entering={FadeInDown} style={{ flex: 1, gap: 15, borderRadius: 35, justifyContent: "center" }}>
+        {[
+          [1, 2, 3],
+          [4, 5, 6],
+          [7, 8, 9],
+          [".", 0, "C"],
+        ].map((row) => (
+          <View style={{ flexDirection: "row", gap: 15 }} key={row.toString()}>
+            {row.map((num) => (
+              <NumpadNumber
+                navigation={navigation}
+                rotateBackButton={rotateBackButton}
+                num={num}
+                key={num.toString()}
+                onPress={() => handleAmountChange(num.toString())}
+              />
+            ))}
+          </View>
+        ))}
+      </Animated.View>
+    );
+  }
+);
+
+const AnimatedRipple = Animated.createAnimatedComponent(Ripple);
+
+const NumpadNumber = (props: { onPress: VoidFunction; num: string | number; rotateBackButton: boolean; navigation: any }) => {
+  const scale = useSharedValue(1);
+
+  const onPress = () => {
+    props.num === "C" && props.rotateBackButton ? props.navigation.goBack() : props.onPress();
+    scale.value = withSequence(withSpring(1.5, { duration: 200 }), withSpring(1, { duration: 200 }));
+  };
+
+  const animatedScale = useAnimatedStyle(
+    () => ({
+      transform: [
+        { scale: scale.value },
+        {
+          rotate: withTiming(props.num === "C" && props.rotateBackButton ? "-90deg" : "0deg", { duration: 150 }),
+        },
+      ],
+    }),
+    [props.rotateBackButton]
+  );
+
+  const interval = useRef<NodeJS.Timeout | null>(null);
+
+  return (
+    <View style={{ width: "30%", height: 75, overflow: "hidden", borderRadius: 100 }}>
+      <AnimatedRipple
+        rippleCentered
+        rippleColor={Colors.secondary}
+        rippleSize={50}
+        onPress={onPress}
+        onLongPress={() => {
+          if (props.num !== "C") {
+            interval.current = setInterval(() => {
+              onPress();
+            }, 50);
+          }
+        }}
+        onPressOut={() => {
+          if (interval.current) {
+            clearInterval(interval.current!);
+          }
+        }}
+        style={[
+          {
+            justifyContent: "center",
+            alignItems: "center",
+            width: "100%",
+            height: "100%",
+          },
+          animatedScale,
+        ]}
+      >
+        {props.num === "C" ? (
+          <Entypo name="chevron-left" size={40} color="#fff" />
+        ) : (
+          <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 24 }}>{props.num}</Text>
+        )}
+      </AnimatedRipple>
+    </View>
+  );
+};
+
 const styles = StyleSheet.create({
-  // ... previous styles
-  quickValues: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 10,
-    marginTop: 20,
-    width: "100%",
-  },
-  quickButton: {
-    borderRadius: 15,
-    backgroundColor: Colors.primary_lighter,
-    padding: 15,
-  },
   container: {
     flex: 1,
     padding: 15,
-    alignItems: "center",
-    justifyContent: "space-between",
+    gap: 15,
+    backgroundColor: Colors.primary,
   },
-  icon: {},
-  title: {
-    fontSize: 30,
+  iconContainer: {
+    width: 60,
+    height: 60,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: Colors.primary_lighter,
+    borderRadius: 40,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.1)",
+  },
+  quickValueButton: {
+    backgroundColor: Colors.primary_lighter,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 12,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.1)",
+  },
+  quickValueButtonActive: {
+    backgroundColor: lowOpacity(Colors.secondary, 0.3),
+    borderColor: Colors.secondary,
+  },
+  quickValueText: {
+    color: "rgba(255,255,255,0.9)",
+    fontWeight: "500",
+  },
+  quickValueTextActive: {
+    color: "#FFFFFF",
     fontWeight: "600",
-    color: "#fff",
-  },
-  inputContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    width: "100%",
-  },
-  unit: {
-    color: "#fff",
-    fontSize: 16,
-    zIndex: 10,
-  },
-  button: {
-    marginTop: 20,
-    width: "100%",
-    borderRadius: 100,
-    padding: 17.5,
   },
 });
