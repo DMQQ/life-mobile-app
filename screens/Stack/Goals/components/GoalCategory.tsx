@@ -1,10 +1,11 @@
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import Colors from "@/constants/Colors";
-import Color from "color";
+import Colors, { secondary_candidates } from "@/constants/Colors";
+import GoalActivityGrid from "./StatGrid";
+import moment from "moment";
+import { useMemo } from "react";
+import { Pressable, Text, View } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 import Ripple from "react-native-material-ripple";
-import DayEntry from "./GoalEntry";
+import lowOpacity from "@/utils/functions/lowOpacity";
 
 interface GoalCategoryProps {
   id: string;
@@ -17,74 +18,53 @@ interface GoalCategoryProps {
     value: number;
     date: string;
   }[];
+
+  target: number;
+
+  min: number;
+
+  max: number;
+
+  index: number;
 }
 
 export const GoalCategory = ({ name, icon, description, entries = [], onPress, ...rest }: GoalCategoryProps) => {
-  const latestValue = entries[entries.length - 1]?.value;
+  const navigation = useNavigation<any>();
 
+  const contributionData = useMemo(() => {
+    return entries.map((entry) => ({
+      date: entry.date,
+      count: rest?.target > entry.value ? entry.value : rest?.target / entry.value,
+    }));
+  }, [entries.length]);
   return (
-    <Ripple onPress={onPress} style={styles.container}>
-      <View
-        style={[
-          styles.header,
-          latestValue
-            ? {
-                marginBottom: 15,
-              }
-            : {},
-        ]}
-      >
-        <Text style={styles.icon}>
-          <MaterialCommunityIcons name={icon as any} size={24} color="#fff" />
-        </Text>
-        <View>
-          <Text style={styles.name}>{name}</Text>
-          <Text style={styles.description}>{description}</Text>
-        </View>
+    <View style={{ padding: 10, backgroundColor: Colors.primary_lighter, borderRadius: 15, marginBottom: 15 }}>
+      <View style={{ pointerEvents: "box-none" }}>
+        <GoalActivityGrid
+          contributionData={contributionData}
+          primaryColor={secondary_candidates[rest?.index % secondary_candidates.length]}
+        />
       </View>
+      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end" }}>
+        <View>
+          <Text style={{ color: "#fff", marginTop: 15 }}>{name}</Text>
+          <Text style={{ color: "#fff" }}>{description}</Text>
+        </View>
 
-      <DayEntry entry={{ id: "", value: latestValue || 0, date: new Date().toISOString(), ...rest }} />
-    </Ripple>
+        <Ripple
+          onPress={() => {
+            navigation.navigate("Goal", { id: rest.id });
+          }}
+          style={{
+            backgroundColor: lowOpacity(Colors.secondary, 0.15),
+            borderRadius: 10,
+            paddingHorizontal: 10,
+            paddingVertical: 5,
+          }}
+        >
+          <Text style={{ color: Colors.secondary }}>More</Text>
+        </Ripple>
+      </View>
+    </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    borderRadius: 30,
-    borderWidth: 1,
-    borderColor: Color(Colors.primary_lighter).lighten(1).hex(),
-    backgroundColor: Colors.primary_lighter,
-    padding: 15,
-    gap: 15,
-
-    marginBottom: 15,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 15,
-  },
-  icon: {
-    fontSize: 24,
-  },
-  name: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#fff",
-  },
-  description: {
-    fontSize: 14,
-    color: "#999",
-    marginTop: 4,
-  },
-  stats: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "flex-end",
-  },
-  value: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#fff",
-  },
-});

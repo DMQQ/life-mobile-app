@@ -120,7 +120,7 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
       </SafeAreaView>
     );
 
-  if (loading) return <SafeAreaView style={{ flex: 1 }}>{<ScreenLoader />}</SafeAreaView>;
+  if (loading) return <SafeAreaView style={{ flex: 1, marginTop: insets.top }}>{<ScreenLoader />}</SafeAreaView>;
 
   return (
     <Animated.View style={{ flex: 1 }} entering={FadeIn.delay(200)}>

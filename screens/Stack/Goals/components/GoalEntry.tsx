@@ -38,15 +38,29 @@ const DayEntry = ({ entry, index }: DayEntryProps) => {
     return isCloserToTarget ? "#4CAF50" : "#FFC107"; // Green or Yellow
   };
 
+  const isGoalMet = entry.value >= (entry?.target || 0);
+
   return (
     <View
       style={[
         styles.dayContainer,
         index === 0 && {
           borderWidth: 2,
-          borderColor: lowOpacity(Colors.secondary, 0.7),
-          backgroundColor: lowOpacity(Colors.secondary, 0.15),
+          borderColor: lowOpacity(Colors.secondary, 0.2),
+          backgroundColor: lowOpacity(Colors.secondary, 0.2),
         },
+        index !== 0 &&
+          isGoalMet && {
+            borderWidth: 2,
+            borderColor: lowOpacity("#0ED725", 0.2),
+            backgroundColor: lowOpacity("#0ED725", 0.2),
+          },
+        index !== 0 &&
+          !isGoalMet && {
+            borderWidth: 2,
+            borderColor: lowOpacity("#FF0000", 0.2),
+            backgroundColor: lowOpacity("#FF0000", 0.2),
+          },
       ]}
     >
       <View style={styles.dateSection}>
@@ -62,7 +76,7 @@ const DayEntry = ({ entry, index }: DayEntryProps) => {
           }}
         >
           <Text style={styles.value}>{entry.min}</Text>
-          <Text style={{ color: "gray", fontSize: 12 }}>Min</Text>
+          <Text style={{ color: "rgba(255,255,255,0.6)", fontSize: 12 }}>Min</Text>
         </View>
 
         <View style={styles.separator} />
@@ -74,7 +88,7 @@ const DayEntry = ({ entry, index }: DayEntryProps) => {
           }}
         >
           <Text style={styles.value}>{entry.target}</Text>
-          <Text style={{ color: "gray", fontSize: 12 }}>Goal</Text>
+          <Text style={{ color: "rgba(255,255,255,0.6)", fontSize: 12 }}>Goal</Text>
         </View>
 
         <View style={styles.separator} />
@@ -86,20 +100,20 @@ const DayEntry = ({ entry, index }: DayEntryProps) => {
           }}
         >
           <Text style={[styles.target, { color: getProgressColor() }]}>{entry.value}</Text>
-          <Text style={{ color: "gray", fontSize: 12 }}>You</Text>
+          <Text style={{ color: "rgba(255,255,255,0.6)", fontSize: 12 }}>You</Text>
         </View>
       </View>
 
       <View style={[styles.valueContainer, { alignSelf: "center" }]}>
         <Text
           style={{
-            color: entry.value > (entry?.target || 0) ? "#4CAF50" : isCurrentDay ? "#FFC107" : "#F44336",
+            color: isGoalMet ? "#4CAF50" : isCurrentDay ? "#FFC107" : "#F44336",
             fontWeight: "bold",
             width: 110,
             textAlign: "center",
           }}
         >
-          {entry.value > (entry?.target || 0) ? "🎉  Good Job!" : isCurrentDay ? "👀 Keep trying" : "You didn't meet your goal"}
+          {isGoalMet ? "🎉  Good Job!" : isCurrentDay ? "👀 Keep trying" : "You didn't meet your goal"}
         </Text>
       </View>
     </View>
@@ -110,9 +124,9 @@ const styles = StyleSheet.create({
   dayContainer: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 15,
-    borderRadius: 15,
-    borderWidth: 1,
+    padding: 10,
+    borderRadius: 10,
+    borderWidth: 2,
     borderColor: Color(Colors.primary_lighter).lighten(1).hex(),
     backgroundColor: Colors.primary_lighter,
   },
@@ -130,7 +144,7 @@ const styles = StyleSheet.create({
   },
   month: {
     fontSize: 14,
-    color: "#666",
+    color: "rgba(255,255,255,0.6)",
     marginTop: 2,
   },
   valueContainer: {

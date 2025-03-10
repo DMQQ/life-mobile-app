@@ -48,12 +48,12 @@ export default function Goal({ route, navigation }: any) {
     }
 
     return goal?.entries;
-  }, [goals.length]);
+  }, [goals]);
 
   return (
     <ScreenContainer style={{ padding: 0 }}>
       <Header goBack />
-      <View style={{ padding: 15, flex: 1 }}>
+      <View style={{ paddingHorizontal: 15, flex: 1, paddingTop: 15 }}>
         <View
           style={{
             justifyContent: "center",
@@ -69,16 +69,7 @@ export default function Goal({ route, navigation }: any) {
         <FlatList
           data={data}
           keyExtractor={(item) => item.id}
-          renderItem={({ item, index }) => (
-            <View
-              style={{
-                marginBottom: index === data.length - 1 ? 0 : 6,
-              }}
-            >
-              {index === 0 && <Text style={{ color: "#fff", fontSize: 18, fontWeight: "500", marginBottom: 10 }}>Today!</Text>}
-              <DayEntry index={index} entry={{ ...item, ...goal }} />
-            </View>
-          )}
+          renderItem={({ item, index }) => <DayEntry index={index} entry={{ ...item, ...goal }} />}
           contentContainerStyle={styles.list}
           showsVerticalScrollIndicator={false}
           ListHeaderComponent={
@@ -93,7 +84,7 @@ export default function Goal({ route, navigation }: any) {
           onPress={() => {
             navigation.navigate("UpdateGoalEntry", { id });
           }}
-          style={{ borderRadius: 100, padding: 17.5 }}
+          style={{ borderRadius: 100, marginTop: 15 }}
         >
           Update today's entry
         </Button>
