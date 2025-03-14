@@ -15,14 +15,15 @@ import Settings from "../screens/Stack/Settings/Settings";
 import Authentication from "../screens/Stack/Authentication/Main";
 
 import GoalsScreens from "../screens/Stack/Goals/Main";
+import { useApolloClient } from "@apollo/client";
 
 export const navigationRef = React.createRef<NavigationContainerRef<RootStackParamList>>();
 
 const Tab = createBottomTabNavigator<RootStackParamList>();
 
 export default function Navigation() {
-  const { isAuthenticated, loadUser, isLoading } = useUser();
-
+  const { isAuthenticated, loadUser, isLoading, token, removeUser } = useUser();
+  const client = useApolloClient();
   const { sendTokenToServer } = useNotifications(navigationRef);
 
   useEffect(() => {
@@ -31,7 +32,14 @@ export default function Navigation() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      sendTokenToServer();
+      sendTokenToServer().catch(async (err) => {
+        const cause = err?.cause;
+
+        if (cause?.extensions?.response?.statusCode === 403) {
+          await client.resetStore();
+          await removeUser();
+        }
+      });
     }
   }, [isAuthenticated]);
 

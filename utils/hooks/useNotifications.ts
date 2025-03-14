@@ -62,7 +62,8 @@ export default function useNotifications(navigationRef: React.RefObject<Navigati
       }
     } catch (error) {
       ToastAndroid.show("Notifications disabled: Couldn't upload token", ToastAndroid.SHORT);
-      console.error("Failed to send notification token", error);
+
+      throw error;
     }
   }
 

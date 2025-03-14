@@ -1,4 +1,4 @@
-const isDev = true;
+const isDev = false;
 
 const API = isDev ? "http://192.168.0.15:3001" : "https://life.dmqq.dev";
 
