@@ -148,6 +148,138 @@ const quickActions: QuickActionsMap = {
     { label: "Dose", value: 1 },
     { label: "Day", value: 1 },
   ],
+  // New mood tracking with emoji
+  emoticon: [
+    { label: "😢 (1)", value: 1 },
+    { label: "😐 (3)", value: 3 },
+    { label: "😊 (5)", value: 5 },
+  ],
+  "emoticon-happy": [
+    { label: "😔 (2)", value: 2 },
+    { label: "😊 (4)", value: 4 },
+    { label: "😁 (5)", value: 5 },
+  ],
+  "emoticon-sad": [
+    { label: "😭 (1)", value: 1 },
+    { label: "😢 (2)", value: 2 },
+    { label: "😔 (3)", value: 3 },
+  ],
+  "weather-sunny": [
+    { label: "🌧️ (1)", value: 1 },
+    { label: "⛅ (3)", value: 3 },
+    { label: "☀️ (5)", value: 5 },
+  ],
+  "stress-level": [
+    { label: "😌 Low", value: 1 },
+    { label: "😐 Medium", value: 3 },
+    { label: "😫 High", value: 5 },
+  ],
+  "energy-level": [
+    { label: "😴 Low", value: 1 },
+    { label: "😐 Medium", value: 3 },
+    { label: "⚡ High", value: 5 },
+  ],
+  // Productivity
+  "check-circle": [
+    { label: "Task", value: 1 },
+    { label: "Project", value: 1 },
+    { label: "3 tasks", value: 3 },
+  ],
+  timer: [
+    { label: "Pomodoro", value: 1 },
+    { label: "Hours", value: 1 },
+    { label: "Sessions", value: 1 },
+  ],
+  "hammer-wrench": [
+    { label: "Task", value: 1 },
+    { label: "Hours", value: 1 },
+    { label: "Project", value: 1 },
+  ],
+  // Health
+  "food-fork-drink": [
+    { label: "Meal", value: 1 },
+    { label: "Calories", value: 500 },
+    { label: "Snack", value: 1 },
+  ],
+  beer: [
+    { label: "Drink", value: 1 },
+    { label: "Day", value: 1 },
+    { label: "Week", value: 7 },
+  ],
+  steps: [
+    { label: "1,000", value: 1000 },
+    { label: "5,000", value: 5000 },
+    { label: "10,000", value: 10000 },
+  ],
+  // Finances
+  bank: [
+    { label: "$10", value: 10 },
+    { label: "$100", value: 100 },
+    { label: "$1000", value: 1000 },
+  ],
+  "currency-usd": [
+    { label: "Expense", value: -1 },
+    { label: "Income", value: 1 },
+    { label: "Saving", value: 1 },
+  ],
+  // Habits
+  calendar: [
+    { label: "Day", value: 1 },
+    { label: "Week", value: 7 },
+    { label: "Month", value: 30 },
+  ],
+  "calendar-check": [
+    { label: "Streak", value: 1 },
+    { label: "Week", value: 7 },
+    { label: "Month", value: 30 },
+  ],
+  // Learning
+  school: [
+    { label: "Lesson", value: 1 },
+    { label: "Hour", value: 1 },
+    { label: "Chapter", value: 1 },
+  ],
+  video: [
+    { label: "Video", value: 1 },
+    { label: "Course", value: 1 },
+    { label: "Hour", value: 1 },
+  ],
+  pencil: [
+    { label: "Page", value: 1 },
+    { label: "Chapter", value: 1 },
+    { label: "Essay", value: 1 },
+  ],
+  // Miscellaneous
+  flask: [
+    { label: "Experiment", value: 1 },
+    { label: "Project", value: 1 },
+    { label: "Hour", value: 1 },
+  ],
+  gamepad: [
+    { label: "Hour", value: 1 },
+    { label: "Game", value: 1 },
+    { label: "Level", value: 1 },
+  ],
+  phone: [
+    { label: "Call", value: 1 },
+    { label: "Minutes", value: 15 },
+    { label: "Hour", value: 60 },
+  ],
+  account: [
+    { label: "Meeting", value: 1 },
+    { label: "Hour", value: 1 },
+    { label: "Person", value: 1 },
+  ],
+  home: [
+    { label: "Chore", value: 1 },
+    { label: "Task", value: 1 },
+    { label: "Hour", value: 1 },
+  ],
+  car: [
+    { label: "Trip", value: 1 },
+    { label: "Mile/km", value: 10 },
+    { label: "Hour", value: 1 },
+  ],
 };
 
 export default function AddGoalEntry({ route, navigation }: AddGoalEntryProps) {
@@ -200,7 +332,7 @@ export default function AddGoalEntry({ route, navigation }: AddGoalEntryProps) {
         value: parseAmount(amount),
         date: date,
       },
-      refetchQueries: ["GetGoals"],
+      refetchQueries: ["GetGoal"],
       onCompleted: () => navigation.goBack(),
       onError: (error) => console.error(JSON.stringify(error, null, 2)),
     });

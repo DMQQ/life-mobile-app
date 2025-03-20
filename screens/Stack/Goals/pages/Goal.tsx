@@ -6,35 +6,23 @@ import Input from "@/components/ui/TextInput/TextInput";
 import { useMemo, useState } from "react";
 import IconButton from "@/components/ui/IconButton/IconButton";
 import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons";
-import { useGoal } from "../hooks/hooks";
+import { useGetGoal, useGoal } from "../hooks/hooks";
 import Layout from "@/constants/Layout";
-import Colors from "@/constants/Colors";
+import Colors, { secondary_candidates } from "@/constants/Colors";
 import Color from "color";
 import DayEntry from "../components/GoalEntry";
 import Button from "@/components/ui/Button/Button";
+import GitHubActivityGrid from "../components/StatGrid";
 
 // Updated Goal component
 export default function Goal({ route, navigation }: any) {
   const { id } = route.params;
-  const { goals, upsertStats } = useGoal();
-  const goal = goals.find((goal) => goal.id === id);
-  const [value, setValue] = useState("");
+  const { data: goalData } = useGetGoal(id);
 
-  const handleSubmit = () => {
-    if (!value) return;
-
-    upsertStats({
-      variables: {
-        goalsId: id,
-        value: parseFloat(value),
-        date: moment().toISOString(),
-      },
-    });
-    setValue("");
-  };
+  const goal = goalData?.goal || {};
 
   const data = useMemo(() => {
-    const hasTodayEntry = goal?.entries.some((entry) => moment(entry.date).isSame(moment(), "day"));
+    const hasTodayEntry = goal?.entries?.some((entry) => moment(entry.date).isSame(moment(), "day"));
 
     if (!hasTodayEntry) {
       return [
@@ -43,27 +31,26 @@ export default function Goal({ route, navigation }: any) {
           date: moment().toISOString(),
           value: "0",
         },
-        ...goal?.entries,
+        ...(goal?.entries || []),
       ];
     }
 
     return goal?.entries;
-  }, [goals]);
+  }, [goal]);
+
+  const contributionData = useMemo(() => {
+    return goal?.entries?.map((entry) => ({
+      date: entry.date,
+      count: entry.value,
+    }));
+  }, [goal.entries]);
 
   return (
     <ScreenContainer style={{ padding: 0 }}>
       <Header goBack />
       <View style={{ paddingHorizontal: 15, flex: 1, paddingTop: 15 }}>
-        <View
-          style={{
-            justifyContent: "center",
-            alignItems: "center",
-            marginBottom: 30,
-          }}
-        >
-          <View style={styles.iconContainer}>
-            <MaterialCommunityIcons name={goal?.icon || "close"} size={90} color={Colors.secondary} />
-          </View>
+        <View style={{ padding: 10, backgroundColor: Colors.primary_lighter, borderRadius: 10, marginBottom: 15 }}>
+          <GitHubActivityGrid contributionData={contributionData} primaryColor={secondary_candidates[0]} goalThreshold={goal.target} />
         </View>
 
         <FlatList
@@ -73,9 +60,15 @@ export default function Goal({ route, navigation }: any) {
           contentContainerStyle={styles.list}
           showsVerticalScrollIndicator={false}
           ListHeaderComponent={
-            <View style={{ marginBottom: 20 }}>
-              <Text style={{ fontSize: 24, fontWeight: "600", color: "#fff" }}>{goal?.name}</Text>
-              <Text style={{ fontSize: 16, color: "rgba(255,255,255,0.9)", marginTop: 5 }}>{goal?.description}</Text>
+            <View style={{ marginBottom: 20, flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+              <View>
+                <Text style={{ fontSize: 24, fontWeight: "600", color: "#fff" }}>{goal?.name}</Text>
+                <Text style={{ fontSize: 16, color: "rgba(255,255,255,0.9)", marginTop: 5 }}>{goal?.description}</Text>
+              </View>
+
+              <View style={{ padding: 10, borderRadius: 100, backgroundColor: Colors.secondary }}>
+                <MaterialCommunityIcons name={goal?.icon} size={30} color="#fff" style={{ marginLeft: "auto" }} />
+              </View>
             </View>
           }
           ListEmptyComponent={<Text style={styles.emptyText}>No entries yet</Text>}

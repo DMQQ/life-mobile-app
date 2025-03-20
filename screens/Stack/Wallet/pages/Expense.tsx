@@ -1,6 +1,6 @@
 import { ReactNode, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import Colors from "@/constants/Colors";
+import Colors, { secondary_candidates } from "@/constants/Colors";
 import { CategoryIcon, WalletElement } from "../components/Wallet/WalletItem";
 import SheetActionButtons from "../components/Wallet/WalletSheetControls";
 import { AntDesign, MaterialIcons } from "@expo/vector-icons";
@@ -88,63 +88,6 @@ export default function Expense({ route: { params }, navigation }: any) {
 
           <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>Balance before: {selected?.balanceBeforeInteraction} zł</Text>
         </View>
-        {/* 
-        <View
-          style={[{ marginTop: 30, flexDirection: "column", backgroundColor: styles.row.backgroundColor, padding: styles.row.padding }]}
-        >
-           <View style={[styles.row, { marginTop: 0, padding: 0, width: "100%" }]}>
-            <MaterialIcons
-              name="check-box-outline-blank"
-              size={24}
-              color={Colors.ternary}
-              style={{ paddingHorizontal: 7.5, padding: 2.5 }}
-            />
-            <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>Subscription</Text>
-          </View>
-          {false && (
-            <Animated.View layout={LinearTransition}>
-              <View style={[styles.row, { marginTop: 15 }]}>
-                <Text style={{ color: "gray", fontSize: 15 }}>Next payment: 2024-12-11</Text>
-                <Text style={{ color: "gray", fontSize: 15 }}>99zł</Text>
-              </View>
-              <View style={[styles.row]}>
-                <Text style={{ color: "gray", fontSize: 15 }}>Subscribed at 2024-06-11</Text>
-                <Text style={{ color: "gray", fontSize: 15 }}>6 payments made</Text>
-              </View>
-            </Animated.View>
-          )} 
-
-           <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-            <Ripple>
-              <View
-                style={{
-                  padding: 10,
-                  paddingHorizontal: 15,
-                  borderRadius: 5,
-                  marginTop: 15,
-                  width: "100%",
-                  alignItems: "center",
-                }}
-              >
-                <Text style={{ color: "#fff", fontSize: 15 }}>Unsubscribe</Text>
-              </View>
-            </Ripple>
-            <Ripple>
-              <View
-                style={{
-                  padding: 10,
-                  paddingHorizontal: 15,
-                  borderRadius: 5,
-                  marginTop: 15,
-                  width: "100%",
-                  alignItems: "center",
-                }}
-              >
-                <Text style={{ color: "#fff", fontSize: 15 }}>Notify before next payment</Text>
-              </View>
-            </Ripple>
-          </View> 
-        </View> */}
 
         <View
           style={[
@@ -171,6 +114,50 @@ export default function Expense({ route: { params }, navigation }: any) {
             <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }} numberOfLines={1}>
               {selected?.type === "refunded" ? selected?.note ?? `Refunded at ${moment().format("YYYY MM DD HH:SS")}` : "Refund"}
             </Text>
+          </Ripple>
+        </View>
+        <View
+          style={[
+            {
+              marginTop: 15,
+              flexDirection: "column",
+              backgroundColor: styles.row.backgroundColor,
+              padding: styles.row.padding,
+              opacity: !!selected?.subscription?.id ? 1 : 0.5,
+            },
+          ]}
+        >
+          <Ripple disabled={loading || !selected?.subscription?.id} style={[{ marginTop: 0, padding: 0, width: "100%" }]}>
+            <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+              <MaterialIcons
+                name={selected?.subscription?.isActive ? "check-box" : "check-box-outline-blank"}
+                size={24}
+                color={Colors.ternary}
+                style={{ paddingHorizontal: 7.5, padding: 2.5 }}
+              />
+              <Text
+                style={{ color: selected?.subscription?.isActive ? secondary_candidates[0] : Colors.secondary_light_2, fontSize: 18 }}
+                numberOfLines={1}
+              >
+                {selected?.subscription?.isActive ? "Subscription is active" : "Subscription is not active"}
+              </Text>
+            </View>
+            <View style={{ flexDirection: "row", justifyContent: "space-between", padding: 10, marginTop: 10 }}>
+              <Text style={{ color: "rgba(255,255,255,0.7)" }}>
+                {selected?.subscription?.isActive ? "Next payment: " : "Last payment: "}
+              </Text>
+
+              {selected.subscription?.nextBillingDate && (
+                <Text style={{ color: "rgba(255,255,255,0.7)" }}>
+                  {moment(+selected?.subscription?.nextBillingDate).format("YYYY-MM-DD")}
+                </Text>
+              )}
+            </View>
+            <View style={{ flexDirection: "row", justifyContent: "space-between", padding: 10 }}>
+              <Text style={{ color: "rgba(255,255,255,0.7)" }}>Active since</Text>
+
+              <Text style={{ color: "rgba(255,255,255,0.7)" }}>{moment(+selected?.subscription?.dateStart).format("YYYY-MM-DD")}</Text>
+            </View>
           </Ripple>
         </View>
       </View>
