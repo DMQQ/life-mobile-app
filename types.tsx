@@ -99,6 +99,13 @@ export interface Expense {
   type: string;
   balanceBeforeInteraction: number;
   category: string;
+
+  subscription: {
+    id: string;
+    isActive: boolean;
+    nextBillingDate: string;
+    dateStart: string;
+  } | null;
 }
 
 export interface Timeline {

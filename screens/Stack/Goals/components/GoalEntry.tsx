@@ -46,20 +46,20 @@ const DayEntry = ({ entry, index }: DayEntryProps) => {
         styles.dayContainer,
         index === 0 && {
           borderWidth: 2,
-          borderColor: lowOpacity(Colors.secondary, 0.2),
-          backgroundColor: lowOpacity(Colors.secondary, 0.2),
+          borderColor: lowOpacity(Colors.secondary, 0.1),
+          backgroundColor: lowOpacity(Colors.secondary, 0.1),
         },
         index !== 0 &&
           isGoalMet && {
             borderWidth: 2,
-            borderColor: lowOpacity("#0ED725", 0.2),
-            backgroundColor: lowOpacity("#0ED725", 0.2),
+            borderColor: lowOpacity("#0ED725", 0.1),
+            backgroundColor: lowOpacity("#0ED725", 0.1),
           },
         index !== 0 &&
           !isGoalMet && {
             borderWidth: 2,
-            borderColor: lowOpacity("#FF0000", 0.2),
-            backgroundColor: lowOpacity("#FF0000", 0.2),
+            borderColor: lowOpacity("#FF0000", 0.1),
+            backgroundColor: lowOpacity("#FF0000", 0.1),
           },
       ]}
     >

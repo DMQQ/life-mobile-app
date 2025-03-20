@@ -145,3 +145,28 @@ export const useGoal = (dateRange?: { start: Date; end: Date }) => {
     upsertStats,
   };
 };
+
+export const useGetGoal = (id: string) => {
+  return useQuery(
+    gql`
+      query GetGoal($id: ID!) {
+        goal(id: $id) {
+          id
+          name
+          icon
+          description
+          min
+          max
+          target
+          unit
+          entries {
+            id
+            value
+            date
+          }
+        }
+      }
+    `,
+    { variables: { id } }
+  );
+};

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, memo } from "react";
 import { Animated, View } from "react-native";
 import { PanGestureHandler } from "react-native-gesture-handler";
 
@@ -197,4 +197,4 @@ function RangeSlider({
   );
 }
 
-export default RangeSlider;
+export default memo(RangeSlider, () => false);

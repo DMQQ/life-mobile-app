@@ -33,77 +33,79 @@ export default function WalletScreens({ navigation, route }: WalletScreens<"Wall
   }, [route.params?.expenseId]);
 
   return (
-    <Stack.Navigator
-      initialRouteName="Wallet"
-      screenOptions={{
-        headerShown: false,
-        headerStyle: {
-          backgroundColor: Colors.primary,
-        },
-        animation: "default",
-      }}
-    >
-      <Stack.Screen
-        name="Watchlist"
-        component={Watchlist}
-        options={{
-          headerShown: true,
-          title: "Create shopping list",
-          headerTitleAlign: "center",
-        }}
-      />
-      <Stack.Screen
-        name="CreateActivity"
-        component={CreateActivity}
-        options={{
-          headerShown: true,
-          title: "",
-        }}
-      />
-
-      <Stack.Screen
-        name={"CreateExpense"}
-        component={CreateExpenseModal}
-        options={{
-          presentation: "modal",
-        }}
-        initialParams={{
-          type: null,
-          amount: 0,
-          category: "",
-          date: "",
-          description: "",
-
-          isEditing: false,
-        }}
-      />
-
-      <Stack.Screen
-        name="Expense"
-        component={Expense}
-        options={{
-          presentation: "modal",
-        }}
-      />
-
-      <Stack.Screen
-        name="Charts"
-        component={WalletCharts}
-        options={{
-          presentation: "modal",
+    <WalletContextProvider>
+      <Stack.Navigator
+        initialRouteName="Wallet"
+        screenOptions={{
           headerShown: false,
+          headerStyle: {
+            backgroundColor: Colors.primary,
+          },
+          animation: "default",
         }}
-      />
+      >
+        <Stack.Screen
+          name="Watchlist"
+          component={Watchlist}
+          options={{
+            headerShown: true,
+            title: "Create shopping list",
+            headerTitleAlign: "center",
+          }}
+        />
+        <Stack.Screen
+          name="CreateActivity"
+          component={CreateActivity}
+          options={{
+            headerShown: true,
+            title: "",
+          }}
+        />
 
-      <Stack.Screen name="Wallet" component={Wallet} />
+        <Stack.Screen
+          name={"CreateExpense"}
+          component={CreateExpenseModal}
+          options={{
+            presentation: "modal",
+          }}
+          initialParams={{
+            type: null,
+            amount: 0,
+            category: "",
+            date: "",
+            description: "",
 
-      <Stack.Screen
-        name="Filters"
-        component={ExpoenseFiltersSheet}
-        options={{
-          presentation: "modal",
-        }}
-      />
-    </Stack.Navigator>
+            isEditing: false,
+          }}
+        />
+
+        <Stack.Screen
+          name="Expense"
+          component={Expense}
+          options={{
+            presentation: "modal",
+          }}
+        />
+
+        <Stack.Screen
+          name="Charts"
+          component={WalletCharts}
+          options={{
+            presentation: "modal",
+            headerShown: false,
+          }}
+        />
+
+        <Stack.Screen name="Wallet" component={Wallet} />
+
+        <Stack.Screen
+          name="Filters"
+          component={ExpoenseFiltersSheet}
+          options={{
+            presentation: "modal",
+          }}
+        />
+      </Stack.Navigator>
+    </WalletContextProvider>
   );
 }

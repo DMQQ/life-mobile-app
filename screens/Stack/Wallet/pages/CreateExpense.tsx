@@ -1,6 +1,6 @@
 import moment from "moment";
 import { Keyboard, ScrollView, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View } from "react-native";
-import Colors from "../../../../constants/Colors";
+import Colors, { secondary_candidates } from "../../../../constants/Colors";
 import { memo, useCallback, useRef, useState } from "react";
 import Ripple from "react-native-material-ripple";
 import Layout from "@/constants/Layout";
@@ -44,6 +44,7 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
   const [category, setCategory] = useState<keyof typeof Icons>(params.category || "none");
   const [name, setName] = useState(params?.description || "");
   const [type, setType] = useState<"expense" | "income" | null>(params?.type || null);
+  const [isSubscription, setIsSubscription] = useState(false);
 
   const transformX = useSharedValue(0);
 
@@ -105,6 +106,7 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
         category: category,
         date: date ?? moment().format("YYYY-MM-DD"),
         schedule: moment(date).isAfter(moment()),
+        isSubscription: isSubscription,
       },
     });
   };
@@ -309,13 +311,33 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
                       {Icons[category].icon}
                       <Text
                         style={{
-                          color: category === "none" ? "rgba(255,255,255,0.7)" : Color(Icons[category].backgroundColor).lighten(0.25).hex(),
+                          color:
+                            category === "none" ? "rgba(255,255,255,0.7)" : Color(Icons[category]?.backgroundColor).lighten(0.25).hex(),
                           fontSize: 15,
                         }}
                       >
                         {category === "none" ? "Select category" : category}
                       </Text>
                     </Ripple>
+                    {!params?.isEditing && (
+                      <Ripple
+                        onPress={() => setIsSubscription((p) => !p)}
+                        style={{
+                          padding: 7.5,
+                          paddingHorizontal: 15,
+                          backgroundColor: isSubscription ? secondary_candidates[3] : Colors.primary_lighter,
+                          borderRadius: 10,
+                          justifyContent: "center",
+                          alignItems: "center",
+                          flexDirection: "row",
+                          gap: 15,
+                          minWidth: (Layout.screen.width - 30 - 30) / 3,
+                          flex: 1,
+                        }}
+                      >
+                        <Text style={{ color: "rgba(255,255,255,0.7)", fontSize: 14 }}>Subscription</Text>
+                      </Ripple>
+                    )}
                   </ScrollView>
                 </Animated.View>
               )}

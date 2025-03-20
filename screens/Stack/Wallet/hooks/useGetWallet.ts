@@ -18,6 +18,12 @@ export const GET_WALLET = gql`
         category
         balanceBeforeInteraction
         note
+        subscription {
+          id
+          isActive
+          nextBillingDate
+          dateStart
+        }
       }
     }
   }
