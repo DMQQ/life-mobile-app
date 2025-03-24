@@ -2,7 +2,7 @@
   "expo": {
     "name": "MyLifeFlow",
     "slug": "mylife-mobile",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
@@ -18,10 +18,11 @@
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
-      "buildNumber": "20250103",
+      "buildNumber": "20252203",
       "supportsTablet": true,
       "infoPlist": {
-        "NSFaceIDUsageDescription": "Allow $(PRODUCT_NAME) to use Face ID."
+        "NSFaceIDUsageDescription": "Allow $(PRODUCT_NAME) to use Face ID.",
+        "ITSAppUsesNonExemptEncryption": false
       },
       "bundleIdentifier": "com.dmq.mylifemobile"
     },
@@ -51,7 +52,6 @@
           "faceIDPermission": "Allow $(PRODUCT_NAME) to use Face ID."
         }
       ],
-
       "expo-asset",
       "expo-font",
       "expo-secure-store"

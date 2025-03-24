@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { View, Text } from "react-native";
+import { View, Text, ScrollView } from "react-native";
 import { barDataItem, LineChart } from "react-native-gifted-charts";
 import moment from "moment";
 import Colors from "@/constants/Colors";
@@ -61,7 +61,6 @@ export default function FutureProjection({ data, income, currentBalance: current
     let currentBalance = currentBalanceProps;
 
     return Array.from({ length: projectionMonths }, (_, i) => {
-      currentBalance = currentBalance + income - averageMonthlyExpense;
       return {
         value: Math.round(currentBalance),
         label: moment().add(i, "months").format("MMM"),
@@ -77,7 +76,7 @@ export default function FutureProjection({ data, income, currentBalance: current
         <Text style={{ color: "gray", marginTop: 5 }}>Takes current spending avarage and calculates the balance</Text>
       </View>
 
-      <View style={{ height: 300 }}>
+      <ScrollView style={{ height: 300, overflow: "hidden" }}>
         <LineChart
           width={Layout.screen.width - 60}
           data={projectionData}
@@ -109,7 +108,7 @@ export default function FutureProjection({ data, income, currentBalance: current
           yAxisLabelWidth={60}
           yAxisLabelSuffix="zł"
         />
-      </View>
+      </ScrollView>
 
       <View style={{ flexDirection: "row", gap: 16 }}>
         <View

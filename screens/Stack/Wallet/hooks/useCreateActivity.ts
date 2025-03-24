@@ -2,8 +2,24 @@ import { gql, useApolloClient, useMutation } from "@apollo/client";
 import { Platform, ToastAndroid } from "react-native";
 
 const CREATE_EXPENSE = gql`
-  mutation CreateExpense($amount: Float!, $description: String!, $type: String!, $category: String!, $date: String!, $schedule: Boolean) {
-    createExpense(amount: $amount, description: $description, type: $type, category: $category, date: $date, schedule: $schedule) {
+  mutation CreateExpense(
+    $amount: Float!
+    $description: String!
+    $type: String!
+    $category: String!
+    $date: String!
+    $schedule: Boolean
+    $isSubscription: Boolean
+  ) {
+    createExpense(
+      amount: $amount
+      description: $description
+      type: $type
+      category: $category
+      date: $date
+      schedule: $schedule
+      isSubscription: $isSubscription
+    ) {
       id
       amount
       description

@@ -83,7 +83,6 @@ export default function Root({ navigation }: ScreenProps<"Root">) {
       ],
     },
     onCompleted: (data) => offline.save("RootScreen", data),
-    onError: (er) => console.log(JSON.stringify(er, null, 2)),
   });
 
   const data = offline.isOffline ? offline.data || {} : gql;

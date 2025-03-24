@@ -1,11 +1,12 @@
 import { View, Text, StyleSheet, StyleProp, ViewStyle } from "react-native";
 import moment from "moment";
-import Colors from "@/constants/Colors";
+import Colors, { secondary_candidates } from "@/constants/Colors";
 import Ripple from "react-native-material-ripple";
 import Animated, { AnimatedStyle } from "react-native-reanimated";
 import { CategoryIcon, Icons } from "../ExpenseIcon";
+import { Expense } from "@/types";
 
-export interface WalletElement {
+export interface WalletElement extends Expense {
   description: string;
   amount: number;
   type: string;
@@ -125,7 +126,11 @@ export default function WalletItem(
           </Text>
           <View style={{ flexDirection: "row" }}>
             <Text style={styles.date}>
-              {parseDateToText(item.date)} &#183; {item.category ? `${item.category}` : ""}
+              {parseDateToText(item.date)}
+              {(item.category || item.subscription?.isActive) && " / "}
+              {item.category}
+              {item.category && item.subscription?.isActive && " / "}
+              {item.subscription?.isActive ? <Text style={{ color: secondary_candidates[0] }}>Subscription</Text> : ""}
             </Text>
           </View>
         </View>
