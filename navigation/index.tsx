@@ -1,8 +1,4 @@
-import {
-  DarkTheme,
-  NavigationContainer,
-  NavigationContainerRef,
-} from "@react-navigation/native";
+import { DarkTheme, NavigationContainer, NavigationContainerRef } from "@react-navigation/native";
 import useUser from "../utils/hooks/useUser";
 import React, { useCallback, useEffect } from "react";
 import Root from "../screens/Stack/Home/Root";
@@ -10,10 +6,7 @@ import { RootStackParamList } from "../types";
 import Colors from "../constants/Colors";
 import useNotifications from "../utils/hooks/useNotifications";
 import TimelineScreens from "../screens/Stack/Timeline/Main";
-import {
-  BottomTabBarProps,
-  createBottomTabNavigator,
-} from "@react-navigation/bottom-tabs";
+import { BottomTabBarProps, createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import BottomTab from "../components/BottomTab/BottomTab";
 import WalletScreens from "../screens/Stack/Wallet/Main";
 import WorkoutScreens from "../screens/Stack/Workout/Main";
@@ -21,14 +14,16 @@ import NotesScreens from "../screens/Stack/Notes/Main";
 import Settings from "../screens/Stack/Settings/Settings";
 import Authentication from "../screens/Stack/Authentication/Main";
 
-export const navigationRef =
-  React.createRef<NavigationContainerRef<RootStackParamList>>();
+import GoalsScreens from "../screens/Stack/Goals/Main";
+import { useApolloClient } from "@apollo/client";
+
+export const navigationRef = React.createRef<NavigationContainerRef<RootStackParamList>>();
 
 const Tab = createBottomTabNavigator<RootStackParamList>();
 
 export default function Navigation() {
-  const { isAuthenticated, loadUser, isLoading } = useUser();
-
+  const { isAuthenticated, loadUser, isLoading, token, removeUser } = useUser();
+  const client = useApolloClient();
   const { sendTokenToServer } = useNotifications(navigationRef);
 
   useEffect(() => {
@@ -37,15 +32,18 @@ export default function Navigation() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      sendTokenToServer();
+      sendTokenToServer().catch(async (err) => {
+        const cause = err?.cause;
+
+        if (cause?.extensions?.response?.statusCode === 403) {
+          await client.resetStore();
+          await removeUser();
+        }
+      });
     }
   }, [isAuthenticated]);
 
-  const renderTab = useCallback(
-    (props: BottomTabBarProps) =>
-      isAuthenticated ? <BottomTab {...props} /> : null,
-    [isAuthenticated]
-  );
+  const renderTab = useCallback((props: BottomTabBarProps) => (isAuthenticated ? <BottomTab {...props} /> : null), [isAuthenticated]);
 
   if (isLoading) return null;
 
@@ -74,7 +72,9 @@ export default function Navigation() {
           <>
             <Tab.Screen name="Root" component={Root} />
 
-            <Tab.Screen name="WorkoutScreens" component={WorkoutScreens} />
+            {/* <Tab.Screen name="WorkoutScreens" component={WorkoutScreens} /> */}
+
+            <Tab.Screen name="GoalsScreens" component={GoalsScreens} />
 
             <Tab.Screen name="WalletScreens" component={WalletScreens} />
 

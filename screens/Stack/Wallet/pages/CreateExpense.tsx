@@ -1,6 +1,6 @@
 import moment from "moment";
-import { Keyboard, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View } from "react-native";
-import Colors from "../../../../constants/Colors";
+import { Keyboard, ScrollView, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View } from "react-native";
+import Colors, { secondary_candidates } from "../../../../constants/Colors";
 import { memo, useCallback, useRef, useState } from "react";
 import Ripple from "react-native-material-ripple";
 import Layout from "@/constants/Layout";
@@ -25,6 +25,7 @@ import IconButton from "@/components/ui/IconButton/IconButton";
 import { useNavigation } from "@react-navigation/native";
 import Button from "@/components/ui/Button/Button";
 import Color from "color";
+import Input from "@/components/ui/TextInput/TextInput";
 
 const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
 
@@ -43,6 +44,7 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
   const [category, setCategory] = useState<keyof typeof Icons>(params.category || "none");
   const [name, setName] = useState(params?.description || "");
   const [type, setType] = useState<"expense" | "income" | null>(params?.type || null);
+  const [isSubscription, setIsSubscription] = useState(false);
 
   const transformX = useSharedValue(0);
 
@@ -104,6 +106,7 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
         category: category,
         date: date ?? moment().format("YYYY-MM-DD"),
         schedule: moment(date).isAfter(moment()),
+        isSubscription: isSubscription,
       },
     });
   };
@@ -155,63 +158,8 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
       <View style={{ flex: 1 }}>
         <View style={styles.container}>
-          <View style={{ flexDirection: "row", gap: 15, justifyContent: "space-between" }}>
-            <View style={{ flexDirection: "row", gap: 15, justifyContent: "space-between" }}>
-              <IconButton onPress={() => navigation.goBack()} icon={<AntDesign name="close" size={24} color="#fff" />} />
-
-              <Ripple
-                onPress={() => setDate(null)}
-                style={{ padding: 7.5, paddingHorizontal: 22.5, backgroundColor: Colors.primary_lighter, borderRadius: 100 }}
-              >
-                <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 14 }}>{date ?? moment().format("YYYY-MM-DD")}</Text>
-              </Ripple>
-            </View>
-
-            <Ripple
-              onPress={() => setType((p) => (p === "expense" ? "income" : "expense"))}
-              style={{
-                padding: 5,
-                paddingHorizontal: 15,
-                backgroundColor: Colors.primary_lighter,
-                borderRadius: 100,
-                flexDirection: "row",
-                gap: 5,
-                paddingLeft: 30,
-                alignItems: "center",
-              }}
-            >
-              <View style={{ position: "absolute", left: 10, top: 2.5 }}>
-                {type == null ? (
-                  <>
-                    <Entypo name="chevron-up" color="#fff" size={15} style={{ transform: [{ translateY: 3 }] }} />
-                    <Entypo name="chevron-down" color="#fff" size={15} style={{ transform: [{ translateY: -5 }] }} />
-                  </>
-                ) : type === "expense" ? (
-                  <AntDesign name="arrowdown" size={15} color={Colors.error} style={{ transform: [{ translateY: 7 }] }} />
-                ) : type === "income" ? (
-                  <AntDesign name="arrowup" size={15} color={Colors.secondary} style={{ transform: [{ translateY: 7 }] }} />
-                ) : (
-                  <Entypo name="back-in-time" size={15} color="#fff" style={{ transform: [{ translateY: 7 }] }} />
-                )}
-              </View>
-
-              <Text
-                style={{
-                  color:
-                    type == null
-                      ? "#fff"
-                      : type === "expense"
-                      ? Colors.error
-                      : type === "income"
-                      ? Colors.secondary
-                      : Colors.secondary_light_2,
-                  fontWeight: "bold",
-                  fontSize: 14,
-                }}
-              >
-                {type == null ? "Select type" : type === "expense" ? "Expense" : type === "income" ? "Income" : "Refunded"}
-              </Text>
-            </Ripple>
+          <View style={{ position: "absolute", top: 15, left: 15, zIndex: 100 }}>
+            <IconButton onPress={() => navigation.goBack()} icon={<AntDesign name="close" size={24} color="rgba(255,255,255,0.7)" />} />
           </View>
           <View
             style={{
@@ -230,7 +178,7 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
 
             {moment(date).isAfter(moment()) && type && amount != "0" && (
               <View style={{ position: "absolute", justifyContent: "center", alignItems: "center", bottom: -15 }}>
-                <Text style={{ color: "#fff", fontWeight: "600", fontSize: 13, textAlign: "center" }}>
+                <Text style={{ color: "rgba(255,255,255,0.7)", fontWeight: "600", fontSize: 13, textAlign: "center" }}>
                   {capitalize(type || "")} of {amount}zł will be scheduled for {"\n"} {moment(date).format("DD MMMM YYYY")}
                 </Text>
               </View>
@@ -240,127 +188,174 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
           <View style={{ marginTop: 20, flex: 1, gap: 15, maxHeight: Layout.screen.height / 1.85 - 5 }}>
             <View
               style={{
-                borderWidth: 1,
-                borderColor: Colors.primary_lighter,
                 borderRadius: 35,
-                backgroundColor: Colors.primary_lighter,
-                padding: 10,
                 flex: 1,
               }}
             >
               {!changeView && (
-                <Animated.View
-                  entering={FadeIn}
-                  // exiting={FadeOutUp}
-                  style={{
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    height: 55,
-                  }}
-                >
-                  <Ripple
-                    onPress={() => setChangeView((p) => !p)}
-                    style={{
-                      padding: 15,
-                      backgroundColor: lowOpacity(Icons[category].backgroundColor, 0.25),
-                      borderRadius: 100,
-                      width: 50,
-                      height: 50,
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
+                <Animated.View entering={FadeIn} style={{ gap: 5 }}>
+                  <View style={{ flexDirection: "row", width: "100%", alignItems: "center" }}>
+                    <Input
+                      containerStyle={{ borderRadius: 25 }}
+                      placeholder="Expense name"
+                      style={styles.input}
+                      placeholderTextColor={"gray"}
+                      value={name}
+                      onChangeText={setName}
+                      right={
+                        <Ripple
+                          onPress={handleSubmit}
+                          style={{
+                            paddingHorizontal: 15,
+                            paddingVertical: 5,
+                            borderRadius: 7.5,
+                            backgroundColor: isValid ? Colors.secondary : Colors.primary_lighter,
+                            flexDirection: "row",
+                            alignItems: "center",
+                            gap: 5,
+                          }}
+                        >
+                          <AntDesign name="save" size={20} color="#fff" />
+                          <Text style={{ color: "#fff" }}>Save</Text>
+                        </Ripple>
+                      }
+                    />
+                  </View>
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    style={{ flexDirection: "row" }}
+                    contentContainerStyle={{ gap: 15 }}
                   >
-                    {Icons[category].icon}
-                  </Ripple>
+                    <Ripple
+                      onPress={() => setType((p) => (p === "expense" ? "income" : "expense"))}
+                      style={{
+                        padding: 5,
+                        paddingHorizontal: 15,
+                        backgroundColor: Colors.primary_lighter,
+                        borderRadius: 10,
+                        flexDirection: "row",
+                        gap: 5,
+                        paddingLeft: 30,
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <View style={{ position: "absolute", left: 10, top: 2.5 }}>
+                        {type == null ? (
+                          <>
+                            <Entypo name="chevron-up" color="rgba(255,255,255,0.7)" size={15} style={{ transform: [{ translateY: 3 }] }} />
+                            <Entypo
+                              name="chevron-down"
+                              color="rgba(255,255,255,0.7)"
+                              size={15}
+                              style={{ transform: [{ translateY: -5 }] }}
+                            />
+                          </>
+                        ) : type === "expense" ? (
+                          <AntDesign name="arrowdown" size={15} color={Colors.error} style={{ transform: [{ translateY: 7 }] }} />
+                        ) : type === "income" ? (
+                          <AntDesign name="arrowup" size={15} color={Colors.secondary} style={{ transform: [{ translateY: 7 }] }} />
+                        ) : (
+                          <Entypo name="back-in-time" size={15} color="rgba(255,255,255,0.7)" style={{ transform: [{ translateY: 7 }] }} />
+                        )}
+                      </View>
 
-                  <TextInput
-                    placeholder="Expense name"
-                    style={styles.input}
-                    placeholderTextColor={"gray"}
-                    value={name}
-                    onChangeText={setName}
-                  />
+                      <Text
+                        numberOfLines={1}
+                        style={{
+                          color:
+                            type == null
+                              ? "rgba(255,255,255,0.7)"
+                              : type === "expense"
+                              ? Colors.error
+                              : type === "income"
+                              ? Colors.secondary
+                              : Colors.secondary_light_2,
+                          fontSize: 14,
+                        }}
+                      >
+                        {type == null ? "Select type" : type === "expense" ? "Expense" : type === "income" ? "Income" : "Refunded"}
+                      </Text>
+                    </Ripple>
+                    <Ripple
+                      onPress={() => setDate(null)}
+                      style={{
+                        padding: 7.5,
+                        justifyContent: "center",
+                        backgroundColor: Colors.primary_lighter,
+                        borderRadius: 10,
+                        flex: 1,
+                        alignItems: "center",
+                        width: (Layout.screen.width - 30 - 30) / 3,
+                      }}
+                    >
+                      <Text style={{ color: "rgba(255,255,255,0.7)", fontSize: 14 }}>{date ?? moment().format("YYYY-MM-DD")}</Text>
+                    </Ripple>
+
+                    <Ripple
+                      onPress={() => setChangeView((p) => !p)}
+                      style={{
+                        padding: 7.5,
+                        paddingHorizontal: 15,
+                        backgroundColor: category === "none" ? Colors.primary_light : lowOpacity(Icons[category].backgroundColor, 0.2),
+                        borderRadius: 10,
+                        justifyContent: "center",
+                        alignItems: "center",
+                        flexDirection: "row",
+                        gap: 15,
+                        minWidth: (Layout.screen.width - 30 - 30) / 3,
+                        flex: 1,
+                      }}
+                    >
+                      {Icons[category].icon}
+                      <Text
+                        style={{
+                          color:
+                            category === "none" ? "rgba(255,255,255,0.7)" : Color(Icons[category]?.backgroundColor).lighten(0.25).hex(),
+                          fontSize: 15,
+                        }}
+                      >
+                        {category === "none" ? "Select category" : category}
+                      </Text>
+                    </Ripple>
+                    {!params?.isEditing && (
+                      <Ripple
+                        onPress={() => setIsSubscription((p) => !p)}
+                        style={{
+                          padding: 7.5,
+                          paddingHorizontal: 15,
+                          backgroundColor: isSubscription ? secondary_candidates[3] : Colors.primary_lighter,
+                          borderRadius: 10,
+                          justifyContent: "center",
+                          alignItems: "center",
+                          flexDirection: "row",
+                          gap: 15,
+                          minWidth: (Layout.screen.width - 30 - 30) / 3,
+                          flex: 1,
+                        }}
+                      >
+                        <Text style={{ color: "rgba(255,255,255,0.7)", fontSize: 14 }}>Subscription</Text>
+                      </Ripple>
+                    )}
+                  </ScrollView>
                 </Animated.View>
               )}
 
               {changeView && (
-                <Animated.FlatList
-                  layout={LinearTransition}
-                  entering={FadeInDown}
-                  // dont use exiting animation, breaks the modal closing and many other ui issues
-                  style={{ width: "100%", height: Layout.screen.height / 2.25 }}
-                  data={Object.entries(Icons)}
-                  keyExtractor={(item) => item[0]}
-                  renderItem={({ item }) => (
-                    <View
-                      style={{
-                        flexDirection: "row",
-                        justifyContent: "space-between",
-                        borderBottomWidth: 0.5,
-                        borderBottomColor: "rgba(255,255,255,0.15)",
-                        ...((item[0] === category && { backgroundColor: Colors.primary_light }) || {}),
-                        paddingRight: 15,
-                      }}
-                    >
-                      <Ripple
-                        onPress={() => {
-                          setCategory(item[0] as keyof typeof Icons);
-                          setChangeView(false);
-                        }}
-                        style={{
-                          paddingVertical: 15,
-                          paddingHorizontal: 5.5,
-                          flexDirection: "row",
-                          gap: 15,
-                          alignItems: "center",
-                          flex: 1,
-                        }}
-                      >
-                        <View
-                          style={{
-                            padding: 10,
-                            borderRadius: 100,
-                            backgroundColor: lowOpacity(item[1].backgroundColor, 0.25),
-                            width: 40,
-                            height: 40,
-                            justifyContent: "center",
-                            alignItems: "center",
-                          }}
-                        >
-                          {item[1].icon}
-                        </View>
-
-                        <Text style={{ color: "#fff", fontSize: 18, textTransform: "capitalize", fontWeight: "600" }}>{item[0]}</Text>
-                      </Ripple>
-
-                      {item[0] === category && (
-                        <IconButton
-                          onPress={() => {
-                            setCategory("none");
-                            setChangeView(false);
-                          }}
-                          icon={<AntDesign name="close" color={"#fff"} size={24} />}
-                        />
-                      )}
-                    </View>
-                  )}
+                <CategorySelector
+                  dismiss={() => {
+                    setChangeView(false);
+                    setCategory("none");
+                  }}
+                  current={category}
+                  onPress={(item) => {
+                    setCategory(item as keyof typeof Icons);
+                    setChangeView(false);
+                  }}
                 />
               )}
               {!changeView && <NumbersPad rotateBackButton={amount === "0"} handleAmountChange={handleAmountChange} />}
-
-              <Button
-                disabled={!isValid}
-                onPress={handleSubmit}
-                style={{
-                  marginTop: 15,
-                  backgroundColor: isValid ? Color(Colors.secondary).hex() : lowOpacity(Colors.secondary, 0.1),
-                  borderRadius: 100,
-                  paddingVertical: 17.5,
-                }}
-              >
-                {params?.isEditing ? "Save editing" : "Create activity"}
-              </Button>
             </View>
           </View>
         </View>
@@ -385,7 +380,7 @@ const NumbersPad = memo(
       <Animated.View
         entering={FadeInDown}
         // exiting={FadeOutDown}
-        style={{ flex: 1, gap: 15, borderRadius: 35, marginTop: 15 }}
+        style={{ flex: 1, gap: 15, borderRadius: 35, marginTop: 30 }}
       >
         {[
           [1, 2, 3],
@@ -470,13 +465,76 @@ const NumpadNumber = (props: { onPress: VoidFunction; num: string | number; rota
   );
 };
 
+const CategorySelector = (props: { current: string; onPress: (item: string) => void; dismiss: VoidFunction }) => {
+  const data = Object.entries(Icons);
+
+  const [query, setQuery] = useState("");
+
+  return (
+    <Animated.FlatList
+      ListHeaderComponent={<Input placeholder="Search for category" value={query} onChangeText={setQuery} style={{ padding: 15 }} />}
+      layout={LinearTransition}
+      entering={FadeInDown}
+      style={{ width: "100%", height: Layout.screen.height / 2.25 }}
+      data={data.filter((item) => item[0].toLowerCase().includes(query.toLowerCase()))}
+      keyExtractor={(item) => item[0]}
+      stickyHeaderIndices={[0]}
+      renderItem={({ item }) => (
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            borderBottomWidth: 0.5,
+            borderBottomColor: "rgba(255,255,255,0.15)",
+            ...((item[0] === props.current && { backgroundColor: Colors.primary_light }) || {}),
+            paddingRight: 15,
+          }}
+        >
+          <Ripple
+            onPress={() => props.onPress(item[0])}
+            style={{
+              paddingVertical: 15,
+              paddingHorizontal: 5.5,
+              flexDirection: "row",
+              gap: 15,
+              alignItems: "center",
+              flex: 1,
+            }}
+          >
+            <View
+              style={{
+                padding: 10,
+                borderRadius: 100,
+                backgroundColor: lowOpacity(item[1].backgroundColor, 0.25),
+                width: 40,
+                height: 40,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              {item[1].icon}
+            </View>
+
+            <Text style={{ color: "rgba(255,255,255,0.7)", fontSize: 18, textTransform: "capitalize", fontWeight: "600" }}>{item[0]}</Text>
+          </Ripple>
+
+          {item[0] === props.current && (
+            <IconButton onPress={props.dismiss} icon={<AntDesign name="close" color={"rgba(255,255,255,0.7)"} size={24} />} />
+          )}
+        </View>
+      )}
+    />
+  );
+};
+
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 15, gap: 15 },
   input: {
-    padding: 13,
-    color: "#fff",
+    color: "rgba(255,255,255,0.7)",
     fontSize: 18,
-    borderColor: Colors.primary_lighter,
+    borderColor: Colors.secondary,
     flex: 1,
+    width: Layout.screen.width - 30,
+    borderRadius: 100,
   },
 });

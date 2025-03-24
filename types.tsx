@@ -4,12 +4,7 @@
  */
 
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
-import {
-  CompositeScreenProps,
-  NavigatorScreenParams,
-  ParamListBase,
-  RouteProp,
-} from "@react-navigation/native";
+import { CompositeScreenProps, NavigatorScreenParams, ParamListBase, RouteProp } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -19,10 +14,7 @@ export interface ScreenProps<Route extends keyof RootStackParamList> {
   route: RouteProp<RootStackParamList, Route>;
 }
 
-export interface StackScreenProps<
-  T extends ParamListBase,
-  Route extends keyof T
-> {
+export interface StackScreenProps<T extends ParamListBase, Route extends keyof T> {
   navigation: StackNavigationProp<T, Route>;
   route: RouteProp<T, Route>;
 }
@@ -40,6 +32,8 @@ export type RootStackParamList = {
 
   //  Landing: undefined;
 
+  GoalsScreens: undefined;
+
   Authentication: undefined;
 
   WorkoutScreens: undefined;
@@ -55,8 +49,7 @@ export type RootStackParamList = {
   Settings: undefined;
 };
 
-export type RootStackScreenProps<Screen extends keyof RootStackParamList> =
-  NativeStackScreenProps<RootStackParamList, Screen>;
+export type RootStackScreenProps<Screen extends keyof RootStackParamList> = NativeStackScreenProps<RootStackParamList, Screen>;
 
 export interface Workout {
   workoutId: string;
@@ -106,6 +99,19 @@ export interface Expense {
   type: string;
   balanceBeforeInteraction: number;
   category: string;
+
+  subscription: {
+    id: string;
+    isActive: boolean;
+    nextBillingDate: string;
+    dateStart: string;
+  } | null;
+
+  note?: string;
+
+  tags?: string;
+
+  shop?: string;
 }
 
 export interface Timeline {

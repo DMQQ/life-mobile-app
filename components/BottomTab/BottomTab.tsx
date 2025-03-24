@@ -3,7 +3,7 @@ import { Platform, StyleSheet } from "react-native";
 import Layout from "../../constants/Layout";
 import Colors from "../../constants/Colors";
 import Ripple from "react-native-material-ripple";
-import { Ionicons } from "@expo/vector-icons";
+import { Feather, Ionicons } from "@expo/vector-icons";
 import useKeyboard from "../../utils/hooks/useKeyboard";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { useTheme } from "../../utils/context/ThemeContext";
@@ -49,12 +49,16 @@ export default function BottomTab({ navigation, state, insets }: BottomTabBarPro
       ]}
       onPress={() => navigate(props.route)}
     >
-      <Ionicons
-        size={22.5}
-        name={props.iconName}
-        color={activeRoute === props.route ? Colors.secondary : "rgba(255,255,255,0.8)"}
-        style={{ marginBottom: 2.5, paddingVertical: 7.5 }}
-      />
+      {typeof props.iconName === "string" ? (
+        <Ionicons
+          size={22.5}
+          name={props.iconName as any}
+          color={activeRoute === props.route ? Colors.secondary : "rgba(255,255,255,0.8)"}
+          style={{ marginBottom: 2.5, paddingVertical: 7.5 }}
+        />
+      ) : (
+        props.iconName
+      )}
     </Ripple>
   );
 
@@ -81,7 +85,18 @@ export default function BottomTab({ navigation, state, insets }: BottomTabBarPro
     >
       <Btn route="NotesScreens" label="Notes" iconName={"clipboard"} />
 
-      <Btn route="WorkoutScreens" label="Training" iconName={"barbell"} />
+      <Btn
+        route="GoalsScreens"
+        label="Training"
+        iconName={
+          <Feather
+            name="target"
+            size={22.5}
+            color={activeRoute === "GoalsScreens" ? Colors.secondary : "rgba(255,255,255,0.8)"}
+            style={{ marginBottom: 2.5, paddingVertical: 7.5 }}
+          />
+        }
+      />
 
       <Btn route="Root" label="Home" iconName={"home"} />
 
