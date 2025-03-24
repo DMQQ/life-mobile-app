@@ -106,6 +106,12 @@ export interface Expense {
     nextBillingDate: string;
     dateStart: string;
   } | null;
+
+  note?: string;
+
+  tags?: string;
+
+  shop?: string;
 }
 
 export interface Timeline {
