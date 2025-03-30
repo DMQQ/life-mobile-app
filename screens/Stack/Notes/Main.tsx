@@ -1,6 +1,4 @@
 import NotesScreen from "./pages/NotesScreen";
-import NoteScreen from "./pages/Note";
-import CreateNoteScreen from "./pages/CreateNote";
 import Colors from "../../../constants/Colors";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
@@ -35,31 +33,6 @@ export default function NotesScreens() {
         }}
         name="Notes"
         component={NotesScreen}
-      />
-      <SharedStack.Screen
-        initialParams={{ noteId: "", title: "" }}
-        name="Note"
-        component={NoteScreen}
-        options={{
-          headerStyle: { backgroundColor: Colors.primary },
-          presentation: "modal",
-        }}
-      />
-      <SharedStack.Screen
-        options={{
-          title: "Create note",
-          headerStyle: {
-            backgroundColor: Colors.primary,
-          },
-          headerTitleAlign: "center",
-          presentation: "modal",
-        }}
-        initialParams={{
-          mode: "create",
-          noteId: 0,
-        }}
-        name="NoteCreate"
-        component={CreateNoteScreen}
       />
 
       <SharedStack.Screen

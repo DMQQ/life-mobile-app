@@ -42,7 +42,7 @@ export default function DailySpendingChart({ data }: Props) {
   const averageSpending = totalSpending / chartData.length;
 
   return (
-    <View style={{ padding: 20, gap: 5 }}>
+    <View style={{ marginVertical: 20, gap: 5 }}>
       <View style={{ width: "100%", marginBottom: 10 }}>
         <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 18 }}>Daily spendings</Text>
         <Text style={{ color: "gray", marginTop: 5 }}>Sum of expenses for each day shown on a chart</Text>
@@ -72,17 +72,18 @@ export default function DailySpendingChart({ data }: Props) {
         />
       </View>
 
-      <View style={{ flexDirection: "row", gap: 16, padding: 15 }}>
+      <View style={{ flexDirection: "row", gap: 16, padding: 0, marginTop: 40 }}>
         <View
           style={{
             flex: 1,
             padding: 16,
             backgroundColor: Colors.primary_lighter,
             borderRadius: 8,
+            gap: 5,
           }}
         >
           <Text style={{ fontSize: 14, color: "#fff" }}>Daily Average</Text>
-          <Text style={{ fontSize: 20, fontWeight: "600", color: Colors.secondary }}>{Math.round(averageSpending).toLocaleString()}zł</Text>
+          <Text style={{ fontSize: 25, fontWeight: "600", color: Colors.secondary }}>{Math.round(averageSpending).toLocaleString()}zł</Text>
         </View>
 
         <View
@@ -91,10 +92,11 @@ export default function DailySpendingChart({ data }: Props) {
             padding: 16,
             backgroundColor: Colors.primary_lighter,
             borderRadius: 8,
+            gap: 5,
           }}
         >
           <Text style={{ fontSize: 14, color: "#fff" }}>Peak Spending</Text>
-          <Text style={{ fontSize: 20, fontWeight: "600", color: Colors.secondary }}>{maxSpending.toLocaleString()}zł</Text>
+          <Text style={{ fontSize: 25, fontWeight: "600", color: Colors.secondary }}>{maxSpending.toLocaleString()}zł</Text>
         </View>
       </View>
     </View>

@@ -25,10 +25,7 @@ const groupDates = (dates: { date: string }[]) => {
   return monthEvents;
 };
 
-export default function useTimeline({
-  route,
-  navigation,
-}: TimelineScreenProps<"Timeline">) {
+export default function useTimeline({ route, navigation }: TimelineScreenProps<"Timeline">) {
   const { data, selected, setSelected, loading, error } = useGetTimeLineQuery();
 
   const [fetchDate, setFetchDate] = useState(moment().format("YYYY-MM-DD"));
@@ -45,12 +42,10 @@ export default function useTimeline({
   const { data: monthData, refetch } = useQuery(GET_MONTHLY_EVENTS, {
     variables: { date: fetchDate },
 
-    onError: (err) =>
-      ToastAndroid.show("Oh! Something went wrong", ToastAndroid.SHORT),
+    onError: (err) => ToastAndroid.show("Oh! Something went wrong", ToastAndroid.SHORT),
   });
 
-  const onDayPress = (day: { dateString: string }) =>
-    setSelected(day.dateString);
+  const onDayPress = (day: { dateString: string }) => setSelected(day.dateString);
 
   const createTimeline = () =>
     navigation.navigate("TimelineCreate", {
@@ -58,22 +53,20 @@ export default function useTimeline({
       mode: "create",
     });
 
-  const dayEventsSorted = useMemo(
-    () => groupDates(monthData?.timelineMonth || []),
-    [monthData?.timelineMonth]
-  );
+  const dayEventsSorted = useMemo(() => groupDates(monthData?.timelineMonth || []), [monthData?.timelineMonth]);
 
-  const displayDate =
-    moment().format("YYYY-MM-DD") === selected
-      ? `Today (${selected})`
-      : selected;
+  const displayDate = moment().format("YYYY-MM-DD") === selected ? `Today (${selected})` : selected;
 
-  const [switchView, setSwitchView] = useState<"date-list" | "calendar">(
-    "date-list"
-  );
+  const [switchView, setSwitchView] = useState<"date-list" | "calendar" | "timeline">("timeline");
 
   const onViewToggle = () => {
-    setSwitchView((sw) => (sw === "calendar" ? "date-list" : "calendar"));
+    const views = ["date-list", "calendar", "timeline"];
+
+    setSwitchView((prev) => {
+      const index = views.findIndex((v) => v === prev);
+
+      return views[(index + 1) % views.length] as "date-list" | "calendar" | "timeline";
+    });
   };
 
   return {

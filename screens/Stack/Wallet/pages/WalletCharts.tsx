@@ -5,7 +5,7 @@ import { AntDesign, MaterialIcons } from "@expo/vector-icons";
 import { useMemo, useRef, useState } from "react";
 import { Alert, StyleSheet, Text, View, VirtualizedList } from "react-native";
 import Charts from "../components/Wallet/Charts";
-import WalletItem, { WalletElement } from "../components/Wallet/WalletItem";
+import WalletItem, { Icons, WalletElement } from "../components/Wallet/WalletItem";
 import useGetWallet, { useGetBalance } from "../hooks/useGetWallet";
 import PieChart from "../components/WalletChart/PieChart";
 import wrapWithFunction from "@/utils/functions/wrapFn";
@@ -19,6 +19,7 @@ import FutureProjection from "../components/WalletChart/FutureProjection";
 import DailySpendingChart from "../components/WalletChart/DailySpendingChart";
 import WalletContextProvider from "../components/WalletContext";
 import Ripple from "react-native-material-ripple";
+import Color from "color";
 
 const styles = StyleSheet.create({
   tilesContainer: {
@@ -73,6 +74,38 @@ export default (props: any) => (
   </WalletContextProvider>
 );
 
+const categoryColors = {
+  housing: "#05ad21",
+  transportation: "#ab0505",
+  food: "#5733FF",
+  drinks: "#5733FF",
+  shopping: "#ff5733",
+  addictions: "#ff5733",
+  work: "#5733FF",
+  clothes: "#ff5733",
+  health: "#07bab4",
+  entertainment: "#990583",
+  utilities: "#5733FF",
+  debt: "#ff5733",
+  education: "#cc9a1b",
+  savings: "#cf0a80",
+  travel: "#33FF57",
+  edit: "gray",
+  income: Colors.secondary_light_1, // You might want to replace this with an actual hex value
+  animals: "#ff5733",
+  refunded: Colors.secondary_light_1, // You might want to replace this with an actual hex value
+  gifts: "#33FF57",
+  subscriptions: "#8033ff",
+  investments: "#33ff89",
+  maintenance: "#ff8c33",
+  insurance: "#3357ff",
+  taxes: "#ff3333",
+  children: "#ff33d1",
+  donations: "#33ffd4",
+  beauty: "#ff33a1",
+  none: Colors.primary, // You might want to replace this with an actual hex value
+};
+
 function WalletCharts({ navigation }: any) {
   const { data = { wallet: { expenses: [] } }, dispatch, filters } = useGetWallet({ fetchAll: true });
   const { data: stats } = useGetStatistics([filters.date.from, filters.date.to]);
@@ -106,7 +139,7 @@ function WalletCharts({ navigation }: any) {
       .map(([key, value], index) => ({
         value,
         label: key,
-        color: secondary_candidates[index],
+        color: categoryColors[key as keyof typeof Icons],
         selected: key === selected,
       }))
       .sort((a, b) => b.value - a.value) as {

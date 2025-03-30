@@ -60,3 +60,113 @@ export const Sizing = {
   text: 18,
   tooltip: 14,
 } as const;
+
+export const calendarTheme = {
+  // Background
+  calendarBackground: theme.primary_darker,
+  backgroundColor: theme.primary_darker,
+
+  // Month header
+  monthTextColor: theme.text_light,
+  textMonthFontWeight: "bold",
+  textMonthFontSize: 16,
+
+  // Day names header (Mon, Tue, etc)
+  textSectionTitleColor: theme.secondary_light_1,
+  textDayHeaderFontWeight: "600",
+
+  // Date styling (numbers)
+  dayTextColor: theme.text_light,
+  textDayFontWeight: "400",
+
+  // Today styling
+  todayTextColor: theme.secondary,
+  todayBackgroundColor: Color(theme.secondary).alpha(0.15).string(),
+
+  // Selected day
+  selectedDayBackgroundColor: theme.secondary,
+  selectedDayTextColor: theme.text_light,
+
+  // Disabled day
+  textDisabledColor: theme.text_dark,
+
+  // Arrows
+  arrowColor: theme.secondary,
+
+  // Dot markers
+  dotColor: theme.secondary,
+  selectedDotColor: theme.text_light,
+
+  // Month navigation buttons
+  textDayFontFamily: "System",
+  textMonthFontFamily: "System",
+  textDayHeaderFontFamily: "System",
+
+  // Additional specific styling
+  "stylesheet.calendar.header": {
+    header: {
+      backgroundColor: theme.primary_dark,
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      paddingLeft: 10,
+      paddingRight: 10,
+      paddingTop: 10,
+      paddingBottom: 10,
+    },
+    arrow: {
+      padding: 10,
+    },
+  },
+  "stylesheet.day.basic": {
+    base: {
+      width: 32,
+      height: 32,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    today: {
+      borderRadius: 16,
+    },
+    selected: {
+      borderRadius: 16,
+    },
+  },
+};
+
+// Timeline specific theme
+const timelineTheme = {
+  ...calendarTheme,
+
+  // Timeline specific styles
+  backgroundColor: theme.primary_darker,
+  calendarBackground: theme.primary_darker,
+
+  // Timeline colors
+  timelineContainer: {
+    backgroundColor: theme.primary_dark,
+  },
+  eventBackground: theme.secondary_dark_1,
+  eventText: {
+    color: theme.text_light,
+    fontWeight: "bold",
+  },
+  eventTitleStyle: {
+    color: theme.text_light,
+    fontWeight: "bold",
+  },
+  eventSummaryStyle: {
+    color: theme.text_light,
+    fontStyle: "italic",
+  },
+  timeLabel: {
+    color: theme.secondary_light_1,
+    fontWeight: "600",
+  },
+  // Time column
+  timeColumnBackground: theme.primary_darker,
+  timeColumnTextColor: theme.secondary_light_1,
+  // Lines
+  timeColumnLineColor: theme.primary_light,
+  eventContainerBorderColor: theme.primary_light,
+};
