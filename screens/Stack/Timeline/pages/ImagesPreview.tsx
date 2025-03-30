@@ -1,30 +1,25 @@
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import ScreenContainer from "@/components/ui/ScreenContainer";
-import { InteractionManager, Text, Image, Dimensions } from "react-native";
+import { InteractionManager, Text, Image, Dimensions, StyleSheet } from "react-native";
 import Layout from "@/constants/Layout";
 import { useEffect, useLayoutEffect, useState } from "react";
 import useGetTimelineById from "../hooks/query/useGetTimelineById";
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from "react-native-reanimated";
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import Url from "@/constants/Url";
 import { TimelineScreenProps } from "../types";
 import Ripple from "react-native-material-ripple";
 import { transition } from "../sharedTransition";
+import { AntDesign } from "@expo/vector-icons";
+import IconButton from "@/components/ui/IconButton/IconButton";
+import throttle from "@/utils/functions/throttle";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-export default function ImagesPreview({
-  route,
-  navigation,
-}: TimelineScreenProps<"ImagesPreview">) {
+export default function ImagesPreview({ route, navigation }: TimelineScreenProps<"ImagesPreview">) {
   const { data } = useGetTimelineById(route.params.timelineId! as string, {
     fetchPolicy: "cache-only",
   });
 
-  const currentImageIndex = data.images.findIndex(
-    (img: { id: string; url: string }) => img.url === route.params.selectedImage
-  );
+  const currentImageIndex = data.images.findIndex((img: { id: string; url: string }) => img.url === route.params.selectedImage);
 
   useEffect(() => {
     navigation.setOptions({
@@ -47,6 +42,8 @@ export default function ImagesPreview({
     });
   }, [data.images, route.params.selectedImage]);
 
+  const insets = useSafeAreaInsets();
+
   return (
     <ScreenContainer
       style={{
@@ -54,8 +51,15 @@ export default function ImagesPreview({
         alignItems: "center",
         padding: 0,
         backgroundColor: "rgba(0,0,0,0.75)",
+        ...StyleSheet.absoluteFillObject,
       }}
     >
+      <Ripple style={{ position: "absolute", left: 10, top: insets.top + 10, zIndex: 1000 }}>
+        <IconButton
+          onPress={throttle(() => navigation.canGoBack() && navigation.goBack(), 250)}
+          icon={<AntDesign name="arrowleft" size={24} color="#fff" />}
+        />
+      </Ripple>
       <GesturedImage uri={route.params.selectedImage} />
     </ScreenContainer>
   );
@@ -136,12 +140,7 @@ const GesturedImage = (props: { uri: string }) => {
 
   return (
     <GestureDetector gesture={handleGesture}>
-      <Animated.Image
-        sharedTransitionStyle={transition}
-        sharedTransitionTag={`image-${props.uri}`}
-        source={src}
-        style={[animatedDims, animatedStyle]}
-      />
+      <Animated.Image source={src} style={[animatedDims, animatedStyle]} />
     </GestureDetector>
   );
 };

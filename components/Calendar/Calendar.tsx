@@ -42,20 +42,13 @@ const styles = StyleSheet.create({
   },
 });
 
-export default function Calendar({
-  onDayPress,
-  refetch,
-  selected: propSelected,
-  monthData: data,
-}: CalendarProps) {
+export default function Calendar({ onDayPress, refetch, selected: propSelected, monthData: data }: CalendarProps) {
   const onMonthChange = async (date: { dateString: string }) =>
     await refetch({
       date: moment(date.dateString).format("YYYY-MM-DD"),
     });
 
-  const renderArrow = (direction: "left" | "right") => (
-    <AntDesign name={`arrow${direction}`} color={Colors.secondary} size={20} />
-  );
+  const renderArrow = (direction: "left" | "right") => <AntDesign name={`arrow${direction}`} color={Colors.secondary} size={20} />;
 
   const [selected, setSelected] = useState(propSelected || "");
 

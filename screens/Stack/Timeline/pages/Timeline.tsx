@@ -1,5 +1,5 @@
 import Header from "@/components/ui/Header/Header";
-import Colors from "@/constants/Colors";
+import Colors, { calendarTheme } from "@/constants/Colors";
 import { AntDesign, FontAwesome, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import moment from "moment";
 import { memo } from "react";
@@ -13,6 +13,7 @@ import TimelineItem from "../components/TimelineItem";
 import useTimeline from "../hooks/general/useTimeline";
 import { GetTimelineQuery } from "../hooks/query/useGetTimeLineQuery";
 import { TimelineScreenProps } from "../types";
+import DayTimeline from "../components/DayTimeline";
 
 const ListHeaderComponent = memo(
   (
@@ -72,10 +73,6 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
           }).format(moment(timeline.selected).toDate())}
           titleAnimatedStyle={animatedTitleStyle}
           buttons={[
-            // {
-            //   onPress: () => navigation.navigate("Search"),
-            //   icon: <MaterialIcons name="search" size={20} color="#fff" />,
-            // },
             {
               onPress: timeline.onViewToggle,
               icon:
@@ -91,53 +88,66 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
             },
           ]}
         />
-        <AnimatedVirtualizedList
-          ListHeaderComponent={<ListHeaderComponent translateY={translateY} navigation={navigation} {...timeline} />}
-          ListEmptyComponent={
-            timeline.loading ? (
-              <TimelineScreenLoader loading />
-            ) : (
-              <View
-                style={{
-                  padding: 25,
-                  flex: 1,
-                  justifyContent: "center",
-                  alignItems: "center",
-                  marginTop: 25,
+        {timeline.switchView !== "timeline" ? (
+          <AnimatedVirtualizedList
+            ListHeaderComponent={<ListHeaderComponent translateY={translateY} navigation={navigation} {...timeline} />}
+            ListEmptyComponent={
+              timeline.loading ? (
+                <TimelineScreenLoader loading />
+              ) : (
+                <View
+                  style={{
+                    padding: 25,
+                    flex: 1,
+                    justifyContent: "center",
+                    alignItems: "center",
+                    marginTop: 25,
+                  }}
+                >
+                  <NotFound selectedDate={timeline.selected} />
+                </View>
+              )
+            }
+            onScroll={scrollHandler}
+            contentContainerStyle={{
+              paddingHorizontal: 15,
+            }}
+            CellRendererComponent={({ index, style, ...rest }) => {
+              const newStyle = [style, { zIndex: -1 }];
+              return <View style={newStyle} {...rest} />;
+            }}
+            data={(timeline.data?.timeline as GetTimelineQuery[]) || []}
+            initialNumToRender={3}
+            keyExtractor={(item: any) => item.id}
+            getItem={(data, index) => data[index] as GetTimelineQuery}
+            getItemCount={(data) => data.length}
+            renderItem={({ item }: { item: GetTimelineQuery }): any => (
+              <TimelineItem
+                styles={{
+                  backgroundColor: Colors.primary_lighter,
+                  borderRadius: 15,
+                  padding: 20,
+                  marginBottom: 10,
+                  zIndex: 1,
                 }}
-              >
-                <NotFound selectedDate={timeline.selected} />
-              </View>
-            )
-          }
-          onScroll={scrollHandler}
-          contentContainerStyle={{
-            paddingHorizontal: 15,
-          }}
-          CellRendererComponent={({ index, style, ...rest }) => {
-            const newStyle = [style, { zIndex: -1 }];
-            return <View style={newStyle} {...rest} />;
-          }}
-          data={(timeline.data?.timeline as GetTimelineQuery[]) || []}
-          initialNumToRender={3}
-          keyExtractor={(item: any) => item.id}
-          getItem={(data, index) => data[index] as GetTimelineQuery}
-          getItemCount={(data) => data.length}
-          renderItem={({ item }: { item: GetTimelineQuery }): any => (
-            <TimelineItem
-              styles={{
-                backgroundColor: Colors.primary_lighter,
-                borderRadius: 15,
-                padding: 20,
-                marginBottom: 10,
-                zIndex: 1,
-              }}
-              key={item.id}
-              location="timeline"
-              {...item}
-            />
-          )}
-        />
+                key={item.id}
+                location="timeline"
+                {...item}
+              />
+            )}
+          />
+        ) : (
+          <DayTimeline date={timeline.selected} events={timeline.data?.timeline || []} theme={{}}>
+            <View style={{ paddingHorizontal: 15, marginBottom: 50 }}>
+              <DateList
+                onMenuPress={() => timeline.setSwitchView("date-list")}
+                dayEvents={timeline.dayEventsSorted}
+                selectedDate={timeline.selected}
+                setSelected={timeline.setSelected}
+              />
+            </View>
+          </DayTimeline>
+        )}
       </SafeAreaView>
     </>
   );

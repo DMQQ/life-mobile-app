@@ -70,7 +70,7 @@ export default function FutureProjection({ data, income, currentBalance: current
     }) as barDataItem[];
   }, [data, income, currentBalanceProps]);
   return (
-    <View style={{ padding: 20, overflow: "hidden" }}>
+    <View style={{ overflow: "hidden", marginVertical: 20 }}>
       <View style={{ width: "100%", marginBottom: 10 }}>
         <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 18 }}>Balance projection</Text>
         <Text style={{ color: "gray", marginTop: 5 }}>Takes current spending avarage and calculates the balance</Text>
@@ -121,7 +121,7 @@ export default function FutureProjection({ data, income, currentBalance: current
           }}
         >
           <Text style={{ fontSize: 14, color: "#fff" }}>Average Expenses</Text>
-          <Text style={{ fontSize: 20, fontWeight: "600", color: Colors.secondary }}>{projectionData[0]?.expenses.toLocaleString()}zł</Text>
+          <Text style={{ fontSize: 25, fontWeight: "600", color: Colors.secondary }}>{projectionData[0]?.expenses.toLocaleString()}zł</Text>
         </View>
 
         <View
@@ -133,8 +133,8 @@ export default function FutureProjection({ data, income, currentBalance: current
             gap: 8,
           }}
         >
-          <Text style={{ fontSize: 14, color: "#fff" }}>Projected Balance (12mo)</Text>
-          <Text style={{ fontSize: 20, fontWeight: "600", color: Colors.secondary }}>
+          <Text style={{ fontSize: 14, color: "#fff" }}>Projection for (12mo)</Text>
+          <Text style={{ fontSize: 25, fontWeight: "600", color: Colors.secondary }}>
             {projectionData[projectionData.length - 1]?.value.toLocaleString()}zł
           </Text>
         </View>

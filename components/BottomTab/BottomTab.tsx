@@ -3,7 +3,7 @@ import { Platform, StyleSheet } from "react-native";
 import Layout from "../../constants/Layout";
 import Colors from "../../constants/Colors";
 import Ripple from "react-native-material-ripple";
-import { Feather, Ionicons } from "@expo/vector-icons";
+import { Feather, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import useKeyboard from "../../utils/hooks/useKeyboard";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { useTheme } from "../../utils/context/ThemeContext";
@@ -83,7 +83,17 @@ export default function BottomTab({ navigation, state, insets }: BottomTabBarPro
       entering={FadeInDown}
       exiting={FadeInDown}
     >
-      <Btn route="NotesScreens" label="Notes" iconName={"clipboard"} />
+      <Btn
+        route="NotesScreens"
+        label="Notes"
+        iconName={
+          <MaterialCommunityIcons
+            name="cards"
+            size={22.5}
+            color={activeRoute === "NotesScreens" ? Colors.secondary : "rgba(255,255,255,0.8)"}
+          />
+        }
+      />
 
       <Btn
         route="GoalsScreens"
