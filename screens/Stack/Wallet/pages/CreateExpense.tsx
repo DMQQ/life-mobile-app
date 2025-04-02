@@ -1,7 +1,7 @@
 import moment from "moment";
 import { Keyboard, ScrollView, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View } from "react-native";
 import Colors, { secondary_candidates } from "../../../../constants/Colors";
-import { memo, useCallback, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import Ripple from "react-native-material-ripple";
 import Layout from "@/constants/Layout";
 import { Icons } from "../components/Wallet/WalletItem";
@@ -23,9 +23,9 @@ import DateTimePicker from "react-native-modal-datetime-picker";
 import { useEditExpense } from "./CreateActivity";
 import IconButton from "@/components/ui/IconButton/IconButton";
 import { useNavigation } from "@react-navigation/native";
-import Button from "@/components/ui/Button/Button";
 import Color from "color";
 import Input from "@/components/ui/TextInput/TextInput";
+import usePredictCategory from "../hooks/usePredictCategory";
 
 const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
 
@@ -153,6 +153,18 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
     }),
     [amount]
   );
+
+  const [categoryPrediction] = usePredictCategory(name, +amount);
+
+  useEffect(() => {
+    if (categoryPrediction) {
+      setCategory(categoryPrediction.category as keyof typeof Icons);
+    }
+  }, [categoryPrediction]);
+
+  useEffect(() => {
+    if (type === "income") setCategory("income");
+  }, [type]);
 
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
