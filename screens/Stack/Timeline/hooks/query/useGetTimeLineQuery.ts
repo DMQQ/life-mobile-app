@@ -30,22 +30,25 @@ export const GET_TIMELINE_QUERY = gql`
       beginTime
       endTime
       isCompleted
+
+      todos {
+        id
+      }
+
+      images {
+        id
+      }
     }
   }
 `;
 
 export default function useGetTimeLineQuery(date?: string) {
-  const [selected, setSelected] = useState(
-    date || moment().format("YYYY-MM-DD")
-  );
-  const { data, loading, ...rest } = useQuery<{ timeline: GetTimelineQuery[] }>(
-    GET_TIMELINE_QUERY,
-    {
-      variables: {
-        date: selected,
-      },
-    }
-  );
+  const [selected, setSelected] = useState(date || moment().format("YYYY-MM-DD"));
+  const { data, loading, ...rest } = useQuery<{ timeline: GetTimelineQuery[] }>(GET_TIMELINE_QUERY, {
+    variables: {
+      date: selected,
+    },
+  });
 
   return { data, selected, setSelected, loading, ...rest };
 }
