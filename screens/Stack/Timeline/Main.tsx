@@ -52,7 +52,6 @@ export default function TimelineScreens({ route, navigation }: RootStackScreenPr
           mode: "create",
         }}
         options={{
-          presentation: "modal",
           headerShown: false,
         }}
       />
@@ -60,8 +59,6 @@ export default function TimelineScreens({ route, navigation }: RootStackScreenPr
         options={{
           headerTitle: "",
           headerTransparent: true,
-          animation: "none",
-          presentation: "transparentModal",
         }}
         name="ImagesPreview"
         component={ImagesPreview}

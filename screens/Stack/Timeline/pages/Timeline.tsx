@@ -78,8 +78,10 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
               icon:
                 timeline.switchView === "calendar" ? (
                   <Ionicons name={"calendar-number"} size={20} color="#fff" />
-                ) : (
+                ) : timeline.switchView === "date-list" ? (
                   <FontAwesome name="list-alt" size={20} color="#fff" />
+                ) : (
+                  <MaterialIcons name="view-agenda" size={20} color="#fff" />
                 ),
             },
             {
@@ -137,7 +139,13 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
             )}
           />
         ) : (
-          <DayTimeline date={timeline.selected} events={timeline.data?.timeline || []} theme={{}}>
+          <DayTimeline
+            onScroll={scrollHandler}
+            selected={timeline.selected}
+            date={timeline.selected}
+            events={timeline.data?.timeline || []}
+            theme={{}}
+          >
             <View style={{ paddingHorizontal: 15, marginBottom: 50 }}>
               <DateList
                 onMenuPress={() => timeline.setSwitchView("date-list")}

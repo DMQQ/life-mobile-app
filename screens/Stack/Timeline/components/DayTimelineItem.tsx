@@ -7,12 +7,15 @@ import timelineStyles from "./timeline.styles";
 import { GetTimelineQuery } from "../hooks/query/useGetTimeLineQuery";
 import { useMemo } from "react";
 import { AntDesign, MaterialIcons } from "@expo/vector-icons";
+import Colors from "@/constants/Colors";
 
 export default function DayTimelineItem(
   timeline: GetTimelineQuery & {
     location: "timeline" | "root";
     textColor?: string;
     styles?: StyleProp<ViewStyle>;
+
+    isSmall: boolean;
   }
 ) {
   const { remove } = useRemoveTimelineMutation(timeline);
@@ -20,6 +23,7 @@ export default function DayTimelineItem(
   const navigation = useNavigation<any>();
 
   const onPress = () => {
+    console.log("timeline", timeline);
     timeline.location === "root"
       ? navigation.navigate("TimelineScreens", {
           timelineId: timeline.id,
@@ -99,27 +103,41 @@ export default function DayTimelineItem(
             {start} - {end}
           </Text>
         </View>
-        <View
-          style={{
-            flexDirection: "row",
-            flexWrap: "wrap",
-            alignItems: "center",
-            justifyContent: "flex-end",
-            marginTop: 2.5,
-            gap: 10,
-          }}
-        >
-          <Text
-            numberOfLines={3}
-            style={[
-              timelineStyles.itemDescription,
-              { flex: 1, fontSize: 14 },
-              { ...(timeline.textColor && { color: timeline.textColor }) },
-            ]}
+        {!timeline.isSmall && (
+          <View
+            style={{
+              flexWrap: "wrap",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginTop: 2.5,
+              gap: 10,
+              flex: 1,
+            }}
           >
-            {timeline.description}
-          </Text>
-        </View>
+            <Text
+              numberOfLines={3}
+              style={[
+                timelineStyles.itemDescription,
+                { flex: 1, fontSize: 14 },
+                { ...(timeline.textColor && { color: timeline.textColor }) },
+              ]}
+            >
+              {timeline.description}
+            </Text>
+            <View style={{ flexDirection: "row", gap: 10 }}>
+              {timeline.todos.length > 0 && (
+                <Text style={{ color: "#fff" }}>
+                  {timeline.todos.length} {timeline.todos.length > 1 ? "todos" : "todo"}
+                </Text>
+              )}
+              {timeline.images.length > 0 && (
+                <Text style={{ color: "#fff" }}>
+                  {timeline.images.length} {timeline.images.length > 1 ? "images" : "image"}
+                </Text>
+              )}
+            </View>
+          </View>
+        )}
       </View>
     </Ripple>
   );

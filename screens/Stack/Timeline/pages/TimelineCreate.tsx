@@ -1,6 +1,6 @@
 import ScreenContainer from "../../../../components/ui/ScreenContainer";
 import ValidatedInput from "../../../../components/ui/ValidatedInput";
-import { ActivityIndicator, Text, ScrollView, StyleSheet, Platform } from "react-native";
+import { ActivityIndicator, Text, ScrollView, StyleSheet, Platform, KeyboardAvoidingView } from "react-native";
 import Colors from "../../../../constants/Colors";
 import Button from "../../../../components/ui/Button/Button";
 import timelineStyles from "../components/timeline.styles";
@@ -61,7 +61,7 @@ export default function CreateTimeLineEventModal({ route, navigation }: Timeline
   const numberOfLines = f.values.desc.split("\n").length;
 
   return (
-    <View style={{ flex: 1 }}>
+    <ScreenContainer style={{ flex: 1, padding: 0 }}>
       <TimelineCreateHeader
         navigation={navigation}
         handleChangeDate={handleChangeDate}
@@ -70,8 +70,8 @@ export default function CreateTimeLineEventModal({ route, navigation }: Timeline
           f.resetForm();
         }}
       />
-      <ScreenContainer scroll>
-        <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
+        <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 15 }}>
           {!isEditing && <SuggestedEvents date={route.params.selectedDate} />}
 
           <ValidatedInput
@@ -160,10 +160,10 @@ export default function CreateTimeLineEventModal({ route, navigation }: Timeline
             }}
             onCancel={() => setDatePicker("")}
           />
-        </ScrollView>
 
-        <CreateRepeatableTimeline formik={f} ref={sheetRef as any} />
-      </ScreenContainer>
+          <CreateRepeatableTimeline formik={f} ref={sheetRef as any} />
+        </ScrollView>
+      </KeyboardAvoidingView>
       <SubmitButton
         f={f}
         openSheet={() => sheetRef.current?.expand()}
@@ -171,7 +171,7 @@ export default function CreateTimeLineEventModal({ route, navigation }: Timeline
         isKeyboardOpen={isKeyboardOpen || false}
         isLoading={isLoading}
       />
-    </View>
+    </ScreenContainer>
   );
 }
 
@@ -185,37 +185,36 @@ interface SubmitButtonProps {
   openSheet: () => void;
 }
 
-const SubmitButton = (props: SubmitButtonProps) =>
-  !props.isKeyboardOpen ? (
-    <View style={{ flexDirection: "row", padding: 15, marginBottom: 15 }}>
-      <IconButton
-        onPress={props.openSheet}
-        style={{
-          padding: 7.5,
-          width: 35,
-          marginRight: 15,
-        }}
-        icon={<AntDesign name="calendar" color="#fff" size={20} />}
-      />
-      <Button
-        icon={props.isLoading ? <ActivityIndicator style={{ marginRight: 5 }} size={18} color={"#fff"} /> : null}
-        disabled={!(props.f.isValid && !props.f.isSubmitting && props.f.dirty)}
-        type="contained"
-        callback={() => props.f.handleSubmit()}
-        style={[
-          timelineStyles.submitButton,
-          {
-            backgroundColor: !(props.f.isValid && !props.f.isSubmitting && props.f.dirty)
-              ? Color(Colors.secondary).alpha(0.1).string()
-              : Colors.secondary,
-          },
-        ]}
-        fontStyle={{ fontSize: 16 }}
-      >
-        {props.isEditing ? "Save changes" : "Create new event"}
-      </Button>
-    </View>
-  ) : null;
+const SubmitButton = (props: SubmitButtonProps) => (
+  <View style={{ flexDirection: "row", paddingHorizontal: 15 }}>
+    <IconButton
+      onPress={props.openSheet}
+      style={{
+        padding: 7.5,
+        width: 35,
+        marginRight: 15,
+      }}
+      icon={<AntDesign name="calendar" color="#fff" size={20} />}
+    />
+    <Button
+      icon={props.isLoading ? <ActivityIndicator style={{ marginRight: 5 }} size={18} color={"#fff"} /> : null}
+      disabled={!(props.f.isValid && !props.f.isSubmitting && props.f.dirty)}
+      type="contained"
+      callback={() => props.f.handleSubmit()}
+      style={[
+        timelineStyles.submitButton,
+        {
+          backgroundColor: !(props.f.isValid && !props.f.isSubmitting && props.f.dirty)
+            ? Color(Colors.secondary).alpha(0.1).string()
+            : Colors.secondary,
+        },
+      ]}
+      fontStyle={{ fontSize: 16 }}
+    >
+      {props.isEditing ? "Save changes" : "Create new event"}
+    </Button>
+  </View>
+);
 
 const TimePickerModal = (props: { isVisible: boolean; onConfirm: (date: Date) => void; onCancel: () => void }) => {
   return <DateTimePicker mode="time" isVisible={props.isVisible} onConfirm={props.onConfirm} onCancel={props.onCancel} />;
