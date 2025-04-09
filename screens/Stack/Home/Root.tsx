@@ -18,6 +18,7 @@ import Layout from "@/constants/Layout";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 import { FancySpinner } from "@/components/ui/FancyLoader";
 import { useState } from "react";
+import * as SplashScreen from "expo-splash-screen";
 
 const LoadingSkeleton = () => {
   return (
@@ -106,12 +107,12 @@ export default function Root({ navigation }: ScreenProps<"Root">) {
         moment().subtract(1, "day").endOf("week").format("YYYY-MM-DD"),
       ],
     },
-    onCompleted: (data) => {
-      offline.save("RootScreen", data);
+    onCompleted: async (data) => {
+      await offline.save("RootScreen", data);
 
-      setTimeout(() => {
-        setLoading(false);
-      }, 1000);
+      setLoading(false);
+
+      await SplashScreen.hideAsync();
     },
     onError: (er) => console.log(JSON.stringify(er, null, 2)),
   });
@@ -121,7 +122,7 @@ export default function Root({ navigation }: ScreenProps<"Root">) {
   const data = offline.isOffline ? offline.data || {} : gql;
 
   return (
-    <ScreenContainer style={{ padding: 0 }}>
+    <ScreenContainer style={{ padding: 0, flex: 1 }}>
       {loading && <LoadingSkeleton />}
 
       <Header
@@ -135,8 +136,9 @@ export default function Root({ navigation }: ScreenProps<"Root">) {
         ]}
       />
       <ScrollView
+        style={{ flex: 1 }}
         contentContainerStyle={{
-          padding: 15,
+          paddingHorizontal: 15,
         }}
       >
         <AvailableBalanceWidget

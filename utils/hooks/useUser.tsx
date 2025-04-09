@@ -4,6 +4,8 @@ import * as SecureStore from "expo-secure-store";
 import { userActions } from "../redux/user/user";
 import { useApolloClient, ApolloLink } from "@apollo/client";
 
+import * as SplashScreen from "expo-splash-screen";
+
 export const STORE_KEY = "user";
 
 export default function useUser() {
@@ -19,6 +21,8 @@ export default function useUser() {
       dispatch(userActions.loadUser({ user: user.user, token: user.token }));
     } else {
       dispatch(userActions.notSigned());
+
+      await SplashScreen.hideAsync();
     }
   }
 

@@ -15,10 +15,11 @@ export default function ScreenLoader() {
         <View style={{ flexDirection: "row", gap: 5, justifyContent: "flex-end" }}>
           <Skeleton.Item width={25} height={25} />
           <Skeleton.Item width={25} height={25} />
+          <Skeleton.Item width={25} height={25} />
         </View>
 
-        <View style={{ height: 200, justifyContent: "center", alignItems: "center" }}>
-          <Skeleton.Item width={(w) => w / 1.5} height={50} />
+        <View style={{ height: 150, justifyContent: "center", alignItems: "center", marginBottom: 20 }}>
+          <Skeleton.Item width={(w) => w / 1.5} height={80} />
         </View>
 
         <Skeleton.Item width={(w) => w / 3} height={25} />
