@@ -10,6 +10,7 @@ export default function Header(props: {
   buttons?: {
     onPress: () => void;
     icon: JSX.Element | React.ReactNode;
+    style?: StyleProp<ViewStyle>;
   }[];
   title?: string;
   goBack?: boolean;
@@ -69,7 +70,7 @@ export default function Header(props: {
         }}
       >
         {(props.buttons || []).map((button, index) => (
-          <IconButton key={index} onPress={throttle(button.onPress, 250)} icon={button.icon} />
+          <IconButton style={button.style} key={index} onPress={throttle(button.onPress, 250)} icon={button.icon} />
         ))}
       </View>
     </View>
