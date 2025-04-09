@@ -20,6 +20,7 @@ import DailySpendingChart from "../components/WalletChart/DailySpendingChart";
 import WalletContextProvider from "../components/WalletContext";
 import Ripple from "react-native-material-ripple";
 import Color from "color";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const styles = StyleSheet.create({
   tilesContainer: {
@@ -168,7 +169,10 @@ function WalletCharts({ navigation }: any) {
       }, 100);
   };
 
-  const selectedCategoryData = data?.wallet?.expenses.filter((item) => item.category === selected && item.type !== "refunded") || [];
+  const selectedCategoryData =
+    selected === ""
+      ? data?.wallet?.expenses || []
+      : data?.wallet?.expenses.filter((item) => item.category === selected && item.type !== "refunded") || [];
 
   const onChartPress = (e: any) => {
     setSelected(e.label);
@@ -228,8 +232,10 @@ function WalletCharts({ navigation }: any) {
 
   const [step, setStep] = useState(5);
 
+  const insets = useSafeAreaInsets();
+
   return (
-    <View style={{ paddingTop: 15, paddingBottom: 120 }}>
+    <View style={{ paddingTop: 15, paddingBottom: insets.bottom + 15 }}>
       <Header buttons={headerButtons} goBack backIcon={<AntDesign name="close" size={24} color="white" />} />
       <VirtualizedList
         ref={listRef}

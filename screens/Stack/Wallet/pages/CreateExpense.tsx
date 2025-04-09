@@ -164,7 +164,10 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
 
   useEffect(() => {
     if (type === "income") setCategory("income");
-  }, [type]);
+    else if (type === "expense" && category === "income") setCategory("none");
+    {
+    }
+  }, [type, category]);
 
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
@@ -233,7 +236,8 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
                       }
                     />
                   </View>
-                  <ScrollView
+                  <Animated.ScrollView
+                    layout={LinearTransition}
                     horizontal
                     showsHorizontalScrollIndicator={false}
                     style={{ flexDirection: "row" }}
@@ -350,7 +354,7 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
                         <Text style={{ color: "rgba(255,255,255,0.7)", fontSize: 14 }}>Subscription</Text>
                       </Ripple>
                     )}
-                  </ScrollView>
+                  </Animated.ScrollView>
                 </Animated.View>
               )}
 
@@ -389,17 +393,13 @@ const NumbersPad = memo(
     const navigation = useNavigation();
 
     return (
-      <Animated.View
-        entering={FadeInDown}
-        // exiting={FadeOutDown}
-        style={{ flex: 1, gap: 15, borderRadius: 35, marginTop: 30 }}
-      >
+      <Animated.View entering={FadeInDown} style={{ flex: 1, gap: 15, borderRadius: 35, marginTop: 30 }}>
         {[
           [1, 2, 3],
           [4, 5, 6],
           [7, 8, 9],
           [".", 0, "C"],
-        ].map((row, index, array) => (
+        ].map((row) => (
           <View style={{ flexDirection: "row", gap: 15 }} key={row.toString()}>
             {row.map((num) => (
               <NumpadNumber
@@ -457,15 +457,7 @@ const NumpadNumber = (props: { onPress: VoidFunction; num: string | number; rota
         onPressOut={() => {
           clearInterval(interval.current!);
         }}
-        style={[
-          {
-            justifyContent: "center",
-            alignItems: "center",
-            width: "100%",
-            height: "100%",
-          },
-          animatedScale,
-        ]}
+        style={[styles.numberPadNumberButton, animatedScale]}
       >
         {props.num === "C" ? (
           <Entypo name="chevron-left" size={40} color="#fff" />
@@ -502,17 +494,7 @@ const CategorySelector = (props: { current: string; onPress: (item: string) => v
             paddingRight: 15,
           }}
         >
-          <Ripple
-            onPress={() => props.onPress(item[0])}
-            style={{
-              paddingVertical: 15,
-              paddingHorizontal: 5.5,
-              flexDirection: "row",
-              gap: 15,
-              alignItems: "center",
-              flex: 1,
-            }}
-          >
+          <Ripple onPress={() => props.onPress(item[0])} style={styles.categoryButton}>
             <View
               style={{
                 padding: 10,
@@ -548,5 +530,19 @@ const styles = StyleSheet.create({
     flex: 1,
     width: Layout.screen.width - 30,
     borderRadius: 100,
+  },
+  numberPadNumberButton: {
+    justifyContent: "center",
+    alignItems: "center",
+    width: "100%",
+    height: "100%",
+  },
+  categoryButton: {
+    paddingVertical: 15,
+    paddingHorizontal: 5.5,
+    flexDirection: "row",
+    gap: 15,
+    alignItems: "center",
+    flex: 1,
   },
 });
