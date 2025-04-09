@@ -188,8 +188,6 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
         onEndReached={onEndReached}
       />
 
-      <CreateExpenseSheet onCompleted={() => {}} ref={bottomSheetRef} />
-
       <EditBalanceSheet />
     </SafeAreaView>
   );

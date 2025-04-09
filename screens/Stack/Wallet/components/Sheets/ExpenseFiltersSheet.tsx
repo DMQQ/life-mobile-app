@@ -26,29 +26,6 @@ interface ExpenseFiltersProps {
   dispatch: (action: Action) => void;
 }
 
-const HelperText = ({ text, marginTop = 2.5 }: { text: string; marginTop?: number }) => (
-  <Text
-    style={{
-      color: "gray",
-      marginTop,
-      fontSize: 12,
-      paddingBottom: 5,
-      borderBottomWidth: 1,
-      borderBottomColor: "rgba(255,255,255,0.2)",
-    }}
-  >
-    {text.trim()}
-  </Text>
-);
-
-// export default forwardRef<BottomSheetGorhom, ExpenseFiltersProps>((props, ref) => {
-//   return (
-//     // <BottomSheet snapPoints={["95%"]} ref={ref}>
-//     <Forms {...props} />
-//     // </BottomSheet>
-//   );
-// });
-
 export default function ExpenseFiltersSheet() {
   const { filters, dispatch } = useWalletContext();
   return <Forms filters={filters} dispatch={dispatch} />;
@@ -187,12 +164,6 @@ const Forms = (props: ExpenseFiltersProps) => {
           }}
           isActive={(category) => props.filters.category.includes(category)}
         />
-      </View>
-
-      <View style={{ padding: 15 }}>
-        <Button onPress={() => navigation.goBack()} fontStyle={{ fontSize: 16 }} style={{ marginTop: 20 }}>
-          Close Filters
-        </Button>
       </View>
     </ScrollView>
   );

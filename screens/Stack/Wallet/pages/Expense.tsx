@@ -161,68 +161,63 @@ export default function Expense({ route: { params }, navigation }: any) {
         </View>
 
         {/* Subscription section */}
-        <View
+        <View style={styles.row}>
+          <MaterialIcons
+            name={isSubscriptionActive ? "refresh" : "refresh"}
+            size={24}
+            color={Colors.ternary}
+            style={{ paddingHorizontal: 7.5, padding: 2.5 }}
+          />
+
+          <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>
+            {hasSubscription ? (isSubscriptionActive ? "Subscription active" : "Subscription inactive") : "Set up subscription"}
+          </Text>
+
+          {isSubscriptionLoading && <ActivityIndicator size="small" color={Colors.ternary} style={{ marginLeft: 10 }} />}
+        </View>
+
+        {hasSubscription && (
+          <>
+            <View style={styles.row}>
+              <MaterialIcons name="date-range" size={24} color={Colors.ternary} style={{ paddingHorizontal: 7.5, padding: 2.5 }} />
+              <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>
+                {isSubscriptionActive ? "Next payment: " : "Last payment: "}
+                {selected.subscription?.nextBillingDate && moment(+selected?.subscription?.nextBillingDate).format("YYYY-MM-DD")}
+              </Text>
+            </View>
+            <View style={styles.row}>
+              <MaterialIcons name="history" size={24} color={Colors.ternary} style={{ paddingHorizontal: 7.5, padding: 2.5 }} />
+              <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>
+                {isSubscriptionActive ? "Active since: " : "Created on: "}
+                {moment(+selected?.subscription?.dateStart).format("YYYY-MM-DD")}
+              </Text>
+            </View>
+          </>
+        )}
+
+        {/* Subscription action button */}
+        <Ripple
+          onPress={handleSubscriptionAction}
+          disabled={isSubscriptionLoading}
           style={[
+            styles.row,
             {
-              marginTop: 15,
-              flexDirection: "column",
-              backgroundColor: styles.row.backgroundColor,
-              padding: styles.row.padding,
+              marginTop: 10,
+              justifyContent: "center",
+              backgroundColor: isSubscriptionActive ? "rgba(255,59,48,0.2)" : "rgba(52,199,89,0.2)",
             },
           ]}
         >
-          <Ripple onPress={handleSubscriptionAction} disabled={isSubscriptionLoading} style={[{ marginTop: 0, padding: 0, width: "100%" }]}>
-            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-              <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <MaterialIcons
-                  name={isSubscriptionActive ? "check-box" : "check-box-outline-blank"}
-                  size={24}
-                  color={Colors.ternary}
-                  style={{ paddingHorizontal: 7.5, padding: 2.5 }}
-                />
-                <Text
-                  style={{
-                    color: isSubscriptionActive ? secondary_candidates[0] : Colors.secondary_light_2,
-                    fontSize: 18,
-                    textTransform: "uppercase",
-                  }}
-                >
-                  {hasSubscription ? (isSubscriptionActive ? "Subscription is active" : "Subscription is inactive") : "Set up subscription"}
-                </Text>
-              </View>
-              {isSubscriptionLoading && <ActivityIndicator size="small" color={Colors.ternary} />}
-            </View>
-
-            {hasSubscription && (
-              <>
-                <View style={{ flexDirection: "row", justifyContent: "space-between", padding: 10, marginTop: 10 }}>
-                  <Text style={{ color: "rgba(255,255,255,0.7)" }}>{isSubscriptionActive ? "Next payment: " : "Last payment: "}</Text>
-
-                  {selected.subscription?.nextBillingDate && (
-                    <Text style={{ color: "rgba(255,255,255,0.7)" }}>
-                      {moment(+selected?.subscription?.nextBillingDate).format("YYYY-MM-DD")}
-                    </Text>
-                  )}
-                </View>
-                <View style={{ flexDirection: "row", justifyContent: "space-between", padding: 10 }}>
-                  <Text style={{ color: "rgba(255,255,255,0.7)" }}>{isSubscriptionActive ? "Active since" : "Created on"}</Text>
-
-                  <Text style={{ color: "rgba(255,255,255,0.7)" }}>{moment(+selected?.subscription?.dateStart).format("YYYY-MM-DD")}</Text>
-                </View>
-              </>
-            )}
-
-            <View style={{ padding: 10, alignItems: "center" }}>
-              <Text style={{ color: isSubscriptionActive ? "rgba(255,0,0,0.7)" : "rgba(0,255,0,0.7)" }}>
-                {hasSubscription
-                  ? isSubscriptionActive
-                    ? "Tap to disable subscription"
-                    : "Tap to enable subscription"
-                  : "Tap to create monthly subscription"}
-              </Text>
-            </View>
-          </Ripple>
-        </View>
+          <Text
+            style={{
+              color: isSubscriptionActive ? "rgba(255,59,48,0.9)" : "rgba(52,199,89,0.9)",
+              fontSize: 16,
+              fontWeight: "bold",
+            }}
+          >
+            {hasSubscription ? (isSubscriptionActive ? "Disable Subscription" : "Enable Subscription") : "Create Monthly Subscription"}
+          </Text>
+        </Ripple>
       </View>
 
       <View style={{ padding: 15, paddingTop: 5 }}>
