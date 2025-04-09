@@ -132,13 +132,13 @@ const IncomeExpenseBar = memo(() => {
 
   const income = data?.statistics?.income || 0;
 
-  if ((expense === 0 && income === 0) || Number.isNaN(expense) || Number.isNaN(income)) return null;
-
   const total = expense + income;
 
   const incomeWidth = (income / total) * totalWidth;
 
   const expenseWidth = (expense / total) * totalWidth;
+
+  const visible = !((expense === 0 && income === 0) || Number.isNaN(expense) || Number.isNaN(income));
 
   return (
     <View style={{ marginTop: 15 }}>
@@ -153,26 +153,28 @@ const IncomeExpenseBar = memo(() => {
       >
         <Text style={styles.sectionTitle}>{steps[step][0]} overview</Text>
       </TouchableOpacity>
-      <View style={{ flexDirection: "row", backgroundColor: Color(Colors.primary_lighter).lighten(0.5).hex(), borderRadius: 10 }}>
-        <View
-          style={{
-            width: expenseWidth,
-            backgroundColor: "#FF5454",
-            height: 10,
-            borderTopLeftRadius: 10,
-            borderBottomLeftRadius: 10,
-          }}
-        />
-        <View
-          style={{
-            width: incomeWidth,
-            backgroundColor: Colors.secondary,
-            height: 10,
-            borderTopRightRadius: 10,
-            borderBottomRightRadius: 10,
-          }}
-        />
-      </View>
+      {visible && (
+        <View style={{ flexDirection: "row", backgroundColor: Color(Colors.primary_lighter).lighten(0.5).hex(), borderRadius: 10 }}>
+          <View
+            style={{
+              width: expenseWidth,
+              backgroundColor: "#FF5454",
+              height: 10,
+              borderTopLeftRadius: 10,
+              borderBottomLeftRadius: 10,
+            }}
+          />
+          <View
+            style={{
+              width: incomeWidth,
+              backgroundColor: Colors.secondary,
+              height: 10,
+              borderTopRightRadius: 10,
+              borderBottomRightRadius: 10,
+            }}
+          />
+        </View>
+      )}
       <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 6 }}>
         <Text style={{ color: "#FF5454", fontSize: Sizing.tooltip, marginTop: 4 }}>-{expense.toFixed(2)} zł</Text>
         <Text style={{ color: "#fff", fontSize: Sizing.tooltip, marginTop: 4 }}>

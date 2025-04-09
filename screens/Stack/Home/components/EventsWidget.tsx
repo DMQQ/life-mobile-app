@@ -18,7 +18,7 @@ const backgroundColor = Colors.primary_lighter;
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 50,
+    marginTop: 20,
     padding: 10,
   },
 

@@ -133,7 +133,7 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
     );
 
   return (
-    <SafeAreaView style={{ flex: 1, position: "relative" }}>
+    <SafeAreaView style={{ flex: 1 }}>
       {isLoaderVisible && (
         <Animated.View
           exiting={FadeOut.duration(500)}
@@ -144,6 +144,7 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
             position: "absolute",
             zIndex: 1000,
             backgroundColor: "#000",
+            top: insets.top,
           }}
         >
           <ScreenLoader />
