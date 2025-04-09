@@ -18,7 +18,6 @@ interface Expense {
 interface Props {
   data: Expense[];
   income: number;
-
   currentBalance: number;
 }
 
@@ -58,22 +57,30 @@ export default function FutureProjection({ data, income, currentBalance: current
     const averageMonthlyExpense = totalWeight ? weightedSum / totalWeight : 0;
 
     const projectionMonths = 9;
-    let currentBalance = currentBalanceProps;
+    let runningBalance = currentBalanceProps;
+    const monthlyNet = income - averageMonthlyExpense;
 
     return Array.from({ length: projectionMonths }, (_, i) => {
+      // For the first month, use current balance as starting point
+      // For subsequent months, update balance based on net monthly flow
+      if (i > 0) {
+        runningBalance += monthlyNet;
+      }
+
       return {
-        value: Math.round(currentBalance),
+        value: Math.round(runningBalance),
         label: moment().add(i, "months").format("MMM"),
         expenses: Math.round(averageMonthlyExpense),
         labelTextStyle: { color: "#fff" },
       };
     }) as barDataItem[];
   }, [data, income, currentBalanceProps]);
+
   return (
     <View style={{ overflow: "hidden", marginVertical: 20 }}>
       <View style={{ width: "100%", marginBottom: 10 }}>
         <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 18 }}>Balance projection</Text>
-        <Text style={{ color: "gray", marginTop: 5 }}>Takes current spending avarage and calculates the balance</Text>
+        <Text style={{ color: "gray", marginTop: 5 }}>Takes current spending average and calculates the balance</Text>
       </View>
 
       <ScrollView style={{ height: 300, overflow: "hidden" }}>
@@ -133,7 +140,7 @@ export default function FutureProjection({ data, income, currentBalance: current
             gap: 8,
           }}
         >
-          <Text style={{ fontSize: 14, color: "#fff" }}>Projection for (12mo)</Text>
+          <Text style={{ fontSize: 14, color: "#fff" }}>Projection for (9mo)</Text>
           <Text style={{ fontSize: 25, fontWeight: "600", color: Colors.secondary }}>
             {projectionData[projectionData.length - 1]?.value.toLocaleString()}zł
           </Text>

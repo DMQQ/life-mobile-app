@@ -5,7 +5,8 @@ import { FontAwesome5, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import Colors from "@/constants/Colors";
 import { ReactNode, useEffect, useMemo, useState } from "react";
 import moment from "moment";
-import { Expense, Wallet } from "@/types";
+import Ripple from "react-native-material-ripple";
+import lowOpacity from "@/utils/functions/lowOpacity";
 
 interface StatisticsSummaryProps {
   data: WalletStatisticsResponse["statistics"] | undefined;
@@ -32,7 +33,6 @@ export const Item = ({ label, value, icon, formatValue = true, width }: ItemProp
       width: width || (Layout.screen.width - 30 - 10) / 2,
       flexDirection: "row",
       gap: 10,
-      alignItems: "center",
       padding: 20,
       backgroundColor: Colors.primary_light,
       borderRadius: 15,
@@ -117,47 +117,92 @@ export default function StatisticsSummary(props: StatisticsSummaryProps) {
       return typeof value === "number" && value === 0;
     });
 
+  const [view, setView] = useState<"last" | "current">("current");
+
   if (!props.data) return null;
 
   return (
-    <View style={{ width: Layout.screen.width - 30, marginTop: 25, marginBottom: 25 }}>
-      <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 18 }}>Statistics Summary</Text>
+    <View style={{ width: Layout.screen.width - 30, marginTop: 25, marginBottom: 25, minHeight: 475 }}>
+      <View style={{ flexDirection: "row" }}>
+        <View style={{ flex: 1 }}>
+          {view === "current" ? (
+            <>
+              <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 18 }}>Statistics Summary</Text>
 
-      <Text style={{ color: "gray", marginTop: 5 }}>
-        From {props.dates.from} to {props.dates.to}
-      </Text>
-
-      <View style={{ flexDirection: "row", justifyContent: "space-between", flexWrap: "wrap", gap: 10, marginTop: 15 }}>
-        <Item label="Total expenses" value={props.data.expense} icon={<MaterialIcons name="attach-money" size={24} color="red" />} />
-        <Item label="Total income" value={props.data.income} icon={<Ionicons name="cash-outline" size={24} color="lightgreen" />} />
-        <Item label="Min expense" value={props.data.min} icon={<MaterialIcons name="trending-down" size={24} color="red" />} />
-        <Item label="Max expense" value={props.data.max} icon={<MaterialIcons name="trending-up" size={24} color="lightgreen" />} />
-        <Item label="Average purchase" value={props.data.average} icon={<FontAwesome5 name="chart-bar" size={24} color="red" />} />
-        <Item
-          label="Total count"
-          formatValue={false}
-          value={props.data.count}
-          icon={<Ionicons name="receipt-outline" size={24} color="lightgreen" />}
-        />
-        <Item
-          label="Top category"
-          value={capitalize(props.data.theMostCommonCategory)}
-          icon={<MaterialIcons name="category" size={24} color="white" />}
-        />
-        <Item
-          label="Uncommon category"
-          value={capitalize(props.data.theLeastCommonCategory)}
-          icon={<MaterialIcons name="category" size={24} color="white" />}
-        />
+              <Text style={{ color: "gray", marginTop: 5 }}>
+                From {props.dates.from} to {props.dates.to}
+              </Text>
+            </>
+          ) : (
+            <>
+              <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 18 }}>Difference in spendings</Text>
+              <Text style={{ color: "gray", marginTop: 5 }}>
+                Dates {oppositeRange[0]} to {oppositeRange[1]}
+              </Text>
+            </>
+          )}
+        </View>
+        {lastRangeStatistics.data && !isEmptyOppositeRange && (
+          <View style={{ alignItems: "flex-end" }}>
+            <Ripple
+              onPress={() => setView((p) => (p === "current" ? "last" : "current"))}
+              style={{
+                backgroundColor: lowOpacity(Colors.secondary, 0.15),
+                borderWidth: 0.5,
+                borderColor: lowOpacity(Colors.secondary, 0.5),
+                padding: 7.5,
+                paddingHorizontal: 15,
+                borderRadius: 10,
+              }}
+            >
+              <Text style={{ color: Colors.secondary }}>{view === "current" ? "Last range" : "Current range"}</Text>
+            </Ripple>
+          </View>
+        )}
       </View>
 
-      {lastRangeStatistics.data && !isEmptyOppositeRange && (
+      {view === "current" ? (
+        <View style={{ flexDirection: "row", justifyContent: "space-between", flexWrap: "wrap", gap: 10, marginTop: 15 }}>
+          <Item
+            label={"Total expenses" + "\n"}
+            value={props.data.expense}
+            icon={<MaterialIcons name="attach-money" size={24} color="red" />}
+          />
+          <Item
+            label={"Total income" + "\n"}
+            value={props.data.income}
+            icon={<Ionicons name="cash-outline" size={24} color="lightgreen" />}
+          />
+          <Item label={"Min expense" + "\n"} value={props.data.min} icon={<MaterialIcons name="trending-down" size={24} color="red" />} />
+          <Item
+            label={"Max expense" + "\n"}
+            value={props.data.max}
+            icon={<MaterialIcons name="trending-up" size={24} color="lightgreen" />}
+          />
+          <Item
+            label={"Average purchase" + "\n"}
+            value={props.data.average}
+            icon={<FontAwesome5 name="chart-bar" size={24} color="red" />}
+          />
+          <Item
+            label={"Total count" + "\n"}
+            formatValue={false}
+            value={props.data.count}
+            icon={<Ionicons name="receipt-outline" size={24} color="lightgreen" />}
+          />
+          <Item
+            label={"Top category"}
+            value={capitalize(props.data.theMostCommonCategory)}
+            icon={<MaterialIcons name="category" size={24} color="white" />}
+          />
+          <Item
+            label="Uncommon category"
+            value={capitalize(props.data.theLeastCommonCategory)}
+            icon={<MaterialIcons name="category" size={24} color="white" />}
+          />
+        </View>
+      ) : (
         <>
-          <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 18, marginTop: 25 }}>Percentage difference in spendings</Text>
-          <Text style={{ color: "gray", marginTop: 5 }}>
-            Statistics in the previous daterange {"\n"}
-            {oppositeRange[0]} to {oppositeRange[1]}
-          </Text>
           <View style={{ flexDirection: "row", justifyContent: "space-between", flexWrap: "wrap", gap: 10, marginTop: 15 }}>
             <Item
               label={"Total expenses: " + getValue("expense")}
@@ -195,16 +240,20 @@ export default function StatisticsSummary(props: StatisticsSummaryProps) {
               value={percentDiff("count")}
               icon={<Text style={{ fontSize: 25, color: "lightgreen", marginRight: 2.5 }}>%</Text>}
             />
-            <Item
-              label="Top category"
-              value={lastRangeStatistics.data.statistics.theMostCommonCategory}
-              icon={<MaterialIcons name="category" size={24} color="white" />}
-            />
-            <Item
-              label="Meh category"
-              value={lastRangeStatistics.data.statistics.theLeastCommonCategory}
-              icon={<MaterialIcons name="category" size={24} color="white" />}
-            />
+            {lastRangeStatistics?.data && (
+              <>
+                <Item
+                  label="Top category"
+                  value={capitalize(lastRangeStatistics.data.statistics.theMostCommonCategory)}
+                  icon={<MaterialIcons name="category" size={24} color="white" />}
+                />
+                <Item
+                  label="Meh category"
+                  value={capitalize(lastRangeStatistics.data.statistics.theLeastCommonCategory)}
+                  icon={<MaterialIcons name="category" size={24} color="white" />}
+                />
+              </>
+            )}
           </View>
         </>
       )}

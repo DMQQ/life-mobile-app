@@ -1,9 +1,13 @@
 import React, { useMemo } from "react";
 import { View, Text } from "react-native";
-import { LineChart } from "react-native-gifted-charts";
+import { BarChart, LineChart } from "react-native-gifted-charts";
 import moment from "moment";
 import Layout from "@/constants/Layout";
-import Colors from "@/constants/Colors";
+import Colors, { secondary_candidates } from "@/constants/Colors";
+import Charts from "../Wallet/Charts";
+import { categoryColors } from "../../pages/WalletCharts";
+import { Icons } from "../ExpenseIcon";
+import Color from "color";
 
 interface Expense {
   id: string;
@@ -29,11 +33,12 @@ export default function DailySpendingChart({ data }: Props) {
 
     return Object.entries(dailySpending)
       .sort(([dateA], [dateB]) => moment(dateA).diff(moment(dateB)))
-      .map(([date, total]) => ({
+      .map(([date, total], index) => ({
         value: Math.round(total),
         label: moment(date).format("DD"),
         labelTextStyle: { color: "#fff" },
         dataPointText: total > 0 ? `${Math.round(total)}zł` : "",
+        frontColor: secondary_candidates[index % secondary_candidates.length],
       }));
   }, [data]);
 
@@ -49,26 +54,20 @@ export default function DailySpendingChart({ data }: Props) {
       </View>
 
       <View style={{ height: 300 }}>
-        <LineChart
+        <BarChart
           width={Layout.screen.width - 60}
-          data={chartData}
-          height={280}
-          spacing={40}
-          initialSpacing={20}
-          color="#2563eb"
-          thickness={2}
-          hideDataPoints={false}
-          dataPointsColor="#2563eb"
-          xAxisColor="#666"
-          yAxisColor="#666"
+          height={Layout.screen.height / 3.5}
+          sideColor={"#fff"}
+          barWidth={20}
+          noOfSections={3}
+          barBorderRadius={4}
+          frontColor={Colors.secondary}
           yAxisTextStyle={{ color: "#fff" }}
-          xAxisLabelTextStyle={{ color: "#fff" }}
-          hideRules
-          yAxisTextNumberOfLines={1}
-          yAxisLabelWidth={60}
-          yAxisLabelSuffix="zł"
-          focusEnabled
-          curved
+          rulesColor={Color(Colors.primary).lighten(1.5).string()}
+          yAxisThickness={0}
+          xAxisThickness={0}
+          isAnimated
+          data={chartData}
         />
       </View>
 
