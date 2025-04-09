@@ -81,6 +81,11 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
       return +amount;
     };
 
+    if (!isValid) {
+      shake();
+      return;
+    }
+
     if (params?.isEditing) {
       await editExpense({
         variables: {
@@ -138,7 +143,8 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
     });
   }, []);
 
-  const isValid = (type === "income" ? true : category !== "none") && name !== "" && amount !== "" && type !== null && amount != "0";
+  const isValid =
+    (type === "income" ? true : category !== "none") && name !== "" && amount !== "" && type !== null && amount !== "0" && date !== null;
 
   const scale = (n: number) => {
     "worklet";
@@ -159,6 +165,7 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
   useEffect(() => {
     if (categoryPrediction) {
       setCategory(categoryPrediction.category as keyof typeof Icons);
+      setType("expense");
     }
   }, [categoryPrediction]);
 
@@ -218,21 +225,23 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
                       value={name}
                       onChangeText={setName}
                       right={
-                        <Ripple
-                          onPress={handleSubmit}
-                          style={{
-                            paddingHorizontal: 15,
-                            paddingVertical: 5,
-                            borderRadius: 7.5,
-                            backgroundColor: isValid ? Colors.secondary : Colors.primary_lighter,
-                            flexDirection: "row",
-                            alignItems: "center",
-                            gap: 5,
-                          }}
-                        >
-                          <AntDesign name="save" size={20} color="#fff" />
-                          <Text style={{ color: "#fff" }}>Save</Text>
-                        </Ripple>
+                        isValid && (
+                          <Ripple
+                            onPress={handleSubmit}
+                            style={{
+                              paddingHorizontal: 15,
+                              paddingVertical: 5,
+                              borderRadius: 7.5,
+                              backgroundColor: Colors.secondary,
+                              flexDirection: "row",
+                              alignItems: "center",
+                              gap: 5,
+                            }}
+                          >
+                            <AntDesign name="save" size={20} color="#fff" />
+                            <Text style={{ color: "#fff" }}>Save</Text>
+                          </Ripple>
+                        )
                       }
                     />
                   </View>
