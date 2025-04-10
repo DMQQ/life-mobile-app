@@ -1,12 +1,4 @@
-import {
-  FlatList,
-  Image,
-  Text,
-  View,
-  ActivityIndicator,
-  ToastAndroid,
-  StyleSheet,
-} from "react-native";
+import { FlatList, Image, Text, View, ActivityIndicator, ToastAndroid, StyleSheet } from "react-native";
 import Colors from "../../../../constants/Colors";
 import Ripple from "react-native-material-ripple";
 import { useState, useRef, memo, useCallback } from "react";
@@ -136,18 +128,12 @@ export default function FileList({ timelineId }: FileListProps) {
         }}
       >
         <Ripple onPress={() => setToggleView((p) => !p)}>
-          <Text style={styles.available}>
-            Available files ({data?.images.length})
-          </Text>
+          <Text style={styles.available}>Available files ({data?.images.length})</Text>
         </Ripple>
         <UploadFileButton refetch={refetch} timelineId={timelineId} />
       </View>
 
-      <GridImageView
-        data={data}
-        onRemovePhoto={removePhoto}
-        onShowPreview={handleShowPreview}
-      />
+      <GridImageView data={data} onRemovePhoto={removePhoto} onShowPreview={handleShowPreview} />
 
       {/* {toggleView ? (  // app crashes here
         <GridImageView
@@ -213,11 +199,7 @@ const GridImageView = memo((props: ImageDisplayViewProps) => {
       data={props.data?.images}
       keyExtractor={(el) => el.id}
       renderItem={({ item }) => (
-        <Ripple
-          style={{ marginBottom: 10 }}
-          onLongPress={() => props.onRemovePhoto(item.id)}
-          onPress={() => props.onShowPreview(item)}
-        >
+        <Ripple style={{ marginBottom: 10 }} onLongPress={() => props.onRemovePhoto(item.id)} onPress={() => props.onShowPreview(item)}>
           <Animated.Image
             sharedTransitionStyle={transition}
             sharedTransitionTag={`image-${item.url}`}
@@ -241,11 +223,7 @@ const ListImageView = memo((props: ImageDisplayViewProps) => (
     horizontal
     keyExtractor={(el) => el.id}
     renderItem={({ item }) => (
-      <Ripple
-        style={{ marginRight: 10 }}
-        onLongPress={() => props.onRemovePhoto(item.id)}
-        onPress={() => props.onShowPreview(item)}
-      >
+      <Ripple style={{ marginRight: 10 }} onLongPress={() => props.onRemovePhoto(item.id)} onPress={() => props.onShowPreview(item)}>
         <Animated.Image
           sharedTransitionStyle={transition}
           sharedTransitionTag={`image-${item.url}`}
@@ -261,35 +239,18 @@ const ListImageView = memo((props: ImageDisplayViewProps) => (
   />
 ));
 
-function UploadFileButton(props: {
-  timelineId: string;
-  refetch: () => Promise<any>;
-}) {
-  const { handleImagesSelect, loading } = useUploadFiles(
-    props.timelineId,
-    props.refetch
-  );
+function UploadFileButton(props: { timelineId: string; refetch: () => Promise<any> }) {
+  const { handleImagesSelect, loading } = useUploadFiles(props.timelineId, props.refetch);
 
   return (
     <Ripple onPress={handleImagesSelect} style={styles.uploadButton}>
       {loading ? (
-        <ActivityIndicator
-          color={Colors.primary}
-          style={{ marginRight: 5 }}
-          size={15}
-        />
+        <ActivityIndicator color={Colors.primary} style={{ marginRight: 5 }} size={15} />
       ) : (
-        <Ionicons
-          style={{ marginRight: 5 }}
-          name="create-outline"
-          size={16}
-          color={Colors.primary}
-        />
+        <Ionicons style={{ marginRight: 5 }} name="create-outline" size={16} color={Colors.primary} />
       )}
 
-      <Text style={{ color: Colors.primary, fontSize: 13, fontWeight: "bold" }}>
-        {loading ? "Uploading..." : "Upload files"}
-      </Text>
+      <Text style={{ color: Colors.primary, fontSize: 13, fontWeight: "bold" }}>{loading ? "Uploading..." : "Upload files"}</Text>
     </Ripple>
   );
 }

@@ -24,6 +24,11 @@ export const GET_WALLET = gql`
           nextBillingDate
           dateStart
         }
+
+        files {
+          id
+          url
+        }
       }
     }
   }

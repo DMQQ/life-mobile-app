@@ -9,12 +9,7 @@ import Layout from "../../../../constants/Layout";
 import { AntDesign } from "@expo/vector-icons";
 import TimelineTodos from "../components/TimelineTodos";
 import LoaderSkeleton from "../components/LoaderSkeleton";
-import Animated, {
-  useAnimatedScrollHandler,
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from "react-native-reanimated";
+import Animated, { useAnimatedScrollHandler, useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import CompletionBar from "../components/CompletionBar";
 import { useMemo, useRef } from "react";
 import useCompleteTimeline from "../hooks/mutation/useCompleteTimeline";
@@ -64,10 +59,7 @@ const styles = StyleSheet.create({
 export default function TimelineDetails({
   route,
   navigation,
-}: StackScreenProps<
-  { TimelineDetails: { timelineId: string } },
-  "TimelineDetails"
->) {
+}: StackScreenProps<{ TimelineDetails: { timelineId: string } }, "TimelineDetails">) {
   const { data, loading } = useGetTimelineById(route.params.timelineId);
   const [completeTimeline] = useCompleteTimeline(route.params.timelineId);
   const scrollY = useSharedValue(0);
@@ -92,10 +84,7 @@ export default function TimelineDetails({
   const fabAnimatedStyle = useAnimatedStyle(() => ({
     transform: [
       {
-        translateX:
-          scrollY?.value > 40
-            ? withTiming(100, { duration: 250 })
-            : withTiming(0, { duration: 250 }),
+        translateX: scrollY?.value > 40 ? withTiming(100, { duration: 250 }) : withTiming(0, { duration: 250 }),
       },
     ] as any,
   }));
@@ -110,12 +99,10 @@ export default function TimelineDetails({
 
   const taskRef = useRef<BottomSheetType>(null);
 
-  const safearea = useSafeAreaInsets()
+  const safearea = useSafeAreaInsets();
 
   return (
-    <View style={{ backgroundColor: Colors.primary, marginBottom: 50, 
-      marginTop: Platform.OS === 'ios' ? safearea.top : 0
-     }}>
+    <View style={{ backgroundColor: Colors.primary, marginBottom: 50, marginTop: Platform.OS === "ios" ? safearea.top : 0 }}>
       <TimelineHeader
         title={data?.title.slice(0, 18)}
         scrollY={scrollY}
@@ -141,11 +128,7 @@ export default function TimelineDetails({
               {data?.description || "(no content)"}
             </Text>
 
-            <TimelineTodos
-              expandSheet={() => taskRef.current?.snapToIndex(0)}
-              timelineId={data?.id}
-              todos={data?.todos || []}
-            />
+            <TimelineTodos expandSheet={() => taskRef.current?.snapToIndex(0)} timelineId={data?.id} todos={data?.todos || []} />
             {data?.todos.length > 0 && (
               <View style={{ marginTop: 10 }}>
                 <CompletionBar percentage={taskCompletionProgressBar} />
@@ -161,10 +144,7 @@ export default function TimelineDetails({
         )}
       </Animated.ScrollView>
 
-      <AnimatedRipple
-        style={[fabAnimatedStyle, styles.fab]}
-        onPress={onFabPress}
-      >
+      <AnimatedRipple style={[fabAnimatedStyle, styles.fab]} onPress={onFabPress}>
         <AntDesign name="edit" color={"#fff"} size={25} />
       </AnimatedRipple>
 
