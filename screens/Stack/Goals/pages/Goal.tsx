@@ -46,7 +46,7 @@ export default function Goal({ route, navigation }: any) {
   }, [goal.entries]);
 
   return (
-    <ScreenContainer style={{ padding: 0 }}>
+    <View style={{ padding: 0, flex: 1, paddingVertical: 15, paddingBottom: 25 }}>
       <Header goBack />
       <View style={{ paddingHorizontal: 15, flex: 1, paddingTop: 15 }}>
         <View style={{ padding: 10, backgroundColor: Colors.primary_lighter, borderRadius: 10, marginBottom: 15 }}>
@@ -82,7 +82,7 @@ export default function Goal({ route, navigation }: any) {
           Update today's entry
         </Button>
       </View>
-    </ScreenContainer>
+    </View>
   );
 }
 
