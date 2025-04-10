@@ -1,5 +1,5 @@
-import { ReactNode, useEffect, useState } from "react";
-import { Alert, StyleSheet, Text, View, ActivityIndicator, ScrollView, Image, FlatList, Modal } from "react-native";
+import { ReactNode, useEffect, useRef, useState } from "react";
+import { Alert, StyleSheet, Text, View, ActivityIndicator, ScrollView, Image, FlatList, Modal, TouchableOpacity } from "react-native";
 import Colors, { secondary_candidates } from "@/constants/Colors";
 import WalletItem, { CategoryIcon } from "../components/Wallet/WalletItem";
 import { AntDesign, Feather, MaterialIcons } from "@expo/vector-icons";
@@ -11,8 +11,7 @@ import moment from "moment";
 import useSubscription from "../hooks/useSubscription";
 import { Expense as ExpenseType } from "@/types";
 import useDeleteActivity from "../hooks/useDeleteActivity";
-import { gql, useLazyQuery, useQuery } from "@apollo/client";
-import FileList, { UploadFileButton } from "../../Timeline/components/FileList";
+import { gql, useLazyQuery, useMutation, useQuery } from "@apollo/client";
 import axios from "axios";
 import Url from "@/constants/Url";
 
@@ -401,6 +400,8 @@ export default function Expense({ route: { params }, navigation }: any) {
         )}
 
         <FileUpload id={selected.id} images={selected?.files} />
+
+        <MapPicker location={selected.location} id={selected.id} />
       </ScrollView>
     </View>
   );
@@ -409,6 +410,7 @@ export default function Expense({ route: { params }, navigation }: any) {
 import * as ImagePicker from "expo-image-picker";
 import Layout from "@/constants/Layout";
 import ImageViewerModal from "../components/ImageViewer";
+import MapPicker from "../components/Map";
 
 const FileUpload = (props: { id: string; images: any[] }) => {
   const [files, setFiles] = useState<{ id: string; url: string }[]>(props.images ?? []);

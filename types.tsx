@@ -107,6 +107,8 @@ export interface Expense {
     dateStart: string;
   } | null;
 
+  location: { id: string; kind: string; name: string; latitude: number; longitude: number } | null;
+
   note?: string;
 
   tags?: string;
