@@ -371,7 +371,7 @@ export default function CreateGoal({ navigation }: CreateGoalProps): JSX.Element
   };
 
   return (
-    <ScreenContainer style={styles.container}>
+    <View style={styles.container}>
       <Header goBack title="Create New Goal" />
       <Formik<FormValues> validationSchema={validationSchema} onSubmit={onSubmit} initialValues={initialValues}>
         {(f: FormikProps<FormValues>) => (
@@ -594,13 +594,13 @@ export default function CreateGoal({ navigation }: CreateGoalProps): JSX.Element
           </>
         )}
       </Formik>
-    </ScreenContainer>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    padding: 0,
+    paddingVertical: 15,
     backgroundColor: Colors.primary,
     flex: 1,
   },

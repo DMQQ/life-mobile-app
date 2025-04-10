@@ -1,6 +1,6 @@
 import ScreenContainer from "@/components/ui/ScreenContainer";
 import { useGoal } from "../hooks/hooks";
-import { FlatList } from "react-native";
+import { FlatList, View } from "react-native";
 import { GoalCategory } from "../components/GoalCategory";
 import Header from "@/components/ui/Header/Header";
 import { AntDesign } from "@expo/vector-icons";
@@ -9,7 +9,7 @@ export default function Goals({ navigation }: any) {
   const { goals } = useGoal();
 
   return (
-    <ScreenContainer style={{ padding: 0 }}>
+    <View style={{ padding: 0, flex: 1 }}>
       <Header
         buttons={[
           {
@@ -32,6 +32,6 @@ export default function Goals({ navigation }: any) {
           />
         )}
       />
-    </ScreenContainer>
+    </View>
   );
 }

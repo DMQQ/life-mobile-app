@@ -20,6 +20,7 @@ import IconButton from "@/components/ui/IconButton/IconButton";
 import Button from "@/components/ui/Button/Button";
 import { useGoal } from "../hooks/hooks";
 import Color from "color";
+import DateTimePicker from "react-native-modal-datetime-picker";
 
 // Types
 interface QuickAction {
@@ -287,7 +288,7 @@ export default function AddGoalEntry({ route, navigation }: AddGoalEntryProps) {
   const { goals, upsertStats } = useGoal();
   const goal = goals.find((goal: Goal) => goal.id === id);
   const [amount, setAmount] = useState<string>("0");
-  const [date] = useState<string>(moment().format("YYYY-MM-DD"));
+  const [date, setDate] = useState<string>(moment().format("YYYY-MM-DD"));
   const [selectedQuickValue, setSelectedQuickValue] = useState<number | null>(null);
 
   const transformX = useSharedValue(0);
@@ -384,12 +385,27 @@ export default function AddGoalEntry({ route, navigation }: AddGoalEntryProps) {
     [amount]
   );
 
+  const [showDatePicker, setShowDatePicker] = useState(false);
+
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
       <View style={{ flex: 1 }}>
         <View style={styles.container}>
-          <View style={{ position: "absolute", top: 15, left: 15, zIndex: 100 }}>
-            <IconButton onPress={() => navigation.goBack()} icon={<AntDesign name="close" size={24} color="rgba(255,255,255,0.7)" />} />
+          <View style={{ justifyContent: "flex-end", flexDirection: "row" }}>
+            <View style={{ position: "absolute", zIndex: 100, left: 0, top: 0 }}>
+              <IconButton onPress={() => navigation.goBack()} icon={<AntDesign name="close" size={24} color="rgba(255,255,255,0.7)" />} />
+            </View>
+
+            <Ripple
+              onPress={() => {
+                setShowDatePicker((p) => !p);
+              }}
+              style={{
+                padding: 10,
+              }}
+            >
+              <Text style={{ color: "#fff", fontWeight: "500" }}>{date}</Text>
+            </Ripple>
           </View>
 
           <View
@@ -467,6 +483,15 @@ export default function AddGoalEntry({ route, navigation }: AddGoalEntryProps) {
             </View>
           </View>
         </View>
+        <DateTimePicker
+          isVisible={showDatePicker}
+          mode="date"
+          onConfirm={(date) => {
+            setDate(moment(date).format("YYYY-MM-DD"));
+            setShowDatePicker(false);
+          }}
+          onCancel={() => setShowDatePicker(false)}
+        />
       </View>
     </TouchableWithoutFeedback>
   );

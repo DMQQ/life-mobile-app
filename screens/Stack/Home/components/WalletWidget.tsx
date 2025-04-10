@@ -42,16 +42,6 @@ interface Props {
   loading: boolean;
 }
 
-const StatItem = ({ label, value, icon, color }: { label: string; value: number; icon: string; color: string }) => (
-  <View style={[styles.statItem, { backgroundColor: Color(color).alpha(0.1).string() }]}>
-    <View style={{ flexDirection: "row", gap: 10 }}>
-      <MaterialCommunityIcons name={icon as any} size={30} color={color} />
-      <Text style={[styles.statValue, { color }]}>{value?.toFixed(2)} zł</Text>
-    </View>
-    <Text style={styles.statLabel}>{label}</Text>
-  </View>
-);
-
 const AvailableBalanceWidget = ({ data, loading }: Props) => {
   const navigation = useNavigation<any>();
 
@@ -76,18 +66,6 @@ const AvailableBalanceWidget = ({ data, loading }: Props) => {
       </View>
 
       <IncomeExpenseBar />
-
-      {/* Weekly Statistics */}
-      {data.statistics && (
-        <View style={styles.statsSection}>
-          <Text style={styles.sectionTitle}>Weekly Overview</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.statsContainer}>
-            <StatItem label="Weekly Spent" value={data.statistics?.weeklySpendings?.expense} icon="calendar-week" color="#8685EF" />
-            <StatItem label="Income" value={data.statistics?.weeklySpendings?.income} icon="cash-plus" color="#00C896" />
-            <StatItem label="Average" value={data.statistics?.weeklySpendings?.average} icon="chart-line" color="#34A3FA" />
-          </ScrollView>
-        </View>
-      )}
 
       {/* Recent Transactions */}
       {data.wallet?.expenses?.length > 0 && (

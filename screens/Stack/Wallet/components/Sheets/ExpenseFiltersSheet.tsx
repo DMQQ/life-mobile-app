@@ -2,7 +2,7 @@ import BottomSheet, { BottomSheetGorhom } from "@/components/ui/BottomSheet/Bott
 import Select from "@/components/ui/Select/Select";
 import Input from "@/components/ui/TextInput/TextInput";
 import Layout from "@/constants/Layout";
-import { forwardRef, useState } from "react";
+import { forwardRef, useEffect, useState } from "react";
 import { Text, View } from "react-native";
 import { Icons } from "../Wallet/WalletItem";
 import { useWalletContext, type Action, type Filters } from "../../components/WalletContext";
@@ -44,6 +44,20 @@ const Forms = (props: ExpenseFiltersProps) => {
 
   const navigation = useNavigation();
 
+  const [localQuery, setLocalQuery] = useState<string>(props.filters.query || "");
+
+  useEffect(() => {
+    if (localQuery !== props.filters.query) {
+      let timeout = setTimeout(() => {
+        onQueryTextChange(localQuery);
+      }, 500);
+
+      return () => {
+        clearTimeout(timeout);
+      };
+    }
+  }, [localQuery]);
+
   return (
     <ScrollView style={{ flex: 1, height: Layout.screen.height, paddingTop: 15 }}>
       <Header
@@ -61,8 +75,8 @@ const Forms = (props: ExpenseFiltersProps) => {
       />
       <View style={{ flex: 1, paddingHorizontal: 15, marginTop: 15 }}>
         <Input
-          value={props?.filters?.query}
-          onChangeText={onQueryTextChange}
+          value={localQuery}
+          onChangeText={setLocalQuery}
           placeholder="Search for a transaction"
           onFocus={() => onFocus()}
           placeholderTextColor="gray"
