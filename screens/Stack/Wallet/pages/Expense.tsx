@@ -1,5 +1,5 @@
 import { ReactNode, useEffect, useState } from "react";
-import { Alert, StyleSheet, Text, View, ActivityIndicator, ScrollView } from "react-native";
+import { Alert, StyleSheet, Text, View, ActivityIndicator, ScrollView, Image, FlatList, Modal } from "react-native";
 import Colors, { secondary_candidates } from "@/constants/Colors";
 import WalletItem, { CategoryIcon } from "../components/Wallet/WalletItem";
 import { AntDesign, Feather, MaterialIcons } from "@expo/vector-icons";
@@ -12,6 +12,9 @@ import useSubscription from "../hooks/useSubscription";
 import { Expense as ExpenseType } from "@/types";
 import useDeleteActivity from "../hooks/useDeleteActivity";
 import { gql, useLazyQuery, useQuery } from "@apollo/client";
+import FileList, { UploadFileButton } from "../../Timeline/components/FileList";
+import axios from "axios";
+import Url from "@/constants/Url";
 
 const similarCategories = {
   food: ["drinks"],
@@ -239,7 +242,7 @@ export default function Expense({ route: { params }, navigation }: any) {
   };
 
   return (
-    <View style={{ flex: 1, paddingTop: 15 }}>
+    <View style={{ flex: 1, paddingTop: 15, paddingBottom: 55 }}>
       <Header
         buttons={[
           {
@@ -249,7 +252,7 @@ export default function Expense({ route: { params }, navigation }: any) {
           {
             icon: <Feather name="edit-2" size={20} color="white" />,
             onPress: handleEdit,
-            style: { marginLeft: 20 },
+            style: { marginLeft: 5 },
           },
         ]}
         goBack
@@ -396,10 +399,139 @@ export default function Expense({ route: { params }, navigation }: any) {
             </View>
           </View>
         )}
+
+        <FileUpload id={selected.id} images={selected?.files} />
       </ScrollView>
     </View>
   );
 }
+
+import * as ImagePicker from "expo-image-picker";
+import Layout from "@/constants/Layout";
+import ImageViewerModal from "../components/ImageViewer";
+
+const FileUpload = (props: { id: string; images: any[] }) => {
+  const [files, setFiles] = useState<{ id: string; url: string }[]>(props.images ?? []);
+
+  async function uploadPhotoAsync(photos: ImagePicker.ImagePickerResult) {
+    if (photos.assets?.length === 0 || photos.canceled) return;
+
+    const photo = photos.assets[0];
+
+    const formData = new FormData();
+
+    const fileObject = {
+      uri: photo.uri,
+      name: photo.fileName || "photo.jpg",
+      type: photo.type || "image/jpeg",
+    };
+
+    formData.append("file", fileObject as any);
+
+    try {
+      const { data } = await axios.post(Url.API + "/upload/expense-file", formData, {
+        params: {
+          expenseId: props.id,
+          compress: "true",
+        },
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Accept: "application/json",
+        },
+      });
+
+      const newFiles = Array.isArray(data) ? data : [data];
+      setFiles((prev) => [...prev, ...newFiles]);
+      return data;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  const handleImagesSelect = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        quality: 1,
+        allowsMultipleSelection: false,
+      });
+
+      if (!result.canceled) {
+        await uploadPhotoAsync(result);
+      }
+    } catch (error) {
+      console.error("Error selecting image:", error);
+    }
+  };
+
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
+  return (
+    <View style={{ paddingHorizontal: 15, marginBottom: 40 }}>
+      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+        <Txt size={20} color={"#fff"}>
+          Attachments
+        </Txt>
+
+        {files.length > 0 && (
+          <Ripple onPress={handleImagesSelect}>
+            <AntDesign name="plus" size={24} color={"#fff"} onPress={handleImagesSelect} />
+          </Ripple>
+        )}
+      </View>
+      {files.length > 0 ? (
+        <FlatList
+          style={{ marginTop: 25 }}
+          horizontal
+          data={files}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <Ripple
+              onPress={() => {
+                setSelectedImage((p) => (p === item.url ? null : item.url));
+              }}
+            >
+              <Image
+                source={{
+                  uri: Url.API + "/upload/images/" + item?.url,
+                }}
+                style={{
+                  width: Layout.screen.width - 45,
+                  height: 250,
+                  borderRadius: 10,
+                  marginRight: 10,
+                }}
+                resizeMode="cover"
+              />
+            </Ripple>
+          )}
+        />
+      ) : (
+        <Ripple
+          onPress={handleImagesSelect}
+          style={{
+            width: Layout.screen.width - 30,
+            marginTop: 25,
+            height: 200,
+            justifyContent: "center",
+            alignItems: "center",
+            borderRadius: 10,
+            backgroundColor: Colors.primary_light,
+          }}
+        >
+          <Text style={{ color: "gray" }}>Add file</Text>
+        </Ripple>
+      )}
+
+      <ImageViewerModal
+        selectedImage={selectedImage}
+        onClose={() => {
+          setSelectedImage(null);
+        }}
+      />
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
   text: {

@@ -4,7 +4,7 @@ import { InteractionManager, Text, Image, Dimensions, StyleSheet } from "react-n
 import Layout from "@/constants/Layout";
 import { useEffect, useLayoutEffect, useState } from "react";
 import useGetTimelineById from "../hooks/query/useGetTimelineById";
-import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
+import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withSpring, withTiming } from "react-native-reanimated";
 import Url from "@/constants/Url";
 import { TimelineScreenProps } from "../types";
 import Ripple from "react-native-material-ripple";
@@ -65,15 +65,18 @@ export default function ImagesPreview({ route, navigation }: TimelineScreenProps
   );
 }
 
-const GesturedImage = (props: { uri: string }) => {
+export const GesturedImage = (props: { uri: string; onSingleTap?: () => void }) => {
   const scale = useSharedValue(1);
+  const translateX = useSharedValue(0);
+  const translateY = useSharedValue(0);
 
-  const focalX = useSharedValue(0);
-  const focalY = useSharedValue(-50);
+  const savedScale = useSharedValue(1);
+  const savedTranslateX = useSharedValue(0);
+  const savedTranslateY = useSharedValue(0);
+
+  const dimensions = useSharedValue({ width: 0, height: 0 });
 
   const src = { uri: Url.API + "/upload/images/" + props.uri };
-
-  const dimenstions = useSharedValue({ width: 0, height: 0 });
 
   useLayoutEffect(() => {
     Image.getSize(src.uri, (width, height) => {
@@ -82,12 +85,12 @@ const GesturedImage = (props: { uri: string }) => {
       const screenHeight = Layout.window.height;
 
       if (imageRatio > screenWidth / screenHeight) {
-        dimenstions.value = {
+        dimensions.value = {
           width: screenWidth,
           height: screenWidth / imageRatio,
         };
       } else {
-        dimenstions.value = {
+        dimensions.value = {
           width: screenHeight * imageRatio,
           height: screenHeight,
         };
@@ -95,52 +98,94 @@ const GesturedImage = (props: { uri: string }) => {
     });
   }, [props.uri]);
 
-  const handlePinchGesture = Gesture.Pinch()
-    .onUpdate((event) => {
-      scale.value = event.scale;
+  const doubleTapGesture = Gesture.Tap()
+    .numberOfTaps(2)
+    .maxDuration(250)
+    .onStart((event) => {
+      if (scale.value !== 1) {
+        scale.value = withSpring(1);
+        translateX.value = withSpring(0);
+        translateY.value = withSpring(0);
 
-      focalX.value = event.focalX;
-      focalY.value = event.focalY;
-    })
-    .onEnd(() => {
-      if (scale.value < 1) {
-        scale.value = withTiming(1);
-      } else if (scale.value > 3) {
-        scale.value = withTiming(2);
+        savedScale.value = 1;
+        savedTranslateX.value = 0;
+        savedTranslateY.value = 0;
+      } else {
+        scale.value = withSpring(2);
+        savedScale.value = 2;
       }
     });
 
-  const handlePanGesture = Gesture.Pan().onUpdate((event) => {
-    // focalX.value = event.translationX;
-    // focalY.value = event.translationY;
+  const singleTapGesture = Gesture.Tap()
+    .maxDuration(250)
+    .onStart(() => {
+      if (props.onSingleTap) {
+        runOnJS(props.onSingleTap)();
+      }
+    });
+
+  const panGesture = Gesture.Pan()
+    .onStart(() => {
+      savedTranslateX.value = translateX.value;
+      savedTranslateY.value = translateY.value;
+    })
+    .onUpdate((event) => {
+      translateX.value = savedTranslateX.value + event.translationX;
+      translateY.value = savedTranslateY.value + event.translationY;
+    })
+    .onEnd(() => {
+      if (scale.value <= 1) {
+        translateX.value = withSpring(0);
+        translateY.value = withSpring(0);
+        savedTranslateX.value = 0;
+        savedTranslateY.value = 0;
+      } else {
+        savedTranslateX.value = translateX.value;
+        savedTranslateY.value = translateY.value;
+      }
+    });
+
+  const pinchGesture = Gesture.Pinch()
+    .onStart(() => {
+      savedScale.value = scale.value;
+    })
+    .onUpdate((event) => {
+      const newScale = savedScale.value * event.scale;
+      scale.value = Math.max(0.5, newScale);
+    })
+    .onEnd(() => {
+      if (scale.value < 1) {
+        scale.value = withSpring(1);
+        translateX.value = withSpring(0);
+        translateY.value = withSpring(0);
+
+        savedScale.value = 1;
+        savedTranslateX.value = 0;
+        savedTranslateY.value = 0;
+      } else if (scale.value > 6) {
+        scale.value = withSpring(6);
+        savedScale.value = 6;
+      } else {
+        savedScale.value = scale.value;
+      }
+    });
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      width: dimensions.value.width,
+      height: dimensions.value.height,
+      transform: [{ translateX: translateX.value }, { translateY: translateY.value }, { scale: scale.value }],
+    };
   });
 
-  // .onEnd(() => (scale.value = withTiming(1)));
-
-  const animatedDims = useAnimatedStyle(() => ({
-    width: dimenstions.value.width,
-    height: dimenstions.value.height,
-  }));
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [
-      { translateX: focalX.value },
-      { translateY: focalY.value },
-      { translateX: -Layout.window.width / 2 },
-      { translateY: -Layout.window.height / 4 },
-      { scale: scale.value },
-      { translateX: -focalX.value },
-      { translateY: -focalY.value },
-      { translateX: Layout.window.width / 2 },
-      { translateY: Layout.window.height / 4 },
-    ] as any,
-  }));
-
-  const handleGesture = Gesture.Race(handlePinchGesture);
+  const combinedGesture = Gesture.Exclusive(
+    doubleTapGesture,
+    Gesture.Simultaneous(singleTapGesture, Gesture.Simultaneous(pinchGesture, panGesture))
+  );
 
   return (
-    <GestureDetector gesture={handleGesture}>
-      <Animated.Image source={src} style={[animatedDims, animatedStyle]} />
+    <GestureDetector gesture={combinedGesture}>
+      <Animated.Image source={src} style={animatedStyle} resizeMode="contain" />
     </GestureDetector>
   );
 };
