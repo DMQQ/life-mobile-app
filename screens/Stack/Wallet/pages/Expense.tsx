@@ -448,6 +448,23 @@ const FileUpload = (props: { id: string; images: any[] }) => {
     }
   }
 
+  const handleTakePhoto = async () => {
+    const permission = await ImagePicker.requestCameraPermissionsAsync();
+
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      allowsMultipleSelection: false,
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      cameraType: ImagePicker.CameraType.back,
+      quality: 1,
+      aspect: [4, 3],
+    });
+
+    if (!result.canceled) {
+      await uploadPhotoAsync(result);
+    }
+  };
+
   const handleImagesSelect = async () => {
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
@@ -473,11 +490,14 @@ const FileUpload = (props: { id: string; images: any[] }) => {
           Attachments
         </Txt>
 
-        {files.length > 0 && (
+        <View style={{ flexDirection: "row", gap: 20 }}>
+          <Ripple onPress={handleTakePhoto}>
+            <AntDesign name="camerao" size={24} color={"#fff"} />
+          </Ripple>
           <Ripple onPress={handleImagesSelect}>
             <AntDesign name="plus" size={24} color={"#fff"} onPress={handleImagesSelect} />
           </Ripple>
-        )}
+        </View>
       </View>
       {files.length > 0 ? (
         <FlatList
