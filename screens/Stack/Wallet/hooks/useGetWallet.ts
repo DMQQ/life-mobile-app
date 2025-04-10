@@ -25,6 +25,14 @@ export const GET_WALLET = gql`
           dateStart
         }
 
+        location {
+          id
+          kind
+          name
+          latitude
+          longitude
+        }
+
         files {
           id
           url
