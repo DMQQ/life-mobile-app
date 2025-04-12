@@ -240,6 +240,39 @@ export default function Expense({ route: { params }, navigation }: any) {
     });
   };
 
+  const [deleteSubExpense] = useMutation(gql`
+    mutation ($id: ID!) {
+      deleteSubExpense(id: $id)
+    }
+  `);
+
+  const handleDeleteSubExpense = async (id: string) => {
+    try {
+      Alert.alert("Delete Sub-Expense", "Are you sure you want to delete this sub-expense?", [
+        {
+          onPress: async () => {
+            try {
+              await deleteSubExpense({ variables: { id } });
+              setSelected((prev: any) => ({
+                ...prev,
+                subexpenses: prev.subexpenses.filter((item: any) => item.id !== id),
+              }));
+            } catch (error) {
+              Alert.alert("Error", "Failed to delete sub-expense. Please try again.");
+            }
+          },
+          text: "Yes",
+        },
+        {
+          onPress: () => {},
+          text: "Cancel",
+        },
+      ]);
+    } catch (error) {
+      Alert.alert("Error", "Failed to delete sub-expense. Please try again.");
+    }
+  };
+
   return (
     <View style={{ flex: 1, paddingTop: 15, paddingBottom: 55 }}>
       <Header
@@ -259,34 +292,50 @@ export default function Expense({ route: { params }, navigation }: any) {
       />
       <ScrollView style={{ flex: 1, marginTop: 5 }}>
         <View style={{ marginBottom: 30, marginTop: 15, paddingHorizontal: 15 }}>
-          <View style={[styles.row, { marginTop: 0, padding: 15, flexWrap: "wrap", backgroundColor: "transparent" }]}>
-            <Txt size={30} color={"#fff"}>
+          <View
+            style={[
+              styles.row,
+              { marginTop: 0, padding: 0, flexWrap: "wrap", backgroundColor: "transparent", marginVertical: 20, alignItems: "center" },
+            ]}
+          >
+            <Txt size={35} color={"#fff"}>
               {capitalize(selected?.description)}
             </Txt>
 
-            <Txt size={20} color={Colors.secondary_light_2}>
+            <Txt
+              size={20}
+              color={selected.type === "refunded" ? Colors.secondary_light_2 : selected.type === "expense" ? "#F07070" : "#66E875"}
+            >
               {amount}
               <Text style={{ fontSize: 16 }}>zł</Text>
             </Txt>
           </View>
 
           {selected.subexpenses.length > 0 && (
-            <View style={{ marginTop: 10, backgroundColor: Colors.primary_light, borderRadius: 15, padding: 15 }}>
-              <Txt size={16} color={Colors.secondary_light_2}>
-                Sub expenses
+            <View style={{ marginTop: 15 }}>
+              <Txt size={20} color={"#fff"}>
+                Sub items
               </Txt>
 
-              <View style={{ marginTop: 15 }}>
+              <Animated.View style={{ marginTop: 15 }} layout={LinearTransition}>
                 {selected.subexpenses.map((item: any) => (
                   <WalletItem
+                    key={item.id}
                     {...selected}
                     {...item}
-                    handlePress={() => {}}
+                    handlePress={() => {
+                      handleDeleteSubExpense(item.id);
+                    }}
                     subexpenses={[]}
-                    animatedStyle={{ marginBottom: 5 }}
-                    containerStyle={{ backgroundColor: Colors.primary }}
+                    animatedStyle={{ marginBottom: 7.5 }}
+                    containerStyle={{ backgroundColor: Colors.primary_light }}
                   />
                 ))}
+              </Animated.View>
+              <View style={{ marginTop: 25, marginBottom: 15 }}>
+                <Txt size={20} color={"#fff"}>
+                  Expense details
+                </Txt>
               </View>
             </View>
           )}
@@ -432,6 +481,7 @@ import * as ImagePicker from "expo-image-picker";
 import Layout from "@/constants/Layout";
 import ImageViewerModal from "../components/ImageViewer";
 import MapPicker from "../components/Map";
+import Animated, { LinearTransition } from "react-native-reanimated";
 
 const FileUpload = (props: { id: string; images: any[] }) => {
   const [files, setFiles] = useState<{ id: string; url: string }[]>(props.images ?? []);

@@ -28,6 +28,19 @@ const CREATE_EXPENSE = gql`
       category
       balanceBeforeInteraction
       schedule
+
+      subscription {
+        id
+        isActive
+        nextBillingDate
+        dateStart
+      }
+      subexpenses {
+        id
+        description
+        amount
+        category
+      }
     }
   }
 `;

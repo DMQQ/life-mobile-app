@@ -1,12 +1,54 @@
 import React, { useState, useEffect, useRef, ReactNode } from "react";
 import { View, Alert, Text, TouchableOpacity, StyleSheet } from "react-native";
 import Map, { PROVIDER_DEFAULT, Marker, Callout } from "react-native-maps";
-import { Feather } from "@expo/vector-icons";
+import { AntDesign, Feather } from "@expo/vector-icons";
 import * as Location from "expo-location";
-import { useQuery, useMutation, gql } from "@apollo/client";
+import { useQuery, useMutation, gql, useLazyQuery } from "@apollo/client";
 import Ripple from "react-native-material-ripple";
 import Layout from "@/constants/Layout";
 import Colors from "@/constants/Colors";
+
+const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+  const R = 6371; // Radius of the Earth in km
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const distance = R * c; // Distance in km
+
+  return distance;
+};
+
+interface Point {
+  latitude: number;
+  longitude: number;
+}
+
+const findClosestPoint = (points: Point[], currentLocation: Point) => {
+  if (!points || points.length === 0) return null;
+
+  // If there's only one point, return it
+  if (points.length === 1) return points[0];
+
+  // Calculate distance for each point and find the minimum
+  let closestPoint = points[0];
+  let minDistance = calculateDistance(currentLocation.latitude, currentLocation.longitude, points[0].latitude, points[0].longitude);
+
+  for (let i = 1; i < points.length; i++) {
+    const distance = calculateDistance(currentLocation.latitude, currentLocation.longitude, points[i].latitude, points[i].longitude);
+
+    if (distance < minDistance) {
+      minDistance = distance;
+      closestPoint = points[i];
+    }
+  }
+
+  return closestPoint;
+};
 
 const Txt = (props: { children: ReactNode; size: number; color?: any }) => (
   <Text
@@ -94,9 +136,9 @@ const MapPicker = (props: Pick<ExpenseType, "location"> & { id: string }) => {
   const [assignedMarker, setAssignedMarker] = useState(props.location || null);
   const [editMode, setEditMode] = useState(false);
 
-  const { data: points, error } = useQuery(gql`
-    query {
-      locations {
+  const [queryLocation, { data: points }] = useLazyQuery(gql`
+    query ($query: String) {
+      locations(query: $query) {
         id
         name
         kind
@@ -105,6 +147,46 @@ const MapPicker = (props: Pick<ExpenseType, "location"> & { id: string }) => {
       }
     }
   `);
+
+  const [locationQuery, setLocationQuery] = useState("");
+
+  useEffect(() => {
+    if (locationQuery) {
+      const timeout = setTimeout(() => {
+        (async () => {
+          const { data } = await queryLocation({
+            variables: {
+              query: locationQuery,
+              latitude: location.latitude,
+              longitude: location.longitude,
+            },
+          });
+
+          const points = data.locations;
+
+          // Find the closest point to current location
+          if (points && points.length > 0) {
+            const closestPoint = findClosestPoint(points, location);
+
+            // Animate map to the closest point
+            map.current?.animateToRegion(
+              {
+                latitude: closestPoint!.latitude,
+                longitude: closestPoint!.longitude,
+                latitudeDelta: 0.04,
+                longitudeDelta: 0.05,
+              },
+              1000
+            );
+          }
+        })();
+      }, 750);
+
+      return () => {
+        clearTimeout(timeout);
+      };
+    }
+  }, [locationQuery]);
 
   const [createMarker] = useMutation(gql`
     mutation ($input: CreateLocationDto!) {
@@ -118,7 +200,7 @@ const MapPicker = (props: Pick<ExpenseType, "location"> & { id: string }) => {
     }
   `);
 
-  const [assignLocation, { error: err2 }] = useMutation(gql`
+  const [assignLocation] = useMutation(gql`
     mutation ($expenseId: ID!, $locationId: ID!) {
       addExpenseLocation(expenseId: $expenseId, locationId: $locationId)
     }
@@ -145,10 +227,21 @@ const MapPicker = (props: Pick<ExpenseType, "location"> & { id: string }) => {
     <View style={{ padding: 15, marginBottom: 40 }}>
       <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
         <Txt size={20} color={"#fff"}>
-          Location
+          Location {assignedMarker?.name}
         </Txt>
 
-        <View style={{ flexDirection: "row", gap: 20 }}>
+        <View style={{ flexDirection: "row", gap: 25 }}>
+          <Ripple
+            onPress={() => {
+              Alert.prompt("Location Search", "Enter location name:", (name) => {
+                if (name) {
+                  setLocationQuery(name);
+                }
+              });
+            }}
+          >
+            <AntDesign name="search1" size={20} color="#fff" />
+          </Ripple>
           <Ripple onPress={() => setEditMode((p) => !p)}>
             <Feather name="edit-2" size={20} color={editMode ? Colors.secondary : "#fff"} />
           </Ripple>
