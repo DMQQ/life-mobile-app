@@ -38,6 +38,8 @@ export default function useCreateActivity(props: { onCompleted?: () => void }) {
     onCompleted(data) {
       props.onCompleted?.();
 
+      console.log("data", data);
+
       if (data.createExpense.schedule === false) {
         client?.refetchQueries({
           include: ["GetWallet"],
@@ -46,6 +48,7 @@ export default function useCreateActivity(props: { onCompleted?: () => void }) {
         ToastAndroid.show("Expense has been scheduled", ToastAndroid.SHORT);
       }
     },
+    onError: (er) => JSON.stringify(er, null, 2),
   });
 
   return { createExpense, data, loading, error, called, reset };

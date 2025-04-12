@@ -1,10 +1,10 @@
 import moment from "moment";
-import { Keyboard, ScrollView, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View } from "react-native";
+import { Alert, Keyboard, ScrollView, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View } from "react-native";
 import Colors, { secondary_candidates } from "../../../../constants/Colors";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import Ripple from "react-native-material-ripple";
 import Layout from "@/constants/Layout";
-import { Icons } from "../components/Wallet/WalletItem";
+import WalletItem, { Icons } from "../components/Wallet/WalletItem";
 import { AntDesign, Entypo } from "@expo/vector-icons";
 import lowOpacity from "@/utils/functions/lowOpacity";
 import Animated, {
@@ -26,14 +26,41 @@ import { useNavigation } from "@react-navigation/native";
 import Color from "color";
 import Input from "@/components/ui/TextInput/TextInput";
 import usePredictCategory from "../hooks/usePredictCategory";
+import BottomSheet, { BottomSheetBackdrop } from "@gorhom/bottom-sheet";
+import NumbersPad from "../components/CreateExpense/NumberPad";
+import CategorySelector from "../components/CreateExpense/CategorySelector";
+import { FlatList } from "react-native-gesture-handler";
+import { gql, useMutation } from "@apollo/client";
+
+interface SubExpense {
+  id: string;
+  description: string;
+  amount: number;
+
+  category: keyof typeof Icons;
+}
+
+const useUploadSubExpense = (onCompleted: () => void) => {
+  return useMutation(
+    gql`
+      mutation UploadSubExpense($expenseId: ID!, $input: [CreateSubExpenseDto!]!) {
+        addMultipleSubExpenses(expenseId: $expenseId, inputs: $input) {
+          id
+          description
+          amount
+          category
+        }
+      }
+    `,
+    { onCompleted, onError: (e) => console.log(JSON.stringify(e, null, 2)) }
+  );
+};
 
 const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
 
 export default function CreateExpenseModal({ navigation, route: { params } }: any) {
   const { createExpense } = useCreateActivity({
-    onCompleted() {
-      navigation.goBack();
-    },
+    onCompleted() {},
   });
 
   const editExpense = useEditExpense();
@@ -46,9 +73,15 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
   const [type, setType] = useState<"expense" | "income" | null>(params?.type || null);
   const [isSubscription, setIsSubscription] = useState(false);
 
+  const [isSubExpenseMode, setIsSubExpenseMode] = useState(false);
+
+  const [SubExpenses, setSubExpenses] = useState<SubExpense[]>([]);
+
   const transformX = useSharedValue(0);
 
   const isAnimating = useSharedValue(false);
+
+  const [uploadSubexpenses, state] = useUploadSubExpense(() => {});
 
   const shake = () => {
     if (isAnimating.value) return;
@@ -68,6 +101,12 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
   };
 
   const handleSubmit = async () => {
+    if (isSubExpenseMode) {
+      handleAddSubexpense();
+
+      return;
+    }
+
     const parseAmount = (amount: string) => {
       if (amount.endsWith(".")) return +amount.slice(0, -1);
 
@@ -98,12 +137,25 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
         },
       }).catch((e) => console.log(e));
 
+      if (SubExpenses.length > 0) {
+        await uploadSubexpenses({
+          variables: {
+            expenseId: params.id,
+            input: SubExpenses.map((item) => ({
+              description: item.description,
+              amount: item.amount,
+              category: item.category,
+            })),
+          },
+        });
+      }
+
       navigation.goBack();
 
       return;
     }
 
-    await createExpense({
+    const { data, errors } = await createExpense({
       variables: {
         amount: parseAmount(amount),
         description: name,
@@ -114,6 +166,23 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
         isSubscription: isSubscription,
       },
     });
+
+    const id = data.createExpense.id;
+
+    if (SubExpenses.length > 0) {
+      await uploadSubexpenses({
+        variables: {
+          expenseId: id,
+          input: SubExpenses.map((item) => ({
+            description: item.description,
+            amount: item.amount,
+            category: item.category,
+          })),
+        },
+      });
+    }
+
+    navigation.goBack();
   };
 
   const handleAmountChange = useCallback((value: string) => {
@@ -176,31 +245,62 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
     }
   }, [type, category]);
 
+  const handleAddSubexpense = () => {
+    if (amount === "0") {
+      shake();
+      return;
+    }
+
+    setSubExpenses((prev) => [
+      ...prev,
+      {
+        id: Math.random().toString(),
+        description: name,
+        amount: +amount,
+        category: category,
+      },
+    ]);
+    setAmount("0");
+    setName("");
+  };
+
+  const subexpenseSheetRef = useRef<BottomSheet>(null);
+
+  const renderBackdrop = useCallback((props: any) => <BottomSheetBackdrop {...props} appearsOnIndex={0} disappearsOnIndex={-1} />, []);
+
+  const calculateSubExpensesTotal = () => {
+    return SubExpenses.reduce((acc, item) => acc + item.amount, 0);
+  };
+
+  const [isInputFocused, setIsInputFocused] = useState(false);
+
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
       <View style={{ flex: 1 }}>
         <View style={styles.container}>
-          <View style={{ position: "absolute", top: 15, left: 15, zIndex: 100 }}>
-            <IconButton onPress={() => navigation.goBack()} icon={<AntDesign name="close" size={24} color="rgba(255,255,255,0.7)" />} />
-          </View>
-          <View
-            style={{
-              height: 250,
-              justifyContent: "center",
-              width: "100%",
-              alignItems: "center",
-              flexDirection: "row",
-              paddingHorizontal: 15,
-            }}
-          >
-            <Animated.Text style={[{ color: "#fff", fontWeight: "bold" }, animatedAmount]}>
-              {amount}
-              <Text style={{ fontSize: 20 }}>zł</Text>
-            </Animated.Text>
+          <IconButton
+            style={{ position: "absolute", top: 15, left: 15, zIndex: 100 }}
+            onPress={() => navigation.goBack()}
+            icon={<AntDesign name="close" size={24} color="rgba(255,255,255,0.7)" />}
+          />
+
+          <View style={styles.amountContainer}>
+            <View>
+              <Animated.Text style={[{ color: "#fff", fontWeight: "bold" }, animatedAmount]}>
+                {amount}
+                <Text style={{ fontSize: 20 }}>zł</Text>
+              </Animated.Text>
+
+              {SubExpenses.length > 0 && (
+                <Text style={{ color: "rgba(255,255,255,0.7)", fontSize: 12, textAlign: "center" }}>
+                  {SubExpenses.length} sub expenses for {calculateSubExpensesTotal()}zł
+                </Text>
+              )}
+            </View>
 
             {moment(date).isAfter(moment()) && type && amount != "0" && (
-              <View style={{ position: "absolute", justifyContent: "center", alignItems: "center", bottom: -15 }}>
-                <Text style={{ color: "rgba(255,255,255,0.7)", fontWeight: "600", fontSize: 13, textAlign: "center" }}>
+              <View style={styles.scheduledContainer}>
+                <Text style={styles.scheduledText}>
                   {capitalize(type || "")} of {amount}zł will be scheduled for {"\n"} {moment(date).format("DD MMMM YYYY")}
                 </Text>
               </View>
@@ -218,26 +318,50 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
                 <Animated.View entering={FadeIn} style={{ gap: 5 }}>
                   <View style={{ flexDirection: "row", width: "100%", alignItems: "center" }}>
                     <Input
-                      containerStyle={{ borderRadius: 25 }}
-                      placeholder="Expense name"
+                      containerStyle={{
+                        borderRadius: 25,
+                        backgroundColor: isInputFocused ? Color(Colors.primary_light).lighten(0.25).hex() : Colors.primary_light,
+                        borderColor: isInputFocused ? Color(Colors.primary).lighten(2.5).hex() : Colors.primary_lighter,
+                      }}
+                      placeholder="What are you spending on?"
                       style={styles.input}
-                      placeholderTextColor={"gray"}
+                      placeholderTextColor={"rgba(255,255,255,0.3)"}
                       value={name}
                       onChangeText={setName}
+                      onBlur={() => setIsInputFocused(false)}
+                      onFocus={() => setIsInputFocused(true)}
+                      left={
+                        <IconButton
+                          onLongPress={() => {
+                            subexpenseSheetRef.current?.expand();
+                          }}
+                          icon={
+                            isSubExpenseMode ? (
+                              <Text style={{ width: 18, height: 18, textAlign: "center", color: "#fff", fontWeight: "900" }}>
+                                {SubExpenses.length}
+                              </Text>
+                            ) : (
+                              <AntDesign name="switcher" size={18} color="rgba(255,255,255,0.7)" />
+                            )
+                          }
+                          onPress={() => {
+                            setIsSubExpenseMode((p) => {
+                              setType("expense");
+
+                              if (p) setAmount(calculateSubExpensesTotal().toString());
+
+                              return !p;
+                            });
+                          }}
+                          style={{
+                            backgroundColor: !isSubExpenseMode ? Colors.primary : Colors.secondary,
+                            padding: 10,
+                          }}
+                        />
+                      }
                       right={
                         isValid && (
-                          <Ripple
-                            onPress={handleSubmit}
-                            style={{
-                              paddingHorizontal: 15,
-                              paddingVertical: 5,
-                              borderRadius: 7.5,
-                              backgroundColor: Colors.secondary,
-                              flexDirection: "row",
-                              alignItems: "center",
-                              gap: 5,
-                            }}
-                          >
+                          <Ripple onPress={handleSubmit} style={styles.save}>
                             <AntDesign name="save" size={20} color="#fff" />
                             <Text style={{ color: "#fff" }}>Save</Text>
                           </Ripple>
@@ -254,21 +378,11 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
                   >
                     <Ripple
                       onPress={() => setType((p) => (p === "expense" ? "income" : "expense"))}
-                      style={{
-                        padding: 5,
-                        paddingHorizontal: 15,
-                        backgroundColor: Colors.primary_lighter,
-                        borderRadius: 10,
-                        flexDirection: "row",
-                        gap: 5,
-                        paddingLeft: 30,
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
+                      style={[styles.chip, { backgroundColor: Colors.primary_lighter, gap: 5 }]}
                     >
-                      <View style={{ position: "absolute", left: 10, top: 2.5 }}>
+                      <View>
                         {type == null ? (
-                          <>
+                          <View style={{ height: 15, transform: [{ translateY: -6.5 }] }}>
                             <Entypo name="chevron-up" color="rgba(255,255,255,0.7)" size={15} style={{ transform: [{ translateY: 3 }] }} />
                             <Entypo
                               name="chevron-down"
@@ -276,13 +390,13 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
                               size={15}
                               style={{ transform: [{ translateY: -5 }] }}
                             />
-                          </>
+                          </View>
                         ) : type === "expense" ? (
-                          <AntDesign name="arrowdown" size={15} color={Colors.error} style={{ transform: [{ translateY: 7 }] }} />
+                          <AntDesign name="arrowdown" size={15} color={Colors.error} />
                         ) : type === "income" ? (
-                          <AntDesign name="arrowup" size={15} color={Colors.secondary} style={{ transform: [{ translateY: 7 }] }} />
+                          <AntDesign name="arrowup" size={15} color={Colors.secondary} />
                         ) : (
-                          <Entypo name="back-in-time" size={15} color="rgba(255,255,255,0.7)" style={{ transform: [{ translateY: 7 }] }} />
+                          <Entypo name="back-in-time" size={15} color="rgba(255,255,255,0.7)" />
                         )}
                       </View>
 
@@ -303,35 +417,17 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
                         {type == null ? "Select type" : type === "expense" ? "Expense" : type === "income" ? "Income" : "Refunded"}
                       </Text>
                     </Ripple>
-                    <Ripple
-                      onPress={() => setDate(null)}
-                      style={{
-                        padding: 7.5,
-                        justifyContent: "center",
-                        backgroundColor: Colors.primary_lighter,
-                        borderRadius: 10,
-                        flex: 1,
-                        alignItems: "center",
-                        width: (Layout.screen.width - 30 - 30) / 3,
-                      }}
-                    >
+
+                    <Ripple onPress={() => setDate(null)} style={[styles.chip, { backgroundColor: Colors.primary_lighter }]}>
                       <Text style={{ color: "rgba(255,255,255,0.7)", fontSize: 14 }}>{date ?? moment().format("YYYY-MM-DD")}</Text>
                     </Ripple>
 
                     <Ripple
                       onPress={() => setChangeView((p) => !p)}
-                      style={{
-                        padding: 7.5,
-                        paddingHorizontal: 15,
-                        backgroundColor: category === "none" ? Colors.primary_light : lowOpacity(Icons[category].backgroundColor, 0.2),
-                        borderRadius: 10,
-                        justifyContent: "center",
-                        alignItems: "center",
-                        flexDirection: "row",
-                        gap: 15,
-                        minWidth: (Layout.screen.width - 30 - 30) / 3,
-                        flex: 1,
-                      }}
+                      style={[
+                        styles.chip,
+                        { backgroundColor: category === "none" ? Colors.primary_light : lowOpacity(Icons[category]?.backgroundColor, 0.2) },
+                      ]}
                     >
                       {Icons[category].icon}
                       <Text
@@ -347,18 +443,7 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
                     {!params?.isEditing && (
                       <Ripple
                         onPress={() => setIsSubscription((p) => !p)}
-                        style={{
-                          padding: 7.5,
-                          paddingHorizontal: 15,
-                          backgroundColor: isSubscription ? secondary_candidates[3] : Colors.primary_lighter,
-                          borderRadius: 10,
-                          justifyContent: "center",
-                          alignItems: "center",
-                          flexDirection: "row",
-                          gap: 15,
-                          minWidth: (Layout.screen.width - 30 - 30) / 3,
-                          flex: 1,
-                        }}
+                        style={[styles.chip, { backgroundColor: isSubscription ? secondary_candidates[3] : Colors.primary_lighter }]}
                       >
                         <Text style={{ color: "rgba(255,255,255,0.7)", fontSize: 14 }}>Subscription</Text>
                       </Ripple>
@@ -385,6 +470,49 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
           </View>
         </View>
 
+        <BottomSheet
+          ref={subexpenseSheetRef}
+          index={-1}
+          snapPoints={[Layout.screen.height / 1.6]}
+          enablePanDownToClose
+          backdropComponent={renderBackdrop}
+          backgroundStyle={{ backgroundColor: Colors.primary }}
+          handleIndicatorStyle={{ backgroundColor: Colors.secondary }}
+        >
+          <View style={{ flex: 1, padding: 15 }}>
+            <FlatList
+              data={SubExpenses}
+              showsHorizontalScrollIndicator={false}
+              renderItem={({ item }) => (
+                <WalletItem
+                  handlePress={() => {
+                    Alert.alert("Delete", "Are you sure you want to delete this subexpense?", [
+                      {
+                        text: "Cancel",
+                        style: "cancel",
+                      },
+                      {
+                        text: "Delete",
+                        onPress: () => {
+                          setSubExpenses((prev) => prev.filter((i) => i.id !== item.id));
+                        },
+                      },
+                    ]);
+                  }}
+                  {...({
+                    ...item,
+                    amount: item.amount.toString(),
+                    date: moment(date).format("YYYY-MM-DD"),
+                    type: "expense",
+                    category: item.category,
+                  } as any)}
+                  containerStyle={{ backgroundColor: Colors.primary_lighter }}
+                />
+              )}
+            />
+          </View>
+        </BottomSheet>
+
         <DateTimePicker
           isVisible={date == null}
           onConfirm={(date) => {
@@ -396,139 +524,6 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
     </TouchableWithoutFeedback>
   );
 }
-
-const NumbersPad = memo(
-  ({ handleAmountChange, rotateBackButton }: { handleAmountChange: (val: string) => void; rotateBackButton: boolean }) => {
-    const navigation = useNavigation();
-
-    return (
-      <Animated.View entering={FadeInDown} style={{ flex: 1, gap: 15, borderRadius: 35, marginTop: 30 }}>
-        {[
-          [1, 2, 3],
-          [4, 5, 6],
-          [7, 8, 9],
-          [".", 0, "C"],
-        ].map((row) => (
-          <View style={{ flexDirection: "row", gap: 15 }} key={row.toString()}>
-            {row.map((num) => (
-              <NumpadNumber
-                navigation={navigation}
-                rotateBackButton={rotateBackButton}
-                num={num}
-                key={num.toString()}
-                onPress={() => handleAmountChange(num.toString())}
-              />
-            ))}
-          </View>
-        ))}
-      </Animated.View>
-    );
-  }
-);
-
-const AnimatedRipple = Animated.createAnimatedComponent(Ripple);
-
-const NumpadNumber = (props: { onPress: VoidFunction; num: string | number; rotateBackButton: boolean; navigation: any }) => {
-  const scale = useSharedValue(1);
-
-  const onPress = () => {
-    props.num === "C" && props.rotateBackButton ? props.navigation.goBack() : props.onPress();
-
-    scale.value = withSequence(withSpring(1.5, { duration: 200 }), withSpring(1, { duration: 200 }));
-  };
-
-  const animatedScale = useAnimatedStyle(
-    () => ({
-      transform: [
-        { scale: scale.value },
-        {
-          rotate: withTiming(props.num === "C" && props.rotateBackButton ? "-90deg" : "0deg", { duration: 150 }),
-        },
-      ],
-    }),
-    [props.rotateBackButton]
-  );
-
-  const interval = useRef<NodeJS.Timeout | null>(null);
-
-  return (
-    <View style={{ width: "30%", height: 75, overflow: "hidden", borderRadius: 100 }}>
-      <AnimatedRipple
-        rippleCentered
-        rippleColor={Colors.secondary}
-        rippleSize={50}
-        onPress={onPress}
-        onLongPress={() => {
-          interval.current = setInterval(() => {
-            onPress();
-          }, 50);
-        }}
-        onPressOut={() => {
-          clearInterval(interval.current!);
-        }}
-        style={[styles.numberPadNumberButton, animatedScale]}
-      >
-        {props.num === "C" ? (
-          <Entypo name="chevron-left" size={40} color="#fff" />
-        ) : (
-          <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 24 }}>{props.num}</Text>
-        )}
-      </AnimatedRipple>
-    </View>
-  );
-};
-
-const CategorySelector = (props: { current: string; onPress: (item: string) => void; dismiss: VoidFunction }) => {
-  const data = Object.entries(Icons);
-
-  const [query, setQuery] = useState("");
-
-  return (
-    <Animated.FlatList
-      ListHeaderComponent={<Input placeholder="Search for category" value={query} onChangeText={setQuery} style={{ padding: 15 }} />}
-      layout={LinearTransition}
-      entering={FadeInDown}
-      style={{ width: "100%", height: Layout.screen.height / 2.25 }}
-      data={data.filter((item) => item[0].toLowerCase().includes(query.toLowerCase()))}
-      keyExtractor={(item) => item[0]}
-      stickyHeaderIndices={[0]}
-      renderItem={({ item }) => (
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            borderBottomWidth: 0.5,
-            borderBottomColor: "rgba(255,255,255,0.15)",
-            ...((item[0] === props.current && { backgroundColor: Colors.primary_light }) || {}),
-            paddingRight: 15,
-          }}
-        >
-          <Ripple onPress={() => props.onPress(item[0])} style={styles.categoryButton}>
-            <View
-              style={{
-                padding: 10,
-                borderRadius: 100,
-                backgroundColor: lowOpacity(item[1].backgroundColor, 0.25),
-                width: 40,
-                height: 40,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              {item[1].icon}
-            </View>
-
-            <Text style={{ color: "rgba(255,255,255,0.7)", fontSize: 18, textTransform: "capitalize", fontWeight: "600" }}>{item[0]}</Text>
-          </Ripple>
-
-          {item[0] === props.current && (
-            <IconButton onPress={props.dismiss} icon={<AntDesign name="close" color={"rgba(255,255,255,0.7)"} size={24} />} />
-          )}
-        </View>
-      )}
-    />
-  );
-};
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 15, gap: 15 },
@@ -553,5 +548,40 @@ const styles = StyleSheet.create({
     gap: 15,
     alignItems: "center",
     flex: 1,
+  },
+
+  chip: {
+    padding: 7.5,
+    paddingHorizontal: 15,
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 15,
+    minWidth: (Layout.screen.width - 30 - 30) / 3,
+    flex: 1,
+  },
+
+  amountContainer: {
+    height: 250,
+    justifyContent: "center",
+    width: "100%",
+    alignItems: "center",
+    flexDirection: "row",
+    paddingHorizontal: 15,
+  },
+
+  scheduledContainer: { position: "absolute", justifyContent: "center", alignItems: "center", bottom: -15 },
+
+  scheduledText: { color: "rgba(255,255,255,0.7)", fontWeight: "600", fontSize: 13, textAlign: "center" },
+
+  save: {
+    paddingHorizontal: 15,
+    paddingVertical: 5,
+    borderRadius: 7.5,
+    backgroundColor: Colors.secondary,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
   },
 });
