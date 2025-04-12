@@ -273,6 +273,41 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
 
   const [isInputFocused, setIsInputFocused] = useState(false);
 
+  const [regularModeState, setRegularModeState] = useState({
+    amount: params?.amount?.toString() || "0",
+    date: params?.date ? moment(params.date).format("YYYY-MM-DD") : moment().format("YYYY-MM-DD"),
+    category: params?.category || "none",
+    name: params?.description || "",
+    type: params?.type || null,
+  });
+
+  const handleToggleSubExpenseMode = () => {
+    if (!isSubExpenseMode) {
+      setRegularModeState({
+        amount,
+        date,
+        category,
+        name,
+        type,
+      });
+
+      setAmount(calculateSubExpensesTotal().toString());
+      setName("");
+      setIsSubExpenseMode(true);
+    } else {
+      if (params?.isEditing) {
+        restorePreviousState();
+      } else {
+        setAmount(regularModeState.amount);
+        setDate(regularModeState.date);
+        setCategory(regularModeState.category);
+        setName(regularModeState.name);
+        setType(regularModeState.type);
+      }
+      setIsSubExpenseMode(false);
+    }
+  };
+
   const restorePreviousState = () => {
     setAmount(params?.amount.toString() || "0");
     setDate(params?.date ? moment(params.date).format("YYYY-MM-DD") : moment().format("YYYY-MM-DD"));
@@ -283,13 +318,24 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
   };
 
   useEffect(() => {
-    if (params?.isEditing && !isSubExpenseMode) {
-      restorePreviousState();
-    } else {
+    if (isSubExpenseMode) {
       setAmount(calculateSubExpensesTotal().toString());
-      setName("");
     }
-  }, [params, isSubExpenseMode, SubExpenses]);
+  }, [SubExpenses, isSubExpenseMode]);
+
+  useEffect(() => {
+    if (params?.isEditing) {
+      restorePreviousState();
+
+      setRegularModeState({
+        amount: params?.amount?.toString() || "0",
+        date: params?.date ? moment(params.date).format("YYYY-MM-DD") : moment().format("YYYY-MM-DD"),
+        category: params?.category || "none",
+        name: params?.description || "",
+        type: params?.type || null,
+      });
+    }
+  }, [params]);
 
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
@@ -361,11 +407,7 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
                               <AntDesign name="switcher" size={18} color="rgba(255,255,255,0.7)" />
                             )
                           }
-                          onPress={() => {
-                            setIsSubExpenseMode((p) => {
-                              return !p;
-                            });
-                          }}
+                          onPress={handleToggleSubExpenseMode}
                           style={{
                             backgroundColor: !isSubExpenseMode ? Colors.primary : Colors.secondary,
                             padding: 10,

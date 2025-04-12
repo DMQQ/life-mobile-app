@@ -116,6 +116,12 @@ export interface Expense {
     category: string;
   }[];
 
+  files?: {
+    id: string;
+    url: string;
+    expenseId: string | undefined;
+  }[];
+
   note?: string;
 
   tags?: string;
