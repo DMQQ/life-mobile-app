@@ -2,7 +2,7 @@
   "expo": {
     "name": "Life",
     "slug": "mylife-mobile",
-    "version": "1.1.0",
+    "version": "1.1.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
@@ -18,10 +18,12 @@
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
-      "buildNumber": "20251304",
+      "buildNumber": "20251504",
       "supportsTablet": true,
       "infoPlist": {
         "NSFaceIDUsageDescription": "Allow $(PRODUCT_NAME) to use Face ID.",
+        "NSLocationWhenInUseUsageDescription": "This app needs access to your location to show nearby places and assign locations to your expenses.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "This app needs access to your location to show nearby places and assign locations to your expenses.",
         "ITSAppUsesNonExemptEncryption": false
       },
       "bundleIdentifier": "com.dmq.mylifemobile"
@@ -32,7 +34,13 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#151421"
       },
-      "permissions": ["android.permission.RECORD_AUDIO", "android.permission.USE_BIOMETRIC", "android.permission.USE_FINGERPRINT"],
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.USE_BIOMETRIC",
+        "android.permission.USE_FINGERPRINT",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ],
       "package": "com.dmq.mylifemobile"
     },
     "web": {
@@ -44,6 +52,12 @@
         "expo-image-picker",
         {
           "photosPermission": "The app accesses your photos to let you share them with your friends."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location to show nearby places and assign locations to your expenses."
         }
       ],
       "expo-asset",
