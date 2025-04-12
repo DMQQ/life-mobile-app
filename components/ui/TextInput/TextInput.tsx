@@ -108,6 +108,23 @@ export default function Input({
     isFocused,
   };
 
+  const applyContainerStyles = (containerStyle: StyleProp<ViewStyle> | undefined) => {
+    if (typeof containerStyle === "object" && containerStyle !== null) {
+      const allowed = ["backgroundColor", "borderColor", "borderWidth"];
+
+      const styles = Object.keys(containerStyle).reduce((acc, key) => {
+        if (allowed.includes(key)) {
+          // @ts-ignore
+          acc[key] = containerStyle[key];
+        }
+        return acc;
+      }, {} as any);
+
+      return styles;
+    }
+    return {};
+  };
+
   return (
     <View style={[styles.container, rest.containerStyle]}>
       {typeof name !== "undefined" && (
@@ -118,15 +135,18 @@ export default function Input({
         />
       )}
       <View
-        style={{
-          backgroundColor: isFocused ? Colors.primary_lighter : Colors.primary_light,
-          borderRadius: 10,
-          flexDirection: "row",
-          width: (style as any)?.width || "100%", //(style as any)?.width ?? Layout.screen.width * 0.95,
-          borderWidth: 2,
-          borderColor: error ? Colors.error : isFocused ? Colors.secondary : Color(Colors.primary).lighten(0.5).hex(),
-          alignItems: "center",
-        }}
+        style={[
+          {
+            backgroundColor: isFocused ? Colors.primary_lighter : Colors.primary_light,
+            borderRadius: 10,
+            flexDirection: "row",
+            width: (style as any)?.width || "100%", //(style as any)?.width ?? Layout.screen.width * 0.95,
+            borderWidth: 2,
+            borderColor: error ? Colors.error : isFocused ? Colors.secondary : Color(Colors.primary).lighten(0.5).hex(),
+            alignItems: "center",
+          },
+          applyContainerStyles(rest.containerStyle),
+        ]}
       >
         {!!left && <View style={{ paddingHorizontal: 7.5 }}>{typeof left === "function" ? left(renderComponentProps) : left}</View>}
         <TextInput

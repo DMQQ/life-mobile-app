@@ -37,6 +37,13 @@ export const GET_WALLET = gql`
           id
           url
         }
+
+        subexpenses {
+          id
+          description
+          amount
+          category
+        }
       }
     }
   }

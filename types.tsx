@@ -109,6 +109,13 @@ export interface Expense {
 
   location: { id: string; kind: string; name: string; latitude: number; longitude: number } | null;
 
+  subexpenses: {
+    id: string;
+    amount: number;
+    description: string;
+    category: string;
+  }[];
+
   note?: string;
 
   tags?: string;

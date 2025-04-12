@@ -2,9 +2,10 @@ import { View, Text, StyleSheet, StyleProp, ViewStyle } from "react-native";
 import moment from "moment";
 import Colors, { secondary_candidates } from "@/constants/Colors";
 import Ripple from "react-native-material-ripple";
-import Animated, { AnimatedStyle } from "react-native-reanimated";
+import Animated, { AnimatedStyle, FadeIn, FadeOut, LinearTransition } from "react-native-reanimated";
 import { CategoryIcon, Icons } from "../ExpenseIcon";
 import { Expense } from "@/types";
+import { useState } from "react";
 
 export interface WalletElement extends Expense {
   description: string;
@@ -78,6 +79,11 @@ const styles = StyleSheet.create({
     height: 40,
     width: 40,
   },
+  expanded: {
+    padding: 15,
+    borderRadius: 15,
+    paddingTop: 20,
+  },
 });
 
 export function parseDateToText(date: string) {
@@ -107,17 +113,29 @@ export default function WalletItem(
 
   const isBalanceEdit = item.description.includes("Balance edited") || item.amount === 0;
 
+  const [isExpanded, setIsExpanded] = useState(false);
+
   return (
     <Animated.View
       style={[
         {
           marginBottom: 15,
           position: "relative",
+          backgroundColor: Colors.primary_lighter,
+          borderRadius: 15,
         },
         item.animatedStyle,
       ]}
+      layout={LinearTransition}
     >
-      <Ripple disabled={isBalanceEdit} style={[styles.expense_item, item.containerStyle]} onPress={() => item.handlePress()}>
+      <Ripple
+        onLongPress={() => {
+          setIsExpanded(!isExpanded);
+        }}
+        disabled={isBalanceEdit}
+        style={[styles.expense_item, item.containerStyle]}
+        onPress={() => item.handlePress()}
+      >
         <CategoryIcon type={item.type as "income" | "expense" | "refunded"} category={isBalanceEdit ? "edit" : item.category} />
 
         <View style={{ height: "100%", justifyContent: "center", flex: 3 }}>
@@ -154,6 +172,30 @@ export default function WalletItem(
           </View>
         )}
       </Ripple>
+
+      {isExpanded && item.subexpenses.length > 0 && (
+        <Animated.View layout={LinearTransition} style={styles.expanded}>
+          {item.subexpenses.map((subexpense, index) => (
+            <Animated.View
+              key={subexpense.id}
+              entering={FadeIn.delay(index * 50)}
+              exiting={FadeOut.delay((item.subexpenses.length - index) * 50)}
+            >
+              <WalletItem
+                key={index}
+                {...item}
+                {...(subexpense as any)}
+                subexpenses={[]}
+                type="expense"
+                handlePress={() => {}}
+                animatedStyle={{ marginBottom: 5 }}
+                index={index}
+                containerStyle={{ marginBottom: 0, backgroundColor: Colors.primary }}
+              />
+            </Animated.View>
+          ))}
+        </Animated.View>
+      )}
     </Animated.View>
   );
 }

@@ -259,7 +259,7 @@ export default function Expense({ route: { params }, navigation }: any) {
       />
       <ScrollView style={{ flex: 1, marginTop: 5 }}>
         <View style={{ marginBottom: 30, marginTop: 15, paddingHorizontal: 15 }}>
-          <View style={[styles.row, { marginTop: 0, padding: 15, flexWrap: "wrap" }]}>
+          <View style={[styles.row, { marginTop: 0, padding: 15, flexWrap: "wrap", backgroundColor: "transparent" }]}>
             <Txt size={30} color={"#fff"}>
               {capitalize(selected?.description)}
             </Txt>
@@ -269,6 +269,27 @@ export default function Expense({ route: { params }, navigation }: any) {
               <Text style={{ fontSize: 16 }}>zł</Text>
             </Txt>
           </View>
+
+          {selected.subexpenses.length > 0 && (
+            <View style={{ marginTop: 10, backgroundColor: Colors.primary_light, borderRadius: 15, padding: 15 }}>
+              <Txt size={16} color={Colors.secondary_light_2}>
+                Sub expenses
+              </Txt>
+
+              <View style={{ marginTop: 15 }}>
+                {selected.subexpenses.map((item: any) => (
+                  <WalletItem
+                    {...selected}
+                    {...item}
+                    handlePress={() => {}}
+                    subexpenses={[]}
+                    animatedStyle={{ marginBottom: 5 }}
+                    containerStyle={{ backgroundColor: Colors.primary }}
+                  />
+                ))}
+              </View>
+            </View>
+          )}
 
           {selected?.category && (
             <View style={[styles.row, { padding: 0, paddingRight: 10, paddingLeft: 0 }]}>
