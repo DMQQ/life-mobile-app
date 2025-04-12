@@ -149,6 +149,23 @@ export default function WalletItem(
               {item.category}
               {item.category && item.subscription?.isActive && " / "}
               {item.subscription?.isActive ? <Text style={{ color: secondary_candidates[0] }}>Subscription</Text> : ""}
+              {item.files && item.files.length > 0 && (
+                <>
+                  {" / "}
+
+                  <Text style={{ color: secondary_candidates[1] }}>
+                    {item.files.length} {item.files.length > 1 ? "files" : "file"}
+                  </Text>
+                </>
+              )}
+              {item.subexpenses && item.subexpenses.length > 0 && (
+                <>
+                  {" / "}
+                  <Text style={{ color: secondary_candidates[2] }}>
+                    {item.subexpenses.length} {item.subexpenses.length > 1 ? "sub" : "subs"}
+                  </Text>
+                </>
+              )}
             </Text>
           </View>
         </View>
@@ -179,12 +196,14 @@ export default function WalletItem(
             <Animated.View
               key={subexpense.id}
               entering={FadeIn.delay(index * 50)}
-              exiting={FadeOut.delay((item.subexpenses.length - index) * 50)}
+              exiting={FadeOut.delay(Math.min((item.subexpenses.length - index) * 50, 200))}
             >
               <WalletItem
                 key={index}
                 {...item}
                 {...(subexpense as any)}
+                files={[]}
+                subscription={undefined}
                 subexpenses={[]}
                 type="expense"
                 handlePress={() => {}}

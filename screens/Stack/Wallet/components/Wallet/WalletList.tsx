@@ -3,7 +3,7 @@ import { Expense, Wallet } from "@/types";
 import WalletItem, { WalletElement, parseDateToText } from "./WalletItem";
 import { useRef, useEffect, useMemo, useCallback } from "react";
 import { Text, NativeScrollEvent, View, StyleSheet, VirtualizedList } from "react-native";
-import Animated, { SharedValue } from "react-native-reanimated";
+import Animated, { LinearTransition, SharedValue } from "react-native-reanimated";
 import { NativeSyntheticEvent } from "react-native";
 import moment from "moment";
 import Colors, { Sizing } from "@/constants/Colors";
@@ -129,7 +129,7 @@ const MonthExpenseList = ({
   const amount = diff.data?.getMonthTotal || 0;
 
   return (
-    <View style={{ marginBottom: 30 }}>
+    <Animated.View style={{ marginBottom: 30 }} layout={LinearTransition.delay(100)}>
       <View style={styles.monthRow}>
         <Text style={styles.monthText}>{moment(item.month).format("MMMM YYYY")}</Text>
 
@@ -155,7 +155,7 @@ const MonthExpenseList = ({
           }}
         />
       ))}
-    </View>
+    </Animated.View>
   );
 };
 
@@ -183,7 +183,7 @@ const ListItem = ({
   } = useWalletContext();
 
   return (
-    <>
+    <Animated.View layout={LinearTransition.delay(100)}>
       {!areDatesEqual && (
         <Ripple
           onPress={() => {
@@ -196,7 +196,7 @@ const ListItem = ({
         </Ripple>
       )}
       <WalletItem index={index} handlePress={handlePress} {...(item as any)} />
-    </>
+    </Animated.View>
   );
 };
 

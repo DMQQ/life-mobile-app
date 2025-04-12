@@ -20,6 +20,25 @@ export const GET_MAIN_SCREEN = gql`
         amount
         description
         type
+
+        subscription {
+          id
+          isActive
+          nextBillingDate
+          dateStart
+        }
+
+        files {
+          id
+          url
+        }
+
+        subexpenses {
+          id
+          description
+          amount
+          category
+        }
       }
     }
 
