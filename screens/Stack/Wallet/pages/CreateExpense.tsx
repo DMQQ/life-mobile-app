@@ -1,5 +1,5 @@
 import moment from "moment";
-import { Alert, Keyboard, ScrollView, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View } from "react-native";
+import { ActivityIndicator, Alert, Keyboard, ScrollView, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View } from "react-native";
 import Colors, { secondary_candidates } from "../../../../constants/Colors";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import Ripple from "react-native-material-ripple";
@@ -59,7 +59,7 @@ const useUploadSubExpense = (onCompleted: () => void) => {
 const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
 
 export default function CreateExpenseModal({ navigation, route: { params } }: any) {
-  const { createExpense } = useCreateActivity({
+  const { createExpense, loading } = useCreateActivity({
     onCompleted() {},
   });
 
@@ -212,8 +212,7 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
     });
   }, []);
 
-  const isValid =
-    (type === "income" ? true : category !== "none") && name !== "" && amount !== "" && type !== null && amount !== "0" && date !== null;
+  const isValid = type !== null && name !== "" && amount !== "" && type !== null && amount !== "0" && date !== null;
 
   const scale = (n: number) => {
     "worklet";
@@ -273,6 +272,24 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
   };
 
   const [isInputFocused, setIsInputFocused] = useState(false);
+
+  const restorePreviousState = () => {
+    setAmount(params?.amount.toString() || "0");
+    setDate(params?.date ? moment(params.date).format("YYYY-MM-DD") : moment().format("YYYY-MM-DD"));
+    setChangeView(false);
+    setCategory(params.category || "none");
+    setName(params?.description || "");
+    setType(params?.type || null);
+  };
+
+  useEffect(() => {
+    if (params?.isEditing && !isSubExpenseMode) {
+      restorePreviousState();
+    } else {
+      setAmount(calculateSubExpensesTotal().toString());
+      setName("");
+    }
+  }, [params, isSubExpenseMode, SubExpenses]);
 
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
@@ -346,10 +363,6 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
                           }
                           onPress={() => {
                             setIsSubExpenseMode((p) => {
-                              setType("expense");
-
-                              if (p) setAmount(calculateSubExpensesTotal().toString());
-
                               return !p;
                             });
                           }}
@@ -362,7 +375,7 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
                       right={
                         isValid && (
                           <Ripple onPress={handleSubmit} style={styles.save}>
-                            <AntDesign name="save" size={20} color="#fff" />
+                            {loading ? <ActivityIndicator size={14} color="#fff" /> : <AntDesign name="save" size={20} color="#fff" />}
                             <Text style={{ color: "#fff" }}>Save</Text>
                           </Ripple>
                         )
@@ -582,6 +595,6 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.secondary,
     flexDirection: "row",
     alignItems: "center",
-    gap: 5,
+    gap: 7.5,
   },
 });
