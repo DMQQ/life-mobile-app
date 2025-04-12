@@ -561,6 +561,8 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
                     type: "expense",
                     category: item.category,
                   } as any)}
+                  files={[]}
+                  subexpenses={[]}
                   containerStyle={{ backgroundColor: Colors.primary_lighter }}
                 />
               )}

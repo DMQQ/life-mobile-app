@@ -112,7 +112,7 @@ export default function Expense({ route: { params }, navigation }: any) {
   useEffect(() => {
     if (!called || calls > 1) return;
 
-    if (similar?.wallet?.expenses.length === 1) {
+    if (similar?.wallet?.expenses?.length === 1) {
       getLazyExpenses({
         variables: {
           filters: {
@@ -273,8 +273,6 @@ export default function Expense({ route: { params }, navigation }: any) {
     }
   };
 
-  const [isSubexpensesExapnded, setIsSubexpensesExpanded] = useState(false);
-
   return (
     <View style={{ flex: 1, paddingTop: 15, paddingBottom: 55 }}>
       <Header
@@ -297,7 +295,7 @@ export default function Expense({ route: { params }, navigation }: any) {
           <View
             style={[
               styles.row,
-              { marginTop: 0, padding: 0, flexWrap: "wrap", backgroundColor: "transparent", marginVertical: 20, alignItems: "center" },
+              { marginTop: 15, padding: 0, flexWrap: "wrap", backgroundColor: "transparent", marginVertical: 20, alignItems: "center" },
             ]}
           >
             <Txt size={35} color={"#fff"}>
@@ -313,11 +311,11 @@ export default function Expense({ route: { params }, navigation }: any) {
             </Txt>
           </View>
 
-          {selected.subexpenses.length > 0 && (
+          {selected.subexpenses?.length > 0 && (
             <View style={{ marginTop: 15 }}>
               <SubexpenseStack selected={selected} handleDeleteSubExpense={handleDeleteSubExpense} />
 
-              <View style={{ marginBottom: 15 }}>
+              <View style={{ marginBottom: 15, marginTop: 10 }}>
                 <Txt size={20} color={"#fff"}>
                   Expense details
                 </Txt>
@@ -430,6 +428,10 @@ export default function Expense({ route: { params }, navigation }: any) {
           </Ripple>
         </View>
 
+        <FileUpload id={selected.id} images={selected?.files} />
+
+        <MapPicker location={selected.location} id={selected.id} />
+
         {similar?.wallet?.expenses?.length > 1 && (
           <View style={{ paddingHorizontal: 15, marginBottom: 25 }}>
             <Txt size={20} color={"#fff"}>
@@ -453,10 +455,6 @@ export default function Expense({ route: { params }, navigation }: any) {
             </View>
           </View>
         )}
-
-        <FileUpload id={selected.id} images={selected?.files} />
-
-        <MapPicker location={selected.location} id={selected.id} />
       </ScrollView>
     </View>
   );
@@ -558,7 +556,7 @@ const FileUpload = (props: { id: string; images: any[] }) => {
           </Ripple>
         </View>
       </View>
-      {files.length > 0 ? (
+      {files?.length > 0 ? (
         <FlatList
           style={{ marginTop: 25 }}
           horizontal

@@ -65,14 +65,24 @@ const Txt = (props: { children: ReactNode; size: number; color?: any }) => (
 
 export const getCurrentLocation = async () => {
   try {
-    // Request location permissions
+    const serviceEnabled = await Location.hasServicesEnabledAsync();
+    if (!serviceEnabled) {
+      console.log("Location services are not enabled");
+      return {
+        latitude: 53.7701,
+        longitude: 20.4862,
+        error: null,
+      };
+    }
+
     const { status } = await Location.requestForegroundPermissionsAsync();
 
     if (status !== "granted") {
+      console.log("Permission not granted, using default location");
       return {
-        latitude: null,
-        longitude: null,
-        error: "Location permission denied",
+        latitude: 53.7701,
+        longitude: 20.4862,
+        error: null,
       };
     }
 
@@ -86,10 +96,11 @@ export const getCurrentLocation = async () => {
       error: null,
     };
   } catch (error) {
+    console.log("Location error, using default location");
     return {
-      latitude: null,
-      longitude: null,
-      error: "Could not determine location",
+      latitude: 53.7701,
+      longitude: 20.4862,
+      error: null,
     };
   }
 };
@@ -104,35 +115,31 @@ const MapPicker = (props: Pick<ExpenseType, "location"> & { id: string }) => {
 
   const map = useRef<Map>(null);
 
-  // Keep track of the selected marker (different from assigned marker)
   const [selectedMarker, setSelectedMarker] = useState<any>(null);
 
   useEffect(() => {
     getCurrentLocation().then((coords) => {
-      if (coords.error) {
-        console.error(coords.error);
-        return;
-      }
-      setLocation({
-        latitude: coords.latitude!,
-        longitude: coords.longitude!,
-        latitudeDelta: 0.04,
-        longitudeDelta: 0.05,
-      });
-
-      map.current?.animateToRegion(
-        {
-          latitude: coords.latitude!,
-          longitude: coords.longitude!,
+      if (coords.latitude && coords.longitude) {
+        setLocation({
+          latitude: coords.latitude,
+          longitude: coords.longitude,
           latitudeDelta: 0.04,
           longitudeDelta: 0.05,
-        },
-        1000
-      );
+        });
+
+        map.current?.animateToRegion(
+          {
+            latitude: coords.latitude,
+            longitude: coords.longitude,
+            latitudeDelta: 0.04,
+            longitudeDelta: 0.05,
+          },
+          1000
+        );
+      }
     });
   }, []);
 
-  // Use props.location as assigned marker
   const [assignedMarker, setAssignedMarker] = useState(props.location || null);
   const [editMode, setEditMode] = useState(false);
 

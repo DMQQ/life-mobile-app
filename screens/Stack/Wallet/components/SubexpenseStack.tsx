@@ -50,7 +50,7 @@ const SubexpenseStack: React.FC<SubexpenseStackProps> = ({ selected, handleDelet
     setIsExpanded((prev) => !prev);
   };
 
-  const subexpenses = selected.subexpenses || [];
+  const subexpenses = selected?.subexpenses || [];
 
   const containerHeight = useSharedValue<number>(Math.min(2, subexpenses.length) * 20 + 60);
 
@@ -144,6 +144,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({ item, selected, ind
         {...(item as any)}
         handlePress={isExpanded ? onDelete : expand}
         subexpenses={[]}
+        files={[]}
         containerStyle={{
           backgroundColor: Colors.primary_light,
           shadowColor: "#000",
