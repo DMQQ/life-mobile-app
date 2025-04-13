@@ -21,6 +21,7 @@ import WalletContextProvider from "../components/WalletContext";
 import Ripple from "react-native-material-ripple";
 import Color from "color";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Animated, { LinearTransition } from "react-native-reanimated";
 
 const styles = StyleSheet.create({
   tilesContainer: {
@@ -125,7 +126,8 @@ function WalletCharts({ navigation }: any) {
         curr.description.startsWith("Balance") ||
         curr.type === "income" ||
         curr.type === "refunded" ||
-        curr.category === "refunded"
+        curr.category === "refunded" ||
+        curr.amount == 0
       )
         return acc;
       const key = curr.category;

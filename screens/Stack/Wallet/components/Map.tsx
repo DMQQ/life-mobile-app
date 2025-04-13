@@ -234,7 +234,7 @@ const MapPicker = (props: Pick<ExpenseType, "location"> & { id: string }) => {
     <View style={{ padding: 15, marginBottom: 40 }}>
       <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
         <Txt size={20} color={"#fff"}>
-          Location {assignedMarker?.name}
+          {assignedMarker?.name || "Select location"}
         </Txt>
 
         <View style={{ flexDirection: "row", gap: 25 }}>

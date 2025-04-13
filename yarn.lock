@@ -1330,7 +1330,7 @@
     resolve-from "^5.0.0"
     semver "^7.6.0"
 
-"@expo/image-utils@^0.6.4":
+"@expo/image-utils@^0.6.4", "@expo/image-utils@~0.6.3":
   version "0.6.4"
   resolved "https://registry.npmjs.org/@expo/image-utils/-/image-utils-0.6.4.tgz"
   integrity sha512-L++1PBzSvf5iYc6UHJ8Db8GcYNkfLDw+a+zqEFBQ3xqRXP/muxb/O7wuiMFlXrj/cfkx4e0U+z1a4ceV0A7S7Q==
@@ -4258,6 +4258,15 @@ expo-notifications@~0.29.8:
     badgin "^1.1.5"
     expo-application "~6.0.2"
     expo-constants "~17.0.5"
+
+expo-quick-actions@^4.0.2:
+  version "4.0.2"
+  resolved "https://registry.npmjs.org/expo-quick-actions/-/expo-quick-actions-4.0.2.tgz"
+  integrity sha512-0HCeGf+rEfDOyDqFXmU3vGVm34e9ZJ2iaCXOw6fM6yWFWqSBUR39RBoX4KOYGFScnW5ZftZIG3cbbrumDSrxQg==
+  dependencies:
+    "@expo/image-utils" "~0.6.3"
+    schema-utils "^4.2.0"
+    sf-symbols-typescript "^2.0.0"
 
 expo-secure-store@~14.0.0:
   version "14.0.1"
@@ -7586,6 +7595,16 @@ schema-utils@^3.2.0:
     ajv "^6.12.5"
     ajv-keywords "^3.5.2"
 
+schema-utils@^4.2.0:
+  version "4.3.0"
+  resolved "https://registry.npmjs.org/schema-utils/-/schema-utils-4.3.0.tgz"
+  integrity sha512-Gf9qqc58SpCA/xdziiHz35F4GNIWYWZrEshUc/G/r5BnLph6xpKuLeoJoQuj5WfBIx/eQLf+hmVPYHaxJu7V2g==
+  dependencies:
+    "@types/json-schema" "^7.0.9"
+    ajv "^8.9.0"
+    ajv-formats "^2.1.1"
+    ajv-keywords "^5.1.0"
+
 schema-utils@^4.3.0:
   version "4.3.0"
   resolved "https://registry.npmjs.org/schema-utils/-/schema-utils-4.3.0.tgz"
@@ -7730,6 +7749,11 @@ setprototypeof@1.2.0:
   version "1.2.0"
   resolved "https://registry.npmjs.org/setprototypeof/-/setprototypeof-1.2.0.tgz"
   integrity sha512-E5LDX7Wrp85Kil5bhZv46j8jOeboKq5JMmYM3gVGdGH8xFpPWXUMsNrlODCrkoxMEeNi/XZIwuRvY4XNwYMJpw==
+
+sf-symbols-typescript@^2.0.0:
+  version "2.1.0"
+  resolved "https://registry.npmjs.org/sf-symbols-typescript/-/sf-symbols-typescript-2.1.0.tgz"
+  integrity sha512-ezT7gu/SHTPIOEEoG6TF+O0m5eewl0ZDAO4AtdBi5HjsrUI6JdCG17+Q8+aKp0heM06wZKApRCn5olNbs0Wb/A==
 
 shallow-clone@^3.0.0:
   version "3.0.1"
