@@ -98,7 +98,7 @@ const steps = [
 ] as const;
 
 const IncomeExpenseBar = memo(() => {
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState(2);
 
   const range = step < steps.length ? steps[step][1] : steps[0][1];
 

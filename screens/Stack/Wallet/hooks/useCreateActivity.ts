@@ -51,12 +51,10 @@ export default function useCreateActivity(props: { onCompleted?: () => void }) {
     onCompleted(data) {
       props.onCompleted?.();
 
-      console.log("data", data);
-
       if (data.createExpense.schedule === false) {
-        client?.refetchQueries({
-          include: ["GetWallet"],
-        });
+        // client?.refetchQueries({
+        //   include: ["GetWallet"],
+        // });
       } else if (Platform.OS === "android") {
         ToastAndroid.show("Expense has been scheduled", ToastAndroid.SHORT);
       }

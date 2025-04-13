@@ -30,7 +30,7 @@ import BottomSheet, { BottomSheetBackdrop } from "@gorhom/bottom-sheet";
 import NumbersPad from "../components/CreateExpense/NumberPad";
 import CategorySelector from "../components/CreateExpense/CategorySelector";
 import { FlatList } from "react-native-gesture-handler";
-import { gql, useMutation } from "@apollo/client";
+import { gql, useApolloClient, useMutation } from "@apollo/client";
 
 interface SubExpense {
   id: string;
@@ -62,6 +62,7 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
   const { createExpense, loading } = useCreateActivity({
     onCompleted() {},
   });
+  const client = useApolloClient();
 
   const editExpense = useEditExpense();
 
@@ -149,6 +150,10 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
           },
         });
       }
+
+      await client?.refetchQueries({
+        include: ["GetWallet"],
+      });
 
       navigation.goBack();
 
@@ -282,16 +287,17 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
   });
 
   const handleToggleSubExpenseMode = () => {
+    setType("expense");
     if (!isSubExpenseMode) {
       setRegularModeState({
-        amount,
+        amount: amount === "0" ? calculateSubExpensesTotal().toString() : amount,
         date,
         category,
         name,
         type,
       });
 
-      setAmount(calculateSubExpensesTotal().toString());
+      setAmount("0");
       setName("");
       setIsSubExpenseMode(true);
     } else {
@@ -308,6 +314,8 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
     }
   };
 
+  console.log({ amount });
+
   const restorePreviousState = () => {
     setAmount(params?.amount.toString() || "0");
     setDate(params?.date ? moment(params.date).format("YYYY-MM-DD") : moment().format("YYYY-MM-DD"));
@@ -317,11 +325,11 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
     setType(params?.type || null);
   };
 
-  useEffect(() => {
-    if (isSubExpenseMode) {
-      setAmount(calculateSubExpensesTotal().toString());
-    }
-  }, [SubExpenses, isSubExpenseMode]);
+  // useEffect(() => {
+  //   if (isSubExpenseMode) {
+  //     setAmount(calculateSubExpensesTotal().toString());
+  //   }
+  // }, [SubExpenses, isSubExpenseMode]);
 
   useEffect(() => {
     if (params?.isEditing) {
@@ -386,7 +394,7 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
                         backgroundColor: isInputFocused ? Color(Colors.primary_light).lighten(0.25).hex() : Colors.primary_light,
                         borderColor: isInputFocused ? Color(Colors.primary).lighten(2.5).hex() : Colors.primary_lighter,
                       }}
-                      placeholder="What are you spending on?"
+                      placeholder={isSubExpenseMode ? "Add sub-expense" : "What are you spending on?"}
                       style={styles.input}
                       placeholderTextColor={"rgba(255,255,255,0.3)"}
                       value={name}
@@ -418,7 +426,7 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
                         isValid && (
                           <Ripple onPress={handleSubmit} style={styles.save}>
                             {loading ? <ActivityIndicator size={14} color="#fff" /> : <AntDesign name="save" size={20} color="#fff" />}
-                            <Text style={{ color: "#fff" }}>Save</Text>
+                            <Text style={{ color: "#fff" }}>{isSubExpenseMode ? "Add" : params?.isEditing ? "Edit" : "Save"}</Text>
                           </Ripple>
                         )
                       }
@@ -474,6 +482,7 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
                     </Ripple>
 
                     <Ripple onPress={() => setDate(null)} style={[styles.chip, { backgroundColor: Colors.primary_lighter }]}>
+                      <AntDesign name="calendar" size={15} color="rgba(255,255,255,0.7)" />
                       <Text style={{ color: "rgba(255,255,255,0.7)", fontSize: 14 }}>{date ?? moment().format("YYYY-MM-DD")}</Text>
                     </Ripple>
 
@@ -500,6 +509,7 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
                         onPress={() => setIsSubscription((p) => !p)}
                         style={[styles.chip, { backgroundColor: isSubscription ? secondary_candidates[3] : Colors.primary_lighter }]}
                       >
+                        <AntDesign name="creditcard" size={15} color="rgba(255,255,255,0.7)" />
                         <Text style={{ color: "rgba(255,255,255,0.7)", fontSize: 14 }}>Subscription</Text>
                       </Ripple>
                     )}
@@ -520,7 +530,9 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
                   }}
                 />
               )}
-              {!changeView && <NumbersPad rotateBackButton={amount === "0"} handleAmountChange={handleAmountChange} />}
+              {!changeView && (
+                <NumbersPad rotateBackButton={amount === "0" && SubExpenses.length === 0} handleAmountChange={handleAmountChange} />
+              )}
             </View>
           </View>
         </View>

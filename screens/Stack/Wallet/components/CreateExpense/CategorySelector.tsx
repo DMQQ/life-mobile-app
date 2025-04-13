@@ -17,15 +17,30 @@ const CategorySelector = (props: { current: string; onPress: (item: string) => v
 
   return (
     <Animated.FlatList
-      ListHeaderComponent={<Input placeholder="Search for category" value={query} onChangeText={setQuery} style={{ padding: 15 }} />}
+      ListHeaderComponent={
+        <Input
+          placeholder="Search for category"
+          value={query}
+          onChangeText={setQuery}
+          style={{ padding: 15 }}
+          right={
+            <IconButton
+              onPress={() => props.dismiss()}
+              icon={<AntDesign name="close" size={24} color={"rgba(255,255,255,0.7)"} />}
+              style={{ padding: 0 }}
+            />
+          }
+        />
+      }
       layout={LinearTransition}
       entering={FadeInDown}
       style={{ width: "100%", height: Layout.screen.height / 2.25 }}
       data={data.filter((item) => item[0].toLowerCase().includes(query.toLowerCase()))}
       keyExtractor={(item) => item[0]}
       stickyHeaderIndices={[0]}
-      renderItem={({ item }) => (
-        <View
+      renderItem={({ item, index }) => (
+        <Animated.View
+          entering={FadeInDown.delay(index * 75)}
           style={{
             flexDirection: "row",
             justifyContent: "space-between",
@@ -59,7 +74,7 @@ const CategorySelector = (props: { current: string; onPress: (item: string) => v
           {item[0] === props.current && (
             <IconButton onPress={props.dismiss} icon={<AntDesign name="close" color={"rgba(255,255,255,0.7)"} size={24} />} />
           )}
-        </View>
+        </Animated.View>
       )}
     />
   );

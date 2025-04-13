@@ -1,4 +1,4 @@
-import { DarkTheme, NavigationContainer, NavigationContainerRef } from "@react-navigation/native";
+import { CommonActions, DarkTheme, NavigationContainer, NavigationContainerRef } from "@react-navigation/native";
 import useUser from "../utils/hooks/useUser";
 import React, { useCallback, useEffect } from "react";
 import Root from "../screens/Stack/Home/Root";
@@ -9,13 +9,14 @@ import TimelineScreens from "../screens/Stack/Timeline/Main";
 import { BottomTabBarProps, createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import BottomTab from "../components/BottomTab/BottomTab";
 import WalletScreens from "../screens/Stack/Wallet/Main";
-import WorkoutScreens from "../screens/Stack/Workout/Main";
 import NotesScreens from "../screens/Stack/Notes/Main";
 import Settings from "../screens/Stack/Settings/Settings";
 import Authentication from "../screens/Stack/Authentication/Main";
-
+import * as QuickActions from "expo-quick-actions";
 import GoalsScreens from "../screens/Stack/Goals/Main";
 import { useApolloClient } from "@apollo/client";
+import { Platform } from "react-native";
+import moment from "moment";
 
 export const navigationRef = React.createRef<NavigationContainerRef<RootStackParamList>>();
 
@@ -28,6 +29,66 @@ export default function Navigation() {
 
   useEffect(() => {
     loadUser();
+  }, []);
+
+  useEffect(() => {
+    const quickActions = async () => {
+      QuickActions.addListener((action) => {
+        if (!action || !navigationRef.current) return;
+
+        switch (action?.id) {
+          case "0":
+            navigationRef.current?.navigate<any>({
+              name: "WalletScreens",
+              params: {
+                expenseId: null,
+              },
+            });
+            break;
+          case "1":
+            navigationRef.current.navigate({
+              name: "TimelineScreens",
+              params: {
+                selectedDate: moment(new Date()).format("YYYY-MM-DD"),
+              },
+            });
+            break;
+          case "2":
+            navigationRef.current.navigate<any>({
+              name: "GoalsScreens",
+              params: {
+                selectedDate: moment(new Date()).format("YYYY-MM-DD"),
+              },
+            });
+            break;
+          default:
+            break;
+        }
+      });
+
+      QuickActions.setItems([
+        {
+          title: "Wallet",
+          subtitle: "Create expense or income",
+          icon: Platform.OS === "ios" ? "symbol:plus.circle" : undefined,
+          id: "0",
+        },
+        {
+          title: "Timeline",
+          subtitle: "Create a new entry",
+          icon: Platform.OS === "ios" ? "symbol:plus.circle" : undefined,
+          id: "1",
+        },
+        {
+          title: "Goals",
+          subtitle: "Create a new goal",
+          icon: Platform.OS === "ios" ? "symbol:plus.circle" : undefined,
+          id: "2",
+        },
+      ]);
+    };
+
+    quickActions();
   }, []);
 
   useEffect(() => {
