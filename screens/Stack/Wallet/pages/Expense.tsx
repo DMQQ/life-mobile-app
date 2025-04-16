@@ -88,7 +88,58 @@ const Txt = (props: { children: ReactNode; size: number; color?: any }) => (
 );
 
 export default function Expense({ route: { params }, navigation }: any) {
+  // const { data, error } = useQuery(
+  //   gql`
+  //     query Expense($id: ID!) {
+  //       expense(expenseId: $id) {
+  //         id
+  //         amount
+  //         date
+  //         description
+  //         type
+  //         category
+  //         balanceBeforeInteraction
+  //         note
+
+  //         subscription {
+  //           id
+  //           isActive
+  //           nextBillingDate
+  //           dateStart
+  //         }
+
+  //         location {
+  //           id
+  //           kind
+  //           name
+  //           latitude
+  //           longitude
+  //         }
+
+  //         files {
+  //           id
+  //           url
+  //         }
+
+  //         subexpenses {
+  //           id
+  //           description
+  //           amount
+  //           category
+  //         }
+  //       }
+  //     }
+  //   `,
+  //   { variables: { id: params?.expense?.id } }
+  // );
+
   const [selected, setSelected] = useState(params?.expense);
+
+  // useEffect(() => {
+  //   if (data?.expense) {
+  //     setSelected(data.expense);
+  //   }
+  // }, [data?.expense]);
 
   const amount = selected?.type === "expense" ? (selected.amount * -1).toFixed(2) : selected?.amount.toFixed(2);
 

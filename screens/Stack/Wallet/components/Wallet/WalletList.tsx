@@ -3,13 +3,12 @@ import { Expense, Wallet } from "@/types";
 import WalletItem, { WalletElement, parseDateToText } from "./WalletItem";
 import { useRef, useEffect, useMemo, useCallback } from "react";
 import { Text, NativeScrollEvent, View, StyleSheet, VirtualizedList } from "react-native";
-import Animated, { LinearTransition, SharedValue } from "react-native-reanimated";
+import Animated, { FadeIn, FadeInDown, FadeInUp, LinearTransition, SharedValue } from "react-native-reanimated";
 import { NativeSyntheticEvent } from "react-native";
 import moment from "moment";
 import Colors, { Sizing } from "@/constants/Colors";
 import Ripple from "react-native-material-ripple";
 import { useWalletContext } from "../WalletContext";
-import Color from "color";
 import { gql, useQuery } from "@apollo/client";
 import { useNavigation, useRoute } from "@react-navigation/native";
 
@@ -183,14 +182,14 @@ const ListItem = ({
   } = useWalletContext();
 
   return (
-    <Animated.View layout={LinearTransition.delay(100)}>
+    <Animated.View entering={FadeInDown} layout={LinearTransition.delay(100)}>
       {!areDatesEqual && (
         <Ripple
           onPress={() => {
             setCalendarDate(moment(item.date).toDate());
             bottomSheetRef.current?.snapToIndex(0);
           }}
-          style={[styles.dateTextContainer, { marginBottom: 5 }]}
+          style={[styles.dateTextContainer, { marginBottom: 10, marginTop: 10 }]}
         >
           <Text style={styles.dateText}>{parseDateToText(item.date)}</Text>
         </Ripple>

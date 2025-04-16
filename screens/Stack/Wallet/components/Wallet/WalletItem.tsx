@@ -6,6 +6,7 @@ import Animated, { AnimatedStyle, FadeIn, FadeOut, LinearTransition } from "reac
 import { CategoryIcon, Icons } from "../ExpenseIcon";
 import { Expense } from "@/types";
 import { useState } from "react";
+import Feedback from "react-native-haptic-feedback";
 
 export interface WalletElement extends Expense {
   description: string;
@@ -129,7 +130,8 @@ export default function WalletItem(
       layout={LinearTransition}
     >
       <Ripple
-        onLongPress={() => {
+        onLongPress={async () => {
+          Feedback.trigger("impactLight");
           setIsExpanded(!isExpanded);
         }}
         disabled={isBalanceEdit}

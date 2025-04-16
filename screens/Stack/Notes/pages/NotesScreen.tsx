@@ -9,6 +9,7 @@ import Ripple from "react-native-material-ripple";
 import { Group, useFlashCards, useGroups, useGroupStats } from "../hooks";
 import moment from "moment";
 import { useNavigation } from "@react-navigation/native";
+import Animated, { FadeIn } from "react-native-reanimated";
 
 export default function NotesScreen({ navigation }: ScreenProps<any>) {
   const { groups } = useGroups();
@@ -65,6 +66,7 @@ const FlashCardGroup = (group: Group & { index: number; length: number }) => {
           borderRadius: 15,
           marginVertical: 7.5,
           gap: 10,
+          minHeight: 150,
 
           ...(group.index === group.length - 1 && { marginBottom: 40 }),
         }}
@@ -73,7 +75,7 @@ const FlashCardGroup = (group: Group & { index: number; length: number }) => {
         <Text style={{ color: "#fff", fontSize: 15 }}>{group.description}</Text>
 
         {groupStats && (
-          <>
+          <Animated.View entering={FadeIn} style={{ gap: 15 }}>
             <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
               <Text style={{ color: "rgba(255,255,255,0.8)", fontSize: 12 }}>{moment(group.createdAt).format("MMM Do YYYY")}</Text>
 
@@ -86,7 +88,7 @@ const FlashCardGroup = (group: Group & { index: number; length: number }) => {
                 {groupStats?.averageSuccessRate.toFixed(2)}% Success Rate
               </Text>
             </View>
-          </>
+          </Animated.View>
         )}
       </View>
     </Ripple>

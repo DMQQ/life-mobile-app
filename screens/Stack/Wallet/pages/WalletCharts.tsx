@@ -2,10 +2,10 @@ import Header from "@/components/ui/Header/Header";
 import Colors, { secondary_candidates } from "@/constants/Colors";
 import Layout from "@/constants/Layout";
 import { AntDesign, MaterialIcons } from "@expo/vector-icons";
-import { useMemo, useRef, useState } from "react";
-import { Alert, StyleSheet, Text, View, VirtualizedList } from "react-native";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ActivityIndicator, Alert, StyleSheet, Text, View, VirtualizedList } from "react-native";
 import Charts from "../components/Wallet/Charts";
-import WalletItem, { Icons, WalletElement } from "../components/Wallet/WalletItem";
+import WalletItem, { Icons } from "../components/Wallet/WalletItem";
 import useGetWallet, { useGetBalance } from "../hooks/useGetWallet";
 import PieChart from "../components/WalletChart/PieChart";
 import wrapWithFunction from "@/utils/functions/wrapFn";
@@ -19,9 +19,9 @@ import FutureProjection from "../components/WalletChart/FutureProjection";
 import DailySpendingChart from "../components/WalletChart/DailySpendingChart";
 import WalletContextProvider from "../components/WalletContext";
 import Ripple from "react-native-material-ripple";
-import Color from "color";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Animated, { LinearTransition } from "react-native-reanimated";
+import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
+import Feedback from "react-native-haptic-feedback";
 
 const styles = StyleSheet.create({
   tilesContainer: {
@@ -67,14 +67,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 30,
   },
+  viewAll: { color: Colors.secondary, textAlign: "center", marginTop: 10 },
+
+  overlay: { backgroundColor: Colors.primary, zIndex: 1000, justifyContent: "center", alignItems: "center" },
 });
 
-// use this context to fix the data ovveride issue in Wallet
-export default (props: any) => (
-  <WalletContextProvider>
-    <WalletCharts {...props} />
-  </WalletContextProvider>
-);
+export default function WalletChartComponent(props: any) {
+  return (
+    <WalletContextProvider>
+      <WalletCharts {...props} />
+    </WalletContextProvider>
+  );
+}
 
 const categoryColors = {
   housing: "#05ad21",
@@ -109,8 +113,32 @@ const categoryColors = {
 };
 
 function WalletCharts({ navigation }: any) {
-  const { data = { wallet: { expenses: [] } }, dispatch, filters } = useGetWallet({ fetchAll: true });
-  const { data: stats } = useGetStatistics([filters.date.from, filters.date.to]);
+  const {
+    data = { wallet: { expenses: [] } },
+    dispatch,
+    filters,
+  } = useGetWallet({ fetchAll: true, excludeFields: ["subscription", "location", "files", "subexpenses"] });
+  const { data: stats, loading } = useGetStatistics([filters.date.from, filters.date.to]);
+
+  const [overlay, setOverlay] = useState(true);
+
+  useEffect(() => {
+    if (loading) {
+      setOverlay(true);
+
+      return;
+    }
+
+    let timeout = setTimeout(() => {
+      setOverlay(false);
+    }, 1000);
+
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [loading]);
+
+  const [excluded, setExcluded] = useState<string[]>([]);
 
   const listRef = useRef<VirtualizedList<any> | null>(null);
   const [selected, setSelected] = useState("");
@@ -150,25 +178,27 @@ function WalletCharts({ navigation }: any) {
       value: number;
       color: string;
     }[];
-  }, [data?.wallet?.expenses]);
+  }, [data?.wallet?.expenses, excluded]);
 
   const sumOfExpenses = useMemo(() => {
     if (!data?.wallet?.expenses) return 0;
 
     return data.wallet.expenses.reduce((acc, curr) => {
-      if (curr.type === "income" || curr.type === "refunded") return acc;
+      if (curr.type === "income" || curr.type === "refunded" || excluded.includes(curr.category)) return acc;
 
       return acc + curr.amount;
     }, 0);
-  }, [data?.wallet?.expenses]);
+  }, [data?.wallet?.expenses, excluded.length]);
 
   const onLegendItemPress = (item: { label: string }) => {
+    if (!item.label) return;
+
+    if (excluded.includes(item.label)) {
+      setExcluded((prev) => prev.filter((cat) => cat !== item.label));
+    }
+
     setSelected((prev) => (prev === item.label ? "" : item.label));
     setStep(5);
-    if (selected !== item.label)
-      setTimeout(() => {
-        listRef.current?.scrollToIndex({ index: 0 });
-      }, 100);
   };
 
   const selectedCategoryData =
@@ -184,8 +214,29 @@ function WalletCharts({ navigation }: any) {
   const currentBalance = useGetBalance();
 
   const filteredExpenses = useMemo(() => {
-    return data?.wallet?.expenses.filter((item) => item.type === "expense") || [];
+    return data?.wallet?.expenses.filter((item) => item.type === "expense" || item.type === "refunded" || item.amount === 0) || [];
   }, [data?.wallet?.expenses]);
+
+  const chartData = useMemo(() => {
+    return barData.filter((item) => {
+      if (excluded.length === 0) return true;
+      return !excluded.includes(item.label);
+    });
+  }, [barData]);
+
+  const onLongPress = useCallback(
+    (item: { label: string } & Record<string, any>) => {
+      Feedback.trigger("impactLight");
+      setExcluded((prev) => {
+        if (prev.includes(item.label)) return prev.filter((cat) => cat !== item.label);
+        return [...prev, item.label];
+      });
+      if (item.label === selected) {
+        setSelected("");
+      }
+    },
+    [selected]
+  );
 
   const ListHeaderComponent = useMemo(
     () => (
@@ -193,13 +244,20 @@ function WalletCharts({ navigation }: any) {
         <View style={styles.listHeader}>
           <View style={{ height: Layout.screen.height / 3 }}>
             {chartType === "pie" ? (
-              <PieChart data={barData} totalSum={sumOfExpenses} onPress={onChartPress} />
+              <PieChart data={chartData} totalSum={sumOfExpenses} onPress={onChartPress} />
             ) : (
-              <Charts data={barData} onPress={onChartPress} />
+              <Charts data={chartData} onPress={onChartPress} />
             )}
           </View>
           <DateRangePicker filters={filters} dispatch={wrapWithFunction(dispatch, () => setSelected(""))} />
-          <Legend totalSum={sumOfExpenses} selected={selected} data={barData} onPress={onLegendItemPress} />
+          <Legend
+            excluded={excluded}
+            onLongPress={onLongPress}
+            totalSum={sumOfExpenses}
+            selected={selected}
+            data={barData}
+            onPress={onLegendItemPress}
+          />
 
           {selectedCategoryData.length > 0 && (
             <View style={{ width: Layout.screen.width - 30, marginTop: 25 }}>
@@ -237,7 +295,19 @@ function WalletCharts({ navigation }: any) {
   const insets = useSafeAreaInsets();
 
   return (
-    <View style={{ paddingTop: 15, paddingBottom: insets.bottom + 15 }}>
+    <View style={{ paddingTop: 15, paddingBottom: insets.bottom }}>
+      {overlay && (
+        <Animated.View exiting={FadeOut} style={[StyleSheet.absoluteFillObject, styles.overlay]}>
+          <ActivityIndicator
+            size="large"
+            color={Colors.secondary}
+            style={{
+              position: "absolute",
+            }}
+          />
+        </Animated.View>
+      )}
+
       <Header buttons={headerButtons} goBack backIcon={<AntDesign name="close" size={24} color="white" />} />
       <VirtualizedList
         ref={listRef}
@@ -261,17 +331,19 @@ function WalletCharts({ navigation }: any) {
           />
         )}
         ListFooterComponent={
-          <>
-            {selectedCategoryData.length > step && (
-              <Ripple onPress={() => setStep(selectedCategoryData.length)}>
-                <Text style={{ color: Colors.secondary, textAlign: "center", marginTop: 10 }}>View all</Text>
-              </Ripple>
-            )}
-            <StatisticsSummary dates={filters.date} data={stats?.statistics} />
-            <SpendingsByDay data={filteredExpenses} />
-            <FutureProjection data={filteredExpenses} income={5500} currentBalance={currentBalance} />
-            <DailySpendingChart data={filteredExpenses} />
-          </>
+          <Suspense fallback={<ActivityIndicator size="large" color={Colors.secondary} style={{ position: "absolute", top: 100 }} />}>
+            <>
+              {selectedCategoryData.length > step && (
+                <Ripple onPress={() => setStep(selectedCategoryData.length)}>
+                  <Text style={styles.viewAll}>View all</Text>
+                </Ripple>
+              )}
+              <StatisticsSummary dates={filters.date} data={stats?.statistics} />
+              <SpendingsByDay data={filteredExpenses} />
+              <FutureProjection data={filteredExpenses} income={5500} currentBalance={currentBalance} />
+              <DailySpendingChart data={filteredExpenses} />
+            </>
+          </Suspense>
         }
       />
     </View>

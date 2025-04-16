@@ -4,6 +4,7 @@ import { StyleProp, Text, View, ViewStyle } from "react-native";
 import Colors from "@/constants/Colors";
 import { AntDesign } from "@expo/vector-icons";
 import Layout from "@/constants/Layout";
+import Feedback from "react-native-haptic-feedback";
 
 const buttonStyle = {
   width: (Layout.window.width - 60) / 3 - 10,
@@ -16,6 +17,16 @@ const buttonStyle = {
 
 export default function NumbersPad() {
   const [value, setValue] = useState("0");
+
+  const pipe = (...fns: Function[]) => {
+    return (...args: any[]) => {
+      fns.forEach((fn) => fn(...args));
+    };
+  };
+
+  const haptic = () => {
+    Feedback.trigger("impactLight");
+  };
 
   return (
     <View style={{ padding: 15, flex: 1 }}>
@@ -43,28 +54,15 @@ export default function NumbersPad() {
         }}
       >
         {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((v) => (
-          <Button
-            onPress={() => setValue(value + v)}
-            key={v}
-            style={buttonStyle}
-            fontStyle={{ fontSize: 24 }}
-          >
+          <Button onPress={pipe(haptic, () => setValue(value + v))} key={v} style={buttonStyle} fontStyle={{ fontSize: 24 }}>
             {v}
           </Button>
         ))}
-        <Button
-          onPress={() => setValue((prev) => prev.slice(0, -1))}
-          style={buttonStyle}
-          fontStyle={{ fontSize: 24 }}
-        >
+        <Button onPress={pipe(haptic, () => setValue((prev) => prev.slice(0, -1)))} style={buttonStyle} fontStyle={{ fontSize: 24 }}>
           <AntDesign name="back" size={24} color="#fff" />
         </Button>
 
-        <Button
-          onPress={() => setValue(value + 0)}
-          style={buttonStyle}
-          fontStyle={{ fontSize: 24 }}
-        >
+        <Button onPress={pipe(haptic, () => setValue(value + 0))} style={buttonStyle} fontStyle={{ fontSize: 24 }}>
           0
         </Button>
 
