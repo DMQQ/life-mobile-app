@@ -31,40 +31,52 @@ export default function Navigation() {
     loadUser();
   }, []);
 
+  const handleQuickAction = (action: QuickActions.Action) => {
+    setTimeout(() => {
+      if (!action || !navigationRef.current) return;
+
+      console.log("Quick action triggered:", action);
+
+      switch (action?.id) {
+        case "0":
+          navigationRef.current?.navigate<any>({
+            name: "WalletScreens",
+            params: {
+              expenseId: null,
+            },
+          });
+          break;
+        case "1":
+          navigationRef.current.navigate({
+            name: "TimelineScreens",
+            params: {
+              selectedDate: moment(new Date()).format("YYYY-MM-DD"),
+            },
+          });
+          break;
+        case "2":
+          navigationRef.current.navigate<any>({
+            name: "GoalsScreens",
+            params: {
+              selectedDate: moment(new Date()).format("YYYY-MM-DD"),
+            },
+          });
+          break;
+        default:
+          break;
+      }
+    }, 500);
+  };
+
   useEffect(() => {
     const quickActions = async () => {
-      QuickActions.addListener((action) => {
-        if (!action || !navigationRef.current) return;
+      const initial = QuickActions.initial;
 
-        switch (action?.id) {
-          case "0":
-            navigationRef.current?.navigate<any>({
-              name: "WalletScreens",
-              params: {
-                expenseId: null,
-              },
-            });
-            break;
-          case "1":
-            navigationRef.current.navigate({
-              name: "TimelineScreens",
-              params: {
-                selectedDate: moment(new Date()).format("YYYY-MM-DD"),
-              },
-            });
-            break;
-          case "2":
-            navigationRef.current.navigate<any>({
-              name: "GoalsScreens",
-              params: {
-                selectedDate: moment(new Date()).format("YYYY-MM-DD"),
-              },
-            });
-            break;
-          default:
-            break;
-        }
-      });
+      if (initial) {
+        handleQuickAction(initial);
+      }
+
+      QuickActions.addListener(handleQuickAction);
 
       QuickActions.setItems([
         {

@@ -3,7 +3,7 @@ import { useNavigation } from "@react-navigation/native";
 import { memo, useRef } from "react";
 import { Text, View } from "react-native";
 import Ripple from "react-native-material-ripple";
-
+import Feedback from "react-native-haptic-feedback";
 import Colors from "@/constants/Colors";
 import Animated, { FadeInDown, useAnimatedStyle, useSharedValue, withSequence, withSpring, withTiming } from "react-native-reanimated";
 
@@ -42,9 +42,11 @@ const NumpadNumber = (props: { onPress: VoidFunction; num: string | number; rota
   const scale = useSharedValue(1);
 
   const onPress = () => {
+    Feedback.trigger("impactLight");
+
     props.num === "C" && props.rotateBackButton ? props.navigation.goBack() : props.onPress();
 
-    scale.value = withSequence(withSpring(1.5, { duration: 200 }), withSpring(1, { duration: 200 }));
+    scale.value = withSequence(withSpring(1.5, { duration: 100 }), withSpring(1, { duration: 200 }));
   };
 
   const animatedScale = useAnimatedStyle(

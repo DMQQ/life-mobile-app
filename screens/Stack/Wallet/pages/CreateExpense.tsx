@@ -9,10 +9,8 @@ import { AntDesign, Entypo } from "@expo/vector-icons";
 import lowOpacity from "@/utils/functions/lowOpacity";
 import Animated, {
   FadeIn,
-  FadeInDown,
   LinearTransition,
   useSharedValue,
-  withSequence,
   withSpring,
   useAnimatedStyle,
   cancelAnimation,
@@ -22,7 +20,6 @@ import useCreateActivity from "../hooks/useCreateActivity";
 import DateTimePicker from "react-native-modal-datetime-picker";
 import { useEditExpense } from "./CreateActivity";
 import IconButton from "@/components/ui/IconButton/IconButton";
-import { useNavigation } from "@react-navigation/native";
 import Color from "color";
 import Input from "@/components/ui/TextInput/TextInput";
 import usePredictCategory from "../hooks/usePredictCategory";
@@ -31,6 +28,8 @@ import NumbersPad from "../components/CreateExpense/NumberPad";
 import CategorySelector from "../components/CreateExpense/CategorySelector";
 import { FlatList } from "react-native-gesture-handler";
 import { gql, useApolloClient, useMutation } from "@apollo/client";
+import Feedback from "react-native-haptic-feedback";
+import Button from "@/components/ui/Button/Button";
 
 interface SubExpense {
   id: string;
@@ -151,9 +150,15 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
         });
       }
 
-      await client?.refetchQueries({
-        include: ["GetWallet"],
-      });
+      try {
+        await client?.refetchQueries({
+          include: ["GetWallet"],
+        });
+
+        console.log("Refetched queries successfully");
+      } catch (error) {
+        console.log("Error refetching queries:", error);
+      }
 
       navigation.goBack();
 
@@ -186,6 +191,10 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
         },
       });
     }
+
+    await client?.refetchQueries({
+      include: ["GetWallet"],
+    });
 
     navigation.goBack();
   };
@@ -404,6 +413,7 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
                       left={
                         <IconButton
                           onLongPress={() => {
+                            Feedback.trigger("impactLight");
                             subexpenseSheetRef.current?.expand();
                           }}
                           icon={
@@ -550,6 +560,39 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
             <FlatList
               data={SubExpenses}
               showsHorizontalScrollIndicator={false}
+              ListEmptyComponent={
+                <View style={{ flex: 1 }}>
+                  <View
+                    style={{
+                      height: Layout.screen.height / 1.6 - 130,
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Text
+                      style={{
+                        color: "rgba(255,255,255,0.7)",
+                        fontSize: 18,
+                        textAlign: "center",
+                        padding: 15,
+                      }}
+                    >
+                      No subexpenses added yet.{"\n"}Press the button below to add one.
+                    </Text>
+                  </View>
+
+                  <Button
+                    onPress={() => {
+                      subexpenseSheetRef.current?.close();
+                      setIsSubExpenseMode(true);
+                    }}
+                    style={{
+                      borderRadius: 100,
+                    }}
+                  >
+                    Add Subexpense
+                  </Button>
+                </View>
+              }
               renderItem={({ item }) => (
                 <WalletItem
                   handlePress={() => {

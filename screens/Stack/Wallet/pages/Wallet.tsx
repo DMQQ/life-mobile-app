@@ -92,7 +92,7 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
       },
     ],
 
-    ...(scrollY.value > 200 ? { position: "absolute", top: insets.top + 50 } : { position: "relative", top: 0 }),
+    ...(scrollY.value > 170 ? { position: "absolute", top: insets.top + 50 } : { position: "relative", top: 0 }),
   }));
 
   const animatedBalanceStyle = useAnimatedStyle(() => ({
@@ -111,7 +111,7 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
     if (!loading) {
       const timeout = setTimeout(() => {
         setIsLoaderVisible(false);
-      }, 1000);
+      }, 500);
 
       return () => clearTimeout(timeout);
     }

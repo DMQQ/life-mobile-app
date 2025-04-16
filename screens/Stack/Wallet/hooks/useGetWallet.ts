@@ -5,7 +5,15 @@ import { useContext, useEffect, useMemo, useReducer, useState } from "react";
 import { init, useWalletContext } from "../components/WalletContext";
 
 export const GET_WALLET = gql`
-  query GetWallet($filters: GetWalletFilters, $skip: Int, $take: Int) {
+  query GetWallet(
+    $filters: GetWalletFilters
+    $skip: Int
+    $take: Int
+    $includeFiles: Boolean = true
+    $includeSubexpenses: Boolean = true
+    $includeSubscription: Boolean = true
+    $includeLocation: Boolean = true
+  ) {
     wallet {
       id
       balance
@@ -18,14 +26,15 @@ export const GET_WALLET = gql`
         category
         balanceBeforeInteraction
         note
-        subscription {
+
+        subscription @include(if: $includeSubscription) {
           id
           isActive
           nextBillingDate
           dateStart
         }
 
-        location {
+        location @include(if: $includeLocation) {
           id
           kind
           name
@@ -33,12 +42,12 @@ export const GET_WALLET = gql`
           longitude
         }
 
-        files {
+        files @include(if: $includeFiles) {
           id
           url
         }
 
-        subexpenses {
+        subexpenses @include(if: $includeSubexpenses) {
           id
           description
           amount
@@ -51,13 +60,23 @@ export const GET_WALLET = gql`
 
 const PAGINATION_TAKE = 10;
 
-export default function useGetWallet(options?: { fetchAll: boolean }) {
+export default function useGetWallet(options?: { fetchAll?: boolean; excludeFields?: string[] }) {
   const { filters, dispatch } = useWalletContext();
 
   const [skip, setSkip] = useState(PAGINATION_TAKE);
   const [endReached, setEndReached] = useState(false);
 
   const offline = useOffline<Wallet>("WalletScreen");
+
+  const directiveVariables = useMemo(() => {
+    const excludeFields = options?.excludeFields || [];
+    return {
+      includeFiles: !excludeFields.includes("files"),
+      includeSubexpenses: !excludeFields.includes("subexpenses"),
+      includeSubscription: !excludeFields.includes("subscription"),
+      includeLocation: !excludeFields.includes("location"),
+    };
+  }, [options?.excludeFields]);
 
   const st = useQuery(GET_WALLET, {
     variables: {
@@ -75,6 +94,7 @@ export default function useGetWallet(options?: { fetchAll: boolean }) {
         ...(filters.type && { type: filters.type }),
       },
       take: options?.fetchAll ? 99999 : PAGINATION_TAKE,
+      ...directiveVariables,
     },
     onError: (err) => {
       console.log(JSON.stringify(err, null, 2));
@@ -102,6 +122,7 @@ export default function useGetWallet(options?: { fetchAll: boolean }) {
           category: filters.category,
           ...(filters.type && { type: filters.type }),
         },
+        ...directiveVariables,
       },
       updateQuery(previousQueryResult, { fetchMoreResult }) {
         if (!fetchMoreResult) {
@@ -142,6 +163,7 @@ export default function useGetWallet(options?: { fetchAll: boolean }) {
           category: filters.category,
           ...(filters.type && { type: filters.type }),
         },
+        ...directiveVariables,
       });
     }, 1000);
 
@@ -149,8 +171,8 @@ export default function useGetWallet(options?: { fetchAll: boolean }) {
   }, [filters]);
 
   useEffect(() => {
-    if (!offline.isOffline) offline.save("WalletScreen", st.data);
-  }, []);
+    if (!offline.isOffline && !!st.data) offline.save("WalletScreen", st.data);
+  }, [st.data]);
 
   const filtersActive = useMemo(() => JSON.stringify(filters) !== JSON.stringify(init), [filters]);
 

@@ -4,12 +4,15 @@ import { FlatList, View } from "react-native";
 import { GoalCategory } from "../components/GoalCategory";
 import Header from "@/components/ui/Header/Header";
 import { AntDesign } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function Goals({ navigation }: any) {
   const { goals } = useGoal();
 
+  const insets = useSafeAreaInsets();
+
   return (
-    <View style={{ padding: 0, flex: 1 }}>
+    <View style={{ padding: 0, flex: 1, marginTop: insets.top }}>
       <Header
         buttons={[
           {
