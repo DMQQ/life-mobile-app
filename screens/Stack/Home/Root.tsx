@@ -15,7 +15,7 @@ import useOffline from "@/utils/hooks/useOffline";
 import SkeletonPlaceholder from "@/components/SkeletonLoader/Skeleton";
 import { View } from "react-native";
 import Layout from "@/constants/Layout";
-import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
+import Animated, { FadeIn, FadeOut, LinearTransition } from "react-native-reanimated";
 import { FancySpinner } from "@/components/ui/FancyLoader";
 import { useState } from "react";
 import * as SplashScreen from "expo-splash-screen";
@@ -125,7 +125,7 @@ export default function Root({ navigation }: ScreenProps<"Root">) {
   const edge = useSafeAreaInsets();
 
   return (
-    <View style={{ padding: 0, flex: 1, paddingTop: edge.top }}>
+    <Animated.View style={{ padding: 0, flex: 1, paddingTop: edge.top }} layout={LinearTransition.delay(100)}>
       {loading && <LoadingSkeleton />}
 
       <Header
@@ -158,6 +158,6 @@ export default function Root({ navigation }: ScreenProps<"Root">) {
 
         {workout.isWorkoutPending && <WorkoutWidget />}
       </ScrollView>
-    </View>
+    </Animated.View>
   );
 }

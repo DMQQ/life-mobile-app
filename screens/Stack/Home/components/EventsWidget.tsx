@@ -13,6 +13,7 @@ import TimelineItem from "../../Timeline/components/TimelineItem";
 import lowOpacity from "@/utils/functions/lowOpacity";
 import { DATE_FORMAT } from "@/utils/functions/parseDate";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import Animated from "react-native-reanimated";
 
 const backgroundColor = Colors.primary_lighter;
 
@@ -80,14 +81,14 @@ export default function TodaysTimelineEvents(props: { data: any[]; loading: bool
 
   if (isEmpty)
     return (
-      <View style={styles.container}>
+      <Animated.View style={styles.container}>
         <Text style={[styles.heading, { marginBottom: 10 }]}>Daily events</Text>
         <NotFound selectedDate={date.format(DATE_FORMAT)} />
-      </View>
+      </Animated.View>
     );
 
   return (
-    <View style={styles.container}>
+    <Animated.View style={styles.container}>
       <View style={styles.headContainer}>
         <Text style={styles.heading}>For today</Text>
 
@@ -118,6 +119,6 @@ export default function TodaysTimelineEvents(props: { data: any[]; loading: bool
           <MaterialCommunityIcons name="chevron-right" size={20} color={Colors.secondary} />
         </Ripple>
       </View>
-    </View>
+    </Animated.View>
   );
 }

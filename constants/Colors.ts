@@ -1,5 +1,7 @@
 import Color from "color";
 
+import { getItem } from "expo-secure-store";
+
 export const secondary_candidates = [
   "#00C896",
   "#F6B161",
@@ -18,9 +20,9 @@ export const secondary_candidates = [
   "#34A3FA",
 ];
 
-const primary = "#0d0f14";
+const primary = getItem("color_scheme_primary") ?? "#0d0f14";
 
-const secondary = secondary_candidates[secondary_candidates.length - 1];
+const secondary = getItem("color_scheme_secondary") ?? secondary_candidates[secondary_candidates.length - 1];
 
 export const randColor = () => secondary_candidates[Math.floor(Math.random() * secondary_candidates.length)];
 
@@ -169,4 +171,36 @@ const timelineTheme = {
   // Lines
   timeColumnLineColor: theme.primary_light,
   eventContainerBorderColor: theme.primary_light,
+};
+
+const darkPrimaryOptions = [
+  "#0d0f14", // original
+  "#101217", // slightly cooler tone
+  "#12141A", // darker steel
+  "#0C0E13", // blackened blue-grey
+  "#111418", // slate black
+  "#161A1F", // modern dark neutral
+  "#1A1D24", // charcoal steel
+  "#0B0D11", // near-black bluish
+];
+
+const secondaryCandidates = [
+  ...new Set([
+    ...secondary_candidates,
+    "#2C2F36", // charcoal grey
+    "#4A4E57", // medium slate
+    "#6C6F76", // desaturated silver-grey
+    "#00B2FF", // soft neon blue
+    "#00FFA3", // mint green
+    "#C2E7FF", // frosty blue
+    "#8899AA", // cool dusty blue
+    "#8685EF", // cyber violet
+    "#999999", // plain light grey
+    "#C0C0C0", // soft metallic
+  ]),
+];
+
+export const CustomThemeOptions = {
+  primary: darkPrimaryOptions,
+  secondary: secondaryCandidates,
 };

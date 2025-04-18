@@ -8,6 +8,7 @@ import Ripple from "react-native-material-ripple";
 import useGetStatistics from "../../Wallet/hooks/useGetStatistics";
 import moment from "moment";
 import { memo, useState } from "react";
+import Animated, { LinearTransition } from "react-native-reanimated";
 
 const Sizing = {
   heading: 30,
@@ -50,7 +51,7 @@ const AvailableBalanceWidget = ({ data, loading }: Props) => {
   }
 
   return (
-    <View style={styles.container}>
+    <Animated.View style={styles.container} layout={LinearTransition.delay(200)}>
       {/* Balance Header */}
       <View style={styles.header}>
         <View>
@@ -69,24 +70,25 @@ const AvailableBalanceWidget = ({ data, loading }: Props) => {
 
       {/* Recent Transactions */}
       {data.wallet?.expenses?.length > 0 && (
-        <View style={styles.transactionsSection}>
+        <Animated.View style={styles.transactionsSection} layout={LinearTransition.delay(100)}>
           <Text style={styles.sectionTitle}>Recent Transactions</Text>
 
           {data?.wallet?.expenses.slice(0, 3).map((expense) => (
-            <WalletItem
-              handlePress={() =>
-                navigation.navigate("WalletScreens", {
-                  screen: "Wallet",
-                  params: { expenseId: expense.id },
-                })
-              }
-              {...(expense as any)}
-              key={expense.id}
-            />
+            <Animated.View layout={LinearTransition.delay(100)} key={expense.id}>
+              <WalletItem
+                handlePress={() =>
+                  navigation.navigate("WalletScreens", {
+                    screen: "Wallet",
+                    params: { expenseId: expense.id },
+                  })
+                }
+                {...(expense as any)}
+              />
+            </Animated.View>
           ))}
-        </View>
+        </Animated.View>
       )}
-    </View>
+    </Animated.View>
   );
 };
 
@@ -171,6 +173,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary,
     borderRadius: 24,
     gap: 20,
+    flex: 1,
   },
   loadingContainer: {
     height: 400,

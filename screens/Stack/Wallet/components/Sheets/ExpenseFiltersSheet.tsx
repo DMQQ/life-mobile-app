@@ -165,7 +165,7 @@ const Forms = (props: ExpenseFiltersProps) => {
           }}
         />
 
-        <Input.Label text="Category" error={false} />
+        <Input.Label text="Category" error={false} labelStyle={{ marginBottom: 10 }} />
 
         <CategorySelect
           maxSelectHeight={250}

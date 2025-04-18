@@ -18,7 +18,7 @@
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
-      "buildNumber": "20251804",
+      "buildNumber": "20251904",
       "supportsTablet": true,
       "infoPlist": {
         "NSFaceIDUsageDescription": "Allow $(PRODUCT_NAME) to use Face ID.",
@@ -71,22 +71,7 @@
           "imageWidth": 200
         }
       ],
-      [
-        "expo-quick-actions",
-        {
-          "iosActions": [
-            {
-              "id": "1",
-              "title": "Create Expense",
-              "subtitle": "Create expense",
-              "icon": "add",
-              "params": {
-                "action": "create_expense"
-              }
-            }
-          ]
-        }
-      ]
+      "expo-quick-actions"
     ],
     "extra": {
       "eas": {
