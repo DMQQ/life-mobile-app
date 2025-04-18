@@ -199,6 +199,10 @@ function WalletCharts({ navigation }: any) {
 
     setSelected((prev) => (prev === item.label ? "" : item.label));
     setStep(5);
+
+    setTimeout(() => {
+      listRef.current?.scrollToIndex({ index: 0, animated: true });
+    }, 100);
   };
 
   const selectedCategoryData =
