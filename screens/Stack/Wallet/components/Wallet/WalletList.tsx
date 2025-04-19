@@ -11,6 +11,7 @@ import Ripple from "react-native-material-ripple";
 import { useWalletContext } from "../WalletContext";
 import { gql, useQuery } from "@apollo/client";
 import { useNavigation, useRoute } from "@react-navigation/native";
+import WalletLimits from "../Limits";
 
 const AnimatedList = Animated.createAnimatedComponent(VirtualizedList);
 
@@ -87,6 +88,7 @@ export default function WalletList(props: {
 
   return (
     <AnimatedList
+      ListHeaderComponent={<WalletLimits />}
       onEndReached={!props.isLocked ? props.onEndReached : () => {}}
       onEndReachedThreshold={0.5}
       scrollEventThrottle={16}

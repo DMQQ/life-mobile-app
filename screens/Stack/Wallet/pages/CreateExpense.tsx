@@ -152,7 +152,7 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
 
       try {
         await client?.refetchQueries({
-          include: ["GetWallet"],
+          include: ["GetWallet", "Limits"],
         });
 
         console.log("Refetched queries successfully");
@@ -193,7 +193,7 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
     }
 
     await client?.refetchQueries({
-      include: ["GetWallet"],
+      include: ["GetWallet", "Limits"],
     });
 
     navigation.goBack();
