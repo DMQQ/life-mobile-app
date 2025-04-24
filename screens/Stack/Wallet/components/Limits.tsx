@@ -15,6 +15,13 @@ import CategorySelector from "./CreateExpense/CategorySelector";
 import Select from "@/components/ui/Select/Select";
 import Button from "@/components/ui/Button/Button";
 import { useWalletContext } from "./WalletContext";
+import * as yup from "yup";
+
+const validationSchema = yup.object().shape({
+  category: yup.string().required("Category is required"),
+  amount: yup.number().typeError("Amount must be a number").positive("Amount must be positive").required("Amount is required"),
+  type: yup.string().required(),
+});
 
 const GET_LIMITS = gql`
   query Limits($range: String!) {
@@ -60,12 +67,14 @@ export default function WalletLimits() {
     }
   );
 
-  const handleRangeChange = (range) => {
+  const handleRangeChange = (range: string) => {
     Feedback.trigger("impactLight");
     setSelectedRange(range);
   };
 
   const [isCreateLimitModalVisible, setCreateLimitModalVisible] = useState(false);
+
+  const [compactMode, setCompactMode] = useState(false);
 
   if (loading) {
     return (
@@ -84,9 +93,9 @@ export default function WalletLimits() {
   }
 
   return (
-    <Animated.View style={styles.container} layout={LinearTransition} entering={FadeIn}>
+    <Animated.View style={[styles.container, compactMode && { height: undefined }]} layout={LinearTransition} entering={FadeIn}>
       <View style={styles.headerContainer}>
-        <Ripple onLongPress={() => setCreateLimitModalVisible((p) => !p)}>
+        <Ripple onPress={() => setCompactMode((p) => !p)} onLongPress={() => setCreateLimitModalVisible((p) => !p)}>
           <Text style={styles.header}>Spending Limits</Text>
         </Ripple>
         <View style={styles.tabContainer}>
@@ -125,38 +134,56 @@ export default function WalletLimits() {
                 key={limit.id}
                 entering={FadeIn.delay(index * 100)}
                 layout={LinearTransition}
-                style={{ marginRight: 15, width: limits?.limits?.length > 1 ? Layout.screen.width * 0.8 : Layout.screen.width - 30 }}
+                style={{
+                  marginRight: 15,
+                  width: compactMode
+                    ? (Layout.screen.width - 30 - 3 * 15) / 4
+                    : limits?.limits?.length > 1
+                    ? Layout.screen.width * 0.8
+                    : Layout.screen.width - 30,
+                }}
               >
                 <Ripple
                   style={[
                     styles.limitCard,
                     {
                       backgroundColor: lowOpacity(iconData.backgroundColor || color, 0.2),
+                      flexDirection: compactMode ? "column" : "row",
                     },
                   ]}
                   onPress={() => {
                     Feedback.trigger("impactLight");
-                    dispatch({ type: "SET_CATEGORY", payload: limit.category });
+                    if (!filters.category.includes(limit.category)) dispatch({ type: "SET_CATEGORY", payload: limit.category });
+                    else dispatch({ type: "SET_CATEGORY", payload: [] as string[] });
                   }}
                 >
-                  <View style={[styles.iconContainer, { backgroundColor: lowOpacity(iconData.backgroundColor || color, 0.2) }]}>
+                  <View
+                    style={[
+                      styles.iconContainer,
+                      { backgroundColor: lowOpacity(iconData.backgroundColor || color, 0.2) },
+                      compactMode && { marginRight: 0 },
+                    ]}
+                  >
                     {iconData.icon}
                   </View>
 
                   <View style={styles.detailsContainer}>
-                    <View style={styles.headerRow}>
-                      <Text style={styles.categoryText} numberOfLines={1}>
-                        {limit.category}
-                      </Text>
-                      <Text style={[styles.amountText, isOverLimit && styles.overLimitText]}>
-                        {limit.current.toFixed(2)}
-                        <Text style={styles.currencyText}> zł</Text>
-                        <Text style={styles.slashText}> / </Text>
-                        <Text>{limit.amount.toFixed(2)} zł</Text>
-                      </Text>
-                    </View>
+                    {!compactMode && (
+                      <View style={[styles.headerRow, { flexDirection: compactMode ? "column" : "row" }]}>
+                        <Text style={[styles.categoryText, { textTransform: "capitalize" }]} numberOfLines={1}>
+                          {limit.category}
+                        </Text>
 
-                    <View style={styles.progressContainer}>
+                        <Text style={[styles.amountText, isOverLimit && styles.overLimitText]}>
+                          {limit.current.toFixed(2)}
+                          <Text style={styles.currencyText}> zł</Text>
+                          <Text style={styles.slashText}> / </Text>
+                          <Text>{limit.amount.toFixed(2)} zł</Text>
+                        </Text>
+                      </View>
+                    )}
+
+                    <View style={[styles.progressContainer, compactMode && { marginTop: 10 }]}>
                       <View style={styles.progressBackground}>
                         <Animated.View
                           style={[
@@ -177,7 +204,9 @@ export default function WalletLimits() {
                           {
                             color: isOverLimit ? "#F07070" : iconData.backgroundColor || color,
                           },
+                          compactMode && { fontSize: 16 },
                         ]}
+                        numberOfLines={1}
                       >
                         {((limit.current / limit.amount) * 100).toFixed(0)}%
                       </Text>
@@ -204,7 +233,9 @@ export default function WalletLimits() {
             padding: 15,
           }}
         >
+          <Text style={{ fontSize: 22, color: "#fff", fontWeight: "bold", marginBottom: 25 }}>Create limit</Text>
           <Formik
+            validationSchema={validationSchema}
             initialValues={{ category: "", amount: "", type: "" }}
             onSubmit={(values) => {
               createLimit({
@@ -235,7 +266,7 @@ export default function WalletLimits() {
                   ) : (
                     <ValidatedInput
                       showLabel
-                      label="Category"
+                      label="Restricted category"
                       formik={f}
                       name="category"
                       onPress={() => {
@@ -247,7 +278,7 @@ export default function WalletLimits() {
                   {!categoryPicker && (
                     <>
                       <Text style={{ marginVertical: 10 }}>
-                        <Text style={styles.categoryText}> Category</Text>
+                        <Text style={styles.categoryText}>How often do you want to be reminded?</Text>
                       </Text>
                       <Select
                         setSelected={([v]) => {
@@ -262,7 +293,11 @@ export default function WalletLimits() {
                     </>
                   )}
                 </View>
-                {!categoryPicker && <Button onPress={() => f.handleSubmit()}>Save</Button>}
+                {!categoryPicker && (
+                  <Button disabled={!(f.isValid && f.dirty)} onPress={() => f.handleSubmit()}>
+                    Save
+                  </Button>
+                )}
               </>
             )}
           </Formik>
@@ -275,12 +310,13 @@ export default function WalletLimits() {
 const styles = StyleSheet.create({
   container: {
     marginBottom: 15,
+    height: 150,
   },
   headerContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 15,
+    marginBottom: 25,
   },
   header: {
     fontSize: 18,
@@ -299,6 +335,8 @@ const styles = StyleSheet.create({
   },
   activeTabButton: {
     backgroundColor: Colors.secondary,
+    borderRadius: 10,
+    paddingHorizontal: 15,
   },
   tabText: {
     fontSize: 12,
@@ -315,6 +353,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary_lighter,
     borderRadius: 15,
     marginBottom: 15,
+    height: 150,
   },
   errorContainer: {
     padding: 20,
