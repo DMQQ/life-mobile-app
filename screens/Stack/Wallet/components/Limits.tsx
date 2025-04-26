@@ -74,11 +74,13 @@ export default function WalletLimits() {
 
   const [isCreateLimitModalVisible, setCreateLimitModalVisible] = useState(false);
 
-  const [compactMode, setCompactMode] = useState(false);
+  const [compactMode, setCompactMode] = useState(true);
+
+  const [height, setHeight] = useState(150);
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
+      <View style={[styles.loadingContainer, { height }]}>
         <ActivityIndicator size="large" color={Colors.secondary} />
       </View>
     );
@@ -86,14 +88,19 @@ export default function WalletLimits() {
 
   if (error) {
     return (
-      <View style={styles.errorContainer}>
+      <View style={[styles.errorContainer, { height }]}>
         <Text style={styles.errorText}>Failed to load limits</Text>
       </View>
     );
   }
 
   return (
-    <Animated.View style={[styles.container, compactMode && { height: undefined }]} layout={LinearTransition} entering={FadeIn}>
+    <Animated.View
+      onLayout={(layout) => setHeight(layout.nativeEvent.layout.height)}
+      style={[styles.container, compactMode && { height: undefined }, { height: compactMode ? undefined : height }]}
+      layout={LinearTransition}
+      entering={FadeIn}
+    >
       <View style={styles.headerContainer}>
         <Ripple onPress={() => setCompactMode((p) => !p)} onLongPress={() => setCreateLimitModalVisible((p) => !p)}>
           <Text style={styles.header}>Spending Limits</Text>
@@ -134,14 +141,17 @@ export default function WalletLimits() {
                 key={limit.id}
                 entering={FadeIn.delay(index * 100)}
                 layout={LinearTransition}
-                style={{
-                  marginRight: 15,
-                  width: compactMode
-                    ? (Layout.screen.width - 30 - 3 * 15) / 4
-                    : limits?.limits?.length > 1
-                    ? Layout.screen.width * 0.8
-                    : Layout.screen.width - 30,
-                }}
+                style={[
+                  {
+                    marginRight: 15,
+                    width: compactMode
+                      ? (Layout.screen.width - 30 - 3 * 15) / 4
+                      : limits?.limits?.length > 1
+                      ? Layout.screen.width * 0.8
+                      : Layout.screen.width - 30,
+                  },
+                  !filters.category.includes(limit.category) && filters.category.length > 0 && { opacity: 0.5 },
+                ]}
               >
                 <Ripple
                   style={[

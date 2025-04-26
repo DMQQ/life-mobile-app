@@ -5,14 +5,13 @@ import ScreenContainer from "@/components/ui/ScreenContainer";
 import Colors from "@/constants/Colors";
 import useAuthForm from "../hooks/useAuthForm";
 
-import { ActivityIndicator } from "react-native";
+import { ActivityIndicator, View } from "react-native";
 
 export default function Login() {
-  const { validationSchema, onSubmit, state, savedCredentials } =
-    useAuthForm("login");
+  const { validationSchema, onSubmit, state, savedCredentials } = useAuthForm("login");
 
   return (
-    <ScreenContainer>
+    <View style={{ flex: 1, padding: 15 }}>
       <Modal isVisible={state.loading && state.called}>
         <ActivityIndicator size={"large"} color={Colors.secondary} />
       </Modal>
@@ -28,6 +27,6 @@ export default function Login() {
       />
 
       <LoginForm onSubmit={onSubmit} validationSchema={validationSchema} />
-    </ScreenContainer>
+    </View>
   );
 }

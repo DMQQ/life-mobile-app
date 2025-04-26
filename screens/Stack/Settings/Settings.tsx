@@ -40,7 +40,7 @@ export default function Settings() {
 
   return (
     <ScreenContainer style={{ padding: 0 }}>
-      <Header buttons={[]} title="Settings" titleAnimatedStyle={{}} goBack />
+      <Header buttons={[]} titleAnimatedStyle={{}} goBack />
       <View style={{ flex: 1, padding: 15 }}>
         <View style={{ flex: 1 }}>
           <Text
@@ -65,47 +65,49 @@ export default function Settings() {
           <View style={{ marginTop: 25 }}>
             <Text style={{ color: "#fff", fontSize: 18, fontWeight: "600" }}>Custom color theme!</Text>
 
-            <Text>Primary</Text>
-            <FlatList
-              horizontal
-              data={CustomThemeOptions.primary}
-              keyExtractor={(item) => item}
-              renderItem={({ item }) => (
-                <Ripple
-                  onPress={() => setPrimary(item)}
-                  style={{
-                    backgroundColor: item,
-                    width: 40,
-                    height: 40,
-                    borderRadius: 20,
-                    margin: 5,
-                    borderWidth: primary === item ? 2 : 0,
-                    borderColor: "white",
-                  }}
-                />
-              )}
-            />
+            <View style={{ padding: 15 }}>
+              <Text style={{ color: "#fff", fontSize: 18, fontWeight: 600, marginVertical: 15 }}>Primary</Text>
+              <FlatList
+                horizontal
+                data={CustomThemeOptions.primary}
+                keyExtractor={(item) => item}
+                renderItem={({ item }) => (
+                  <Ripple
+                    onPress={() => setPrimary(item)}
+                    style={{
+                      backgroundColor: item,
+                      width: 40,
+                      height: 40,
+                      borderRadius: 20,
+                      margin: 5,
+                      borderWidth: primary === item ? 2 : 0,
+                      borderColor: "white",
+                    }}
+                  />
+                )}
+              />
 
-            <Text>Secondary</Text>
-            <FlatList
-              horizontal
-              data={CustomThemeOptions.secondary}
-              keyExtractor={(item) => item}
-              renderItem={({ item }) => (
-                <Ripple
-                  onPress={() => setSecondary(item)}
-                  style={{
-                    backgroundColor: item,
-                    width: 40,
-                    height: 40,
-                    borderRadius: 20,
-                    margin: 5,
-                    borderWidth: secondary === item ? 2 : 0,
-                    borderColor: "white",
-                  }}
-                />
-              )}
-            />
+              <Text style={{ color: "#fff", fontSize: 18, fontWeight: 600, marginVertical: 15 }}>Secondary</Text>
+              <FlatList
+                horizontal
+                data={CustomThemeOptions.secondary}
+                keyExtractor={(item) => item}
+                renderItem={({ item }) => (
+                  <Ripple
+                    onPress={() => setSecondary(item)}
+                    style={{
+                      backgroundColor: item,
+                      width: 40,
+                      height: 40,
+                      borderRadius: 20,
+                      margin: 5,
+                      borderWidth: secondary === item ? 2 : 0,
+                      borderColor: "white",
+                    }}
+                  />
+                )}
+              />
+            </View>
           </View>
           <Button
             style={{ marginTop: 20 }}
