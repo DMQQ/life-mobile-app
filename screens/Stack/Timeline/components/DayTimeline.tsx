@@ -111,6 +111,9 @@ const CalendarTimetable = ({ events, selected, children, onScroll }: CustomTimel
                   borderRadius: 5,
                   overflow: "hidden",
                 },
+                props.item.timeline.isCompleted && {
+                  opacity: 0.5,
+                },
               ]}
             >
               <DayTimelineItem

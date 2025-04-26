@@ -114,6 +114,14 @@ const categoryColors = {
   none: Colors.primary, // You might want to replace this with an actual hex value
 };
 
+export const getInvalidExpenses = (curr: Expense) =>
+  !curr.category ||
+  curr.description.startsWith("Balance") ||
+  curr.type === "income" ||
+  curr.type === "refunded" ||
+  curr.category === "refunded" ||
+  curr.amount == 0;
+
 function WalletCharts({ navigation }: any) {
   const {
     data = { wallet: { expenses: [] } },
@@ -133,7 +141,7 @@ function WalletCharts({ navigation }: any) {
 
     let timeout = setTimeout(() => {
       setOverlay(false);
-    }, 1000);
+    }, 1500);
 
     return () => {
       clearTimeout(timeout);
@@ -146,14 +154,6 @@ function WalletCharts({ navigation }: any) {
   const [selected, setSelected] = useState("");
 
   const [chartType, setChartType] = useState<"pie" | "bar">("pie");
-
-  const getInvalidExpenses = (curr: Expense) =>
-    !curr.category ||
-    curr.description.startsWith("Balance") ||
-    curr.type === "income" ||
-    curr.type === "refunded" ||
-    curr.category === "refunded" ||
-    curr.amount == 0;
 
   const barData = useMemo(() => {
     if (!data?.wallet?.expenses) return [];
@@ -222,7 +222,7 @@ function WalletCharts({ navigation }: any) {
   const selectedCategoryData =
     selected === ""
       ? data?.wallet?.expenses || []
-      : data?.wallet?.expenses.filter((item) => item.category === selected && item.type !== "refunded") || [];
+      : data?.wallet?.expenses?.filter((item) => item.category === selected && item.type !== "refunded") || [];
 
   const onChartPress = (e: any) => {
     setSelected(e.label);
@@ -232,7 +232,7 @@ function WalletCharts({ navigation }: any) {
   const currentBalance = useGetBalance();
 
   const filteredExpenses = useMemo(() => {
-    return data?.wallet?.expenses.filter((item) => !getInvalidExpenses(item)) || [];
+    return data?.wallet?.expenses?.filter((item) => !getInvalidExpenses(item)) || [];
   }, [data?.wallet?.expenses]);
 
   const chartData = useMemo(() => {

@@ -35,8 +35,6 @@ export default function Navigation() {
     setTimeout(() => {
       if (!action || !navigationRef.current) return;
 
-      console.log("Quick action triggered:", action);
-
       switch (action?.id) {
         case "0":
           navigationRef.current?.navigate<any>({

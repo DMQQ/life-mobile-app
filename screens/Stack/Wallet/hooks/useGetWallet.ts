@@ -99,6 +99,9 @@ export default function useGetWallet(options?: { fetchAll?: boolean; excludeFiel
     onError: (err) => {
       console.log(JSON.stringify(err, null, 2));
     },
+    returnPartialData: true,
+    notifyOnNetworkStatusChange: true,
+    fetchPolicy: "cache-and-network",
   });
 
   const onEndReached = async () => {
