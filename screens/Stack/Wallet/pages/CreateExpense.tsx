@@ -5,7 +5,7 @@ import { memo, useCallback, useEffect, useRef, useState } from "react";
 import Ripple from "react-native-material-ripple";
 import Layout from "@/constants/Layout";
 import WalletItem, { Icons } from "../components/Wallet/WalletItem";
-import { AntDesign, Entypo } from "@expo/vector-icons";
+import { AntDesign, Entypo, Ionicons } from "@expo/vector-icons";
 import lowOpacity from "@/utils/functions/lowOpacity";
 import Animated, {
   FadeIn,
@@ -15,6 +15,7 @@ import Animated, {
   useAnimatedStyle,
   cancelAnimation,
   withTiming,
+  FadeOut,
 } from "react-native-reanimated";
 import useCreateActivity from "../hooks/useCreateActivity";
 import DateTimePicker from "react-native-modal-datetime-picker";
@@ -30,6 +31,7 @@ import { FlatList } from "react-native-gesture-handler";
 import { gql, useApolloClient, useMutation } from "@apollo/client";
 import Feedback from "react-native-haptic-feedback";
 import Button from "@/components/ui/Button/Button";
+import SpontaneousRate, { SpontaneousRateChip, SpontaneousRateSelector } from "../components/CreateExpense/SpontaneousRate";
 
 interface SubExpense {
   id: string;
@@ -57,6 +59,39 @@ const useUploadSubExpense = (onCompleted: () => void) => {
 
 const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
 
+const spontaneousOptions = [
+  {
+    label: "Budgeted for",
+    value: 0,
+    icon: "📅",
+  },
+  {
+    label: "Planned purchase",
+    value: 20,
+    icon: "📝",
+  },
+  {
+    label: "Sale opportunity",
+    value: 40,
+    icon: "🏷️",
+  },
+  {
+    label: "Quick decision",
+    value: 60,
+    icon: "⏱️",
+  },
+  {
+    label: "Spontaneous treat",
+    value: 80,
+    icon: "🍦",
+  },
+  {
+    label: "Complete impulse",
+    value: 100,
+    icon: "🛍️",
+  },
+];
+
 export default function CreateExpenseModal({ navigation, route: { params } }: any) {
   const { createExpense, loading } = useCreateActivity({
     onCompleted() {},
@@ -72,6 +107,8 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
   const [name, setName] = useState(params?.description || "");
   const [type, setType] = useState<"expense" | "income" | null>(params?.type || null);
   const [isSubscription, setIsSubscription] = useState(false);
+
+  const [spontaneousRate, setSpontaneousRate] = useState(0);
 
   const [isSubExpenseMode, setIsSubExpenseMode] = useState(false);
 
@@ -174,6 +211,7 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
         date: date ?? moment().format("YYYY-MM-DD"),
         schedule: moment(date).isAfter(moment()),
         isSubscription: isSubscription,
+        spontaneousRate: spontaneousRate,
       },
     });
 
@@ -323,8 +361,6 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
     }
   };
 
-  console.log({ amount });
-
   const restorePreviousState = () => {
     setAmount(params?.amount.toString() || "0");
     setDate(params?.date ? moment(params.date).format("YYYY-MM-DD") : moment().format("YYYY-MM-DD"));
@@ -333,12 +369,6 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
     setName(params?.description || "");
     setType(params?.type || null);
   };
-
-  // useEffect(() => {
-  //   if (isSubExpenseMode) {
-  //     setAmount(calculateSubExpensesTotal().toString());
-  //   }
-  // }, [SubExpenses, isSubExpenseMode]);
 
   useEffect(() => {
     if (params?.isEditing) {
@@ -353,6 +383,8 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
       });
     }
   }, [params]);
+
+  const [spontaneousView, setSpontaneousView] = useState(false);
 
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
@@ -394,7 +426,7 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
                 flex: 1,
               }}
             >
-              {!changeView && (
+              {!changeView && !spontaneousView && (
                 <Animated.View entering={FadeIn} style={{ gap: 5 }}>
                   <View style={{ flexDirection: "row", width: "100%", alignItems: "center" }}>
                     <Input
@@ -523,11 +555,18 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
                         <Text style={{ color: "rgba(255,255,255,0.7)", fontSize: 14 }}>Subscription</Text>
                       </Ripple>
                     )}
+                    <SpontaneousRateChip
+                      value={spontaneousRate}
+                      onPress={() => {
+                        setChangeView(false);
+                        setSpontaneousView(true);
+                      }}
+                    />
                   </Animated.ScrollView>
                 </Animated.View>
               )}
 
-              {changeView && (
+              {changeView && !spontaneousView && (
                 <CategorySelector
                   dismiss={() => {
                     setChangeView(false);
@@ -540,7 +579,12 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
                   }}
                 />
               )}
-              {!changeView && (
+
+              {spontaneousView && (
+                <SpontaneousRateSelector value={spontaneousRate} setValue={setSpontaneousRate} dismiss={() => setSpontaneousView(false)} />
+              )}
+
+              {!changeView && !spontaneousView && (
                 <NumbersPad rotateBackButton={amount === "0" && SubExpenses.length === 0} handleAmountChange={handleAmountChange} />
               )}
             </View>

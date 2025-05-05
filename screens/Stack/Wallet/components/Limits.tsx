@@ -5,7 +5,7 @@ import lowOpacity from "@/utils/functions/lowOpacity";
 import Colors, { secondary_candidates } from "@/constants/Colors";
 import Animated, { FadeIn, LinearTransition } from "react-native-reanimated";
 import Ripple from "react-native-material-ripple";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Feedback from "react-native-haptic-feedback";
 import Modal from "@/components/ui/Modal";
 import Layout from "@/constants/Layout";
@@ -16,6 +16,8 @@ import Select from "@/components/ui/Select/Select";
 import Button from "@/components/ui/Button/Button";
 import { useWalletContext } from "./WalletContext";
 import * as yup from "yup";
+import moment from "moment";
+import useGetStatistics from "../hooks/useGetStatistics";
 
 const validationSchema = yup.object().shape({
   category: yup.string().required("Category is required"),
@@ -34,14 +36,53 @@ const GET_LIMITS = gql`
   }
 `;
 
+const GET_WALLET = gql`
+  query {
+    wallet {
+      income
+      monthlyPercentageTarget
+    }
+  }
+`;
+
 export default function WalletLimits() {
   const [selectedRange, setSelectedRange] = useState("monthly");
 
   const { data: limits, loading, error } = useQuery(GET_LIMITS, { variables: { range: selectedRange } });
 
-  const [categoryPicker, setCategoryPicker] = useState(false);
+  // Get monthly budget data
+  const { data: walletData } = useQuery(GET_WALLET);
+  const { data: statistics } = useGetStatistics([moment().startOf("month").toDate(), moment().endOf("month").toDate()]);
 
+  const [categoryPicker, setCategoryPicker] = useState(false);
   const { dispatch, filters } = useWalletContext();
+  const [isCreateLimitModalVisible, setCreateLimitModalVisible] = useState(false);
+  const [compactMode, setCompactMode] = useState(true);
+  const [height, setHeight] = useState(150);
+
+  const budgetStatus = useMemo(() => {
+    let budgetStatus = null;
+    if (walletData?.wallet && statistics?.statistics && selectedRange === "monthly") {
+      const { income, monthlyPercentageTarget } = walletData.wallet;
+      const { expense } = statistics.statistics;
+
+      const targetAmount = income * (monthlyPercentageTarget / 100);
+      const percentageSpent = Math.round((expense / targetAmount) * 100);
+
+      const isOverTarget = expense > targetAmount;
+      const isOverIncome = expense > income;
+
+      budgetStatus = {
+        text: isOverIncome
+          ? `${percentageSpent}% over target (${Math.round((expense / income) * 100)}% of income used)`
+          : isOverTarget
+          ? `${percentageSpent}% spent (${percentageSpent - 100}% over target)`
+          : `${percentageSpent}% spent (${100 - percentageSpent}% target remaining)`,
+        color: isOverIncome ? "#F07070" : isOverTarget ? Colors.warning : "#66E875",
+      };
+    }
+    return budgetStatus;
+  }, [walletData, statistics, selectedRange]);
 
   const [createLimit] = useMutation(
     gql`
@@ -67,16 +108,10 @@ export default function WalletLimits() {
     }
   );
 
-  const handleRangeChange = (range: string) => {
+  const handleRangeChange = (range: any) => {
     Feedback.trigger("impactLight");
     setSelectedRange(range);
   };
-
-  const [isCreateLimitModalVisible, setCreateLimitModalVisible] = useState(false);
-
-  const [compactMode, setCompactMode] = useState(true);
-
-  const [height, setHeight] = useState(150);
 
   if (loading) {
     return (
@@ -102,9 +137,12 @@ export default function WalletLimits() {
       entering={FadeIn}
     >
       <View style={styles.headerContainer}>
-        <Ripple onPress={() => setCompactMode((p) => !p)} onLongPress={() => setCreateLimitModalVisible((p) => !p)}>
-          <Text style={styles.header}>Spending Limits</Text>
-        </Ripple>
+        <View style={{ flexDirection: "column" }}>
+          <Ripple onPress={() => setCompactMode((p) => !p)} onLongPress={() => setCreateLimitModalVisible((p) => !p)}>
+            <Text style={styles.header}>Spending Limits</Text>
+          </Ripple>
+        </View>
+
         <View style={styles.tabContainer}>
           {["daily", "weekly", "monthly", "yearly"].map((range) => (
             <TouchableOpacity
@@ -124,7 +162,7 @@ export default function WalletLimits() {
         {limits?.limits?.length === 0 ? (
           <Text style={[styles.emptyText, { width: Layout.screen.width - 30 }]}>No limits set for this period</Text>
         ) : (
-          limits?.limits?.map((limit, index) => {
+          limits?.limits?.map((limit: any, index: number) => {
             const iconData = Icons[limit.category as keyof typeof Icons] || {
               backgroundColor: secondary_candidates[0],
               icon: null,
@@ -229,6 +267,14 @@ export default function WalletLimits() {
         )}
       </ScrollView>
 
+      {budgetStatus && (
+        <View style={{ flexDirection: "row", justifyContent: "center", marginBottom: 10 }}>
+          <Animated.Text style={[styles.budgetIndicator, { color: budgetStatus.color }]} entering={FadeIn}>
+            {budgetStatus.text}
+          </Animated.Text>
+        </View>
+      )}
+
       <Modal
         onBackdropPress={() => setCreateLimitModalVisible(false)}
         isVisible={isCreateLimitModalVisible}
@@ -325,13 +371,18 @@ const styles = StyleSheet.create({
   headerContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
+    alignItems: "flex-start", // Changed from center to allow for budget indicator below
     marginBottom: 25,
   },
   header: {
     fontSize: 18,
     fontWeight: "600",
     color: "#fff",
+  },
+  budgetIndicator: {
+    fontSize: 12,
+    marginTop: 4,
+    fontWeight: "500",
   },
   tabContainer: {
     flexDirection: "row",

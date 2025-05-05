@@ -89,7 +89,11 @@ export default function WalletList(props: {
 
   return (
     <AnimatedList
-      ListHeaderComponent={<WalletLimits />}
+      ListHeaderComponent={
+        <>
+          <WalletLimits />
+        </>
+      }
       onEndReached={!props.isLocked ? props.onEndReached : () => {}}
       onEndReachedThreshold={0.5}
       scrollEventThrottle={16}
