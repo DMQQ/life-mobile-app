@@ -24,6 +24,7 @@ import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 import Feedback from "react-native-haptic-feedback";
 import MonthlyCategoryComparison from "../components/WalletChart/MonthlyComparison";
 import CalendarHeatmap from "../components/WalletChart/MonthlySpendingHeatMap";
+import moment from "moment";
 
 const styles = StyleSheet.create({
   tilesContainer: {
@@ -312,6 +313,8 @@ function WalletCharts({ navigation }: any) {
 
   const insets = useSafeAreaInsets();
 
+  const monthDiff = moment(filters.date.from).diff(moment(filters.date.to));
+
   return (
     <View style={{ paddingTop: 15, paddingBottom: insets.bottom }}>
       {overlay && (
@@ -358,7 +361,9 @@ function WalletCharts({ navigation }: any) {
               )}
               <StatisticsSummary dates={filters.date} data={stats?.statistics} />
               <SpendingsByDay data={filteredExpenses} />
-              <FutureProjection data={filteredExpenses} income={5500} currentBalance={currentBalance} />
+              {monthDiff > 28 && monthDiff < 32 && (
+                <FutureProjection data={filteredExpenses} income={5500} currentBalance={currentBalance} />
+              )}
               <DailySpendingChart data={filteredExpenses} />
 
               <MonthlyCategoryComparison />

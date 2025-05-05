@@ -17,6 +17,9 @@ export const GET_WALLET = gql`
     wallet {
       id
       balance
+      income
+      monthlyPercentageTarget
+
       expenses(filters: $filters, take: $take, skip: $skip) {
         id
         amount
@@ -26,6 +29,7 @@ export const GET_WALLET = gql`
         category
         balanceBeforeInteraction
         note
+        spontaneousRate
 
         subscription @include(if: $includeSubscription) {
           id
@@ -99,9 +103,6 @@ export default function useGetWallet(options?: { fetchAll?: boolean; excludeFiel
     onError: (err) => {
       console.log(JSON.stringify(err, null, 2));
     },
-    returnPartialData: true,
-    notifyOnNetworkStatusChange: true,
-    fetchPolicy: "cache-and-network",
   });
 
   const onEndReached = async () => {

@@ -17,6 +17,7 @@ import GoalsScreens from "../screens/Stack/Goals/Main";
 import { useApolloClient } from "@apollo/client";
 import { Platform } from "react-native";
 import moment from "moment";
+import * as Linking from "expo-linking";
 
 export const navigationRef = React.createRef<NavigationContainerRef<RootStackParamList>>();
 
@@ -63,7 +64,7 @@ export default function Navigation() {
         default:
           break;
       }
-    }, 500);
+    }, 300);
   };
 
   useEffect(() => {
@@ -116,11 +117,74 @@ export default function Navigation() {
 
   const renderTab = useCallback((props: BottomTabBarProps) => (isAuthenticated ? <BottomTab {...props} /> : null), [isAuthenticated]);
 
+  useEffect(() => {
+    const handleDeepLink = async ({ url }: { url: string }) => {
+      if (!url) return;
+
+      console.log("Received URL:", url);
+
+      setTimeout(() => {
+        if (url.includes("wallet/create-expense")) {
+          navigationRef.current?.navigate<any>({
+            name: "WalletScreens",
+            params: {
+              expenseId: null,
+            },
+          });
+        } else if (url.includes("wallet/expense/id/")) {
+          const expenseId = url.split("/").pop();
+
+          navigationRef.current?.navigate<any>("WalletScreens", {
+            screen: "Wallet",
+            params: { expenseId },
+          });
+        } else if (url.includes("timeline/id/")) {
+          const timelineId = url.split("/").pop();
+
+          navigationRef.current?.navigate("TimelineScreens", {
+            timelineId,
+          });
+        } else if (url.includes("timeline")) {
+          navigationRef.current?.navigate("TimelineScreens", {
+            screen: "",
+          });
+        }
+      }, 300);
+    };
+
+    const subscription = Linking.addEventListener("url", handleDeepLink);
+
+    Linking.getInitialURL().then((url) => {
+      if (url) {
+        handleDeepLink({ url });
+      }
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
+
+  const linking = {
+    prefixes: ["mylife://", "https://life.dmqq.dev"],
+    config: {
+      screens: {
+        WalletScreens: "wallet",
+        TimelineScreens: "timeline",
+        Root: "home",
+        GoalsScreens: "goals",
+        NotesScreens: "notes",
+        Settings: "settings",
+      },
+    },
+  };
+
   if (isLoading) return null;
 
   return (
     <NavigationContainer
       ref={navigationRef}
+      linking={linking}
       theme={{
         ...DarkTheme,
         colors: {
@@ -143,11 +207,9 @@ export default function Navigation() {
           <>
             <Tab.Screen name="Root" component={Root} />
 
-            {/* <Tab.Screen name="WorkoutScreens" component={WorkoutScreens} /> */}
-
             <Tab.Screen name="GoalsScreens" component={GoalsScreens} />
 
-            <Tab.Screen name="WalletScreens" component={WalletScreens} />
+            <Tab.Screen name="WalletScreens" component={WalletScreens as any} />
 
             <Tab.Screen name="TimelineScreens" component={TimelineScreens} />
 
