@@ -1,19 +1,18 @@
 import { CommonActions, DarkTheme, NavigationContainer, NavigationContainerRef } from "@react-navigation/native";
 import useUser from "../utils/hooks/useUser";
 import React, { useCallback, useEffect } from "react";
-import Root from "../screens/Stack/Home/Root";
+import Root from "../screens/Home/Root";
 import { RootStackParamList } from "../types";
 import Colors from "../constants/Colors";
 import useNotifications from "../utils/hooks/useNotifications";
-import TimelineScreens from "../screens/Stack/Timeline/Main";
+import TimelineScreens from "../screens/Timeline/Main";
 import { BottomTabBarProps, createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import BottomTab from "../components/BottomTab/BottomTab";
-import WalletScreens from "../screens/Stack/Wallet/Main";
-import NotesScreens from "../screens/Stack/Notes/Main";
-import Settings from "../screens/Stack/Settings/Settings";
-import Authentication from "../screens/Stack/Authentication/Main";
+import WalletScreens from "../screens/Wallet/Main";
+import Settings from "../screens/Settings/Settings";
+import Authentication from "../screens/Authentication/Main";
 import * as QuickActions from "expo-quick-actions";
-import GoalsScreens from "../screens/Stack/Goals/Main";
+import GoalsScreens from "../screens/Goals/Main";
 import { useApolloClient } from "@apollo/client";
 import { Platform } from "react-native";
 import moment from "moment";
@@ -212,8 +211,6 @@ export default function Navigation() {
             <Tab.Screen name="WalletScreens" component={WalletScreens as any} />
 
             <Tab.Screen name="TimelineScreens" component={TimelineScreens} />
-
-            <Tab.Screen name="NotesScreens" component={NotesScreens} />
 
             <Tab.Screen name="Settings" component={Settings} />
           </>
