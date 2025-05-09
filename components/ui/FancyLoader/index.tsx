@@ -103,3 +103,5 @@ export const FancySpinner = ({
     </Animated.View>
   );
 };
+
+export default FancySpinner;

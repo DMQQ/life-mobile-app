@@ -1,6 +1,6 @@
 import ScreenContainer from "@/components/ui/ScreenContainer";
-import TodaysTimelineEvents from "@/screens/Home/components/EventsWidget";
-import AvailableBalanceWidget from "@/screens/Home/components/WalletWidget";
+import TodaysTimelineEvents from "@/screens/home/components/EventsWidget";
+import AvailableBalanceWidget from "@/screens/home/components/WalletWidget";
 import { ScreenProps } from "@/types";
 import { useAppSelector } from "@/utils/redux";
 import { GET_MAIN_SCREEN } from "@/utils/schemas/GET_MAIN_SCREEN";
@@ -18,7 +18,7 @@ import Animated, { FadeIn, FadeOut, LinearTransition } from "react-native-reanim
 import { useState } from "react";
 import * as SplashScreen from "expo-splash-screen";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import WorkoutWidget from "../Workout/components/WorkoutWidget";
+import WorkoutWidget from "../workout/components/WorkoutWidget";
 
 const LoadingSkeleton = () => {
   return (

@@ -13,7 +13,7 @@ import useTimeline from "../hooks/general/useTimeline";
 import { GetTimelineQuery } from "../hooks/query/useGetTimeLineQuery";
 import { TimelineScreenProps } from "../types";
 import DayTimeline from "../components/DayTimeline";
-import NotFound from "@/screens/Home/components/NotFound";
+import NotFound from "@/screens/home/components/NotFound";
 
 const ListHeaderComponent = memo(
   (

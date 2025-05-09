@@ -1,5 +1,5 @@
 import moment, { Moment } from "moment";
-import { Action, Filters } from "../../components/WalletContext";
+import { Action, Filters } from "../WalletContext";
 import { useEffect, useState } from "react";
 import { ScrollView, Text } from "react-native";
 import Layout from "@/constants/Layout";

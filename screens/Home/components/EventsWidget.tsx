@@ -11,7 +11,7 @@ import lowOpacity from "@/utils/functions/lowOpacity";
 import { DATE_FORMAT } from "@/utils/functions/parseDate";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import Animated from "react-native-reanimated";
-import TimelineItem from "@/screens/Timeline/components/TimelineItem";
+import TimelineItem from "@/screens/timeline/components/TimelineItem";
 
 const backgroundColor = Colors.primary_lighter;
 

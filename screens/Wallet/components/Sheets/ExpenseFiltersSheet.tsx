@@ -5,7 +5,7 @@ import Layout from "@/constants/Layout";
 import { forwardRef, useEffect, useState } from "react";
 import { Text, View } from "react-native";
 import { Icons } from "../Wallet/WalletItem";
-import { useWalletContext, type Action, type Filters } from "../../components/WalletContext";
+import { useWalletContext, type Action, type Filters } from "../WalletContext";
 import Button from "@/components/ui/Button/Button";
 import { useBottomSheet } from "@gorhom/bottom-sheet";
 import SegmentedButtons from "@/components/ui/SegmentedButtons";
