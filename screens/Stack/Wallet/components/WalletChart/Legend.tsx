@@ -39,8 +39,6 @@ const Legend = (props: LegendProps) =>
       {props.data.map((item, index) => {
         const isExcluded = props.excluded?.includes(item.label);
 
-        const Icon = Icons?.[item.label as keyof typeof Icons]?.icon;
-
         return (
           <Ripple
             onLongPress={() => props.onLongPress?.(item)}
@@ -86,7 +84,7 @@ const Legend = (props: LegendProps) =>
               <View
                 style={{
                   backgroundColor: lowOpacity(item.color, 0.2),
-                  padding: 7.5,
+                  padding: 10,
                   borderRadius: 100,
                 }}
               >

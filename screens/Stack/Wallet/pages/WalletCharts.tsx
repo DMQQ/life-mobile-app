@@ -25,6 +25,7 @@ import Feedback from "react-native-haptic-feedback";
 import MonthlyCategoryComparison from "../components/WalletChart/MonthlyComparison";
 import CalendarHeatmap from "../components/WalletChart/MonthlySpendingHeatMap";
 import moment from "moment";
+import HourlySpendingsHeatMap from "../components/WalletChart/HourlyHeatMap";
 
 const styles = StyleSheet.create({
   tilesContainer: {
@@ -261,7 +262,7 @@ function WalletCharts({ navigation }: any) {
     () => (
       <>
         <View style={styles.listHeader}>
-          <View style={{ height: Layout.screen.height / 3 }}>
+          <View style={{ height: Layout.screen.height / 2.8, marginBottom: 15 }}>
             {chartType === "pie" ? (
               <PieChart data={chartData} totalSum={sumOfExpenses} onPress={onChartPress} />
             ) : (
@@ -369,6 +370,8 @@ function WalletCharts({ navigation }: any) {
               <MonthlyCategoryComparison />
 
               <CalendarHeatmap />
+
+              <HourlySpendingsHeatMap />
             </>
           </Suspense>
         }
