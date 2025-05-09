@@ -150,6 +150,10 @@ function WalletCharts({ navigation }: any) {
     };
   }, [loading]);
 
+  const filteredExpenses = useMemo(() => {
+    return data?.wallet?.expenses?.filter((item) => !getInvalidExpenses(item)) || [];
+  }, [data?.wallet?.expenses]);
+
   const [excluded, setExcluded] = useState<string[]>([]);
 
   const listRef = useRef<VirtualizedList<any> | null>(null);
@@ -232,10 +236,6 @@ function WalletCharts({ navigation }: any) {
   };
 
   const currentBalance = useGetBalance();
-
-  const filteredExpenses = useMemo(() => {
-    return data?.wallet?.expenses?.filter((item) => !getInvalidExpenses(item)) || [];
-  }, [data?.wallet?.expenses]);
 
   const chartData = useMemo(() => {
     return barData.filter((item) => {

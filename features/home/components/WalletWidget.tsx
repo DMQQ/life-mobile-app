@@ -7,8 +7,8 @@ import Ripple from "react-native-material-ripple";
 import moment from "moment";
 import { memo, useState } from "react";
 import Animated, { LinearTransition } from "react-native-reanimated";
-import WalletLimits from "@/screens/wallet/components/Limits";
-import useGetStatistics from "@/screens/wallet/hooks/useGetStatistics";
+import WalletLimits from "@/features/wallet/components/Limits";
+import useGetStatistics from "@/features/wallet/hooks/useGetStatistics";
 
 const Sizing = {
   heading: 30,

@@ -1,7 +1,7 @@
 import { Modal, View, StyleSheet, TouchableOpacity } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { GesturedImage } from "@/screens/timeline/pages/ImagesPreview";
+import { GesturedImage } from "@/features/timeline/pages/ImagesPreview";
 
 const ImageViewerModal = ({ selectedImage, onClose }: any) => {
   const insets = useSafeAreaInsets();

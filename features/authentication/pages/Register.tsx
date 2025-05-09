@@ -5,7 +5,7 @@ import useAuthForm from "../hooks/useAuthForm";
 import Modal from "@/components/ui/Modal";
 
 import { ActivityIndicator } from "react-native";
-import ErrorMessageModal from "@/screens/authentication/components/ErrorMessageModal";
+import ErrorMessageModal from "@/features/authentication/components/ErrorMessageModal";
 
 export default function Register() {
   const { onSubmit, validationSchema, state, savedCredentials } = useAuthForm("register");

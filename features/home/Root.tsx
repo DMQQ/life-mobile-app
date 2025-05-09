@@ -1,6 +1,6 @@
 import ScreenContainer from "@/components/ui/ScreenContainer";
-import TodaysTimelineEvents from "@/screens/home/components/EventsWidget";
-import AvailableBalanceWidget from "@/screens/home/components/WalletWidget";
+import TodaysTimelineEvents from "@/features/home/components/EventsWidget";
+import AvailableBalanceWidget from "@/features/home/components/WalletWidget";
 import { ScreenProps } from "@/types";
 import { useAppSelector } from "@/utils/redux";
 import { GET_MAIN_SCREEN } from "@/utils/schemas/GET_MAIN_SCREEN";
