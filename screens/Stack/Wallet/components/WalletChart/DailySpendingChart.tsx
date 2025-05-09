@@ -4,8 +4,6 @@ import { BarChart, LineChart } from "react-native-gifted-charts";
 import moment from "moment";
 import Layout from "@/constants/Layout";
 import Colors, { secondary_candidates } from "@/constants/Colors";
-import Charts from "../Wallet/Charts";
-import { categoryColors } from "../../pages/WalletCharts";
 import { Icons } from "../ExpenseIcon";
 import Color from "color";
 
@@ -53,12 +51,16 @@ export default function DailySpendingChart({ data }: Props) {
         <Text style={{ color: "gray", marginTop: 5 }}>Sum of expenses for each day shown on a chart</Text>
       </View>
 
+      <Text style={{ color: "#fff", marginBottom: 15 }}>
+        From: {moment(data[data.length - 1].date).format("MMM D, YYYY")} to {moment(data[0].date).format("MMM D, YYYY")}
+      </Text>
+
       <View style={{ height: 300 }}>
         <BarChart
           width={Layout.screen.width - 60}
           height={Layout.screen.height / 3.5}
           sideColor={"#fff"}
-          barWidth={20}
+          barWidth={35}
           noOfSections={3}
           barBorderRadius={4}
           frontColor={Colors.secondary}

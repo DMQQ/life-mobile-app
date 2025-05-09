@@ -7,6 +7,7 @@ import Button from "@/components/ui/Button/Button";
 import lowOpacity from "@/utils/functions/lowOpacity";
 import { gql, useQuery } from "@apollo/client";
 import moment from "moment";
+import DateTimePicker from "react-native-modal-datetime-picker";
 
 const GET_MONTHLY_CATEGORY_COMPARISON = gql`
   query MonthlyCategoryComparison($months: [String!]!) {
@@ -61,7 +62,7 @@ interface CustomBarChartProps {
 const CustomBarChart: React.FC<CustomBarChartProps> = ({ data, maxValue }) => {
   const [selectedBarInfo, setSelectedBarInfo] = useState<BarItem | null>(null);
 
-  const BAR_WIDTH = 24;
+  const BAR_WIDTH = 35;
   const BAR_SPACING = 6;
   const GROUP_SPACING = 40;
   const CATEGORY_LABEL_HEIGHT = 20;
@@ -177,6 +178,7 @@ const blueText = Color(Colors.primary).lighten(10).string();
 
 const MonthlyCategoryComparison: React.FC = () => {
   const defaultMonths = useMemo(() => {
+    // Create an array of the last 3 months as default
     const months = [];
     for (let i = 2; i >= 0; i--) {
       const date = moment().subtract(i, "months").format("YYYY-MM-DD");
@@ -185,13 +187,53 @@ const MonthlyCategoryComparison: React.FC = () => {
     return months;
   }, []);
 
-  const [selectedMonths] = useState<string[]>(defaultMonths);
+  // Start and end dates for the date pickers
+  const [dateRange, setDateRange] = useState<[string, string]>([
+    moment().subtract(2, "months").startOf("month").format("YYYY-MM-DD"),
+    moment().format("YYYY-MM-DD"),
+  ]);
+  const [selectedMonths, setSelectedMonths] = useState<string[]>(defaultMonths);
+  const [showStartDatePicker, setShowStartDatePicker] = useState(false);
+  const [showEndDatePicker, setShowEndDatePicker] = useState(false);
   const [viewType, setViewType] = useState<"total" | "avg" | "count">("total");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
+  // Generate array of months between start and end date
+  const generateMonthsArray = (startDate: string, endDate: string): string[] => {
+    const start = moment(startDate).startOf("month");
+    const end = moment(endDate).startOf("month");
+    const months: string[] = [];
+
+    let current = moment(start);
+    while (current.isSameOrBefore(end, "month")) {
+      months.push(current.format("YYYY-MM-DD"));
+      current.add(1, "month");
+    }
+
+    return months;
+  };
+
+  // Update months array when date range changes
+  useMemo(() => {
+    const monthsArray = generateMonthsArray(dateRange[0], dateRange[1]);
+    setSelectedMonths(monthsArray);
+  }, [dateRange]);
 
   const { loading, error, data } = useQuery(GET_MONTHLY_CATEGORY_COMPARISON, {
     variables: { months: selectedMonths },
   });
+
+  const handleStartDateConfirm = (date: Date) => {
+    const formattedDate = moment(date).format("YYYY-MM-DD");
+    setDateRange([formattedDate, dateRange[1]]);
+    setShowStartDatePicker(false);
+  };
+
+  const handleEndDateConfirm = (date: Date) => {
+    const formattedDate = moment(date).format("YYYY-MM-DD");
+    setDateRange([dateRange[0], formattedDate]);
+    setShowEndDatePicker(false);
+  };
 
   const { chartData, categories, months, maxValue } = useMemo(() => {
     if (!data?.monthlyCategoryComparison || !Array.isArray(data.monthlyCategoryComparison)) {
@@ -324,6 +366,16 @@ const MonthlyCategoryComparison: React.FC = () => {
         <Text style={{ color: "#fff", fontSize: 18, fontWeight: 600, marginBottom: 5 }}>Monthly Category Comparison</Text>
         <Text style={styles.subtitle}>Monthly comparison of your expenses by category</Text>
 
+        <View style={styles.dateRangeContainer}>
+          <TouchableOpacity style={styles.dateButton} onPress={() => setShowStartDatePicker(true)}>
+            <Text style={styles.dateButtonText}>From: {moment(dateRange[0]).format("MMM D, YYYY")}</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.dateButton} onPress={() => setShowEndDatePicker(true)}>
+            <Text style={styles.dateButtonText}>To: {moment(dateRange[1]).format("MMM D, YYYY")}</Text>
+          </TouchableOpacity>
+        </View>
+
         <View style={styles.typeSelectorContainer}>
           {["total", "avg", "count"].map((item) => (
             <Button
@@ -390,6 +442,24 @@ const MonthlyCategoryComparison: React.FC = () => {
         </View>
       )}
       {MonthLegend}
+
+      <DateTimePicker
+        isVisible={showStartDatePicker}
+        mode="date"
+        onConfirm={handleStartDateConfirm}
+        onCancel={() => setShowStartDatePicker(false)}
+        date={moment(dateRange[0]).toDate()}
+        maximumDate={moment(dateRange[1]).toDate()}
+      />
+
+      <DateTimePicker
+        isVisible={showEndDatePicker}
+        mode="date"
+        onConfirm={handleEndDateConfirm}
+        onCancel={() => setShowEndDatePicker(false)}
+        date={moment(dateRange[1]).toDate()}
+        minimumDate={moment(dateRange[0]).toDate()}
+      />
     </View>
   );
 };
@@ -417,6 +487,35 @@ const styles = StyleSheet.create({
     color: "gray",
     fontSize: 16,
     marginBottom: 20,
+  },
+  dateRangeContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 15,
+  },
+  dateButton: {
+    backgroundColor: lowOpacity(Colors.primary, 0.3),
+    borderWidth: 1,
+    borderColor: lowOpacity(Colors.primary, 0.5),
+    borderRadius: 7.5,
+    padding: 10,
+    width: "48%",
+    alignItems: "center",
+  },
+  dateButtonText: {
+    color: "#fff",
+    fontSize: 14,
+  },
+  selectedMonthsInfo: {
+    backgroundColor: Color(Colors.primary).lighten(0.3).string(),
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 15,
+  },
+  selectedMonthsText: {
+    color: "#fff",
+    fontSize: 12,
+    textAlign: "center",
   },
   typeSelectorContainer: {
     flexDirection: "row",

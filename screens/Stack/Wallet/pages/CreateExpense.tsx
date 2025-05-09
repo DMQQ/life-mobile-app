@@ -31,7 +31,7 @@ import { FlatList } from "react-native-gesture-handler";
 import { gql, useApolloClient, useMutation } from "@apollo/client";
 import Feedback from "react-native-haptic-feedback";
 import Button from "@/components/ui/Button/Button";
-import SpontaneousRate, { SpontaneousRateChip, SpontaneousRateSelector } from "../components/CreateExpense/SpontaneousRate";
+import { SpontaneousRateChip, SpontaneousRateSelector } from "../components/CreateExpense/SpontaneousRate";
 
 interface SubExpense {
   id: string;
@@ -59,39 +59,6 @@ const useUploadSubExpense = (onCompleted: () => void) => {
 
 const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
 
-const spontaneousOptions = [
-  {
-    label: "Budgeted for",
-    value: 0,
-    icon: "📅",
-  },
-  {
-    label: "Planned purchase",
-    value: 20,
-    icon: "📝",
-  },
-  {
-    label: "Sale opportunity",
-    value: 40,
-    icon: "🏷️",
-  },
-  {
-    label: "Quick decision",
-    value: 60,
-    icon: "⏱️",
-  },
-  {
-    label: "Spontaneous treat",
-    value: 80,
-    icon: "🍦",
-  },
-  {
-    label: "Complete impulse",
-    value: 100,
-    icon: "🛍️",
-  },
-];
-
 export default function CreateExpenseModal({ navigation, route: { params } }: any) {
   const { createExpense, loading } = useCreateActivity({
     onCompleted() {},
@@ -108,7 +75,7 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
   const [type, setType] = useState<"expense" | "income" | null>(params?.type || null);
   const [isSubscription, setIsSubscription] = useState(false);
 
-  const [spontaneousRate, setSpontaneousRate] = useState(0);
+  const [spontaneousRate, setSpontaneousRate] = useState(params?.spontaneousRate || 0);
 
   const [isSubExpenseMode, setIsSubExpenseMode] = useState(false);
 
@@ -171,6 +138,7 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
           category: category,
           expenseId: params.id,
           date: date,
+          spontaneousRate,
         },
       }).catch((e) => console.log(e));
 
@@ -338,7 +306,7 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
     if (!isSubExpenseMode) {
       setRegularModeState({
         amount: amount === "0" ? calculateSubExpensesTotal().toString() : amount,
-        date,
+        date: date as any,
         category,
         name,
         type,
@@ -546,15 +514,6 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
                         {category === "none" ? "Select category" : category}
                       </Text>
                     </Ripple>
-                    {!params?.isEditing && (
-                      <Ripple
-                        onPress={() => setIsSubscription((p) => !p)}
-                        style={[styles.chip, { backgroundColor: isSubscription ? secondary_candidates[3] : Colors.primary_lighter }]}
-                      >
-                        <AntDesign name="creditcard" size={15} color="rgba(255,255,255,0.7)" />
-                        <Text style={{ color: "rgba(255,255,255,0.7)", fontSize: 14 }}>Subscription</Text>
-                      </Ripple>
-                    )}
                     <SpontaneousRateChip
                       value={spontaneousRate}
                       onPress={() => {
@@ -574,6 +533,8 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
                   }}
                   current={category}
                   onPress={(item) => {
+                    setIsSubscription(item === "subscription");
+
                     setCategory(item as keyof typeof Icons);
                     setChangeView(false);
                   }}
