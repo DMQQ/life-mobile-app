@@ -5,7 +5,7 @@ import { AntDesign, MaterialIcons } from "@expo/vector-icons";
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ActivityIndicator, Alert, StyleSheet, Text, View, VirtualizedList } from "react-native";
 import Charts from "../components/Wallet/Charts";
-import WalletItem, { Icons } from "../components/Wallet/WalletItem";
+import WalletItem, { Icons, WalletElement } from "../components/Wallet/WalletItem";
 import useGetWallet, { useGetBalance } from "../hooks/useGetWallet";
 import PieChart from "../components/WalletChart/PieChart";
 import wrapWithFunction from "@/utils/functions/wrapFn";
@@ -22,6 +22,10 @@ import Ripple from "react-native-material-ripple";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 import Feedback from "react-native-haptic-feedback";
+import MonthlyCategoryComparison from "../components/WalletChart/MonthlyComparison";
+import CalendarHeatmap from "../components/WalletChart/MonthlySpendingHeatMap";
+import moment from "moment";
+import HourlySpendingsHeatMap from "../components/WalletChart/HourlyHeatMap";
 
 const styles = StyleSheet.create({
   tilesContainer: {
@@ -112,6 +116,14 @@ const categoryColors = {
   none: Colors.primary, // You might want to replace this with an actual hex value
 };
 
+export const getInvalidExpenses = (curr: Expense) =>
+  !curr.category ||
+  curr.description.startsWith("Balance") ||
+  curr.type === "income" ||
+  curr.type === "refunded" ||
+  curr.category === "refunded" ||
+  curr.amount == 0;
+
 function WalletCharts({ navigation }: any) {
   const {
     data = { wallet: { expenses: [] } },
@@ -131,7 +143,7 @@ function WalletCharts({ navigation }: any) {
 
     let timeout = setTimeout(() => {
       setOverlay(false);
-    }, 1000);
+    }, 1500);
 
     return () => {
       clearTimeout(timeout);
@@ -148,16 +160,18 @@ function WalletCharts({ navigation }: any) {
   const barData = useMemo(() => {
     if (!data?.wallet?.expenses) return [];
 
+    const itemsCountPerCategory = data.wallet.expenses.reduce((acc, curr) => {
+      if (getInvalidExpenses(curr)) return acc;
+      const key = curr.category;
+
+      if (!acc[key]) acc[key] = 0;
+
+      acc[key] += 1;
+      return acc;
+    }, {} as Record<string, number>);
+
     const mapped = data.wallet.expenses.reduce((acc, curr) => {
-      if (
-        !curr.category ||
-        curr.description.startsWith("Balance") ||
-        curr.type === "income" ||
-        curr.type === "refunded" ||
-        curr.category === "refunded" ||
-        curr.amount == 0
-      )
-        return acc;
+      if (getInvalidExpenses(curr)) return acc;
       const key = curr.category;
 
       if (!acc[key]) acc[key] = 0;
@@ -172,23 +186,25 @@ function WalletCharts({ navigation }: any) {
         label: key,
         color: categoryColors[key as keyof typeof Icons],
         selected: key === selected,
+        itemsCount: itemsCountPerCategory[key as keyof typeof Icons],
       }))
       .sort((a, b) => b.value - a.value) as {
       label: string;
       value: number;
       color: string;
+      selected: boolean;
+      itemsCount: number;
     }[];
   }, [data?.wallet?.expenses, excluded]);
 
   const sumOfExpenses = useMemo(() => {
     if (!data?.wallet?.expenses) return 0;
 
-    return data.wallet.expenses.reduce((acc, curr) => {
-      if (curr.type === "income" || curr.type === "refunded" || excluded.includes(curr.category)) return acc;
-
-      return acc + curr.amount;
+    return barData.reduce((acc, curr) => {
+      if (excluded.includes(curr.label)) return acc;
+      return acc + curr.value;
     }, 0);
-  }, [data?.wallet?.expenses, excluded.length]);
+  }, [barData, excluded.length]);
 
   const onLegendItemPress = (item: { label: string }) => {
     if (!item.label) return;
@@ -208,7 +224,7 @@ function WalletCharts({ navigation }: any) {
   const selectedCategoryData =
     selected === ""
       ? data?.wallet?.expenses || []
-      : data?.wallet?.expenses.filter((item) => item.category === selected && item.type !== "refunded") || [];
+      : data?.wallet?.expenses?.filter((item) => item.category === selected && item.type !== "refunded") || [];
 
   const onChartPress = (e: any) => {
     setSelected(e.label);
@@ -218,7 +234,7 @@ function WalletCharts({ navigation }: any) {
   const currentBalance = useGetBalance();
 
   const filteredExpenses = useMemo(() => {
-    return data?.wallet?.expenses.filter((item) => item.type === "expense" || item.type === "refunded" || item.amount === 0) || [];
+    return data?.wallet?.expenses?.filter((item) => !getInvalidExpenses(item)) || [];
   }, [data?.wallet?.expenses]);
 
   const chartData = useMemo(() => {
@@ -246,7 +262,7 @@ function WalletCharts({ navigation }: any) {
     () => (
       <>
         <View style={styles.listHeader}>
-          <View style={{ height: Layout.screen.height / 3 }}>
+          <View style={{ height: Layout.screen.height / 2.8, marginBottom: 15 }}>
             {chartType === "pie" ? (
               <PieChart data={chartData} totalSum={sumOfExpenses} onPress={onChartPress} />
             ) : (
@@ -298,6 +314,8 @@ function WalletCharts({ navigation }: any) {
 
   const insets = useSafeAreaInsets();
 
+  const monthDiff = moment(filters.date.from).diff(moment(filters.date.to));
+
   return (
     <View style={{ paddingTop: 15, paddingBottom: insets.bottom }}>
       {overlay && (
@@ -344,8 +362,16 @@ function WalletCharts({ navigation }: any) {
               )}
               <StatisticsSummary dates={filters.date} data={stats?.statistics} />
               <SpendingsByDay data={filteredExpenses} />
-              <FutureProjection data={filteredExpenses} income={5500} currentBalance={currentBalance} />
+              {monthDiff > 28 && monthDiff < 32 && (
+                <FutureProjection data={filteredExpenses} income={5500} currentBalance={currentBalance} />
+              )}
               <DailySpendingChart data={filteredExpenses} />
+
+              <MonthlyCategoryComparison />
+
+              <CalendarHeatmap />
+
+              <HourlySpendingsHeatMap />
             </>
           </Suspense>
         }

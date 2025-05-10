@@ -172,7 +172,7 @@ const Forms = (props: ExpenseFiltersProps) => {
           multiSelect
           closeOnSelect={false}
           onFocusChange={() => onFocus()}
-          selected={props?.filters?.category || []}
+          selected={Array.isArray(props?.filters?.category) ? props?.filters?.category : [props?.filters?.category]}
           setSelected={(selected) => {
             props.dispatch({ type: "SET_CATEGORY", payload: selected });
           }}

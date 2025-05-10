@@ -2,9 +2,10 @@ import { useDispatch } from "react-redux";
 import { useAppSelector } from "../redux/index";
 import * as SecureStore from "expo-secure-store";
 import { userActions } from "../redux/user/user";
-import { useApolloClient, ApolloLink } from "@apollo/client";
+import { useApolloClient, ApolloLink, useMutation, gql } from "@apollo/client";
 
 import * as SplashScreen from "expo-splash-screen";
+import { useEffect } from "react";
 
 export const STORE_KEY = "user";
 
@@ -33,6 +34,29 @@ export default function useUser() {
 
     dispatch(userActions.removeUser());
   }
+
+  const [refreshToken] = useMutation(gql`
+    mutation {
+      refreshToken
+    }
+  `);
+
+  useEffect(() => {
+    if (user.isAuthenticated) {
+      const refresh = async () => {
+        const token = await SecureStore.getItemAsync(STORE_KEY);
+
+        if (token) {
+          const { data } = await refreshToken();
+          const parsedToken = JSON.parse(token);
+          const newUser = { ...parsedToken, token: data.refreshToken };
+          await SecureStore.setItemAsync(STORE_KEY, JSON.stringify(newUser));
+          dispatch(userActions.loadUser(newUser));
+        }
+      };
+      refresh();
+    }
+  }, [user.isAuthenticated]);
 
   async function saveUser(input: { user: any; token: string }) {
     await SecureStore.setItemAsync(STORE_KEY, JSON.stringify(input));

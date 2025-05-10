@@ -6,11 +6,14 @@ import Color from "color";
 import Animated, { LinearTransition } from "react-native-reanimated";
 import { Icons } from "../ExpenseIcon";
 import lowOpacity from "@/utils/functions/lowOpacity";
+import React from "react";
 
 interface ICategory {
   label: string;
   value: number;
   color: string;
+
+  itemsCount: number;
 }
 
 interface LegendProps {
@@ -35,6 +38,7 @@ const Legend = (props: LegendProps) =>
       </View>
       {props.data.map((item, index) => {
         const isExcluded = props.excluded?.includes(item.label);
+
         return (
           <Ripple
             onLongPress={() => props.onLongPress?.(item)}
@@ -44,7 +48,7 @@ const Legend = (props: LegendProps) =>
               styles.tile,
 
               {
-                width: props.data.length - 1 === index && props.data.length % 2 === 1 ? "100%" : (Layout.screen.width - 30) / 2 - 5,
+                width: props.data.length - 1 === index && props.data.length % 2 === 1 ? "100%" : (Layout.screen.width - 30) / 2 - 7.5,
                 backgroundColor:
                   props.selected === item.label
                     ? Color(Colors.primary_light).lighten(0.4).string()
@@ -74,8 +78,25 @@ const Legend = (props: LegendProps) =>
                 )}
               </Text>
             </Text>
+            <View style={styles.tileText}>
+              {/* <View style={[styles.dot, { backgroundColor: item.color }]} /> */}
 
-            <View style={{ width: "100%", overflow: "hidden" }}>
+              <View
+                style={{
+                  backgroundColor: lowOpacity(item.color, 0.2),
+                  padding: 10,
+                  borderRadius: 100,
+                }}
+              >
+                {Icons?.[item.label as keyof typeof Icons]?.icon}
+              </View>
+
+              <View style={{ gap: 1.5 }}>
+                <Text style={{ color: blueText, fontSize: 15, fontWeight: 500 }}>{capitalize(item.label)}</Text>
+                <Text style={{ fontSize: 11, color: "rgba(255,255,255,0.6)" }}>(No transactions {item.itemsCount})</Text>
+              </View>
+            </View>
+            <View style={{ width: "100%", overflow: "hidden", position: "absolute", bottom: 0 }}>
               <View
                 style={{
                   width: (((item.value / props.totalSum) * 100).toFixed(2) + "%") as any,
@@ -86,37 +107,22 @@ const Legend = (props: LegendProps) =>
                 }}
               />
             </View>
-
-            <View style={styles.tileText}>
-              {/* <View style={[styles.dot, { backgroundColor: item.color }]} /> */}
-
-              <View
-                style={{
-                  backgroundColor: lowOpacity(item.color, 0.2),
-                  padding: 7.5,
-                  borderRadius: 100,
-                }}
-              >
-                {Icons?.[item.label as keyof typeof Icons]?.icon}
-              </View>
-
-              <Text style={{ color: blueText, fontSize: 17 }}>{capitalize(item.label)}</Text>
-            </View>
           </Ripple>
         );
       })}
     </Animated.View>
   );
 
-const blueText = Color(Colors.primary).lighten(10).string();
+const blueText = "#fff";
 
 const styles = StyleSheet.create({
   tilesContainer: {
     marginTop: 15,
     width: Layout.window.width - 30,
-    gap: 10,
+    gap: 15,
     flexDirection: "row",
     flexWrap: "wrap",
+    justifyContent: "space-between",
   },
 
   tile: {
@@ -125,6 +131,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary_light,
     borderRadius: 15,
     gap: 5,
+    paddingBottom: 30,
   },
   dot: {
     width: 10,

@@ -84,8 +84,8 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
   const insets = useSafeAreaInsets();
 
   const animatedContainerStyle = useAnimatedStyle(() => ({
-    height: interpolate(scrollY.value, [0, 200], [150, 35], Extrapolation.CLAMP),
-    width: interpolate(scrollY.value, [0, 200], [Layout.screen.width, 200], Extrapolation.CLAMP),
+    height: interpolate(scrollY.value, [0, 180], [110, 35], Extrapolation.CLAMP),
+    width: interpolate(scrollY.value, [0, 180], [Layout.screen.width, 200], Extrapolation.CLAMP),
     transform: [
       {
         translateY: interpolate(scrollY.value, [0, 200], [0, -40], Extrapolation.CLAMP),
@@ -96,10 +96,10 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
   }));
 
   const animatedBalanceStyle = useAnimatedStyle(() => ({
-    fontSize: interpolate(scrollY.value, [0, 200], [70, 25], Extrapolation.CLAMP),
+    fontSize: interpolate(scrollY.value, [0, 100, 200], [70, 50, 25], Extrapolation.CLAMP),
   }));
 
-  const balance = loading ? " ..." : (wallet?.balance || 0).toFixed(2);
+  const balance = loading && wallet?.balance === undefined ? " ..." : (wallet?.balance || 0).toFixed(2);
 
   const handleShowEditSheet = () => {
     editBalanceRef.current?.expand();

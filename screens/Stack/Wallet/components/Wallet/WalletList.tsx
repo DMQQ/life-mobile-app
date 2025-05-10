@@ -11,6 +11,8 @@ import Ripple from "react-native-material-ripple";
 import { useWalletContext } from "../WalletContext";
 import { gql, useQuery } from "@apollo/client";
 import { useNavigation, useRoute } from "@react-navigation/native";
+import WalletLimits from "../Limits";
+import { getInvalidExpenses } from "../../pages/WalletCharts";
 
 const AnimatedList = Animated.createAnimatedComponent(VirtualizedList);
 
@@ -43,7 +45,7 @@ export default function WalletList(props: {
         expense: expense,
       });
     }
-  }, [props?.wallet?.expenses.length]);
+  }, [props?.wallet?.expenses?.length]);
 
   const data = useMemo(() => {
     const sorted = [] as {
@@ -87,6 +89,11 @@ export default function WalletList(props: {
 
   return (
     <AnimatedList
+      ListHeaderComponent={
+        <>
+          <WalletLimits />
+        </>
+      }
       onEndReached={!props.isLocked ? props.onEndReached : () => {}}
       onEndReachedThreshold={0.5}
       scrollEventThrottle={16}
@@ -97,7 +104,7 @@ export default function WalletList(props: {
         padding: 15,
       }}
       data={data || []}
-      keyExtractor={(expense: any, idx) => expense.month + "_" + idx}
+      keyExtractor={(expense: any, idx) => expense.month}
       renderItem={renderItem as any}
       getItem={(data, index) => data[index]}
       getItemCount={(data) => data.length}
@@ -127,6 +134,21 @@ const MonthExpenseList = ({
 
   const amount = diff.data?.getMonthTotal || 0;
 
+  const sum = (items: Expense[]) => {
+    const expenses = items.reduce((acc, expense) => {
+      if (getInvalidExpenses(expense)) return acc;
+      const value = expense.amount;
+      return acc + (isNaN(value) ? 0 : value);
+    }, 0);
+
+    const income = items.reduce((acc, expense) => {
+      if (expense.type !== "income") return acc;
+      const value = expense.amount;
+      return acc + (isNaN(value) ? 0 : value);
+    }, 0);
+    return [expenses, income] as [number, number];
+  };
+
   return (
     <Animated.View style={{ marginBottom: 30 }} layout={LinearTransition.delay(100)}>
       <View style={styles.monthRow}>
@@ -152,6 +174,11 @@ const MonthExpenseList = ({
             setSelected(expense as any);
             sheet.current?.snapToIndex(0);
           }}
+          sum={sum(
+            item?.expenses.filter((item) => {
+              return moment(item.date).isSame(expense.date, "day");
+            })
+          )}
         />
       ))}
     </Animated.View>
@@ -163,11 +190,13 @@ const ListItem = ({
   index,
   expenses,
   handlePress,
+  sum,
 }: {
   item: Expense;
   index: number;
   expenses: Expense[];
   handlePress: () => void;
+  sum: [number, number];
 }) => {
   const hasPrevious = expenses?.[index - 1] !== undefined;
 
@@ -181,17 +210,31 @@ const ListItem = ({
     calendar: { setCalendarDate },
   } = useWalletContext();
 
+  const navigation = useNavigation<any>();
+
   return (
     <Animated.View entering={FadeInDown} layout={LinearTransition.delay(100)}>
       {!areDatesEqual && (
         <Ripple
           onPress={() => {
             setCalendarDate(moment(item.date).toDate());
-            bottomSheetRef.current?.snapToIndex(0);
+            navigation.navigate("CreateExpense", {
+              date: moment(item.date).format("YYYY-MM-DD"),
+            });
           }}
-          style={[styles.dateTextContainer, { marginBottom: 10, marginTop: 10 }]}
+          style={[styles.dateTextContainer, { marginBottom: 15, marginTop: 10, alignItems: "center" }]}
         >
           <Text style={styles.dateText}>{parseDateToText(item.date)}</Text>
+
+          <View style={{ gap: 5, flexDirection: "row" }}>
+            {sum[0] > 0 && (
+              <Text style={[styles.dateText, { color: "#F07070" }]}>{sum[0] > 0 ? `-${sum[0].toFixed(2)}` : sum[0].toFixed(2)} zł</Text>
+            )}
+            {sum[0] > 0 && sum[1] > 0 && <Text style={styles.dateText}>/</Text>}
+            {sum[1] > 0 && (
+              <Text style={[styles.dateText, { color: "#66E875" }]}>{sum[1] > 0 ? `+${sum[1].toFixed(2)}` : sum[1].toFixed(2)} zł</Text>
+            )}
+          </View>
         </Ripple>
       )}
       <WalletItem index={index} handlePress={handlePress} {...(item as any)} />

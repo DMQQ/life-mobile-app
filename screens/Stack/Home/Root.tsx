@@ -16,7 +16,6 @@ import SkeletonPlaceholder from "@/components/SkeletonLoader/Skeleton";
 import { View } from "react-native";
 import Layout from "@/constants/Layout";
 import Animated, { FadeIn, FadeOut, LinearTransition } from "react-native-reanimated";
-import { FancySpinner } from "@/components/ui/FancyLoader";
 import { useState } from "react";
 import * as SplashScreen from "expo-splash-screen";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -115,7 +114,11 @@ export default function Root({ navigation }: ScreenProps<"Root">) {
 
       await SplashScreen.hideAsync();
     },
-    onError: (er) => console.log(JSON.stringify(er, null, 2)),
+    onError: (er) => {
+      console.log("Error fetching data", er);
+      setLoading(false);
+      SplashScreen.hideAsync();
+    },
   });
 
   const [loading, setLoading] = useState(true);

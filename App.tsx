@@ -9,7 +9,7 @@ import * as Notifications from "expo-notifications";
 import Url from "./constants/Url";
 import Colors from "./constants/Colors";
 import { setContext } from "@apollo/client/link/context";
-import { getItemAsync } from "expo-secure-store";
+import { getItemAsync, deleteItemAsync } from "expo-secure-store";
 import { STORE_KEY } from "./utils/hooks/useUser";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { LogBox } from "react-native";
