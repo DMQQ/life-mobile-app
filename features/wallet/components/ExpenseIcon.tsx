@@ -4,6 +4,7 @@ import lowOpacity from "@/utils/functions/lowOpacity";
 import { StyleSheet, View } from "react-native";
 
 export const Icons = {
+  // Original categories - preserved for backward compatibility
   housing: {
     icon: <AntDesign name="home" size={20} color={"#05ad21"} />,
     backgroundColor: "#05ad21",
@@ -17,8 +18,8 @@ export const Icons = {
     backgroundColor: "#5733FF",
   },
   drinks: {
-    icon: <Ionicons name="beer-outline" color={"#5733FF"} size={20} />,
-    backgroundColor: "#5733FF",
+    icon: <Ionicons name="beer-outline" color={"#ff774f"} size={20} />,
+    backgroundColor: "#ff774f",
   },
   shopping: {
     icon: <MaterialCommunityIcons name="shopping" size={20} color={"#ff5733"} />,
@@ -60,37 +61,30 @@ export const Icons = {
     icon: <Ionicons name="cash-outline" size={20} color="#cf0a80" />,
     backgroundColor: "#cf0a80",
   },
-
   travel: {
+    icon: <Ionicons name="airplane-outline" size={20} color="#33FF57" />,
     backgroundColor: "#33FF57",
-    icon: <Ionicons name="airplane-outline" size={20} color="#33ff57" />,
   },
-
   edit: {
-    backgroundColor: "gray",
     icon: <Ionicons name="create" color="#fff" size={20} />,
+    backgroundColor: "gray",
   },
-
   income: {
-    backgroundColor: Colors.secondary_light_1,
     icon: <FontAwesome5 name="dollar-sign" size={20} color={Colors.secondary_light_1} />,
-  },
-
-  animals: {
-    backgroundColor: "#ff5733",
-    icon: <FontAwesome5 name="dog" size={20} color="#ff5733" />,
-  },
-
-  refunded: {
     backgroundColor: Colors.secondary_light_1,
+  },
+  animals: {
+    icon: <FontAwesome5 name="dog" size={20} color="#ff5733" />,
+    backgroundColor: "#ff5733",
+  },
+  refunded: {
     icon: <Entypo name="back-in-time" color={Colors.secondary_light_2} size={20} />,
+    backgroundColor: Colors.secondary_light_1,
   },
-
   gifts: {
+    icon: <MaterialCommunityIcons name="gift" size={20} color="#33FF57" />,
     backgroundColor: "#33FF57",
-    icon: <MaterialCommunityIcons name="gift" size={20} color="#33ff57" />,
   },
-
   subscriptions: {
     icon: <MaterialCommunityIcons name="refresh" size={20} color="#8033ff" />,
     backgroundColor: "#8033ff",
@@ -123,12 +117,448 @@ export const Icons = {
     icon: <MaterialCommunityIcons name="face-woman" size={20} color="#ff33a1" />,
     backgroundColor: "#ff33a1",
   },
+  pets: {
+    icon: <MaterialCommunityIcons name="cat" size={20} color="#827717" />,
+    backgroundColor: "#827717",
+  },
+
+  // Also keep standalone categories for backward compatibility
+  weed: {
+    icon: <MaterialCommunityIcons name="cannabis" size={20} color="#01796F" />,
+    backgroundColor: "#01796F",
+  },
+  alcohol: {
+    icon: <MaterialCommunityIcons name="glass-wine" size={20} color="#8B0000" />,
+    backgroundColor: "#8B0000",
+  },
+  vape: {
+    icon: <MaterialCommunityIcons name="smoking-pipe" size={20} color="#4A0404" />,
+    backgroundColor: "#4A0404",
+  },
+  tattoos: {
+    icon: <MaterialCommunityIcons name="needle" size={20} color="#111111" />,
+    backgroundColor: "#111111",
+  },
+  dating: {
+    icon: <MaterialCommunityIcons name="heart" size={20} color="#E91E63" />,
+    backgroundColor: "#E91E63",
+  },
+  gambling: {
+    icon: <MaterialCommunityIcons name="dice-multiple" size={20} color="#4B0082" />,
+    backgroundColor: "#4B0082",
+  },
+  fastFood: {
+    icon: <MaterialCommunityIcons name="hamburger" size={20} color="#D84315" />,
+    backgroundColor: "#D84315",
+  },
+  videoGames: {
+    icon: <MaterialCommunityIcons name="gamepad-variant" size={20} color="#311B92" />,
+    backgroundColor: "#311B92",
+  },
+  streaming: {
+    icon: <MaterialCommunityIcons name="youtube-subscription" size={20} color="#FF0000" />,
+    backgroundColor: "#FF0000",
+  },
+  concerts: {
+    icon: <MaterialCommunityIcons name="music" size={20} color="#6200EA" />,
+    backgroundColor: "#6200EA",
+  },
+  haircuts: {
+    icon: <MaterialCommunityIcons name="content-cut" size={20} color="#880E4F" />,
+    backgroundColor: "#880E4F",
+  },
+  coffee: {
+    icon: <MaterialCommunityIcons name="coffee" size={20} color="#5D4037" />,
+    backgroundColor: "#5D4037",
+  },
+  therapy: {
+    icon: <MaterialCommunityIcons name="head-heart" size={20} color="#006064" />,
+    backgroundColor: "#006064",
+  },
+  gym: {
+    icon: <MaterialCommunityIcons name="dumbbell" size={20} color="#FF6F00" />,
+    backgroundColor: "#FF6F00",
+  },
+  skincare: {
+    icon: <MaterialCommunityIcons name="lotion" size={20} color="#F48FB1" />,
+    backgroundColor: "#F48FB1",
+  },
+  dentist: {
+    icon: <MaterialCommunityIcons name="tooth" size={20} color="#0D47A1" />,
+    backgroundColor: "#0D47A1",
+  },
+  emergencies: {
+    icon: <MaterialCommunityIcons name="alert-circle" size={20} color="#D50000" />,
+    backgroundColor: "#D50000",
+  },
+  carRepair: {
+    icon: <MaterialCommunityIcons name="car-wrench" size={20} color="#3E2723" />,
+    backgroundColor: "#3E2723",
+  },
+  parking: {
+    icon: <MaterialCommunityIcons name="parking" size={20} color="#01579B" />,
+    backgroundColor: "#01579B",
+  },
+
+  // Hierarchical subcategories
+  "housing:rent": {
+    icon: <MaterialCommunityIcons name="home-city" size={20} color={"#05ad21"} />,
+    backgroundColor: "#05ad21",
+  },
+  "housing:mortgage": {
+    icon: <MaterialCommunityIcons name="bank" size={20} color={"#05ad21"} />,
+    backgroundColor: "#05ad21",
+  },
+  "housing:utilities": {
+    icon: <MaterialCommunityIcons name="power-plug-outline" size={20} color={"#05ad21"} />,
+    backgroundColor: "#05ad21",
+  },
+  "housing:furniture": {
+    icon: <MaterialCommunityIcons name="sofa" size={20} color={"#05ad21"} />,
+    backgroundColor: "#05ad21",
+  },
+
+  "transportation:gas": {
+    icon: <MaterialCommunityIcons name="gas-station" size={20} color={"#ab0505"} />,
+    backgroundColor: "#ab0505",
+  },
+  "transportation:repair": {
+    icon: <MaterialCommunityIcons name="car-wrench" size={20} color={"#ab0505"} />,
+    backgroundColor: "#ab0505",
+  },
+  "transportation:parking": {
+    icon: <MaterialCommunityIcons name="parking" size={20} color={"#ab0505"} />,
+    backgroundColor: "#ab0505",
+  },
+  "transportation:public": {
+    icon: <MaterialCommunityIcons name="bus" size={20} color={"#ab0505"} />,
+    backgroundColor: "#ab0505",
+  },
+  "transportation:taxi": {
+    icon: <MaterialCommunityIcons name="taxi" size={20} color={"#ab0505"} />,
+    backgroundColor: "#ab0505",
+  },
+
+  "food:groceries": {
+    icon: <MaterialCommunityIcons name="cart" size={20} color={"#5733FF"} />,
+    backgroundColor: "#5733FF",
+  },
+  "food:restaurant": {
+    icon: <MaterialCommunityIcons name="silverware-fork-knife" size={20} color={"#5733FF"} />,
+    backgroundColor: "#5733FF",
+  },
+  "food:fastfood": {
+    icon: <MaterialCommunityIcons name="hamburger" size={20} color={"#5733FF"} />,
+    backgroundColor: "#5733FF",
+  },
+  "food:delivery": {
+    icon: <MaterialCommunityIcons name="moped" size={20} color={"#5733FF"} />,
+    backgroundColor: "#5733FF",
+  },
+
+  "drinks:coffee": {
+    icon: <MaterialCommunityIcons name="coffee" size={20} color={"#5733FF"} />,
+    backgroundColor: "#5733FF",
+  },
+  "drinks:alcohol": {
+    icon: <MaterialCommunityIcons name="glass-wine" size={20} color={"#5733FF"} />,
+    backgroundColor: "#5733FF",
+  },
+  "drinks:beer": {
+    icon: <MaterialCommunityIcons name="beer" size={20} color={"#5733FF"} />,
+    backgroundColor: "#5733FF",
+  },
+  "drinks:softdrinks": {
+    icon: <MaterialCommunityIcons name="bottle-soda" size={20} color={"#5733FF"} />,
+    backgroundColor: "#5733FF",
+  },
+
+  "shopping:clothes": {
+    icon: <MaterialCommunityIcons name="tshirt-crew" size={20} color={"#ff5733"} />,
+    backgroundColor: "#ff5733",
+  },
+  "shopping:electronics": {
+    icon: <MaterialCommunityIcons name="television" size={20} color={"#ff5733"} />,
+    backgroundColor: "#ff5733",
+  },
+  "shopping:gifts": {
+    icon: <MaterialCommunityIcons name="gift" size={20} color={"#ff5733"} />,
+    backgroundColor: "#ff5733",
+  },
+  "shopping:online": {
+    icon: <MaterialCommunityIcons name="cart-outline" size={20} color={"#ff5733"} />,
+    backgroundColor: "#ff5733",
+  },
+
+  "addictions:tobacco": {
+    icon: <MaterialCommunityIcons name="cigar" size={20} color={"#ff5733"} />,
+    backgroundColor: "#ff5733",
+  },
+  "addictions:vape": {
+    icon: <MaterialCommunityIcons name="smoking-pipe" size={20} color={"#ff5733"} />,
+    backgroundColor: "#ff5733",
+  },
+  "addictions:weed": {
+    icon: <MaterialCommunityIcons name="cannabis" size={20} color={"#ff5733"} />,
+    backgroundColor: "#ff5733",
+  },
+  "addictions:gambling": {
+    icon: <MaterialCommunityIcons name="poker-chip" size={20} color={"#ff5733"} />,
+    backgroundColor: "#ff5733",
+  },
+
+  "entertainment:movies": {
+    icon: <MaterialCommunityIcons name="filmstrip" size={20} color={"#990583"} />,
+    backgroundColor: "#990583",
+  },
+  "entertainment:concerts": {
+    icon: <MaterialCommunityIcons name="music" size={20} color={"#990583"} />,
+    backgroundColor: "#990583",
+  },
+  "entertainment:sports": {
+    icon: <MaterialCommunityIcons name="basketball" size={20} color={"#990583"} />,
+    backgroundColor: "#990583",
+  },
+  "entertainment:games": {
+    icon: <MaterialCommunityIcons name="gamepad-variant" size={20} color={"#990583"} />,
+    backgroundColor: "#990583",
+  },
+  "entertainment:streaming": {
+    icon: <MaterialCommunityIcons name="youtube-subscription" size={20} color={"#990583"} />,
+    backgroundColor: "#990583",
+  },
+  "entertainment:dating": {
+    icon: <MaterialCommunityIcons name="heart" size={20} color={"#990583"} />,
+    backgroundColor: "#990583",
+  },
+
+  "health:doctor": {
+    icon: <MaterialCommunityIcons name="stethoscope" size={20} color={"#07bab4"} />,
+    backgroundColor: "#07bab4",
+  },
+  "health:dentist": {
+    icon: <MaterialCommunityIcons name="tooth" size={20} color={"#07bab4"} />,
+    backgroundColor: "#07bab4",
+  },
+  "health:medicine": {
+    icon: <MaterialCommunityIcons name="pill" size={20} color={"#07bab4"} />,
+    backgroundColor: "#07bab4",
+  },
+  "health:therapy": {
+    icon: <MaterialCommunityIcons name="head-heart" size={20} color={"#07bab4"} />,
+    backgroundColor: "#07bab4",
+  },
+  "health:gym": {
+    icon: <MaterialCommunityIcons name="dumbbell" size={20} color={"#07bab4"} />,
+    backgroundColor: "#07bab4",
+  },
+
+  "beauty:haircuts": {
+    icon: <MaterialCommunityIcons name="content-cut" size={20} color="#ff33a1" />,
+    backgroundColor: "#ff33a1",
+  },
+  "beauty:skincare": {
+    icon: <MaterialCommunityIcons name="lotion" size={20} color="#ff33a1" />,
+    backgroundColor: "#ff33a1",
+  },
+  "beauty:makeup": {
+    icon: <MaterialCommunityIcons name="lipstick" size={20} color="#ff33a1" />,
+    backgroundColor: "#ff33a1",
+  },
+  "beauty:spa": {
+    icon: <MaterialCommunityIcons name="spa" size={20} color="#ff33a1" />,
+    backgroundColor: "#ff33a1",
+  },
+  "beauty:tattoos": {
+    icon: <MaterialCommunityIcons name="needle" size={20} color="#ff33a1" />,
+    backgroundColor: "#ff33a1",
+  },
+
+  "work:supplies": {
+    icon: <MaterialCommunityIcons name="office-building" size={20} color={"#5733ff"} />,
+    backgroundColor: "#5733ff",
+  },
+  "work:equipment": {
+    icon: <MaterialCommunityIcons name="laptop" size={20} color={"#5733ff"} />,
+    backgroundColor: "#5733ff",
+  },
+  "work:commute": {
+    icon: <MaterialCommunityIcons name="train-car" size={20} color={"#5733ff"} />,
+    backgroundColor: "#5733ff",
+  },
+
+  "education:tuition": {
+    icon: <MaterialCommunityIcons name="school" size={20} color={"#cc9a1b"} />,
+    backgroundColor: "#cc9a1b",
+  },
+  "education:books": {
+    icon: <MaterialCommunityIcons name="book-open-variant" size={20} color={"#cc9a1b"} />,
+    backgroundColor: "#cc9a1b",
+  },
+  "education:courses": {
+    icon: <MaterialCommunityIcons name="certificate" size={20} color={"#cc9a1b"} />,
+    backgroundColor: "#cc9a1b",
+  },
+
+  "travel:flights": {
+    icon: <MaterialCommunityIcons name="airplane" size={20} color="#33FF57" />,
+    backgroundColor: "#33FF57",
+  },
+  "travel:hotels": {
+    icon: <MaterialCommunityIcons name="bed" size={20} color="#33FF57" />,
+    backgroundColor: "#33FF57",
+  },
+  "travel:rental": {
+    icon: <MaterialCommunityIcons name="car-estate" size={20} color="#33FF57" />,
+    backgroundColor: "#33FF57",
+  },
+  "travel:activities": {
+    icon: <MaterialCommunityIcons name="map-marker" size={20} color="#33FF57" />,
+    backgroundColor: "#33FF57",
+  },
+
+  "pets:food": {
+    icon: <MaterialCommunityIcons name="food-variant" size={20} color="#827717" />,
+    backgroundColor: "#827717",
+  },
+  "pets:vet": {
+    icon: <MaterialCommunityIcons name="medical-bag" size={20} color="#827717" />,
+    backgroundColor: "#827717",
+  },
+  "pets:supplies": {
+    icon: <MaterialCommunityIcons name="paw" size={20} color="#827717" />,
+    backgroundColor: "#827717",
+  },
+
+  "subscriptions:software": {
+    icon: <MaterialCommunityIcons name="microsoft" size={20} color="#8033ff" />,
+    backgroundColor: "#8033ff",
+  },
+  "subscriptions:media": {
+    icon: <MaterialCommunityIcons name="netflix" size={20} color="#8033ff" />,
+    backgroundColor: "#8033ff",
+  },
+  "subscriptions:news": {
+    icon: <MaterialCommunityIcons name="newspaper" size={20} color="#8033ff" />,
+    backgroundColor: "#8033ff",
+  },
+  "subscriptions:membership": {
+    icon: <MaterialCommunityIcons name="card-account-details" size={20} color="#8033ff" />,
+    backgroundColor: "#8033ff",
+  },
+
+  "taxes:income": {
+    icon: <MaterialCommunityIcons name="cash-lock" size={20} color="#ff3333" />,
+    backgroundColor: "#ff3333",
+  },
+  "taxes:property": {
+    icon: <MaterialCommunityIcons name="home-city" size={20} color="#ff3333" />,
+    backgroundColor: "#ff3333",
+  },
+
+  "debt:credit": {
+    icon: <MaterialCommunityIcons name="credit-card" size={20} color={"#ff5733"} />,
+    backgroundColor: "#ff5733",
+  },
+  "debt:loan": {
+    icon: <MaterialCommunityIcons name="bank" size={20} color={"#ff5733"} />,
+    backgroundColor: "#ff5733",
+  },
+  "debt:student": {
+    icon: <MaterialCommunityIcons name="school" size={20} color={"#ff5733"} />,
+    backgroundColor: "#ff5733",
+  },
+
+  "savings:emergency": {
+    icon: <MaterialCommunityIcons name="piggy-bank" size={20} color="#cf0a80" />,
+    backgroundColor: "#cf0a80",
+  },
+  "savings:retirement": {
+    icon: <MaterialCommunityIcons name="home-heart" size={20} color="#cf0a80" />,
+    backgroundColor: "#cf0a80",
+  },
+
+  "investments:stocks": {
+    icon: <MaterialCommunityIcons name="chart-timeline-variant" size={20} color="#33ff89" />,
+    backgroundColor: "#33ff89",
+  },
+  "investments:crypto": {
+    icon: <MaterialCommunityIcons name="bitcoin" size={20} color="#33ff89" />,
+    backgroundColor: "#33ff89",
+  },
+  "investments:property": {
+    icon: <MaterialCommunityIcons name="domain" size={20} color="#33ff89" />,
+    backgroundColor: "#33ff89",
+  },
+
+  "children:toys": {
+    icon: <MaterialCommunityIcons name="teddy-bear" size={20} color="#ff33d1" />,
+    backgroundColor: "#ff33d1",
+  },
+  "children:education": {
+    icon: <MaterialCommunityIcons name="school" size={20} color="#ff33d1" />,
+    backgroundColor: "#ff33d1",
+  },
+  "children:activities": {
+    icon: <MaterialCommunityIcons name="human-male-child" size={20} color="#ff33d1" />,
+    backgroundColor: "#ff33d1",
+  },
+
+  "donations:charity": {
+    icon: <MaterialCommunityIcons name="charity" size={20} color="#33ffd4" />,
+    backgroundColor: "#33ffd4",
+  },
+  "donations:religious": {
+    icon: <MaterialCommunityIcons name="church" size={20} color="#33ffd4" />,
+    backgroundColor: "#33ffd4",
+  },
+
+  "income:salary": {
+    icon: <MaterialCommunityIcons name="cash-multiple" size={20} color={Colors.secondary_light_1} />,
+    backgroundColor: Colors.secondary_light_1,
+  },
+  "income:bonus": {
+    icon: <MaterialCommunityIcons name="gift" size={20} color={Colors.secondary_light_1} />,
+    backgroundColor: Colors.secondary_light_1,
+  },
+  "income:freelance": {
+    icon: <MaterialCommunityIcons name="briefcase-outline" size={20} color={Colors.secondary_light_1} />,
+    backgroundColor: Colors.secondary_light_1,
+  },
+  "income:dividends": {
+    icon: <MaterialCommunityIcons name="chart-areaspline" size={20} color={Colors.secondary_light_1} />,
+    backgroundColor: Colors.secondary_light_1,
+  },
 
   none: {
-    backgroundColor: Colors.primary,
     icon: <Ionicons name="add" color={Colors.secondary} size={20} />,
+    backgroundColor: Colors.primary,
   },
-} as const;
+};
+
+const getCategoryName = (category: string) => {
+  return category.split(":").pop()?.replace(/_/g, " ") || "";
+};
+
+const getCategoryIcon = (category: string) => {
+  const icon = Icons[category as keyof typeof Icons];
+
+  if (icon) {
+    return icon.icon;
+  } else {
+    return Icons.none.icon;
+  }
+};
+
+const getCategoryParent = (category: string) => {
+  return category.split(":").shift()?.replace(/_/g, " ") || "";
+};
+
+export const CategoryUtils = {
+  getCategoryName,
+  getCategoryIcon,
+  getCategoryParent,
+};
 
 export const CategoryIcon = (props: { category: keyof typeof Icons; type: "income" | "expense" | "refunded"; clear?: boolean }) => {
   let category = props.category || "none";

@@ -26,6 +26,7 @@ import MonthlyCategoryComparison from "../components/WalletChart/MonthlyComparis
 import CalendarHeatmap from "../components/WalletChart/MonthlySpendingHeatMap";
 import moment from "moment";
 import HourlySpendingsHeatMap from "../components/WalletChart/HourlyHeatMap";
+import { CategoryUtils } from "../components/ExpenseIcon";
 
 const styles = StyleSheet.create({
   tilesContainer: {
@@ -84,37 +85,13 @@ export default function WalletChartComponent(props: any) {
   );
 }
 
-const categoryColors = {
-  housing: "#05ad21",
-  transportation: "#ab0505",
-  food: "#5733FF",
-  drinks: "#5733FF",
-  shopping: "#ff5733",
-  addictions: "#ff5733",
-  work: "#5733FF",
-  clothes: "#ff5733",
-  health: "#07bab4",
-  entertainment: "#990583",
-  utilities: "#5733FF",
-  debt: "#ff5733",
-  education: "#cc9a1b",
-  savings: "#cf0a80",
-  travel: "#33FF57",
-  edit: "gray",
-  income: Colors.secondary_light_1, // You might want to replace this with an actual hex value
-  animals: "#ff5733",
-  refunded: Colors.secondary_light_1, // You might want to replace this with an actual hex value
-  gifts: "#33FF57",
-  subscriptions: "#8033ff",
-  investments: "#33ff89",
-  maintenance: "#ff8c33",
-  insurance: "#3357ff",
-  taxes: "#ff3333",
-  children: "#ff33d1",
-  donations: "#33ffd4",
-  beauty: "#ff33a1",
-  none: Colors.primary, // You might want to replace this with an actual hex value
-};
+interface BarItemProps {
+  label: string;
+  value: number;
+  color: string;
+  selected: boolean;
+  itemsCount: number;
+}
 
 export const getInvalidExpenses = (curr: Expense) =>
   !curr.category ||
@@ -162,44 +139,48 @@ function WalletCharts({ navigation }: any) {
   const [chartType, setChartType] = useState<"pie" | "bar">("pie");
 
   const barData = useMemo(() => {
-    if (!data?.wallet?.expenses) return [];
+    if (!filteredExpenses.length) return [];
 
-    const itemsCountPerCategory = data.wallet.expenses.reduce((acc, curr) => {
-      if (getInvalidExpenses(curr)) return acc;
-      const key = curr.category;
+    const expensesGroupedByCategory = filteredExpenses.reduce(
+      (acc, curr) => {
+        const key = CategoryUtils.getCategoryParent(curr.category);
 
-      if (!acc[key]) acc[key] = 0;
+        if (!acc[key])
+          return {
+            ...acc,
+            [key]: {
+              amount: curr.amount,
+              count: 1,
+            },
+          };
 
-      acc[key] += 1;
-      return acc;
-    }, {} as Record<string, number>);
+        return {
+          ...acc,
+          [key]: {
+            amount: acc[key].amount + curr.amount,
+            count: acc[key].count + 1,
+          },
+        };
+      },
+      {} as Record<
+        string,
+        {
+          amount: number;
+          count: number;
+        }
+      >
+    );
 
-    const mapped = data.wallet.expenses.reduce((acc, curr) => {
-      if (getInvalidExpenses(curr)) return acc;
-      const key = curr.category;
-
-      if (!acc[key]) acc[key] = 0;
-
-      acc[key] += curr.amount;
-      return acc;
-    }, {} as Record<string, number>);
-
-    return Object.entries(mapped)
-      .map(([key, value], index) => ({
-        value,
+    return Object.entries(expensesGroupedByCategory)
+      .map(([key, { amount, count }], index) => ({
+        value: amount,
         label: key,
-        color: categoryColors[key as keyof typeof Icons],
+        color: Icons[key as keyof typeof Icons]?.backgroundColor || secondary_candidates[index % secondary_candidates.length],
         selected: key === selected,
-        itemsCount: itemsCountPerCategory[key as keyof typeof Icons],
+        itemsCount: count,
       }))
-      .sort((a, b) => b.value - a.value) as {
-      label: string;
-      value: number;
-      color: string;
-      selected: boolean;
-      itemsCount: number;
-    }[];
-  }, [data?.wallet?.expenses, excluded]);
+      .sort((a, b) => b.value - a.value) as BarItemProps[];
+  }, [filteredExpenses, excluded]);
 
   const sumOfExpenses = useMemo(() => {
     if (!data?.wallet?.expenses) return 0;
@@ -228,7 +209,8 @@ function WalletCharts({ navigation }: any) {
   const selectedCategoryData =
     selected === ""
       ? data?.wallet?.expenses || []
-      : data?.wallet?.expenses?.filter((item) => item.category === selected && item.type !== "refunded") || [];
+      : data?.wallet?.expenses?.filter((item) => item.category === CategoryUtils.getCategoryParent(selected) && item.type !== "refunded") ||
+        [];
 
   const onChartPress = (e: any) => {
     setSelected(e.label);
@@ -266,7 +248,7 @@ function WalletCharts({ navigation }: any) {
             {chartType === "pie" ? (
               <PieChart data={chartData} totalSum={sumOfExpenses} onPress={onChartPress} />
             ) : (
-              <Charts data={chartData} onPress={onChartPress} />
+              <Charts data={chartData} onPress={onChartPress} totalSum={sumOfExpenses} />
             )}
           </View>
           <DateRangePicker filters={filters} dispatch={wrapWithFunction(dispatch, () => setSelected(""))} />
@@ -285,7 +267,7 @@ function WalletCharts({ navigation }: any) {
                 Selected category:{" "}
                 <Text style={{ color: barData.find((c) => c.label === selected)?.color, fontSize: 18, textTransform: "capitalize" }}>
                   {" "}
-                  {selected || "income"}
+                  {selected || "All"}
                 </Text>
               </Text>
             </View>

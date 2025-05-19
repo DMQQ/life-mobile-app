@@ -66,6 +66,7 @@ export const SpontaneousRateChip = ({ value, onPress }) => {
         style={{
           color: value === 0 ? "rgba(255,255,255,0.7)" : color,
           fontSize: 14,
+          fontWeight: "500",
         }}
       >
         Spontaneous
@@ -130,8 +131,8 @@ export const SpontaneousRateSelector = ({ value, setValue, dismiss }) => {
 
 const styles = StyleSheet.create({
   chip: {
-    padding: 7.5,
-    paddingHorizontal: 15,
+    padding: 10,
+    paddingHorizontal: 20,
     borderRadius: 10,
     justifyContent: "center",
     alignItems: "center",

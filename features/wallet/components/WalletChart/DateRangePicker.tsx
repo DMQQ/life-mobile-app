@@ -32,7 +32,8 @@ const DateRangePicker = (props: { filters: Filters; dispatch: React.Dispatch<Act
 
   useEffect(() => {
     if (!(props.filters.date.from && props.filters.date.to)) {
-      onDateChange("Last 7 days", moment().subtract(7, "days"), moment().add(1, "day"));
+      const defaultDateRange = DateRanges.find(([label]) => label === "This month");
+      onDateChange(defaultDateRange![0], defaultDateRange![1][0], defaultDateRange![1][1]);
     }
   }, [props.filters?.date.from, props.filters?.date.to]);
 

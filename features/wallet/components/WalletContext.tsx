@@ -14,7 +14,8 @@ export type Action =
   | { type: "SET_TYPE"; payload: string | undefined }
   | { type: "TOGGLE_CATEGORY"; payload: string }
   | { type: "SET_SKIP"; payload?: number }
-  | { type: "RESET" };
+  | { type: "RESET" }
+  | { type: "SET_IS_EXACT_CATEGORY"; payload: boolean };
 
 const reducer = (state: typeof init, action: Action) => {
   if (action.type === "SET_QUERY") {
@@ -96,6 +97,13 @@ const reducer = (state: typeof init, action: Action) => {
     return init;
   }
 
+  if (action.type === "SET_IS_EXACT_CATEGORY") {
+    return {
+      ...state,
+      isExactCategory: action.payload,
+    };
+  }
+
   return state;
 };
 
@@ -119,6 +127,8 @@ export const init = {
   skip: 0,
 
   take: PAGINATION_TAKE,
+
+  isExactCategory: false,
 };
 
 type WalletContextType = {

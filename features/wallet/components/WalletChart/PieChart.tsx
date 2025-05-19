@@ -20,7 +20,7 @@ export default function PieChart(props: PieChartProps) {
       innerCircleColor={Colors.primary}
       showGradient
       donut
-      radius={(Layout.screen.width - 30) / 3}
+      radius={(Layout.screen.width - 30) / 2.6}
       data={props.data.length !== 0 ? props.data : [{ label: "No data", value: 1, color: secondary_candidates[0] }]}
       showText
       isAnimated

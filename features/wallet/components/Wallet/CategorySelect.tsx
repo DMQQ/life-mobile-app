@@ -2,7 +2,7 @@ import Select, { Props } from "@/components/ui/Select/Select";
 import Layout from "@/constants/Layout";
 import Color from "color";
 import Colors from "@/constants/Colors";
-import { CategoryIcon, Icons } from "../ExpenseIcon";
+import { CategoryIcon, CategoryUtils, Icons } from "../ExpenseIcon";
 import lowOpacity from "@/utils/functions/lowOpacity";
 import { Text, View } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -44,7 +44,9 @@ export default function CategorySelect<T>(props: CategorySelectProps<T>) {
           }}
         >
           <CategoryIcon type="expense" category={item.item} clear />
-          <Text style={{ color: "#fff", fontSize: 16, marginLeft: 10, fontWeight: "bold" }}>{item.item}</Text>
+          <Text style={{ color: "#fff", fontSize: 16, marginLeft: 10, fontWeight: "bold" }}>
+            {CategoryUtils.getCategoryName(item.item)}
+          </Text>
           {props.isActive(item.item) && (
             <MaterialCommunityIcons name="check" size={25} color={Colors.secondary} style={{ position: "absolute", right: 25 }} />
           )}

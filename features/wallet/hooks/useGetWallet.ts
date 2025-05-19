@@ -96,8 +96,10 @@ export default function useGetWallet(options?: { fetchAll?: boolean; excludeFiel
         },
         category: filters.category,
         ...(filters.type && { type: filters.type }),
+        ...(filters.isExactCategory && { isExactCategory: filters.isExactCategory }),
       },
       take: options?.fetchAll ? 99999 : PAGINATION_TAKE,
+
       ...directiveVariables,
     },
     onError: (err) => {
@@ -125,6 +127,7 @@ export default function useGetWallet(options?: { fetchAll?: boolean; excludeFiel
           },
           category: filters.category,
           ...(filters.type && { type: filters.type }),
+          ...(filters.isExactCategory && { isExactCategory: filters.isExactCategory }),
         },
         ...directiveVariables,
       },
@@ -166,6 +169,7 @@ export default function useGetWallet(options?: { fetchAll?: boolean; excludeFiel
           },
           category: filters.category,
           ...(filters.type && { type: filters.type }),
+          ...(filters.isExactCategory && { isExactCategory: filters.isExactCategory }),
         },
         ...directiveVariables,
       });

@@ -3,7 +3,7 @@ import moment from "moment";
 import Colors, { secondary_candidates } from "@/constants/Colors";
 import Ripple from "react-native-material-ripple";
 import Animated, { AnimatedStyle, FadeIn, FadeOut, LinearTransition } from "react-native-reanimated";
-import { CategoryIcon, Icons } from "../ExpenseIcon";
+import { CategoryIcon, CategoryUtils, Icons } from "../ExpenseIcon";
 import { Expense } from "@/types";
 import { useState } from "react";
 import Feedback from "react-native-haptic-feedback";
@@ -148,7 +148,7 @@ export default function WalletItem(
             <Text style={styles.date}>
               {parseDateToText(item.date)}
               {(item.category || item.subscription?.isActive) && " / "}
-              {item.category}
+              {CategoryUtils.getCategoryName(item.category)}
               {item.category && item.subscription?.isActive && " / "}
               {item.subscription?.isActive ? <Text style={{ color: secondary_candidates[0] }}>Subscription</Text> : ""}
               {item.files && item.files.length > 0 && (

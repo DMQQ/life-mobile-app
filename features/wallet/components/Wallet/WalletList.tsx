@@ -72,7 +72,7 @@ export default function WalletList(props: {
   }, [props?.wallet?.expenses]);
 
   const renderItem = useCallback(
-    ({ item }: { item: { month: string; expenses: Expense[] } }) => (
+    ({ item, index }: { item: { month: string; expenses: Expense[] }; index: number }) => (
       <MonthExpenseList
         showTotal={!props.filtersActive}
         item={item}
@@ -82,6 +82,7 @@ export default function WalletList(props: {
           });
         }}
         sheet={sheet}
+        monthIndex={index}
       />
     ),
     [props.filtersActive]
@@ -89,11 +90,7 @@ export default function WalletList(props: {
 
   return (
     <AnimatedList
-      ListHeaderComponent={
-        <>
-          <WalletLimits />
-        </>
-      }
+      ListHeaderComponent={<WalletLimits />}
       onEndReached={!props.isLocked ? props.onEndReached : () => {}}
       onEndReachedThreshold={0.5}
       scrollEventThrottle={16}
@@ -117,11 +114,13 @@ const MonthExpenseList = ({
   setSelected,
   sheet,
   showTotal = true,
+  monthIndex = 0,
 }: {
   item: { month: string; expenses: Expense[] };
   setSelected: (expense: WalletElement) => void;
   sheet: React.RefObject<BottomSheet>;
   showTotal: boolean;
+  monthIndex?: number;
 }) => {
   const diff = useQuery(
     gql`
@@ -179,6 +178,7 @@ const MonthExpenseList = ({
               return moment(item.date).isSame(expense.date, "day");
             })
           )}
+          monthIndex={monthIndex}
         />
       ))}
     </Animated.View>
@@ -191,12 +191,14 @@ const ListItem = ({
   expenses,
   handlePress,
   sum,
+  monthIndex = 0,
 }: {
   item: Expense;
   index: number;
   expenses: Expense[];
   handlePress: () => void;
   sum: [number, number];
+  monthIndex?: number;
 }) => {
   const hasPrevious = expenses?.[index - 1] !== undefined;
 
@@ -213,7 +215,7 @@ const ListItem = ({
   const navigation = useNavigation<any>();
 
   return (
-    <Animated.View entering={FadeInDown} layout={LinearTransition.delay(100)}>
+    <Animated.View entering={FadeIn.delay(Math.min(((index + monthIndex) % 10) * 75, 2000))} layout={LinearTransition.delay(100)}>
       {!areDatesEqual && (
         <Ripple
           onPress={() => {

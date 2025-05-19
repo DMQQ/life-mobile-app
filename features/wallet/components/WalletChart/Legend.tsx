@@ -6,7 +6,6 @@ import Color from "color";
 import Animated, { LinearTransition } from "react-native-reanimated";
 import { Icons } from "../ExpenseIcon";
 import lowOpacity from "@/utils/functions/lowOpacity";
-import React from "react";
 
 interface ICategory {
   label: string;

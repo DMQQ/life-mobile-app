@@ -12,7 +12,7 @@ const NumbersPad = memo(
     const navigation = useNavigation();
 
     return (
-      <Animated.View entering={FadeInDown} style={{ flex: 1, gap: 15, borderRadius: 35, marginTop: 30 }}>
+      <Animated.View entering={FadeInDown} style={{ gap: 15, flex: 1, justifyContent: "center" }}>
         {[
           [1, 2, 3],
           [4, 5, 6],
@@ -64,26 +64,27 @@ const NumpadNumber = (props: { onPress: VoidFunction; num: string | number; rota
   const interval = useRef<NodeJS.Timeout | null>(null);
 
   return (
-    <View style={{ width: "30%", height: 75, overflow: "hidden", borderRadius: 100 }}>
+    <View style={{ width: "30%", height: 75, overflow: "hidden" }}>
       <AnimatedRipple
         rippleCentered
         rippleColor={Colors.secondary}
         rippleSize={50}
         onPress={onPress}
         onLongPress={() => {
+          if (interval.current) clearInterval(interval.current!);
           interval.current = setInterval(() => {
             onPress();
           }, 50);
         }}
         onPressOut={() => {
-          clearInterval(interval.current!);
+          if (interval.current) clearInterval(interval.current!);
         }}
         style={[{ justifyContent: "center", alignItems: "center", width: "100%", height: "100%" }, animatedScale]}
       >
         {props.num === "C" ? (
           <Entypo name="chevron-left" size={40} color="#fff" />
         ) : (
-          <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 24 }}>{props.num}</Text>
+          <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 28 }}>{props.num}</Text>
         )}
       </AnimatedRipple>
     </View>

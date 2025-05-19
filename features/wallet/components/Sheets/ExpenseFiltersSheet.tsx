@@ -174,6 +174,7 @@ const Forms = (props: ExpenseFiltersProps) => {
           onFocusChange={() => onFocus()}
           selected={Array.isArray(props?.filters?.category) ? props?.filters?.category : [props?.filters?.category]}
           setSelected={(selected) => {
+            console.log(selected);
             props.dispatch({ type: "SET_CATEGORY", payload: selected });
           }}
           isActive={(category) => props.filters.category.includes(category)}

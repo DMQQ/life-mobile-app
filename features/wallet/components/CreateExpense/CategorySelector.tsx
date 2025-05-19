@@ -1,8 +1,7 @@
 import Animated, { FadeIn, FadeInDown, LinearTransition } from "react-native-reanimated";
-import { Icons } from "../ExpenseIcon";
+import { CategoryUtils, Icons } from "../ExpenseIcon";
 import { useEffect, useRef, useState } from "react";
 import Input from "@/components/ui/TextInput/TextInput";
-import Layout from "@/constants/Layout";
 import Colors from "@/constants/Colors";
 import lowOpacity from "@/utils/functions/lowOpacity";
 import { Text, View, StyleSheet, FlatList } from "react-native";
@@ -16,7 +15,10 @@ const CategorySelector = (props: { current: string; onPress: (item: string) => v
   const [query, setQuery] = useState("");
 
   const filteredData = data.filter(
-    (item) => !["edit", "none", "income", "refunded"].includes(item[0]) && item[0].toLowerCase().includes(query.toLowerCase())
+    (item) =>
+      !["edit", "none", "income", "refunded"].includes(item[0]) &&
+      item[0].toLowerCase().includes(query.toLowerCase()) &&
+      (query.trim().length > 0 ? true : !item[0].includes(":"))
   );
 
   const listRef = useRef<FlatList>(null);
@@ -79,7 +81,7 @@ const CategorySelector = (props: { current: string; onPress: (item: string) => v
                   },
                 ]}
               >
-                {item[0]}
+                {CategoryUtils.getCategoryName(item[0])}
               </Text>
 
               {item[0] === props.current && (

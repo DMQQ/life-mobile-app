@@ -1,11 +1,11 @@
 import { gql, useMutation, useQuery } from "@apollo/client";
 import { Text, View, StyleSheet, ActivityIndicator, TouchableOpacity, ScrollView } from "react-native";
-import { Icons } from "./ExpenseIcon";
+import { CategoryUtils, Icons } from "./ExpenseIcon";
 import lowOpacity from "@/utils/functions/lowOpacity";
 import Colors, { secondary_candidates } from "@/constants/Colors";
 import Animated, { FadeIn, LinearTransition } from "react-native-reanimated";
 import Ripple from "react-native-material-ripple";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Feedback from "react-native-haptic-feedback";
 import Modal from "@/components/ui/Modal";
 import Layout from "@/constants/Layout";
@@ -59,6 +59,12 @@ export default function WalletLimits() {
   const [isCreateLimitModalVisible, setCreateLimitModalVisible] = useState(false);
   const [compactMode, setCompactMode] = useState(true);
   const [height, setHeight] = useState(150);
+
+  const [isExactCategory, setIsExactCategory] = useState(false);
+
+  useEffect(() => {
+    dispatch({ type: "SET_IS_EXACT_CATEGORY", payload: isExactCategory });
+  }, [isExactCategory]);
 
   const budgetStatus = useMemo(() => {
     let budgetStatus = null;
@@ -174,6 +180,9 @@ export default function WalletLimits() {
             // Pick a color from secondary_candidates based on index
             const color = secondary_candidates[index % secondary_candidates.length];
 
+            const isSelected =
+              filters.category === limit.category || (Array.isArray(filters.category) && filters.category.includes(limit.category));
+
             return (
               <Animated.View
                 key={limit.id}
@@ -188,7 +197,7 @@ export default function WalletLimits() {
                       ? Layout.screen.width * 0.8
                       : Layout.screen.width - 30,
                   },
-                  !filters.category.includes(limit.category) && filters.category.length > 0 && { opacity: 0.5 },
+                  !isSelected && filters.category.length > 0 && { opacity: 0.5 },
                 ]}
               >
                 <Ripple
@@ -197,12 +206,18 @@ export default function WalletLimits() {
                     {
                       backgroundColor: lowOpacity(iconData.backgroundColor || color, 0.2),
                       flexDirection: compactMode ? "column" : "row",
+                      padding: compactMode ? 15 : 22.5,
                     },
                   ]}
                   onPress={() => {
                     Feedback.trigger("impactLight");
-                    if (!filters.category.includes(limit.category)) dispatch({ type: "SET_CATEGORY", payload: limit.category });
-                    else dispatch({ type: "SET_CATEGORY", payload: [] as string[] });
+                    if (!isSelected) {
+                      setIsExactCategory(true);
+                      dispatch({ type: "SET_CATEGORY", payload: limit.category });
+                    } else {
+                      setIsExactCategory(false);
+                      dispatch({ type: "SET_CATEGORY", payload: [] as string[] });
+                    }
                   }}
                 >
                   <View
@@ -219,7 +234,7 @@ export default function WalletLimits() {
                     {!compactMode && (
                       <View style={[styles.headerRow, { flexDirection: compactMode ? "column" : "row" }]}>
                         <Text style={[styles.categoryText, { textTransform: "capitalize" }]} numberOfLines={1}>
-                          {limit.category}
+                          {CategoryUtils.getCategoryName(limit.category)}
                         </Text>
 
                         <Text style={[styles.amountText, isOverLimit && styles.overLimitText]}>
@@ -231,7 +246,7 @@ export default function WalletLimits() {
                       </View>
                     )}
 
-                    <View style={[styles.progressContainer, compactMode && { marginTop: 10 }]}>
+                    <View style={[styles.progressContainer, compactMode && { marginTop: 5 }]}>
                       <View style={styles.progressBackground}>
                         <Animated.View
                           style={[
@@ -268,7 +283,7 @@ export default function WalletLimits() {
       </ScrollView>
 
       {budgetStatus && (
-        <View style={{ flexDirection: "row", justifyContent: "center", marginBottom: 10 }}>
+        <View style={{ flexDirection: "row", justifyContent: "center", marginBottom: 5 }}>
           <Animated.Text style={[styles.budgetIndicator, { color: budgetStatus.color }]} entering={FadeIn}>
             {budgetStatus.text}
           </Animated.Text>
@@ -372,7 +387,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start", // Changed from center to allow for budget indicator below
-    marginBottom: 25,
+    marginBottom: 15,
   },
   header: {
     fontSize: 18,

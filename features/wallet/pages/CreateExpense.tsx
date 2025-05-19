@@ -387,7 +387,7 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
             )}
           </View>
 
-          <View style={{ marginTop: 20, flex: 1, gap: 15, maxHeight: Layout.screen.height / 1.85 - 5 }}>
+          <View style={{ marginTop: 20, flex: 1, gap: 15, maxHeight: Layout.screen.height / 1.75 - 5 }}>
             <View
               style={{
                 borderRadius: 35,
@@ -433,12 +433,27 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
                         />
                       }
                       right={
-                        isValid && (
-                          <Ripple onPress={handleSubmit} style={styles.save}>
-                            {loading ? <ActivityIndicator size={14} color="#fff" /> : <AntDesign name="save" size={20} color="#fff" />}
-                            <Text style={{ color: "#fff" }}>{isSubExpenseMode ? "Add" : params?.isEditing ? "Edit" : "Save"}</Text>
-                          </Ripple>
-                        )
+                        <Ripple
+                          onPress={handleSubmit}
+                          style={[styles.save, !isValid && { backgroundColor: lowOpacity(styles.save.backgroundColor, 0.2) }]}
+                          disabled={!isValid}
+                        >
+                          {loading ? (
+                            <ActivityIndicator size={14} color="#fff" />
+                          ) : (
+                            <AntDesign name="save" size={20} color={isValid ? "#fff" : lowOpacity(Colors.secondary_light_1, 0.5)} />
+                          )}
+                          <Text
+                            style={{
+                              color: isValid ? "#fff" : lowOpacity(Colors.secondary_light_1, 0.5),
+                              fontSize: 14,
+                              fontWeight: "500",
+                              lineHeight: 20,
+                            }}
+                          >
+                            {isSubExpenseMode ? "Add" : params?.isEditing ? "Edit" : "Done"}
+                          </Text>
+                        </Ripple>
                       }
                     />
                   </View>
@@ -447,11 +462,27 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
                     horizontal
                     showsHorizontalScrollIndicator={false}
                     style={{ flexDirection: "row" }}
-                    contentContainerStyle={{ gap: 15 }}
+                    contentContainerStyle={{ gap: 10 }}
                   >
                     <Ripple
                       onPress={() => setType((p) => (p === "expense" ? "income" : "expense"))}
-                      style={[styles.chip, { backgroundColor: Colors.primary_lighter, gap: 5 }]}
+                      style={[
+                        styles.chip,
+                        {
+                          backgroundColor:
+                            type == null
+                              ? Colors.primary_lighter
+                              : lowOpacity(
+                                  type === "expense"
+                                    ? Colors.error
+                                    : type === "income"
+                                    ? Colors.secondary_light_1
+                                    : Colors.secondary_light_2,
+                                  0.2
+                                ),
+                          gap: 10,
+                        },
+                      ]}
                     >
                       <View>
                         {type == null ? (
@@ -465,9 +496,9 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
                             />
                           </View>
                         ) : type === "expense" ? (
-                          <AntDesign name="arrowdown" size={15} color={Colors.error} />
+                          <AntDesign name="arrowdown" size={15} color={Color(Colors.error).lighten(0.2).string()} />
                         ) : type === "income" ? (
-                          <AntDesign name="arrowup" size={15} color={Colors.secondary} />
+                          <AntDesign name="arrowup" size={15} color={Color(Colors.secondary_light_1).lighten(0.2).string()} />
                         ) : (
                           <Entypo name="back-in-time" size={15} color="rgba(255,255,255,0.7)" />
                         )}
@@ -476,14 +507,17 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
                       <Text
                         numberOfLines={1}
                         style={{
-                          color:
+                          color: Color(
                             type == null
                               ? "rgba(255,255,255,0.7)"
                               : type === "expense"
                               ? Colors.error
                               : type === "income"
-                              ? Colors.secondary
-                              : Colors.secondary_light_2,
+                              ? Colors.secondary_light_1
+                              : Colors.secondary_light_2
+                          )
+                            .lighten(0.2)
+                            .string(),
                           fontSize: 14,
                         }}
                       >
@@ -668,8 +702,8 @@ const styles = StyleSheet.create({
   },
 
   chip: {
-    padding: 7.5,
-    paddingHorizontal: 15,
+    padding: 10,
+    paddingHorizontal: 20,
     borderRadius: 10,
     justifyContent: "center",
     alignItems: "center",
@@ -695,10 +729,11 @@ const styles = StyleSheet.create({
   save: {
     paddingHorizontal: 15,
     paddingVertical: 5,
-    borderRadius: 7.5,
+    borderRadius: 8,
     backgroundColor: Colors.secondary,
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
     gap: 7.5,
   },
 });

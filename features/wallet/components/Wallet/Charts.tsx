@@ -11,9 +11,11 @@ import lowOpacity from "@/utils/functions/lowOpacity";
 interface ChartsProps {
   data: any[];
   onPress: (dt: { label: string; value: number; color: string }) => void;
+
+  totalSum: number;
 }
 
-export default function Charts({ data, onPress }: ChartsProps) {
+export default function Charts({ data, onPress, totalSum }: ChartsProps) {
   return (
     <BarChart
       onPress={onPress}
