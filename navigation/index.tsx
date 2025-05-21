@@ -16,6 +16,7 @@ import GoalsScreens from "../features/goals/Main";
 import { useApolloClient } from "@apollo/client";
 import useQuickActions from "@/utils/hooks/useQuickActions";
 import useDeeplinking from "@/utils/hooks/useDeeplinking";
+import NotesScreens from "@/features/flashcards/Main";
 
 export const navigationRef = React.createRef<NavigationContainerRef<RootStackParamList>>();
 
@@ -83,6 +84,8 @@ export default function Navigation() {
             <Tab.Screen name="TimelineScreens" component={TimelineScreens} />
 
             <Tab.Screen name="Settings" component={Settings} />
+
+            <Tab.Screen name="NotesScreens" component={NotesScreens} />
           </>
         ) : (
           <>
