@@ -20,6 +20,7 @@ import { useNavigation } from "@react-navigation/native";
 import useGetWallet from "../../hooks/useGetWallet";
 import Header from "@/components/ui/Header/Header";
 import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons";
+import { CategoryUtils } from "../ExpenseIcon";
 
 interface ExpenseFiltersProps {
   filters: Filters;
@@ -174,8 +175,7 @@ const Forms = (props: ExpenseFiltersProps) => {
           onFocusChange={() => onFocus()}
           selected={Array.isArray(props?.filters?.category) ? props?.filters?.category : [props?.filters?.category]}
           setSelected={(selected) => {
-            console.log(selected);
-            props.dispatch({ type: "SET_CATEGORY", payload: selected });
+            props.dispatch({ type: "SET_CATEGORY", payload: selected.map(CategoryUtils.getCategoryParent) });
           }}
           isActive={(category) => props.filters.category.includes(category)}
         />

@@ -23,7 +23,7 @@ import { useEditExpense } from "./CreateActivity";
 import IconButton from "@/components/ui/IconButton/IconButton";
 import Color from "color";
 import Input from "@/components/ui/TextInput/TextInput";
-import usePredictCategory from "../hooks/usePredictCategory";
+import usePredictCategory, { ExpensePrediction } from "../hooks/usePredictCategory";
 import BottomSheet, { BottomSheetBackdrop } from "@gorhom/bottom-sheet";
 import NumbersPad from "../components/CreateExpense/NumberPad";
 import CategorySelector from "../components/CreateExpense/CategorySelector";
@@ -32,6 +32,7 @@ import { gql, useApolloClient, useMutation } from "@apollo/client";
 import Feedback from "react-native-haptic-feedback";
 import Button from "@/components/ui/Button/Button";
 import { SpontaneousRateChip, SpontaneousRateSelector } from "../components/CreateExpense/SpontaneousRate";
+import usePredictExpense from "../hooks/usePredictCategory";
 
 interface SubExpense {
   id: string;
@@ -248,14 +249,14 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
     [amount]
   );
 
-  const [categoryPrediction] = usePredictCategory(name, +amount);
-
-  useEffect(() => {
-    if (categoryPrediction) {
-      setCategory(categoryPrediction.category as keyof typeof Icons);
-      setType("expense");
+  const onPredict = useCallback((prediction: ExpensePrediction) => {
+    if (prediction) {
+      setCategory(prediction.category as keyof typeof Icons);
+      setType(prediction.type as "expense" | "income");
+      setAmount(prediction.amount.toString());
     }
-  }, [categoryPrediction]);
+  }, []);
+  usePredictExpense([name, +amount], onPredict);
 
   useEffect(() => {
     if (type === "income") setCategory("income");

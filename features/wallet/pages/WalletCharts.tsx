@@ -121,19 +121,19 @@ function WalletCharts({ navigation }: any) {
 
   const [chartType, setChartType] = useState<"pie" | "bar">("pie");
 
-  const { data: legendData } = useGetLegendData();
+  const legend = useGetLegendData();
 
   const barData = useMemo(() => {
-    if (!legendData?.statisticsLegend) return [];
+    if (!legend.data?.statisticsLegend) return [];
 
-    return legendData?.statisticsLegend.map((item, index: number) => ({
+    return legend.data?.statisticsLegend.map((item, index: number) => ({
       value: item.total,
       label: item.category,
       color: Icons[item.category as keyof typeof Icons]?.backgroundColor || secondary_candidates[index % secondary_candidates.length],
       selected: item.category === selected,
       itemsCount: +item.count,
     }));
-  }, [legendData?.statisticsLegend]);
+  }, [legend.data?.statisticsLegend]);
 
   const sumOfExpenses = useMemo(() => {
     if (!data?.wallet?.expenses) return 0;
@@ -164,8 +164,7 @@ function WalletCharts({ navigation }: any) {
   const selectedCategoryData =
     selected === ""
       ? data?.wallet?.expenses || []
-      : data?.wallet?.expenses?.filter((item) => item.category === CategoryUtils.getCategoryParent(selected) && item.type !== "refunded") ||
-        [];
+      : data?.wallet?.expenses?.filter((item) => item.category === selected && item.type !== "refunded") || [];
 
   const onChartPress = (e: any) => {
     setSelected(e.label);
@@ -215,6 +214,9 @@ function WalletCharts({ navigation }: any) {
             onPress={onLegendItemPress}
             startDate={filters.date.from}
             endDate={filters.date.to}
+            detailed={legend.detailed}
+            statisticsLegendData={legend.data || { statisticsLegend: [] }}
+            toggleMode={legend.toggleMode}
           />
 
           {selectedCategoryData.length > 0 && (
@@ -223,7 +225,7 @@ function WalletCharts({ navigation }: any) {
                 Selected category:{" "}
                 <Text style={{ color: barData.find((c) => c.label === selected)?.color, fontSize: 18, textTransform: "capitalize" }}>
                   {" "}
-                  {selected || "All"}
+                  {CategoryUtils.getCategoryName(selected) || "All"}
                 </Text>
               </Text>
             </View>

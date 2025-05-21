@@ -31,20 +31,26 @@ interface LegendProps {
   startDate: string;
 
   endDate: string;
+
+  detailed: string;
+
+  toggleMode: () => void;
+
+  statisticsLegendData: {
+    statisticsLegend: ICategory[];
+  };
 }
 
 const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
 
 const Legend = (props: LegendProps) => {
-  const { data: statisticsLegendData, detailed, toggleMode } = useGetLegendData();
-
-  const [data, setData] = useState<ICategory[]>(statisticsLegendData?.statisticsLegend || []);
+  const [data, setData] = useState<ICategory[]>(props.statisticsLegendData?.statisticsLegend || []);
 
   useEffect(() => {
-    if (statisticsLegendData?.statisticsLegend) {
-      setData(statisticsLegendData.statisticsLegend);
+    if (props.statisticsLegendData?.statisticsLegend) {
+      setData(props.statisticsLegendData.statisticsLegend);
     }
-  }, [statisticsLegendData]);
+  }, [props.statisticsLegendData]);
 
   return data?.length === 0 ? null : (
     <Animated.View style={styles.tilesContainer} layout={LinearTransition}>
@@ -56,7 +62,7 @@ const Legend = (props: LegendProps) => {
 
         <View style={{ alignItems: "center" }}>
           <Ripple
-            onPress={toggleMode}
+            onPress={props.toggleMode}
             style={{
               backgroundColor: lowOpacity(Colors.secondary, 0.15),
               borderWidth: 0.5,
@@ -66,7 +72,7 @@ const Legend = (props: LegendProps) => {
               borderRadius: 10,
             }}
           >
-            <Text style={{ color: Colors.secondary, textTransform: "capitalize" }}>{detailed}</Text>
+            <Text style={{ color: Colors.secondary, textTransform: "capitalize" }}>{props.detailed}</Text>
           </Ripple>
         </View>
       </View>
@@ -113,8 +119,6 @@ const Legend = (props: LegendProps) => {
               </Text>
             </Text>
             <View style={styles.tileText}>
-              {/* <View style={[styles.dot, { backgroundColor: item.color }]} /> */}
-
               <View
                 style={{
                   backgroundColor: lowOpacity(Icons[item.category as keyof typeof Icons]?.backgroundColor, 0.2),
