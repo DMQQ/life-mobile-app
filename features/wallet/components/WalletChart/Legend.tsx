@@ -47,7 +47,7 @@ const Legend = (props: LegendProps) => {
   const [data, setData] = useState<ICategory[]>(props.statisticsLegendData?.statisticsLegend || []);
 
   useEffect(() => {
-    if (props.statisticsLegendData?.statisticsLegend) {
+    if (props.statisticsLegendData?.statisticsLegend?.length > 0) {
       setData(props.statisticsLegendData.statisticsLegend);
     }
   }, [props.statisticsLegendData]);

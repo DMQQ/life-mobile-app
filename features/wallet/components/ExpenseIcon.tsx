@@ -85,6 +85,87 @@ export const Icons = {
     icon: <MaterialCommunityIcons name="gift" size={20} color="#33FF57" />,
     backgroundColor: "#33FF57",
   },
+  "gifts:birthday": {
+    icon: <MaterialCommunityIcons name="cake-variant" size={20} color="#33ffd4" />,
+    backgroundColor: "#33ffd4",
+  },
+  "gifts:holiday": {
+    icon: <MaterialCommunityIcons name="pine-tree" size={20} color="#33ffd4" />,
+    backgroundColor: "#33ffd4",
+  },
+  "gifts:charitable": {
+    icon: <MaterialCommunityIcons name="heart-circle" size={20} color="#33ffd4" />,
+    backgroundColor: "#33ffd4",
+  },
+
+  sports: {
+    icon: <MaterialCommunityIcons name="weight-lifter" size={20} color="#4CAF50" />,
+    backgroundColor: "#4CAF50",
+  },
+  "sports:equipment": {
+    icon: <MaterialCommunityIcons name="tennis" size={20} color="#4CAF50" />,
+    backgroundColor: "#4CAF50",
+  },
+  "sports:memberships": {
+    icon: <MaterialCommunityIcons name="card-account-details" size={20} color="#4CAF50" />,
+    backgroundColor: "#4CAF50",
+  },
+  "sports:events": {
+    icon: <MaterialCommunityIcons name="ticket" size={20} color="#4CAF50" />,
+    backgroundColor: "#4CAF50",
+  },
+
+  tech: {
+    icon: <MaterialCommunityIcons name="devices" size={20} color="#0288D1" />,
+    backgroundColor: "#0288D1",
+  },
+  "tech:software": {
+    icon: <MaterialCommunityIcons name="application" size={20} color="#0288D1" />,
+    backgroundColor: "#0288D1",
+  },
+  "tech:accessories": {
+    icon: <MaterialCommunityIcons name="headphones" size={20} color="#0288D1" />,
+    backgroundColor: "#0288D1",
+  },
+  "tech:repairs": {
+    icon: <MaterialCommunityIcons name="wrench" size={20} color="#0288D1" />,
+    backgroundColor: "#0288D1",
+  },
+
+  goingout: {
+    icon: <MaterialCommunityIcons name="party-popper" size={20} color="#9C27B0" />,
+    backgroundColor: "#9C27B0",
+  },
+  "goingout:dining": {
+    icon: <MaterialCommunityIcons name="silverware-fork-knife" size={20} color="#9C27B0" />,
+    backgroundColor: "#9C27B0",
+  },
+  "goingout:nightlife": {
+    icon: <MaterialCommunityIcons name="glass-cocktail" size={20} color="#9C27B0" />,
+    backgroundColor: "#9C27B0",
+  },
+  "goingout:events": {
+    icon: <MaterialCommunityIcons name="ticket-confirmation" size={20} color="#9C27B0" />,
+    backgroundColor: "#9C27B0",
+  },
+
+  trips: {
+    icon: <MaterialCommunityIcons name="bag-suitcase" size={20} color="#FF9800" />,
+    backgroundColor: "#FF9800",
+  },
+  "trips:lodging": {
+    icon: <MaterialCommunityIcons name="home-city" size={20} color="#FF9800" />,
+    backgroundColor: "#FF9800",
+  },
+  "trips:activities": {
+    icon: <MaterialCommunityIcons name="hiking" size={20} color="#FF9800" />,
+    backgroundColor: "#FF9800",
+  },
+  "trips:transportation": {
+    icon: <MaterialCommunityIcons name="train-car" size={20} color="#FF9800" />,
+    backgroundColor: "#FF9800",
+  },
+
   subscriptions: {
     icon: <MaterialCommunityIcons name="refresh" size={20} color="#8033ff" />,
     backgroundColor: "#8033ff",
@@ -167,23 +248,19 @@ export const Icons = {
     icon: <MaterialCommunityIcons name="content-cut" size={20} color="#880E4F" />,
     backgroundColor: "#880E4F",
   },
-  coffee: {
-    icon: <MaterialCommunityIcons name="coffee" size={20} color="#5D4037" />,
-    backgroundColor: "#5D4037",
-  },
-  therapy: {
+  "health:therapy": {
     icon: <MaterialCommunityIcons name="head-heart" size={20} color="#006064" />,
     backgroundColor: "#006064",
   },
-  gym: {
+  "health:gym": {
     icon: <MaterialCommunityIcons name="dumbbell" size={20} color="#FF6F00" />,
     backgroundColor: "#FF6F00",
   },
-  skincare: {
+  "health:skincare": {
     icon: <MaterialCommunityIcons name="lotion" size={20} color="#F48FB1" />,
     backgroundColor: "#F48FB1",
   },
-  dentist: {
+  "health:dentist": {
     icon: <MaterialCommunityIcons name="tooth" size={20} color="#0D47A1" />,
     backgroundColor: "#0D47A1",
   },
@@ -195,7 +272,7 @@ export const Icons = {
     icon: <MaterialCommunityIcons name="car-wrench" size={20} color="#3E2723" />,
     backgroundColor: "#3E2723",
   },
-  parking: {
+  "transporation:parking": {
     icon: <MaterialCommunityIcons name="parking" size={20} color="#01579B" />,
     backgroundColor: "#01579B",
   },
@@ -273,6 +350,11 @@ export const Icons = {
     backgroundColor: "#5733FF",
   },
 
+  "drinks:energy drinks": {
+    icon: <MaterialCommunityIcons name="bottle-tonic" size={20} color={"#5733FF"} />,
+    backgroundColor: "#5733FF",
+  },
+
   "shopping:clothes": {
     icon: <MaterialCommunityIcons name="tshirt-crew" size={20} color={"#ff5733"} />,
     backgroundColor: "#ff5733",
@@ -336,23 +418,10 @@ export const Icons = {
     icon: <MaterialCommunityIcons name="stethoscope" size={20} color={"#07bab4"} />,
     backgroundColor: "#07bab4",
   },
-  "health:dentist": {
-    icon: <MaterialCommunityIcons name="tooth" size={20} color={"#07bab4"} />,
-    backgroundColor: "#07bab4",
-  },
   "health:medicine": {
     icon: <MaterialCommunityIcons name="pill" size={20} color={"#07bab4"} />,
     backgroundColor: "#07bab4",
   },
-  "health:therapy": {
-    icon: <MaterialCommunityIcons name="head-heart" size={20} color={"#07bab4"} />,
-    backgroundColor: "#07bab4",
-  },
-  "health:gym": {
-    icon: <MaterialCommunityIcons name="dumbbell" size={20} color={"#07bab4"} />,
-    backgroundColor: "#07bab4",
-  },
-
   "beauty:haircuts": {
     icon: <MaterialCommunityIcons name="content-cut" size={20} color="#ff33a1" />,
     backgroundColor: "#ff33a1",

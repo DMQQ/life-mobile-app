@@ -9,6 +9,7 @@ import Ripple from "react-native-material-ripple";
 import IconButton from "@/components/ui/IconButton/IconButton";
 import { AntDesign } from "@expo/vector-icons";
 import Feedback from "react-native-haptic-feedback";
+import Color from "color";
 
 const CategorySelector = (props: { current: string; onPress: (item: string) => void; dismiss: VoidFunction }) => {
   const data = Object.entries(Icons);
@@ -58,7 +59,7 @@ const CategorySelector = (props: { current: string; onPress: (item: string) => v
         data={filteredData}
         keyExtractor={(item) => item[0]}
         renderItem={({ item, index }) => (
-          <Animated.View style={{ marginBottom: 15, height: 60 }}>
+          <Animated.View style={{ marginBottom: 10, height: 60 }} entering={FadeIn.delay(Math.min((index + 1) * 10, 150))}>
             <Ripple
               onPress={() => {
                 Feedback.trigger("impactLight");
@@ -73,16 +74,34 @@ const CategorySelector = (props: { current: string; onPress: (item: string) => v
             >
               <View style={[styles.iconContainer, { backgroundColor: lowOpacity(item[1].backgroundColor, 0.25) }]}>{item[1].icon}</View>
 
-              <Text
-                style={[
-                  styles.optionLabel,
-                  {
-                    color: item[0] === props.current ? item[1].backgroundColor : "rgba(255,255,255,0.9)",
-                  },
-                ]}
-              >
-                {CategoryUtils.getCategoryName(item[0])}
-              </Text>
+              {item[0]?.includes(":") ? (
+                <View style={{ flex: 1, justifyContent: "center", gap: 5 }}>
+                  <Text style={{ color: lowOpacity("#fff", 0.75), textTransform: "capitalize", fontSize: 10 }}>
+                    {CategoryUtils.getCategoryParent(item[0])}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.optionLabel,
+                      {
+                        color: item[0] === props.current ? Color(item[1].backgroundColor).lighten(0.5).hex() : "rgba(255,255,255,0.9)",
+                      },
+                    ]}
+                  >
+                    {CategoryUtils.getCategoryName(item[0])}
+                  </Text>
+                </View>
+              ) : (
+                <Text
+                  style={[
+                    styles.optionLabel,
+                    {
+                      color: item[0] === props.current ? Color(item[1].backgroundColor).lighten(0.5).hex() : "rgba(255,255,255,0.9)",
+                    },
+                  ]}
+                >
+                  {CategoryUtils.getCategoryName(item[0])}
+                </Text>
+              )}
 
               {item[0] === props.current && (
                 <View style={[styles.selectedIndicator, { backgroundColor: item[1].backgroundColor }]}>
@@ -120,7 +139,6 @@ const styles = StyleSheet.create({
     color: "rgba(255,255,255,0.7)",
   },
   searchContainer: {
-    marginBottom: 20,
     backgroundColor: Colors.primary_lighter,
     borderRadius: 10,
     padding: 5,
@@ -134,7 +152,6 @@ const styles = StyleSheet.create({
   },
   optionsGrid: {
     flex: 1,
-    marginBottom: 15,
   },
   optionButton: {
     flexDirection: "row",

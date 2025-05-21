@@ -4,17 +4,18 @@ import { useState } from "react";
 
 interface ICategory {
   category: string;
-
   percentage: number;
-
   total: number;
-
   count: string;
 }
+
 export default function useGetLegendData(startDate?: string, endDate?: string) {
   const { filters } = useWalletContext();
   const [detailed, setDetailed] = useState<"general" | "detailed">("general");
-  const r = useQuery<{ statisticsLegend: ICategory[] }>(
+
+  const { data, previousData, loading, error, ...rest } = useQuery<{
+    statisticsLegend: ICategory[];
+  }>(
     gql`
       query StatisticsLegend($startDate: String!, $endDate: String!, $detailed: String!) {
         statisticsLegend(startDate: $startDate, endDate: $endDate, displayMode: $detailed) {
@@ -26,9 +27,13 @@ export default function useGetLegendData(startDate?: string, endDate?: string) {
       }
     `,
     {
-      variables: { startDate: startDate ?? filters.date.from, endDate: endDate ?? filters.date.to, detailed },
-      returnPartialData: true,
+      variables: {
+        startDate: startDate ?? filters.date.from,
+        endDate: endDate ?? filters.date.to,
+        detailed,
+      },
       fetchPolicy: "cache-and-network",
+      notifyOnNetworkStatusChange: true,
     }
   );
 
@@ -36,5 +41,14 @@ export default function useGetLegendData(startDate?: string, endDate?: string) {
     setDetailed((p) => (p === "general" ? "detailed" : "general"));
   }
 
-  return { ...r, toggleMode, detailed };
+  const displayData = data ?? previousData;
+
+  return {
+    data: displayData,
+    loading,
+    error,
+    toggleMode,
+    detailed,
+    ...rest,
+  };
 }

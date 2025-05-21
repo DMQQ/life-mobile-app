@@ -11,7 +11,6 @@ import PieChart from "../components/WalletChart/PieChart";
 import wrapWithFunction from "@/utils/functions/wrapFn";
 import DateRangePicker from "../components/WalletChart/DateRangePicker";
 import Legend from "../components/WalletChart/Legend";
-import useGetStatistics from "../hooks/useGetStatistics";
 import StatisticsSummary from "../components/WalletChart/StatisticsSummary";
 import SpendingsByDay from "../components/WalletChart/SpendingsByDayOfWeek";
 import { Expense, ScreenProps } from "@/types";
@@ -110,6 +109,10 @@ function WalletCharts({ navigation }: any) {
     loading,
   } = useGetWallet({ fetchAll: true, excludeFields: ["subscription", "location", "files"] });
 
+  useEffect(() => {
+    dispatch({ type: "SET_TYPE", payload: "expense" });
+  }, []);
+
   const filteredExpenses = useMemo(() => {
     return data?.wallet?.expenses?.filter((item) => !getInvalidExpenses(item)) || [];
   }, [data?.wallet?.expenses]);
@@ -178,7 +181,7 @@ function WalletCharts({ navigation }: any) {
       if (excluded.length === 0) return true;
       return !excluded.includes(item.label);
     });
-  }, [barData]);
+  }, [barData, excluded]);
 
   const onLongPress = useCallback(
     (item: { category: string } & Record<string, any>) => {
