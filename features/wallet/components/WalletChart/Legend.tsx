@@ -6,7 +6,8 @@ import Color from "color";
 import Animated, { LinearTransition } from "react-native-reanimated";
 import { CategoryUtils, Icons } from "../ExpenseIcon";
 import lowOpacity from "@/utils/functions/lowOpacity";
-import { gql, useQuery } from "@apollo/client";
+import { useEffect, useState } from "react";
+import useGetLegendData from "../../hooks/useGetLegendData";
 
 interface ICategory {
   category: string;
@@ -35,27 +36,39 @@ interface LegendProps {
 const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
 
 const Legend = (props: LegendProps) => {
-  const { data: statisticsLegendData } = useQuery<{ statisticsLegend: ICategory[] }>(
-    gql`
-      query StatisticsLegend($startDate: String!, $endDate: String!) {
-        statisticsLegend(startDate: $startDate, endDate: $endDate) {
-          category
-          count
-          total
-          percentage
-        }
-      }
-    `,
-    { variables: { startDate: props.startDate, endDate: props.endDate } }
-  );
+  const { data: statisticsLegendData, detailed, toggleMode } = useGetLegendData();
 
-  const data = statisticsLegendData?.statisticsLegend;
+  const [data, setData] = useState<ICategory[]>(statisticsLegendData?.statisticsLegend || []);
+
+  useEffect(() => {
+    if (statisticsLegendData?.statisticsLegend) {
+      setData(statisticsLegendData.statisticsLegend);
+    }
+  }, [statisticsLegendData]);
 
   return data?.length === 0 ? null : (
     <Animated.View style={styles.tilesContainer} layout={LinearTransition}>
-      <View style={{ width: "100%", marginBottom: 10 }}>
-        <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 18 }}>Chart legend</Text>
-        <Text style={{ color: "gray", marginTop: 5 }}>Detailed percentage of your expenses</Text>
+      <View style={{ width: "100%", marginBottom: 10, flexDirection: "row", justifyContent: "space-between" }}>
+        <View>
+          <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 18 }}>Chart legend</Text>
+          <Text style={{ color: "gray", marginTop: 5 }}>Detailed percentage of your expenses</Text>
+        </View>
+
+        <View style={{ alignItems: "center" }}>
+          <Ripple
+            onPress={toggleMode}
+            style={{
+              backgroundColor: lowOpacity(Colors.secondary, 0.15),
+              borderWidth: 0.5,
+              borderColor: lowOpacity(Colors.secondary, 0.5),
+              padding: 7.5,
+              paddingHorizontal: 15,
+              borderRadius: 10,
+            }}
+          >
+            <Text style={{ color: Colors.secondary, textTransform: "capitalize" }}>{detailed}</Text>
+          </Ripple>
+        </View>
       </View>
       {data?.map((item, index) => {
         const isExcluded = props.excluded?.includes(item.category);
@@ -64,7 +77,7 @@ const Legend = (props: LegendProps) => {
           <Ripple
             onLongPress={() => props.onLongPress?.(item)}
             onPress={() => props.onPress(item)}
-            key={index}
+            key={item.category}
             style={[
               styles.tile,
 
@@ -105,15 +118,20 @@ const Legend = (props: LegendProps) => {
               <View
                 style={{
                   backgroundColor: lowOpacity(Icons[item.category as keyof typeof Icons]?.backgroundColor, 0.2),
-                  padding: 10,
                   borderRadius: 100,
+                  width: 40,
+                  height: 40,
+                  justifyContent: "center",
+                  alignItems: "center",
                 }}
               >
                 {CategoryUtils.getCategoryIcon(item.category)}
               </View>
 
               <View style={{ gap: 1.5 }}>
-                <Text style={{ color: blueText, fontSize: 15, fontWeight: 500 }}>{capitalize(item.category)}</Text>
+                <Text style={{ color: blueText, fontSize: 15, fontWeight: 500 }}>
+                  {capitalize(CategoryUtils.getCategoryName(item.category ?? "None"))}
+                </Text>
                 <Text style={{ fontSize: 11, color: "rgba(255,255,255,0.6)" }}>(No transactions {item.count})</Text>
               </View>
             </View>

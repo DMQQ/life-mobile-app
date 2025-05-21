@@ -1,12 +1,4 @@
-import {
-  LayoutRectangle,
-  StyleProp,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-  ViewStyle,
-} from "react-native";
+import { LayoutRectangle, StyleProp, StyleSheet, Text, TextInput, View, ViewStyle } from "react-native";
 import Colors from "../../constants/Colors";
 import { useEffect, useState } from "react";
 import Color from "color";
@@ -14,7 +6,6 @@ import Ripple from "react-native-material-ripple";
 import { AntDesign } from "@expo/vector-icons";
 import Layout from "../../constants/Layout";
 import { useNavigation } from "@react-navigation/core";
-import Note from "../../screens/Stack/Notes/components/Note";
 import { useAppSelector } from "../../utils/redux";
 
 const backgroundColor = Color(Colors.primary).lighten(0.25).string();
@@ -60,19 +51,13 @@ interface SearchBarProps<T = []> {
   textInputRef?: React.MutableRefObject<TextInput | null>;
 }
 
-export default function SearchBar({
-  isFocused,
-  setIsFocused,
-  ...props
-}: SearchBarProps) {
+export default function SearchBar({ isFocused, setIsFocused, ...props }: SearchBarProps) {
   const [layout, setLayout] = useState<LayoutRectangle | undefined>();
   const [text, setText] = useState<string>("");
   const navigation = useNavigation<any>();
   const [suggestions, setSuggestions] = useState<typeof notes.notes>([]);
 
-  const borderColor = isFocused
-    ? Color(Colors.secondary).lighten(0.1).hex()
-    : Colors.secondary;
+  const borderColor = isFocused ? Color(Colors.secondary).lighten(0.1).hex() : Colors.secondary;
 
   const onPlusPress = () => navigation.navigate("NoteCreate");
 
@@ -105,23 +90,12 @@ export default function SearchBar({
     >
       <View
         onLayout={(ev) => setLayout(ev.nativeEvent.layout)}
-        style={[
-          styles.container,
-          { borderColor },
-          { zIndex: isFocused ? 100 : 1 },
-          props.outerContainerStyles,
-        ]}
+        style={[styles.container, { borderColor }, { zIndex: isFocused ? 100 : 1 }, props.outerContainerStyles]}
       >
         <Ripple onPress={onPlusPress} style={styles.icons}>
           <AntDesign size={24} name="plus" color={"#fff"} />
         </Ripple>
-        <TextInput
-          ref={props.textInputRef}
-          value={text}
-          onChangeText={setText}
-          style={[styles.input]}
-          onFocus={() => setIsFocused(true)}
-        />
+        <TextInput ref={props.textInputRef} value={text} onChangeText={setText} style={[styles.input]} onFocus={() => setIsFocused(true)} />
       </View>
 
       {isFocused && (
@@ -146,25 +120,7 @@ export default function SearchBar({
             },
           ]}
         >
-          <Text style={{ color: "#ffffff74", marginBottom: 5, marginLeft: 15 }}>
-            List of suggestions
-          </Text>
-
-          {suggestions.map((item) => (
-            <Note
-              hideContent
-              key={item.id.toString()}
-              {...item}
-              noteId={item.id.toString()}
-              title={item.content.split("\n")[0]}
-              text={item.content}
-              containerStyles={{
-                padding: 0,
-                paddingHorizontal: 10,
-                marginBottom: 5,
-              }}
-            />
-          ))}
+          <Text style={{ color: "#ffffff74", marginBottom: 5, marginLeft: 15 }}>List of suggestions</Text>
         </View>
       )}
     </View>

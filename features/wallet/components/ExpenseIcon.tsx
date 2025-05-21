@@ -551,7 +551,7 @@ const getCategoryIcon = (category: string) => {
 };
 
 const getCategoryParent = (category: string) => {
-  return category.split(":").shift()?.replace(/_/g, " ") || "";
+  return category?.split?.(":")?.shift?.()?.replace(/_/g, " ") || "";
 };
 
 export const CategoryUtils = {

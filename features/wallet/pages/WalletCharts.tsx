@@ -27,6 +27,7 @@ import CalendarHeatmap from "../components/WalletChart/MonthlySpendingHeatMap";
 import moment from "moment";
 import HourlySpendingsHeatMap from "../components/WalletChart/HourlyHeatMap";
 import { CategoryUtils } from "../components/ExpenseIcon";
+import useGetLegendData from "../hooks/useGetLegendData";
 
 const styles = StyleSheet.create({
   tilesContainer: {
@@ -106,26 +107,8 @@ function WalletCharts({ navigation }: any) {
     data = { wallet: { expenses: [] } },
     dispatch,
     filters,
+    loading,
   } = useGetWallet({ fetchAll: true, excludeFields: ["subscription", "location", "files"] });
-  const { data: stats, loading } = useGetStatistics([filters.date.from, filters.date.to]);
-
-  const [overlay, setOverlay] = useState(true);
-
-  useEffect(() => {
-    if (loading) {
-      setOverlay(true);
-
-      return;
-    }
-
-    let timeout = setTimeout(() => {
-      setOverlay(false);
-    }, 1500);
-
-    return () => {
-      clearTimeout(timeout);
-    };
-  }, [loading]);
 
   const filteredExpenses = useMemo(() => {
     return data?.wallet?.expenses?.filter((item) => !getInvalidExpenses(item)) || [];
@@ -138,49 +121,19 @@ function WalletCharts({ navigation }: any) {
 
   const [chartType, setChartType] = useState<"pie" | "bar">("pie");
 
+  const { data: legendData } = useGetLegendData();
+
   const barData = useMemo(() => {
-    if (!filteredExpenses.length) return [];
+    if (!legendData?.statisticsLegend) return [];
 
-    const expensesGroupedByCategory = filteredExpenses.reduce(
-      (acc, curr) => {
-        const key = CategoryUtils.getCategoryParent(curr.category);
-
-        if (!acc[key])
-          return {
-            ...acc,
-            [key]: {
-              amount: curr.amount,
-              count: 1,
-            },
-          };
-
-        return {
-          ...acc,
-          [key]: {
-            amount: acc[key].amount + curr.amount,
-            count: acc[key].count + 1,
-          },
-        };
-      },
-      {} as Record<
-        string,
-        {
-          amount: number;
-          count: number;
-        }
-      >
-    );
-
-    return Object.entries(expensesGroupedByCategory)
-      .map(([key, { amount, count }], index) => ({
-        value: amount,
-        label: key,
-        color: Icons[key as keyof typeof Icons]?.backgroundColor || secondary_candidates[index % secondary_candidates.length],
-        selected: key === selected,
-        itemsCount: count,
-      }))
-      .sort((a, b) => b.value - a.value) as BarItemProps[];
-  }, [filteredExpenses, excluded]);
+    return legendData?.statisticsLegend.map((item, index: number) => ({
+      value: item.total,
+      label: item.category,
+      color: Icons[item.category as keyof typeof Icons]?.backgroundColor || secondary_candidates[index % secondary_candidates.length],
+      selected: item.category === selected,
+      itemsCount: +item.count,
+    }));
+  }, [legendData?.statisticsLegend]);
 
   const sumOfExpenses = useMemo(() => {
     if (!data?.wallet?.expenses) return 0;
@@ -201,9 +154,11 @@ function WalletCharts({ navigation }: any) {
     setSelected((prev) => (prev === item.category ? "" : item.category));
     setStep(5);
 
-    setTimeout(() => {
-      listRef.current?.scrollToIndex({ index: 0, animated: true });
-    }, 100);
+    try {
+      setTimeout(() => {
+        listRef.current?.scrollToIndex({ index: 0, animated: true });
+      }, 100);
+    } catch (error) {}
   };
 
   const selectedCategoryData =
@@ -301,7 +256,7 @@ function WalletCharts({ navigation }: any) {
 
   return (
     <View style={{ paddingTop: 15, paddingBottom: insets.bottom }}>
-      {overlay && (
+      {loading && (
         <Animated.View exiting={FadeOut} style={[StyleSheet.absoluteFillObject, styles.overlay]}>
           <ActivityIndicator
             size="large"
@@ -343,7 +298,7 @@ function WalletCharts({ navigation }: any) {
                   <Text style={styles.viewAll}>View all</Text>
                 </Ripple>
               )}
-              <StatisticsSummary dates={filters.date} data={stats?.statistics} />
+              <StatisticsSummary />
               <SpendingsByDay data={filteredExpenses} />
               {monthDiff > 28 && monthDiff < 32 && (
                 <FutureProjection data={filteredExpenses} income={5500} currentBalance={currentBalance} />

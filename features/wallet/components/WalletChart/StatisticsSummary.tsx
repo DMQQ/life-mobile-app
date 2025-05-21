@@ -7,14 +7,7 @@ import { ReactNode, useEffect, useMemo, useState } from "react";
 import moment from "moment";
 import Ripple from "react-native-material-ripple";
 import lowOpacity from "@/utils/functions/lowOpacity";
-
-interface StatisticsSummaryProps {
-  data: WalletStatisticsResponse["statistics"] | undefined;
-  dates: {
-    from: string;
-    to: string;
-  };
-}
+import { useWalletContext } from "../WalletContext";
 
 interface ItemProps {
   label: string;
@@ -48,47 +41,50 @@ export const Item = ({ label, value, icon, formatValue = true, width }: ItemProp
   </View>
 );
 
-export default function StatisticsSummary(props: StatisticsSummaryProps) {
+export default function StatisticsSummary() {
+  const { filters } = useWalletContext();
+  const { data: stats, loading } = useGetStatistics([filters.date.from, filters.date.to]);
+
   const oppositeRange = useMemo(() => {
-    const size = moment(props.dates.to).diff(moment(props.dates.from), "days");
+    const size = moment(filters.date.to).diff(moment(filters.date.from), "days");
 
     if (size === 1)
       return [
-        moment(props.dates.from).subtract(1, "day").format("YYYY-MM-DD"),
-        moment(props.dates.to).subtract(1, "day").format("YYYY-MM-DD"),
+        moment(filters.date.from).subtract(1, "day").format("YYYY-MM-DD"),
+        moment(filters.date.to).subtract(1, "day").format("YYYY-MM-DD"),
       ];
 
     if (size === 2)
       return [
-        moment(props.dates.from).subtract(2, "day").format("YYYY-MM-DD"),
-        moment(props.dates.to).subtract(2, "day").format("YYYY-MM-DD"),
+        moment(filters.date.from).subtract(2, "day").format("YYYY-MM-DD"),
+        moment(filters.date.to).subtract(2, "day").format("YYYY-MM-DD"),
       ];
 
     if (size >= 7 && size <= 10)
       return [
-        moment(props.dates.from).subtract(1, "week").format("YYYY-MM-DD"),
-        moment(props.dates.to).subtract(1, "week").format("YYYY-MM-DD"),
+        moment(filters.date.from).subtract(1, "week").format("YYYY-MM-DD"),
+        moment(filters.date.to).subtract(1, "week").format("YYYY-MM-DD"),
       ];
 
     if (size >= 28 && size <= 31)
       return [
-        moment(props.dates.from).subtract(1, "month").format("YYYY-MM-DD"),
-        moment(props.dates.to).subtract(1, "month").format("YYYY-MM-DD"),
+        moment(filters.date.from).subtract(1, "month").format("YYYY-MM-DD"),
+        moment(filters.date.to).subtract(1, "month").format("YYYY-MM-DD"),
       ];
 
     if (size >= 365)
       return [
-        moment(props.dates.from).subtract(1, "year").format("YYYY-MM-DD"),
-        moment(props.dates.to).subtract(1, "year").format("YYYY-MM-DD"),
+        moment(filters.date.from).subtract(1, "year").format("YYYY-MM-DD"),
+        moment(filters.date.to).subtract(1, "year").format("YYYY-MM-DD"),
       ];
 
     return ["", ""];
-  }, [props.dates]) as [string, string];
+  }, [filters.date]) as [string, string];
 
   const lastRangeStatistics = useGetStatistics(oppositeRange);
 
   const percentDiff = (key: keyof WalletStatisticsResponse["statistics"]) => {
-    const current = props.data?.[key];
+    const current = stats?.statistics?.[key];
     const previous = lastRangeStatistics.data?.statistics?.[key];
 
     if (typeof previous !== "number" || typeof current !== "number") return 0;
@@ -119,7 +115,7 @@ export default function StatisticsSummary(props: StatisticsSummaryProps) {
 
   const [view, setView] = useState<"last" | "current">("current");
 
-  if (!props.data) return null;
+  if (!stats?.statistics) return null;
 
   return (
     <View style={{ width: Layout.screen.width - 30, marginTop: 25, marginBottom: 25, minHeight: 475 }}>
@@ -130,7 +126,7 @@ export default function StatisticsSummary(props: StatisticsSummaryProps) {
               <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 18 }}>Statistics Summary</Text>
 
               <Text style={{ color: "gray", marginTop: 5 }}>
-                From {props.dates.from} to {props.dates.to}
+                From {filters.date.from} to {filters.date.to}
               </Text>
             </>
           ) : (
@@ -165,39 +161,43 @@ export default function StatisticsSummary(props: StatisticsSummaryProps) {
         <View style={{ flexDirection: "row", justifyContent: "space-between", flexWrap: "wrap", gap: 10, marginTop: 15 }}>
           <Item
             label={"Total expenses" + "\n"}
-            value={props.data.expense}
+            value={stats.statistics.expense}
             icon={<MaterialIcons name="attach-money" size={24} color="red" />}
           />
           <Item
             label={"Total income" + "\n"}
-            value={props.data.income}
+            value={stats.statistics.income}
             icon={<Ionicons name="cash-outline" size={24} color="lightgreen" />}
           />
-          <Item label={"Min expense" + "\n"} value={props.data.min} icon={<MaterialIcons name="trending-down" size={24} color="red" />} />
+          <Item
+            label={"Min expense" + "\n"}
+            value={stats.statistics.min}
+            icon={<MaterialIcons name="trending-down" size={24} color="red" />}
+          />
           <Item
             label={"Max expense" + "\n"}
-            value={props.data.max}
+            value={stats.statistics.max}
             icon={<MaterialIcons name="trending-up" size={24} color="lightgreen" />}
           />
           <Item
             label={"Average purchase" + "\n"}
-            value={props.data.average}
+            value={stats.statistics.average}
             icon={<FontAwesome5 name="chart-bar" size={24} color="red" />}
           />
           <Item
             label={"Total count" + "\n"}
             formatValue={false}
-            value={props.data.count}
+            value={stats.statistics.count}
             icon={<Ionicons name="receipt-outline" size={24} color="lightgreen" />}
           />
           <Item
             label={"Top category"}
-            value={capitalize(props.data.theMostCommonCategory)}
+            value={capitalize(stats.statistics.theMostCommonCategory)}
             icon={<MaterialIcons name="category" size={24} color="white" />}
           />
           <Item
             label="Uncommon category"
-            value={capitalize(props.data.theLeastCommonCategory)}
+            value={capitalize(stats.statistics.theLeastCommonCategory)}
             icon={<MaterialIcons name="category" size={24} color="white" />}
           />
         </View>
