@@ -106,7 +106,7 @@ function WalletCharts({ navigation }: any) {
     data = { wallet: { expenses: [] } },
     dispatch,
     filters,
-  } = useGetWallet({ fetchAll: true, excludeFields: ["subscription", "location", "files", "subexpenses"] });
+  } = useGetWallet({ fetchAll: true, excludeFields: ["subscription", "location", "files"] });
   const { data: stats, loading } = useGetStatistics([filters.date.from, filters.date.to]);
 
   const [overlay, setOverlay] = useState(true);
@@ -191,14 +191,14 @@ function WalletCharts({ navigation }: any) {
     }, 0);
   }, [barData, excluded.length]);
 
-  const onLegendItemPress = (item: { label: string }) => {
-    if (!item.label) return;
+  const onLegendItemPress = (item: { category: string }) => {
+    if (!item.category) return;
 
-    if (excluded.includes(item.label)) {
-      setExcluded((prev) => prev.filter((cat) => cat !== item.label));
+    if (excluded.includes(item.category)) {
+      setExcluded((prev) => prev.filter((cat) => cat !== item.category));
     }
 
-    setSelected((prev) => (prev === item.label ? "" : item.label));
+    setSelected((prev) => (prev === item.category ? "" : item.category));
     setStep(5);
 
     setTimeout(() => {
@@ -227,13 +227,13 @@ function WalletCharts({ navigation }: any) {
   }, [barData]);
 
   const onLongPress = useCallback(
-    (item: { label: string } & Record<string, any>) => {
+    (item: { category: string } & Record<string, any>) => {
       Feedback.trigger("impactLight");
       setExcluded((prev) => {
-        if (prev.includes(item.label)) return prev.filter((cat) => cat !== item.label);
-        return [...prev, item.label];
+        if (prev.includes(item.category)) return prev.filter((cat) => cat !== item.category);
+        return [...prev, item.category];
       });
-      if (item.label === selected) {
+      if (item.category === selected) {
         setSelected("");
       }
     },
@@ -257,8 +257,9 @@ function WalletCharts({ navigation }: any) {
             onLongPress={onLongPress}
             totalSum={sumOfExpenses}
             selected={selected}
-            data={barData}
             onPress={onLegendItemPress}
+            startDate={filters.date.from}
+            endDate={filters.date.to}
           />
 
           {selectedCategoryData.length > 0 && (

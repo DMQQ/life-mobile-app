@@ -4,19 +4,21 @@ import Ripple from "react-native-material-ripple";
 import Colors from "@/constants/Colors";
 import Color from "color";
 import Animated, { LinearTransition } from "react-native-reanimated";
-import { Icons } from "../ExpenseIcon";
+import { CategoryUtils, Icons } from "../ExpenseIcon";
 import lowOpacity from "@/utils/functions/lowOpacity";
+import { gql, useQuery } from "@apollo/client";
 
 interface ICategory {
-  label: string;
-  value: number;
-  color: string;
+  category: string;
 
-  itemsCount: number;
+  percentage: number;
+
+  total: number;
+
+  count: string;
 }
 
 interface LegendProps {
-  data: ICategory[];
   totalSum: number;
   onPress: (item: ICategory) => void;
   selected: string;
@@ -24,19 +26,39 @@ interface LegendProps {
   onLongPress?: (item: ICategory) => void;
 
   excluded?: string[];
+
+  startDate: string;
+
+  endDate: string;
 }
 
 const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
 
-const Legend = (props: LegendProps) =>
-  props.data.length === 0 ? null : (
+const Legend = (props: LegendProps) => {
+  const { data: statisticsLegendData } = useQuery<{ statisticsLegend: ICategory[] }>(
+    gql`
+      query StatisticsLegend($startDate: String!, $endDate: String!) {
+        statisticsLegend(startDate: $startDate, endDate: $endDate) {
+          category
+          count
+          total
+          percentage
+        }
+      }
+    `,
+    { variables: { startDate: props.startDate, endDate: props.endDate } }
+  );
+
+  const data = statisticsLegendData?.statisticsLegend;
+
+  return data?.length === 0 ? null : (
     <Animated.View style={styles.tilesContainer} layout={LinearTransition}>
       <View style={{ width: "100%", marginBottom: 10 }}>
         <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 18 }}>Chart legend</Text>
         <Text style={{ color: "gray", marginTop: 5 }}>Detailed percentage of your expenses</Text>
       </View>
-      {props.data.map((item, index) => {
-        const isExcluded = props.excluded?.includes(item.label);
+      {data?.map((item, index) => {
+        const isExcluded = props.excluded?.includes(item.category);
 
         return (
           <Ripple
@@ -47,9 +69,9 @@ const Legend = (props: LegendProps) =>
               styles.tile,
 
               {
-                width: props.data.length - 1 === index && props.data.length % 2 === 1 ? "100%" : (Layout.screen.width - 30) / 2 - 7.5,
+                width: data?.length - 1 === index && data?.length % 2 === 1 ? "100%" : (Layout.screen.width - 30) / 2 - 7.5,
                 backgroundColor:
-                  props.selected === item.label
+                  props.selected === item.category
                     ? Color(Colors.primary_light).lighten(0.4).string()
                     : isExcluded
                     ? Color(Colors.primary_light).darken(0.4).string()
@@ -65,14 +87,14 @@ const Legend = (props: LegendProps) =>
                 },
               ]}
             >
-              {Math.trunc(item.value)}zł
+              {Math.trunc(item.total)}zł
               <Text style={{ color: "gray" }}>
                 {!isExcluded && (
                   <>
                     <Text style={{ fontSize: 12 }}>
                       {"  "} / {"  "}
                     </Text>
-                    <Text style={{ fontSize: 12 }}>{((item.value / props.totalSum) * 100).toFixed(2)}%</Text>
+                    <Text style={{ fontSize: 12 }}>{item.percentage.toFixed(2)}%</Text>
                   </>
                 )}
               </Text>
@@ -82,27 +104,34 @@ const Legend = (props: LegendProps) =>
 
               <View
                 style={{
-                  backgroundColor: lowOpacity(item.color, 0.2),
+                  backgroundColor: lowOpacity(Icons[item.category as keyof typeof Icons]?.backgroundColor, 0.2),
                   padding: 10,
                   borderRadius: 100,
                 }}
               >
-                {Icons?.[item.label as keyof typeof Icons]?.icon}
+                {CategoryUtils.getCategoryIcon(item.category)}
               </View>
 
               <View style={{ gap: 1.5 }}>
-                <Text style={{ color: blueText, fontSize: 15, fontWeight: 500 }}>{capitalize(item.label)}</Text>
-                <Text style={{ fontSize: 11, color: "rgba(255,255,255,0.6)" }}>(No transactions {item.itemsCount})</Text>
+                <Text style={{ color: blueText, fontSize: 15, fontWeight: 500 }}>{capitalize(item.category)}</Text>
+                <Text style={{ fontSize: 11, color: "rgba(255,255,255,0.6)" }}>(No transactions {item.count})</Text>
               </View>
             </View>
-            <View style={{ width: "100%", overflow: "hidden", position: "absolute", bottom: 0 }}>
+            <View
+              style={{
+                width: data?.length - 1 === index && data?.length % 2 === 1 ? "100%" : (Layout.screen.width - 30) / 2 - 7.5,
+                overflow: "hidden",
+                position: "absolute",
+                bottom: 0,
+                marginTop: 10,
+              }}
+            >
               <View
                 style={{
-                  width: (((item.value / props.totalSum) * 100).toFixed(2) + "%") as any,
+                  width: (item.percentage + "%") as any,
                   height: 5,
-                  backgroundColor: item.color,
+                  backgroundColor: Icons[item.category as keyof typeof Icons]?.backgroundColor,
                   borderRadius: 10,
-                  marginTop: 10,
                 }}
               />
             </View>
@@ -111,6 +140,7 @@ const Legend = (props: LegendProps) =>
       })}
     </Animated.View>
   );
+};
 
 const blueText = "#fff";
 
