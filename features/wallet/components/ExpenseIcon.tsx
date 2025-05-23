@@ -2,6 +2,7 @@ import { AntDesign, Entypo, FontAwesome5, Ionicons, MaterialCommunityIcons } fro
 import Colors from "@/constants/Colors";
 import lowOpacity from "@/utils/functions/lowOpacity";
 import { StyleSheet, View } from "react-native";
+import React from "react";
 
 export const Icons = {
   // Original categories - preserved for backward compatibility
@@ -598,6 +599,10 @@ export const Icons = {
     icon: <MaterialCommunityIcons name="chart-areaspline" size={20} color={Colors.secondary_light_1} />,
     backgroundColor: Colors.secondary_light_1,
   },
+  bell: {
+    icon: <MaterialCommunityIcons name="bell" size={20} color={Colors.secondary_light_1} />,
+    backgroundColor: Colors.secondary_light_1,
+  },
 
   none: {
     icon: <Ionicons name="add" color={Colors.secondary} size={20} />,
@@ -629,7 +634,12 @@ export const CategoryUtils = {
   getCategoryParent,
 };
 
-export const CategoryIcon = (props: { category: keyof typeof Icons; type: "income" | "expense" | "refunded"; clear?: boolean }) => {
+export const CategoryIcon = (props: {
+  category: keyof typeof Icons;
+  type: "income" | "expense" | "refunded";
+  clear?: boolean;
+  size?: number;
+}) => {
   let category = props.category || "none";
 
   if (props.category === "edit") {
@@ -650,7 +660,9 @@ export const CategoryIcon = (props: { category: keyof typeof Icons; type: "incom
           },
         ]}
       >
-        {Icons[category]?.icon}
+        {React.cloneElement(Icons[category]?.icon, {
+          size: props.size || 20,
+        })}
       </View>
     </View>
   );

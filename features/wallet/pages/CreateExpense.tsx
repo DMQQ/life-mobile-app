@@ -33,6 +33,7 @@ import Feedback from "react-native-haptic-feedback";
 import Button from "@/components/ui/Button/Button";
 import { SpontaneousRateChip, SpontaneousRateSelector } from "../components/CreateExpense/SpontaneousRate";
 import usePredictExpense from "../hooks/usePredictCategory";
+import { CategoryUtils } from "../components/ExpenseIcon";
 
 interface SubExpense {
   id: string;
@@ -546,7 +547,7 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
                           fontSize: 15,
                         }}
                       >
-                        {category === "none" ? "Select category" : category}
+                        {category === "none" ? "Select category" : CategoryUtils.getCategoryName(category)}
                       </Text>
                     </Ripple>
                     <SpontaneousRateChip

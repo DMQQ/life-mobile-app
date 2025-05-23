@@ -160,11 +160,11 @@ export default function WalletItem(
                   </Text>
                 </>
               )}
-              {item.subexpenses && item.subexpenses.length > 0 && (
+              {item.subexpenses && item.subexpenses?.length > 0 && (
                 <>
                   {" / "}
                   <Text style={{ color: secondary_candidates[2] }}>
-                    {item.subexpenses.length} {item.subexpenses.length > 1 ? "sub" : "subs"}
+                    {item.subexpenses?.length} {item.subexpenses?.length > 1 ? "sub" : "subs"}
                   </Text>
                 </>
               )}
@@ -192,7 +192,7 @@ export default function WalletItem(
         )}
       </Ripple>
 
-      {isExpanded && item.subexpenses.length > 0 && (
+      {isExpanded && item.subexpenses?.length > 0 && (
         <Animated.View layout={LinearTransition} style={styles.expanded}>
           {item.subexpenses.map((subexpense, index) => (
             <Animated.View

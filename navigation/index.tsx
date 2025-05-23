@@ -9,9 +9,7 @@ import TimelineScreens from "../features/timeline/Main";
 import { BottomTabBarProps, createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import BottomTab from "../components/BottomTab/BottomTab";
 import WalletScreens from "../features/wallet/Main";
-import Settings from "../features/settings/Settings";
 import Authentication from "../features/authentication/Main";
-
 import GoalsScreens from "../features/goals/Main";
 import { useApolloClient } from "@apollo/client";
 import useQuickActions from "@/utils/hooks/useQuickActions";
@@ -82,8 +80,6 @@ export default function Navigation() {
             <Tab.Screen name="WalletScreens" component={WalletScreens as any} />
 
             <Tab.Screen name="TimelineScreens" component={TimelineScreens} />
-
-            <Tab.Screen name="Settings" component={Settings} />
 
             <Tab.Screen name="NotesScreens" component={NotesScreens} />
           </>

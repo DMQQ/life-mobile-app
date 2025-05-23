@@ -1,4 +1,3 @@
-import ScreenContainer from "@/components/ui/ScreenContainer";
 import TodaysTimelineEvents from "@/features/home/components/EventsWidget";
 import AvailableBalanceWidget from "@/features/home/components/WalletWidget";
 import { ScreenProps } from "@/types";
@@ -10,15 +9,19 @@ import Header from "@/components/ui/Header/Header";
 import { AntDesign } from "@expo/vector-icons";
 import moment from "moment";
 import useOffline from "@/utils/hooks/useOffline";
-
 import SkeletonPlaceholder from "@/components/SkeletonLoader/Skeleton";
-import { View } from "react-native";
+import { View, Modal, TouchableOpacity, Text, StyleSheet } from "react-native";
 import Layout from "@/constants/Layout";
 import Animated, { FadeIn, FadeOut, LinearTransition } from "react-native-reanimated";
 import { useState } from "react";
 import * as SplashScreen from "expo-splash-screen";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import WorkoutWidget from "../workout/components/WorkoutWidget";
+import WalletNotifications from "../wallet/components/WalletNotifications";
+import Colors from "@/constants/Colors";
+import Feedback from "react-native-haptic-feedback";
+import { BlurView } from "expo-blur";
+import SettingsModal from "./components/SettingsModal";
 
 const LoadingSkeleton = () => {
   return (
@@ -34,8 +37,6 @@ const LoadingSkeleton = () => {
         padding: 15,
       }}
     >
-      {/* <FancySpinner size={100} /> */}
-
       <SkeletonPlaceholder size={(size) => size}>
         <View>
           {/* Main Balance */}
@@ -93,12 +94,82 @@ const LoadingSkeleton = () => {
   );
 };
 
+const NotificationBadge = ({ count }: { count: number }) => {
+  if (count === 0) return null;
+
+  return (
+    <View style={styles.badge}>
+      <Text style={styles.badgeText}>{count > 99 ? "99+" : count}</Text>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  badge: {
+    position: "absolute",
+    top: -6,
+    right: -6,
+    backgroundColor: "#FF3B30",
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: Colors.primary,
+  },
+  badgeText: {
+    color: "white",
+    fontSize: 12,
+    fontWeight: "bold",
+  },
+  modalContainer: {
+    flex: 1,
+  },
+  blurBackground: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  modalContent: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.3)", // Semi-transparent overlay
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(255, 255, 255, 0.1)",
+    backgroundColor: "rgba(0, 0, 0, 0.2)",
+    paddingTop: 60,
+  },
+  modalTitle: {
+    color: Colors.text_light,
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  closeButton: {
+    padding: 8,
+  },
+  notificationsContainer: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.2)",
+  },
+});
+
 export default function Root({ navigation }: ScreenProps<"Root">) {
   const workout = useAppSelector((s) => s.workout);
-
   const user = useAppSelector((s) => s.user);
-
   const offline = useOffline("RootScreen");
+
+  const [loading, setLoading] = useState(true);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(3);
 
   const { data: gql } = useQuery(GET_MAIN_SCREEN, {
     variables: {
@@ -109,9 +180,7 @@ export default function Root({ navigation }: ScreenProps<"Root">) {
     },
     onCompleted: async (data) => {
       await offline.save("RootScreen", data);
-
       setLoading(false);
-
       await SplashScreen.hideAsync();
     },
     onError: (er) => {
@@ -121,26 +190,52 @@ export default function Root({ navigation }: ScreenProps<"Root">) {
     },
   });
 
-  const [loading, setLoading] = useState(true);
-
   const data = offline.isOffline ? offline.data || {} : gql;
-
   const edge = useSafeAreaInsets();
+
+  const handleNotificationPress = () => {
+    Feedback.trigger("impactLight");
+    setShowNotifications(true);
+  };
+
+  const closeNotifications = () => {
+    Feedback.trigger("impactLight");
+    setShowNotifications(false);
+  };
+
+  const handleSettingsPress = () => {
+    Feedback.trigger("impactLight");
+    setShowSettings(true);
+  };
+
+  const closeSettings = () => {
+    Feedback.trigger("impactLight");
+    setShowSettings(false);
+  };
 
   return (
     <Animated.View style={{ padding: 0, flex: 1, paddingTop: edge.top }} layout={LinearTransition.delay(100)}>
       {loading && <LoadingSkeleton />}
-
       <Header
         titleAnimatedStyle={{}}
         title={`Hello, ${user?.user?.email.split("@")[0]}`}
         buttons={[
           {
+            icon: (
+              <View>
+                <AntDesign name="bells" size={20} color="#fff" />
+                <NotificationBadge count={unreadCount} />
+              </View>
+            ),
+            onPress: handleNotificationPress,
+          },
+          {
             icon: <AntDesign name="setting" size={20} color="#fff" />,
-            onPress: () => navigation.navigate("Settings"),
+            onPress: handleSettingsPress,
           },
         ]}
       />
+
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{
@@ -161,6 +256,31 @@ export default function Root({ navigation }: ScreenProps<"Root">) {
 
         {workout.isWorkoutPending && <WorkoutWidget />}
       </ScrollView>
+
+      <Modal
+        visible={showNotifications}
+        animationType="slide"
+        presentationStyle="overFullScreen"
+        transparent={true}
+        onRequestClose={closeNotifications}
+      >
+        <View style={styles.modalContainer}>
+          <BlurView intensity={80} tint="dark" style={styles.blurBackground} />
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Notifications</Text>
+              <TouchableOpacity onPress={closeNotifications} style={styles.closeButton}>
+                <AntDesign name="close" size={24} color={Colors.text_light} />
+              </TouchableOpacity>
+            </View>
+            <View style={styles.notificationsContainer}>
+              <WalletNotifications />
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      <SettingsModal visible={showSettings} onClose={closeSettings} />
     </Animated.View>
   );
 }
