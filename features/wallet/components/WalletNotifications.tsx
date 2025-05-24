@@ -1,5 +1,5 @@
-import { gql, useQuery } from "@apollo/client";
-import { useState } from "react";
+import { gql, useMutation, useQuery } from "@apollo/client";
+import { useEffect, useState } from "react";
 import { Text, View, StyleSheet, TouchableOpacity, ScrollView, FlatList } from "react-native";
 import Colors from "@/constants/Colors";
 import Ripple from "react-native-material-ripple";
@@ -8,6 +8,7 @@ import { CategoryIcon } from "./ExpenseIcon";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { BlurView } from "expo-blur";
 import lowOpacity from "@/utils/functions/lowOpacity";
+import * as Notifications from "expo-notifications";
 
 interface Notification {
   id: string;
@@ -20,6 +21,8 @@ interface Notification {
     };
   };
   sendAt: string;
+
+  read: boolean;
 }
 
 const styles = StyleSheet.create({
@@ -187,6 +190,37 @@ const formatTimeAgo = (dateString: string) => {
   return date.toLocaleDateString();
 };
 
+export const NOTIFICATIONS_QUERY = gql`
+  query WalletNotifications($skip: Int!, $take: Int!) {
+    notifications(skip: $skip, take: $take) {
+      id
+      message
+      sendAt
+      read
+    }
+  }
+`;
+
+export function useGetNotifications() {
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  const notification = useQuery(NOTIFICATIONS_QUERY, {
+    variables: { take: 25, skip: 0 },
+  });
+
+  useEffect(() => {
+    if (notification.data?.notifications) {
+      const unreadNotifications = notification.data.notifications.filter((n: Notification) => !n.read);
+      setUnreadCount(unreadNotifications.length);
+      Notifications.setBadgeCountAsync(unreadNotifications.length);
+    } else {
+      setUnreadCount(0);
+    }
+  }, [notification.data]);
+
+  return { ...notification, unreadCount };
+}
+
 function NotificationCard({
   notification,
   onDismiss,
@@ -196,19 +230,41 @@ function NotificationCard({
   onDismiss: (id: string) => void;
   index: number;
 }) {
+  const [readNotification] = useMutation(
+    gql`
+      mutation ReadNotification($id: ID!) {
+        readNotification(id: $id)
+      }
+    `,
+    {
+      variables: { id: notification.id },
+      awaitRefetchQueries: true,
+      refetchQueries: [
+        {
+          query: NOTIFICATIONS_QUERY,
+          variables: { take: 25, skip: 0 },
+        },
+      ],
+    }
+  );
+
   const handleDismiss = () => {
     Feedback.trigger("impactLight");
     onDismiss(notification.id);
   };
 
-  const handlePress = () => {
+  const handlePress = async () => {
     Feedback.trigger("selection");
+
+    await readNotification().catch((error) => {
+      console.error("Error marking notification as read:", error);
+    });
   };
 
   return (
     <Animated.View style={styles.notificationCard} entering={FadeInDown.delay((index + 1) * 75)}>
       <BlurView intensity={100} tint="dark" style={styles.blurContainer}>
-        <Ripple onPress={handlePress} rippleColor="rgba(255, 255, 255, 0.1)" rippleDuration={300}>
+        <Ripple disabled={notification.read} onPress={handlePress} rippleColor="rgba(255, 255, 255, 0.1)" rippleDuration={300}>
           <View style={styles.notificationContent}>
             <View style={styles.headerRow}>
               <View style={styles.iconContainer}>
@@ -226,8 +282,10 @@ function NotificationCard({
               {notification.message.body}
             </Text>
 
-            <View style={styles.footerRow}>
-              <Text style={styles.timestamp}>{formatTimeAgo(notification.sendAt)}</Text>
+            <View style={[styles.footerRow]}>
+              <Text style={styles.timestamp}>
+                {`${notification.read ? "" : "Not read, "} ${formatTimeAgo(notification.sendAt)}`.trim()}
+              </Text>
             </View>
 
             <TouchableOpacity
@@ -245,22 +303,17 @@ function NotificationCard({
   );
 }
 
-export default function WalletNotifications() {
+interface WalletNotificationsProps {
+  data: { notifications: any[] };
+
+  error?: any;
+
+  loading?: boolean;
+}
+
+export default function WalletNotifications({ data, error, loading }: WalletNotificationsProps) {
   const [pagination, setPagination] = useState({ skip: 0, take: 25 });
   const [dismissedNotifications, setDismissedNotifications] = useState<Set<string>>(new Set());
-
-  const { data, error, loading } = useQuery(
-    gql`
-      query WalletNotifications($skip: Int!, $take: Int!) {
-        notifications(skip: $skip, take: $take) {
-          id
-          message
-          sendAt
-        }
-      }
-    `,
-    { variables: { ...pagination } }
-  );
 
   const handleDismiss = (notificationId: string) => {
     setDismissedNotifications((prev) => new Set([...prev, notificationId]));

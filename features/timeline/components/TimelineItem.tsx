@@ -102,17 +102,18 @@ export default function TimelineItem(
             {timeline.description}
           </Text>
 
-          <Text
-            style={[
-              timelineStyles.status,
-              {
-                backgroundColor: timeline.isCompleted ? "lightgreen" : isExpired ? "#BA4343" : Colors.secondary,
-                alignSelf: "flex-end",
-              },
-            ]}
+          <View
+            style={{
+              backgroundColor: timeline.isCompleted ? "lightgreen" : isExpired ? "#BA4343" : Colors.secondary,
+              padding: 2.5,
+              paddingHorizontal: 10,
+              borderRadius: 100,
+              marginLeft: 2.5,
+              alignSelf: "flex-end",
+            }}
           >
-            {timeline.isCompleted ? "Finished" : isExpired ? "Late" : "To do"}
-          </Text>
+            <Text style={[timelineStyles.status]}>{timeline.isCompleted ? "Finished" : isExpired ? "Late" : "To do"}</Text>
+          </View>
         </View>
       </View>
     </Ripple>

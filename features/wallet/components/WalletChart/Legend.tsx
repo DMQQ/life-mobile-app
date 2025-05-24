@@ -7,7 +7,6 @@ import Animated, { LinearTransition } from "react-native-reanimated";
 import { CategoryUtils, Icons } from "../ExpenseIcon";
 import lowOpacity from "@/utils/functions/lowOpacity";
 import { useEffect, useState } from "react";
-import useGetLegendData from "../../hooks/useGetLegendData";
 
 interface ICategory {
   category: string;
@@ -79,6 +78,8 @@ const Legend = (props: LegendProps) => {
       {data?.map((item, index) => {
         const isExcluded = props.excluded?.includes(item.category);
 
+        const percentage = (props?.excluded?.length || 0) > 0 ? (item.total / props.totalSum) * 100 : item.percentage;
+
         return (
           <Ripple
             onLongPress={() => props.onLongPress?.(item)}
@@ -113,7 +114,7 @@ const Legend = (props: LegendProps) => {
                     <Text style={{ fontSize: 12 }}>
                       {"  "} / {"  "}
                     </Text>
-                    <Text style={{ fontSize: 12 }}>{item.percentage.toFixed(2)}%</Text>
+                    <Text style={{ fontSize: 12 }}>{percentage.toFixed(2)}%</Text>
                   </>
                 )}
               </Text>
@@ -150,7 +151,7 @@ const Legend = (props: LegendProps) => {
             >
               <View
                 style={{
-                  width: (item.percentage + "%") as any,
+                  width: (percentage + "%") as any,
                   height: 5,
                   backgroundColor: Icons[item.category as keyof typeof Icons]?.backgroundColor,
                   borderRadius: 10,

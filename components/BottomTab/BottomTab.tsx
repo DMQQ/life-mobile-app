@@ -5,11 +5,9 @@ import Colors from "../../constants/Colors";
 import Ripple from "react-native-material-ripple";
 import { Feather, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import useKeyboard from "../../utils/hooks/useKeyboard";
-import Animated, { FadeInDown } from "react-native-reanimated";
+import Animated, { FadeInDown, useAnimatedStyle, withTiming } from "react-native-reanimated";
 import { useTheme } from "../../utils/context/ThemeContext";
 import { Padding } from "@/constants/Values";
-import lowOpacity from "@/utils/functions/lowOpacity";
-import { CommonActions } from "@react-navigation/native";
 import moment from "moment";
 
 const styles = StyleSheet.create({
@@ -66,7 +64,13 @@ export default function BottomTab({ navigation, state, insets }: BottomTabBarPro
 
   const isOpenSubScreen = (state.routes[state.index].state?.index || 0) > 0;
 
-  if (isOpenSubScreen || keyboard) return null;
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [
+      {
+        translateY: isOpenSubScreen || keyboard ? withTiming(100) : withTiming(0),
+      },
+    ],
+  }));
 
   return (
     <Animated.View
@@ -78,7 +82,11 @@ export default function BottomTab({ navigation, state, insets }: BottomTabBarPro
           borderTopWidth: 1,
 
           paddingTop: Platform.OS === "android" ? insets.bottom + Padding.s : Padding.s,
+          position: "absolute",
+          bottom: 0,
+          height: 90,
         },
+        animatedStyle,
       ]}
       entering={FadeInDown}
       exiting={FadeInDown}

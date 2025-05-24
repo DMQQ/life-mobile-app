@@ -250,27 +250,25 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
     [amount]
   );
 
-  const onPredict = useCallback((prediction: ExpensePrediction) => {
-    if (prediction) {
-      setCategory(prediction.category as keyof typeof Icons);
-      setType(prediction.type as "expense" | "income");
-      setAmount(prediction.amount.toString());
-    }
-  }, []);
+  const onPredict = useCallback(
+    (prediction: ExpensePrediction) => {
+      if (prediction) {
+        setCategory(prediction.category as keyof typeof Icons);
+        setType(prediction.type as "expense" | "income");
+        if (amount === "0") setAmount(prediction.amount.toString());
+      }
+    },
+    [amount]
+  );
   usePredictExpense([name, +amount], onPredict);
 
   useEffect(() => {
     if (type === "income") setCategory("income");
     else if (type === "expense" && category === "income") setCategory("none");
-    {
-    }
   }, [type, category]);
 
   const handleAddSubexpense = () => {
-    if (amount === "0") {
-      shake();
-      return;
-    }
+    if (amount === "0") return shake();
 
     setSubExpenses((prev) => [
       ...prev,

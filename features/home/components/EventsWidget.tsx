@@ -13,19 +13,16 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import Animated from "react-native-reanimated";
 import TimelineItem from "@/features/timeline/components/TimelineItem";
 
-const backgroundColor = Colors.primary_lighter;
-
 const styles = StyleSheet.create({
   container: {
     marginTop: 20,
-    padding: 10,
   },
 
   headContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 20,
+    marginBottom: 10,
   },
 
   heading: {
@@ -88,7 +85,7 @@ export default function TodaysTimelineEvents(props: { data: any[]; loading: bool
   return (
     <Animated.View style={styles.container}>
       <View style={styles.headContainer}>
-        <Text style={styles.heading}>For today</Text>
+        <Text style={styles.heading}>Events</Text>
 
         <Ripple style={styles.actionButton} onPress={() => navigation.navigate("TimelineScreens")}>
           <Text style={styles.actionButtonText}>See more</Text>
@@ -108,15 +105,6 @@ export default function TodaysTimelineEvents(props: { data: any[]; loading: bool
           {...timeline}
         />
       ))}
-
-      <View style={[styles.headContainer, { marginTop: 20 }]}>
-        <Text style={styles.heading}>Missed events</Text>
-
-        <Ripple style={styles.actionButton} onPress={() => navigation.navigate("TimelineScreens")}>
-          <Text style={styles.actionButtonText}>See more</Text>
-          <MaterialCommunityIcons name="chevron-right" size={20} color={Colors.secondary} />
-        </Ripple>
-      </View>
     </Animated.View>
   );
 }

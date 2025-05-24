@@ -15,6 +15,8 @@ import { gql, useLazyQuery, useMutation, useQuery } from "@apollo/client";
 import axios from "axios";
 import Url from "@/constants/Url";
 
+import { CategoryUtils } from "../components/ExpenseIcon";
+
 const similarCategories = {
   food: ["drinks"],
   drinks: ["food"],
@@ -88,58 +90,58 @@ const Txt = (props: { children: ReactNode; size: number; color?: any }) => (
 );
 
 export default function Expense({ route: { params }, navigation }: any) {
-  // const { data, error } = useQuery(
-  //   gql`
-  //     query Expense($id: ID!) {
-  //       expense(expenseId: $id) {
-  //         id
-  //         amount
-  //         date
-  //         description
-  //         type
-  //         category
-  //         balanceBeforeInteraction
-  //         note
+  const { data, error } = useQuery(
+    gql`
+      query Expense($id: ID!) {
+        expense(expenseId: $id) {
+          id
+          amount
+          date
+          description
+          type
+          category
+          balanceBeforeInteraction
+          note
 
-  //         subscription {
-  //           id
-  //           isActive
-  //           nextBillingDate
-  //           dateStart
-  //         }
+          subscription {
+            id
+            isActive
+            nextBillingDate
+            dateStart
+          }
 
-  //         location {
-  //           id
-  //           kind
-  //           name
-  //           latitude
-  //           longitude
-  //         }
+          location {
+            id
+            kind
+            name
+            latitude
+            longitude
+          }
 
-  //         files {
-  //           id
-  //           url
-  //         }
+          files {
+            id
+            url
+          }
 
-  //         subexpenses {
-  //           id
-  //           description
-  //           amount
-  //           category
-  //         }
-  //       }
-  //     }
-  //   `,
-  //   { variables: { id: params?.expense?.id } }
-  // );
+          subexpenses {
+            id
+            description
+            amount
+            category
+          }
+        }
+      }
+    `,
+    { variables: { id: params?.expense?.id } }
+  );
 
   const [selected, setSelected] = useState(params?.expense);
 
-  // useEffect(() => {
-  //   if (data?.expense) {
-  //     setSelected(data.expense);
-  //   }
-  // }, [data?.expense]);
+  useEffect(() => {
+    if (data?.expense) {
+      setSelected(data.expense);
+    }
+  }, [data?.expense]);
 
   const amount = selected?.type === "expense" ? (selected.amount * -1).toFixed(2) : selected?.amount.toFixed(2);
 
@@ -353,13 +355,15 @@ export default function Expense({ route: { params }, navigation }: any) {
               {capitalize(selected?.description)}
             </Txt>
 
-            <Txt
-              size={20}
-              color={selected.type === "refunded" ? Colors.secondary_light_2 : selected.type === "expense" ? "#F07070" : "#66E875"}
-            >
-              {amount}
-              <Text style={{ fontSize: 16 }}>zł</Text>
-            </Txt>
+            <View style={{ marginTop: 2.5 }}>
+              <Txt
+                size={20}
+                color={selected.type === "refunded" ? Colors.secondary_light_2 : selected.type === "expense" ? "#F07070" : "#66E875"}
+              >
+                {amount}
+                <Text style={{ fontSize: 16 }}>zł</Text>
+              </Txt>
+            </View>
           </View>
 
           {selected.subexpenses?.length > 0 && (
@@ -375,10 +379,12 @@ export default function Expense({ route: { params }, navigation }: any) {
           )}
 
           {selected?.category && (
-            <View style={[styles.row, { padding: 0, paddingRight: 10, paddingLeft: 0 }]}>
+            <View style={[styles.row, { padding: 0, paddingRight: 10, paddingLeft: 7.5 }]}>
               <CategoryIcon type={selected?.type as "expense" | "income"} category={(selected?.category || "none") as any} clear />
 
-              <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>{capitalize(selected?.category)}</Text>
+              <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>
+                {capitalize(CategoryUtils.getCategoryName(selected?.category || ""))}
+              </Text>
             </View>
           )}
 

@@ -3,7 +3,7 @@ import AvailableBalanceWidget from "@/features/home/components/WalletWidget";
 import { ScreenProps } from "@/types";
 import { useAppSelector } from "@/utils/redux";
 import { GET_MAIN_SCREEN } from "@/utils/schemas/GET_MAIN_SCREEN";
-import { useQuery } from "@apollo/client";
+import { gql, useQuery } from "@apollo/client";
 import { ScrollView } from "react-native-gesture-handler";
 import Header from "@/components/ui/Header/Header";
 import { AntDesign } from "@expo/vector-icons";
@@ -17,7 +17,7 @@ import { useState } from "react";
 import * as SplashScreen from "expo-splash-screen";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import WorkoutWidget from "../workout/components/WorkoutWidget";
-import WalletNotifications from "../wallet/components/WalletNotifications";
+import WalletNotifications, { useGetNotifications } from "../wallet/components/WalletNotifications";
 import Colors from "@/constants/Colors";
 import Feedback from "react-native-haptic-feedback";
 import { BlurView } from "expo-blur";
@@ -169,9 +169,8 @@ export default function Root({ navigation }: ScreenProps<"Root">) {
   const [loading, setLoading] = useState(true);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(3);
 
-  const { data: gql } = useQuery(GET_MAIN_SCREEN, {
+  const { data: home } = useQuery(GET_MAIN_SCREEN, {
     variables: {
       range: [
         moment().subtract(1, "day").startOf("week").format("YYYY-MM-DD"),
@@ -190,7 +189,9 @@ export default function Root({ navigation }: ScreenProps<"Root">) {
     },
   });
 
-  const data = offline.isOffline ? offline.data || {} : gql;
+  const { unreadCount, ...notification } = useGetNotifications();
+
+  const data = offline.isOffline ? offline.data || {} : home;
   const edge = useSafeAreaInsets();
 
   const handleNotificationPress = () => {
@@ -274,7 +275,7 @@ export default function Root({ navigation }: ScreenProps<"Root">) {
               </TouchableOpacity>
             </View>
             <View style={styles.notificationsContainer}>
-              <WalletNotifications />
+              <WalletNotifications {...notification} />
             </View>
           </View>
         </View>
