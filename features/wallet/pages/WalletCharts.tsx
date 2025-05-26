@@ -167,7 +167,7 @@ function WalletCharts({ navigation }: any) {
   const selectedCategoryData =
     selected === ""
       ? data?.wallet?.expenses || []
-      : data?.wallet?.expenses?.filter((item) => item.category === selected && item.type !== "refunded") || [];
+      : data?.wallet?.expenses?.filter((item) => item.category.startsWith(selected) && item.type !== "refunded") || [];
 
   const onChartPress = (e: any) => {
     setSelected(e.label);

@@ -22,6 +22,7 @@ import Colors from "@/constants/Colors";
 import Feedback from "react-native-haptic-feedback";
 import { BlurView } from "expo-blur";
 import SettingsModal from "./components/SettingsModal";
+import useAppBackground from "@/utils/hooks/useAppBackground";
 
 const LoadingSkeleton = () => {
   return (
@@ -170,7 +171,7 @@ export default function Root({ navigation }: ScreenProps<"Root">) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
 
-  const { data: home } = useQuery(GET_MAIN_SCREEN, {
+  const { data: home, refetch: refetchHome } = useQuery(GET_MAIN_SCREEN, {
     variables: {
       range: [
         moment().subtract(1, "day").startOf("week").format("YYYY-MM-DD"),
@@ -189,10 +190,14 @@ export default function Root({ navigation }: ScreenProps<"Root">) {
     },
   });
 
-  const { unreadCount, ...notification } = useGetNotifications();
+  const { unreadCount, refetch: refetchNotifications, ...notification } = useGetNotifications();
 
   const data = offline.isOffline ? offline.data || {} : home;
   const edge = useSafeAreaInsets();
+
+  useAppBackground({
+    onForeground: () => Promise.any([refetchNotifications, refetchHome]),
+  });
 
   const handleNotificationPress = () => {
     Feedback.trigger("impactLight");

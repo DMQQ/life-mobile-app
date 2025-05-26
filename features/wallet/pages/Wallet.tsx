@@ -1,6 +1,6 @@
 import Header from "@/components/ui/Header/Header";
 import Layout from "@/constants/Layout";
-import { AntDesign, Ionicons } from "@expo/vector-icons";
+import { AntDesign, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { SafeAreaView, StyleSheet, Text, View } from "react-native";
 import Ripple from "react-native-material-ripple";
 import Animated, {
@@ -22,6 +22,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import InitializeWallet from "../components/InitializeWallet";
 import { useEffect, useState } from "react";
 import { useFocusEffect } from "@react-navigation/native";
+import SubscriptionList from "../components/Wallet/SubscriptionList";
 
 const styles = StyleSheet.create({
   container: {
@@ -117,6 +118,8 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
     }
   }, [loading]);
 
+  const [showSubscriptionsView, setShowSubscriptionsView] = useState(false);
+
   if (
     (Array.isArray(error?.cause?.extensions)
       ? //@ts-ignore
@@ -134,25 +137,15 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      {/* {isLoaderVisible && (
-        <Animated.View
-          exiting={FadeOut.duration(500)}
-          style={{
-            flex: 1,
-            width: Layout.screen.width,
-            height: Layout.screen.height,
-            position: "absolute",
-            zIndex: 1000,
-            backgroundColor: "#000",
-            top: insets.top,
-          }}
-        >
-          <ScreenLoader />
-        </Animated.View>
-      )} */}
-
       <Header
         buttons={[
+          {
+            onPress: () => {
+              setShowSubscriptionsView(!showSubscriptionsView);
+              bottomSheetRef.current?.snapToIndex(showSubscriptionsView ? -1 : 0);
+            },
+            icon: <MaterialIcons name="subscriptions" size={24} color="#fff" />,
+          },
           {
             onPress: () => navigation.navigate("Filters"),
             icon: <Ionicons name="search" size={20} color="#fff" />,
@@ -162,7 +155,6 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
             icon: <Ionicons name="stats-chart" size={20} color="#fff" />,
           },
           {
-            // onPress: () => bottomSheetRef.current?.snapToIndex(0),
             onPress: () => navigation.navigate("CreateExpense"),
             icon: <AntDesign name="plus" size={20} color="#fff" />,
           },
@@ -179,15 +171,19 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
         </Ripple>
       </Animated.View>
 
-      <WalletList
-        filtersActive={filtersActive}
-        isLocked={loading || !data || endReached}
-        refetch={refetch}
-        scrollY={scrollY}
-        onScroll={onAnimatedScrollHandler}
-        wallet={data?.wallet}
-        onEndReached={onEndReached}
-      />
+      {showSubscriptionsView ? (
+        <SubscriptionList onScroll={onAnimatedScrollHandler} scrollY={scrollY} />
+      ) : (
+        <WalletList
+          filtersActive={filtersActive}
+          isLocked={loading || !data || endReached}
+          refetch={refetch}
+          scrollY={scrollY}
+          onScroll={onAnimatedScrollHandler}
+          wallet={data?.wallet}
+          onEndReached={onEndReached}
+        />
+      )}
 
       <EditBalanceSheet />
     </SafeAreaView>
