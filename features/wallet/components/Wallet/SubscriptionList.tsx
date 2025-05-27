@@ -1,10 +1,11 @@
 import { gql, useQuery } from "@apollo/client";
-import { View, Text, StyleSheet, VirtualizedList, NativeSyntheticEvent, NativeScrollEvent } from "react-native";
+import { View, Text, StyleSheet, ScrollView, NativeSyntheticEvent, NativeScrollEvent } from "react-native";
 import Colors, { Sizing } from "@/constants/Colors";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import SubscriptionItem from "./SubscriptionItem";
-import Reanimated, { SharedValue } from "react-native-reanimated";
+import Animated, { SharedValue } from "react-native-reanimated";
 import WalletLimits from "../Limits";
+import { RefreshControl } from "react-native-gesture-handler";
 
 interface Subscription {
   id: string;
@@ -30,7 +31,7 @@ interface SubscriptionListProps {
   contentContainerStyle?: any;
 }
 
-const AnimatedVirtualizedList = Reanimated.createAnimatedComponent(VirtualizedList);
+const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView);
 
 export default function SubscriptionList({ onScroll, contentContainerStyle }: SubscriptionListProps) {
   const { data, loading, refetch } = useQuery(gql`
@@ -64,49 +65,15 @@ export default function SubscriptionList({ onScroll, contentContainerStyle }: Su
     return { active, inactive };
   }, [data?.subscriptions]);
 
-  const flatData = useMemo(() => {
-    const sections = [];
+  const [refreshing, setRefreshing] = useState(false);
 
-    if (groupedData.active.length > 0) {
-      sections.push({ type: "header", title: "Active Subscriptions", count: groupedData.active.length });
-      sections.push(...groupedData.active.map((sub: Subscription) => ({ type: "subscription", data: sub })));
-    }
-
-    if (groupedData.inactive.length > 0) {
-      sections.push({ type: "header", title: "Inactive Subscriptions", count: groupedData.inactive.length });
-      sections.push(...groupedData.inactive.map((sub: Subscription) => ({ type: "subscription", data: sub })));
-    }
-
-    return sections;
-  }, [groupedData]);
-
-  const renderItem = useCallback(
-    ({ item, index }: { item: any; index: number }) => {
-      if (item.type === "header") {
-        return (
-          <View style={styles.headerContainer}>
-            <Text style={styles.headerText}>{item.title}</Text>
-            <View style={[styles.countBadge, { backgroundColor: item.title.includes("Active") ? Colors.secondary : "#F07070" }]}>
-              <Text style={styles.countText}>{item.count}</Text>
-            </View>
-          </View>
-        );
-      }
-
-      const subscriptionIndex = flatData.slice(0, index).filter((item) => item.type === "subscription").length;
-
-      return (
-        <SubscriptionItem
-          subscription={item.data}
-          index={subscriptionIndex}
-          onPress={() => {
-            console.log("Subscription pressed:", item.data.id);
-          }}
-        />
-      );
-    },
-    [flatData]
-  );
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    refetch();
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 2000);
+  }, []);
 
   if (loading) {
     return (
@@ -126,13 +93,8 @@ export default function SubscriptionList({ onScroll, contentContainerStyle }: Su
   }
 
   return (
-    <AnimatedVirtualizedList
-      ListHeaderComponent={WalletLimits}
-      data={flatData}
-      keyExtractor={(item, index) => (item.type === "header" ? `header-${index}` : `subscription-${item.data.id}`)}
-      renderItem={renderItem as any}
-      getItem={(data, index) => data[index]}
-      getItemCount={(data) => data.length}
+    <AnimatedScrollView
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       onScroll={onScroll}
       scrollEventThrottle={16}
       style={{ flex: 1 }}
@@ -143,8 +105,53 @@ export default function SubscriptionList({ onScroll, contentContainerStyle }: Su
         },
         contentContainerStyle,
       ]}
-      removeClippedSubviews
-    />
+    >
+      <WalletLimits />
+
+      {groupedData.active.length > 0 && (
+        <>
+          <View style={styles.headerContainer}>
+            <Text style={styles.headerText}>Active Subscriptions</Text>
+            <View style={[styles.countBadge, { backgroundColor: Colors.secondary }]}>
+              <Text style={styles.countText}>{groupedData.active.length}</Text>
+            </View>
+          </View>
+
+          {groupedData.active.map((subscription, index) => (
+            <SubscriptionItem
+              key={subscription.id}
+              subscription={subscription}
+              index={index}
+              onPress={() => {
+                console.log("Subscription pressed:", subscription.id);
+              }}
+            />
+          ))}
+        </>
+      )}
+
+      {groupedData.inactive.length > 0 && (
+        <>
+          <View style={styles.headerContainer}>
+            <Text style={styles.headerText}>Inactive Subscriptions</Text>
+            <View style={[styles.countBadge, { backgroundColor: "#F07070" }]}>
+              <Text style={styles.countText}>{groupedData.inactive.length}</Text>
+            </View>
+          </View>
+
+          {groupedData.inactive.map((subscription, index) => (
+            <SubscriptionItem
+              key={subscription.id}
+              subscription={subscription}
+              index={index + groupedData.active.length}
+              onPress={() => {
+                console.log("Subscription pressed:", subscription.id);
+              }}
+            />
+          ))}
+        </>
+      )}
+    </AnimatedScrollView>
   );
 }
 

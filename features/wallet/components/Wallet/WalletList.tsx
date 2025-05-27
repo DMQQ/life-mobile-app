@@ -1,8 +1,8 @@
 import BottomSheet from "@gorhom/bottom-sheet";
 import { Expense, Wallet } from "@/types";
 import WalletItem, { WalletElement, parseDateToText } from "./WalletItem";
-import { useRef, useEffect, useMemo, useCallback } from "react";
-import { Text, NativeScrollEvent, View, StyleSheet, VirtualizedList } from "react-native";
+import { useRef, useEffect, useMemo, useCallback, useState } from "react";
+import { Text, NativeScrollEvent, View, StyleSheet, VirtualizedList, RefreshControl } from "react-native";
 import Animated, { FadeIn, FadeInDown, FadeInUp, LinearTransition, SharedValue } from "react-native-reanimated";
 import { NativeSyntheticEvent } from "react-native";
 import moment from "moment";
@@ -88,8 +88,19 @@ export default function WalletList(props: {
     [props.filtersActive]
   );
 
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    props.refetch();
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 2000);
+  }, []);
+
   return (
     <AnimatedList
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       ListHeaderComponent={<WalletLimits />}
       onEndReached={!props.isLocked ? props.onEndReached : () => {}}
       onEndReachedThreshold={0.5}

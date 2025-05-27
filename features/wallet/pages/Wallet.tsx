@@ -1,6 +1,6 @@
 import Header from "@/components/ui/Header/Header";
 import Layout from "@/constants/Layout";
-import { AntDesign, Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { AntDesign, FontAwesome, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { SafeAreaView, StyleSheet, Text, View } from "react-native";
 import Ripple from "react-native-material-ripple";
 import Animated, {
@@ -144,7 +144,7 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
               setShowSubscriptionsView(!showSubscriptionsView);
               bottomSheetRef.current?.snapToIndex(showSubscriptionsView ? -1 : 0);
             },
-            icon: <MaterialIcons name="subscriptions" size={24} color="#fff" />,
+            icon: <FontAwesome name="exchange" size={20} color="#fff" />,
           },
           {
             onPress: () => navigation.navigate("Filters"),

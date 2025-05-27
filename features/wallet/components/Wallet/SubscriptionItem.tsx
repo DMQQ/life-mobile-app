@@ -3,9 +3,9 @@ import moment from "moment";
 import Colors, { secondary_candidates } from "@/constants/Colors";
 import Ripple from "react-native-material-ripple";
 import { CategoryIcon } from "../ExpenseIcon";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Feedback from "react-native-haptic-feedback";
-import Animated, { FadeIn } from "react-native-reanimated";
+import Animated, { FadeIn, FadeOut, LinearTransition } from "react-native-reanimated";
 
 interface SubscriptionItemProps {
   subscription: {
@@ -58,7 +58,7 @@ function parseDateToText(date: string) {
 }
 
 function getSubscriptionDuration(startDate: string) {
-  const start = moment(parseInt(startDate));
+  const start = moment(startDate);
   const now = moment();
   const duration = moment.duration(now.diff(start));
 
@@ -83,10 +83,19 @@ export default function SubscriptionItem({ subscription, index, onPress }: Subsc
   const totalSpent = subscription.expenses.reduce((sum, expense) => sum + expense.amount, 0);
   const daysUntilNext = moment(parseInt(subscription.nextBillingDate)).diff(moment(), "days");
   const isOverdue = daysUntilNext < 0;
-  const subscriptionDuration = getSubscriptionDuration(subscription.dateStart);
+  const subscriptionDuration = getSubscriptionDuration(subscription.expenses.at(-1)?.date || subscription.dateStart);
+
+  const expenses = useMemo(() => {
+    const copy = JSON.parse(JSON.stringify(subscription.expenses));
+
+    copy.sort((a, b) => moment(b.date).diff(moment(a.date)));
+
+    return copy.slice(0, 5);
+  }, [subscription.expenses]);
 
   return (
     <Animated.View
+      layout={LinearTransition}
       entering={FadeIn.delay((index + 1) * 50)}
       style={[
         styles.container,
@@ -167,28 +176,33 @@ export default function SubscriptionItem({ subscription, index, onPress }: Subsc
         )}
       </Ripple>
 
-      {isExpanded && subscription.expenses.length > 0 && (
-        <View style={styles.expanded}>
-          <Text style={styles.expandedTitle}>Recent Payments</Text>
+      <Animated.View layout={LinearTransition}>
+        {isExpanded && subscription.expenses.length > 0 && (
+          <Animated.View style={styles.expanded} layout={LinearTransition}>
+            <Text style={styles.expandedTitle}>Recent Payments</Text>
 
-          {subscription.expenses
-            .sort((a, b) => moment(b.date).diff(moment(a.date)))
-            .slice(0, 5)
-            .map((expense, expenseIndex) => (
-              <View key={expense.id} style={styles.expenseItem}>
+            {expenses.map((expense, expenseIndex) => (
+              <Animated.View
+                key={expense.id}
+                style={styles.expenseItem}
+                layout={LinearTransition}
+                entering={FadeIn.delay(expenseIndex * 50)}
+                exiting={FadeOut.delay((expenses.length - expenseIndex) * 50)}
+              >
                 <View style={styles.expenseLeft}>
                   <Text style={styles.expenseDescription} numberOfLines={1}>
                     {expense.description}
                   </Text>
-                  <Text style={styles.expenseDate}>{moment(parseInt(expense.date)).format("MMM DD, YYYY")}</Text>
+                  <Text style={styles.expenseDate}>{moment(expense.date).format("MMM DD, YYYY")}</Text>
                 </View>
                 <Text style={styles.expenseAmount}>-{expense.amount.toFixed(2)}zł</Text>
-              </View>
+              </Animated.View>
             ))}
 
-          {subscription.expenses.length > 5 && <Text style={styles.moreText}>+{subscription.expenses.length - 5} more payments</Text>}
-        </View>
-      )}
+            {subscription.expenses.length > 5 && <Text style={styles.moreText}>+{subscription.expenses.length - 5} more payments</Text>}
+          </Animated.View>
+        )}
+      </Animated.View>
     </Animated.View>
   );
 }
