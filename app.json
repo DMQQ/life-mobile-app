@@ -2,10 +2,10 @@
   "expo": {
     "name": "Life",
     "slug": "mylife-mobile",
-    "version": "1.1.2",
+    "version": "1.1.4",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
+    "scheme": "mylife",
     "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/images/splash.png",
@@ -18,7 +18,7 @@
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
-      "buildNumber": "20251904",
+      "buildNumber": "20250523",
       "supportsTablet": true,
       "infoPlist": {
         "NSFaceIDUsageDescription": "Allow $(PRODUCT_NAME) to use Face ID.",
@@ -26,7 +26,8 @@
         "NSLocationAlwaysAndWhenInUseUsageDescription": "This app needs access to your location to show nearby places and assign locations to your expenses.",
         "ITSAppUsesNonExemptEncryption": false
       },
-      "bundleIdentifier": "com.dmq.mylifemobile"
+      "bundleIdentifier": "com.dmq.mylifemobile",
+      "associatedDomains": ["applinks:life.dmqq.dev"]
     },
     "android": {
       "googleServicesFile": "./google-services.json",
@@ -41,7 +42,24 @@
         "android.permission.ACCESS_COARSE_LOCATION",
         "android.permission.ACCESS_FINE_LOCATION"
       ],
-      "package": "com.dmq.mylifemobile"
+      "package": "com.dmq.mylifemobile",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "*.life.dmqq.dev",
+              "pathPrefix": "/"
+            },
+            {
+              "scheme": "mylife"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
     },
     "web": {
       "favicon": "./assets/images/favicon.png"
