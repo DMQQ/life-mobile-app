@@ -5,7 +5,7 @@ import { memo, useCallback, useEffect, useRef, useState } from "react";
 import Ripple from "react-native-material-ripple";
 import Layout from "@/constants/Layout";
 import WalletItem, { Icons } from "../components/Wallet/WalletItem";
-import { AntDesign, Entypo, Ionicons } from "@expo/vector-icons";
+import { AntDesign, Entypo, FontAwesome6, Ionicons } from "@expo/vector-icons";
 import lowOpacity from "@/utils/functions/lowOpacity";
 import Animated, {
   FadeIn,
@@ -15,7 +15,6 @@ import Animated, {
   useAnimatedStyle,
   cancelAnimation,
   withTiming,
-  FadeOut,
 } from "react-native-reanimated";
 import useCreateActivity from "../hooks/useCreateActivity";
 import DateTimePicker from "react-native-modal-datetime-picker";
@@ -23,7 +22,6 @@ import { useEditExpense } from "./CreateActivity";
 import IconButton from "@/components/ui/IconButton/IconButton";
 import Color from "color";
 import Input from "@/components/ui/TextInput/TextInput";
-import usePredictCategory, { ExpensePrediction } from "../hooks/usePredictCategory";
 import BottomSheet, { BottomSheetBackdrop } from "@gorhom/bottom-sheet";
 import NumbersPad from "../components/CreateExpense/NumberPad";
 import CategorySelector from "../components/CreateExpense/CategorySelector";
@@ -33,7 +31,9 @@ import Feedback from "react-native-haptic-feedback";
 import Button from "@/components/ui/Button/Button";
 import { SpontaneousRateChip, SpontaneousRateSelector } from "../components/CreateExpense/SpontaneousRate";
 import usePredictExpense from "../hooks/usePredictCategory";
-import { CategoryUtils } from "../components/ExpenseIcon";
+import { CategoryIcon, CategoryUtils } from "../components/ExpenseIcon";
+import { LinearGradient } from "expo-linear-gradient";
+import PredictionView from "../components/PredictionView";
 
 interface SubExpense {
   id: string;
@@ -249,18 +249,7 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
     }),
     [amount]
   );
-
-  const onPredict = useCallback(
-    (prediction: ExpensePrediction) => {
-      if (prediction) {
-        setCategory(prediction.category as keyof typeof Icons);
-        setType(prediction.type as "expense" | "income");
-        if (amount === "0") setAmount(prediction.amount.toString());
-      }
-    },
-    [amount]
-  );
-  usePredictExpense([name, +amount], onPredict);
+  const prediction = usePredictExpense([name, +amount], () => {});
 
   useEffect(() => {
     if (type === "income") setCategory("income");
@@ -354,10 +343,22 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
 
   const [spontaneousView, setSpontaneousView] = useState(false);
 
+  const applyPrediction = useCallback(() => {
+    if (!prediction) return;
+
+    setAmount(prediction.amount.toString());
+    setType(prediction.type as "expense" | "income");
+    setCategory(prediction.category as keyof typeof Icons);
+  }, [prediction]);
+
+  const canPredict = !isValid && prediction;
+
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
       <View style={{ flex: 1 }}>
         <View style={styles.container}>
+          {prediction && <PredictionView applyPrediction={applyPrediction} {...prediction} />}
+
           <IconButton
             style={{ position: "absolute", top: 15, left: 15, zIndex: 100 }}
             onPress={() => navigation.goBack()}
@@ -434,24 +435,38 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
                       }
                       right={
                         <Ripple
-                          onPress={handleSubmit}
-                          style={[styles.save, !isValid && { backgroundColor: lowOpacity(styles.save.backgroundColor, 0.2) }]}
-                          disabled={!isValid}
+                          onPress={!isValid && prediction ? applyPrediction : handleSubmit}
+                          style={[
+                            styles.save,
+                            !isValid && { backgroundColor: lowOpacity(styles.save.backgroundColor, 0.2) },
+                            !isValid && prediction && { backgroundColor: Icons[prediction.category as keyof typeof Icons].backgroundColor },
+                          ]}
+                          disabled={!isValid && !prediction && !canPredict}
                         >
                           {loading ? (
                             <ActivityIndicator size={14} color="#fff" />
+                          ) : isValid ? (
+                            <AntDesign
+                              name="save"
+                              size={20}
+                              color={isValid || canPredict ? "#fff" : lowOpacity(Colors.secondary_light_1, 0.5)}
+                            />
                           ) : (
-                            <AntDesign name="save" size={20} color={isValid ? "#fff" : lowOpacity(Colors.secondary_light_1, 0.5)} />
+                            <Ionicons
+                              name="color-wand-sharp"
+                              size={20}
+                              color={isValid || canPredict ? "#fff" : lowOpacity(Colors.secondary_light_1, 0.5)}
+                            />
                           )}
                           <Text
                             style={{
-                              color: isValid ? "#fff" : lowOpacity(Colors.secondary_light_1, 0.5),
+                              color: isValid || (!isValid && prediction) ? "#fff" : lowOpacity(Colors.secondary_light_1, 0.5),
                               fontSize: 14,
                               fontWeight: "500",
                               lineHeight: 20,
                             }}
                           >
-                            {isSubExpenseMode ? "Add" : params?.isEditing ? "Edit" : "Done"}
+                            {isSubExpenseMode ? "Add" : params?.isEditing ? "Edit" : !isValid && prediction ? "Use" : "Done"}
                           </Text>
                         </Ripple>
                       }
@@ -719,6 +734,7 @@ const styles = StyleSheet.create({
     width: "100%",
     alignItems: "center",
     flexDirection: "row",
+    paddingTop: 30,
     paddingHorizontal: 15,
   },
 

@@ -54,4 +54,6 @@ export default function usePredictExpense(input: [string, number], onPrediction:
       onPrediction(data.predictExpense);
     }
   }, [data?.predictExpense, onPrediction]);
+
+  return (data?.predictExpense || null) as ExpensePrediction | null;
 }
