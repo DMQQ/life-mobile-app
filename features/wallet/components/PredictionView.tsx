@@ -210,6 +210,8 @@ export default function PredictionView(item: ExpensePrediction & { applyPredicti
   const categoryIcon = Icons[item.category as keyof typeof Icons];
   const iconBackgroundColor = categoryIcon?.backgroundColor || "#00FFC8";
 
+  console.log(item);
+
   return (
     <AnimatedPressable
       key={item.description}
@@ -306,10 +308,7 @@ export default function PredictionView(item: ExpensePrediction & { applyPredicti
               styles.expense_item,
             ]}
           >
-            <CategoryIcon
-              type={item.type as "income" | "expense" | "refunded"}
-              category={isBalanceEdit ? "edit" : (item.category as any)}
-            />
+            <CategoryIcon type={item.type as "income" | "expense" | "refunded"} category={item.category as any} />
 
             <View style={{ height: "100%", justifyContent: "center", flex: 3 }}>
               <Text style={[styles.title, { textShadowColor: "rgba(255, 255, 255, 0.3)", textShadowRadius: 2 }]} numberOfLines={1}>

@@ -1,11 +1,11 @@
 import moment from "moment";
-import { ActivityIndicator, Alert, Keyboard, ScrollView, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View } from "react-native";
-import Colors, { secondary_candidates } from "@/constants/Colors";
-import { memo, useCallback, useEffect, useRef, useState } from "react";
+import { ActivityIndicator, Alert, Keyboard, StyleSheet, Text, TouchableWithoutFeedback, View } from "react-native";
+import Colors from "@/constants/Colors";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Ripple from "react-native-material-ripple";
 import Layout from "@/constants/Layout";
 import WalletItem, { Icons } from "../components/Wallet/WalletItem";
-import { AntDesign, Entypo, FontAwesome6, Ionicons } from "@expo/vector-icons";
+import { AntDesign, Entypo, Ionicons } from "@expo/vector-icons";
 import lowOpacity from "@/utils/functions/lowOpacity";
 import Animated, {
   FadeIn,
@@ -31,9 +31,9 @@ import Feedback from "react-native-haptic-feedback";
 import Button from "@/components/ui/Button/Button";
 import { SpontaneousRateChip, SpontaneousRateSelector } from "../components/CreateExpense/SpontaneousRate";
 import usePredictExpense from "../hooks/usePredictCategory";
-import { CategoryIcon, CategoryUtils } from "../components/ExpenseIcon";
-import { LinearGradient } from "expo-linear-gradient";
+import { CategoryUtils } from "../components/ExpenseIcon";
 import PredictionView from "../components/PredictionView";
+import ExpenseAIMaker from "../components/ExpenseAIMaker";
 
 interface SubExpense {
   id: string;
@@ -364,6 +364,8 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
             onPress={() => navigation.goBack()}
             icon={<AntDesign name="close" size={24} color="rgba(255,255,255,0.7)" />}
           />
+
+          <ExpenseAIMaker />
 
           <View style={styles.amountContainer}>
             <View>
