@@ -10,10 +10,10 @@ import { AntDesign } from "@expo/vector-icons";
 import moment from "moment";
 import useOffline from "@/utils/hooks/useOffline";
 import SkeletonPlaceholder from "@/components/SkeletonLoader/Skeleton";
-import { View, Modal, TouchableOpacity, Text, StyleSheet } from "react-native";
+import { View, Modal, TouchableOpacity, Text, StyleSheet, RefreshControl } from "react-native";
 import Layout from "@/constants/Layout";
 import Animated, { FadeIn, FadeOut, LinearTransition } from "react-native-reanimated";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import * as SplashScreen from "expo-splash-screen";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import WorkoutWidget from "../workout/components/WorkoutWidget";
@@ -100,7 +100,7 @@ const NotificationBadge = ({ count }: { count: number }) => {
 
   return (
     <View style={styles.badge}>
-      <Text style={styles.badgeText}>{count > 99 ? "99+" : count}</Text>
+      <Text style={styles.badgeText}>{count > 9 ? "+" : count}</Text>
     </View>
   );
 };
@@ -123,6 +123,8 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 12,
     fontWeight: "bold",
+    alignItems: "center",
+    transform: [{ translateY: -1 }],
   },
   modalContainer: {
     flex: 1,
@@ -195,9 +197,21 @@ export default function Root({ navigation }: ScreenProps<"Root">) {
   const data = offline.isOffline ? offline.data || {} : home;
   const edge = useSafeAreaInsets();
 
+  const refetchApp = useCallback(() => Promise.any([refetchNotifications, refetchHome]), []);
+
   useAppBackground({
-    onForeground: () => Promise.any([refetchNotifications, refetchHome]),
+    onForeground: refetchApp,
   });
+
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    refetchApp();
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 2000);
+  }, []);
 
   const handleNotificationPress = () => {
     Feedback.trigger("impactLight");
@@ -247,6 +261,7 @@ export default function Root({ navigation }: ScreenProps<"Root">) {
         contentContainerStyle={{
           paddingHorizontal: 15,
         }}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         <AvailableBalanceWidget
           data={{

@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Pressable } from "react-native";
+import { View, Text, StyleSheet, Pressable, Alert } from "react-native";
 import Colors from "@/constants/Colors";
 import Animated, {
   useSharedValue,
@@ -384,12 +384,20 @@ export default function ExpenseAIMaker() {
   };
 
   const handleImagePick = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+
+    if (status !== "granted") {
+      Alert.alert("Camera Permission Required", "Please allow camera access to take photos of your expenses.", [{ text: "OK" }]);
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
       mediaTypes: "images",
       allowsEditing: true,
       aspect: [4, 3],
       quality: 0.8,
       base64: true,
+      cameraType: ImagePicker.CameraType.back,
     });
 
     if (!result.canceled && result.assets?.[0]?.base64) {

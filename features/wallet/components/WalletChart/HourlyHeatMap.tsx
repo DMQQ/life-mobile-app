@@ -8,6 +8,7 @@ import lowOpacity from "@/utils/functions/lowOpacity";
 import DateTimePicker from "react-native-modal-datetime-picker";
 import { gql, useQuery } from "@apollo/client";
 import moment from "moment";
+import ChartTemplate, { Types } from "./ChartTemplate";
 
 const GET_HOURLY_SPENDINGS = gql`
   query HourlySpendings($months: [String!]!) {
@@ -69,14 +70,6 @@ const CustomBarChart: React.FC<CustomBarChartProps> = ({ data, maxValue, viewTyp
     setTimeout(() => {
       setSelectedBarInfo(null);
     }, 3000);
-  };
-
-  const getValueLabel = (value: number) => {
-    if (viewType === "count") {
-      return value.toString() + "tx";
-    } else {
-      return Math.round(value) + "zł";
-    }
   };
 
   return (
@@ -168,45 +161,15 @@ const CustomBarChart: React.FC<CustomBarChartProps> = ({ data, maxValue, viewTyp
   );
 };
 
-const button = {
-  padding: 10,
-  paddingHorizontal: 15,
-  borderRadius: 7.5,
-  backgroundColor: Colors.primary_light,
-  flex: 1,
-};
+const HourlySpendingsBarChart = ({ type, dateRange }: { type: string; dateRange?: [string, string] }) => {
+  const viewType = type as "avg_amount" | "count" | "max_amount" | "min_amount";
 
-const blueText = Color(Colors.primary).lighten(10).string();
-
-const HourlySpendingsBarChart: React.FC = () => {
-  const [viewType, setViewType] = useState<"avg_amount" | "count" | "max_amount" | "min_amount">("avg_amount");
-
-  const defaultMonths = useMemo(() => {
-    // Use a 3-month range as default
-    const lastDay = moment().format("YYYY-MM-DD");
-    const firstDay = moment().subtract(2, "months").startOf("month").format("YYYY-MM-DD");
-    return [firstDay, lastDay];
-  }, []);
-
-  const [selectedMonths, setSelectedMonths] = useState<string[]>(defaultMonths);
   const [showStartDatePicker, setShowStartDatePicker] = useState(false);
   const [showEndDatePicker, setShowEndDatePicker] = useState(false);
 
   const { loading, error, data } = useQuery(GET_HOURLY_SPENDINGS, {
-    variables: { months: selectedMonths },
+    variables: { months: dateRange },
   });
-
-  const handleStartDateConfirm = (date: Date) => {
-    const formattedDate = moment(date).format("YYYY-MM-DD");
-    setSelectedMonths([formattedDate, selectedMonths[1]]);
-    setShowStartDatePicker(false);
-  };
-
-  const handleEndDateConfirm = (date: Date) => {
-    const formattedDate = moment(date).format("YYYY-MM-DD");
-    setSelectedMonths([selectedMonths[0], formattedDate]);
-    setShowEndDatePicker(false);
-  };
 
   const { chartData, maxValue } = useMemo(() => {
     if (!data?.hourlySpendingsHeatMap || !Array.isArray(data.hourlySpendingsHeatMap)) {
@@ -296,109 +259,21 @@ const HourlySpendingsBarChart: React.FC = () => {
     );
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={{ color: "#fff", fontSize: 18, fontWeight: "600", marginBottom: 5 }}>Hourly Spending Analysis</Text>
-        <Text style={styles.subtitle}>See your spending patterns by hour of day</Text>
-
-        <View style={styles.dateRangeContainer}>
-          <TouchableOpacity style={styles.dateButton} onPress={() => setShowStartDatePicker(true)}>
-            <Text style={styles.dateButtonText}>From: {moment(selectedMonths[0]).format("MMM D, YYYY")}</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.dateButton} onPress={() => setShowEndDatePicker(true)}>
-            <Text style={styles.dateButtonText}>To: {moment(selectedMonths[1]).format("MMM D, YYYY")}</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.typeSelectorContainer}>
-          {[
-            { key: "avg_amount", label: "AVERAGE" },
-            { key: "count", label: "COUNT" },
-            { key: "max_amount", label: "MAX" },
-            { key: "min_amount", label: "MIN" },
-          ].map((item) => (
-            <Button
-              variant="text"
-              key={item.key}
-              onPress={() => setViewType(item.key as "avg_amount" | "count" | "max_amount" | "min_amount")}
-              style={[
-                button,
-                {
-                  borderWidth: 0.5,
-                  borderColor: Colors.primary,
-                  marginRight: 5,
-                  ...(item.key === viewType && {
-                    backgroundColor: lowOpacity(Colors.secondary, 0.15),
-                    borderWidth: 0.5,
-                    borderColor: lowOpacity(Colors.secondary, 0.5),
-                  }),
-                },
-              ]}
-            >
-              <Text
-                style={{
-                  fontSize: 14,
-                  color: viewType === item.key ? Colors.secondary : blueText,
-                  textAlign: "center",
-                }}
-              >
-                {item.label}
-              </Text>
-            </Button>
-          ))}
-        </View>
-      </View>
-
+    <View>
       {chartData.length > 0 ? (
         <>
           <CustomBarChart data={chartData} maxValue={maxValue} viewType={viewType} />
-          <View style={styles.chartDescription}>
-            <Text style={styles.chartDescriptionText}>
-              {viewType === "avg_amount"
-                ? "Average amount spent by hour of day"
-                : viewType === "count"
-                ? "Number of transactions by hour of day"
-                : viewType === "max_amount"
-                ? "Maximum transaction amount by hour of day"
-                : "Minimum transaction amount by hour of day"}
-            </Text>
-          </View>
         </>
       ) : (
         <View style={styles.noDataContainer}>
           <Text style={styles.noDataText}>No data available for the selected time period</Text>
         </View>
       )}
-
-      <DateTimePicker
-        isVisible={showStartDatePicker}
-        mode="date"
-        onConfirm={handleStartDateConfirm}
-        onCancel={() => setShowStartDatePicker(false)}
-        date={moment(selectedMonths[0]).toDate()}
-        maximumDate={moment(selectedMonths[1]).toDate()}
-      />
-
-      <DateTimePicker
-        isVisible={showEndDatePicker}
-        mode="date"
-        onConfirm={handleEndDateConfirm}
-        onCancel={() => setShowEndDatePicker(false)}
-        date={moment(selectedMonths[1]).toDate()}
-        minimumDate={moment(selectedMonths[0]).toDate()}
-      />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    width: Layout.screen.width - 30,
-    marginTop: 25,
-    marginBottom: 25,
-    minHeight: 500,
-  },
   header: {
     marginBottom: 20,
   },
@@ -432,7 +307,6 @@ const styles = StyleSheet.create({
   },
   chartWrapper: {
     flexDirection: "row",
-    height: 330,
     marginTop: 10,
   },
   yAxisLabels: {
@@ -564,4 +438,14 @@ const styles = StyleSheet.create({
   },
 });
 
-export default HourlySpendingsBarChart;
+export default () => {
+  return (
+    <ChartTemplate
+      title="Hourly spending"
+      description="See your spending patterns by hours"
+      types={["avg_amount", "count", "max_amount", "min_amount"] as any}
+    >
+      {({ dateRange, type }) => <HourlySpendingsBarChart type={type} dateRange={dateRange} />}
+    </ChartTemplate>
+  );
+};

@@ -568,7 +568,7 @@ const FileUpload = (props: { id: string; images: any[] }) => {
     const result = await ImagePicker.launchCameraAsync({
       allowsEditing: true,
       allowsMultipleSelection: false,
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: "images",
       cameraType: ImagePicker.CameraType.back,
       quality: 1,
       aspect: [4, 3],

@@ -13,13 +13,16 @@ export interface ExpensePrediction {
 
 export default function usePredictExpense(input: [string, number], onPrediction: (data: ExpensePrediction) => void) {
   const [debouncedInput, setDebouncedInput] = useState<string>("");
+  const [prediction, setPrediction] = useState<ExpensePrediction | null>(null);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (input && input[0].length >= 3) {
         setDebouncedInput(input[0]);
+      } else {
+        setDebouncedInput("");
       }
-    }, 500);
+    }, 750);
 
     return () => clearTimeout(timeout);
   }, [input]);
@@ -41,19 +44,29 @@ export default function usePredictExpense(input: [string, number], onPrediction:
     {
       variables: {
         input: debouncedInput,
-        // amount: input?.[1] ?? 0,
       },
       skip: !debouncedInput,
       fetchPolicy: "cache-and-network",
       notifyOnNetworkStatusChange: true,
+
+      onCompleted() {
+        console.log("fetch completed");
+      },
     }
   );
 
   useEffect(() => {
+    if (debouncedInput.length < 3) {
+      setPrediction(null);
+    }
+  }, [debouncedInput]);
+
+  useEffect(() => {
     if (data?.predictExpense && data?.predictExpense) {
       onPrediction(data.predictExpense);
+      setPrediction(data.predictExpense);
     }
   }, [data?.predictExpense, onPrediction]);
 
-  return (data?.predictExpense || null) as ExpensePrediction | null;
+  return prediction;
 }

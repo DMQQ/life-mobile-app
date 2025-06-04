@@ -27,6 +27,7 @@ import moment from "moment";
 import HourlySpendingsHeatMap from "../components/WalletChart/HourlyHeatMap";
 import { CategoryUtils } from "../components/ExpenseIcon";
 import useGetLegendData from "../hooks/useGetLegendData";
+import ChartTemplate from "../components/WalletChart/ChartTemplate";
 
 const styles = StyleSheet.create({
   tilesContainer: {
@@ -304,11 +305,11 @@ function WalletCharts({ navigation }: any) {
                 </Ripple>
               )}
               <StatisticsSummary />
-              <SpendingsByDay data={filteredExpenses} />
+              <SpendingsByDay />
               {monthDiff > 28 && monthDiff < 32 && (
                 <FutureProjection data={filteredExpenses} income={5500} currentBalance={currentBalance} />
               )}
-              <DailySpendingChart data={filteredExpenses} />
+              <DailySpendingChart />
 
               <MonthlyCategoryComparison />
 

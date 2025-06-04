@@ -1,27 +1,26 @@
-import React, { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { View, Text } from "react-native";
-import { BarChart, LineChart } from "react-native-gifted-charts";
+import { BarChart } from "react-native-gifted-charts";
 import moment from "moment";
 import Layout from "@/constants/Layout";
 import Colors, { secondary_candidates } from "@/constants/Colors";
-import { Icons } from "../ExpenseIcon";
 import Color from "color";
+import ChartTemplate from "./ChartTemplate";
+import useGetWallet from "../../hooks/useGetWallet";
 
-interface Expense {
-  id: string;
-  amount: number;
-  description: string;
-  date: string;
-  type: string;
-  balanceBeforeInteraction: number;
-  category: string;
-}
+function DailySpendingChart({ dateRange }: { dateRange: [string, string] }) {
+  const wallet = useGetWallet();
 
-interface Props {
-  data: Expense[];
-}
+  const data = wallet?.data?.wallet?.expenses || [];
 
-export default function DailySpendingChart({ data }: Props) {
+  useEffect(() => {
+    if (dateRange) {
+      const [startDate, endDate] = dateRange;
+      wallet.dispatch({ type: "SET_DATE_MIN", payload: startDate });
+      wallet.dispatch({ type: "SET_DATE_MAX", payload: endDate });
+    }
+  }, [dateRange]);
+
   const chartData = useMemo(() => {
     const dailySpending = data.reduce((acc, expense) => {
       const day = moment(expense.date).format("YYYY-MM-DD");
@@ -46,32 +45,21 @@ export default function DailySpendingChart({ data }: Props) {
 
   return (
     <View style={{ marginVertical: 20, gap: 5 }}>
-      <View style={{ width: "100%", marginBottom: 10 }}>
-        <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 18 }}>Daily spendings</Text>
-        <Text style={{ color: "gray", marginTop: 5 }}>Sum of expenses for each day shown on a chart</Text>
-      </View>
-
-      <Text style={{ color: "#fff", marginBottom: 15 }}>
-        From: {moment(data?.[data.length - 1]?.date).format("MMM D, YYYY")} to {moment(data?.[0]?.date).format("MMM D, YYYY")}
-      </Text>
-
-      <View style={{ height: 300 }}>
-        <BarChart
-          width={Layout.screen.width - 60}
-          height={Layout.screen.height / 3.5}
-          sideColor={"#fff"}
-          barWidth={35}
-          noOfSections={3}
-          barBorderRadius={4}
-          frontColor={Colors.secondary}
-          yAxisTextStyle={{ color: "#fff" }}
-          rulesColor={Color(Colors.primary).lighten(1.5).string()}
-          yAxisThickness={0}
-          xAxisThickness={0}
-          isAnimated
-          data={chartData}
-        />
-      </View>
+      <BarChart
+        width={Layout.screen.width - 60}
+        height={Layout.screen.height / 3.5}
+        sideColor={"#fff"}
+        barWidth={35}
+        noOfSections={3}
+        barBorderRadius={4}
+        frontColor={Colors.secondary}
+        yAxisTextStyle={{ color: "#fff" }}
+        rulesColor={Color(Colors.primary).lighten(1.5).string()}
+        yAxisThickness={0}
+        xAxisThickness={0}
+        isAnimated
+        data={chartData}
+      />
 
       <View style={{ flexDirection: "row", gap: 16, padding: 0, marginTop: 40 }}>
         <View
@@ -103,3 +91,11 @@ export default function DailySpendingChart({ data }: Props) {
     </View>
   );
 }
+
+export default () => {
+  return (
+    <ChartTemplate title="Daily spendings" description="Sum of expenses for every day" types={[]}>
+      {({ dateRange }) => <DailySpendingChart dateRange={dateRange} />}
+    </ChartTemplate>
+  );
+};

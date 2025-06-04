@@ -1,27 +1,17 @@
 import Header from "@/components/ui/Header/Header";
 import Layout from "@/constants/Layout";
-import { AntDesign, FontAwesome, Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { SafeAreaView, StyleSheet, Text, View } from "react-native";
+import { AntDesign, FontAwesome, Ionicons } from "@expo/vector-icons";
+import { SafeAreaView, StyleSheet, Text } from "react-native";
 import Ripple from "react-native-material-ripple";
-import Animated, {
-  Extrapolation,
-  FadeOut,
-  interpolate,
-  useAnimatedScrollHandler,
-  useAnimatedStyle,
-  useSharedValue,
-} from "react-native-reanimated";
+import Animated, { Extrapolation, interpolate, useAnimatedScrollHandler, useAnimatedStyle, useSharedValue } from "react-native-reanimated";
 import { WalletScreens } from "../Main";
 import EditBalanceSheet from "../components/Sheets/EditBalanceSheet";
-import CreateExpenseSheet from "../components/Wallet/CreateExpense/CreateExpenseSheet";
-import ScreenLoader from "../components/Wallet/ScreenLoader";
 import WalletList from "../components/Wallet/WalletList";
 import { useWalletContext } from "../components/WalletContext";
 import useGetWallet from "../hooks/useGetWallet";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import InitializeWallet from "../components/InitializeWallet";
 import { useEffect, useState } from "react";
-import { useFocusEffect } from "@react-navigation/native";
 import SubscriptionList from "../components/Wallet/SubscriptionList";
 
 const styles = StyleSheet.create({

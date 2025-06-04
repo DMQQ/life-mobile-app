@@ -1,5 +1,5 @@
 import Layout from "@/constants/Layout";
-import { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from "react-native";
 import Colors, { secondary_candidates } from "@/constants/Colors";
 import Color from "color";
@@ -7,7 +7,8 @@ import Button from "@/components/ui/Button/Button";
 import lowOpacity from "@/utils/functions/lowOpacity";
 import { gql, useQuery } from "@apollo/client";
 import moment from "moment";
-import DateTimePicker from "react-native-modal-datetime-picker";
+import ChartTemplate, { Types } from "./ChartTemplate";
+import { Icons } from "../ExpenseIcon";
 
 const GET_MONTHLY_CATEGORY_COMPARISON = gql`
   query MonthlyCategoryComparison($months: [String!]!) {
@@ -65,7 +66,6 @@ const CustomBarChart: React.FC<CustomBarChartProps> = ({ data, maxValue }) => {
   const BAR_WIDTH = 35;
   const BAR_SPACING = 6;
   const GROUP_SPACING = 40;
-  const CATEGORY_LABEL_HEIGHT = 20;
   const CHART_HEIGHT = 250;
   const MIN_BAR_HEIGHT = 20;
 
@@ -166,40 +166,12 @@ const CustomBarChart: React.FC<CustomBarChartProps> = ({ data, maxValue }) => {
   );
 };
 
-const button = {
-  padding: 10,
-  paddingHorizontal: 15,
-  borderRadius: 7.5,
-  backgroundColor: Colors.primary_light,
-  flex: 1,
-};
-
 const blueText = Color(Colors.primary).lighten(10).string();
 
-const MonthlyCategoryComparison: React.FC = () => {
-  const defaultMonths = useMemo(() => {
-    // Create an array of the last 3 months as default
-    const months = [];
-    for (let i = 2; i >= 0; i--) {
-      const date = moment().subtract(i, "months").format("YYYY-MM-DD");
-      months.push(date);
-    }
-    return months;
-  }, []);
+const MonthlyCategoryComparison = ({ dateRange, type: viewType }: { dateRange: [string, string]; type: Types }) => {
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
-  // Start and end dates for the date pickers
-  const [dateRange, setDateRange] = useState<[string, string]>([
-    moment().subtract(2, "months").startOf("month").format("YYYY-MM-DD"),
-    moment().format("YYYY-MM-DD"),
-  ]);
-  const [selectedMonths, setSelectedMonths] = useState<string[]>(defaultMonths);
-  const [showStartDatePicker, setShowStartDatePicker] = useState(false);
-  const [showEndDatePicker, setShowEndDatePicker] = useState(false);
-  const [viewType, setViewType] = useState<"total" | "avg" | "count">("total");
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-
-  // Generate array of months between start and end date
-  const generateMonthsArray = (startDate: string, endDate: string): string[] => {
+  const generateMonthsArray = (startDate: string, endDate: string) => {
     const start = moment(startDate).startOf("month");
     const end = moment(endDate).startOf("month");
     const months: string[] = [];
@@ -213,26 +185,16 @@ const MonthlyCategoryComparison: React.FC = () => {
     return months;
   };
 
-  // Update months array when date range changes
-  useMemo(() => {
-    const monthsArray = generateMonthsArray(dateRange[0], dateRange[1]);
-    setSelectedMonths(monthsArray);
-  }, [dateRange]);
-
   const { loading, error, data } = useQuery(GET_MONTHLY_CATEGORY_COMPARISON, {
-    variables: { months: selectedMonths },
+    variables: { months: generateMonthsArray(...dateRange) },
   });
 
-  const handleStartDateConfirm = (date: Date) => {
-    const formattedDate = moment(date).format("YYYY-MM-DD");
-    setDateRange([formattedDate, dateRange[1]]);
-    setShowStartDatePicker(false);
+  const toggleCategory = (category: string) => {
+    setSelectedCategories((prev) => (prev.includes(category) ? prev.filter((cat) => cat !== category) : [...prev, category]));
   };
 
-  const handleEndDateConfirm = (date: Date) => {
-    const formattedDate = moment(date).format("YYYY-MM-DD");
-    setDateRange([dateRange[0], formattedDate]);
-    setShowEndDatePicker(false);
+  const selectAllCategories = () => {
+    setSelectedCategories([]);
   };
 
   const { chartData, categories, months, maxValue } = useMemo(() => {
@@ -251,7 +213,7 @@ const MonthlyCategoryComparison: React.FC = () => {
 
     const categoriesArray = Array.from(allCategories);
     const monthsArray = data.monthlyCategoryComparison.map((monthData: MonthData) => monthData.month || "Unknown");
-    const categoriesToShow = selectedCategory ? [selectedCategory] : categoriesArray;
+    const categoriesToShow = selectedCategories.length === 0 ? categoriesArray : selectedCategories;
     const allValues: number[] = [];
     let chartDataArray: ChartItem[] = [];
 
@@ -330,22 +292,7 @@ const MonthlyCategoryComparison: React.FC = () => {
       months: monthsArray,
       maxValue: maxValueCalculated,
     };
-  }, [data, viewType, selectedCategory]);
-
-  const MonthLegend = useMemo(() => {
-    if (!months || months.length === 0) return null;
-
-    return (
-      <View style={styles.monthLegendContainer}>
-        {months.map((month, index) => (
-          <View key={index} style={styles.monthLegendItem}>
-            <View style={[styles.colorIndicator, { backgroundColor: secondary_candidates[index % secondary_candidates.length] }]} />
-            <Text style={styles.monthLegendText}>{month}</Text>
-          </View>
-        ))}
-      </View>
-    );
-  }, [months]);
+  }, [data, viewType, selectedCategories]);
 
   if (loading)
     return (
@@ -361,74 +308,50 @@ const MonthlyCategoryComparison: React.FC = () => {
     );
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={{ color: "#fff", fontSize: 18, fontWeight: 600, marginBottom: 5 }}>Monthly Category Comparison</Text>
-        <Text style={styles.subtitle}>Monthly comparison of your expenses by category</Text>
-
-        <View style={styles.dateRangeContainer}>
-          <TouchableOpacity style={styles.dateButton} onPress={() => setShowStartDatePicker(true)}>
-            <Text style={styles.dateButtonText}>From: {moment(dateRange[0]).format("MMM D, YYYY")}</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.dateButton} onPress={() => setShowEndDatePicker(true)}>
-            <Text style={styles.dateButtonText}>To: {moment(dateRange[1]).format("MMM D, YYYY")}</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.typeSelectorContainer}>
-          {["total", "avg", "count"].map((item) => (
-            <Button
-              variant="text"
-              key={item}
-              onPress={() => setViewType(item as "total" | "avg" | "count")}
-              style={[
-                button,
-                {
-                  borderWidth: 0.5,
-                  borderColor: Colors.primary,
-                  marginRight: 5,
-                  ...(item === viewType && {
-                    backgroundColor: lowOpacity(Colors.secondary, 0.15),
-                    borderWidth: 0.5,
-                    borderColor: lowOpacity(Colors.secondary, 0.5),
-                  }),
-                },
-              ]}
-            >
-              <Text
-                style={{
-                  fontSize: 14,
-                  color: viewType === item ? Colors.secondary : blueText,
-                  textAlign: "center",
-                }}
-              >
-                {item.toUpperCase()}
-              </Text>
-            </Button>
-          ))}
-        </View>
-      </View>
-
+    <View>
       {categories.length > 0 && (
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryFilterContainer}>
           <Button
             variant="text"
             key="all-categories"
-            onPress={() => setSelectedCategory(null)}
-            style={[styles.categoryFilterButton, !selectedCategory && styles.selectedCategoryButton]}
+            onPress={selectAllCategories}
+            style={[styles.categoryFilterButton, selectedCategories.length === 0 && styles.selectedCategoryButton]}
           >
-            <Text style={[styles.categoryFilterText, !selectedCategory && styles.selectedCategoryText]}>All</Text>
+            <Text style={[styles.categoryFilterText, selectedCategories.length === 0 && styles.selectedCategoryText]}>All</Text>
           </Button>
 
           {categories.map((category) => (
             <Button
               variant="text"
               key={category}
-              onPress={() => setSelectedCategory(category)}
-              style={[styles.categoryFilterButton, selectedCategory === category && styles.selectedCategoryButton]}
+              onPress={() => toggleCategory(category)}
+              style={[
+                styles.categoryFilterButton,
+                selectedCategories.includes(category) && {
+                  ...styles.selectedCategoryButton,
+                  borderColor: lowOpacity(Icons[category as keyof typeof Icons]?.backgroundColor || Colors.secondary, 0.75),
+                  backgroundColor: lowOpacity(Icons[category as keyof typeof Icons]?.backgroundColor || Colors.secondary, 0.125),
+                },
+              ]}
             >
-              <Text style={[styles.categoryFilterText, selectedCategory === category && styles.selectedCategoryText]}>{category}</Text>
+              {Icons[category as keyof typeof Icons]?.icon ? (
+                <View style={{ marginRight: 5 }}>
+                  {React.cloneElement(Icons[category as keyof typeof Icons]?.icon, {
+                    size: 15,
+                  })}
+                </View>
+              ) : null}
+              <Text
+                style={[
+                  styles.categoryFilterText,
+                  selectedCategories.includes(category) && {
+                    ...styles.selectedCategoryText,
+                    color: Icons[category as keyof typeof Icons]?.backgroundColor || Colors.secondary,
+                  },
+                ]}
+              >
+                {category}
+              </Text>
             </Button>
           ))}
         </ScrollView>
@@ -441,87 +364,11 @@ const MonthlyCategoryComparison: React.FC = () => {
           <Text style={styles.noDataText}>No data available for the selected months</Text>
         </View>
       )}
-      {MonthLegend}
-
-      <DateTimePicker
-        isVisible={showStartDatePicker}
-        mode="date"
-        onConfirm={handleStartDateConfirm}
-        onCancel={() => setShowStartDatePicker(false)}
-        date={moment(dateRange[0]).toDate()}
-        maximumDate={moment(dateRange[1]).toDate()}
-      />
-
-      <DateTimePicker
-        isVisible={showEndDatePicker}
-        mode="date"
-        onConfirm={handleEndDateConfirm}
-        onCancel={() => setShowEndDatePicker(false)}
-        date={moment(dateRange[1]).toDate()}
-        minimumDate={moment(dateRange[0]).toDate()}
-      />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    width: Layout.screen.width - 30,
-    marginTop: 25,
-    marginBottom: 25,
-    minHeight: 500,
-  },
-  header: {
-    marginBottom: 10,
-  },
-  titleContainer: {
-    marginBottom: 15,
-  },
-  title: {
-    color: "#fff",
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 5,
-  },
-  subtitle: {
-    color: "gray",
-    fontSize: 16,
-    marginBottom: 20,
-  },
-  dateRangeContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 15,
-  },
-  dateButton: {
-    backgroundColor: lowOpacity(Colors.primary, 0.3),
-    borderWidth: 1,
-    borderColor: lowOpacity(Colors.primary, 0.5),
-    borderRadius: 7.5,
-    padding: 10,
-    width: "48%",
-    alignItems: "center",
-  },
-  dateButtonText: {
-    color: "#fff",
-    fontSize: 14,
-  },
-  selectedMonthsInfo: {
-    backgroundColor: Color(Colors.primary).lighten(0.3).string(),
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 15,
-  },
-  selectedMonthsText: {
-    color: "#fff",
-    fontSize: 12,
-    textAlign: "center",
-  },
-  typeSelectorContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 10,
-  },
   categoryFilterContainer: {
     flexDirection: "row",
     marginBottom: 15,
@@ -534,6 +381,9 @@ const styles = StyleSheet.create({
     padding: 8,
     paddingHorizontal: 15,
     marginRight: 8,
+    gap: 5,
+    alignItems: "center",
+    justifyContent: "center",
   },
   selectedCategoryButton: {
     backgroundColor: lowOpacity(Colors.secondary, 0.15),
@@ -716,4 +566,14 @@ const styles = StyleSheet.create({
   },
 });
 
-export default MonthlyCategoryComparison;
+export default function MonthlyComparison() {
+  return (
+    <ChartTemplate
+      types={["total", "avg", "count"]}
+      title="Category comparison"
+      description="Side by side comparison of total expense sum/avg/count in selected date range"
+    >
+      {({ dateRange, type }) => <MonthlyCategoryComparison type={type} dateRange={dateRange} />}
+    </ChartTemplate>
+  );
+}
