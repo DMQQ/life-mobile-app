@@ -6,6 +6,7 @@ import { BarChart } from "react-native-gifted-charts";
 import Color from "color";
 import ChartTemplate, { Types } from "./ChartTemplate";
 import { gql, useQuery } from "@apollo/client";
+import WalletContextProvider from "../WalletContext";
 
 interface LegendProps {
   data: { label: string; value: number; frontColor?: string; color?: string }[];

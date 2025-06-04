@@ -1,46 +1,42 @@
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { View, Text } from "react-native";
 import { BarChart } from "react-native-gifted-charts";
-import moment from "moment";
 import Layout from "@/constants/Layout";
 import Colors, { secondary_candidates } from "@/constants/Colors";
 import Color from "color";
 import ChartTemplate from "./ChartTemplate";
-import useGetWallet from "../../hooks/useGetWallet";
+import { gql, useQuery } from "@apollo/client";
 
 function DailySpendingChart({ dateRange }: { dateRange: [string, string] }) {
-  const wallet = useGetWallet();
+  const query = useQuery(
+    gql`
+      query SpendingsByDay($startDate: String!, $endDate: String!) {
+        statisticsDailySpendings(startDate: $startDate, endDate: $endDate) {
+          total
+          date
+          day
+        }
+      }
+    `,
+    { variables: { startDate: dateRange[0], endDate: dateRange[1] } }
+  );
 
-  const data = wallet?.data?.wallet?.expenses || [];
-
-  useEffect(() => {
-    if (dateRange) {
-      const [startDate, endDate] = dateRange;
-      wallet.dispatch({ type: "SET_DATE_MIN", payload: startDate });
-      wallet.dispatch({ type: "SET_DATE_MAX", payload: endDate });
-    }
-  }, [dateRange]);
+  const data = query?.data?.statisticsDailySpendings || [];
 
   const chartData = useMemo(() => {
-    const dailySpending = data.reduce((acc, expense) => {
-      const day = moment(expense.date).format("YYYY-MM-DD");
-      acc[day] = (acc[day] || 0) + expense.amount;
-      return acc;
-    }, {} as Record<string, number>);
-
-    return Object.entries(dailySpending)
-      .sort(([dateA], [dateB]) => moment(dateA).diff(moment(dateB)))
-      .map(([date, total], index) => ({
-        value: Math.round(total),
-        label: moment(date).format("DD"),
-        labelTextStyle: { color: "#fff" },
-        dataPointText: total > 0 ? `${Math.round(total)}zł` : "",
-        frontColor: secondary_candidates[index % secondary_candidates.length],
-      }));
+    return data.map((expense: any, index: number) => ({
+      value: Math.round(expense.total),
+      label: expense.day,
+      labelTextStyle: { color: "#fff" },
+      dataPointText: expense.total > 0 ? `${Math.round(expense.total)}zł` : "",
+      frontColor: secondary_candidates[index % secondary_candidates.length],
+      date: expense.date,
+      day: expense.day,
+    }));
   }, [data]);
 
-  const maxSpending = Math.max(...chartData.map((d) => d.value));
-  const totalSpending = chartData.reduce((sum, d) => sum + d.value, 0);
+  const maxSpending = Math.max(...chartData.map((d: any) => d.value));
+  const totalSpending = chartData.reduce((sum: number, d: any) => sum + d.value, 0);
   const averageSpending = totalSpending / chartData.length;
 
   return (
