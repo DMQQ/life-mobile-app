@@ -1,7 +1,7 @@
 import Layout from "@/constants/Layout";
 import { useMemo, useState } from "react";
 import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
-import Colors from "@/constants/Colors";
+import Colors, { secondary_candidates } from "@/constants/Colors";
 import Color from "color";
 import lowOpacity from "@/utils/functions/lowOpacity";
 import { gql, useQuery } from "@apollo/client";
@@ -69,12 +69,12 @@ const MonthlyHeatmap = ({ dateRange, type }: { dateRange: [string, string]; type
 
   const getIntensity = (value: number) => {
     if (!maxValue || !value) return 0;
-    return Math.min(0.9, Math.max(0.1, value / maxValue));
+    return Math.min(0.9, Math.max(0.1, value / maxValue)) * 1.3;
   };
 
   const getCellColor = (value: number) => {
     const intensity = getIntensity(value);
-    return Color(Colors.secondary).alpha(intensity).string();
+    return Color(secondary_candidates[3]).alpha(intensity).string();
   };
 
   const getLabel = (value: number) => {

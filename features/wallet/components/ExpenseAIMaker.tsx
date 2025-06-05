@@ -321,7 +321,7 @@ import { useNavigation } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
 
-export default function ExpenseAIMaker() {
+export default function ExpenseAIMaker({ initialOpen }: { initialOpen?: boolean }) {
   const navigation = useNavigation();
   const [processingStep, setProcessingStep] = useState(-1);
   const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
@@ -334,7 +334,13 @@ export default function ExpenseAIMaker() {
     };
   }, [timeoutId]);
 
-  const [aiPhotoPrediction, { loading }] = useMutation(
+  useEffect(() => {
+    if (initialOpen) {
+      handleImagePick();
+    }
+  }, [initialOpen]);
+
+  const [aiPhotoPrediction] = useMutation(
     gql`
       mutation AiPhotoPrediction($image: String!) {
         createExpenseFromImage(image: $image) {

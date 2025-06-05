@@ -9,6 +9,7 @@ import { memo, useState } from "react";
 import Animated, { LinearTransition } from "react-native-reanimated";
 import WalletLimits from "@/features/wallet/components/Limits";
 import useGetStatistics from "@/features/wallet/hooks/useGetStatistics";
+import WeeklyComparisonChart from "./WalletChart";
 
 const Sizing = {
   heading: 30,
@@ -60,9 +61,19 @@ const AvailableBalanceWidget = ({ data, loading }: Props) => {
             {data?.wallet?.balance && <Text style={styles.currency}> zł</Text>}
           </Text>
         </View>
-        <Ripple style={styles.actionButton} onPress={() => navigation.navigate("WalletScreens")}>
-          <Text style={styles.actionButtonText}>See more</Text>
-          <MaterialCommunityIcons name="chevron-right" size={20} color={Colors.secondary} />
+        <Ripple
+          style={styles.actionButton}
+          onPress={() =>
+            navigation.navigate("WalletScreens", {
+              screen: "CreateExpense",
+              params: {
+                shouldOpenPhotoPicker: true,
+              },
+            })
+          }
+        >
+          <MaterialCommunityIcons name="camera" size={20} color={Colors.secondary} />
+          <Text style={styles.actionButtonText}>AI scan</Text>
         </Ripple>
       </View>
 
@@ -71,6 +82,8 @@ const AvailableBalanceWidget = ({ data, loading }: Props) => {
       <View style={{ marginTop: 15 }}>
         <WalletLimits />
       </View>
+
+      {/* <WeeklyComparisonChart /> */}
     </Animated.View>
   );
 };
@@ -193,6 +206,7 @@ const styles = StyleSheet.create({
     paddingLeft: 12,
     borderRadius: 20,
     marginBottom: 10,
+    gap: 8,
   },
   actionButtonText: {
     color: Colors.secondary,

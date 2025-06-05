@@ -8,7 +8,7 @@ import lowOpacity from "@/utils/functions/lowOpacity";
 import { gql, useQuery } from "@apollo/client";
 import moment from "moment";
 import ChartTemplate, { Types } from "./ChartTemplate";
-import { Icons } from "../ExpenseIcon";
+import { CategoryUtils, Icons } from "../ExpenseIcon";
 
 const GET_MONTHLY_CATEGORY_COMPARISON = gql`
   query MonthlyCategoryComparison($months: [String!]!) {
@@ -143,7 +143,7 @@ const CustomBarChart: React.FC<CustomBarChartProps> = ({ data, maxValue }) => {
                       <Text style={[styles.monthLabel, { color: item.color }]}>{item.month.substring(0, 3)}</Text>
                       {item.isLastInCategory && (
                         <View style={styles.categoryLabelContainer}>
-                          <Text style={styles.categoryLabelText}>{item.category}</Text>
+                          <Text style={styles.categoryLabelText}>{CategoryUtils.getCategoryName(item.category)}</Text>
                         </View>
                       )}
                     </TouchableOpacity>
@@ -158,7 +158,7 @@ const CustomBarChart: React.FC<CustomBarChartProps> = ({ data, maxValue }) => {
           <View style={styles.tooltip}>
             <Text style={styles.tooltipTitle}>{selectedBarInfo.month}</Text>
             <Text style={styles.tooltipValue}>{selectedBarInfo.value.toFixed(2)}zł</Text>
-            <Text style={styles.tooltipCategory}>{selectedBarInfo.category}</Text>
+            <Text style={styles.tooltipCategory}>{CategoryUtils.getCategoryName(selectedBarInfo.category)}</Text>
           </View>
         )}
       </View>
@@ -350,7 +350,7 @@ const MonthlyCategoryComparison = ({ dateRange, type: viewType }: { dateRange: [
                   },
                 ]}
               >
-                {category}
+                {CategoryUtils.getCategoryName(category)}
               </Text>
             </Button>
           ))}

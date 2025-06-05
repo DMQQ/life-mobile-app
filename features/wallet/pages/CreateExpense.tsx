@@ -65,6 +65,7 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
   const { createExpense, loading } = useCreateActivity({
     onCompleted() {},
   });
+
   const client = useApolloClient();
 
   const editExpense = useEditExpense();
@@ -346,10 +347,10 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
   const applyPrediction = useCallback(() => {
     if (!prediction) return;
 
-    setAmount(prediction.amount.toString());
+    if (amount === "0") setAmount(prediction.amount.toString());
     setType(prediction.type as "expense" | "income");
     setCategory(prediction.category as keyof typeof Icons);
-  }, [prediction]);
+  }, [prediction, amount]);
 
   const canPredict = !isValid && prediction;
 
@@ -365,7 +366,7 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
             icon={<AntDesign name="close" size={24} color="rgba(255,255,255,0.7)" />}
           />
 
-          <ExpenseAIMaker />
+          <ExpenseAIMaker initialOpen={params?.shouldOpenPhotoPicker || false} />
 
           <View style={styles.amountContainer}>
             <View>

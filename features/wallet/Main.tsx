@@ -28,7 +28,9 @@ const Stack = createNativeStackNavigator<WalletRootStack>();
 export default function WalletScreens({ navigation, route }: WalletScreens<"Wallet">) {
   useEffect(() => {
     if (route.params?.expenseId !== undefined && route.params?.expenseId == null) {
-      navigation.navigate("CreateExpense");
+      navigation.navigate("CreateExpense", {
+        ...(route.params || {}),
+      });
     }
   }, [route.params?.expenseId]);
 
@@ -74,7 +76,7 @@ export default function WalletScreens({ navigation, route }: WalletScreens<"Wall
             category: "",
             date: "",
             description: "",
-
+            shouldOpenPhotoPicker: false,
             isEditing: false,
           }}
         />

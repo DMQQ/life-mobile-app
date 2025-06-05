@@ -309,13 +309,13 @@ function WalletCharts({ navigation }: any) {
               {monthDiff > 28 && monthDiff < 32 && (
                 <FutureProjection data={filteredExpenses} income={5500} currentBalance={currentBalance} />
               )}
-              <DailySpendingChart />
-
               <MonthlyCategoryComparison />
 
               <CalendarHeatmap />
 
               <HourlySpendingsHeatMap />
+
+              <DailySpendingChart />
             </>
           </Suspense>
         }

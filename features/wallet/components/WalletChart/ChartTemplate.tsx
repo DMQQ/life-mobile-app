@@ -27,7 +27,7 @@ const blueText = Color(Colors.primary).lighten(10).string();
 export default function ChartTemplate({ children, title, description, types }: ChartTemplateProps) {
   const [type, setType] = React.useState<Types>(types ? types[0] : "total");
   const [dateRange, setDateRange] = React.useState<[string, string]>([
-    moment().subtract(2, "months").startOf("month").format("YYYY-MM-DD"),
+    moment().subtract(1, "months").format("YYYY-MM-DD"),
     moment().format("YYYY-MM-DD"),
   ]);
   const [showStartDatePicker, setShowStartDatePicker] = React.useState(false);
@@ -155,7 +155,7 @@ export default function ChartTemplate({ children, title, description, types }: C
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, marginVertical: 25 },
+  container: { flex: 1, marginBottom: 50 },
   dateRangeContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -190,8 +190,8 @@ const styles = StyleSheet.create({
 
   dateToggleButton: {
     backgroundColor: Colors.secondary,
+    padding: 4,
     paddingHorizontal: 8,
-    paddingVertical: 4,
     flexDirection: "row",
     borderRadius: 100,
     alignItems: "center",

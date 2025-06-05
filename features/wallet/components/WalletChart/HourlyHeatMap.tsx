@@ -1,14 +1,12 @@
 import Layout from "@/constants/Layout";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from "react-native";
 import Colors, { secondary_candidates } from "@/constants/Colors";
 import Color from "color";
-import Button from "@/components/ui/Button/Button";
 import lowOpacity from "@/utils/functions/lowOpacity";
-import DateTimePicker from "react-native-modal-datetime-picker";
 import { gql, useQuery } from "@apollo/client";
-import moment from "moment";
 import ChartTemplate, { Types } from "./ChartTemplate";
+import Animated, { useSharedValue, useAnimatedStyle, withTiming, runOnJS, interpolate, Extrapolation } from "react-native-reanimated";
 
 const GET_HOURLY_SPENDINGS = gql`
   query HourlySpendings($months: [String!]!) {
@@ -43,6 +41,11 @@ interface BarItem {
   min?: number;
   max?: number;
   isOutlier?: boolean;
+  prevValue?: number;
+  prevDisplayValue?: number;
+  prevCount?: number;
+  prevMin?: number;
+  prevMax?: number;
 }
 
 interface CustomBarChartProps {
@@ -51,12 +54,22 @@ interface CustomBarChartProps {
   viewType: "avg_amount" | "count" | "max_amount" | "min_amount";
 }
 
-const CustomBarChart: React.FC<CustomBarChartProps> = ({ data, maxValue, viewType }) => {
-  const [selectedBarInfo, setSelectedBarInfo] = useState<BarItem | null>(null);
+interface AnimatedBarProps {
+  item: BarItem;
+  maxValue: number;
+  viewType: "avg_amount" | "count" | "max_amount" | "min_amount";
+  onPress: (item: BarItem) => void;
+}
 
-  const BAR_WIDTH = 35;
-  const BAR_SPACING = 6;
-  const CHART_HEIGHT = 250;
+const AnimatedBar: React.FC<AnimatedBarProps> = ({ item, maxValue, viewType, onPress }) => {
+  const animatedHeight = useSharedValue(0);
+  const animatedPrevHeight = useSharedValue(0);
+  const animatedOpacity = useSharedValue(0);
+  const animatedScale = useSharedValue(0.8);
+
+  const BAR_WIDTH = 40;
+  const BAR_SPACING = 8;
+  const CHART_HEIGHT = 320;
   const MIN_BAR_HEIGHT = 20;
 
   const getBarHeight = (value: number): number => {
@@ -65,12 +78,125 @@ const CustomBarChart: React.FC<CustomBarChartProps> = ({ data, maxValue, viewTyp
     return Math.max(proportion * CHART_HEIGHT, value > 0 ? MIN_BAR_HEIGHT : 0);
   };
 
+  const targetHeight = getBarHeight(item.displayValue);
+  const targetPrevHeight = getBarHeight(item.prevDisplayValue || 0);
+
+  useEffect(() => {
+    animatedOpacity.value = withTiming(1, { duration: 400 });
+    animatedScale.value = withTiming(1, { duration: 400 });
+    animatedHeight.value = withTiming(targetHeight, { duration: 500 });
+
+    if (targetPrevHeight > 0) {
+      animatedPrevHeight.value = withTiming(targetPrevHeight, { duration: 500 });
+    }
+  }, [targetHeight, targetPrevHeight]);
+
+  const animatedBarStyle = useAnimatedStyle(() => ({
+    height: animatedHeight.value,
+    marginTop: CHART_HEIGHT - animatedHeight.value,
+    opacity: animatedOpacity.value,
+    transform: [{ scale: animatedScale.value }],
+  }));
+
+  const animatedPrevBarStyle = useAnimatedStyle(() => ({
+    height: animatedPrevHeight.value,
+    marginTop: CHART_HEIGHT - animatedPrevHeight.value,
+    opacity: animatedOpacity.value * 0.7,
+    transform: [{ scale: animatedScale.value }],
+  }));
+
+  const animatedContainerStyle = useAnimatedStyle(() => ({
+    opacity: animatedOpacity.value,
+    transform: [{ scale: animatedScale.value }],
+  }));
+
+  const animatedValueOpacity = useAnimatedStyle(() => ({
+    opacity: interpolate(animatedHeight.value, [0, MIN_BAR_HEIGHT, MIN_BAR_HEIGHT * 2], [0, 0, 1], Extrapolation.CLAMP),
+  }));
+
+  const hasPrevData = (item.prevValue || 0) > 0;
+
+  return (
+    <TouchableOpacity
+      style={[
+        styles.barContainer,
+        {
+          marginRight: BAR_SPACING,
+          width: BAR_WIDTH,
+        },
+      ]}
+      onPress={() => onPress(item)}
+      activeOpacity={0.7}
+    >
+      <View style={styles.barsWrapper}>
+        {hasPrevData && (
+          <Animated.View
+            style={[
+              styles.bar,
+              {
+                backgroundColor: Color(item.color).alpha(0.25).string(),
+                position: "absolute",
+                width: "100%",
+                borderWidth: 1,
+                borderColor: Color(item.color).alpha(0.4).string(),
+              },
+              animatedPrevBarStyle,
+            ]}
+          />
+        )}
+
+        <Animated.View
+          style={[
+            styles.bar,
+            {
+              backgroundColor: item.color,
+            },
+            animatedBarStyle,
+          ]}
+        >
+          {item.value > 0 && (
+            <Animated.View style={[styles.barValueLabelWrapper, animatedValueOpacity]}>
+              <Text style={styles.barValueLabelInside}>{item.isOutlier ? "↑" + item.value.toFixed(0) : item.value.toFixed(1)}</Text>
+            </Animated.View>
+          )}
+        </Animated.View>
+      </View>
+
+      <Animated.Text style={[styles.hourLabel, { color: item.color }, animatedContainerStyle]}>{item.hour}:00</Animated.Text>
+    </TouchableOpacity>
+  );
+};
+
+const CustomBarChart: React.FC<CustomBarChartProps> = ({ data, maxValue, viewType }) => {
+  const [selectedBarInfo, setSelectedBarInfo] = useState<BarItem | null>(null);
+  const tooltipOpacity = useSharedValue(0);
+  const tooltipScale = useSharedValue(0.8);
+
+  const CHART_HEIGHT = 320;
+  const LABEL_HEIGHT = 40;
+
   const handleBarPress = (item: BarItem) => {
     setSelectedBarInfo(item);
+    tooltipOpacity.value = withTiming(1, { duration: 300 });
+    tooltipScale.value = withTiming(1, { duration: 300 });
+
     setTimeout(() => {
-      setSelectedBarInfo(null);
+      tooltipOpacity.value = withTiming(0, { duration: 300 });
+      tooltipScale.value = withTiming(0.8, { duration: 300 }, () => {
+        runOnJS(setSelectedBarInfo)(null);
+      });
     }, 3000);
   };
+
+  const animatedTooltipStyle = useAnimatedStyle(() => ({
+    opacity: tooltipOpacity.value,
+    transform: [{ scale: tooltipScale.value }],
+  }));
+
+  useEffect(() => {
+    tooltipOpacity.value = 0;
+    tooltipScale.value = 0.8;
+  }, [data]);
 
   return (
     <View style={styles.chartWrapper}>
@@ -89,72 +215,38 @@ const CustomBarChart: React.FC<CustomBarChartProps> = ({ data, maxValue, viewTyp
           ))}
         </View>
 
-        <ScrollView horizontal showsHorizontalScrollIndicator={true} contentContainerStyle={{ height: CHART_HEIGHT + 80 }}>
-          <View style={{ flexDirection: "row", paddingTop: 10, height: CHART_HEIGHT + 80, marginLeft: 15 }}>
-            {data.map((item, index) => {
-              const barHeight = getBarHeight(item.displayValue);
-
-              return (
-                <TouchableOpacity
-                  key={`bar-${index}`}
-                  style={[
-                    styles.barContainer,
-                    {
-                      marginRight: BAR_SPACING,
-                      width: BAR_WIDTH,
-                    },
-                  ]}
-                  onPress={() => handleBarPress(item)}
-                  activeOpacity={0.7}
-                >
-                  <View
-                    style={[
-                      styles.bar,
-                      {
-                        height: barHeight,
-                        backgroundColor: item.color,
-                        marginTop: CHART_HEIGHT - barHeight,
-                      },
-                    ]}
-                  >
-                    {item.value > 0 && (
-                      <View style={styles.barValueLabelWrapper}>
-                        <Text style={styles.barValueLabelInside}>
-                          {item.isOutlier ? "↑" + item.value.toFixed(0) : item.value.toFixed(1)}
-                        </Text>
-                      </View>
-                    )}
-                  </View>
-
-                  <Text style={[styles.hourLabel, { color: item.color }]}>{item.hour}:00</Text>
-                </TouchableOpacity>
-              );
-            })}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ height: CHART_HEIGHT + LABEL_HEIGHT, paddingBottom: 0 }}
+          style={{ height: CHART_HEIGHT + LABEL_HEIGHT }}
+        >
+          <View style={{ flexDirection: "row", paddingTop: 10, height: CHART_HEIGHT + LABEL_HEIGHT, marginLeft: 10 }}>
+            {data.map((item, index) => (
+              <AnimatedBar key={`bar-${index}`} item={item} maxValue={maxValue} viewType={viewType} onPress={handleBarPress} />
+            ))}
           </View>
         </ScrollView>
 
         {selectedBarInfo && (
-          <View style={styles.tooltip}>
+          <Animated.View style={[styles.tooltip, animatedTooltipStyle]}>
             <Text style={styles.tooltipTitle}>Hour {selectedBarInfo.hour}:00</Text>
             <Text style={styles.tooltipValue}>
-              {viewType === "avg_amount"
-                ? "Avg: " + selectedBarInfo.value.toFixed(2) + "zł"
-                : viewType === "count"
-                ? "Count: " + selectedBarInfo.value + " tx"
-                : viewType === "max_amount"
-                ? "Max: " + selectedBarInfo.value.toFixed(2) + "zł"
-                : "Min: " + selectedBarInfo.value.toFixed(2) + "zł"}
+              Current: {selectedBarInfo.value.toFixed(viewType === "count" ? 0 : 2)}
+              {viewType === "count" ? " tx" : "zł"}
             </Text>
+            {(selectedBarInfo.prevValue || 0) > 0 ? (
+              <Text style={styles.tooltipValue}>
+                Previous: {selectedBarInfo.prevValue!.toFixed(viewType === "count" ? 0 : 2)}
+                {viewType === "count" ? " tx" : "zł"}
+              </Text>
+            ) : (
+              <Text style={[styles.tooltipValue, { fontStyle: "italic", opacity: 0.7 }]}>Previous: No data</Text>
+            )}
             {selectedBarInfo.count !== undefined && viewType !== "count" && (
-              <Text style={styles.tooltipValue}>Count: {selectedBarInfo.count} transactions</Text>
+              <Text style={styles.tooltipValue}>Transactions: {selectedBarInfo.count}</Text>
             )}
-            {selectedBarInfo.min !== undefined && viewType !== "min_amount" && (
-              <Text style={styles.tooltipValue}>Min: {selectedBarInfo.min.toFixed(2)}zł</Text>
-            )}
-            {selectedBarInfo.max !== undefined && viewType !== "max_amount" && (
-              <Text style={styles.tooltipValue}>Max: {selectedBarInfo.max.toFixed(2)}zł</Text>
-            )}
-          </View>
+          </Animated.View>
         )}
       </View>
     </View>
@@ -164,11 +256,26 @@ const CustomBarChart: React.FC<CustomBarChartProps> = ({ data, maxValue, viewTyp
 const HourlySpendingsBarChart = ({ type, dateRange }: { type: string; dateRange?: [string, string] }) => {
   const viewType = type as "avg_amount" | "count" | "max_amount" | "min_amount";
 
-  const [showStartDatePicker, setShowStartDatePicker] = useState(false);
-  const [showEndDatePicker, setShowEndDatePicker] = useState(false);
+  const previousDateRange = useMemo(() => {
+    if (!dateRange || !dateRange[0] || !dateRange[1]) return undefined;
+
+    const startDate = new Date(dateRange[0]);
+    const endDate = new Date(dateRange[1]);
+    const diffTime = endDate.getTime() - startDate.getTime();
+
+    const prevEndDate = new Date(startDate.getTime() - 1);
+    const prevStartDate = new Date(prevEndDate.getTime() - diffTime);
+
+    return [prevStartDate.toISOString().split("T")[0], prevEndDate.toISOString().split("T")[0]];
+  }, [dateRange]);
 
   const { loading, error, data } = useQuery(GET_HOURLY_SPENDINGS, {
     variables: { months: dateRange },
+  });
+
+  const prevQuery = useQuery(GET_HOURLY_SPENDINGS, {
+    variables: { months: previousDateRange },
+    skip: !previousDateRange,
   });
 
   const { chartData, maxValue } = useMemo(() => {
@@ -177,16 +284,19 @@ const HourlySpendingsBarChart = ({ type, dateRange }: { type: string; dateRange?
     }
 
     const hourlyData = [...data.hourlySpendingsHeatMap].sort((a, b) => a.hour - b.hour);
+    const prevHourlyData = prevQuery.data?.hourlySpendingsHeatMap || [];
+    const prevDataMap = new Map(prevHourlyData.map((item: HourlyData) => [item.hour, item]));
 
     const allValues: number[] = [];
     const chartDataArray: BarItem[] = [];
 
     hourlyData.forEach((hourData: HourlyData, index: number) => {
       const value = hourData[viewType] || 0;
+      const prevHourData = prevDataMap.get(hourData.hour) as HourlyData | undefined;
+      const prevValue = prevHourData ? prevHourData[viewType] || 0 : 0;
 
-      if (value > 0) {
-        allValues.push(value);
-      }
+      if (value > 0) allValues.push(value);
+      if (prevValue > 0) allValues.push(prevValue);
 
       chartDataArray.push({
         hour: hourData.hour,
@@ -196,6 +306,11 @@ const HourlySpendingsBarChart = ({ type, dateRange }: { type: string; dateRange?
         count: hourData.count,
         min: hourData.min_amount,
         max: hourData.max_amount,
+        prevValue: prevValue,
+        prevDisplayValue: prevValue,
+        prevCount: prevHourData?.count,
+        prevMin: prevHourData?.min_amount,
+        prevMax: prevHourData?.max_amount,
       });
     });
 
@@ -203,49 +318,39 @@ const HourlySpendingsBarChart = ({ type, dateRange }: { type: string; dateRange?
 
     if (allValues.length > 0) {
       const sortedValues = [...allValues].sort((a, b) => a - b);
-
       const q1Index = Math.floor(sortedValues.length * 0.25);
       const q3Index = Math.floor(sortedValues.length * 0.75);
       const q1 = sortedValues[q1Index] || 0;
       const q3 = sortedValues[q3Index] || 100;
       const iqr = q3 - q1;
-
       const upperFence = q3 + 2.5 * iqr;
-
       const regularValues = sortedValues.filter((v) => v <= upperFence);
       const filteredMax = regularValues.length > 0 ? Math.max(...regularValues) : Math.max(...sortedValues);
-
       maxValueCalculated = filteredMax * 1.2;
 
       const updatedChartData = chartDataArray.map((item) => {
-        if (item.value > upperFence) {
-          return {
-            ...item,
-            isOutlier: true,
-            displayValue: maxValueCalculated * 0.95,
-          };
-        } else {
-          return {
-            ...item,
-            isOutlier: false,
-            displayValue: item.value,
-          };
-        }
+        const isCurrentOutlier = item.value > upperFence;
+        const isPrevOutlier = (item.prevValue || 0) > upperFence;
+
+        return {
+          ...item,
+          isOutlier: isCurrentOutlier,
+          displayValue: isCurrentOutlier ? maxValueCalculated * 0.95 : item.value,
+          prevDisplayValue: isPrevOutlier ? maxValueCalculated * 0.95 : item.prevValue,
+        };
       });
 
-      return {
-        chartData: updatedChartData,
-        maxValue: maxValueCalculated,
-      };
+      return { chartData: updatedChartData, maxValue: maxValueCalculated };
     }
 
-    return {
-      chartData: chartDataArray,
-      maxValue: maxValueCalculated,
-    };
-  }, [data, viewType]);
+    return { chartData: chartDataArray, maxValue: maxValueCalculated };
+  }, [data, prevQuery.data, viewType]);
 
-  if (loading)
+  const formatDate = (dateStr: string) => {
+    return new Date(dateStr).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  };
+
+  if (loading || prevQuery.loading)
     return (
       <View style={styles.loadingContainer}>
         <Text style={styles.loadingText}>Loading...</Text>
@@ -261,9 +366,30 @@ const HourlySpendingsBarChart = ({ type, dateRange }: { type: string; dateRange?
   return (
     <View>
       {chartData.length > 0 ? (
-        <>
+        <View style={{ minHeight: 400 }}>
           <CustomBarChart data={chartData} maxValue={maxValue} viewType={viewType} />
-        </>
+
+          <View style={styles.periodLegendContainer}>
+            <View style={styles.periodLegend}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
+                <View style={{ width: 12, height: 8, backgroundColor: secondary_candidates[0], borderRadius: 2 }} />
+                <Text style={{ fontSize: 12, color: "#fff" }}>Current Period</Text>
+              </View>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
+                <View
+                  style={{ width: 12, height: 8, backgroundColor: Color(secondary_candidates[0]).alpha(0.25).string(), borderRadius: 2 }}
+                />
+                <Text style={{ fontSize: 12, color: "#fff" }}>Previous Period</Text>
+              </View>
+            </View>
+            {dateRange && previousDateRange && (
+              <Text style={styles.dateRangeText}>
+                {formatDate(dateRange[0])} - {formatDate(dateRange[1])} vs {formatDate(previousDateRange[0])} -{" "}
+                {formatDate(previousDateRange[1])}
+              </Text>
+            )}
+          </View>
+        </View>
       ) : (
         <View style={styles.noDataContainer}>
           <Text style={styles.noDataText}>No data available for the selected time period</Text>
@@ -274,51 +400,20 @@ const HourlySpendingsBarChart = ({ type, dateRange }: { type: string; dateRange?
 };
 
 const styles = StyleSheet.create({
-  header: {
-    marginBottom: 20,
-  },
-  subtitle: {
-    color: "gray",
-    fontSize: 16,
-    marginBottom: 10,
-  },
-  dateRangeContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 15,
-  },
-  dateButton: {
-    backgroundColor: lowOpacity(Colors.primary, 0.3),
-    borderWidth: 1,
-    borderColor: lowOpacity(Colors.primary, 0.5),
-    borderRadius: 7.5,
-    padding: 10,
-    width: "48%",
-    alignItems: "center",
-  },
-  dateButtonText: {
-    color: "#fff",
-    fontSize: 14,
-  },
-  typeSelectorContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 10,
-  },
   chartWrapper: {
     flexDirection: "row",
     marginTop: 10,
   },
   yAxisLabels: {
-    width: 40,
-    height: 250,
+    width: 35,
+    height: 320,
     justifyContent: "space-between",
-    alignItems: "flex-end",
-    paddingRight: 5,
+    alignItems: "flex-start",
+    paddingLeft: 2,
   },
   yAxisLabel: {
     color: "#fff",
-    fontSize: 10,
+    fontSize: 11,
   },
   chartContent: {
     flex: 1,
@@ -329,7 +424,7 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    height: 250,
+    height: 320,
   },
   gridLine: {
     position: "absolute",
@@ -340,13 +435,18 @@ const styles = StyleSheet.create({
   },
   barContainer: {
     alignItems: "center",
-    height: 250,
+    height: 345,
+    position: "relative",
+  },
+  barsWrapper: {
+    width: "100%",
+    height: 320,
     position: "relative",
   },
   bar: {
     width: "100%",
-    borderTopLeftRadius: 3,
-    borderTopRightRadius: 3,
+    borderTopLeftRadius: 4,
+    borderTopRightRadius: 4,
     justifyContent: "center",
     alignItems: "center",
     overflow: "visible",
@@ -360,24 +460,27 @@ const styles = StyleSheet.create({
   },
   barValueLabelInside: {
     color: "#000",
-    fontSize: 10,
+    fontSize: 12,
+    fontWeight: "700",
     textAlign: "center",
     transform: [{ rotate: "-90deg" }],
     width: 80,
   },
   hourLabel: {
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: "bold",
     marginTop: 5,
+    position: "absolute",
+    bottom: 0,
   },
   tooltip: {
     position: "absolute",
-    top: 50,
-    left: 50,
+    top: 20,
+    left: 20,
     backgroundColor: Color(Colors.primary).lighten(0.5).string(),
     padding: 10,
     borderRadius: 5,
-    width: 150,
+    minWidth: 120,
     zIndex: 10,
   },
   tooltipTitle: {
@@ -387,8 +490,23 @@ const styles = StyleSheet.create({
   },
   tooltipValue: {
     color: "#fff",
-    fontSize: 14,
-    marginVertical: 2,
+    fontSize: 12,
+    marginVertical: 1,
+  },
+  periodLegendContainer: {
+    marginTop: 15,
+    alignItems: "center",
+    gap: 8,
+  },
+  periodLegend: {
+    flexDirection: "row",
+    gap: 15,
+    justifyContent: "center",
+  },
+  dateRangeText: {
+    fontSize: 10,
+    color: Color("#fff").alpha(0.7).string(),
+    textAlign: "center",
   },
   noDataContainer: {
     padding: 30,
@@ -425,24 +543,13 @@ const styles = StyleSheet.create({
     color: "#ff7777",
     fontSize: 16,
   },
-  chartDescription: {
-    alignItems: "center",
-    marginTop: 15,
-    padding: 10,
-    backgroundColor: Color(Colors.primary).lighten(0.3).string(),
-    borderRadius: 8,
-  },
-  chartDescriptionText: {
-    color: "#fff",
-    fontSize: 14,
-  },
 });
 
 export default () => {
   return (
     <ChartTemplate
       title="Hourly spending"
-      description="See your spending patterns by hours"
+      description="See your spending patterns by hours vs previous period"
       types={["avg_amount", "count", "max_amount", "min_amount"] as any}
     >
       {({ dateRange, type }) => <HourlySpendingsBarChart type={type} dateRange={dateRange} />}

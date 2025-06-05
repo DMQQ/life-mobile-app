@@ -118,7 +118,7 @@ export default function StatisticsSummary() {
   if (!stats?.statistics) return null;
 
   return (
-    <View style={{ width: Layout.screen.width - 30, marginTop: 25, marginBottom: 25, minHeight: 475 }}>
+    <View style={{ width: Layout.screen.width - 30, marginTop: 25, marginBottom: 50, minHeight: 475 }}>
       <View style={{ flexDirection: "row" }}>
         <View style={{ flex: 1 }}>
           {view === "current" ? (
