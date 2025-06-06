@@ -3,16 +3,19 @@ import { Expense, Wallet } from "@/types";
 import WalletItem, { WalletElement, parseDateToText } from "./WalletItem";
 import { useRef, useEffect, useMemo, useCallback, useState } from "react";
 import { Text, NativeScrollEvent, View, StyleSheet, VirtualizedList, RefreshControl } from "react-native";
-import Animated, { FadeIn, FadeInDown, FadeInUp, LinearTransition, SharedValue } from "react-native-reanimated";
+import Animated, { FadeIn, FadeInDown, FadeOutDown, LinearTransition, SharedValue } from "react-native-reanimated";
 import { NativeSyntheticEvent } from "react-native";
 import moment from "moment";
-import Colors, { Sizing } from "@/constants/Colors";
+import Colors from "@/constants/Colors";
 import Ripple from "react-native-material-ripple";
-import { useWalletContext } from "../WalletContext";
+import { init, useWalletContext } from "../WalletContext";
 import { gql, useQuery } from "@apollo/client";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import WalletLimits from "../Limits";
 import { getInvalidExpenses } from "../../pages/WalletCharts";
+import Layout from "@/constants/Layout";
+import Color from "color";
+import { AntDesign } from "@expo/vector-icons";
 
 const AnimatedList = Animated.createAnimatedComponent(VirtualizedList);
 
@@ -28,7 +31,6 @@ export default function WalletList(props: {
   const route = useRoute<any>();
 
   const navigation = useNavigation<any>();
-
   const sheet = useRef<BottomSheet>(null);
 
   useEffect(() => {
@@ -99,26 +101,92 @@ export default function WalletList(props: {
   }, []);
 
   return (
-    <AnimatedList
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-      ListHeaderComponent={<WalletLimits />}
-      onEndReached={!props.isLocked ? props.onEndReached : () => {}}
-      onEndReachedThreshold={0.5}
-      scrollEventThrottle={16}
-      removeClippedSubviews
-      onScroll={props.onScroll}
-      style={{ flex: 1 }}
-      contentContainerStyle={{
-        padding: 15,
-      }}
-      data={data || []}
-      keyExtractor={(expense: any, idx) => expense.month}
-      renderItem={renderItem as any}
-      getItem={(data, index) => data[index]}
-      getItemCount={(data) => data.length}
-    />
+    <View style={{ flex: 1 }}>
+      <AnimatedList
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        ListHeaderComponent={<WalletLimits />}
+        onEndReached={!props.isLocked ? props.onEndReached : () => {}}
+        onEndReachedThreshold={1}
+        scrollEventThrottle={32}
+        removeClippedSubviews
+        onScroll={props.onScroll}
+        style={{ flex: 1 }}
+        contentContainerStyle={{
+          padding: 15,
+        }}
+        data={data || []}
+        keyExtractor={(expense: any, idx) => expense.month}
+        renderItem={renderItem as any}
+        getItem={(data, index) => data[index]}
+        getItemCount={(data) => data.length}
+      />
+
+      <ClearFiltersButton />
+    </View>
   );
 }
+
+const ClearFiltersButton = () => {
+  const { filters, dispatch } = useWalletContext();
+
+  const [hasFilters, diffCount] = useMemo(() => {
+    let isDifferent = false;
+    let diffCount = 0;
+
+    const flatFilters = (obj: Record<string, any>) => {
+      const output = {} as Record<string, any>;
+
+      const flatten = (obj: Record<string, any>, parentKey = "") => {
+        for (const key in obj) {
+          const value = obj[key];
+          const newKey = parentKey ? `${parentKey}.${key}` : key;
+
+          if (typeof value === "object" && value !== null) {
+            flatten(value, newKey);
+          } else {
+            output[newKey] = value;
+          }
+        }
+      };
+
+      flatten(obj);
+
+      return output;
+    };
+
+    const flatInitFilters = flatFilters(init);
+
+    const flatCurrentFilters = flatFilters(filters);
+
+    for (const key in flatCurrentFilters) {
+      if (flatCurrentFilters[key] !== flatInitFilters[key]) {
+        isDifferent = true;
+        diffCount++;
+      }
+    }
+
+    return [isDifferent, diffCount];
+  }, [filters]);
+
+  const clearFilters = () => {
+    dispatch({ type: "RESET" });
+  };
+
+  if (!hasFilters) return null;
+
+  return (
+    <Animated.View
+      entering={FadeInDown.delay(1000)}
+      exiting={FadeOutDown}
+      style={{ position: "absolute", bottom: 60, width: Layout.screen.width, justifyContent: "center", alignItems: "center" }}
+    >
+      <Ripple style={styles.filtersButton} onPress={clearFilters}>
+        <Text style={{ color: Colors.secondary_light_2 }}>{diffCount > 0 ? `Reset filters (${diffCount})` : "Reset filters"}</Text>
+        <AntDesign name="close" size={18} color={Colors.secondary_light_2} />
+      </Ripple>
+    </Animated.View>
+  );
+};
 
 const MonthExpenseList = ({
   item,
@@ -160,7 +228,7 @@ const MonthExpenseList = ({
   };
 
   return (
-    <Animated.View style={{ marginBottom: 30 }} layout={LinearTransition.delay(100)}>
+    <Animated.View style={{ marginBottom: 30, marginTop: monthIndex === 0 ? 30 : 0 }} layout={LinearTransition.delay(100)}>
       <View style={styles.monthRow}>
         <Text style={styles.monthText}>{moment(item.month).format("MMMM YYYY")}</Text>
 
@@ -219,7 +287,6 @@ const ListItem = ({
   }, [expenses, index]);
 
   const {
-    refs: { bottomSheetRef },
     calendar: { setCalendarDate },
   } = useWalletContext();
 
@@ -257,7 +324,7 @@ const ListItem = ({
 
 const styles = StyleSheet.create({
   monthText: {
-    fontSize: Sizing.text,
+    fontSize: 25,
     fontWeight: "600",
     color: Colors.text_light,
   },
@@ -278,6 +345,22 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 20,
+    marginBottom: 25,
+  },
+
+  filtersButton: {
+    zIndex: 1000,
+    paddingVertical: 7.5,
+    paddingHorizontal: 22.5,
+    borderRadius: 50,
+    borderWidth: 1,
+    borderColor: Colors.secondary_light_1,
+    backgroundColor: Color(Colors.secondary_light_1).darken(0.8).string(),
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 5,
+    paddingRight: 15,
+    width: 160,
   },
 });
