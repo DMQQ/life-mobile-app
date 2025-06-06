@@ -11,6 +11,7 @@ import Animated, {
   FadeIn,
   FadeOut,
   withSpring,
+  LinearTransition,
 } from "react-native-reanimated";
 import { useEffect } from "react";
 import Layout from "@/constants/Layout";
@@ -30,7 +31,6 @@ const styles = StyleSheet.create({
   },
   processingCard: {
     borderRadius: 20,
-    width: (Layout.screen.width - 30) / 1.4,
     overflow: "hidden",
   },
   glowContainer: {
@@ -41,14 +41,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     borderRadius: 20,
   },
-  content: {
-    height: 60,
-    borderRadius: 20,
-    padding: 5,
-    paddingRight: 10,
-    flexDirection: "row",
-    alignItems: "center",
-  },
+  content: {},
   iconContainer: {
     width: 40,
     height: 40,
@@ -91,12 +84,26 @@ const styles = StyleSheet.create({
     height: "100%",
     backgroundColor: Colors.secondary,
   },
+  aiConfirmButton: {
+    flexDirection: "row",
+    gap: 5,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    backgroundColor: Colors.secondary,
+    borderRadius: 100,
+  },
 });
 
 interface FloatingProcessingViewProps {
   visible: boolean;
   currentStep: number;
   onClose: () => void;
+
+  expense?: Expense;
+
+  handleRemove?: (id: string) => void;
+
+  handleSuccess?: () => void;
 }
 
 const steps = [
@@ -137,7 +144,14 @@ const slideOutDownWithScale = () => {
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-export function FloatingProcessingView({ visible, currentStep, onClose }: FloatingProcessingViewProps) {
+export function FloatingProcessingView({
+  visible,
+  currentStep,
+  onClose,
+  expense,
+  handleRemove,
+  handleSuccess,
+}: FloatingProcessingViewProps) {
   const glowAnimation = useSharedValue(0);
   const pulseAnimation = useSharedValue(1);
   const shimmerAnimation = useSharedValue(0);
@@ -147,8 +161,8 @@ export function FloatingProcessingView({ visible, currentStep, onClose }: Floati
     if (visible) {
       glowAnimation.value = withRepeat(
         withSequence(
-          withTiming(1, { duration: 2500, easing: Easing.bezier(0.4, 0, 0.6, 1) }),
-          withTiming(0, { duration: 2500, easing: Easing.bezier(0.4, 0, 0.6, 1) })
+          withTiming(1, { duration: 1500, easing: Easing.bezier(0.4, 0, 0.6, 1) }),
+          withTiming(0, { duration: 1500, easing: Easing.bezier(0.4, 0, 0.6, 1) })
         ),
         -1,
         true
@@ -163,7 +177,7 @@ export function FloatingProcessingView({ visible, currentStep, onClose }: Floati
         true
       );
 
-      shimmerAnimation.value = withRepeat(withTiming(1, { duration: 4000, easing: Easing.linear }), -1, false);
+      shimmerAnimation.value = withRepeat(withTiming(1, { duration: 2000, easing: Easing.linear }), -1, false);
 
       progressAnimation.value = withTiming((currentStep + 1) / steps.length, {
         duration: 800,
@@ -171,6 +185,36 @@ export function FloatingProcessingView({ visible, currentStep, onClose }: Floati
       });
     }
   }, [visible, currentStep]);
+
+  const expansionProgress = useSharedValue(0);
+  const [showExpense, setShowExpense] = useState(false);
+
+  useEffect(() => {
+    expansionProgress.value = withTiming(currentStep === 3 ? 1 : 0, {
+      duration: 300,
+      easing: Easing.bezier(0.4, 0, 0.6, 1),
+    });
+
+    if (currentStep === 3) {
+      let timeout = setTimeout(() => {
+        setShowExpense(true);
+      }, 300);
+
+      return () => {
+        clearTimeout(timeout);
+      };
+    } else {
+      setShowExpense(false);
+    }
+  }, [currentStep]);
+
+  const animatedHeightStyle = useAnimatedStyle(() => {
+    const progress = expansionProgress.value;
+    return {
+      minHeight: interpolate(progress, [0, 1], [60, 180]),
+      width: interpolate(progress, [0, 1], [(Layout.screen.width - 30) / 1.4, Layout.screen.width - 30]),
+    };
+  });
 
   const glowStyle = useAnimatedStyle(() => {
     const glowIntensity = interpolate(glowAnimation.value, [0, 1], [0.2, 0.6]);
@@ -186,10 +230,11 @@ export function FloatingProcessingView({ visible, currentStep, onClose }: Floati
   });
 
   const pulseStyle = useAnimatedStyle(() => {
+    if (currentStep === 3) return {};
     return {
       transform: [{ scale: pulseAnimation.value }],
     };
-  });
+  }, [currentStep]);
 
   const shimmerStyle = useAnimatedStyle(() => {
     const translateX = interpolate(shimmerAnimation.value, [0, 1], [-Layout.screen.width, Layout.screen.width]);
@@ -278,38 +323,91 @@ export function FloatingProcessingView({ visible, currentStep, onClose }: Floati
         <BlurView
           intensity={60}
           style={[
-            styles.content,
             {
               backgroundColor: "rgba(0, 0, 0, 0.2)",
             },
           ]}
         >
-          <View
+          <Animated.View
             style={[
-              styles.iconContainer,
               {
-                backgroundColor: Color(Colors.secondary).alpha(0.15).hex(),
-                borderWidth: 1,
-                borderColor: Color(Colors.secondary).alpha(0.2).hex(),
+                borderRadius: 20,
+                padding: 10,
               },
+              animatedHeightStyle,
             ]}
           >
-            {getStepIcon(currentStepData.icon)}
-          </View>
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+              }}
+            >
+              <View
+                style={[
+                  styles.iconContainer,
+                  {
+                    backgroundColor: Color(Colors.secondary).alpha(0.15).hex(),
+                    borderWidth: 1,
+                    borderColor: Color(Colors.secondary).alpha(0.2).hex(),
+                  },
+                ]}
+              >
+                {getStepIcon(currentStepData.icon)}
+              </View>
 
-          <View style={styles.textContainer}>
-            <Text style={styles.title}>AI Processing</Text>
-            <Text style={styles.subtitle}>{currentStepData.label}...</Text>
-          </View>
+              <View style={styles.textContainer}>
+                <Text style={styles.title}>AI Processing</Text>
+                <Text style={styles.subtitle}>{currentStepData.label}...</Text>
+              </View>
 
-          <Pressable style={styles.closeButton} onPress={onClose}>
-            <AntDesign name="close" size={16} color="rgba(255, 255, 255, 0.7)" />
-          </Pressable>
+              <Pressable style={styles.closeButton} onPress={onClose}>
+                <AntDesign name="close" size={16} color="rgba(255, 255, 255, 0.7)" />
+              </Pressable>
+            </View>
+            {showExpense && (
+              <Animated.View entering={FadeIn}>
+                <Animated.ScrollView style={{ maxHeight: Layout.window.height / 2, flex: 1, paddingVertical: 10, paddingBottom: 5 }}>
+                  <WalletItem
+                    {...(expense as any)}
+                    subExpenseStyle={{
+                      backgroundColor: Color(Colors.secondary).darken(0.8).hex(),
+                    }}
+                    containerStyle={{ backgroundColor: Color(Colors.secondary).darken(0.75).hex() }}
+                    animatedStyle={{ marginBottom: 0, marginTop: 5, backgroundColor: Color(Colors.secondary).darken(0.75).hex() }}
+                  />
+                </Animated.ScrollView>
+                <View style={{ paddingTop: 10, justifyContent: "flex-end", width: "100%", flexDirection: "row", gap: 10 }}>
+                  <Ripple
+                    style={[styles.aiConfirmButton, { backgroundColor: Colors.error }]}
+                    onPress={() => {
+                      handleRemove?.(expense?.id || "");
+                    }}
+                  >
+                    <AntDesign name="closecircle" size={18} color="rgba(255,255,255,0.8)" />
+                    <Text style={{ color: "rgba(255,255,255,0.8)" }}>Cancel</Text>
+                  </Ripple>
+
+                  <Ripple
+                    style={styles.aiConfirmButton}
+                    onPress={() => {
+                      handleSuccess?.();
+                    }}
+                  >
+                    <AntDesign name="checkcircle" size={18} color="rgba(255,255,255,0.8)" />
+                    <Text style={{ color: "rgba(255,255,255,0.8)" }}>All good!</Text>
+                  </Ripple>
+                </View>
+              </Animated.View>
+            )}
+          </Animated.View>
         </BlurView>
 
-        <View style={styles.progressContainer}>
-          <Animated.View style={[styles.progressFill, progressStyle]} />
-        </View>
+        {currentStep < 3 && (
+          <View style={styles.progressContainer}>
+            <Animated.View style={[styles.progressFill, progressStyle]} />
+          </View>
+        )}
       </Animated.View>
     </AnimatedPressable>
   );
@@ -320,9 +418,13 @@ import { gql, useMutation } from "@apollo/client";
 import { useNavigation } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
+import { Expense } from "@/types";
+import WalletItem from "./Wallet/WalletItem";
+import Ripple from "react-native-material-ripple";
+import useDeleteActivity from "../hooks/useDeleteActivity";
 
 export default function ExpenseAIMaker({ initialOpen }: { initialOpen?: boolean }) {
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
   const [processingStep, setProcessingStep] = useState(-1);
   const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
 
@@ -340,7 +442,7 @@ export default function ExpenseAIMaker({ initialOpen }: { initialOpen?: boolean 
     }
   }, [initialOpen]);
 
-  const [aiPhotoPrediction] = useMutation(
+  const [aiPhotoPrediction, state] = useMutation(
     gql`
       mutation AiPhotoPrediction($image: String!) {
         createExpenseFromImage(image: $image) {
@@ -367,12 +469,6 @@ export default function ExpenseAIMaker({ initialOpen }: { initialOpen?: boolean 
         await context?.client?.refetchQueries({
           include: ["GetWallet", "Limits"],
         });
-        setProcessingStep(3);
-        const timeout = setTimeout(() => {
-          setProcessingStep(-1);
-          navigation.goBack();
-        }, 3000);
-        setTimeoutId(timeout);
       },
       onError: () => {
         setProcessingStep(-1);
@@ -397,14 +493,22 @@ export default function ExpenseAIMaker({ initialOpen }: { initialOpen?: boolean 
       return;
     }
 
-    const result = await ImagePicker.launchCameraAsync({
-      mediaTypes: "images",
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 0.8,
-      base64: true,
-      cameraType: ImagePicker.CameraType.back,
-    });
+    const result = await (__DEV__
+      ? ImagePicker.launchImageLibraryAsync({
+          mediaTypes: "images",
+          allowsEditing: true,
+          quality: 0.8,
+          base64: true,
+          aspect: [9, 16],
+        })
+      : ImagePicker.launchCameraAsync({
+          mediaTypes: "images",
+          allowsEditing: true,
+          quality: 0.8,
+          base64: true,
+          cameraType: ImagePicker.CameraType.back,
+          aspect: [9, 16],
+        }));
 
     if (!result.canceled && result.assets?.[0]?.base64) {
       const asset = result.assets[0];
@@ -414,8 +518,22 @@ export default function ExpenseAIMaker({ initialOpen }: { initialOpen?: boolean 
       setTimeout(() => setProcessingStep(1), 800);
       setTimeout(() => setProcessingStep(2), 1600);
 
-      aiPhotoPrediction({ variables: { image: dataUrl } });
+      await aiPhotoPrediction({ variables: { image: dataUrl } });
+
+      setProcessingStep(3);
     }
+  };
+
+  const { deleteActivity } = useDeleteActivity();
+
+  const handleRemovePredicted = async (id: string) => {
+    await deleteActivity({
+      variables: {
+        id,
+      },
+    });
+
+    setProcessingStep(-1);
   };
 
   return (
@@ -426,7 +544,20 @@ export default function ExpenseAIMaker({ initialOpen }: { initialOpen?: boolean 
         icon={<AntDesign name="camerao" size={24} color="rgba(255,255,255,0.7)" />}
       />
 
-      <FloatingProcessingView visible={processingStep >= 0} currentStep={processingStep} onClose={handleClose} />
+      <FloatingProcessingView
+        visible={processingStep >= 0}
+        currentStep={processingStep}
+        onClose={handleClose}
+        expense={state.data?.createExpenseFromImage}
+        handleRemove={handleRemovePredicted}
+        handleSuccess={() => {
+          setProcessingStep(-1);
+          // navigation.goBack();
+          navigation.replace("Expense", {
+            expense: state.data?.createExpenseFromImage as Expense,
+          });
+        }}
+      />
     </>
   );
 }

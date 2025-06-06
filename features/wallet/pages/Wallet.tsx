@@ -96,18 +96,6 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
     editBalanceRef.current?.expand();
   };
 
-  const [isLoaderVisible, setIsLoaderVisible] = useState(true);
-
-  useEffect(() => {
-    if (!loading) {
-      const timeout = setTimeout(() => {
-        setIsLoaderVisible(false);
-      }, 500);
-
-      return () => clearTimeout(timeout);
-    }
-  }, [loading]);
-
   const [showSubscriptionsView, setShowSubscriptionsView] = useState(false);
 
   if (

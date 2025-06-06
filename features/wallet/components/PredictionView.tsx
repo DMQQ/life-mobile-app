@@ -210,8 +210,6 @@ export default function PredictionView(item: ExpensePrediction & { applyPredicti
   const categoryIcon = Icons[item.category as keyof typeof Icons];
   const iconBackgroundColor = categoryIcon?.backgroundColor || "#00FFC8";
 
-  console.log(item);
-
   return (
     <AnimatedPressable
       key={item.description}

@@ -108,6 +108,8 @@ export default function WalletItem(
     animatedStyle: AnimatedStyle;
     index: number;
     containerStyle?: StyleProp<ViewStyle>;
+    subExpenseStyle?: StyleProp<ViewStyle> & Record<string, any>;
+    onLongPress?: () => void;
   }
 ) {
   const price = item.type === "expense" ? (item.amount * -1).toFixed(2) : item.amount.toFixed(2);
@@ -132,6 +134,9 @@ export default function WalletItem(
       <Ripple
         onLongPress={async () => {
           Feedback.trigger("impactLight");
+          if (item.onLongPress) {
+            item.onLongPress();
+          }
           setIsExpanded(!isExpanded);
         }}
         disabled={isBalanceEdit}
@@ -211,7 +216,7 @@ export default function WalletItem(
                 handlePress={() => {}}
                 animatedStyle={{ marginBottom: 5 }}
                 index={index}
-                containerStyle={{ marginBottom: 0, backgroundColor: Colors.primary }}
+                containerStyle={{ marginBottom: 0, ...((item.subExpenseStyle as any) || {}) }}
               />
             </Animated.View>
           ))}
