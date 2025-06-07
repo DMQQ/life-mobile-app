@@ -18,7 +18,7 @@ import Animated, {
 } from "react-native-reanimated";
 import useCreateActivity from "../hooks/useCreateActivity";
 import DateTimePicker from "react-native-modal-datetime-picker";
-import { useEditExpense } from "./CreateActivity";
+import { useEditExpense } from "../hooks/useEditExpense";
 import IconButton from "@/components/ui/IconButton/IconButton";
 import Color from "color";
 import Input from "@/components/ui/TextInput/TextInput";
@@ -34,6 +34,7 @@ import usePredictExpense from "../hooks/usePredictCategory";
 import { CategoryUtils } from "../components/ExpenseIcon";
 import PredictionView from "../components/PredictionView";
 import ExpenseAIMaker from "../components/ExpenseAIMaker";
+import { Expense } from "@/types";
 
 interface SubExpense {
   id: string;
@@ -354,6 +355,17 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
 
   const canPredict = !isValid && prediction;
 
+  const setExpense = (expense: Expense) => {
+    setAmount(expense.amount.toString());
+    setName(expense.description);
+    setType(expense.type as "expense" | "income");
+    setCategory(expense.category as keyof typeof Icons);
+    setDate(moment(expense.date).format("YYYY-MM-DD"));
+    setSpontaneousRate(expense.spontaneousRate || 0);
+    setIsSubscription(false);
+    setSubExpenses((expense.subexpenses as any) || []);
+  };
+
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
       <View style={{ flex: 1 }}>
@@ -366,7 +378,7 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
             icon={<AntDesign name="close" size={24} color="rgba(255,255,255,0.7)" />}
           />
 
-          <ExpenseAIMaker initialOpen={params?.shouldOpenPhotoPicker || false} />
+          <ExpenseAIMaker setExpense={setExpense} initialOpen={params?.shouldOpenPhotoPicker || false} />
 
           <View style={styles.amountContainer}>
             <View>
@@ -377,7 +389,7 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
 
               {SubExpenses.length > 0 && (
                 <Text style={{ color: "rgba(255,255,255,0.7)", fontSize: 12, textAlign: "center" }}>
-                  {SubExpenses.length} sub expenses for {calculateSubExpensesTotal()}zł
+                  {SubExpenses.length} subexpenses for ~{calculateSubExpensesTotal().toFixed(2)}zł
                 </Text>
               )}
             </View>

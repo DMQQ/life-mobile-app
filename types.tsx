@@ -100,6 +100,8 @@ export interface Expense {
   balanceBeforeInteraction: number;
   category: string;
 
+  spontaneousRate: number;
+
   subscription: {
     id: string;
     isActive: boolean;

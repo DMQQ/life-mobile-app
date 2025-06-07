@@ -112,11 +112,15 @@ export default function WalletItem(
     onLongPress?: () => void;
   }
 ) {
-  const price = item.type === "expense" ? (item.amount * -1).toFixed(2) : item.amount.toFixed(2);
+  const price = item?.type === "expense" ? (item.amount * -1).toFixed(2) : "+" + item.amount?.toFixed(2);
 
-  const isBalanceEdit = item.description.includes("Balance edited") || item.amount === 0;
+  const isBalanceEdit = item?.description?.includes("Balance edited") || item?.amount === 0;
 
   const [isExpanded, setIsExpanded] = useState(false);
+
+  if (!item) {
+    return null;
+  }
 
   return (
     <Animated.View

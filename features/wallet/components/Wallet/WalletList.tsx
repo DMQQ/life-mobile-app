@@ -107,7 +107,7 @@ export default function WalletList(props: {
         ListHeaderComponent={<WalletLimits />}
         onEndReached={!props.isLocked ? props.onEndReached : () => {}}
         onEndReachedThreshold={1}
-        scrollEventThrottle={32}
+        scrollEventThrottle={16}
         removeClippedSubviews
         onScroll={props.onScroll}
         style={{ flex: 1 }}
@@ -293,7 +293,7 @@ const ListItem = ({
   const navigation = useNavigation<any>();
 
   return (
-    <Animated.View entering={FadeIn.delay(Math.min(((index + monthIndex) % 10) * 75, 2000))} layout={LinearTransition.delay(100)}>
+    <Animated.View entering={FadeIn.delay(Math.min(((index + monthIndex) % 10) * 75, 1000))} layout={LinearTransition.delay(100)}>
       {!areDatesEqual && (
         <Ripple
           onPress={() => {

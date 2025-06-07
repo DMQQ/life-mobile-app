@@ -104,6 +104,8 @@ interface FloatingProcessingViewProps {
   handleRemove?: (id: string) => void;
 
   handleSuccess?: () => void;
+
+  handleEdit?: (id: string) => void;
 }
 
 const steps = [
@@ -151,6 +153,7 @@ export function FloatingProcessingView({
   expense,
   handleRemove,
   handleSuccess,
+  handleEdit,
 }: FloatingProcessingViewProps) {
   const glowAnimation = useSharedValue(0);
   const pulseAnimation = useSharedValue(1);
@@ -387,6 +390,15 @@ export function FloatingProcessingView({
                     <AntDesign name="closecircle" size={18} color="rgba(255,255,255,0.8)" />
                     <Text style={{ color: "rgba(255,255,255,0.8)" }}>Cancel</Text>
                   </Ripple>
+                  <Ripple
+                    style={[styles.aiConfirmButton, { backgroundColor: Colors.warning }]}
+                    onPress={() => {
+                      handleEdit?.(expense?.id || "");
+                    }}
+                  >
+                    <AntDesign name="edit" size={18} color="rgba(255,255,255,0.8)" />
+                    <Text style={{ color: "rgba(255,255,255,0.8)" }}>Edit</Text>
+                  </Ripple>
 
                   <Ripple
                     style={styles.aiConfirmButton}
@@ -414,7 +426,7 @@ export function FloatingProcessingView({
 }
 
 import { IconButton } from "@/components";
-import { gql, useMutation } from "@apollo/client";
+import { gql, useApolloClient, useMutation } from "@apollo/client";
 import { useNavigation } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
@@ -423,7 +435,7 @@ import WalletItem from "./Wallet/WalletItem";
 import Ripple from "react-native-material-ripple";
 import useDeleteActivity from "../hooks/useDeleteActivity";
 
-export default function ExpenseAIMaker({ initialOpen }: { initialOpen?: boolean }) {
+export default function ExpenseAIMaker({ initialOpen, setExpense }: { initialOpen?: boolean; setExpense?: (expense: Expense) => void }) {
   const navigation = useNavigation<any>();
   const [processingStep, setProcessingStep] = useState(-1);
   const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
@@ -465,11 +477,6 @@ export default function ExpenseAIMaker({ initialOpen }: { initialOpen?: boolean 
       }
     `,
     {
-      onCompleted: async (_, context) => {
-        await context?.client?.refetchQueries({
-          include: ["GetWallet", "Limits"],
-        });
-      },
       onError: () => {
         setProcessingStep(-1);
       },
@@ -497,14 +504,14 @@ export default function ExpenseAIMaker({ initialOpen }: { initialOpen?: boolean 
       ? ImagePicker.launchImageLibraryAsync({
           mediaTypes: "images",
           allowsEditing: true,
-          quality: 0.8,
+          quality: 1,
           base64: true,
           aspect: [9, 16],
         })
       : ImagePicker.launchCameraAsync({
           mediaTypes: "images",
           allowsEditing: true,
-          quality: 0.8,
+          quality: 1,
           base64: true,
           cameraType: ImagePicker.CameraType.back,
           aspect: [9, 16],
@@ -536,6 +543,8 @@ export default function ExpenseAIMaker({ initialOpen }: { initialOpen?: boolean 
     setProcessingStep(-1);
   };
 
+  const client = useApolloClient();
+
   return (
     <>
       <IconButton
@@ -550,12 +559,17 @@ export default function ExpenseAIMaker({ initialOpen }: { initialOpen?: boolean 
         onClose={handleClose}
         expense={state.data?.createExpenseFromImage}
         handleRemove={handleRemovePredicted}
-        handleSuccess={() => {
-          setProcessingStep(-1);
-          // navigation.goBack();
+        handleSuccess={async () => {
+          await client?.refetchQueries({
+            include: ["GetWallet", "Limits"],
+          });
           navigation.replace("Expense", {
             expense: state.data?.createExpenseFromImage as Expense,
           });
+        }}
+        handleEdit={(id: string) => {
+          handleRemovePredicted(id);
+          setExpense?.(state.data?.createExpenseFromImage as Expense);
         }}
       />
     </>

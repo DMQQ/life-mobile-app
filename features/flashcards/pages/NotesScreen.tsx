@@ -16,7 +16,7 @@ export default function NotesScreen({ navigation }: ScreenProps<any>) {
 
   return (
     <>
-      <SafeAreaView style={{ padding: 0 }}>
+      <SafeAreaView style={{ padding: 0, paddingBottom: 70 }}>
         <Header
           title="FlashCards"
           buttons={[

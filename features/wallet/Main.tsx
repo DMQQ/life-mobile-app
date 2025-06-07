@@ -1,9 +1,7 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Wallet from "./pages/Wallet";
-import CreateActivity from "./pages/CreateActivity";
 import { ParamListBase } from "@react-navigation/native";
 import { StackScreenProps } from "@/types";
-import Watchlist from "./pages/Watchlist";
 import Colors from "@/constants/Colors";
 import WalletCharts from "./pages/WalletCharts";
 import CreateExpenseModal from "./pages/CreateExpense";
@@ -46,24 +44,6 @@ export default function WalletScreens({ navigation, route }: WalletScreens<"Wall
           animation: "default",
         }}
       >
-        <Stack.Screen
-          name="Watchlist"
-          component={Watchlist}
-          options={{
-            headerShown: true,
-            title: "Create shopping list",
-            headerTitleAlign: "center",
-          }}
-        />
-        <Stack.Screen
-          name="CreateActivity"
-          component={CreateActivity}
-          options={{
-            headerShown: true,
-            title: "",
-          }}
-        />
-
         <Stack.Screen
           name={"CreateExpense"}
           component={CreateExpenseModal}
