@@ -76,15 +76,15 @@ export default function CreateFlashCards({ navigation, route }: any) {
   ];
 
   return (
-    <ScrollView style={{ flex: 1, padding: 15, paddingBottom: 45 }}>
-      <View>
+    <View style={{ flex: 1, padding: 15 }}>
+      <View style={{ flex: 1, paddingBottom: 15 }}>
         <CustomTabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
 
         {activeTab === "json" && <JSONImportForm groupId={groupId} navigation={navigation} />}
         {activeTab === "ai" && <AIGeneratedFlashCards groupId={groupId} />}
         {activeTab === "manual" && <FlashCardForm groupId={groupId} />}
       </View>
-    </ScrollView>
+    </View>
   );
 }
 
@@ -339,7 +339,7 @@ const AIGeneratedFlashCards = ({ groupId }: { groupId: string }) => {
   };
 
   return (
-    <View>
+    <View style={{ flex: 1 }}>
       <Input
         multiline
         value={promptContent}
@@ -374,78 +374,78 @@ const AIGeneratedFlashCards = ({ groupId }: { groupId: string }) => {
         {state.loading ? "Generating..." : "Generate Flashcards"}
       </Button>
 
-      {state.data?.generateAIFlashcards && (
-        <View style={{ marginTop: 20 }}>
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: 15,
-            }}
-          >
-            <Text style={{ color: "#fff", fontSize: 16, fontWeight: "bold" }}>
-              Cards ({selectedCards.size}/{state.data.generateAIFlashcards.length})
-            </Text>
-            <View style={{ flexDirection: "row", gap: 15 }}>
-              <TouchableOpacity onPress={selectAll}>
-                <Text style={{ color: Colors.secondary, fontSize: 14 }}>All</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={deselectAll}>
-                <Text style={{ color: "gray", fontSize: 14 }}>Clear</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          <FlatList
-            data={state.data.generateAIFlashcards}
-            keyExtractor={(_, index) => index.toString()}
-            renderItem={({ item: flashCard, index }) => (
-              <TouchableOpacity
-                onPress={() => toggleCardSelection(index)}
-                style={{
-                  marginVertical: 4,
-                  padding: 12,
-                  backgroundColor: selectedCards.has(index) ? lowOpacity(Colors.secondary, 0.2) : Colors.primary_lighter,
-                  borderRadius: 6,
-                  borderWidth: selectedCards.has(index) ? 1 : 0,
-                  borderColor: selectedCards.has(index) ? Colors.secondary : "transparent",
-                }}
-              >
-                <View style={{ flexDirection: "row", alignItems: "flex-start" }}>
-                  <View style={{ flex: 1 }}>
-                    <Text style={{ color: "#fff", fontWeight: "600", fontSize: 13, marginBottom: 4 }}>{flashCard.question}</Text>
-                    <Text style={{ color: "#ccc", fontSize: 12, marginBottom: 3 }}>{flashCard.answer}</Text>
-                    {flashCard.explanation && (
-                      <Text style={{ color: "gray", fontSize: 11, fontStyle: "italic" }}>{flashCard.explanation}</Text>
-                    )}
-                  </View>
-                  <Ionicons
-                    name={selectedCards.has(index) ? "checkbox" : "square-outline"}
-                    size={18}
-                    color={selectedCards.has(index) ? Colors.secondary : "gray"}
-                    style={{ marginLeft: 8 }}
-                  />
-                </View>
-              </TouchableOpacity>
-            )}
-            style={{ maxHeight: 300 }}
-          />
-
-          {selectedCards.size > 0 && (
-            <Button
-              onPress={saveSelectedCards}
-              icon={saving && <ActivityIndicator size="small" color="#fff" />}
+      <View style={{ flex: 1, justifyContent: "space-between", height: "100%" }}>
+        {state.data?.generateAIFlashcards && (
+          <View style={{ marginTop: 20, flex: 1 }}>
+            <View
               style={{
-                marginTop: 15,
-                backgroundColor: Colors.secondary,
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: 15,
               }}
-              disabled={saving}
             >
-              {saving ? "Saving..." : `Save Selected (${selectedCards.size})`}
-            </Button>
-          )}
-        </View>
+              <Text style={{ color: "#fff", fontSize: 16, fontWeight: "bold" }}>
+                Cards ({selectedCards.size}/{state.data.generateAIFlashcards.length})
+              </Text>
+              <View style={{ flexDirection: "row", gap: 15 }}>
+                <TouchableOpacity onPress={selectAll}>
+                  <Text style={{ color: Colors.secondary, fontSize: 14 }}>All</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={deselectAll}>
+                  <Text style={{ color: "gray", fontSize: 14 }}>Clear</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            <FlatList
+              data={state.data.generateAIFlashcards}
+              keyExtractor={(_, index) => index.toString()}
+              renderItem={({ item: flashCard, index }) => (
+                <TouchableOpacity
+                  onPress={() => toggleCardSelection(index)}
+                  style={{
+                    marginVertical: 4,
+                    padding: 12,
+                    backgroundColor: selectedCards.has(index) ? lowOpacity(Colors.secondary, 0.2) : Colors.primary_lighter,
+                    borderRadius: 6,
+                    borderWidth: selectedCards.has(index) ? 1 : 0,
+                    borderColor: selectedCards.has(index) ? Colors.secondary : "transparent",
+                  }}
+                >
+                  <View style={{ flexDirection: "row", alignItems: "flex-start" }}>
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ color: "#fff", fontWeight: "600", fontSize: 13, marginBottom: 4 }}>{flashCard.question}</Text>
+                      <Text style={{ color: "#ccc", fontSize: 12, marginBottom: 3 }}>{flashCard.answer}</Text>
+                      {flashCard.explanation && (
+                        <Text style={{ color: "gray", fontSize: 11, fontStyle: "italic" }}>{flashCard.explanation}</Text>
+                      )}
+                    </View>
+                    <Ionicons
+                      name={selectedCards.has(index) ? "checkbox" : "square-outline"}
+                      size={18}
+                      color={selectedCards.has(index) ? Colors.secondary : "gray"}
+                      style={{ marginLeft: 8 }}
+                    />
+                  </View>
+                </TouchableOpacity>
+              )}
+              style={{ flex: 1, paddingBottom: 15 }}
+            />
+          </View>
+        )}
+      </View>
+      {selectedCards.size > 0 && (
+        <Button
+          onPress={saveSelectedCards}
+          icon={saving && <ActivityIndicator size="small" color="#fff" />}
+          style={{
+            backgroundColor: Colors.secondary,
+          }}
+          disabled={saving}
+        >
+          {saving ? "Saving..." : `Save Selected (${selectedCards.size})`}
+        </Button>
       )}
     </View>
   );
