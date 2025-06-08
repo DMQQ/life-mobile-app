@@ -43,21 +43,25 @@ const styles = StyleSheet.create({
     color: "#fff",
     letterSpacing: 1,
   },
-
   expense_item: {
     height: 80,
     borderRadius: 5,
     padding: 5,
     flexDirection: "row",
   },
-
   recentText: {
     color: "#7f7f7f",
     fontSize: 25,
     fontWeight: "bold",
     marginTop: 10,
   },
-  overlay: { backgroundColor: Colors.primary, zIndex: 1000, justifyContent: "center", alignItems: "center" },
+  overlay: {
+    backgroundColor: Colors.primary,
+    zIndex: 1000,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingTop: 125,
+  },
 });
 
 export default function WalletScreen({ navigation, route }: WalletScreens<"Wallet">) {
@@ -93,7 +97,6 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
         translateY: interpolate(scrollY.value, [0, 200], [0, -40], Extrapolation.CLAMP),
       },
     ],
-
     ...(scrollY.value > 170 ? { position: "absolute", top: insets.top + 50 } : { position: "relative", top: 0 }),
   }));
 
@@ -111,12 +114,8 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
 
   if (
     (Array.isArray(error?.cause?.extensions)
-      ? //@ts-ignore
-
-        error?.cause?.extensions?.[0]?.response?.statusCode
-      : //@ts-ignore
-
-        error?.cause?.extensions?.response?.statusCode) === 404
+      ? (error as any)?.cause?.extensions?.[0]?.response?.statusCode
+      : (error as any)?.cause?.extensions?.response?.statusCode) === 404
   )
     return (
       <SafeAreaView style={{ flex: 1 }}>
@@ -125,16 +124,13 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
     );
 
   return (
-    <View style={{ flex: 1, marginTop: insets.top, position: "relative" }}>
+    <SafeAreaView style={{ flex: 1 }}>
       {loading && (
-        <Animated.View
-          entering={FadeIn}
-          exiting={FadeOut.duration(250)}
-          style={[StyleSheet.absoluteFillObject, styles.overlay, { top: insets.top }]}
-        >
+        <Animated.View entering={FadeIn} exiting={FadeOut.duration(250)} style={[StyleSheet.absoluteFillObject, styles.overlay]}>
           <WalletLoader />
         </Animated.View>
       )}
+
       <Header
         buttons={[
           {
@@ -184,6 +180,6 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
       )}
 
       <EditBalanceSheet />
-    </View>
+    </SafeAreaView>
   );
 }
