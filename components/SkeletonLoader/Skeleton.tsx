@@ -1,5 +1,5 @@
 import * as React from "react";
-import { View, StyleSheet, Dimensions } from "react-native";
+import { View, StyleSheet, Dimensions, StyleProp, ViewStyle } from "react-native";
 import MaskedView from "@react-native-masked-view/masked-view";
 import { LinearGradient } from "expo-linear-gradient";
 import Reanimated, {
@@ -38,12 +38,7 @@ const Skeleton = ({
 }: SkeletonProps) => {
   const shared = useSharedValue(0);
 
-  const { width, height } =
-    typeof size === "undefined"
-      ? dims
-      : typeof size === "function"
-      ? size(dims)
-      : size;
+  const { width, height } = typeof size === "undefined" ? dims : typeof size === "function" ? size(dims) : size;
 
   React.useEffect(() => {
     shared.value = withRepeat(withTiming(1, { duration: 750 }), Infinity);
@@ -52,19 +47,13 @@ const Skeleton = ({
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [
       {
-        translateX: interpolate(
-          shared.value,
-          [0, 1],
-          [size ? -width : 0, size ? width : 0]
-        ),
+        translateX: interpolate(shared.value, [0, 1], [size ? -width : 0, size ? width : 0]),
       },
     ],
   }));
 
   return (
-    <Reanimated.View
-      style={{ width, height, marginVertical, marginHorizontal }}
-    >
+    <Reanimated.View style={{ width, height, marginVertical, marginHorizontal }}>
       <MaskedView
         androidRenderingMode="hardware"
         maskElement={children}
@@ -86,14 +75,7 @@ const Skeleton = ({
               />
             }
           >
-            <Reanimated.View
-              entering={FadeIn}
-              exiting={FadeOut}
-              style={[
-                StyleSheet.absoluteFill,
-                { backgroundColor: highlightColor },
-              ]}
-            />
+            <Reanimated.View entering={FadeIn} exiting={FadeOut} style={[StyleSheet.absoluteFill, { backgroundColor: highlightColor }]} />
           </MaskedView>
         </Reanimated.View>
       </MaskedView>
@@ -108,15 +90,11 @@ interface ItemProps {
   marginRight?: number;
 
   marginTop?: number;
+
+  style?: StyleProp<ViewStyle>;
 }
 
-Skeleton.Item = ({
-  width,
-  height,
-  margin,
-  marginRight,
-  marginTop,
-}: ItemProps) => (
+Skeleton.Item = ({ width, height, margin, marginRight, marginTop, style }: ItemProps) => (
   <View
     style={[
       styles.item,
@@ -127,6 +105,7 @@ Skeleton.Item = ({
         marginRight,
         marginTop: marginTop ?? 10,
       },
+      style,
     ]}
   />
 );

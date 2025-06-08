@@ -1,4 +1,3 @@
-import ScreenContainer from "@/components/ui/ScreenContainer";
 import { useGoal } from "../hooks/hooks";
 import { FlatList, View } from "react-native";
 import { GoalCategory } from "../components/GoalCategory";
@@ -12,7 +11,7 @@ export default function Goals({ navigation }: any) {
   const insets = useSafeAreaInsets();
 
   return (
-    <View style={{ padding: 0, flex: 1, marginTop: insets.top }}>
+    <View style={{ padding: 0, flex: 1, marginTop: insets.top, paddingBottom: 70 }}>
       <Header
         buttons={[
           {

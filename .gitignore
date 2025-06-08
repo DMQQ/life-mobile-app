@@ -79,3 +79,5 @@ dist/
 /ios
 /Android
 .vscode
+
+google-services.json

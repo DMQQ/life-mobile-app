@@ -2,7 +2,7 @@
   "expo": {
     "name": "Life",
     "slug": "mylife-mobile",
-    "version": "1.1.4",
+    "version": "1.1.7",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "mylife",
@@ -18,7 +18,7 @@
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
-      "buildNumber": "20250523",
+      "buildNumber": "20250610",
       "supportsTablet": true,
       "infoPlist": {
         "NSFaceIDUsageDescription": "Allow $(PRODUCT_NAME) to use Face ID.",

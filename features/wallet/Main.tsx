@@ -1,9 +1,7 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Wallet from "./pages/Wallet";
-import CreateActivity from "./pages/CreateActivity";
 import { ParamListBase } from "@react-navigation/native";
 import { StackScreenProps } from "@/types";
-import Watchlist from "./pages/Watchlist";
 import Colors from "@/constants/Colors";
 import WalletCharts from "./pages/WalletCharts";
 import CreateExpenseModal from "./pages/CreateExpense";
@@ -28,7 +26,9 @@ const Stack = createNativeStackNavigator<WalletRootStack>();
 export default function WalletScreens({ navigation, route }: WalletScreens<"Wallet">) {
   useEffect(() => {
     if (route.params?.expenseId !== undefined && route.params?.expenseId == null) {
-      navigation.navigate("CreateExpense");
+      navigation.navigate("CreateExpense", {
+        ...(route.params || {}),
+      });
     }
   }, [route.params?.expenseId]);
 
@@ -45,24 +45,6 @@ export default function WalletScreens({ navigation, route }: WalletScreens<"Wall
         }}
       >
         <Stack.Screen
-          name="Watchlist"
-          component={Watchlist}
-          options={{
-            headerShown: true,
-            title: "Create shopping list",
-            headerTitleAlign: "center",
-          }}
-        />
-        <Stack.Screen
-          name="CreateActivity"
-          component={CreateActivity}
-          options={{
-            headerShown: true,
-            title: "",
-          }}
-        />
-
-        <Stack.Screen
           name={"CreateExpense"}
           component={CreateExpenseModal}
           options={{
@@ -74,7 +56,7 @@ export default function WalletScreens({ navigation, route }: WalletScreens<"Wall
             category: "",
             date: "",
             description: "",
-
+            shouldOpenPhotoPicker: false,
             isEditing: false,
           }}
         />

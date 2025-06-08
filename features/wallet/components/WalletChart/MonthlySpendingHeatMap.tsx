@@ -1,13 +1,11 @@
 import Layout from "@/constants/Layout";
 import { useMemo, useState } from "react";
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from "react-native";
-import Colors from "@/constants/Colors";
+import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
+import Colors, { secondary_candidates } from "@/constants/Colors";
 import Color from "color";
-import Button from "@/components/ui/Button/Button";
 import lowOpacity from "@/utils/functions/lowOpacity";
-import DateTimePicker from "react-native-modal-datetime-picker";
 import { gql, useQuery } from "@apollo/client";
-import moment from "moment";
+import ChartTemplate from "./ChartTemplate";
 
 const GET_MONTHLY_DATE_SPENDINGS = gql`
   query MonthlyDateSpendings($months: [String!]!) {
@@ -27,23 +25,18 @@ interface DayData {
   averageAmount: number;
 }
 
-const MonthlyHeatmap: React.FC = () => {
-  const [viewType, setViewType] = useState<"totalAmount" | "totalCount" | "averageAmount">("totalAmount");
+const MonthlyHeatmap = ({ dateRange, type }: { dateRange: [string, string]; type: string }) => {
+  const viewType =
+    {
+      total: "totalAmount",
+      avg: "averageAmount",
+      count: "totalCount",
+    }[type] || "totalAmount";
+
   const [selectedDayInfo, setSelectedDayInfo] = useState<DayData | null>(null);
 
-  const defaultMonths = useMemo(() => {
-    // Use a 3-month range as default
-    const lastDay = moment().format("YYYY-MM-DD");
-    const firstDay = moment().subtract(2, "months").startOf("month").format("YYYY-MM-DD");
-    return [firstDay, lastDay];
-  }, []);
-
-  const [selectedMonths, setSelectedMonths] = useState<string[]>(defaultMonths);
-  const [showStartDatePicker, setShowStartDatePicker] = useState(false);
-  const [showEndDatePicker, setShowEndDatePicker] = useState(false);
-
   const { loading, error, data } = useQuery(GET_MONTHLY_DATE_SPENDINGS, {
-    variables: { months: selectedMonths },
+    variables: { months: dateRange },
   });
 
   const handleDayPress = (dayData: DayData) => {
@@ -53,18 +46,6 @@ const MonthlyHeatmap: React.FC = () => {
     }, 3000);
   };
 
-  const handleStartDateConfirm = (date: Date) => {
-    const formattedDate = moment(date).format("YYYY-MM-DD");
-    setSelectedMonths([formattedDate, selectedMonths[1]]);
-    setShowStartDatePicker(false);
-  };
-
-  const handleEndDateConfirm = (date: Date) => {
-    const formattedDate = moment(date).format("YYYY-MM-DD");
-    setSelectedMonths([selectedMonths[0], formattedDate]);
-    setShowEndDatePicker(false);
-  };
-
   const { dayDataArray, maxValue } = useMemo(() => {
     if (!data?.monthlyDateSpendings || !Array.isArray(data.monthlyDateSpendings)) {
       return { dayDataArray: [], maxValue: 0 };
@@ -72,7 +53,6 @@ const MonthlyHeatmap: React.FC = () => {
 
     const sortedDays = [...data.monthlyDateSpendings].sort((a, b) => a.dayOfMonth - b.dayOfMonth);
 
-    // Find max value for scaling intensity
     let maxVal = 0;
     sortedDays.forEach((day) => {
       const value = day[viewType];
@@ -89,12 +69,12 @@ const MonthlyHeatmap: React.FC = () => {
 
   const getIntensity = (value: number) => {
     if (!maxValue || !value) return 0;
-    return Math.min(0.9, Math.max(0.1, value / maxValue));
+    return Math.min(0.9, Math.max(0.1, value / maxValue)) * 1.3;
   };
 
   const getCellColor = (value: number) => {
     const intensity = getIntensity(value);
-    return Color(Colors.secondary).alpha(intensity).string();
+    return Color(secondary_candidates[3]).alpha(intensity).string();
   };
 
   const getLabel = (value: number) => {
@@ -104,16 +84,6 @@ const MonthlyHeatmap: React.FC = () => {
       return Math.round(value) + "zł";
     }
   };
-
-  const button = {
-    padding: 10,
-    paddingHorizontal: 15,
-    borderRadius: 7.5,
-    backgroundColor: Colors.primary_light,
-    flex: 1,
-  };
-
-  const blueText = Color(Colors.primary).lighten(10).string();
 
   if (loading)
     return (
@@ -129,59 +99,7 @@ const MonthlyHeatmap: React.FC = () => {
     );
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={{ color: "#fff", fontSize: 18, fontWeight: "600", marginBottom: 5 }}>Monthly Spending Heatmap</Text>
-        <Text style={styles.subtitle}>See your spending patterns by day of month</Text>
-
-        <View style={styles.dateRangeContainer}>
-          <TouchableOpacity style={styles.dateButton} onPress={() => setShowStartDatePicker(true)}>
-            <Text style={styles.dateButtonText}>From: {moment(selectedMonths[0]).format("MMM D, YYYY")}</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.dateButton} onPress={() => setShowEndDatePicker(true)}>
-            <Text style={styles.dateButtonText}>To: {moment(selectedMonths[1]).format("MMM D, YYYY")}</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.typeSelectorContainer}>
-          {[
-            { key: "totalAmount", label: "TOTAL" },
-            { key: "averageAmount", label: "AVERAGE" },
-            { key: "totalCount", label: "COUNT" },
-          ].map((item) => (
-            <Button
-              variant="text"
-              key={item.key}
-              onPress={() => setViewType(item.key as "totalAmount" | "totalCount" | "averageAmount")}
-              style={[
-                button,
-                {
-                  borderWidth: 0.5,
-                  borderColor: Colors.primary,
-                  marginRight: 5,
-                  ...(item.key === viewType && {
-                    backgroundColor: lowOpacity(Colors.secondary, 0.15),
-                    borderWidth: 0.5,
-                    borderColor: lowOpacity(Colors.secondary, 0.5),
-                  }),
-                },
-              ]}
-            >
-              <Text
-                style={{
-                  fontSize: 14,
-                  color: viewType === item.key ? Colors.secondary : blueText,
-                  textAlign: "center",
-                }}
-              >
-                {item.label}
-              </Text>
-            </Button>
-          ))}
-        </View>
-      </View>
-
+    <View>
       <View style={styles.heatmapContainer}>
         <View style={styles.monthGrid}>
           {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => {
@@ -192,10 +110,7 @@ const MonthlyHeatmap: React.FC = () => {
             return (
               <TouchableOpacity
                 key={day}
-                style={[
-                  styles.dayCell,
-                  hasData ? { backgroundColor: getCellColor(value) } : { backgroundColor: lowOpacity(Colors.primary, 0.2) },
-                ]}
+                style={[styles.dayCell, hasData ? { backgroundColor: getCellColor(value) } : { backgroundColor: Colors.primary_light }]}
                 onPress={() => dayData && handleDayPress(dayData)}
                 disabled={!hasData}
               >
@@ -215,61 +130,11 @@ const MonthlyHeatmap: React.FC = () => {
           </View>
         )}
       </View>
-
-      <DateTimePicker
-        isVisible={showStartDatePicker}
-        mode="date"
-        onConfirm={handleStartDateConfirm}
-        onCancel={() => setShowStartDatePicker(false)}
-        date={moment(selectedMonths[0]).toDate()}
-        maximumDate={moment(selectedMonths[1]).toDate()}
-      />
-
-      <DateTimePicker
-        isVisible={showEndDatePicker}
-        mode="date"
-        onConfirm={handleEndDateConfirm}
-        onCancel={() => setShowEndDatePicker(false)}
-        date={moment(selectedMonths[1]).toDate()}
-        minimumDate={moment(selectedMonths[0]).toDate()}
-      />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    width: Layout.screen.width - 30,
-    marginTop: 25,
-    marginBottom: 25,
-    minHeight: 400,
-  },
-  header: {
-    marginBottom: 20,
-  },
-  subtitle: {
-    color: "gray",
-    fontSize: 16,
-    marginBottom: 10,
-  },
-  dateRangeContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 15,
-  },
-  dateButton: {
-    backgroundColor: lowOpacity(Colors.primary, 0.3),
-    borderWidth: 1,
-    borderColor: lowOpacity(Colors.primary, 0.5),
-    borderRadius: 7.5,
-    padding: 10,
-    width: "48%",
-    alignItems: "center",
-  },
-  dateButtonText: {
-    color: "#fff",
-    fontSize: 14,
-  },
   typeSelectorContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -280,7 +145,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 1,
     borderColor: lowOpacity(Colors.primary, 0.3),
-    minHeight: 350,
     position: "relative",
   },
   monthGrid: {
@@ -291,6 +155,7 @@ const styles = StyleSheet.create({
   },
   dayCell: {
     width: `${100 / 7 - 1}%`,
+    height: Layout.screen.width / 7 - 10,
     aspectRatio: 1,
     padding: 6,
     margin: "0.5%",
@@ -389,4 +254,10 @@ const styles = StyleSheet.create({
   },
 });
 
-export default MonthlyHeatmap;
+export default function HeatMap() {
+  return (
+    <ChartTemplate types={["total", "avg", "count"]} title="Spendings Heatmap" description="See you spendings patterns as heatmap">
+      {({ dateRange, type }) => <MonthlyHeatmap type={type} dateRange={dateRange} />}
+    </ChartTemplate>
+  );
+}

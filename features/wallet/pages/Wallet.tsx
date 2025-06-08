@@ -1,10 +1,11 @@
 import Header from "@/components/ui/Header/Header";
 import Layout from "@/constants/Layout";
-import { AntDesign, Ionicons } from "@expo/vector-icons";
+import { AntDesign, FontAwesome, Ionicons } from "@expo/vector-icons";
 import { SafeAreaView, StyleSheet, Text, View } from "react-native";
 import Ripple from "react-native-material-ripple";
 import Animated, {
   Extrapolation,
+  FadeIn,
   FadeOut,
   interpolate,
   useAnimatedScrollHandler,
@@ -13,15 +14,15 @@ import Animated, {
 } from "react-native-reanimated";
 import { WalletScreens } from "../Main";
 import EditBalanceSheet from "../components/Sheets/EditBalanceSheet";
-import CreateExpenseSheet from "../components/Wallet/CreateExpense/CreateExpenseSheet";
-import ScreenLoader from "../components/Wallet/ScreenLoader";
 import WalletList from "../components/Wallet/WalletList";
 import { useWalletContext } from "../components/WalletContext";
 import useGetWallet from "../hooks/useGetWallet";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import InitializeWallet from "../components/InitializeWallet";
 import { useEffect, useState } from "react";
-import { useFocusEffect } from "@react-navigation/native";
+import SubscriptionList from "../components/Wallet/SubscriptionList";
+import WalletLoader from "../components/WalletLoader";
+import Colors from "@/constants/Colors";
 
 const styles = StyleSheet.create({
   container: {
@@ -42,19 +43,24 @@ const styles = StyleSheet.create({
     color: "#fff",
     letterSpacing: 1,
   },
-
   expense_item: {
     height: 80,
     borderRadius: 5,
     padding: 5,
     flexDirection: "row",
   },
-
   recentText: {
     color: "#7f7f7f",
     fontSize: 25,
     fontWeight: "bold",
     marginTop: 10,
+  },
+  overlay: {
+    backgroundColor: Colors.primary,
+    zIndex: 1000,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingTop: 125,
   },
 });
 
@@ -91,7 +97,6 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
         translateY: interpolate(scrollY.value, [0, 200], [0, -40], Extrapolation.CLAMP),
       },
     ],
-
     ...(scrollY.value > 170 ? { position: "absolute", top: insets.top + 50 } : { position: "relative", top: 0 }),
   }));
 
@@ -105,26 +110,12 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
     editBalanceRef.current?.expand();
   };
 
-  const [isLoaderVisible, setIsLoaderVisible] = useState(true);
-
-  useEffect(() => {
-    if (!loading) {
-      const timeout = setTimeout(() => {
-        setIsLoaderVisible(false);
-      }, 500);
-
-      return () => clearTimeout(timeout);
-    }
-  }, [loading]);
+  const [showSubscriptionsView, setShowSubscriptionsView] = useState(false);
 
   if (
     (Array.isArray(error?.cause?.extensions)
-      ? //@ts-ignore
-
-        error?.cause?.extensions?.[0]?.response?.statusCode
-      : //@ts-ignore
-
-        error?.cause?.extensions?.response?.statusCode) === 404
+      ? (error as any)?.cause?.extensions?.[0]?.response?.statusCode
+      : (error as any)?.cause?.extensions?.response?.statusCode) === 404
   )
     return (
       <SafeAreaView style={{ flex: 1 }}>
@@ -134,25 +125,21 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      {/* {isLoaderVisible && (
-        <Animated.View
-          exiting={FadeOut.duration(500)}
-          style={{
-            flex: 1,
-            width: Layout.screen.width,
-            height: Layout.screen.height,
-            position: "absolute",
-            zIndex: 1000,
-            backgroundColor: "#000",
-            top: insets.top,
-          }}
-        >
-          <ScreenLoader />
+      {loading && (
+        <Animated.View entering={FadeIn} exiting={FadeOut.duration(250)} style={[StyleSheet.absoluteFillObject, styles.overlay]}>
+          <WalletLoader />
         </Animated.View>
-      )} */}
+      )}
 
       <Header
         buttons={[
+          {
+            onPress: () => {
+              setShowSubscriptionsView(!showSubscriptionsView);
+              bottomSheetRef.current?.snapToIndex(showSubscriptionsView ? -1 : 0);
+            },
+            icon: <FontAwesome name="exchange" size={20} color="#fff" />,
+          },
           {
             onPress: () => navigation.navigate("Filters"),
             icon: <Ionicons name="search" size={20} color="#fff" />,
@@ -162,7 +149,6 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
             icon: <Ionicons name="stats-chart" size={20} color="#fff" />,
           },
           {
-            // onPress: () => bottomSheetRef.current?.snapToIndex(0),
             onPress: () => navigation.navigate("CreateExpense"),
             icon: <AntDesign name="plus" size={20} color="#fff" />,
           },
@@ -179,15 +165,19 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
         </Ripple>
       </Animated.View>
 
-      <WalletList
-        filtersActive={filtersActive}
-        isLocked={loading || !data || endReached}
-        refetch={refetch}
-        scrollY={scrollY}
-        onScroll={onAnimatedScrollHandler}
-        wallet={data?.wallet}
-        onEndReached={onEndReached}
-      />
+      {showSubscriptionsView ? (
+        <SubscriptionList onScroll={onAnimatedScrollHandler} scrollY={scrollY} />
+      ) : (
+        <WalletList
+          filtersActive={filtersActive}
+          isLocked={loading || !data || endReached}
+          refetch={refetch}
+          scrollY={scrollY}
+          onScroll={onAnimatedScrollHandler}
+          wallet={data?.wallet}
+          onEndReached={onEndReached}
+        />
+      )}
 
       <EditBalanceSheet />
     </SafeAreaView>

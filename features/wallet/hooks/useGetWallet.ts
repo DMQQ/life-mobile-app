@@ -62,7 +62,7 @@ export const GET_WALLET = gql`
   }
 `;
 
-const PAGINATION_TAKE = 10;
+const PAGINATION_TAKE = 20;
 
 export default function useGetWallet(options?: { fetchAll?: boolean; excludeFields?: string[] }) {
   const { filters, dispatch } = useWalletContext();

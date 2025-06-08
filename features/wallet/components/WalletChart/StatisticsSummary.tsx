@@ -43,7 +43,7 @@ export const Item = ({ label, value, icon, formatValue = true, width }: ItemProp
 
 export default function StatisticsSummary() {
   const { filters } = useWalletContext();
-  const { data: stats, loading } = useGetStatistics([filters.date.from, filters.date.to]);
+  const { data: stats } = useGetStatistics([filters.date.from, filters.date.to]);
 
   const oppositeRange = useMemo(() => {
     const size = moment(filters.date.to).diff(moment(filters.date.from), "days");
@@ -118,7 +118,7 @@ export default function StatisticsSummary() {
   if (!stats?.statistics) return null;
 
   return (
-    <View style={{ width: Layout.screen.width - 30, marginTop: 25, marginBottom: 25, minHeight: 475 }}>
+    <View style={{ width: Layout.screen.width - 30, marginTop: 25, marginBottom: 50, minHeight: 475 }}>
       <View style={{ flexDirection: "row" }}>
         <View style={{ flex: 1 }}>
           {view === "current" ? (

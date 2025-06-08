@@ -16,10 +16,7 @@ const CategorySelector = (props: { current: string; onPress: (item: string) => v
   const [query, setQuery] = useState("");
 
   const filteredData = data.filter(
-    (item) =>
-      !["edit", "none", "income", "refunded"].includes(item[0]) &&
-      item[0].toLowerCase().includes(query.toLowerCase()) &&
-      (query.trim().length > 0 ? true : !item[0].includes(":"))
+    (item) => !["edit", "none", "income", "refunded", "bell"].includes(item[0]) && item[0].toLowerCase().includes(query.toLowerCase())
   );
 
   const listRef = useRef<FlatList>(null);
@@ -52,6 +49,7 @@ const CategorySelector = (props: { current: string; onPress: (item: string) => v
       />
 
       <Animated.FlatList
+        initialNumToRender={10}
         getItemLayout={(_, index) => ({ length: 60, offset: 75 * index, index })}
         ref={listRef}
         layout={LinearTransition}

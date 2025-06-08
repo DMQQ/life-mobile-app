@@ -1,7 +1,7 @@
 import moment from "moment";
-import { ActivityIndicator, Alert, Keyboard, ScrollView, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View } from "react-native";
-import Colors, { secondary_candidates } from "@/constants/Colors";
-import { memo, useCallback, useEffect, useRef, useState } from "react";
+import { ActivityIndicator, Alert, Keyboard, StyleSheet, Text, TouchableWithoutFeedback, View } from "react-native";
+import Colors from "@/constants/Colors";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Ripple from "react-native-material-ripple";
 import Layout from "@/constants/Layout";
 import WalletItem, { Icons } from "../components/Wallet/WalletItem";
@@ -15,15 +15,13 @@ import Animated, {
   useAnimatedStyle,
   cancelAnimation,
   withTiming,
-  FadeOut,
 } from "react-native-reanimated";
 import useCreateActivity from "../hooks/useCreateActivity";
 import DateTimePicker from "react-native-modal-datetime-picker";
-import { useEditExpense } from "./CreateActivity";
+import { useEditExpense } from "../hooks/useEditExpense";
 import IconButton from "@/components/ui/IconButton/IconButton";
 import Color from "color";
 import Input from "@/components/ui/TextInput/TextInput";
-import usePredictCategory, { ExpensePrediction } from "../hooks/usePredictCategory";
 import BottomSheet, { BottomSheetBackdrop } from "@gorhom/bottom-sheet";
 import NumbersPad from "../components/CreateExpense/NumberPad";
 import CategorySelector from "../components/CreateExpense/CategorySelector";
@@ -34,6 +32,9 @@ import Button from "@/components/ui/Button/Button";
 import { SpontaneousRateChip, SpontaneousRateSelector } from "../components/CreateExpense/SpontaneousRate";
 import usePredictExpense from "../hooks/usePredictCategory";
 import { CategoryUtils } from "../components/ExpenseIcon";
+import PredictionView from "../components/PredictionView";
+import ExpenseAIMaker from "../components/ExpenseAIMaker";
+import { Expense } from "@/types";
 
 interface SubExpense {
   id: string;
@@ -65,6 +66,7 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
   const { createExpense, loading } = useCreateActivity({
     onCompleted() {},
   });
+
   const client = useApolloClient();
 
   const editExpense = useEditExpense();
@@ -249,18 +251,7 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
     }),
     [amount]
   );
-
-  const onPredict = useCallback(
-    (prediction: ExpensePrediction) => {
-      if (prediction) {
-        setCategory(prediction.category as keyof typeof Icons);
-        setType(prediction.type as "expense" | "income");
-        if (amount === "0") setAmount(prediction.amount.toString());
-      }
-    },
-    [amount]
-  );
-  usePredictExpense([name, +amount], onPredict);
+  const prediction = usePredictExpense([name, +amount], () => {});
 
   useEffect(() => {
     if (type === "income") setCategory("income");
@@ -354,15 +345,40 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
 
   const [spontaneousView, setSpontaneousView] = useState(false);
 
+  const applyPrediction = useCallback(() => {
+    if (!prediction) return;
+
+    if (amount === "0") setAmount(prediction.amount.toString());
+    setType(prediction.type as "expense" | "income");
+    setCategory(prediction.category as keyof typeof Icons);
+  }, [prediction, amount]);
+
+  const canPredict = !isValid && prediction;
+
+  const setExpense = (expense: Expense) => {
+    setAmount(expense.amount.toString());
+    setName(expense.description);
+    setType(expense.type as "expense" | "income");
+    setCategory(expense.category as keyof typeof Icons);
+    setDate(moment(expense.date).format("YYYY-MM-DD"));
+    setSpontaneousRate(expense.spontaneousRate || 0);
+    setIsSubscription(false);
+    setSubExpenses((expense.subexpenses as any) || []);
+  };
+
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
       <View style={{ flex: 1 }}>
         <View style={styles.container}>
+          {prediction && <PredictionView applyPrediction={applyPrediction} {...prediction} />}
+
           <IconButton
             style={{ position: "absolute", top: 15, left: 15, zIndex: 100 }}
             onPress={() => navigation.goBack()}
             icon={<AntDesign name="close" size={24} color="rgba(255,255,255,0.7)" />}
           />
+
+          <ExpenseAIMaker setExpense={setExpense} initialOpen={params?.shouldOpenPhotoPicker || false} />
 
           <View style={styles.amountContainer}>
             <View>
@@ -373,7 +389,7 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
 
               {SubExpenses.length > 0 && (
                 <Text style={{ color: "rgba(255,255,255,0.7)", fontSize: 12, textAlign: "center" }}>
-                  {SubExpenses.length} sub expenses for {calculateSubExpensesTotal()}zł
+                  {SubExpenses.length} subexpenses for ~{calculateSubExpensesTotal().toFixed(2)}zł
                 </Text>
               )}
             </View>
@@ -434,24 +450,38 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
                       }
                       right={
                         <Ripple
-                          onPress={handleSubmit}
-                          style={[styles.save, !isValid && { backgroundColor: lowOpacity(styles.save.backgroundColor, 0.2) }]}
-                          disabled={!isValid}
+                          onPress={!isValid && prediction ? applyPrediction : handleSubmit}
+                          style={[
+                            styles.save,
+                            !isValid && { backgroundColor: lowOpacity(styles.save.backgroundColor, 0.2) },
+                            !isValid && prediction && { backgroundColor: Icons[prediction.category as keyof typeof Icons].backgroundColor },
+                          ]}
+                          disabled={!isValid && !prediction && !canPredict}
                         >
                           {loading ? (
                             <ActivityIndicator size={14} color="#fff" />
+                          ) : isValid ? (
+                            <AntDesign
+                              name="save"
+                              size={20}
+                              color={isValid || canPredict ? "#fff" : lowOpacity(Colors.secondary_light_1, 0.5)}
+                            />
                           ) : (
-                            <AntDesign name="save" size={20} color={isValid ? "#fff" : lowOpacity(Colors.secondary_light_1, 0.5)} />
+                            <Ionicons
+                              name="color-wand-sharp"
+                              size={20}
+                              color={isValid || canPredict ? "#fff" : lowOpacity(Colors.secondary_light_1, 0.5)}
+                            />
                           )}
                           <Text
                             style={{
-                              color: isValid ? "#fff" : lowOpacity(Colors.secondary_light_1, 0.5),
+                              color: isValid || (!isValid && prediction) ? "#fff" : lowOpacity(Colors.secondary_light_1, 0.5),
                               fontSize: 14,
                               fontWeight: "500",
                               lineHeight: 20,
                             }}
                           >
-                            {isSubExpenseMode ? "Add" : params?.isEditing ? "Edit" : "Done"}
+                            {isSubExpenseMode ? "Add" : params?.isEditing ? "Edit" : !isValid && prediction ? "Use" : "Done"}
                           </Text>
                         </Ripple>
                       }
@@ -719,6 +749,7 @@ const styles = StyleSheet.create({
     width: "100%",
     alignItems: "center",
     flexDirection: "row",
+    paddingTop: 30,
     paddingHorizontal: 15,
   },
 

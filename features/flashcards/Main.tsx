@@ -1,8 +1,6 @@
-import { useEffect } from "react";
-import { useDispatch } from "react-redux";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import NotesScreen from "./pages/NotesScreen";
-import CreateFlashCards from "./pages/CreateFlashCardGroup";
+import CreateFlashCards from "./pages/CreateFlashCards";
 import FlashCardScreen from "./pages/FlashCard";
 import SwipeFlashCardsScreen from "./pages/SwipeFlashCards";
 import CreateFlashCardGroup from "./pages/CreateFlashCardGroup";
@@ -11,8 +9,6 @@ import Colors from "@/constants/Colors";
 const SharedStack = createNativeStackNavigator();
 
 export default function NotesScreens() {
-  const dispatch = useDispatch();
-
   return (
     <SharedStack.Navigator
       initialRouteName="Notes"
