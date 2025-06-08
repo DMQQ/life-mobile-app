@@ -2,10 +2,10 @@ import Header from "@/components/ui/Header/Header";
 import Colors, { secondary_candidates } from "@/constants/Colors";
 import Layout from "@/constants/Layout";
 import { AntDesign, MaterialIcons } from "@expo/vector-icons";
-import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ActivityIndicator, Alert, StyleSheet, Text, View, VirtualizedList } from "react-native";
-import Charts from "../components/Wallet/Charts";
-import WalletItem, { Icons, WalletElement } from "../components/Wallet/WalletItem";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Alert, StyleSheet, Text, View, VirtualizedList } from "react-native";
+import Charts from "../components/WalletChart/Charts";
+import WalletItem, { Icons } from "../components/Wallet/WalletItem";
 import useGetWallet, { useGetBalance } from "../hooks/useGetWallet";
 import PieChart from "../components/WalletChart/PieChart";
 import wrapWithFunction from "@/utils/functions/wrapFn";
@@ -27,7 +27,7 @@ import moment from "moment";
 import HourlySpendingsHeatMap from "../components/WalletChart/HourlyHeatMap";
 import { CategoryUtils } from "../components/ExpenseIcon";
 import useGetLegendData from "../hooks/useGetLegendData";
-import ChartTemplate from "../components/WalletChart/ChartTemplate";
+import ChartLoader from "../components/WalletChart/ChartLoader";
 
 const styles = StyleSheet.create({
   tilesContainer: {
@@ -84,14 +84,6 @@ export default function WalletChartComponent(props: any) {
       <WalletCharts {...props} />
     </WalletContextProvider>
   );
-}
-
-interface BarItemProps {
-  label: string;
-  value: number;
-  color: string;
-  selected: boolean;
-  itemsCount: number;
 }
 
 export const getInvalidExpenses = (curr: Expense) =>
@@ -165,10 +157,11 @@ function WalletCharts({ navigation }: any) {
     } catch (error) {}
   };
 
-  const selectedCategoryData =
-    selected === ""
-      ? data?.wallet?.expenses || []
-      : data?.wallet?.expenses?.filter((item) => item.category.startsWith(selected) && item.type !== "refunded") || [];
+  const selectedCategoryData = useMemo(() => {
+    if (selected.trim() === "") return data?.wallet?.expenses || [];
+
+    return data?.wallet?.expenses?.filter((item) => item.category.startsWith(selected) && item.type !== "refunded") || [];
+  }, [selected]);
 
   const onChartPress = (e: any) => {
     setSelected(e.label);
@@ -198,48 +191,6 @@ function WalletCharts({ navigation }: any) {
     [selected]
   );
 
-  const ListHeaderComponent = useMemo(
-    () => (
-      <>
-        <View style={styles.listHeader}>
-          <View style={{ height: Layout.screen.height / 2.8, marginBottom: 15 }}>
-            {chartType === "pie" ? (
-              <PieChart data={chartData} totalSum={sumOfExpenses} onPress={onChartPress} />
-            ) : (
-              <Charts data={chartData} onPress={onChartPress} totalSum={sumOfExpenses} />
-            )}
-          </View>
-          <DateRangePicker filters={filters} dispatch={wrapWithFunction(dispatch, () => setSelected(""))} />
-          <Legend
-            excluded={excluded}
-            onLongPress={onLongPress}
-            totalSum={sumOfExpenses}
-            selected={selected}
-            onPress={onLegendItemPress}
-            startDate={filters.date.from}
-            endDate={filters.date.to}
-            detailed={legend.detailed}
-            statisticsLegendData={legend.data || { statisticsLegend: [] }}
-            toggleMode={legend.toggleMode}
-          />
-
-          {selectedCategoryData.length > 0 && (
-            <View style={{ width: Layout.screen.width - 30, marginTop: 25 }}>
-              <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 18 }}>
-                Selected category:{" "}
-                <Text style={{ color: barData.find((c) => c.label === selected)?.color, fontSize: 18, textTransform: "capitalize" }}>
-                  {" "}
-                  {CategoryUtils.getCategoryName(selected) || "All"}
-                </Text>
-              </Text>
-            </View>
-          )}
-        </View>
-      </>
-    ),
-    [sumOfExpenses, barData, filters, dispatch, chartType, selected, filteredExpenses.length]
-  );
-
   const headerButtons = useMemo(
     () => [
       {
@@ -263,21 +214,50 @@ function WalletCharts({ navigation }: any) {
   return (
     <View style={{ paddingTop: 15, paddingBottom: insets.bottom }}>
       {loading && (
-        <Animated.View exiting={FadeOut} style={[StyleSheet.absoluteFillObject, styles.overlay]}>
-          <ActivityIndicator
-            size="large"
-            color={Colors.secondary}
-            style={{
-              position: "absolute",
-            }}
-          />
+        <Animated.View entering={FadeIn} exiting={FadeOut.duration(250)} style={[StyleSheet.absoluteFillObject, styles.overlay]}>
+          <ChartLoader />
         </Animated.View>
       )}
 
       <Header buttons={headerButtons} goBack backIcon={<AntDesign name="close" size={24} color="white" />} />
       <VirtualizedList
         ref={listRef}
-        ListHeaderComponent={ListHeaderComponent}
+        ListHeaderComponent={
+          <View style={styles.listHeader}>
+            <View style={{ height: Layout.screen.height / 2.8, marginBottom: 15 }}>
+              {chartType === "pie" ? (
+                <PieChart data={chartData} totalSum={sumOfExpenses} onPress={onChartPress} />
+              ) : (
+                <Charts data={chartData} onPress={onChartPress} />
+              )}
+            </View>
+            <DateRangePicker filters={filters} dispatch={wrapWithFunction(dispatch, () => setSelected(""))} />
+            <Legend
+              excluded={excluded}
+              onLongPress={onLongPress}
+              totalSum={sumOfExpenses}
+              selected={selected}
+              onPress={onLegendItemPress}
+              startDate={filters.date.from}
+              endDate={filters.date.to}
+              detailed={legend.detailed}
+              statisticsLegendData={legend.data || { statisticsLegend: [] }}
+              toggleMode={legend.toggleMode}
+            />
+
+            {selectedCategoryData.length > 0 && (
+              <View style={{ width: Layout.screen.width - 30, marginTop: 25 }}>
+                <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 18 }}>
+                  Selected category:{" "}
+                  <Text style={{ color: barData.find((c) => c.label === selected)?.color, fontSize: 18, textTransform: "capitalize" }}>
+                    {" "}
+                    {CategoryUtils.getCategoryName(selected) || "All"}
+                  </Text>
+                </Text>
+              </View>
+            )}
+          </View>
+        }
         data={selectedCategoryData.slice(0, step)}
         getItem={(data, index) => data[index]}
         getItemCount={(data) => data.length}
@@ -297,27 +277,23 @@ function WalletCharts({ navigation }: any) {
           />
         )}
         ListFooterComponent={
-          <Suspense fallback={<ActivityIndicator size="large" color={Colors.secondary} style={{ position: "absolute", top: 100 }} />}>
-            <>
-              {selectedCategoryData.length > step && (
-                <Ripple onPress={() => setStep(selectedCategoryData.length)}>
-                  <Text style={styles.viewAll}>View all</Text>
-                </Ripple>
-              )}
-              <StatisticsSummary />
-              <SpendingsByDay />
-              {monthDiff > 28 && monthDiff < 32 && (
-                <FutureProjection data={filteredExpenses} income={5500} currentBalance={currentBalance} />
-              )}
-              <MonthlyCategoryComparison />
+          <>
+            {selectedCategoryData.length > step && (
+              <Ripple onPress={() => setStep(selectedCategoryData.length)}>
+                <Text style={styles.viewAll}>View all</Text>
+              </Ripple>
+            )}
+            <StatisticsSummary />
+            <SpendingsByDay />
+            {monthDiff > 28 && monthDiff < 32 && <FutureProjection data={filteredExpenses} income={5500} currentBalance={currentBalance} />}
+            <MonthlyCategoryComparison />
 
-              <CalendarHeatmap />
+            <CalendarHeatmap />
 
-              <HourlySpendingsHeatMap />
+            <HourlySpendingsHeatMap />
 
-              <DailySpendingChart />
-            </>
-          </Suspense>
+            <DailySpendingChart />
+          </>
         }
       />
     </View>

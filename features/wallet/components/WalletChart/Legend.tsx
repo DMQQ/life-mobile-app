@@ -3,10 +3,10 @@ import { StyleSheet, Text, View } from "react-native";
 import Ripple from "react-native-material-ripple";
 import Colors from "@/constants/Colors";
 import Color from "color";
-import Animated, { LinearTransition } from "react-native-reanimated";
 import { CategoryUtils, Icons } from "../ExpenseIcon";
 import lowOpacity from "@/utils/functions/lowOpacity";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { AntDesign } from "@expo/vector-icons";
 
 interface ICategory {
   category: string;
@@ -51,31 +51,9 @@ const Legend = (props: LegendProps) => {
     }
   }, [props.statisticsLegendData]);
 
-  return data?.length === 0 ? null : (
-    <Animated.View style={styles.tilesContainer} layout={LinearTransition}>
-      <View style={{ width: "100%", marginBottom: 10, flexDirection: "row", justifyContent: "space-between" }}>
-        <View>
-          <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 18 }}>Chart legend</Text>
-          <Text style={{ color: "gray", marginTop: 5 }}>Detailed percentage of your expenses</Text>
-        </View>
-
-        <View style={{ alignItems: "center" }}>
-          <Ripple
-            onPress={props.toggleMode}
-            style={{
-              backgroundColor: lowOpacity(Colors.secondary, 0.15),
-              borderWidth: 0.5,
-              borderColor: lowOpacity(Colors.secondary, 0.5),
-              padding: 7.5,
-              paddingHorizontal: 15,
-              borderRadius: 10,
-            }}
-          >
-            <Text style={{ color: Colors.secondary, textTransform: "capitalize" }}>{props.detailed}</Text>
-          </Ripple>
-        </View>
-      </View>
-      {data?.map((item, index) => {
+  const legendList = useMemo(
+    () =>
+      data?.map((item, index) => {
         const isExcluded = props.excluded?.includes(item.category);
 
         const percentage = (props?.excluded?.length || 0) > 0 ? (item.total / props.totalSum) * 100 : item.percentage;
@@ -160,8 +138,27 @@ const Legend = (props: LegendProps) => {
             </View>
           </Ripple>
         );
-      })}
-    </Animated.View>
+      }),
+    [data]
+  );
+
+  return data?.length === 0 ? null : (
+    <View style={styles.tilesContainer}>
+      <View style={{ width: "100%", marginBottom: 10, flexDirection: "row", justifyContent: "space-between" }}>
+        <View>
+          <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 18 }}>Chart legend</Text>
+          <Text style={{ color: "gray", marginTop: 5 }}>Detailed percentage of your expenses</Text>
+        </View>
+
+        <View style={{ alignItems: "center" }}>
+          <Ripple onPress={props.toggleMode} style={styles.viewToggle}>
+            <AntDesign name="swap" size={20} color={Colors.secondary} />
+            <Text style={{ color: Colors.secondary, textTransform: "capitalize" }}>{props.detailed}</Text>
+          </Ripple>
+        </View>
+      </View>
+      {legendList}
+    </View>
   );
 };
 
@@ -213,6 +210,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     alignItems: "center",
     marginBottom: 30,
+  },
+
+  viewToggle: {
+    backgroundColor: lowOpacity(Colors.secondary, 0.15),
+    borderWidth: 0.5,
+    borderColor: lowOpacity(Colors.secondary, 0.5),
+    padding: 7.5,
+    paddingHorizontal: 15,
+    borderRadius: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
   },
 });
 

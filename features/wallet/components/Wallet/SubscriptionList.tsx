@@ -62,7 +62,10 @@ export default function SubscriptionList({ onScroll, contentContainerStyle }: Su
     const active = data.subscriptions.filter((sub: Subscription) => sub.isActive);
     const inactive = data.subscriptions.filter((sub: Subscription) => !sub.isActive);
 
-    return { active, inactive };
+    return { active, inactive } as {
+      active: Subscription[];
+      inactive: Subscription[];
+    };
   }, [data?.subscriptions]);
 
   const [refreshing, setRefreshing] = useState(false);

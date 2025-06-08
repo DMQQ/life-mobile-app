@@ -25,18 +25,11 @@ import SettingsModal from "./components/SettingsModal";
 import useAppBackground from "@/utils/hooks/useAppBackground";
 
 const LoadingSkeleton = () => {
+  const insets = useSafeAreaInsets();
   return (
     <Animated.View
-      exiting={FadeOut.duration(500)}
-      style={{
-        flex: 1,
-        width: Layout.screen.width,
-        height: Layout.screen.height,
-        position: "absolute",
-        zIndex: 1000,
-        backgroundColor: "#000",
-        padding: 15,
-      }}
+      exiting={FadeOut.duration(250)}
+      style={[StyleSheet.absoluteFillObject, { top: insets.top, zIndex: 1000, flex: 1, padding: 15, backgroundColor: Colors.primary }]}
     >
       <SkeletonPlaceholder size={(size) => size}>
         <View>

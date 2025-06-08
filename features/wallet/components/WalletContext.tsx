@@ -107,7 +107,7 @@ const reducer = (state: typeof init, action: Action) => {
   return state;
 };
 
-const PAGINATION_TAKE = 10;
+const PAGINATION_TAKE = 20;
 
 export const init = {
   query: "",

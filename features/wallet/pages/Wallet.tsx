@@ -1,9 +1,17 @@
 import Header from "@/components/ui/Header/Header";
 import Layout from "@/constants/Layout";
 import { AntDesign, FontAwesome, Ionicons } from "@expo/vector-icons";
-import { SafeAreaView, StyleSheet, Text } from "react-native";
+import { SafeAreaView, StyleSheet, Text, View } from "react-native";
 import Ripple from "react-native-material-ripple";
-import Animated, { Extrapolation, interpolate, useAnimatedScrollHandler, useAnimatedStyle, useSharedValue } from "react-native-reanimated";
+import Animated, {
+  Extrapolation,
+  FadeIn,
+  FadeOut,
+  interpolate,
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  useSharedValue,
+} from "react-native-reanimated";
 import { WalletScreens } from "../Main";
 import EditBalanceSheet from "../components/Sheets/EditBalanceSheet";
 import WalletList from "../components/Wallet/WalletList";
@@ -13,6 +21,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import InitializeWallet from "../components/InitializeWallet";
 import { useEffect, useState } from "react";
 import SubscriptionList from "../components/Wallet/SubscriptionList";
+import WalletLoader from "../components/WalletLoader";
+import Colors from "@/constants/Colors";
 
 const styles = StyleSheet.create({
   container: {
@@ -47,6 +57,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginTop: 10,
   },
+  overlay: { backgroundColor: Colors.primary, zIndex: 1000, justifyContent: "center", alignItems: "center" },
 });
 
 export default function WalletScreen({ navigation, route }: WalletScreens<"Wallet">) {
@@ -114,7 +125,16 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
     );
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <View style={{ flex: 1, marginTop: insets.top, position: "relative" }}>
+      {loading && (
+        <Animated.View
+          entering={FadeIn}
+          exiting={FadeOut.duration(250)}
+          style={[StyleSheet.absoluteFillObject, styles.overlay, { top: insets.top }]}
+        >
+          <WalletLoader />
+        </Animated.View>
+      )}
       <Header
         buttons={[
           {
@@ -164,6 +184,6 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
       )}
 
       <EditBalanceSheet />
-    </SafeAreaView>
+    </View>
   );
 }

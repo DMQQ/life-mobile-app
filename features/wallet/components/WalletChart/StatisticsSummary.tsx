@@ -43,7 +43,7 @@ export const Item = ({ label, value, icon, formatValue = true, width }: ItemProp
 
 export default function StatisticsSummary() {
   const { filters } = useWalletContext();
-  const { data: stats, loading } = useGetStatistics([filters.date.from, filters.date.to]);
+  const { data: stats } = useGetStatistics([filters.date.from, filters.date.to]);
 
   const oppositeRange = useMemo(() => {
     const size = moment(filters.date.to).diff(moment(filters.date.from), "days");

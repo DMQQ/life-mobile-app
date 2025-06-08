@@ -1,5 +1,3 @@
-import { Wallet } from "@/types";
-import { useMemo } from "react";
 import { Text, View } from "react-native";
 import { BarChart, barDataItem } from "react-native-gifted-charts";
 import Colors from "@/constants/Colors";
@@ -11,11 +9,9 @@ import lowOpacity from "@/utils/functions/lowOpacity";
 interface ChartsProps {
   data: any[];
   onPress: (dt: { label: string; value: number; color: string }) => void;
-
-  totalSum: number;
 }
 
-export default function Charts({ data, onPress, totalSum }: ChartsProps) {
+export default function Charts({ data, onPress }: ChartsProps) {
   return (
     <BarChart
       onPress={onPress}
@@ -47,7 +43,7 @@ export default function Charts({ data, onPress, totalSum }: ChartsProps) {
                   alignItems: "center",
                 }}
               >
-                {Icons[item.label as keyof typeof Icons].icon}
+                {Icons?.[item?.label as keyof typeof Icons]?.icon}
               </View>
             </View>
           ),
