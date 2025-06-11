@@ -117,7 +117,7 @@ function WalletCharts({ navigation }: any) {
 
   const [chartType, setChartType] = useState<"pie" | "bar">("pie");
 
-  const legend = useGetLegendData();
+  const legend = useGetLegendData(moment().startOf("month").format("YYYY-MM-DD"), moment().endOf("month").format("YYYY-MM-DD"));
 
   const barData = useMemo(() => {
     if (!legend.data?.statisticsLegend) return [];

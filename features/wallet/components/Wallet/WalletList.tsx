@@ -105,8 +105,8 @@ export default function WalletList(props: {
       <AnimatedList
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         ListHeaderComponent={<WalletLimits />}
-        onEndReached={!props.isLocked ? props.onEndReached : () => {}}
-        onEndReachedThreshold={1}
+        onEndReached={props.onEndReached}
+        onEndReachedThreshold={5}
         scrollEventThrottle={16}
         removeClippedSubviews
         onScroll={props.onScroll}
@@ -176,7 +176,7 @@ const ClearFiltersButton = () => {
 
   return (
     <Animated.View
-      entering={FadeInDown.delay(1000)}
+      entering={FadeInDown.delay(100)}
       exiting={FadeOutDown}
       style={{ position: "absolute", bottom: 60, width: Layout.screen.width, justifyContent: "center", alignItems: "center" }}
     >
@@ -293,7 +293,7 @@ const ListItem = ({
   const navigation = useNavigation<any>();
 
   return (
-    <Animated.View entering={FadeIn.delay(Math.min(((index + monthIndex) % 10) * 75, 1000))} layout={LinearTransition.delay(100)}>
+    <Animated.View entering={FadeIn.delay(100)} layout={LinearTransition.delay(100)}>
       {!areDatesEqual && (
         <Ripple
           onPress={() => {

@@ -110,6 +110,8 @@ export default function useGetWallet(options?: { fetchAll?: boolean; excludeFiel
   const onEndReached = async () => {
     if (st.loading || endReached) return;
 
+    console.log("onEndReached");
+
     setSkip((p) => p + PAGINATION_TAKE);
 
     await st.fetchMore({

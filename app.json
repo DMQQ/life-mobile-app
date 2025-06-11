@@ -18,7 +18,7 @@
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
-      "buildNumber": "20250610",
+      "buildNumber": "20250611",
       "supportsTablet": true,
       "infoPlist": {
         "NSFaceIDUsageDescription": "Allow $(PRODUCT_NAME) to use Face ID.",
