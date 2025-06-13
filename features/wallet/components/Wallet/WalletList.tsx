@@ -1,7 +1,7 @@
 import BottomSheet from "@gorhom/bottom-sheet";
 import { Expense, Wallet } from "@/types";
 import WalletItem, { WalletElement, parseDateToText } from "./WalletItem";
-import { useRef, useEffect, useMemo, useCallback, useState } from "react";
+import { useRef, useEffect, useMemo, useCallback, useState, memo } from "react";
 import { Text, NativeScrollEvent, View, StyleSheet, VirtualizedList, RefreshControl } from "react-native";
 import Animated, { FadeIn, FadeInDown, FadeOutDown, LinearTransition, SharedValue } from "react-native-reanimated";
 import { NativeSyntheticEvent } from "react-native";
@@ -16,10 +16,11 @@ import { getInvalidExpenses } from "../../pages/WalletCharts";
 import Layout from "@/constants/Layout";
 import Color from "color";
 import { AntDesign } from "@expo/vector-icons";
+import { FlashList } from "@shopify/flash-list";
 
-const AnimatedList = Animated.createAnimatedComponent(VirtualizedList);
+const AnimatedList = Animated.createAnimatedComponent(FlashList);
 
-export default function WalletList(props: {
+function WalletList(props: {
   wallet: Wallet;
   scrollY: SharedValue<number>;
   onScroll: (event: NativeSyntheticEvent<NativeScrollEvent>) => void;
@@ -75,17 +76,7 @@ export default function WalletList(props: {
 
   const renderItem = useCallback(
     ({ item, index }: { item: { month: string; expenses: Expense[] }; index: number }) => (
-      <MonthExpenseList
-        showTotal={!props.filtersActive}
-        item={item}
-        setSelected={(expense) => {
-          navigation.navigate("Expense", {
-            expense: expense,
-          });
-        }}
-        sheet={sheet}
-        monthIndex={index}
-      />
+      <MonthExpenseList showTotal={!props.filtersActive} item={item} sheet={sheet} monthIndex={index} />
     ),
     [props.filtersActive]
   );
@@ -102,7 +93,7 @@ export default function WalletList(props: {
 
   return (
     <View style={{ flex: 1 }}>
-      <AnimatedList
+      {/* <AnimatedList
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         ListHeaderComponent={<WalletLimits />}
         onEndReached={props.onEndReached}
@@ -119,6 +110,24 @@ export default function WalletList(props: {
         renderItem={renderItem as any}
         getItem={(data, index) => data[index]}
         getItemCount={(data) => data.length}
+      /> */}
+
+      <AnimatedList
+        data={data || []}
+        estimatedItemSize={80}
+        renderItem={renderItem as any}
+        keyExtractor={(item, index) => item.month}
+        onScroll={props.onScroll}
+        contentContainerStyle={{
+          padding: 15,
+        }}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        refreshing={refreshing}
+        ListHeaderComponent={<WalletLimits />}
+        onEndReached={props.onEndReached}
+        onEndReachedThreshold={2}
+        scrollEventThrottle={16}
+        removeClippedSubviews
       />
 
       <ClearFiltersButton />
@@ -190,13 +199,11 @@ const ClearFiltersButton = () => {
 
 const MonthExpenseList = ({
   item,
-  setSelected,
   sheet,
   showTotal = true,
   monthIndex = 0,
 }: {
   item: { month: string; expenses: Expense[] };
-  setSelected: (expense: WalletElement) => void;
   sheet: React.RefObject<BottomSheet>;
   showTotal: boolean;
   monthIndex?: number;
@@ -212,7 +219,7 @@ const MonthExpenseList = ({
 
   const amount = diff.data?.getMonthTotal || 0;
 
-  const sum = (items: Expense[]) => {
+  const sum = useCallback((items: Expense[]) => {
     const expenses = items.reduce((acc, expense) => {
       if (getInvalidExpenses(expense)) return acc;
       const value = expense.amount;
@@ -225,7 +232,24 @@ const MonthExpenseList = ({
       return acc + (isNaN(value) ? 0 : value);
     }, 0);
     return [expenses, income] as [number, number];
-  };
+  }, []);
+
+  const items = useMemo(() => {
+    return item?.expenses.map((expense, i) => (
+      <ListItem
+        key={expense.id}
+        expenses={item?.expenses}
+        item={expense}
+        index={i}
+        sum={sum(
+          item?.expenses.filter((item) => {
+            return moment(item.date).isSame(expense.date, "day");
+          })
+        )}
+        monthIndex={monthIndex}
+      />
+    ));
+  }, [item.expenses]);
 
   return (
     <Animated.View style={{ marginBottom: 30, marginTop: monthIndex === 0 ? 30 : 0 }} layout={LinearTransition.delay(100)}>
@@ -242,24 +266,7 @@ const MonthExpenseList = ({
           </View>
         )}
       </View>
-      {item?.expenses.map((expense, i) => (
-        <ListItem
-          key={expense.id}
-          expenses={item?.expenses}
-          item={expense}
-          index={i}
-          handlePress={() => {
-            setSelected(expense as any);
-            sheet.current?.snapToIndex(0);
-          }}
-          sum={sum(
-            item?.expenses.filter((item) => {
-              return moment(item.date).isSame(expense.date, "day");
-            })
-          )}
-          monthIndex={monthIndex}
-        />
-      ))}
+      {items}
     </Animated.View>
   );
 };
@@ -268,14 +275,11 @@ const ListItem = ({
   item,
   index,
   expenses,
-  handlePress,
   sum,
-  monthIndex = 0,
 }: {
   item: Expense;
   index: number;
   expenses: Expense[];
-  handlePress: () => void;
   sum: [number, number];
   monthIndex?: number;
 }) => {
@@ -317,7 +321,15 @@ const ListItem = ({
           </View>
         </Ripple>
       )}
-      <WalletItem index={index} handlePress={handlePress} {...(item as any)} />
+      <WalletItem
+        index={index}
+        handlePress={() => {
+          navigation.navigate("Expense", {
+            expense: item,
+          });
+        }}
+        {...(item as any)}
+      />
     </Animated.View>
   );
 };
@@ -364,3 +376,5 @@ const styles = StyleSheet.create({
     width: 160,
   },
 });
+
+export default memo(WalletList);

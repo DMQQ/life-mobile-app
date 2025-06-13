@@ -100,11 +100,19 @@ function WalletCharts({ navigation }: any) {
     dispatch,
     filters,
     loading,
-  } = useGetWallet({ fetchAll: true, excludeFields: ["subscription", "location", "files"] });
+    onEndReached,
+  } = useGetWallet({
+    fetchAll: true,
+    excludeFields: ["subscription", "location", "files"],
 
-  useEffect(() => {
-    dispatch({ type: "SET_TYPE", payload: "expense" });
-  }, []);
+    defaultFilters: {
+      type: "expense",
+      date: {
+        from: moment().startOf("month").format("YYYY-MM-DD"),
+        to: moment().endOf("month").format("YYYY-MM-DD"),
+      },
+    },
+  });
 
   const filteredExpenses = useMemo(() => {
     return data?.wallet?.expenses?.filter((item) => !getInvalidExpenses(item)) || [];
@@ -151,6 +159,7 @@ function WalletCharts({ navigation }: any) {
     setStep(5);
 
     try {
+      if (data.wallet?.expenses?.length === 0) return;
       setTimeout(() => {
         listRef.current?.scrollToIndex({ index: 0, animated: true });
       }, 100);
@@ -266,6 +275,7 @@ function WalletCharts({ navigation }: any) {
         bounces
         removeClippedSubviews
         initialNumToRender={5}
+        onEndReached={onEndReached}
         renderItem={({ item }) => (
           <WalletItem
             handlePress={() => {

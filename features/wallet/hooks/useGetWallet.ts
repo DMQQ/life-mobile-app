@@ -1,7 +1,6 @@
 import { Expense, Wallet } from "@/types";
-import useOffline from "@/utils/hooks/useOffline";
 import { gql, useQuery } from "@apollo/client";
-import { useContext, useEffect, useMemo, useReducer, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { init, useWalletContext } from "../components/WalletContext";
 
 export const GET_WALLET = gql`
@@ -64,13 +63,11 @@ export const GET_WALLET = gql`
 
 const PAGINATION_TAKE = 20;
 
-export default function useGetWallet(options?: { fetchAll?: boolean; excludeFields?: string[] }) {
+export default function useGetWallet(options?: { fetchAll?: boolean; excludeFields?: string[]; defaultFilters?: Partial<typeof init> }) {
   const { filters, dispatch } = useWalletContext();
 
-  const [skip, setSkip] = useState(PAGINATION_TAKE);
+  const [skip, setSkip] = useState(0);
   const [endReached, setEndReached] = useState(false);
-
-  const offline = useOffline<Wallet>("WalletScreen");
 
   const directiveVariables = useMemo(() => {
     const excludeFields = options?.excludeFields || [];
@@ -82,24 +79,51 @@ export default function useGetWallet(options?: { fetchAll?: boolean; excludeFiel
     };
   }, [options?.excludeFields]);
 
+  const effectiveFilters = useMemo(() => {
+    const defaultFilters = options?.defaultFilters || {};
+
+    return {
+      query: filters.query || defaultFilters.query || init.query,
+      amount: {
+        min: filters.amount.min !== init.amount.min ? filters.amount.min : defaultFilters.amount?.min ?? init.amount.min,
+        max: filters.amount.max !== init.amount.max ? filters.amount.max : defaultFilters.amount?.max ?? init.amount.max,
+      },
+      date: {
+        from: filters.date.from || defaultFilters.date?.from || init.date.from,
+        to: filters.date.to || defaultFilters.date?.to || init.date.to,
+      },
+      category: filters.category.length > 0 ? filters.category : defaultFilters.category || init.category,
+      type: filters.type || defaultFilters.type || init.type,
+      isExactCategory:
+        filters.isExactCategory !== init.isExactCategory ? filters.isExactCategory : defaultFilters.isExactCategory ?? init.isExactCategory,
+      skip: filters.skip || defaultFilters.skip || init.skip,
+      take: filters.take || defaultFilters.take || init.take,
+    };
+  }, [filters, options?.defaultFilters]);
+
+  const baseFilters = useMemo(
+    () => ({
+      title: effectiveFilters.query,
+      amount: {
+        from: effectiveFilters.amount.min,
+        to: effectiveFilters.amount.max,
+      },
+      date: {
+        from: effectiveFilters.date.from,
+        to: effectiveFilters.date.to,
+      },
+      category: effectiveFilters.category,
+      ...(effectiveFilters.type && { type: effectiveFilters.type }),
+      ...(effectiveFilters.isExactCategory && { isExactCategory: effectiveFilters.isExactCategory }),
+    }),
+    [effectiveFilters]
+  );
+
   const st = useQuery(GET_WALLET, {
     variables: {
-      filters: {
-        title: filters.query,
-        amount: {
-          from: filters.amount.min,
-          to: filters.amount.max,
-        },
-        date: {
-          from: filters.date.from,
-          to: filters.date.to,
-        },
-        category: filters.category,
-        ...(filters.type && { type: filters.type }),
-        ...(filters.isExactCategory && { isExactCategory: filters.isExactCategory }),
-      },
+      filters: baseFilters,
+      skip: 0,
       take: options?.fetchAll ? 99999 : PAGINATION_TAKE,
-
       ...directiveVariables,
     },
     onError: (err) => {
@@ -107,92 +131,77 @@ export default function useGetWallet(options?: { fetchAll?: boolean; excludeFiel
     },
   });
 
-  const onEndReached = async () => {
-    if (st.loading || endReached) return;
+  const onEndReached = useCallback(async () => {
+    if (st.loading || endReached || options?.fetchAll) return;
 
-    console.log("onEndReached");
+    const nextSkip = skip + PAGINATION_TAKE;
 
-    setSkip((p) => p + PAGINATION_TAKE);
-
-    await st.fetchMore({
-      variables: {
-        ...(options?.fetchAll ? { take: 99999, skip: 0 } : { skip: skip + PAGINATION_TAKE, take: PAGINATION_TAKE }),
-        filters: {
-          title: filters.query,
-          amount: {
-            from: filters.amount.min,
-            to: filters.amount.max,
-          },
-          date: {
-            from: filters.date.from,
-            to: filters.date.to,
-          },
-          category: filters.category,
-          ...(filters.type && { type: filters.type }),
-          ...(filters.isExactCategory && { isExactCategory: filters.isExactCategory }),
+    try {
+      await st.fetchMore({
+        variables: {
+          skip: nextSkip,
+          take: PAGINATION_TAKE,
+          filters: baseFilters,
+          ...directiveVariables,
         },
-        ...directiveVariables,
-      },
-      updateQuery(previousQueryResult, { fetchMoreResult }) {
-        if (!fetchMoreResult) {
-          setEndReached(true);
-          return previousQueryResult;
-        }
+        updateQuery(previousQueryResult, { fetchMoreResult }) {
+          if (!fetchMoreResult || !fetchMoreResult.wallet || !fetchMoreResult.wallet.expenses) {
+            setEndReached(true);
+            return previousQueryResult;
+          }
 
-        const mergeExpenses = (previousExpenses: Expense[], newExpenses: Expense[]): Expense[] =>
-          Array.from(new Map([...previousExpenses, ...newExpenses].map((exp) => [exp.id, exp])).values());
+          const newExpenses = fetchMoreResult.wallet.expenses;
+          if (newExpenses.length === 0 || newExpenses.length < PAGINATION_TAKE) {
+            setEndReached(true);
+          }
 
-        const finalData = {
-          wallet: {
-            ...previousQueryResult.wallet,
-            expenses: mergeExpenses(previousQueryResult.wallet.expenses, fetchMoreResult.wallet.expenses),
-          },
-        };
+          if (!previousQueryResult?.wallet?.expenses) {
+            return fetchMoreResult;
+          }
 
-        return finalData;
-      },
-    });
-  };
+          const mergeExpenses = (previousExpenses: Expense[], newExpenses: Expense[]): Expense[] =>
+            Array.from(new Map([...previousExpenses, ...newExpenses].map((exp) => [exp.id, exp])).values());
+
+          return {
+            wallet: {
+              ...previousQueryResult.wallet,
+              ...fetchMoreResult.wallet,
+              expenses: mergeExpenses(previousQueryResult.wallet.expenses, newExpenses),
+            },
+          };
+        },
+      });
+
+      setSkip(nextSkip);
+    } catch (error) {
+      console.error("Error loading more:", error);
+    }
+  }, [st.loading, endReached, skip, baseFilters, directiveVariables, options?.fetchAll]);
 
   useEffect(() => {
-    let timeout = setTimeout(async () => {
-      !options?.fetchAll && setSkip(0);
+    const timeout = setTimeout(async () => {
+      setSkip(0);
+      setEndReached(false);
+
       await st.refetch({
-        ...(options?.fetchAll ? { take: 99999, skip: 0 } : { skip: 0, take: PAGINATION_TAKE }),
-        filters: {
-          title: filters.query,
-          amount: {
-            from: filters.amount.min,
-            to: filters.amount.max,
-          },
-          date: {
-            from: filters.date.from,
-            to: filters.date.to,
-          },
-          category: filters.category,
-          ...(filters.type && { type: filters.type }),
-          ...(filters.isExactCategory && { isExactCategory: filters.isExactCategory }),
-        },
+        skip: 0,
+        take: options?.fetchAll ? 99999 : PAGINATION_TAKE,
+        filters: baseFilters,
         ...directiveVariables,
       });
     }, 1000);
 
     return () => clearTimeout(timeout);
-  }, [filters]);
+  }, [effectiveFilters]);
 
-  useEffect(() => {
-    if (!offline.isOffline && !!st.data) offline.save("WalletScreen", st.data);
-  }, [st.data]);
+  const filtersActive = useMemo(() => JSON.stringify(effectiveFilters) !== JSON.stringify(init), [effectiveFilters]);
 
-  const filtersActive = useMemo(() => JSON.stringify(filters) !== JSON.stringify(init), [filters]);
+  const data = useMemo(() => st.data as { wallet: Wallet }, [st.data]);
 
-  const data = (offline.isOffline ? offline.data || {} : st.data) as { wallet: Wallet };
-
-  return { ...st, data: data, filters, dispatch, onEndReached, endReached, filtersActive };
+  return { ...st, data, filters: effectiveFilters, dispatch, onEndReached, endReached, filtersActive };
 }
 
 export const useGetBalance = () => {
-  const { data } = useGetWallet({ fetchAll: true });
-
+  const { data } = useGetWallet({ fetchAll: false });
   return data?.wallet?.balance || 0;
 };
