@@ -10,6 +10,9 @@ import Animated, { LinearTransition } from "react-native-reanimated";
 import WalletLimits from "@/features/wallet/components/Limits";
 import useGetStatistics from "@/features/wallet/hooks/useGetStatistics";
 import WeeklyComparisonChart from "./WalletChart";
+import ZeroExpenseStats from "@/features/wallet/components/WalletChart/ZeroSpendings";
+import { gql, useQuery } from "@apollo/client";
+import { AnimatedNumber } from "@/components";
 
 const Sizing = {
   heading: 30,
@@ -53,12 +56,17 @@ const AvailableBalanceWidget = ({ data, loading }: Props) => {
 
   return (
     <Animated.View style={styles.container} layout={LinearTransition.delay(200)}>
-      {/* Balance Header */}
       <View style={styles.header}>
         <View>
           <Text style={styles.balance}>
-            {data?.wallet?.balance?.toFixed(2) || "Balance unavailable"}
-            {data?.wallet?.balance && <Text style={styles.currency}> zł</Text>}
+            {!loading && (
+              <AnimatedNumber
+                value={data?.wallet?.balance || 0}
+                style={styles.balance}
+                formatValue={(value) => value.toFixed(2) + "zł"}
+                delay={200}
+              />
+            )}
           </Text>
         </View>
         <Ripple
@@ -77,11 +85,13 @@ const AvailableBalanceWidget = ({ data, loading }: Props) => {
         </Ripple>
       </View>
 
-      <IncomeExpenseBar />
+      {/* <IncomeExpenseBar /> */}
 
-      <View style={{ marginTop: 15 }}>
+      {/* <View style={{ marginTop: 15 }}>
         <WalletLimits />
-      </View>
+      </View>  */}
+
+      <ZeroExpenseStats />
 
       {/* <WeeklyComparisonChart /> */}
     </Animated.View>

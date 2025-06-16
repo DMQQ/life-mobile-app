@@ -28,6 +28,7 @@ import HourlySpendingsHeatMap from "../components/WalletChart/HourlyHeatMap";
 import { CategoryUtils } from "../components/ExpenseIcon";
 import useGetLegendData from "../hooks/useGetLegendData";
 import ChartLoader from "../components/WalletChart/ChartLoader";
+import LimitsComparison from "../components/WalletChart/LimitsComparison";
 
 const styles = StyleSheet.create({
   tilesContainer: {
@@ -297,6 +298,8 @@ function WalletCharts({ navigation }: any) {
             <SpendingsByDay />
             {monthDiff > 28 && monthDiff < 32 && <FutureProjection data={filteredExpenses} income={5500} currentBalance={currentBalance} />}
             <MonthlyCategoryComparison />
+
+            <LimitsComparison />
 
             <CalendarHeatmap />
 

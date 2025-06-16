@@ -1,5 +1,5 @@
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
-import { Platform, StyleSheet, View } from "react-native";
+import { Platform, StyleSheet } from "react-native";
 import Layout from "../../constants/Layout";
 import Colors from "../../constants/Colors";
 import Ripple from "react-native-material-ripple";
@@ -9,7 +9,7 @@ import Animated, { FadeInDown, useAnimatedStyle, withTiming } from "react-native
 import { useTheme } from "../../utils/context/ThemeContext";
 import { Padding } from "@/constants/Values";
 import moment from "moment";
-import { BlurView } from "expo-blur";
+import BlurSurface from "../ui/BlurSurface";
 
 const styles = StyleSheet.create({
   container: {
@@ -32,8 +32,6 @@ const styles = StyleSheet.create({
   innerContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    borderTopColor: Colors.primary_dark,
-    borderTopWidth: 1,
     backgroundColor: "rgba(0,0,0,0.3)",
   },
 });
@@ -85,73 +83,70 @@ export default function BottomTab({ navigation, state, insets }: BottomTabBarPro
 
   return (
     <Animated.View style={[styles.container, animatedStyle]} entering={FadeInDown} exiting={FadeInDown}>
-      <BlurView intensity={80} style={{ flex: 1, position: "relative" }} tint="dark">
-        <View
-          style={[
-            StyleSheet.absoluteFillObject,
-            styles.innerContainer,
-            {
-              paddingBottom: Platform.OS === "android" ? Padding.s + insets.bottom : Padding.xxl,
-              paddingTop: Platform.OS === "android" ? insets.bottom + Padding.s : Padding.s,
-            },
-          ]}
-        >
-          <Btn
-            route="NotesScreens"
-            label="Notes"
-            iconName={
-              <MaterialCommunityIcons
-                name="cards"
-                size={22.5}
-                color={activeRoute === "NotesScreens" ? Colors.secondary : "rgba(255,255,255,0.8)"}
-              />
-            }
-          />
+      <BlurSurface
+        style={[
+          styles.innerContainer,
+          {
+            paddingBottom: Platform.OS === "android" ? Padding.s + insets.bottom : Padding.xxl,
+            paddingTop: Platform.OS === "android" ? insets.bottom + Padding.s : Padding.s,
+          },
+        ]}
+      >
+        <Btn
+          route="NotesScreens"
+          label="Notes"
+          iconName={
+            <MaterialCommunityIcons
+              name="cards"
+              size={22.5}
+              color={activeRoute === "NotesScreens" ? Colors.secondary : "rgba(255,255,255,0.8)"}
+            />
+          }
+        />
 
-          <Btn
-            route="GoalsScreens"
-            label="Training"
-            iconName={
-              <Feather
-                name="target"
-                size={22.5}
-                color={activeRoute === "GoalsScreens" ? Colors.secondary : "rgba(255,255,255,0.8)"}
-                style={{ marginBottom: 2.5, paddingVertical: 7.5 }}
-              />
-            }
-          />
+        <Btn
+          route="GoalsScreens"
+          label="Training"
+          iconName={
+            <Feather
+              name="target"
+              size={22.5}
+              color={activeRoute === "GoalsScreens" ? Colors.secondary : "rgba(255,255,255,0.8)"}
+              style={{ marginBottom: 2.5, paddingVertical: 7.5 }}
+            />
+          }
+        />
 
-          <Btn route="Root" label="Home" iconName={"home"} />
+        <Btn route="Root" label="Home" iconName={"home"} />
 
-          <Btn
-            onLongPress={() => {
-              navigation.navigate({
-                name: "WalletScreens",
-                params: {
-                  expenseId: null,
-                },
-              });
-            }}
-            route="WalletScreens"
-            label="Wallet"
-            iconName={"wallet"}
-          />
+        <Btn
+          onLongPress={() => {
+            navigation.navigate({
+              name: "WalletScreens",
+              params: {
+                expenseId: null,
+              },
+            });
+          }}
+          route="WalletScreens"
+          label="Wallet"
+          iconName={"wallet"}
+        />
 
-          <Btn
-            onLongPress={() => {
-              navigation.navigate({
-                name: "TimelineScreens",
-                params: {
-                  selectedDate: moment(new Date()).format("YYYY-MM-DD"),
-                },
-              });
-            }}
-            route="TimelineScreens"
-            label="Timeline"
-            iconName={"calendar-number"}
-          />
-        </View>
-      </BlurView>
+        <Btn
+          onLongPress={() => {
+            navigation.navigate({
+              name: "TimelineScreens",
+              params: {
+                selectedDate: moment(new Date()).format("YYYY-MM-DD"),
+              },
+            });
+          }}
+          route="TimelineScreens"
+          label="Timeline"
+          iconName={"calendar-number"}
+        />
+      </BlurSurface>
     </Animated.View>
   );
 }

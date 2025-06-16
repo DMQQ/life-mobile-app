@@ -43,12 +43,16 @@ const CREATE_EXPENSE = gql`
         amount
         category
       }
+
+      files {
+        id
+        url
+      }
     }
   }
 `;
 
 export default function useCreateActivity(props: { onCompleted?: () => void }) {
-  const client = useApolloClient();
   const [createExpense, { data, loading, error, called, reset }] = useMutation(CREATE_EXPENSE, {
     onCompleted(data) {
       props.onCompleted?.();
