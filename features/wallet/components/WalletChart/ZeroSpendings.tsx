@@ -40,6 +40,10 @@ const GET_ZERO_SPENDINGS = gql`
   }
 `;
 
+const getStreakLength = (start: string, end: string): number => {
+  return moment(end).diff(moment(start), "days") + 1;
+};
+
 const AnimatedItem = ({
   label,
   value,
@@ -116,6 +120,7 @@ const StreakTile = ({
   ];
 
   const colorSet = isLongest ? { bg: "#FFD700", accent: "#FFE55C" } : colors[index % colors.length];
+  const actualLength = getStreakLength(streak.start, streak.end);
 
   return (
     <Ripple onPress={onPress} style={[styles.streakTileHorizontal, { backgroundColor: colorSet.bg }]}>
@@ -126,7 +131,7 @@ const StreakTile = ({
           </View>
         )}
         <View style={styles.streakMainContent}>
-          <Text style={[styles.streakLengthHorizontal, { color: isLongest ? "#000" : "#fff" }]}>{streak.length} days</Text>
+          <Text style={[styles.streakLengthHorizontal, { color: isLongest ? "#000" : "#fff" }]}>{actualLength} days</Text>
           <Text style={[styles.streakDateHorizontal, { color: isLongest ? "#555" : "rgba(255,255,255,0.9)" }]}>
             {moment(streak.start).format("MMM D")} - {moment(streak.end).format("MMM D")}
           </Text>
@@ -157,7 +162,11 @@ export default function ZeroExpenseStats() {
 
   const longestStreak = useMemo(() => {
     if (!data?.streak?.length) return null;
-    return data.streak.reduce((longest, current) => (current.length > longest.length ? current : longest));
+    return data.streak.reduce((longest, current) => {
+      const currentLength = getStreakLength(current.start, current.end);
+      const longestLength = getStreakLength(longest.start, longest.end);
+      return currentLength > longestLength ? current : longest;
+    });
   }, [data?.streak]);
 
   const currentStreak = useMemo(() => {
@@ -202,7 +211,6 @@ export default function ZeroExpenseStats() {
   return (
     <View style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Header */}
         <View style={styles.header}>
           <View style={{ flex: 1 }}>
             <Text style={styles.headerTitle}>Zero Expense Analytics</Text>
@@ -246,15 +254,13 @@ export default function ZeroExpenseStats() {
           </MenuView>
         </View>
 
-        {/* Current Streak Alert */}
         {currentStreak && (
           <View style={styles.currentStreakAlert}>
-            <Text style={styles.currentStreakText}>🔥 Current streak: {currentStreak.length} days!</Text>
+            <Text style={styles.currentStreakText}>🔥 Current streak: {getStreakLength(currentStreak.start, currentStreak.end)} days!</Text>
             <Text style={styles.currentStreakSubtext}>Started {moment(currentStreak.start).format("MMM D, YYYY")}</Text>
           </View>
         )}
 
-        {/* Animated Stats Grid */}
         <View style={styles.statsGrid}>
           <AnimatedItem
             label="Zero expense days"
@@ -286,7 +292,7 @@ export default function ZeroExpenseStats() {
           />
           <AnimatedItem
             label="Longest streak"
-            value={longestStreak?.length || 0}
+            value={longestStreak ? getStreakLength(longestStreak.start, longestStreak.end) : 0}
             icon={<Ionicons name="flame" size={25} color={Colors.warning} />}
             formatType="days"
             index={4}
@@ -300,7 +306,6 @@ export default function ZeroExpenseStats() {
           />
         </View>
 
-        {/* Streak History */}
         <Animated.View entering={FadeInDown.delay(75 * 6 + 50)} style={styles.streaksSection}>
           <Text style={styles.sectionTitle}>Streak History</Text>
           {data.streak.length === 0 ? (
@@ -317,7 +322,7 @@ export default function ZeroExpenseStats() {
               contentContainerStyle={styles.streaksScrollContent}
             >
               {[...data.streak]
-                .sort((a, b) => b.length - a.length)
+                .sort((a, b) => getStreakLength(b.start, b.end) - getStreakLength(a.start, a.end))
                 .slice(0, 8)
                 .map((s, index) => (
                   <StreakTile
@@ -333,7 +338,6 @@ export default function ZeroExpenseStats() {
         </Animated.View>
       </ScrollView>
 
-      {/* Date Pickers */}
       <DateTimePicker
         isVisible={showStartDatePicker}
         mode="date"
