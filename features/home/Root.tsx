@@ -253,6 +253,7 @@ export default function Root({ navigation }: ScreenProps<"Root">) {
         style={{ flex: 1 }}
         contentContainerStyle={{
           paddingHorizontal: 15,
+          paddingBottom: 100,
         }}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >

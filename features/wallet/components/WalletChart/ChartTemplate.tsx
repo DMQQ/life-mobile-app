@@ -18,17 +18,21 @@ interface ChartTemplatePropsWithTypes {
   title: string;
   description: string;
   types: Types[];
+
+  initialStartDate?: string;
+
+  initialEndDate?: string;
 }
 
 type ChartTemplateProps = ChartTemplatePropsWithTypes;
 
 const blueText = Color(Colors.primary).lighten(10).string();
 
-export default function ChartTemplate({ children, title, description, types }: ChartTemplateProps) {
+export default function ChartTemplate({ children, title, description, types, initialStartDate, initialEndDate }: ChartTemplateProps) {
   const [type, setType] = React.useState<Types>(types ? types[0] : "total");
   const [dateRange, setDateRange] = React.useState<[string, string]>([
-    moment().subtract(1, "months").format("YYYY-MM-DD"),
-    moment().format("YYYY-MM-DD"),
+    initialStartDate ?? moment().subtract(1, "months").format("YYYY-MM-DD"),
+    initialEndDate ?? moment().format("YYYY-MM-DD"),
   ]);
   const [showStartDatePicker, setShowStartDatePicker] = React.useState(false);
   const [showEndDatePicker, setShowEndDatePicker] = React.useState(false);

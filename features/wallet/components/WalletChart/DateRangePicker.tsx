@@ -30,14 +30,14 @@ const DateRangePicker = (props: { filters: Filters; dispatch: React.Dispatch<Act
     ["All time", [moment("2020-01-01"), moment()]],
   ] as [string, [Moment, Moment]][];
 
-  useEffect(() => {
-    if (!(props.filters.date.from && props.filters.date.to)) {
-      const defaultDateRange = DateRanges.find(([label]) => label === "This month");
-      onDateChange(defaultDateRange![0], defaultDateRange![1][0], defaultDateRange![1][1]);
-    }
-  }, [props.filters?.date.from, props.filters?.date.to]);
+  // useEffect(() => {
+  //   if (!(props.filters.date.from && props.filters.date.to)) {
+  //     const defaultDateRange = DateRanges.find(([label]) => label === "This month");
+  //     onDateChange(defaultDateRange![0], defaultDateRange![1][0], defaultDateRange![1][1]);
+  //   }
+  // }, [props.filters?.date.from, props.filters?.date.to]);
 
-  const [selected, setSelected] = useState("This year");
+  const [selected, setSelected] = useState("This month");
 
   const onDateChange = (label: string, from: Moment, to: Moment) => {
     if (label === selected) {

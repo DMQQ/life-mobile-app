@@ -14,32 +14,6 @@ export const GET_MAIN_SCREEN = gql`
     wallet {
       id
       balance
-      expenses(skip: 0, take: 3) {
-        category
-        id
-        amount
-        description
-        type
-
-        subscription {
-          id
-          isActive
-          nextBillingDate
-          dateStart
-        }
-
-        files {
-          id
-          url
-        }
-
-        subexpenses {
-          id
-          description
-          amount
-          category
-        }
-      }
     }
 
     weeklySpendings: getStatistics(range: $range) {

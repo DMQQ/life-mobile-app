@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   cardsRow: {
-    marginTop: 7.5,
+    marginTop: 5,
     flexDirection: "row",
     gap: 15,
   },

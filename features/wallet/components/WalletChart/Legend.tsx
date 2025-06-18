@@ -139,7 +139,7 @@ const Legend = (props: LegendProps) => {
           </Ripple>
         );
       }),
-    [data]
+    [data, props.selected, props.excluded, props.totalSum]
   );
 
   return data?.length === 0 ? null : (

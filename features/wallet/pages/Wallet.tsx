@@ -70,15 +70,17 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
   const {
     refs: { bottomSheetRef, editBalanceRef },
   } = useWalletContext();
-  const wallet = data?.wallet;
 
   const scrollY = useSharedValue<number>(0);
 
-  const onAnimatedScrollHandler = useAnimatedScrollHandler({
-    onScroll(event) {
-      scrollY.value = event.contentOffset.y;
+  const onAnimatedScrollHandler = useAnimatedScrollHandler(
+    {
+      onScroll(event) {
+        scrollY.value = event.contentOffset.y;
+      },
     },
-  });
+    []
+  );
 
   useEffect(() => {
     if (route.params?.expenseId && data?.wallet) {
@@ -104,7 +106,7 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
     fontSize: interpolate(scrollY.value, [0, 100, 200], [70, 50, 25], Extrapolation.CLAMP),
   }));
 
-  const balance = loading && wallet?.balance === undefined ? " ..." : (wallet?.balance || 0).toFixed(2);
+  const balance = loading && data?.wallet?.balance === undefined ? " ..." : (data?.wallet?.balance || 0).toFixed(2);
 
   const handleShowEditSheet = () => {
     editBalanceRef.current?.expand();

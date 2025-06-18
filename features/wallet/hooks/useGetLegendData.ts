@@ -28,12 +28,10 @@ export default function useGetLegendData(startDate?: string, endDate?: string) {
     `,
     {
       variables: {
-        startDate: startDate ?? filters.date.from,
-        endDate: endDate ?? filters.date.to,
+        startDate: filters.date.from || startDate,
+        endDate: filters.date.to || endDate,
         detailed,
       },
-      fetchPolicy: "cache-and-network",
-      notifyOnNetworkStatusChange: true,
     }
   );
 
