@@ -9,10 +9,9 @@ import * as Notifications from "expo-notifications";
 import Url from "./constants/Url";
 import Colors from "./constants/Colors";
 import { setContext } from "@apollo/client/link/context";
-import { getItemAsync, deleteItemAsync } from "expo-secure-store";
+import { getItemAsync } from "expo-secure-store";
 import { STORE_KEY } from "./utils/hooks/useUser";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-
 import * as SplashScreen from "expo-splash-screen";
 
 SplashScreen.preventAutoHideAsync();
@@ -30,21 +29,17 @@ Notifications.setNotificationHandler({
   }),
 });
 
-let token: string | undefined;
-
 const withToken = setContext(async () => {
-  // if you have a cached value, return it immediately
-  if (token !== undefined) return { token };
-
-  return await getItemAsync(STORE_KEY).then((v) => {
-    let user = JSON.parse(v || "{}") as { token: string } | null;
-
-    if (token) return { token };
-
-    if (user !== undefined && typeof user?.token === "string") token = user.token;
+  try {
+    const stored = await getItemAsync(STORE_KEY);
+    const user = stored ? JSON.parse(stored) : null;
+    const token = user?.token || "";
 
     return { token };
-  });
+  } catch (error) {
+    console.log("Error reading token:", error);
+    return { token: "" };
+  }
 });
 
 const authMiddleware = new ApolloLink((op, forw) => {
@@ -64,23 +59,7 @@ const httpLink = createHttpLink({
 
 const link = from([withToken, authMiddleware.concat(httpLink)]);
 
-const cache = new InMemoryCache({
-  // typePolicies: {
-  //   WalletEntity: {
-  //     keyFields: ["id"], // Ensure it uses 'id' as the unique key
-  //     fields: {
-  //       expenses: {
-  //         merge(existing = [], incoming) {
-  //           return [...existing, ...incoming];
-  //         },
-  //       },
-  //     },
-  //   },
-  //   ExpenseEntity: {
-  //     keyFields: ["id"],
-  //   },
-  // },
-});
+const cache = new InMemoryCache();
 
 const apolloClient = new ApolloClient({
   cache,

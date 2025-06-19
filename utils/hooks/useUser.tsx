@@ -2,8 +2,7 @@ import { useDispatch } from "react-redux";
 import { useAppSelector } from "../redux/index";
 import * as SecureStore from "expo-secure-store";
 import { userActions } from "../redux/user/user";
-import { useApolloClient, ApolloLink, useMutation, gql } from "@apollo/client";
-
+import { useApolloClient, useMutation, gql } from "@apollo/client";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 
@@ -22,17 +21,16 @@ export default function useUser() {
       dispatch(userActions.loadUser({ user: user.user, token: user.token }));
     } else {
       dispatch(userActions.notSigned());
-
       await SplashScreen.hideAsync();
     }
   }
 
   async function removeUser() {
-    await SecureStore.deleteItemAsync(STORE_KEY);
-
-    await apollo.clearStore();
-
     dispatch(userActions.removeUser());
+
+    await SecureStore.deleteItemAsync(STORE_KEY);
+    await apollo.clearStore();
+    await apollo.resetStore();
   }
 
   const [refreshToken] = useMutation(gql`
@@ -60,7 +58,6 @@ export default function useUser() {
 
   async function saveUser(input: { user: any; token: string }) {
     await SecureStore.setItemAsync(STORE_KEY, JSON.stringify(input));
-
     dispatch(userActions.loadUser(input));
   }
 

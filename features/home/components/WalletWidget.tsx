@@ -59,14 +59,12 @@ const AvailableBalanceWidget = ({ data, loading }: Props) => {
       <View style={styles.header}>
         <View>
           <Text style={styles.balance}>
-            {!loading && (
-              <AnimatedNumber
-                value={data?.wallet?.balance || 0}
-                style={styles.balance}
-                formatValue={(value) => value.toFixed(2) + "zł"}
-                delay={200}
-              />
-            )}
+            <AnimatedNumber
+              value={data?.wallet?.balance || 0}
+              style={styles.balance}
+              formatValue={(value) => value.toFixed(2) + "zł"}
+              delay={250}
+            />
           </Text>
         </View>
         <Ripple

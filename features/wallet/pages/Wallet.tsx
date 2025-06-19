@@ -128,7 +128,7 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
   return (
     <SafeAreaView style={{ flex: 1 }}>
       {loading && (
-        <Animated.View entering={FadeIn} exiting={FadeOut.duration(250)} style={[StyleSheet.absoluteFillObject, styles.overlay]}>
+        <Animated.View exiting={FadeOut.duration(250)} style={[StyleSheet.absoluteFillObject, styles.overlay]}>
           <WalletLoader />
         </Animated.View>
       )}

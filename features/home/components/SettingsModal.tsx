@@ -2,7 +2,6 @@ import { FlatList, Text, View, StyleSheet, Modal, TouchableOpacity } from "react
 import Button from "@/components/ui/Button/Button";
 import useUser from "@/utils/hooks/useUser";
 import Colors, { CustomThemeOptions } from "@/constants/Colors";
-import { useApolloClient } from "@apollo/client";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Ripple from "react-native-material-ripple";
 import { reloadAppAsync } from "expo";
@@ -145,17 +144,15 @@ interface SettingsModalProps {
 
 export default function SettingsModal({ visible, onClose }: SettingsModalProps) {
   const { removeUser, user } = useUser();
-  const client = useApolloClient();
 
   const handleSignout = async () => {
     await removeUser();
-    await client.clearStore();
 
     let keys = await AsyncStorage.getAllKeys();
-    keys = keys.filter((key) => !key.startsWith("FlashCard_"));
+    keys = keys.filter((key) => !key.startsWith("color_scheme"));
     await AsyncStorage.multiRemove(keys);
 
-    onClose(); // Close modal after signout
+    onClose();
   };
 
   const setCustomTheme = async (schema: { primary: string; secondary: string }) => {
