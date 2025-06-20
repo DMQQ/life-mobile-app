@@ -174,6 +174,7 @@ function WalletCharts({ navigation }: any) {
   }, [selected]);
 
   const onChartPress = (e: any) => {
+    if (!e.label) return;
     setSelected(e.label);
     e.label !== undefined && Alert.alert(`Category ${e.label} is`, e.value.toFixed(2));
   };
@@ -224,7 +225,7 @@ function WalletCharts({ navigation }: any) {
   return (
     <View style={{ paddingTop: 15, paddingBottom: insets.bottom }}>
       {loading && (
-        <Animated.View entering={FadeIn} exiting={FadeOut.duration(250)} style={[StyleSheet.absoluteFillObject, styles.overlay]}>
+        <Animated.View exiting={FadeOut.duration(250)} style={[StyleSheet.absoluteFillObject, styles.overlay, { paddingTop: 15 }]}>
           <ChartLoader />
         </Animated.View>
       )}
