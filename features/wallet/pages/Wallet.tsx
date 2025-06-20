@@ -17,12 +17,12 @@ import EditBalanceSheet from "../components/Sheets/EditBalanceSheet";
 import WalletList from "../components/Wallet/WalletList";
 import { useWalletContext } from "../components/WalletContext";
 import useGetWallet from "../hooks/useGetWallet";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import InitializeWallet from "../components/InitializeWallet";
 import { useEffect, useState } from "react";
 import SubscriptionList from "../components/Wallet/SubscriptionList";
 import WalletLoader from "../components/WalletLoader";
 import Colors from "@/constants/Colors";
+import { AnimatedNumber } from "@/components";
 
 const styles = StyleSheet.create({
   container: {
@@ -89,22 +89,26 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
     }
   }, [route.params?.expenseId]);
 
-  const insets = useSafeAreaInsets();
+  const animatedContainerStyle = useAnimatedStyle(
+    () => ({
+      height: interpolate(scrollY.value, [0, 150], [150, 0], Extrapolation.CLAMP),
+    }),
+    []
+  );
 
-  const animatedContainerStyle = useAnimatedStyle(() => ({
-    height: interpolate(scrollY.value, [0, 180], [110, 35], Extrapolation.CLAMP),
-    width: interpolate(scrollY.value, [0, 180], [Layout.screen.width, 200], Extrapolation.CLAMP),
-    transform: [
-      {
-        translateY: interpolate(scrollY.value, [0, 200], [0, -40], Extrapolation.CLAMP),
-      },
-    ],
-    ...(scrollY.value > 170 ? { position: "absolute", top: insets.top + 50 } : { position: "relative", top: 0 }),
-  }));
-
-  const animatedBalanceStyle = useAnimatedStyle(() => ({
-    fontSize: interpolate(scrollY.value, [0, 100, 200], [70, 50, 25], Extrapolation.CLAMP),
-  }));
+  const animatedBalanceStyle = useAnimatedStyle(
+    () => ({
+      transform: [
+        {
+          scale: interpolate(scrollY.value, [0, 150], [1, 0.4], Extrapolation.CLAMP),
+        },
+      ],
+      top: interpolate(scrollY.value, [0, 150], [25, -60], Extrapolation.CLAMP),
+      left: interpolate(scrollY.value, [0, 150], [25, -20], Extrapolation.CLAMP),
+      width: interpolate(scrollY.value, [0, 150], [Layout.screen.width - 50, 100], Extrapolation.CLAMP),
+    }),
+    []
+  );
 
   const balance = loading && data?.wallet?.balance === undefined ? " ..." : (data?.wallet?.balance || 0).toFixed(2);
 
@@ -159,12 +163,15 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
       />
 
       <Animated.View style={[styles.header, animatedContainerStyle]}>
-        <Ripple onLongPress={handleShowEditSheet}>
-          <Animated.Text style={[styles.title, animatedBalanceStyle]}>
-            {balance}
-            <Text style={{ color: "#ffffff97", fontSize: 18 }}>zł </Text>
-          </Animated.Text>
-        </Ripple>
+        <Animated.View style={[{ position: "absolute", left: 25 }, animatedBalanceStyle]}>
+          <Ripple onLongPress={handleShowEditSheet}>
+            <AnimatedNumber
+              value={parseFloat(balance)}
+              style={[styles.title, animatedBalanceStyle]}
+              formatValue={(value) => `${value.toFixed(2)}zł`}
+            />
+          </Ripple>
+        </Animated.View>
       </Animated.View>
 
       {showSubscriptionsView ? (
