@@ -83,96 +83,12 @@ const AvailableBalanceWidget = ({ data, loading }: Props) => {
         </Ripple>
       </View>
 
-      {/* <IncomeExpenseBar /> */}
-
-      {/* <View style={{ marginTop: 15 }}>
-        <WalletLimits />
-      </View>  */}
+      <WeeklyComparisonChart />
 
       <ZeroExpenseStats />
-
-      {/* <WeeklyComparisonChart /> */}
     </Animated.View>
   );
 };
-
-const steps = [
-  ["This year", [moment().startOf("year").format("YYYY-MM-DD"), moment().endOf("year").format("YYYY-MM-DD")]],
-  ["This month", [moment().startOf("month").format("YYYY-MM-DD"), moment().endOf("month").format("YYYY-MM-DD")]],
-  ["This week", [moment().startOf("week").format("YYYY-MM-DD"), moment().endOf("week").format("YYYY-MM-DD")]],
-  ["Today", [moment().subtract(1, "day").format("YYYY-MM-DD"), moment().add(1, "d").format("YYYY-MM-DD")]],
-] as const;
-
-const IncomeExpenseBar = memo(() => {
-  const [step, setStep] = useState(2);
-
-  const range = step < steps.length ? steps[step][1] : steps[0][1];
-
-  const { data } = useGetStatistics(range as any);
-
-  const totalWidth = Dimensions.get("window").width - 30;
-
-  const expense = data?.statistics?.expense || 0;
-
-  const income = data?.statistics?.income || 0;
-
-  const total = expense + income;
-
-  const incomeWidth = (income / total) * totalWidth;
-
-  const expenseWidth = (expense / total) * totalWidth;
-
-  const visible = !((expense === 0 && income === 0) || Number.isNaN(expense) || Number.isNaN(income));
-
-  return (
-    <View style={{ marginTop: 15 }}>
-      <TouchableOpacity
-        onPress={() => {
-          if (step === steps.length - 1) {
-            setStep(0);
-          } else {
-            setStep(step + 1);
-          }
-        }}
-      >
-        <Text style={styles.sectionTitle}>{steps[step][0]} overview</Text>
-      </TouchableOpacity>
-      {visible && (
-        <Animated.View
-          layout={LinearTransition}
-          style={{ flexDirection: "row", backgroundColor: Color(Colors.primary_lighter).lighten(0.5).hex(), borderRadius: 10 }}
-        >
-          <Animated.View
-            style={{
-              width: expenseWidth,
-              backgroundColor: "#FF5454",
-              height: 10,
-              borderTopLeftRadius: 10,
-              borderBottomLeftRadius: 10,
-            }}
-          />
-          <Animated.View
-            style={{
-              width: incomeWidth,
-              backgroundColor: Colors.secondary,
-              height: 10,
-              borderTopRightRadius: 10,
-              borderBottomRightRadius: 10,
-            }}
-          />
-        </Animated.View>
-      )}
-      <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 6 }}>
-        <Text style={{ color: "#FF5454", fontSize: Sizing.tooltip, marginTop: 4 }}>-{expense.toFixed(2)} zł</Text>
-        <Text style={{ color: "#fff", fontSize: Sizing.tooltip, marginTop: 4 }}>
-          {income - expense > 0 ? "+" : ""}
-          {(income - expense).toFixed(2)}zł
-        </Text>
-        <Text style={{ color: Colors.secondary, fontSize: Sizing.tooltip, marginTop: 4 }}>+{income.toFixed(2)} zł</Text>
-      </View>
-    </View>
-  );
-});
 
 const styles = StyleSheet.create({
   container: {
