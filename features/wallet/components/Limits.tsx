@@ -1,6 +1,6 @@
 import { gql, useMutation, useQuery } from "@apollo/client";
 import { Text, View, StyleSheet, ActivityIndicator, TouchableOpacity, ScrollView } from "react-native";
-import { CategoryUtils, Icons } from "./ExpenseIcon";
+import { CategoryIcon, CategoryUtils, Icons } from "./ExpenseIcon";
 import lowOpacity from "@/utils/functions/lowOpacity";
 import Colors, { secondary_candidates } from "@/constants/Colors";
 import Animated, { FadeIn, LinearTransition } from "react-native-reanimated";
@@ -149,19 +149,13 @@ export default function WalletLimits() {
           </Ripple>
         </View>
 
-        <View style={styles.tabContainer}>
-          {["daily", "weekly", "monthly", "yearly"].map((range) => (
-            <TouchableOpacity
-              key={range}
-              onPress={() => handleRangeChange(range)}
-              style={[styles.tabButton, selectedRange === range && styles.activeTabButton]}
-            >
-              <Text style={[styles.tabText, selectedRange === range && styles.activeTabText]}>
-                {range.charAt(0).toUpperCase() + range.slice(1)}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
+        {budgetStatus && (
+          <View style={{ flexDirection: "row", justifyContent: "center", marginBottom: 5 }}>
+            <Animated.Text style={[styles.budgetIndicator, { color: budgetStatus.color }]} entering={FadeIn}>
+              {budgetStatus.text}
+            </Animated.Text>
+          </View>
+        )}
       </View>
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -204,7 +198,7 @@ export default function WalletLimits() {
                   style={[
                     styles.limitCard,
                     {
-                      backgroundColor: lowOpacity(iconData.backgroundColor || color, 0.2),
+                      backgroundColor: lowOpacity(iconData.backgroundColor || color, 0.15),
                       flexDirection: compactMode ? "column" : "row",
                       padding: compactMode ? 15 : 22.5,
                     },
@@ -223,11 +217,11 @@ export default function WalletLimits() {
                   <View
                     style={[
                       styles.iconContainer,
-                      { backgroundColor: lowOpacity(iconData.backgroundColor || color, 0.2) },
+                      { backgroundColor: lowOpacity(iconData.backgroundColor || color, 0.1) },
                       compactMode && { marginRight: 0 },
                     ]}
                   >
-                    {iconData.icon}
+                    <CategoryIcon category={limit.category} type="expense" clear={false} size={20} />
                   </View>
 
                   <View style={styles.detailsContainer}>
@@ -282,13 +276,19 @@ export default function WalletLimits() {
         )}
       </ScrollView>
 
-      {budgetStatus && (
-        <View style={{ flexDirection: "row", justifyContent: "center", marginBottom: 5 }}>
-          <Animated.Text style={[styles.budgetIndicator, { color: budgetStatus.color }]} entering={FadeIn}>
-            {budgetStatus.text}
-          </Animated.Text>
-        </View>
-      )}
+      <View style={styles.tabContainer}>
+        {["daily", "weekly", "monthly", "yearly"].map((range) => (
+          <TouchableOpacity
+            key={range}
+            onPress={() => handleRangeChange(range)}
+            style={[styles.tabButton, selectedRange === range && styles.activeTabButton]}
+          >
+            <Text style={[styles.tabText, selectedRange === range && styles.activeTabText]}>
+              {range.charAt(0).toUpperCase() + range.slice(1)}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
 
       <Modal
         onBackdropPress={() => setCreateLimitModalVisible(false)}
@@ -388,6 +388,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "flex-start", // Changed from center to allow for budget indicator below
     marginBottom: 15,
+    height: 25,
   },
   header: {
     fontSize: 18,
@@ -403,7 +404,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     borderRadius: 20,
     overflow: "hidden",
-    backgroundColor: Colors.primary_light,
+    gap: 5,
+    justifyContent: "center",
   },
   tabButton: {
     paddingVertical: 6,

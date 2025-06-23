@@ -83,15 +83,16 @@ export default function SubscriptionItem({ subscription, index, onPress }: Subsc
   const totalSpent = subscription.expenses.reduce((sum, expense) => sum + expense.amount, 0);
   const daysUntilNext = moment(parseInt(subscription.nextBillingDate)).diff(moment(), "days");
   const isOverdue = daysUntilNext < 0;
-  const subscriptionDuration = getSubscriptionDuration(subscription.expenses.at(-1)?.date || subscription.dateStart);
 
   const expenses = useMemo(() => {
     const copy = JSON.parse(JSON.stringify(subscription.expenses));
 
     copy.sort((a, b) => moment(b.date).diff(moment(a.date)));
 
-    return copy.slice(0, 5);
+    return copy;
   }, [subscription.expenses]);
+
+  const subscriptionDuration = getSubscriptionDuration(expenses[expenses.length - 1]?.date || subscription.dateStart);
 
   return (
     <Animated.View
@@ -181,7 +182,7 @@ export default function SubscriptionItem({ subscription, index, onPress }: Subsc
           <Animated.View style={styles.expanded} layout={LinearTransition}>
             <Text style={styles.expandedTitle}>Recent Payments</Text>
 
-            {expenses.map((expense, expenseIndex) => (
+            {expenses.slice(0, 5).map((expense, expenseIndex) => (
               <Animated.View
                 key={expense.id}
                 style={styles.expenseItem}

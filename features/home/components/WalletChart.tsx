@@ -90,47 +90,31 @@ const AnimatedBar = ({ value, prevValue, maxValue, color, label, index }: Animat
   );
 };
 
+const STATISTICS_DAY_OF_WEEK = gql`
+  query StatisticsDayOfWeek($startDate: String!, $endDate: String!) {
+    statisticsDayOfWeek(startDate: $startDate, endDate: $endDate) {
+      day
+      total
+    }
+  }
+`;
+
 interface CompactSpendingChartProps {}
 
 const CompactSpendingChart = ({}: CompactSpendingChartProps) => {
-  const dateRange = useMemo(() => [moment().subtract(2, "weeks").format("YYYY-MM-DD"), moment().format("YYYY-MM-DD")], []);
+  const dateRange = useMemo(() => [moment().subtract(1, "weeks").format("YYYY-MM-DD"), moment().format("YYYY-MM-DD")], []);
 
   const previousDateRange = useMemo(() => {
-    const startDate = new Date(dateRange[0]);
-    const endDate = new Date(dateRange[1]);
-    const diffTime = endDate.getTime() - startDate.getTime();
-    const prevEndDate = new Date(startDate.getTime() - 1);
-    const prevStartDate = new Date(prevEndDate.getTime() - diffTime);
-    return [prevStartDate.toISOString().split("T")[0], prevEndDate.toISOString().split("T")[0]];
+    return [moment(dateRange[0]).subtract(1, "weeks").format("YYYY-MM-DD"), moment(dateRange[1]).subtract(1, "weeks").format("YYYY-MM-DD")];
   }, [dateRange]);
 
-  const query = useQuery(
-    gql`
-      query StatisticsDayOfWeek($startDate: String!, $endDate: String!) {
-        statisticsDayOfWeek(startDate: $startDate, endDate: $endDate) {
-          day
-          total
-        }
-      }
-    `,
-    { variables: { startDate: dateRange[0], endDate: dateRange[1] } }
-  );
+  const query = useQuery(STATISTICS_DAY_OF_WEEK, { variables: { startDate: dateRange[0], endDate: dateRange[1] } });
 
-  const prevQuery = useQuery(
-    gql`
-      query PreviousStatisticsDayOfWeek($startDate: String!, $endDate: String!) {
-        statisticsDayOfWeek(startDate: $startDate, endDate: $endDate) {
-          day
-          total
-        }
-      }
-    `,
-    { variables: { startDate: previousDateRange[0], endDate: previousDateRange[1] } }
-  );
+  const prevQuery = useQuery(STATISTICS_DAY_OF_WEEK, { variables: { startDate: previousDateRange[0], endDate: previousDateRange[1] } });
 
   const { chartData, maxValue, total, prevTotal, percentageChange } = useMemo(() => {
-    const data = query.data?.statisticsDayOfWeek || [];
-    const prevData = prevQuery.data?.statisticsDayOfWeek || [];
+    const data = (query.data?.statisticsDayOfWeek || []) as any;
+    const prevData = (prevQuery.data?.statisticsDayOfWeek || []) as any;
 
     const prevDataMap = new Map(prevData.map((item) => [item.day, item.total]));
 
@@ -189,7 +173,7 @@ const CompactSpendingChart = ({}: CompactSpendingChartProps) => {
               },
             ]}
           >
-            {Math.abs(Math.round(percentageChange))}%
+            {Math.abs(Math.round(percentageChange))}% {percentageChange >= 0 ? "increase" : "decrease"} in this week
           </Text>
         </View>
       </View>
@@ -232,23 +216,23 @@ const CompactSpendingChart = ({}: CompactSpendingChartProps) => {
       <View style={styles.footer}>
         <View style={styles.totalContainer}>
           <Text style={styles.prevAmount}>{Math.round(prevTotal)}zł</Text>
-          <Text style={styles.totalLabel}>last week</Text>
+          <Text style={styles.totalLabel}>Last week</Text>
         </View>
 
         <View style={styles.tinyLegendContainer}>
           <View style={styles.tinyLegendItem}>
             <View style={[styles.tinyLegendDot, { backgroundColor: Color(secondary_candidates[0]).alpha(0.4).string() }]} />
-            <Text style={styles.tinyLegendText}>Prev</Text>
+            <Text style={styles.tinyLegendText}>Previous</Text>
           </View>
           <View style={styles.tinyLegendItem}>
             <View style={[styles.tinyLegendDot, { backgroundColor: secondary_candidates[0] }]} />
-            <Text style={styles.tinyLegendText}>Curr</Text>
+            <Text style={styles.tinyLegendText}>Current</Text>
           </View>
         </View>
 
         <View style={styles.totalContainer}>
           <Text style={styles.totalAmount}>{Math.round(total)}zł</Text>
-          <Text style={styles.totalLabel}>this week</Text>
+          <Text style={styles.totalLabel}>This week</Text>
         </View>
       </View>
     </View>

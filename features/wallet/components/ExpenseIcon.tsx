@@ -634,12 +634,7 @@ export const CategoryUtils = {
   getCategoryParent,
 };
 
-export const CategoryIcon = (props: {
-  category: keyof typeof Icons;
-  type: "income" | "expense" | "refunded";
-  clear?: boolean;
-  size?: number;
-}) => {
+function getCategory(props: { category: string; type: "income" | "expense" | "refunded" }) {
   let category = props.category || "none";
 
   if (props.category === "edit") {
@@ -649,19 +644,34 @@ export const CategoryIcon = (props: {
   } else if (props.type === "refunded") {
     category = "refunded";
   }
+  return category as keyof typeof Icons;
+}
+
+export const CategoryIcon = (props: {
+  category: keyof typeof Icons;
+  type: "income" | "expense" | "refunded";
+  clear?: boolean;
+  size?: number;
+}) => {
+  const category = getCategory(props);
+
+  const backgroundColor = Icons[category]?.backgroundColor;
 
   return (
-    <View style={[styles.icon_container, { position: "relative" }]}>
+    <View style={[styles.icon_container]}>
       <View
         style={[
           styles.iconContainer,
           {
-            backgroundColor: !props.clear ? lowOpacity(Icons[category]?.backgroundColor, 15) : undefined,
+            backgroundColor: !props.clear ? lowOpacity(backgroundColor, 15) : undefined,
+            borderWidth: !props.clear ? 1 : 0,
+            borderColor: !props.clear ? lowOpacity(backgroundColor, 20) : undefined,
           },
         ]}
       >
         {React.cloneElement(Icons[category]?.icon, {
           size: props.size || 20,
+          style: [styles.clonedIcon, { shadowColor: backgroundColor ?? "#000" }],
         })}
       </View>
     </View>
@@ -680,5 +690,17 @@ const styles = StyleSheet.create({
   icon_container: {
     padding: 7.5,
     justifyContent: "center",
+    position: "relative",
+  },
+
+  clonedIcon: {
+    shadowOffset: {
+      width: 0,
+      height: 10,
+    },
+    shadowOpacity: 0.7,
+    shadowRadius: 16.0,
+
+    elevation: 24,
   },
 });

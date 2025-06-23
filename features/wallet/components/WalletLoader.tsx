@@ -14,7 +14,7 @@ export default function WalletLoader() {
         </View>
 
         <View style={styles.walletSection}>
-          <Skeleton.Item width={(w) => w * 0.8} height={80} style={styles.walletCard} />
+          <Skeleton.Item width={(w) => w * 0.8} height={70} style={styles.walletCard} />
         </View>
 
         <View style={styles.contentSection}>
@@ -78,6 +78,7 @@ const styles = StyleSheet.create({
   },
   walletSection: {
     marginTop: 20,
+    marginVertical: 50,
   },
   walletCard: {
     marginTop: 20,

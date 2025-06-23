@@ -176,7 +176,6 @@ function WalletCharts({ navigation }: any) {
   const onChartPress = (e: any) => {
     if (!e.label) return;
     setSelected(e.label);
-    e.label !== undefined && Alert.alert(`Category ${e.label} is`, e.value.toFixed(2));
   };
 
   const currentBalance = useGetBalance();

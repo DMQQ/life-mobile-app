@@ -1,7 +1,7 @@
 import { gql } from "@apollo/client";
 
 export const GET_MAIN_SCREEN = gql`
-  query GetRootView($range: [String!]!) {
+  query GetRootView($range: [String!]!, $lastRange: [String!]!) {
     timelineByCurrentDate {
       id
       title
@@ -14,9 +14,15 @@ export const GET_MAIN_SCREEN = gql`
     wallet {
       id
       balance
+      income
+      monthlyPercentageTarget
     }
 
-    weeklySpendings: getStatistics(range: $range) {
+    monthlySpendings: getStatistics(range: $range) {
+      ...Stats
+    }
+
+    lastMonthSpendings: getStatistics(range: $lastRange) {
       ...Stats
     }
   }

@@ -62,6 +62,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingTop: 125,
   },
+  balance: { color: "rgba(255,255,255,0.6)", fontSize: 16, textAlign: "center", opacity: 0.8 },
 });
 
 export default function WalletScreen({ navigation, route }: WalletScreens<"Wallet">) {
@@ -91,7 +92,7 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
 
   const animatedContainerStyle = useAnimatedStyle(
     () => ({
-      height: interpolate(scrollY.value, [0, 150], [150, 0], Extrapolation.CLAMP),
+      height: interpolate(scrollY.value, [0, 200], [150, 0], Extrapolation.CLAMP),
     }),
     []
   );
@@ -100,15 +101,19 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
     () => ({
       transform: [
         {
-          scale: interpolate(scrollY.value, [0, 150], [1, 0.4], Extrapolation.CLAMP),
+          scale: interpolate(scrollY.value, [0, 200], [1, 0.35], Extrapolation.CLAMP),
         },
       ],
-      top: interpolate(scrollY.value, [0, 150], [25, -60], Extrapolation.CLAMP),
-      left: interpolate(scrollY.value, [0, 150], [25, -20], Extrapolation.CLAMP),
-      width: interpolate(scrollY.value, [0, 150], [Layout.screen.width - 50, 100], Extrapolation.CLAMP),
+      top: interpolate(scrollY.value, [0, 200], [25, -73], Extrapolation.CLAMP),
+      left: interpolate(scrollY.value, [0, 200], [25, -20], Extrapolation.CLAMP),
+      width: interpolate(scrollY.value, [0, 200], [Layout.screen.width - 50, 100], Extrapolation.CLAMP),
     }),
     []
   );
+
+  const animatedBalanceLabel = useAnimatedStyle(() => ({
+    opacity: interpolate(scrollY.value, [0, 100], [1, 0], Extrapolation.CLAMP),
+  }));
 
   const balance = loading && data?.wallet?.balance === undefined ? " ..." : (data?.wallet?.balance || 0).toFixed(2);
 
@@ -166,10 +171,12 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
         <Animated.View style={[{ position: "absolute", left: 25 }, animatedBalanceStyle]}>
           <Ripple onLongPress={handleShowEditSheet}>
             <AnimatedNumber
+              delay={250}
               value={parseFloat(balance)}
               style={[styles.title, animatedBalanceStyle]}
               formatValue={(value) => `${value.toFixed(2)}zł`}
             />
+            <Animated.Text style={[styles.balance, animatedBalanceLabel]}>Current Balance (zł)</Animated.Text>
           </Ripple>
         </Animated.View>
       </Animated.View>

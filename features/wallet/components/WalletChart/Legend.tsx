@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from "react-native";
 import Ripple from "react-native-material-ripple";
 import Colors from "@/constants/Colors";
 import Color from "color";
-import { CategoryUtils, Icons } from "../ExpenseIcon";
+import { CategoryIcon, CategoryUtils, Icons } from "../ExpenseIcon";
 import lowOpacity from "@/utils/functions/lowOpacity";
 import { useEffect, useMemo, useState } from "react";
 import { AntDesign } from "@expo/vector-icons";
@@ -51,12 +51,15 @@ const Legend = (props: LegendProps) => {
     }
   }, [props.statisticsLegendData]);
 
+  const [showAll, setShowAll] = useState(false);
+
   const legendList = useMemo(
     () =>
-      data?.map((item, index) => {
+      data?.slice(0, showAll ? data.length : 8).map((item, index) => {
         const isExcluded = props.excluded?.includes(item.category);
-
         const percentage = (props?.excluded?.length || 0) > 0 ? (item.total / props.totalSum) * 100 : item.percentage;
+        const isLastOdd = data?.length - 1 === index && data?.length % 2 === 1;
+        const tileWidth = isLastOdd ? "100%" : (Layout.screen.width - 30) / 2 - 7.5;
 
         return (
           <Ripple
@@ -65,9 +68,8 @@ const Legend = (props: LegendProps) => {
             key={item.category}
             style={[
               styles.tile,
-
               {
-                width: data?.length - 1 === index && data?.length % 2 === 1 ? "100%" : (Layout.screen.width - 30) / 2 - 7.5,
+                width: tileWidth,
                 backgroundColor:
                   props.selected === item.category
                     ? Color(Colors.primary_light).lighten(0.4).string()
@@ -100,38 +102,39 @@ const Legend = (props: LegendProps) => {
             <View style={styles.tileText}>
               <View
                 style={{
-                  backgroundColor: lowOpacity(Icons[item.category as keyof typeof Icons]?.backgroundColor, 0.2),
-                  borderRadius: 100,
                   width: 40,
                   height: 40,
                   justifyContent: "center",
                   alignItems: "center",
                 }}
               >
-                {CategoryUtils.getCategoryIcon(item.category)}
+                <CategoryIcon size={20} category={item.category} type="expense" />
               </View>
 
               <View style={{ gap: 1.5 }}>
                 <Text style={{ color: blueText, fontSize: 15, fontWeight: 500 }}>
                   {capitalize(CategoryUtils.getCategoryName(item.category ?? "None"))}
                 </Text>
-                <Text style={{ fontSize: 11, color: "rgba(255,255,255,0.6)" }}>(No transactions {item.count})</Text>
+                <Text style={{ fontSize: 11, color: "rgba(255,255,255,0.6)" }}>{item.count} Transactions</Text>
               </View>
             </View>
+
             <View
               style={{
-                width: data?.length - 1 === index && data?.length % 2 === 1 ? "100%" : (Layout.screen.width - 30) / 2 - 7.5,
-                overflow: "hidden",
                 position: "absolute",
                 bottom: 0,
-                marginTop: 10,
+                left: 0,
+                right: 0,
+                height: 5,
+                backgroundColor: "rgba(255,255,255,0.1)",
+                overflow: "hidden",
               }}
             >
               <View
                 style={{
-                  width: (percentage + "%") as any,
+                  width: `${Math.min(percentage, 100)}%`,
                   height: 5,
-                  backgroundColor: Icons[item.category as keyof typeof Icons]?.backgroundColor,
+                  backgroundColor: Icons[item.category as keyof typeof Icons]?.backgroundColor || Colors.secondary,
                   borderRadius: 10,
                 }}
               />
@@ -139,7 +142,7 @@ const Legend = (props: LegendProps) => {
           </Ripple>
         );
       }),
-    [data, props.selected, props.excluded, props.totalSum]
+    [data, props.selected, props.excluded, props.totalSum, showAll]
   );
 
   return data?.length === 0 ? null : (
@@ -158,6 +161,15 @@ const Legend = (props: LegendProps) => {
         </View>
       </View>
       {legendList}
+      <View style={{ justifyContent: "center", alignItems: "center", padding: 10, width: "100%" }}>
+        <Ripple onPress={() => setShowAll((p) => !p)} style={{ width: Layout.screen.width / 3 }}>
+          {data?.length > 8 && (
+            <Text style={{ color: Colors.secondary, fontWeight: "bold", textAlign: "center" }}>
+              {showAll ? "Show less" : "Show all" + (showAll ? "" : ` (${data.length})`)}
+            </Text>
+          )}
+        </Ripple>
+      </View>
     </View>
   );
 };

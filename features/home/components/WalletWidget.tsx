@@ -1,213 +1,302 @@
-import { StyleSheet, Text, View, ScrollView, Dimensions, TouchableOpacity } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import Color from "color";
-import { useNavigation } from "@react-navigation/native";
 import Colors from "@/constants/Colors";
-import Ripple from "react-native-material-ripple";
-import moment from "moment";
-import { memo, useState } from "react";
+import Layout from "@/constants/Layout";
+import { Padding, Rounded } from "@/constants/Values";
 import Animated, { LinearTransition } from "react-native-reanimated";
-import WalletLimits from "@/features/wallet/components/Limits";
-import useGetStatistics from "@/features/wallet/hooks/useGetStatistics";
 import WeeklyComparisonChart from "./WalletChart";
 import ZeroExpenseStats from "@/features/wallet/components/WalletChart/ZeroSpendings";
-import { gql, useQuery } from "@apollo/client";
 import { AnimatedNumber } from "@/components";
 
-const Sizing = {
-  heading: 30,
-  subHead: 22.5,
-  text: 18,
-  tooltip: 14,
-};
+const Typography = {
+  display: { fontSize: 48, fontWeight: "700", letterSpacing: -1 },
+  headline: { fontSize: 24, fontWeight: "600", letterSpacing: -0.3 },
+  title: { fontSize: 18, fontWeight: "600" },
+  body: { fontSize: 16, fontWeight: "500" },
+  caption: { fontSize: 11, fontWeight: "500" },
+  overline: { fontSize: 10, fontWeight: "600", letterSpacing: 0.5 },
+} as const;
 
-interface TransactionItem {
-  id: string;
-  amount: number;
-  category: string;
-  date: string;
-  type: "income" | "expense";
-  description: string;
+interface WalletStatistics {
+  total: number;
+  average: number;
+  max: number;
+  min: number;
+  count: number;
+  theMostCommonCategory: string;
+  theLeastCommonCategory: string;
+  lastBalance: number;
+  income: number;
+  expense: number;
 }
 
 interface Props {
   data: {
     wallet: {
+      id: string;
       balance: number;
-      expenses: TransactionItem[];
+      income: number;
+      monthlyPercentageTarget: number;
     };
-    statistics: {
-      weeklySpendings: {
-        expense: number;
-        income: number;
-        average: number;
-      };
-    };
+    statistics: WalletStatistics;
+    lastMonthSpendings: WalletStatistics;
   };
   loading: boolean;
 }
 
 const AvailableBalanceWidget = ({ data, loading }: Props) => {
-  const navigation = useNavigation<any>();
+  if (loading) return <View style={styles.loadingContainer} />;
 
-  if (loading) {
-    return <View style={styles.loadingContainer} />;
-  }
+  const { wallet, statistics: stats, lastMonthSpendings } = data;
+  const targetAmount = wallet.income * (wallet.monthlyPercentageTarget / 100);
+  const spentPercentage = targetAmount ? (stats.expense / targetAmount) * 100 : 0;
+  const trendPercentage = lastMonthSpendings.expense
+    ? ((stats.expense - lastMonthSpendings.expense) / lastMonthSpendings.expense) * 100
+    : 0;
+  const isIncreasing = trendPercentage > 0;
+
+  const remainingBudget = targetAmount - stats.expense;
+  const now = new Date();
+  const daysLeft = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate() - now.getDate();
+  const dailyBudgetLeft = daysLeft > 0 ? remainingBudget / daysLeft : 0;
+  const savings = wallet.income - stats.expense;
+
+  const isOverBudget = spentPercentage > 100;
+  const isDailyBudgetNegative = dailyBudgetLeft < 0;
 
   return (
     <Animated.View style={styles.container} layout={LinearTransition.delay(200)}>
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.balance}>
-            <AnimatedNumber
-              value={data?.wallet?.balance || 0}
-              style={styles.balance}
-              formatValue={(value) => value.toFixed(2) + "zł"}
-              delay={250}
-            />
-          </Text>
+      <View style={styles.primarySection}>
+        <View style={styles.expenseDisplay}>
+          <AnimatedNumber value={stats.expense} formatValue={(val) => `-${val.toFixed(0)}zł`} style={styles.expenseAmount} />
+          <Text style={styles.expenseLabel}>This month's spending</Text>
         </View>
-        <Ripple
-          style={styles.actionButton}
-          onPress={() =>
-            navigation.navigate("WalletScreens", {
-              screen: "CreateExpense",
-              params: {
-                shouldOpenPhotoPicker: true,
+
+        <View style={styles.trendIndicator}>
+          <View
+            style={[
+              styles.trendBadge,
+              {
+                backgroundColor: Color(isIncreasing ? Colors.error : Colors.secondary)
+                  .alpha(0.12)
+                  .string(),
               },
-            })
-          }
-        >
-          <MaterialCommunityIcons name="camera" size={20} color={Colors.secondary} />
-          <Text style={styles.actionButtonText}>AI scan</Text>
-        </Ripple>
+            ]}
+          >
+            <MaterialCommunityIcons
+              name={isIncreasing ? "trending-up" : "trending-down"}
+              size={16}
+              color={isIncreasing ? Colors.error : Colors.secondary}
+            />
+            <Text style={[styles.trendValue, { color: isIncreasing ? Colors.error : Colors.secondary }]}>
+              {Math.abs(trendPercentage).toFixed(1)}%
+            </Text>
+          </View>
+          <Text style={styles.trendSubtext}>vs last month</Text>
+        </View>
       </View>
 
-      <WeeklyComparisonChart />
+      <View style={styles.metricsGrid}>
+        <MetricCard label="Days remaining" value={daysLeft.toString()} icon="calendar-clock" />
+        <MetricCard
+          label="Daily budget"
+          value={`${Math.abs(dailyBudgetLeft).toFixed(0)}zł`}
+          icon="wallet-outline"
+          status={isDailyBudgetNegative ? "error" : "neutral"}
+          prefix={isDailyBudgetNegative ? "-" : ""}
+        />
+        <MetricCard label="Total saved" value={`${savings.toFixed(0)}zł`} icon="piggy-bank" prefix="+" />
+      </View>
 
-      <ZeroExpenseStats />
+      <View
+        style={[
+          styles.targetProgress,
+          {
+            backgroundColor: Color(isOverBudget ? Colors.error : Colors.secondary)
+              .alpha(0.08)
+              .string(),
+          },
+        ]}
+      >
+        <View style={styles.targetContent}>
+          <MaterialCommunityIcons name="target" size={24} color={isOverBudget ? Colors.error : Colors.secondary} />
+          <Text style={[styles.targetLabel, { color: isOverBudget ? Colors.error : Colors.secondary }]}>
+            Monthly Target Progress {"\n"}of {targetAmount.toFixed(0)}zł target
+          </Text>
+          <Text style={[styles.targetPercentage, { color: isOverBudget ? Colors.error : Colors.secondary }]}>
+            {spentPercentage.toFixed(1)}%
+          </Text>
+        </View>
+      </View>
+
+      <View style={styles.chartSection}>
+        <WeeklyComparisonChart />
+        <ZeroExpenseStats />
+      </View>
     </Animated.View>
+  );
+};
+
+const MetricCard = ({
+  label,
+  value,
+  icon,
+  status = "neutral",
+  prefix = "",
+}: {
+  label: string;
+  value: string;
+  icon: keyof typeof MaterialCommunityIcons.glyphMap;
+  status?: "success" | "error" | "neutral";
+  prefix?: string;
+}) => {
+  const getStatusColor = () => {
+    switch (status) {
+      case "success":
+        return Colors.secondary;
+      case "error":
+        return Colors.error;
+      default:
+        return Colors.text_light;
+    }
+  };
+
+  return (
+    <View style={styles.metricCard}>
+      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 5 }}>
+        <MaterialCommunityIcons name={icon} size={18} color={Colors.secondary_light_2} />
+
+        <AnimatedNumber
+          style={[styles.metricValue, { color: getStatusColor() }]}
+          formatValue={(val) => (Number.isNaN(+val) ? val : (prefix ?? "") + val + "zł")}
+          value={Number.isNaN(Number(value)) ? +value.replace(/\D/g, "") : Number(value)}
+        />
+      </View>
+      <Text style={styles.metricLabel}>{label}</Text>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    padding: 0,
     backgroundColor: Colors.primary,
-    borderRadius: 24,
-    gap: 20,
-    flex: 1,
+    borderRadius: Rounded.xl,
+    overflow: "hidden",
+    width: Layout.screen.width - 30,
+    alignSelf: "center",
+    gap: 15,
   },
   loadingContainer: {
-    height: 400,
+    height: 420,
     backgroundColor: Colors.primary,
-    borderRadius: 24,
+    borderRadius: Rounded.xl,
+    width: Layout.screen.width - 30,
+    alignSelf: "center",
   },
-  header: {
+  primarySection: {
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "flex-start",
+    paddingTop: 25,
+    paddingBottom: 12,
+  },
+  expenseDisplay: {
+    flex: 1,
+  },
+  expenseAmount: {
+    ...Typography.display,
+    fontSize: 60,
+    letterSpacing: 1,
+    lineHeight: 60,
+    color: Colors.text_light,
+  },
+  expenseLabel: {
+    ...Typography.caption,
+    color: Colors.text_dark,
+    marginTop: Padding.xs,
+    textTransform: "uppercase",
+  },
+  trendIndicator: {
     alignItems: "flex-end",
+    marginTop: 10,
   },
-  title: {
-    fontSize: Sizing.text,
-    color: "#fff",
-    fontWeight: "600",
-  },
-  balance: {
-    fontSize: 48,
-    fontWeight: "bold",
-    color: Colors.text_light,
-    marginTop: 8,
-  },
-  currency: {
-    fontSize: 24,
-  },
-  actionButton: {
+  trendBadge: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: Color(Colors.secondary).alpha(0.1).string(),
-    padding: 8,
-    paddingLeft: 12,
-    borderRadius: 20,
-    marginBottom: 10,
-    gap: 8,
-  },
-  actionButtonText: {
-    color: Colors.secondary,
-    marginRight: 4,
-    fontSize: Sizing.tooltip,
-  },
-  sectionTitle: {
-    fontSize: Sizing.text,
-    fontWeight: "600",
-    color: Colors.text_light,
-    marginBottom: 12,
-  },
-  statsSection: {
-    marginTop: 8,
-  },
-  statsContainer: {
-    gap: 12,
-    paddingRight: 20,
-  },
-  statItem: {
-    padding: 20,
+    paddingHorizontal: Padding.m,
+    paddingVertical: Padding.xs,
     borderRadius: 15,
-    width: Dimensions.get("window").width * 0.4,
-    alignItems: "center",
+    gap: Padding.xs,
   },
-  statLabel: {
-    color: "#fff",
-    opacity: 0.9,
-    fontSize: 12,
-    marginTop: 8,
+  trendValue: {
+    ...Typography.body,
+    fontWeight: "600",
   },
-  statValue: {
-    fontSize: Sizing.text,
-    fontWeight: "bold",
-    marginTop: 4,
+  trendSubtext: {
+    ...Typography.overline,
+    color: Colors.text_dark,
+    marginTop: Padding.xs,
+    textTransform: "uppercase",
   },
-  transactionsSection: {
-    marginTop: 8,
-  },
-  transactionsList: {
-    gap: 12,
-    paddingRight: 20,
-  },
-  transactionCard: {
-    backgroundColor: Colors.primary_lighter,
-    padding: 16,
-    borderRadius: 16,
-    width: Dimensions.get("window").width * 0.75,
-  },
-  transactionHeader: {
+  metricsGrid: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 8,
+    gap: 20,
+    marginBottom: 16,
+    marginTop: 10,
   },
-  categoryContainer: {
+  metricCard: {
+    flex: 1,
+    alignItems: "center",
+    gap: Padding.xs,
+  },
+  metricIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: Rounded.m,
+    backgroundColor: Color(Colors.text_dark).alpha(0.1).string(),
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  metricValue: {
+    ...Typography.title,
+    fontSize: 20,
+    lineHeight: 24,
+  },
+  metricLabel: {
+    ...Typography.overline,
+    color: Colors.text_dark,
+    textAlign: "center",
+    textTransform: "uppercase",
+  },
+  targetProgress: {
+    padding: 15,
+    borderRadius: Rounded.l,
+    marginBottom: 16,
+  },
+  targetContent: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
+    marginBottom: 4,
   },
-  iconContainer: {
-    padding: 8,
-    borderRadius: 12,
-  },
-  categoryText: {
-    color: Colors.text_light,
-    fontSize: Sizing.text,
+  targetLabel: {
+    ...Typography.caption,
     fontWeight: "600",
+    textTransform: "uppercase",
+    flex: 1,
   },
-  amount: {
-    fontSize: Sizing.text,
-    fontWeight: "bold",
+  targetPercentage: {
+    ...Typography.title,
+    fontWeight: "700",
   },
-  transactionDate: {
-    color: Colors.text_light,
-    opacity: 0.7,
-    fontSize: Sizing.tooltip,
+  targetSubtext: {
+    ...Typography.caption,
+    color: Colors.text_dark,
+    textAlign: "center",
+  },
+  chartSection: {
+    gap: 12,
   },
 });
 

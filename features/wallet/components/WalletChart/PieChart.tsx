@@ -16,16 +16,21 @@ export default function PieChart(props: PieChartProps) {
   return (
     <GFTPieChart
       onPress={props.onPress}
-      animationDuration={1000}
       innerCircleColor={Colors.primary}
       showGradient
       donut
       radius={(Layout.screen.width - 30) / 2.6}
-      data={props.data.length !== 0 ? props.data : [{ label: "No data", value: 1, color: secondary_candidates[0] }]}
-      showText
-      isAnimated
-      focusOnPress
-      innerRadius={70}
+      data={
+        props.data.length !== 0
+          ? props.data.map((v) => ({ ...v, value: +v.value.toFixed(2) }))
+          : [{ label: "No data", value: 1, color: secondary_candidates[0] }]
+      }
+      textSize={15}
+      showValuesAsLabels
+      showValuesAsTooltipText
+      showTooltip
+      textColor="#fff"
+      innerRadius={90}
       centerLabelComponent={() => (
         <View>
           <Text

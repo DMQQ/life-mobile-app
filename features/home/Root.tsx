@@ -168,9 +168,10 @@ export default function Root({ navigation }: ScreenProps<"Root">) {
 
   const { data: home, refetch: refetchHome } = useQuery(GET_MAIN_SCREEN, {
     variables: {
-      range: [
-        moment().subtract(1, "day").startOf("week").format("YYYY-MM-DD"),
-        moment().subtract(1, "day").endOf("week").format("YYYY-MM-DD"),
+      range: [moment().startOf("month").format("YYYY-MM-DD"), moment().endOf("month").format("YYYY-MM-DD")],
+      lastRange: [
+        moment().subtract(1, "month").startOf("month").format("YYYY-MM-DD"),
+        moment().subtract(1, "month").endOf("month").format("YYYY-MM-DD"),
       ],
     },
     onCompleted: async (data) => {
@@ -234,12 +235,7 @@ export default function Root({ navigation }: ScreenProps<"Root">) {
         title={`Hello, ${user?.user?.email.split("@")[0]}`}
         buttons={[
           {
-            icon: (
-              <View>
-                <AntDesign name="bells" size={20} color="#fff" />
-                <NotificationBadge count={unreadCount} />
-              </View>
-            ),
+            icon: <AntDesign name="bells" size={20} color="#fff" />,
             onPress: handleNotificationPress,
           },
           {
@@ -258,12 +254,7 @@ export default function Root({ navigation }: ScreenProps<"Root">) {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         <AvailableBalanceWidget
-          data={{
-            wallet: data?.wallet,
-            statistics: {
-              weeklySpendings: data?.weeklySpendings,
-            },
-          }}
+          data={{ wallet: home?.wallet, statistics: home?.monthlySpendings, lastMonthSpendings: home?.lastMonthSpendings }}
           loading={loading}
         />
 
