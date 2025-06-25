@@ -1,11 +1,10 @@
 import Header from "@/components/ui/Header/Header";
 import Layout from "@/constants/Layout";
 import { AntDesign, FontAwesome, Ionicons } from "@expo/vector-icons";
-import { SafeAreaView, StyleSheet, Text, View } from "react-native";
+import { SafeAreaView, StyleSheet } from "react-native";
 import Ripple from "react-native-material-ripple";
 import Animated, {
   Extrapolation,
-  FadeIn,
   FadeOut,
   interpolate,
   useAnimatedScrollHandler,
@@ -29,13 +28,7 @@ const styles = StyleSheet.create({
     padding: 10,
     justifyContent: "center",
   },
-  header: {
-    width: Layout.screen.width,
-    height: 150,
-    alignItems: "center",
-    flexDirection: "row",
-    paddingHorizontal: 20,
-  },
+
   title: {
     fontSize: 60,
     fontWeight: "bold",
@@ -90,31 +83,6 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
     }
   }, [route.params?.expenseId]);
 
-  const animatedContainerStyle = useAnimatedStyle(
-    () => ({
-      height: interpolate(scrollY.value, [0, 200], [150, 0], Extrapolation.CLAMP),
-    }),
-    []
-  );
-
-  const animatedBalanceStyle = useAnimatedStyle(
-    () => ({
-      transform: [
-        {
-          scale: interpolate(scrollY.value, [0, 200], [1, 0.35], Extrapolation.CLAMP),
-        },
-      ],
-      top: interpolate(scrollY.value, [0, 200], [25, -73], Extrapolation.CLAMP),
-      left: interpolate(scrollY.value, [0, 200], [25, -20], Extrapolation.CLAMP),
-      width: interpolate(scrollY.value, [0, 200], [Layout.screen.width - 50, 100], Extrapolation.CLAMP),
-    }),
-    []
-  );
-
-  const animatedBalanceLabel = useAnimatedStyle(() => ({
-    opacity: interpolate(scrollY.value, [0, 100], [1, 0], Extrapolation.CLAMP),
-  }));
-
   const balance = loading && data?.wallet?.balance === undefined ? " ..." : (data?.wallet?.balance || 0).toFixed(2);
 
   const handleShowEditSheet = () => {
@@ -143,6 +111,9 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
       )}
 
       <Header
+        scrollY={scrollY}
+        animated={true}
+        subtitleStyles={{ textAlign: "center" }}
         buttons={[
           {
             onPress: () => {
@@ -165,21 +136,12 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
           },
         ]}
         goBack={false}
+        animatedValue={parseFloat(balance)}
+        animatedValueLoading={loading && data?.wallet?.balance === undefined}
+        animatedValueFormat={(value) => `${value.toFixed(2)}zł`}
+        animatedSubtitle="Current Balance (zł)"
+        onAnimatedTitleLongPress={handleShowEditSheet}
       />
-
-      <Animated.View style={[styles.header, animatedContainerStyle]}>
-        <Animated.View style={[{ position: "absolute", left: 25 }, animatedBalanceStyle]}>
-          <Ripple onLongPress={handleShowEditSheet}>
-            <AnimatedNumber
-              delay={250}
-              value={parseFloat(balance)}
-              style={[styles.title, animatedBalanceStyle]}
-              formatValue={(value) => `${value.toFixed(2)}zł`}
-            />
-            <Animated.Text style={[styles.balance, animatedBalanceLabel]}>Current Balance (zł)</Animated.Text>
-          </Ripple>
-        </Animated.View>
-      </Animated.View>
 
       {showSubscriptionsView ? (
         <SubscriptionList onScroll={onAnimatedScrollHandler} scrollY={scrollY} />

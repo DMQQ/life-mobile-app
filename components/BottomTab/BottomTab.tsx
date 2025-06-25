@@ -21,6 +21,7 @@ import moment from "moment";
 import BlurSurface from "../ui/BlurSurface";
 import { useEffect } from "react";
 import Feedback from "react-native-haptic-feedback";
+import lowOpacity from "@/utils/functions/lowOpacity";
 
 const styles = StyleSheet.create({
   container: {
@@ -52,6 +53,15 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.secondary,
     borderRadius: 22.5,
     opacity: 0.15,
+    shadowColor: Colors.secondary,
+    shadowOffset: {
+      width: 0,
+      height: 10,
+    },
+    shadowOpacity: 0.7,
+    shadowRadius: 16.0,
+
+    elevation: 24,
   },
   activeDot: {
     position: "absolute",
@@ -128,7 +138,21 @@ export default function BottomTab({ navigation, state, insets }: BottomTabBarPro
                 size={22.5}
                 name={props.iconName as any}
                 color={isActive ? Colors.secondary : "rgba(255,255,255,0.8)"}
-                style={{ marginBottom: 2.5, paddingVertical: 7.5 }}
+                style={{
+                  marginBottom: 2.5,
+                  paddingVertical: 7.5,
+                  ...(isActive && {
+                    shadowColor: Colors.secondary,
+                    shadowOffset: {
+                      width: 0,
+                      height: 10,
+                    },
+                    shadowOpacity: 0.7,
+                    shadowRadius: 16.0,
+
+                    elevation: 24,
+                  }),
+                }}
               />
             ) : (
               props.iconName

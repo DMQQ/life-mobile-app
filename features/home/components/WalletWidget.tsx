@@ -68,12 +68,7 @@ const AvailableBalanceWidget = ({ data, loading }: Props) => {
   return (
     <Animated.View style={styles.container} layout={LinearTransition.delay(200)}>
       <View style={styles.primarySection}>
-        <View style={styles.expenseDisplay}>
-          <AnimatedNumber value={stats.expense} formatValue={(val) => `-${val.toFixed(0)}zł`} style={styles.expenseAmount} />
-          <Text style={styles.expenseLabel}>This month's spending</Text>
-        </View>
-
-        <View style={styles.trendIndicator}>
+        {/* <View style={styles.trendIndicator}>
           <View
             style={[
               styles.trendBadge,
@@ -94,7 +89,7 @@ const AvailableBalanceWidget = ({ data, loading }: Props) => {
             </Text>
           </View>
           <Text style={styles.trendSubtext}>vs last month</Text>
-        </View>
+        </View> */}
       </View>
 
       <View style={styles.metricsGrid}>
@@ -169,7 +164,7 @@ const MetricCard = ({
 
         <AnimatedNumber
           style={[styles.metricValue, { color: getStatusColor() }]}
-          formatValue={(val) => (Number.isNaN(+val) ? val : (prefix ?? "") + val + "zł")}
+          formatValue={(val) => (!Number.isNaN(+value) ? val + "" : (prefix ?? "") + val + "zł")}
           value={Number.isNaN(Number(value)) ? +value.replace(/\D/g, "") : Number(value)}
         />
       </View>

@@ -104,27 +104,6 @@ const DateList = memo(({ selectedDate, setSelected, dayEvents, translateY, showM
 
   return (
     <View style={{ backgroundColor: Colors.primary }}>
-      {showMonth && (
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: Padding.m,
-          }}
-        >
-          <Text
-            style={{
-              color: "#ffffffda",
-              fontSize: 30,
-              padding: Padding.m,
-              fontWeight: "bold",
-            }}
-          >
-            {moment.months()[today.month()]} {moment(selectedDate).year()}
-          </Text>
-        </View>
-      )}
       <MonthSelectList selected={month} onPress={onMonthChange} />
       <Animated.View style={followWithTranslate}>
         <VirtualizedList

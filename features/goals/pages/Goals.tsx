@@ -1,18 +1,44 @@
 import { useGoal } from "../hooks/hooks";
-import { FlatList, View } from "react-native";
+import { FlatList, SafeAreaView, Text, View } from "react-native";
 import { GoalCategory } from "../components/GoalCategory";
 import Header from "@/components/ui/Header/Header";
 import { AntDesign } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Animated, { useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated";
+import { FlashList } from "@shopify/flash-list";
+
+const AnimatedFlashList = Animated.createAnimatedComponent(FlashList);
 
 export default function Goals({ navigation }: any) {
   const { goals } = useGoal();
 
-  const insets = useSafeAreaInsets();
+  const scrollY = useSharedValue(0);
+
+  const onAnimatedScrollHandler = useAnimatedScrollHandler(
+    {
+      onScroll(event) {
+        scrollY.value = event.contentOffset.y;
+      },
+    },
+    []
+  );
+
+  const renderGoalsContent = ({ contentStyle, labelStyle }: any) => (
+    <>
+      <Text style={[{ fontSize: 60, fontWeight: "bold", color: "#fff", letterSpacing: 1 }, contentStyle]}>Goals</Text>
+      <Animated.Text style={[{ color: "rgba(255,255,255,0.6)", fontSize: 16, textAlign: "center", opacity: 0.8 }, labelStyle]}>
+        {goals.length} Active Goals
+      </Animated.Text>
+    </>
+  );
 
   return (
-    <View style={{ padding: 0, flex: 1, marginTop: insets.top, paddingBottom: 70 }}>
+    <SafeAreaView style={{ padding: 0, flex: 1, paddingBottom: 70 }}>
       <Header
+        scrollY={scrollY}
+        animated={true}
+        animatedTitle="Goals"
+        animatedSubtitle="5 Active Goals"
         buttons={[
           {
             onPress: () => navigation.navigate("CreateGoal"),
@@ -20,11 +46,10 @@ export default function Goals({ navigation }: any) {
           },
         ]}
       />
-      <FlatList
-        contentContainerStyle={{ padding: 15 }}
+      <AnimatedFlashList
         data={goals}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item, index }) => (
+        estimatedItemSize={100}
+        renderItem={({ item, index }: any) => (
           <GoalCategory
             index={index}
             onPress={() => {
@@ -33,7 +58,15 @@ export default function Goals({ navigation }: any) {
             {...item}
           />
         )}
+        keyExtractor={(item: any) => item.id}
+        onScroll={onAnimatedScrollHandler}
+        contentContainerStyle={{
+          padding: 15,
+          paddingBottom: 100,
+        }}
+        scrollEventThrottle={16}
+        removeClippedSubviews
       />
-    </View>
+    </SafeAreaView>
   );
 }

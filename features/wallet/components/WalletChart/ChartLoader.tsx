@@ -65,7 +65,6 @@ const styles = StyleSheet.create({
   chartContainer: {
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 20,
   },
   chartRadius: {
     borderRadius: 1000,

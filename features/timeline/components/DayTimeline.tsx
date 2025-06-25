@@ -58,10 +58,15 @@ const CalendarTimetable = ({ events, selected, children, onScroll }: CustomTimel
   const maxHour = Math.max(...(events.map((v) => +trimTime(v.endTime, 1)) || []));
 
   return (
-    <Animated.ScrollView style={{ flex: 1 }} onScroll={onScroll} showsVerticalScrollIndicator={false}>
+    <Animated.ScrollView
+      style={{ flex: 1, paddingBottom: 100 }}
+      onScroll={onScroll}
+      showsVerticalScrollIndicator={false}
+      scrollEventThrottle={16}
+    >
       {children}
       <TimeTable
-        fromHour={minHour > 0 ? minHour - 1 : minHour}
+        fromHour={minHour > 0 ? minHour : minHour}
         toHour={maxHour < 23 ? maxHour + 1 : maxHour}
         date={moment(selected).toDate()}
         stickyHours

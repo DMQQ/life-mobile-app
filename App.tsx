@@ -13,6 +13,7 @@ import { getItemAsync } from "expo-secure-store";
 import { STORE_KEY } from "./utils/hooks/useUser";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import * as SplashScreen from "expo-splash-screen";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -68,17 +69,19 @@ const apolloClient = new ApolloClient({
 
 export default function App() {
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <ThemeContextProvider>
-        <ApolloProvider client={apolloClient}>
-          <SafeAreaView style={{ flex: 1, backgroundColor: Colors.primary }}>
-            <Provider store={store}>
-              <StatusBar backgroundColor={Colors.primary} />
-              <Navigation />
-            </Provider>
-          </SafeAreaView>
-        </ApolloProvider>
-      </ThemeContextProvider>
-    </GestureHandlerRootView>
+    <SafeAreaView style={{ flex: 1, backgroundColor: Colors.primary }}>
+      <ErrorBoundary>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <ThemeContextProvider>
+            <ApolloProvider client={apolloClient}>
+              <Provider store={store}>
+                <StatusBar backgroundColor={Colors.primary} />
+                <Navigation />
+              </Provider>
+            </ApolloProvider>
+          </ThemeContextProvider>
+        </GestureHandlerRootView>
+      </ErrorBoundary>
+    </SafeAreaView>
   );
 }

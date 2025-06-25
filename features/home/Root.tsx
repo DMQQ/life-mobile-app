@@ -12,7 +12,7 @@ import useOffline from "@/utils/hooks/useOffline";
 import SkeletonPlaceholder from "@/components/SkeletonLoader/Skeleton";
 import { View, Modal, TouchableOpacity, Text, StyleSheet, RefreshControl } from "react-native";
 import Layout from "@/constants/Layout";
-import Animated, { FadeIn, FadeOut, LinearTransition } from "react-native-reanimated";
+import Animated, { FadeIn, FadeOut, LinearTransition, useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated";
 import { useCallback, useState } from "react";
 import * as SplashScreen from "expo-splash-screen";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -227,12 +227,38 @@ export default function Root({ navigation }: ScreenProps<"Root">) {
     setShowSettings(false);
   };
 
+  const scrollY = useSharedValue(0);
+
+  const onAnimatedScrollHandler = useAnimatedScrollHandler(
+    {
+      onScroll(event) {
+        scrollY.value = event.contentOffset.y;
+      },
+    },
+    []
+  );
+
+  const targetAmount = home?.wallet?.income * (home?.wallet?.monthlyPercentageTarget / 100);
+  const spentPercentage = targetAmount ? (home?.monthlySpendings?.expense / targetAmount) * 100 : 0;
+  const trendPercentage = home?.lastMonthSpendings?.expense
+    ? ((home?.monthlySpendings?.expense - home?.lastMonthSpendings?.expense) / home?.lastMonthSpendings?.expense) * 100
+    : 0;
+  const isIncreasing = trendPercentage > 0;
+
   return (
     <Animated.View style={{ padding: 0, flex: 1, paddingTop: edge.top }} layout={LinearTransition.delay(100)}>
       {loading && <LoadingSkeleton />}
       <Header
-        titleAnimatedStyle={{}}
-        title={`Hello, ${user?.user?.email.split("@")[0]}`}
+        goBack={false}
+        animatedValue={parseFloat(home?.monthlySpendings?.expense || 0)}
+        animatedValueLoading={loading && data?.wallet?.balance === undefined}
+        animatedValueFormat={(value) => `-${value?.toFixed(2)}zł`}
+        animatedSubtitle={`Spent ${isIncreasing ? "↑" : "↓"} ${Math.abs(trendPercentage).toFixed(1)}% ${
+          isIncreasing ? "more" : "less"
+        } than last month`}
+        scrollY={scrollY}
+        animated={true}
+        subtitleStyles={{ textAlign: "center", color: Colors.secondary }}
         buttons={[
           {
             icon: <AntDesign name="bells" size={20} color="#fff" />,
@@ -245,7 +271,9 @@ export default function Root({ navigation }: ScreenProps<"Root">) {
         ]}
       />
 
-      <ScrollView
+      <Animated.ScrollView
+        scrollEventThrottle={16}
+        onScroll={onAnimatedScrollHandler}
         style={{ flex: 1 }}
         contentContainerStyle={{
           paddingHorizontal: 15,
@@ -261,7 +289,7 @@ export default function Root({ navigation }: ScreenProps<"Root">) {
         <TodaysTimelineEvents data={data?.timelineByCurrentDate} loading={loading} />
 
         {workout.isWorkoutPending && <WorkoutWidget />}
-      </ScrollView>
+      </Animated.ScrollView>
 
       <Modal
         visible={showNotifications}
