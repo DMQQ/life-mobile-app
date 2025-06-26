@@ -1,9 +1,9 @@
 import { View, Text, StyleSheet, StyleProp, ViewStyle } from "react-native";
 import moment from "moment";
-import Colors, { secondary_candidates } from "@/constants/Colors";
+import Colors from "@/constants/Colors";
 import Ripple from "react-native-material-ripple";
 import Animated, { AnimatedStyle, FadeIn, FadeOut, LinearTransition } from "react-native-reanimated";
-import { CategoryIcon, CategoryUtils, Icons } from "../ExpenseIcon";
+import { CategoryIcon, Icons } from "../ExpenseIcon";
 import { Expense } from "@/types";
 import { useState } from "react";
 import Feedback from "react-native-haptic-feedback";
@@ -30,28 +30,30 @@ interface WalletItemProps extends WalletElement {}
 
 const styles = StyleSheet.create({
   expense_item: {
-    height: 65,
-    borderRadius: 15,
+    height: 75,
+    borderRadius: 20,
     padding: 10,
     flexDirection: "row",
     backgroundColor: Colors.primary_lighter,
   },
   title: {
     color: "#fff",
-    fontSize: 15,
+    fontSize: 14,
     marginLeft: 10,
     fontWeight: "bold",
     marginBottom: 5,
+    textTransform: "capitalize",
   },
   icon_container: {
     padding: 7.5,
     justifyContent: "center",
   },
   date: {
-    color: "#9f9f9f",
-    fontSize: 10,
+    color: "rgba(255,255,255,0.65)",
+    fontSize: 11,
     marginLeft: 10,
-    lineHeight: 15,
+    lineHeight: 16,
+    fontWeight: "500",
   },
   price_container: {
     flex: 2,
@@ -82,24 +84,37 @@ const styles = StyleSheet.create({
   },
   expanded: {
     padding: 15,
-    borderRadius: 15,
+    borderRadius: 20,
     paddingTop: 20,
   },
 });
 
 export function parseDateToText(date: string) {
   const providedDate = moment(date);
-
   const today = moment();
-  const yesterday = moment().subtract(1, "days");
 
   if (providedDate.isSame(today, "day")) {
     return "Today";
   }
-  if (providedDate.isSame(yesterday, "day")) {
+  if (providedDate.isSame(today.clone().subtract(1, "days"), "day")) {
     return "Yesterday";
   }
-  return providedDate.format("YYYY-MM-DD");
+
+  return moment(date).format("DD MMM YYYY");
+}
+
+function dateFormatter(date: string) {
+  const providedDate = moment(date);
+  const today = moment();
+
+  if (providedDate.isSame(today, "day")) {
+    return "Today";
+  }
+  if (providedDate.isSame(today.clone().subtract(1, "days"), "day")) {
+    return "Yesterday";
+  }
+
+  return moment(date).fromNow();
 }
 
 export default function WalletItem(
@@ -129,7 +144,7 @@ export default function WalletItem(
           marginBottom: 15,
           position: "relative",
           backgroundColor: Colors.primary_lighter,
-          borderRadius: 15,
+          borderRadius: 20,
         },
         item.animatedStyle,
       ]}
@@ -153,32 +168,27 @@ export default function WalletItem(
           <Text style={styles.title} numberOfLines={1}>
             {item.description}
           </Text>
-          <View style={{ flexDirection: "row" }}>
-            <Text style={styles.date}>
-              {parseDateToText(item.date)}
-              {(item.category || item.subscription?.isActive) && " / "}
-              {CategoryUtils.getCategoryName(item.category)}
-              {item.category && item.subscription?.isActive && " / "}
-              {item.subscription?.isActive ? <Text style={{ color: secondary_candidates[0] }}>Subscription</Text> : ""}
-              {item.files && item.files.length > 0 && (
-                <>
-                  {" / "}
 
-                  <Text style={{ color: secondary_candidates[1] }}>
-                    {item.files.length} {item.files.length > 1 ? "files" : "file"}
-                  </Text>
-                </>
-              )}
-              {item.subexpenses && item.subexpenses?.length > 0 && (
-                <>
-                  {" / "}
-                  <Text style={{ color: secondary_candidates[2] }}>
-                    {item.subexpenses?.length} {item.subexpenses?.length > 1 ? "sub" : "subs"}
-                  </Text>
-                </>
-              )}
-            </Text>
-          </View>
+          <Text style={styles.date}>
+            {dateFormatter(item.date)}
+            {item.category && item.subscription?.isActive && " • "}
+            {item.subscription?.isActive ? <Text>Subscription</Text> : ""}
+            {item.files && item.files.length > 0 && (
+              <>
+                {" • "}
+
+                <Text>
+                  {item.files.length} {item.files.length > 1 ? "files" : "file"}
+                </Text>
+              </>
+            )}
+            {item.subexpenses && item.subexpenses?.length > 0 && (
+              <>
+                {" • "}
+                <Text>{item.subexpenses?.length} items</Text>
+              </>
+            )}
+          </Text>
         </View>
         {!isBalanceEdit && (
           <View style={[styles.price_container, { flexDirection: "row" }]}>
@@ -195,7 +205,7 @@ export default function WalletItem(
               ]}
             >
               {price}
-              <Text style={{ fontSize: 14 }}>zł</Text>
+              <Text style={{ fontSize: 12 }}>zł</Text>
             </Text>
           </View>
         )}
@@ -220,7 +230,7 @@ export default function WalletItem(
                 handlePress={() => {}}
                 animatedStyle={{ marginBottom: 5 }}
                 index={index}
-                containerStyle={{ marginBottom: 0, ...((item.subExpenseStyle as any) || {}) }}
+                containerStyle={{ marginBottom: 0, ...((item.subExpenseStyle as any) || {}), backgroundColor: Colors.primary_light }}
               />
             </Animated.View>
           ))}

@@ -1,3 +1,4 @@
+import lowOpacity from "@/utils/functions/lowOpacity";
 import Colors from "../../../constants/Colors";
 import { StyleSheet, ViewStyle } from "react-native";
 export const styles = StyleSheet.create({
@@ -30,14 +31,15 @@ export const BUTTON_TYPES = {
   flat: (backgroundColor: string): Return => ({ backgroundColor }),
   contained: (backgroundColor: string): Return => ({
     backgroundColor,
-    shadowColor: "#000",
+    shadowColor: lowOpacity(backgroundColor, 0.5),
     shadowOffset: {
-      width: 5,
-      height: 20,
+      width: 0,
+      height: 10,
     },
-    shadowOpacity: 1,
-    shadowRadius: 20.0,
-    // elevation: 30,
+    shadowOpacity: 0.7,
+    shadowRadius: 16.0,
+
+    elevation: 24,
   }),
   outlined: (mainColor: string): Return => ({
     borderWidth: 2,

@@ -289,8 +289,8 @@ const AIGeneratedFlashCards = ({ groupId }: { groupId: string }) => {
   const navigation = useNavigation<any>();
 
   const [queryFlashCard, state] = useLazyQuery(gql`
-    query GenerateFlashCards($prompt: String!) {
-      generateAIFlashcards(content: $prompt) {
+    query GenerateFlashCards($prompt: String!, $groupId: ID) {
+      generateAIFlashcards(content: $prompt, groupId: $groupId) {
         question
         answer
         explanation
@@ -359,7 +359,7 @@ const AIGeneratedFlashCards = ({ groupId }: { groupId: string }) => {
             return;
           }
           queryFlashCard({
-            variables: { prompt: promptContent },
+            variables: { prompt: promptContent, groupId },
           });
         }}
         icon={state.loading && <ActivityIndicator size="small" color={Colors.secondary} />}

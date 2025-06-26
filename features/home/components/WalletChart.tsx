@@ -1,276 +1,400 @@
-import { useMemo, useState } from "react";
-import { View, Text } from "react-native";
-import { LineChart } from "react-native-gifted-charts";
-import Layout from "@/constants/Layout";
+import { useMemo, useEffect } from "react";
+import { StyleSheet, Text, View } from "react-native";
 import Colors, { secondary_candidates } from "@/constants/Colors";
 import Color from "color";
 import { gql, useQuery } from "@apollo/client";
 import { AntDesign } from "@expo/vector-icons";
 import moment from "moment";
-import DateTimePicker from "react-native-modal-datetime-picker";
-import Ripple from "react-native-material-ripple";
-import { MenuView } from "@react-native-menu/menu";
+import Animated, { useSharedValue, useAnimatedStyle, withTiming, withDelay } from "react-native-reanimated";
 
-function WeeklyComparisonChart() {
-  const [dateRange, setDateRange] = useState<[string, string]>([
-    moment().subtract(1, "months").startOf("month").format("YYYY-MM-DD"),
-    moment().format("YYYY-MM-DD"),
-  ]);
-  const [showStartDatePicker, setShowStartDatePicker] = useState(false);
-  const [showEndDatePicker, setShowEndDatePicker] = useState(false);
+const labels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-  const query = useQuery(
-    gql`
-      query WeeklyComparison($startDate: String!, $endDate: String!) {
-        statisticsDailySpendings(startDate: $startDate, endDate: $endDate) {
-          total
-          date
-          day
-        }
-      }
-    `,
-    {
-      variables: {
-        startDate: dateRange[0],
-        endDate: dateRange[1],
-      },
+interface AnimatedBarProps {
+  value: number;
+  prevValue: number;
+  maxValue: number;
+  color: string;
+  label: string;
+  index: number;
+}
+
+const AnimatedBar = ({ value, prevValue, maxValue, color, label, index }: AnimatedBarProps) => {
+  const animatedHeight = useSharedValue(0);
+  const animatedPrevHeight = useSharedValue(0);
+  const animatedOpacity = useSharedValue(0);
+
+  const CHART_HEIGHT = 150;
+  const MIN_BAR_HEIGHT = 12;
+
+  const getBarHeight = (val: number): number => {
+    if (!val || !maxValue) return 0;
+    const proportion = val / maxValue;
+    return Math.max(proportion * CHART_HEIGHT, val > 0 ? MIN_BAR_HEIGHT : 0);
+  };
+
+  const targetHeight = getBarHeight(value);
+  const targetPrevHeight = getBarHeight(prevValue);
+
+  useEffect(() => {
+    animatedOpacity.value = withDelay(index * 100, withTiming(1, { duration: 400 }));
+    animatedHeight.value = withDelay(index * 100, withTiming(targetHeight, { duration: 600 }));
+
+    if (targetPrevHeight > 0) {
+      animatedPrevHeight.value = withDelay(index * 100, withTiming(targetPrevHeight, { duration: 600 }));
     }
+  }, [targetHeight, targetPrevHeight, index]);
+
+  const animatedBarStyle = useAnimatedStyle(() => ({
+    height: animatedHeight.value,
+    opacity: animatedOpacity.value,
+  }));
+
+  const animatedPrevBarStyle = useAnimatedStyle(() => ({
+    height: animatedPrevHeight.value,
+    opacity: animatedOpacity.value * 0.6,
+  }));
+
+  const animatedContainerStyle = useAnimatedStyle(() => ({
+    opacity: animatedOpacity.value,
+  }));
+
+  return (
+    <Animated.View style={[styles.barContainer, animatedContainerStyle]}>
+      <View style={styles.barWrapper}>
+        {prevValue > 0 && (
+          <Animated.View
+            style={[
+              styles.prevBar,
+              {
+                backgroundColor: Color(color).alpha(0.3).string(),
+                borderColor: Color(color).alpha(0.5).string(),
+              },
+              animatedPrevBarStyle,
+            ]}
+          />
+        )}
+        {value > 0 && (
+          <Animated.View
+            style={[
+              styles.currentBar,
+              {
+                backgroundColor: color,
+              },
+              animatedBarStyle,
+            ]}
+          />
+        )}
+      </View>
+      <Text style={[styles.dayLabel, { color }]}>{label}</Text>
+    </Animated.View>
   );
+};
 
-  const data = query?.data?.statisticsDailySpendings || [];
+const STATISTICS_DAY_OF_WEEK = gql`
+  query StatisticsDayOfWeek($startDate: String!, $endDate: String!) {
+    statisticsDayOfWeek(startDate: $startDate, endDate: $endDate) {
+      day
+      total
+    }
+  }
+`;
 
-  const { thisWeekData, lastWeekData } = useMemo(() => {
-    const processedData = data.map((item: any) => {
-      const timestamp = parseInt(item.date);
-      const date = new Date(timestamp);
-      const dayOfWeek = date.getDay();
-      const midDate = moment(dateRange[0]).add(moment(dateRange[1]).diff(moment(dateRange[0])) / 2, "milliseconds");
-      const isFirstHalf = moment(date).isBefore(midDate);
+interface CompactSpendingChartProps {}
+
+const CompactSpendingChart = ({}: CompactSpendingChartProps) => {
+  const dateRange = useMemo(() => [moment().subtract(1, "weeks").format("YYYY-MM-DD"), moment().format("YYYY-MM-DD")], []);
+
+  const previousDateRange = useMemo(() => {
+    return [moment(dateRange[0]).subtract(1, "weeks").format("YYYY-MM-DD"), moment(dateRange[1]).subtract(1, "weeks").format("YYYY-MM-DD")];
+  }, [dateRange]);
+
+  const query = useQuery(STATISTICS_DAY_OF_WEEK, { variables: { startDate: dateRange[0], endDate: dateRange[1] } });
+
+  const prevQuery = useQuery(STATISTICS_DAY_OF_WEEK, { variables: { startDate: previousDateRange[0], endDate: previousDateRange[1] } });
+
+  const { chartData, maxValue, total, prevTotal, percentageChange } = useMemo(() => {
+    const data = (query.data?.statisticsDayOfWeek || []) as any;
+    const prevData = (prevQuery.data?.statisticsDayOfWeek || []) as any;
+
+    const prevDataMap = new Map(prevData.map((item) => [item.day, item.total]));
+
+    const days = Array.from({ length: 7 }, (_, i) => {
+      const dayData = data.find((d) => d.day === i + 1);
+      const prevValue = prevDataMap.get(i + 1) || 0;
 
       return {
-        ...item,
-        actualDayOfWeek: dayOfWeek,
-        isFirstHalf,
-        dateObj: date,
+        label: labels[i],
+        value: dayData?.total || 0,
+        prevValue,
+        day: i + 1,
       };
     });
 
-    const firstHalfData = processedData.filter((d) => d.isFirstHalf);
-    const secondHalfData = processedData.filter((d) => !d.isFirstHalf);
+    const allValues = [...days.map((d) => d.value), ...days.map((d) => d.prevValue)].filter((v) => v > 0);
+    const maxVal = allValues.length > 0 ? Math.max(...allValues) * 1.2 : 100;
 
-    const dayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-
-    const createWeekData = (weekData: any[]) => {
-      const dayTotals = new Array(7).fill(0);
-      const dayCounts = new Array(7).fill(0);
-
-      weekData.forEach((expense: any) => {
-        const dayOfWeek = expense.actualDayOfWeek;
-        if (dayOfWeek >= 0 && dayOfWeek <= 6 && expense.total > 0) {
-          dayTotals[dayOfWeek] += expense.total;
-          dayCounts[dayOfWeek]++;
-        }
-      });
-
-      return dayTotals.map((total, index) => ({
-        value: dayCounts[index] > 0 ? Math.round(total / dayCounts[index]) : 0,
-        label: dayLabels[index],
-      }));
-    };
-
-    const firstFormatted = createWeekData(firstHalfData);
-    const secondFormatted = createWeekData(secondHalfData);
+    const currentTotal = data.reduce((acc, curr) => acc + curr.total, 0);
+    const previousTotal = prevData.reduce((acc, curr) => acc + curr.total, 0);
+    const change = previousTotal > 0 ? ((currentTotal - previousTotal) / previousTotal) * 100 : 0;
 
     return {
-      thisWeekData: secondFormatted,
-      lastWeekData: firstFormatted,
+      chartData: days,
+      maxValue: maxVal,
+      total: currentTotal,
+      prevTotal: previousTotal,
+      percentageChange: change,
     };
-  }, [data, dateRange]);
+  }, [query.data, prevQuery.data]);
 
-  const thisWeekTotal = thisWeekData.reduce((sum: number, d: any) => sum + d.value, 0);
-  const lastWeekTotal = lastWeekData.reduce((sum: number, d: any) => sum + d.value, 0);
-  const weekDifference = thisWeekTotal - lastWeekTotal;
-
-  const handleStartDateConfirm = (date: Date) => {
-    const formattedDate = moment(date).format("YYYY-MM-DD");
-    setDateRange([formattedDate, dateRange[1]]);
-    setShowStartDatePicker(false);
-  };
-
-  const handleEndDateConfirm = (date: Date) => {
-    const formattedDate = moment(date).format("YYYY-MM-DD");
-    setDateRange([dateRange[0], formattedDate]);
-    setShowEndDatePicker(false);
-  };
+  if (query.loading || prevQuery.loading) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>Loading...</Text>
+        </View>
+      </View>
+    );
+  }
 
   return (
-    <View style={{ marginVertical: 16 }}>
-      <View style={{ flex: 1, width: Layout.screen.width - 30 }}>
-        <LineChart
-          width={Layout.screen.width}
-          height={160}
-          data={thisWeekData}
-          data2={lastWeekData}
-          color1={secondary_candidates[1]}
-          color2={secondary_candidates[3]}
-          thickness1={2.8}
-          thickness2={2.8}
-          dataPointsRadius1={4.5}
-          dataPointsRadius2={4.5}
-          dataPointsColor1={secondary_candidates[1]}
-          dataPointsColor2={secondary_candidates[3]}
-          startFillColor1={secondary_candidates[1]}
-          endFillColor1={Color(secondary_candidates[1]).alpha(0.1).string()}
-          startOpacity1={0.4}
-          endOpacity1={0.1}
-          startFillColor2={secondary_candidates[3]}
-          endFillColor2={Color(secondary_candidates[3]).alpha(0.1).string()}
-          startOpacity2={0.3}
-          endOpacity2={0.05}
-          areaChart1
-          areaChart2
-          noOfSections={3}
-          yAxisTextStyle={{ color: "#fff", fontSize: 11, opacity: 0.6 }}
-          xAxisLabelTextStyle={{ color: "#fff", fontSize: 10, opacity: 0.8 }}
-          rulesColor={Color(Colors.primary).lighten(1.2).alpha(0.3).string()}
-          yAxisThickness={0}
-          xAxisThickness={0}
-          initialSpacing={30}
-          spacing={Layout.screen.width / 8}
-          isAnimated
-          curved
-          showDataPointOnFocus
-          showStripOnFocus
-          stripColor={Color(secondary_candidates[2]).alpha(0.5).string()}
-          maxValue={Math.max(...thisWeekData.map((d) => d.value), ...lastWeekData.map((d) => d.value)) * 1.15}
-        />
-      </View>
-
-      <View
-        style={{
-          backgroundColor: Color(Colors.primary).lighten(0.5).string(),
-          borderRadius: 12,
-          padding: 16,
-          marginTop: 16,
-          gap: 16,
-        }}
-      >
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <View style={{ flex: 1, alignItems: "center" }}>
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 4 }}>
-              <View style={{ width: 8, height: 3, backgroundColor: secondary_candidates[1], borderRadius: 1.5 }} />
-              <Text style={{ fontSize: 12, color: "#fff", opacity: 0.7 }}>Recent period</Text>
-            </View>
-            <Text style={{ fontSize: 18, fontWeight: "600", color: secondary_candidates[1] }}>{Math.round(thisWeekTotal / 7)}zł</Text>
-            <Text style={{ fontSize: 10, color: "#fff", opacity: 0.5 }}>daily average</Text>
-          </View>
-
-          <View style={{ flex: 1, alignItems: "center" }}>
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 4 }}>
-              <View style={{ width: 8, height: 3, backgroundColor: secondary_candidates[3], borderRadius: 1.5 }} />
-              <Text style={{ fontSize: 12, color: "#fff", opacity: 0.7 }}>Previous period</Text>
-            </View>
-            <Text style={{ fontSize: 18, fontWeight: "600", color: secondary_candidates[3] }}>{Math.round(lastWeekTotal / 7)}zł</Text>
-            <Text style={{ fontSize: 10, color: "#fff", opacity: 0.5 }}>daily average</Text>
-          </View>
-        </View>
-
-        <View
-          style={{
-            alignItems: "center",
-            paddingTop: 12,
-            borderTopWidth: 1,
-            borderTopColor: Color(Colors.primary).lighten(1).alpha(0.2).string(),
-          }}
-        >
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 12 }}>
-            <Text
-              style={{
-                fontSize: 16,
-                fontWeight: "600",
-                color: weekDifference >= 0 ? "#FF8A80" : "#4ECDC4",
-              }}
-            >
-              {weekDifference >= 0 ? "+" : ""}
-              {weekDifference}zł
-            </Text>
-            <Text style={{ fontSize: 12, color: "#fff", opacity: 0.6 }}>{weekDifference >= 0 ? "increase" : "decrease"} vs previous</Text>
-          </View>
-
-          <MenuView
-            onPressAction={(ev) => {
-              if (ev.nativeEvent.event === "1") {
-                setShowStartDatePicker(true);
-              } else if (ev.nativeEvent.event === "2") {
-                setShowEndDatePicker(true);
-              }
-            }}
-            title="Select date range"
-            themeVariant="dark"
-            actions={[
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <View style={styles.changeIndicator}>
+          <AntDesign
+            name={percentageChange >= 0 ? "caretup" : "caretdown"}
+            size={12}
+            color={percentageChange >= 0 ? "#FF8A80" : "#4ECDC4"}
+          />
+          <Text
+            style={[
+              styles.changeText,
               {
-                id: "1",
-                title: "Date start",
-                state: "off",
-                subtitle: moment(dateRange[0]).format("DD MMMM YYYY"),
-                image: "calendar",
-              },
-              {
-                id: "2",
-                title: "Date end",
-                state: "off",
-                subtitle: moment(dateRange[1]).format("DD MMMM YYYY"),
-                image: "calendar",
+                color: percentageChange >= 0 ? "#FF8A80" : "#4ECDC4",
               },
             ]}
           >
-            <Ripple
-              style={{
-                backgroundColor: Color(Colors.secondary).alpha(0.2).string(),
-                borderWidth: 1,
-                borderColor: Color(Colors.secondary).alpha(0.3).string(),
-                paddingHorizontal: 16,
-                paddingVertical: 8,
-                flexDirection: "row",
-                borderRadius: 8,
-                alignItems: "center",
-                gap: 8,
-              }}
-            >
-              <AntDesign name="clockcircleo" size={16} color={Colors.secondary} />
-              <Text style={{ color: Colors.secondary, fontSize: 12, fontWeight: "600" }}>
-                {moment(dateRange[0]).format("MMM DD")} - {moment(dateRange[1]).format("MMM DD, YYYY")}
-              </Text>
-            </Ripple>
-          </MenuView>
+            {Math.abs(Math.round(percentageChange))}% {percentageChange >= 0 ? "increase" : "decrease"} in this week
+          </Text>
         </View>
       </View>
 
-      <DateTimePicker
-        isVisible={showStartDatePicker}
-        mode="date"
-        onConfirm={handleStartDateConfirm}
-        onCancel={() => setShowStartDatePicker(false)}
-        date={moment(dateRange[0]).toDate()}
-        maximumDate={moment(dateRange[1]).toDate()}
-      />
+      <View style={styles.chartWrapper}>
+        <View style={styles.yAxisLabels}>
+          {[4, 3, 2, 1, 0].map((i) => {
+            const value = Math.round((maxValue / 4) * i);
+            return (
+              <Text key={i} style={styles.yAxisLabel}>
+                {value > 1000 ? `${(value / 1000).toFixed(1)}k` : value}
+              </Text>
+            );
+          })}
+        </View>
 
-      <DateTimePicker
-        isVisible={showEndDatePicker}
-        mode="date"
-        onConfirm={handleEndDateConfirm}
-        onCancel={() => setShowEndDatePicker(false)}
-        date={moment(dateRange[1]).toDate()}
-        minimumDate={moment(dateRange[0]).toDate()}
-      />
+        <View style={styles.chartContent}>
+          <View style={styles.gridLines}>
+            {[0, 1, 2, 3, 4].map((i) => (
+              <View key={i} style={[styles.gridLine, { bottom: (132 / 4) * i }]} />
+            ))}
+          </View>
+
+          <View style={styles.chartContainer}>
+            {chartData.map((item, index) => (
+              <AnimatedBar
+                key={index}
+                value={item.value}
+                prevValue={item.prevValue}
+                maxValue={maxValue}
+                color={secondary_candidates[index % secondary_candidates.length]}
+                label={item.label}
+                index={index}
+              />
+            ))}
+          </View>
+        </View>
+      </View>
+
+      <View style={styles.footer}>
+        <View style={styles.totalContainer}>
+          <Text style={styles.prevAmount}>{Math.round(prevTotal)}zł</Text>
+          <Text style={styles.totalLabel}>Last week</Text>
+        </View>
+
+        <View style={styles.tinyLegendContainer}>
+          <View style={styles.tinyLegendItem}>
+            <View style={[styles.tinyLegendDot, { backgroundColor: Color(secondary_candidates[0]).alpha(0.4).string() }]} />
+            <Text style={styles.tinyLegendText}>Previous</Text>
+          </View>
+          <View style={styles.tinyLegendItem}>
+            <View style={[styles.tinyLegendDot, { backgroundColor: secondary_candidates[0] }]} />
+            <Text style={styles.tinyLegendText}>Current</Text>
+          </View>
+        </View>
+
+        <View style={styles.totalContainer}>
+          <Text style={styles.totalAmount}>{Math.round(total)}zł</Text>
+          <Text style={styles.totalLabel}>This week</Text>
+        </View>
+      </View>
     </View>
   );
-}
+};
 
-export default WeeklyComparisonChart;
+const styles = StyleSheet.create({
+  container: {
+    paddingVertical: 4,
+    paddingHorizontal: 4,
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  title: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: Colors.text_light,
+  },
+  changeIndicator: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    position: "absolute",
+    right: 0,
+    top: 0,
+  },
+  changeText: {
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  chartWrapper: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+  },
+  yAxisLabels: {
+    width: 35,
+    height: 160,
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    paddingRight: 8,
+  },
+  yAxisLabel: {
+    color: Colors.text_light,
+    fontSize: 10,
+    opacity: 0.7,
+  },
+  chartContent: {
+    flex: 1,
+    position: "relative",
+  },
+  gridLines: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 160,
+  },
+  gridLine: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    height: 0.5,
+    backgroundColor: Color(Colors.secondary).lighten(0.8).alpha(0.2).string(),
+  },
+  chartContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-end",
+    height: 170,
+    marginBottom: 4,
+    paddingHorizontal: 8,
+  },
+  barContainer: {
+    alignItems: "center",
+    flex: 1,
+  },
+  barWrapper: {
+    width: 36,
+    height: 170,
+    justifyContent: "flex-end",
+    alignItems: "center",
+    position: "relative",
+  },
+  currentBar: {
+    width: "90%",
+    borderTopLeftRadius: 4,
+    borderTopRightRadius: 4,
+    position: "absolute",
+    bottom: 0,
+  },
+  prevBar: {
+    width: "90%",
+    borderTopLeftRadius: 3,
+    borderTopRightRadius: 3,
+    position: "absolute",
+    bottom: 0,
+    borderWidth: 1,
+  },
+  dayLabel: {
+    fontSize: 11,
+    fontWeight: "600",
+    marginTop: 3,
+  },
+  footer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 15,
+  },
+  totalContainer: {
+    alignItems: "center",
+  },
+  totalAmount: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: Colors.text_light,
+  },
+  prevAmount: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: Color(Colors.text_light).alpha(0.7).string(),
+  },
+  totalLabel: {
+    fontSize: 10,
+    color: Colors.text_light,
+    opacity: 0.6,
+  },
+  tinyLegendContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 20,
+  },
+  tinyLegendItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+  },
+  tinyLegendDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 10,
+  },
+  tinyLegendText: {
+    fontSize: 12,
+    color: Colors.text_light,
+    opacity: 0.6,
+    fontWeight: "500",
+  },
+  loadingContainer: {
+    height: 200,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    color: Colors.text_light,
+    fontSize: 14,
+    opacity: 0.7,
+  },
+});
+
+export default CompactSpendingChart;

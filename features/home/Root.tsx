@@ -12,7 +12,7 @@ import useOffline from "@/utils/hooks/useOffline";
 import SkeletonPlaceholder from "@/components/SkeletonLoader/Skeleton";
 import { View, Modal, TouchableOpacity, Text, StyleSheet, RefreshControl } from "react-native";
 import Layout from "@/constants/Layout";
-import Animated, { FadeIn, FadeOut, LinearTransition } from "react-native-reanimated";
+import Animated, { FadeIn, FadeOut, LinearTransition, useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated";
 import { useCallback, useState } from "react";
 import * as SplashScreen from "expo-splash-screen";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -168,9 +168,10 @@ export default function Root({ navigation }: ScreenProps<"Root">) {
 
   const { data: home, refetch: refetchHome } = useQuery(GET_MAIN_SCREEN, {
     variables: {
-      range: [
-        moment().subtract(1, "day").startOf("week").format("YYYY-MM-DD"),
-        moment().subtract(1, "day").endOf("week").format("YYYY-MM-DD"),
+      range: [moment().startOf("month").format("YYYY-MM-DD"), moment().endOf("month").format("YYYY-MM-DD")],
+      lastRange: [
+        moment().subtract(1, "month").startOf("month").format("YYYY-MM-DD"),
+        moment().subtract(1, "month").endOf("month").format("YYYY-MM-DD"),
       ],
     },
     onCompleted: async (data) => {
@@ -226,20 +227,41 @@ export default function Root({ navigation }: ScreenProps<"Root">) {
     setShowSettings(false);
   };
 
+  const scrollY = useSharedValue(0);
+
+  const onAnimatedScrollHandler = useAnimatedScrollHandler(
+    {
+      onScroll(event) {
+        scrollY.value = event.contentOffset.y;
+      },
+    },
+    []
+  );
+
+  const targetAmount = home?.wallet?.income * (home?.wallet?.monthlyPercentageTarget / 100);
+  const spentPercentage = targetAmount ? (home?.monthlySpendings?.expense / targetAmount) * 100 : 0;
+  const trendPercentage = home?.lastMonthSpendings?.expense
+    ? ((home?.monthlySpendings?.expense - home?.lastMonthSpendings?.expense) / home?.lastMonthSpendings?.expense) * 100
+    : 0;
+  const isIncreasing = trendPercentage > 0;
+
   return (
     <Animated.View style={{ padding: 0, flex: 1, paddingTop: edge.top }} layout={LinearTransition.delay(100)}>
       {loading && <LoadingSkeleton />}
       <Header
-        titleAnimatedStyle={{}}
-        title={`Hello, ${user?.user?.email.split("@")[0]}`}
+        goBack={false}
+        animatedValue={parseFloat(home?.monthlySpendings?.expense || 0)}
+        animatedValueLoading={loading && data?.wallet?.balance === undefined}
+        animatedValueFormat={(value) => `-${value?.toFixed(2)}zł`}
+        animatedSubtitle={`Spent ${isIncreasing ? "↑" : "↓"} ${Math.abs(trendPercentage).toFixed(1)}% ${
+          isIncreasing ? "more" : "less"
+        } than last month`}
+        scrollY={scrollY}
+        animated={true}
+        subtitleStyles={{ textAlign: "center", color: Colors.secondary }}
         buttons={[
           {
-            icon: (
-              <View>
-                <AntDesign name="bells" size={20} color="#fff" />
-                <NotificationBadge count={unreadCount} />
-              </View>
-            ),
+            icon: <AntDesign name="bells" size={20} color="#fff" />,
             onPress: handleNotificationPress,
           },
           {
@@ -249,7 +271,9 @@ export default function Root({ navigation }: ScreenProps<"Root">) {
         ]}
       />
 
-      <ScrollView
+      <Animated.ScrollView
+        scrollEventThrottle={16}
+        onScroll={onAnimatedScrollHandler}
         style={{ flex: 1 }}
         contentContainerStyle={{
           paddingHorizontal: 15,
@@ -258,19 +282,14 @@ export default function Root({ navigation }: ScreenProps<"Root">) {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         <AvailableBalanceWidget
-          data={{
-            wallet: data?.wallet,
-            statistics: {
-              weeklySpendings: data?.weeklySpendings,
-            },
-          }}
+          data={{ wallet: home?.wallet, statistics: home?.monthlySpendings, lastMonthSpendings: home?.lastMonthSpendings }}
           loading={loading}
         />
 
         <TodaysTimelineEvents data={data?.timelineByCurrentDate} loading={loading} />
 
         {workout.isWorkoutPending && <WorkoutWidget />}
-      </ScrollView>
+      </Animated.ScrollView>
 
       <Modal
         visible={showNotifications}

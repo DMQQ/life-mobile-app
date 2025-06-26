@@ -22,3 +22,4 @@ export { default as TimeKeeper } from "./ui/TimeKeeper/TimeKeeper";
 export { default as ValidatedInput } from "./ui/ValidatedInput/index";
 export { default as RangePicker } from "./ui/RangePicker";
 export { default as AnimatedNumber } from "./ui/AnimatedNumber";
+export { default as AnimatedSelector } from "./ui/AnimatedSelector";

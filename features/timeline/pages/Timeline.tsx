@@ -14,6 +14,8 @@ import { GetTimelineQuery } from "../hooks/query/useGetTimeLineQuery";
 import { TimelineScreenProps } from "../types";
 import DayTimeline from "../components/DayTimeline";
 import NotFound from "@/features/home/components/NotFound";
+import dayjs from "dayjs";
+import Layout from "@/constants/Layout";
 
 const ListHeaderComponent = memo(
   (
@@ -48,115 +50,117 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
     route,
   });
 
+  const scrollY = useSharedValue(0);
   const translateY = useSharedValue(0);
 
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
       const currentScrollY = event.contentOffset.y;
+      scrollY.value = currentScrollY;
       translateY.value = currentScrollY;
     },
   });
 
-  const animatedTitleStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(translateY.value, [0, 50], [0, 1]),
-  }));
+  const selectedDateFormatted = new Intl.DateTimeFormat("en-US", {
+    weekday: "long",
+    month: "short",
+    day: "numeric",
+  }).format(moment(timeline.selected).toDate());
+
+  const eventsCount = timeline.data?.timeline?.length || 0;
 
   return (
-    <>
-      <SafeAreaView style={{ flex: 1 }}>
-        <Header
-          title={new Intl.DateTimeFormat("en-US", {
-            weekday: "long",
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          }).format(moment(timeline.selected).toDate())}
-          titleAnimatedStyle={animatedTitleStyle}
-          buttons={[
-            {
-              onPress: timeline.onViewToggle,
-              icon:
-                timeline.switchView === "calendar" ? (
-                  <Ionicons name={"calendar-number"} size={20} color="#fff" />
-                ) : timeline.switchView === "date-list" ? (
-                  <FontAwesome name="list-alt" size={20} color="#fff" />
-                ) : (
-                  <MaterialIcons name="view-agenda" size={20} color="#fff" />
-                ),
-            },
-            {
-              icon: <AntDesign name="plus" size={20} color="#fff" />,
-              onPress: () => timeline.createTimeline(),
-            },
-          ]}
-        />
-        {timeline.switchView !== "timeline" ? (
-          <AnimatedVirtualizedList
-            ListHeaderComponent={<ListHeaderComponent translateY={translateY} navigation={navigation} {...timeline} />}
-            ListEmptyComponent={
-              timeline.loading ? (
-                <TimelineScreenLoader loading />
+    <SafeAreaView style={{ flex: 1 }}>
+      <Header
+        scrollY={scrollY}
+        animated={true}
+        buttons={[
+          {
+            onPress: timeline.onViewToggle,
+            icon:
+              timeline.switchView === "calendar" ? (
+                <Ionicons name={"calendar-number"} size={20} color="#fff" />
+              ) : timeline.switchView === "date-list" ? (
+                <FontAwesome name="list-alt" size={20} color="#fff" />
               ) : (
-                <View
-                  style={{
-                    padding: 25,
-                    flex: 1,
-                    justifyContent: "center",
-                    alignItems: "center",
-                    marginTop: 25,
-                  }}
-                >
-                  <NotFound selectedDate={timeline.selected} />
-                </View>
-              )
-            }
-            onScroll={scrollHandler}
-            contentContainerStyle={{
-              paddingHorizontal: 15,
-            }}
-            CellRendererComponent={({ index, style, ...rest }) => {
-              const newStyle = [style, { zIndex: -1 }];
-              return <View style={newStyle} {...rest} />;
-            }}
-            data={(timeline.data?.timeline as GetTimelineQuery[]) || []}
-            initialNumToRender={3}
-            keyExtractor={(item: any) => item.id}
-            getItem={(data, index) => data[index] as GetTimelineQuery}
-            getItemCount={(data) => data.length}
-            renderItem={({ item }: { item: GetTimelineQuery }): any => (
-              <TimelineItem
-                styles={{
-                  backgroundColor: Colors.primary_lighter,
-                  borderRadius: 15,
-                  padding: 20,
-                  marginBottom: 10,
-                  zIndex: 1,
+                <MaterialIcons name="view-agenda" size={20} color="#fff" />
+              ),
+          },
+          {
+            icon: <AntDesign name="plus" size={20} color="#fff" />,
+            onPress: () => timeline.createTimeline(),
+          },
+        ]}
+        animatedTitle={dayjs(timeline.selected).format("DD MMMM")}
+        animatedSubtitle={`${selectedDateFormatted} • ${eventsCount} Events`}
+      />
+      {timeline.switchView !== "timeline" ? (
+        <AnimatedVirtualizedList
+          ListHeaderComponent={<ListHeaderComponent translateY={translateY} navigation={navigation} {...timeline} />}
+          ListEmptyComponent={
+            timeline.loading ? (
+              <TimelineScreenLoader loading />
+            ) : (
+              <View
+                style={{
+                  padding: 25,
+                  flex: 1,
+                  justifyContent: "center",
+                  alignItems: "center",
+                  marginTop: 25,
                 }}
-                key={item.id}
-                location="timeline"
-                {...item}
-              />
-            )}
-          />
-        ) : (
-          <DayTimeline
-            onScroll={scrollHandler}
-            selected={timeline.selected}
-            date={timeline.selected}
-            events={timeline.data?.timeline || []}
-            theme={{}}
-          >
-            <View style={{ paddingHorizontal: 15, marginBottom: 50 }}>
-              <DateList
-                onMenuPress={() => timeline.setSwitchView("date-list")}
-                dayEvents={timeline.dayEventsSorted}
-                selectedDate={timeline.selected}
-                setSelected={timeline.setSelected}
-              />
-            </View>
-          </DayTimeline>
-        )}
-      </SafeAreaView>
-    </>
+              >
+                <NotFound selectedDate={timeline.selected} />
+              </View>
+            )
+          }
+          onScroll={scrollHandler}
+          contentContainerStyle={{
+            paddingHorizontal: 15,
+            paddingBottom: 100,
+          }}
+          CellRendererComponent={({ index, style, ...rest }) => {
+            const newStyle = [style, { zIndex: -1 }];
+            return <View style={newStyle} {...rest} />;
+          }}
+          data={(timeline.data?.timeline as GetTimelineQuery[]) || []}
+          initialNumToRender={3}
+          keyExtractor={(item: any) => item.id}
+          getItem={(data, index) => data[index] as GetTimelineQuery}
+          getItemCount={(data) => data.length}
+          renderItem={({ item }: { item: GetTimelineQuery }): any => (
+            <TimelineItem
+              styles={{
+                backgroundColor: Colors.primary_lighter,
+                borderRadius: 15,
+                padding: 20,
+                marginBottom: 10,
+                zIndex: 1,
+              }}
+              key={item.id}
+              location="timeline"
+              {...item}
+            />
+          )}
+        />
+      ) : (
+        <DayTimeline
+          onScroll={scrollHandler}
+          selected={timeline.selected}
+          date={timeline.selected}
+          events={timeline.data?.timeline || []}
+          theme={{}}
+        >
+          <View style={{ paddingHorizontal: 15, marginBottom: 50 }}>
+            <DateList
+              onMenuPress={() => timeline.setSwitchView("date-list")}
+              dayEvents={timeline.dayEventsSorted}
+              selectedDate={timeline.selected}
+              setSelected={timeline.setSelected}
+            />
+          </View>
+        </DayTimeline>
+      )}
+    </SafeAreaView>
   );
 }

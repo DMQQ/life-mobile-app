@@ -1,6 +1,6 @@
 import { gql, useMutation, useQuery } from "@apollo/client";
 import { Text, View, StyleSheet, ActivityIndicator, TouchableOpacity, ScrollView } from "react-native";
-import { CategoryUtils, Icons } from "./ExpenseIcon";
+import { CategoryIcon, CategoryUtils, Icons } from "./ExpenseIcon";
 import lowOpacity from "@/utils/functions/lowOpacity";
 import Colors, { secondary_candidates } from "@/constants/Colors";
 import Animated, { FadeIn, LinearTransition } from "react-native-reanimated";
@@ -18,6 +18,10 @@ import { useWalletContext } from "./WalletContext";
 import * as yup from "yup";
 import moment from "moment";
 import useGetStatistics from "../hooks/useGetStatistics";
+import { AnimatedSelector } from "@/components";
+import dayjs from "dayjs";
+import { AntDesign } from "@expo/vector-icons";
+import Color from "color";
 
 const validationSchema = yup.object().shape({
   category: yup.string().required("Category is required"),
@@ -26,8 +30,8 @@ const validationSchema = yup.object().shape({
 });
 
 const GET_LIMITS = gql`
-  query Limits($range: String!) {
-    limits(range: $range) {
+  query Limits($range: String!, $date: String) {
+    limits(range: $range, date: $date) {
       id
       category
       amount
@@ -45,10 +49,44 @@ const GET_WALLET = gql`
   }
 `;
 
+function makePreviousRange(range: string) {
+  const date = dayjs();
+  switch (range) {
+    case "daily":
+      return date.subtract(1, "day").format("YYYY-MM-DD");
+    case "weekly":
+      return date.subtract(1, "week").format("YYYY-MM-DD");
+    case "monthly":
+      return date.subtract(1, "month").format("YYYY-MM-DD");
+    case "yearly":
+      return date.subtract(1, "year").format("YYYY-MM-DD");
+    default:
+      return date.format("YYYY-MM-DD");
+  }
+}
+
 export default function WalletLimits() {
   const [selectedRange, setSelectedRange] = useState("monthly");
 
   const { data: limits, loading, error } = useQuery(GET_LIMITS, { variables: { range: selectedRange } });
+
+  const date = useMemo(() => makePreviousRange(selectedRange), [selectedRange]);
+
+  const { data: limitsLastRange } = useQuery(GET_LIMITS, {
+    variables: { range: selectedRange, date },
+    skip: !date,
+    fetchPolicy: "no-cache",
+  });
+
+  const prevMap = useMemo(
+    () =>
+      Object.entries(limitsLastRange?.limits || {}).reduce((acc, [key, value]) => {
+        //@ts-ignore
+        acc[value.category] = value?.current || 0;
+        return acc;
+      }, {} as Record<string, number>),
+    [limitsLastRange?.limits]
+  );
 
   // Get monthly budget data
   const { data: walletData } = useQuery(GET_WALLET);
@@ -149,19 +187,13 @@ export default function WalletLimits() {
           </Ripple>
         </View>
 
-        <View style={styles.tabContainer}>
-          {["daily", "weekly", "monthly", "yearly"].map((range) => (
-            <TouchableOpacity
-              key={range}
-              onPress={() => handleRangeChange(range)}
-              style={[styles.tabButton, selectedRange === range && styles.activeTabButton]}
-            >
-              <Text style={[styles.tabText, selectedRange === range && styles.activeTabText]}>
-                {range.charAt(0).toUpperCase() + range.slice(1)}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
+        {budgetStatus && (
+          <View style={{ flexDirection: "row", justifyContent: "center", marginBottom: 5 }}>
+            <Animated.Text style={[styles.budgetIndicator, { color: budgetStatus.color }]} entering={FadeIn}>
+              {budgetStatus.text}
+            </Animated.Text>
+          </View>
+        )}
       </View>
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -182,6 +214,8 @@ export default function WalletLimits() {
 
             const isSelected =
               filters.category === limit.category || (Array.isArray(filters.category) && filters.category.includes(limit.category));
+
+            const lightIcon = Color(iconData.backgroundColor).lighten(0.35).hex();
 
             return (
               <Animated.View
@@ -204,7 +238,7 @@ export default function WalletLimits() {
                   style={[
                     styles.limitCard,
                     {
-                      backgroundColor: lowOpacity(iconData.backgroundColor || color, 0.2),
+                      backgroundColor: lowOpacity(iconData.backgroundColor || color, 0.15),
                       flexDirection: compactMode ? "column" : "row",
                       padding: compactMode ? 15 : 22.5,
                     },
@@ -223,11 +257,29 @@ export default function WalletLimits() {
                   <View
                     style={[
                       styles.iconContainer,
-                      { backgroundColor: lowOpacity(iconData.backgroundColor || color, 0.2) },
+                      { backgroundColor: lowOpacity(iconData.backgroundColor || color, 0.1) },
                       compactMode && { marginRight: 0 },
                     ]}
                   >
-                    {iconData.icon}
+                    <Animated.View
+                      style={{
+                        position: "absolute",
+                        top: -7.5,
+                        left: -7.5,
+                        borderWidth: 1,
+                        padding: 2.5,
+                        borderRadius: 100,
+                        backgroundColor: lowOpacity(iconData.backgroundColor, 0.25),
+                        borderColor: iconData.backgroundColor,
+                      }}
+                    >
+                      {limit.current > prevMap[limit.category] ? (
+                        <AntDesign name="arrowup" size={12} color={lightIcon} />
+                      ) : (
+                        <AntDesign name="arrowdown" size={12} color={lightIcon} />
+                      )}
+                    </Animated.View>
+                    <CategoryIcon category={limit.category} type="expense" clear={false} size={20} />
                   </View>
 
                   <View style={styles.detailsContainer}>
@@ -271,6 +323,11 @@ export default function WalletLimits() {
                         ]}
                         numberOfLines={1}
                       >
+                        {/* {limit.current > prevMap[limit.category] ? (
+                          <AntDesign name="arrowup" size={12} color={isOverLimit ? "#F07070" : iconData.backgroundColor || color} />
+                        ) : (
+                          <AntDesign name="arrowdown" size={12} color={isOverLimit ? "#F07070" : iconData.backgroundColor || color} />
+                        )} */}
                         {((limit.current / limit.amount) * 100).toFixed(0)}%
                       </Text>
                     </View>
@@ -282,13 +339,15 @@ export default function WalletLimits() {
         )}
       </ScrollView>
 
-      {budgetStatus && (
-        <View style={{ flexDirection: "row", justifyContent: "center", marginBottom: 5 }}>
-          <Animated.Text style={[styles.budgetIndicator, { color: budgetStatus.color }]} entering={FadeIn}>
-            {budgetStatus.text}
-          </Animated.Text>
-        </View>
-      )}
+      <View style={styles.tabContainer}>
+        <AnimatedSelector
+          items={["daily", "weekly", "monthly", "yearly"]}
+          selectedItem={selectedRange}
+          onItemSelect={handleRangeChange}
+          containerStyle={{ backgroundColor: Colors.primary }}
+          scale={0.75}
+        />
+      </View>
 
       <Modal
         onBackdropPress={() => setCreateLimitModalVisible(false)}
@@ -388,6 +447,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "flex-start", // Changed from center to allow for budget indicator below
     marginBottom: 15,
+    height: 25,
   },
   header: {
     fontSize: 18,
@@ -401,9 +461,9 @@ const styles = StyleSheet.create({
   },
   tabContainer: {
     flexDirection: "row",
-    borderRadius: 20,
     overflow: "hidden",
-    backgroundColor: Colors.primary_light,
+    gap: 5,
+    justifyContent: "center",
   },
   tabButton: {
     paddingVertical: 6,
@@ -514,6 +574,8 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     fontSize: 12,
     fontWeight: "500",
-    minWidth: 32,
+    minWidth: 80,
+    textAlign: "center",
+    paddingRight: 7.5,
   },
 });

@@ -83,12 +83,7 @@ const AnimatedItem = ({
           {typeof value === "string" && isNaN(numericValue) ? (
             <Text style={styles.itemValue}>{value}</Text>
           ) : (
-            <AnimatedNumber
-              style={styles.itemValue}
-              value={numericValue}
-              step={formatType === "currency" ? numericValue / 25 : 1}
-              formatValue={getFormatValue()}
-            />
+            <AnimatedNumber style={styles.itemValue} value={numericValue} formatValue={getFormatValue()} />
           )}
           <Text style={styles.itemLabel}>{label}</Text>
         </View>
@@ -290,7 +285,7 @@ export default function ZeroExpenseStats() {
             formatType="currency"
             index={3}
           />
-          <AnimatedItem
+          {/* <AnimatedItem
             label="Longest streak"
             value={longestStreak ? getStreakLength(longestStreak.start, longestStreak.end) : 0}
             icon={<Ionicons name="flame" size={25} color={Colors.warning} />}
@@ -303,39 +298,41 @@ export default function ZeroExpenseStats() {
             icon={<Ionicons name="flame" size={25} color={Colors.error} />}
             formatType="number"
             index={5}
-          />
+          /> */}
         </View>
 
-        <Animated.View entering={FadeInDown.delay(75 * 6 + 50)} style={styles.streaksSection}>
-          <Text style={styles.sectionTitle}>Streak History</Text>
-          {data.streak.length === 0 ? (
-            <View style={styles.noStreaksContainer}>
-              <Text style={styles.noStreaksIcon}>🎯</Text>
-              <Text style={styles.noStreaksText}>No streaks recorded yet. Start your first streak today!</Text>
-              <Text style={styles.noStreaksSubtext}>A streak starts when you have consecutive days without expenses</Text>
-            </View>
-          ) : (
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              style={styles.streaksScrollView}
-              contentContainerStyle={styles.streaksScrollContent}
-            >
-              {[...data.streak]
-                .sort((a, b) => getStreakLength(b.start, b.end) - getStreakLength(a.start, a.end))
-                .slice(0, 8)
-                .map((s, index) => (
-                  <StreakTile
-                    key={`${s.start}-${s.end}`}
-                    streak={s}
-                    isLongest={index === 0}
-                    index={index}
-                    onPress={() => console.log("Streak details:", s)}
-                  />
-                ))}
-            </ScrollView>
-          )}
-        </Animated.View>
+        {data?.streak?.length > 0 && (
+          <Animated.View entering={FadeInDown.delay(75 * 6 + 50)} style={styles.streaksSection}>
+            <Text style={styles.sectionTitle}>Streak History {data?.streak?.length && `(${data.streak.length})`}</Text>
+            {data.streak.length === 0 ? (
+              <View style={styles.noStreaksContainer}>
+                <Text style={styles.noStreaksIcon}>🎯</Text>
+                <Text style={styles.noStreaksText}>No streaks recorded yet. Start your first streak today!</Text>
+                <Text style={styles.noStreaksSubtext}>A streak starts when you have consecutive days without expenses</Text>
+              </View>
+            ) : (
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={styles.streaksScrollView}
+                contentContainerStyle={styles.streaksScrollContent}
+              >
+                {[...data.streak]
+                  .sort((a, b) => getStreakLength(b.start, b.end) - getStreakLength(a.start, a.end))
+                  .slice(0, 8)
+                  .map((s, index) => (
+                    <StreakTile
+                      key={`${s.start}-${s.end}`}
+                      streak={s}
+                      isLongest={index === 0}
+                      index={index}
+                      onPress={() => console.log("Streak details:", s)}
+                    />
+                  ))}
+              </ScrollView>
+            )}
+          </Animated.View>
+        )}
       </ScrollView>
 
       <DateTimePicker
@@ -363,7 +360,7 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: Colors.primary,
     width: Layout.screen.width - 30,
-    marginTop: 25,
+    marginTop: 10,
   },
   loadingContainer: {
     backgroundColor: Colors.primary,

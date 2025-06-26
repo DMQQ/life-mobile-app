@@ -1,8 +1,8 @@
 import BottomSheet from "@gorhom/bottom-sheet";
 import { Expense, Wallet } from "@/types";
-import WalletItem, { WalletElement, parseDateToText } from "./WalletItem";
+import WalletItem, { parseDateToText } from "./WalletItem";
 import { useRef, useEffect, useMemo, useCallback, useState, memo } from "react";
-import { Text, NativeScrollEvent, View, StyleSheet, VirtualizedList, RefreshControl } from "react-native";
+import { Text, NativeScrollEvent, View, StyleSheet, RefreshControl } from "react-native";
 import Animated, { FadeIn, FadeInDown, FadeOutDown, LinearTransition, SharedValue } from "react-native-reanimated";
 import { NativeSyntheticEvent } from "react-native";
 import moment from "moment";
@@ -76,47 +76,27 @@ function WalletList(props: {
 
   const renderItem = useCallback(
     ({ item, index }: { item: { month: string; expenses: Expense[] }; index: number }) => (
-      <MonthExpenseList showTotal={!props.filtersActive} item={item} sheet={sheet} monthIndex={index} />
+      <MonthExpenseList item={item} monthIndex={index} />
     ),
     [props.filtersActive]
   );
 
   const [refreshing, setRefreshing] = useState(false);
 
-  const onRefresh = useCallback(() => {
+  const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    props.refetch();
-    setTimeout(() => {
-      setRefreshing(false);
-    }, 2000);
+    await props.refetch();
+
+    setRefreshing(false);
   }, []);
 
   return (
     <View style={{ flex: 1 }}>
-      {/* <AnimatedList
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-        ListHeaderComponent={<WalletLimits />}
-        onEndReached={props.onEndReached}
-        onEndReachedThreshold={5}
-        scrollEventThrottle={16}
-        removeClippedSubviews
-        onScroll={props.onScroll}
-        style={{ flex: 1 }}
-        contentContainerStyle={{
-          padding: 15,
-        }}
-        data={data || []}
-        keyExtractor={(expense: any, idx) => expense.month}
-        renderItem={renderItem as any}
-        getItem={(data, index) => data[index]}
-        getItemCount={(data) => data.length}
-      /> */}
-
       <AnimatedList
         data={data || []}
         estimatedItemSize={80}
         renderItem={renderItem as any}
-        keyExtractor={(item, index) => item.month}
+        keyExtractor={(item: any, index) => item.month}
         onScroll={props.onScroll}
         contentContainerStyle={{
           padding: 15,
@@ -190,24 +170,16 @@ const ClearFiltersButton = () => {
       style={{ position: "absolute", bottom: 60, width: Layout.screen.width, justifyContent: "center", alignItems: "center" }}
     >
       <Ripple style={styles.filtersButton} onPress={clearFilters}>
-        <Text style={{ color: Colors.secondary_light_2 }}>{diffCount > 0 ? `Reset filters (${diffCount})` : "Reset filters"}</Text>
+        <Text style={{ color: Colors.secondary_light_2 }}>
+          {diffCount > 0 ? `Reset (${diffCount}) ${diffCount > 1 ? "filters" : "filter"}` : "Reset filters"}
+        </Text>
         <AntDesign name="close" size={18} color={Colors.secondary_light_2} />
       </Ripple>
     </Animated.View>
   );
 };
 
-const MonthExpenseList = ({
-  item,
-  sheet,
-  showTotal = true,
-  monthIndex = 0,
-}: {
-  item: { month: string; expenses: Expense[] };
-  sheet: React.RefObject<BottomSheet>;
-  showTotal: boolean;
-  monthIndex?: number;
-}) => {
+const MonthExpenseList = ({ item, monthIndex = 0 }: { item: { month: string; expenses: Expense[] }; monthIndex?: number }) => {
   const diff = useQuery(
     gql`
       query getMonthTotal($date: String!) {
@@ -256,33 +228,27 @@ const MonthExpenseList = ({
       <View style={styles.monthRow}>
         <Text style={styles.monthText}>{moment(item.month).format("MMMM YYYY")}</Text>
 
-        {showTotal && (
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <Text style={{ color: amount > 0 ? "#66E875" : "#F07070", fontSize: 15 }}>
-              {amount > 0 ? `+${amount.toFixed(2)}` : amount.toFixed(2)}
-            </Text>
-
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <Text style={{ color: amount > 0 ? "#66E875" : "#F07070", fontSize: 17, fontWeight: "600" }}>
+            {amount > 0 ? `+${amount.toFixed(2)}` : amount.toFixed(2)}{" "}
             <Text style={{ color: amount > 0 ? "#66E875" : "#F07070", fontSize: 13 }}>zł</Text>
-          </View>
-        )}
+          </Text>
+        </View>
       </View>
       {items}
     </Animated.View>
   );
 };
 
-const ListItem = ({
-  item,
-  index,
-  expenses,
-  sum,
-}: {
+interface ListItemProps {
   item: Expense;
   index: number;
   expenses: Expense[];
   sum: [number, number];
   monthIndex?: number;
-}) => {
+}
+
+const ListItem = ({ item, index, expenses, sum }: ListItemProps) => {
   const hasPrevious = expenses?.[index - 1] !== undefined;
 
   const areDatesEqual = useMemo(() => {
@@ -296,40 +262,53 @@ const ListItem = ({
 
   const navigation = useNavigation<any>();
 
+  const onPress = useCallback(() => {
+    setCalendarDate(moment(item.date).toDate());
+    navigation.navigate("CreateExpense", {
+      date: moment(item.date).format("YYYY-MM-DD"),
+    });
+  }, [item.date]);
+
+  const handleNavigation = useCallback(() => {
+    navigation.navigate("Expense", {
+      expense: item,
+    });
+  }, [item]);
+
   return (
     <Animated.View entering={FadeIn.delay(100)} layout={LinearTransition.delay(100)}>
       {!areDatesEqual && (
-        <Ripple
-          onPress={() => {
-            setCalendarDate(moment(item.date).toDate());
-            navigation.navigate("CreateExpense", {
-              date: moment(item.date).format("YYYY-MM-DD"),
-            });
-          }}
-          style={[styles.dateTextContainer, { marginBottom: 15, marginTop: 10, alignItems: "center" }]}
-        >
+        <Ripple onPress={onPress} style={styles.dateTextContainer}>
           <Text style={styles.dateText}>{parseDateToText(item.date)}</Text>
 
           <View style={{ gap: 5, flexDirection: "row" }}>
             {sum[0] > 0 && (
-              <Text style={[styles.dateText, { color: "#F07070" }]}>{sum[0] > 0 ? `-${sum[0].toFixed(2)}` : sum[0].toFixed(2)} zł</Text>
+              <Text
+                style={{
+                  color: sum[0] > 0 ? "#F07070" : "#66E875",
+                  fontSize: 15,
+                  fontWeight: "600",
+                }}
+              >
+                {sum[0] > 0 ? `-${sum[0].toFixed(2)}` : sum[0].toFixed(2)} zł
+              </Text>
             )}
             {sum[0] > 0 && sum[1] > 0 && <Text style={styles.dateText}>/</Text>}
             {sum[1] > 0 && (
-              <Text style={[styles.dateText, { color: "#66E875" }]}>{sum[1] > 0 ? `+${sum[1].toFixed(2)}` : sum[1].toFixed(2)} zł</Text>
+              <Text
+                style={{
+                  color: sum[1] > 0 ? "#66E875" : "#F07070",
+                  fontSize: 15,
+                  fontWeight: "600",
+                }}
+              >
+                {sum[1] > 0 ? `+${sum[1].toFixed(2)}` : sum[1].toFixed(2)} zł
+              </Text>
             )}
           </View>
         </Ripple>
       )}
-      <WalletItem
-        index={index}
-        handlePress={() => {
-          navigation.navigate("Expense", {
-            expense: item,
-          });
-        }}
-        {...(item as any)}
-      />
+      <WalletItem index={index} handlePress={handleNavigation} {...(item as any)} />
     </Animated.View>
   );
 };
@@ -337,7 +316,7 @@ const ListItem = ({
 const styles = StyleSheet.create({
   monthText: {
     fontSize: 25,
-    fontWeight: "600",
+    fontWeight: "700",
     color: Colors.text_light,
   },
 
@@ -345,11 +324,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     padding: 5,
+    marginBottom: 15,
+    marginTop: 25,
+    alignItems: "center",
   },
 
   dateText: {
     color: "rgba(255,255,255,0.7)",
-    fontWeight: "400",
+    fontWeight: "600",
     fontSize: 15,
   },
 
@@ -366,7 +348,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 22.5,
     borderRadius: 50,
     borderWidth: 1,
-    borderColor: Colors.secondary_light_1,
+    borderColor: Color(Colors.secondary_light_1).darken(0.5).string(),
     backgroundColor: Color(Colors.secondary_light_1).darken(0.8).string(),
     flexDirection: "row",
     alignItems: "center",

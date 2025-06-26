@@ -8,33 +8,54 @@ import Ripple from "react-native-material-ripple";
 import { Group, useFlashCards, useGroups, useGroupStats } from "../hooks";
 import moment from "moment";
 import { useNavigation } from "@react-navigation/native";
-import Animated, { FadeIn } from "react-native-reanimated";
+import Animated, { FadeIn, useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated";
 import { ScreenProps } from "@/types";
+import { FlashList } from "@shopify/flash-list";
+
+const AnimatedFlashList = Animated.createAnimatedComponent(FlashList);
 
 export default function NotesScreen({ navigation }: ScreenProps<any>) {
   const { groups } = useGroups();
 
+  const scrollY = useSharedValue(0);
+
+  const onAnimatedScrollHandler = useAnimatedScrollHandler(
+    {
+      onScroll(event) {
+        scrollY.value = event.contentOffset.y;
+      },
+    },
+    []
+  );
+
   return (
-    <>
-      <SafeAreaView style={{ padding: 0, paddingBottom: 70 }}>
-        <Header
-          title="FlashCards"
-          buttons={[
-            {
-              icon: <AntDesign name="plus" size={20} color={"#fff"} />,
-              onPress: () => navigation.navigate("CreateFlashCardGroup"),
-            },
-          ]}
-          titleAnimatedStyle={{}}
-        />
-        <FlatList
-          style={{ paddingHorizontal: 15 }}
-          data={groups}
-          keyExtractor={(key) => key.id.toString()}
-          renderItem={({ item: group, index }) => <FlashCardGroup {...group} index={index} length={groups.length} />}
-        />
-      </SafeAreaView>
-    </>
+    <SafeAreaView style={{ padding: 0, paddingBottom: 70, flex: 1 }}>
+      <Header
+        scrollY={scrollY}
+        animated={true}
+        buttons={[
+          {
+            icon: <AntDesign name="plus" size={20} color={"#fff"} />,
+            onPress: () => navigation.navigate("CreateFlashCardGroup"),
+          },
+        ]}
+        animatedTitle="FlashCards"
+        animatedSubtitle={`${groups?.length || 0} Groups`}
+      />
+      <AnimatedFlashList
+        data={groups}
+        estimatedItemSize={150}
+        renderItem={({ item: group, index }: any) => <FlashCardGroup {...group} index={index} length={groups.length} />}
+        keyExtractor={(key: any) => key.id.toString()}
+        onScroll={onAnimatedScrollHandler}
+        contentContainerStyle={{
+          paddingHorizontal: 15,
+          paddingBottom: 100,
+        }}
+        scrollEventThrottle={16}
+        removeClippedSubviews
+      />
+    </SafeAreaView>
   );
 }
 
