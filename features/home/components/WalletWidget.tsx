@@ -49,49 +49,25 @@ const AvailableBalanceWidget = ({ data, loading }: Props) => {
   if (loading) return <View style={styles.loadingContainer} />;
 
   const { wallet, statistics: stats, lastMonthSpendings } = data;
-  const targetAmount = wallet.income * (wallet.monthlyPercentageTarget / 100);
-  const spentPercentage = targetAmount ? (stats.expense / targetAmount) * 100 : 0;
-  const trendPercentage = lastMonthSpendings.expense
-    ? ((stats.expense - lastMonthSpendings.expense) / lastMonthSpendings.expense) * 100
+
+  const targetAmount = wallet?.income * (wallet?.monthlyPercentageTarget / 100);
+  const spentPercentage = targetAmount ? (stats?.expense / targetAmount) * 100 : 0;
+  const trendPercentage = lastMonthSpendings?.expense
+    ? ((stats?.expense - lastMonthSpendings?.expense) / lastMonthSpendings?.expense) * 100
     : 0;
   const isIncreasing = trendPercentage > 0;
 
-  const remainingBudget = targetAmount - stats.expense;
+  const remainingBudget = targetAmount - stats?.expense;
   const now = new Date();
   const daysLeft = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate() - now.getDate();
   const dailyBudgetLeft = daysLeft > 0 ? remainingBudget / daysLeft : 0;
-  const savings = wallet.income - stats.expense;
+  const savings = wallet?.income - stats?.expense;
 
   const isOverBudget = spentPercentage > 100;
   const isDailyBudgetNegative = dailyBudgetLeft < 0;
 
   return (
     <Animated.View style={styles.container} layout={LinearTransition.delay(200)}>
-      <View style={styles.primarySection}>
-        {/* <View style={styles.trendIndicator}>
-          <View
-            style={[
-              styles.trendBadge,
-              {
-                backgroundColor: Color(isIncreasing ? Colors.error : Colors.secondary)
-                  .alpha(0.12)
-                  .string(),
-              },
-            ]}
-          >
-            <MaterialCommunityIcons
-              name={isIncreasing ? "trending-up" : "trending-down"}
-              size={16}
-              color={isIncreasing ? Colors.error : Colors.secondary}
-            />
-            <Text style={[styles.trendValue, { color: isIncreasing ? Colors.error : Colors.secondary }]}>
-              {Math.abs(trendPercentage).toFixed(1)}%
-            </Text>
-          </View>
-          <Text style={styles.trendSubtext}>vs last month</Text>
-        </View> */}
-      </View>
-
       <View style={styles.metricsGrid}>
         <MetricCard label="Days remaining" value={daysLeft.toString()} icon="calendar-clock" />
         <MetricCard

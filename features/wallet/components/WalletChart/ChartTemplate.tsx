@@ -92,7 +92,7 @@ export default function ChartTemplate({ children, title, description, types, ini
       </View>
 
       {types && types.length > 0 && (
-        <View style={{ marginBottom: 15, transform: [{ scale: 0.5 }] }}>
+        <View style={{ marginBottom: 15 }}>
           <AnimatedSelector
             items={types}
             selectedItem={type}
@@ -101,6 +101,7 @@ export default function ChartTemplate({ children, title, description, types, ini
             containerStyle={{
               backgroundColor: Colors.primary,
             }}
+            scale={1}
           />
         </View>
       )}
