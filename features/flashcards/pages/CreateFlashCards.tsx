@@ -1,4 +1,4 @@
-import { ActivityIndicator, FlatList, KeyboardAvoidingView, ScrollView, Text, View, TouchableOpacity } from "react-native";
+import { ActivityIndicator, FlatList, KeyboardAvoidingView, ScrollView, Text, View, TouchableOpacity, Keyboard } from "react-native";
 import * as DocumentPicker from "expo-document-picker";
 import Button from "@/components/ui/Button/Button";
 import Input from "@/components/ui/TextInput/TextInput";
@@ -162,7 +162,7 @@ const JSONImportForm = ({ groupId, navigation }: { groupId: string; navigation: 
   };
 
   return (
-    <View>
+    <View style={{ flex: 1 }}>
       <Button
         onPress={handleFilePicker}
         fontStyle={{ color: Colors.secondary }}
@@ -173,26 +173,36 @@ const JSONImportForm = ({ groupId, navigation }: { groupId: string; navigation: 
         Import from File
       </Button>
 
-      <Text style={{ color: "gray", fontSize: 12, marginTop: 15 }}>
-        Import flashcards from JSON file with format:{" "}
-        {JSON.stringify(
-          {
-            question: "What is React?",
-            answer: "A JavaScript library for building user interfaces.",
-            explanation: "React allows developers to create large web applications that can change data without reloading the page.",
-          },
-          null,
-          2
-        )}
+      <Text style={{ color: "gray", fontSize: 12, marginTop: 15 }} selectable>
+        Import flashcards from JSON file with format:{"\n"}
+        <View style={{ backgroundColor: Colors.primary_lighter, padding: 10, borderRadius: 15 }}>
+          <Text style={{ color: Colors.secondary_light_2 }}>
+            {JSON.stringify(
+              {
+                question: "What is React?",
+                answer: "A JavaScript library for building user interfaces.",
+                explanation: "React allows developers to create large web applications that can change data without reloading the page.",
+              },
+              null,
+              2
+            )}
+          </Text>
+        </View>
       </Text>
 
-      <View style={{ marginTop: 20 }}>
+      <ScrollView style={{ marginTop: 20, flex: 1 }}>
         <Input
           value={text}
           onChangeText={setText}
           placeholder="Or paste JSON here"
           multiline
           style={{ minHeight: 80, textAlignVertical: "top" }}
+          onEndEditing={() => {
+            Keyboard.dismiss();
+            if (text.trim() === "") {
+              handleSubmit();
+            }
+          }}
         />
 
         {!!text && (
@@ -207,7 +217,7 @@ const JSONImportForm = ({ groupId, navigation }: { groupId: string; navigation: 
             {isValid ? "✓ Valid JSON" : "✗ Invalid JSON"}
           </Text>
         )}
-      </View>
+      </ScrollView>
 
       <Button
         icon={loading && <ActivityIndicator size="small" color={"#fff"} />}
@@ -363,7 +373,7 @@ const AIGeneratedFlashCards = ({ groupId }: { groupId: string }) => {
           });
         }}
         icon={state.loading && <ActivityIndicator size="small" color={Colors.secondary} />}
-        fontStyle={{ color: Colors.secondary, fontWeight: "600" }}
+        fontStyle={{ color: Colors.secondary, fontWeight: "600", paddingHorizontal: 10 }}
         style={{
           backgroundColor: lowOpacity(Colors.secondary, 0.15),
           marginTop: 15,

@@ -106,13 +106,14 @@ export default function SubscriptionItem({ subscription, index, onPress }: Subsc
       ]}
     >
       <Ripple
-        onPress={() => {
+        onLongPress={() => {
           if (subscription.expenses.length > 0) {
             Feedback.trigger("impactLight");
             setIsExpanded(!isExpanded);
-          } else {
-            onPress();
           }
+        }}
+        onPress={() => {
+          onPress();
         }}
         style={styles.subscriptionItem}
       >

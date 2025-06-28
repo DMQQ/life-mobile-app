@@ -1,16 +1,7 @@
 import Header from "@/components/ui/Header/Header";
-import Layout from "@/constants/Layout";
 import { AntDesign, FontAwesome, Ionicons } from "@expo/vector-icons";
 import { SafeAreaView, StyleSheet } from "react-native";
-import Ripple from "react-native-material-ripple";
-import Animated, {
-  Extrapolation,
-  FadeOut,
-  interpolate,
-  useAnimatedScrollHandler,
-  useAnimatedStyle,
-  useSharedValue,
-} from "react-native-reanimated";
+import Animated, { FadeOut, useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated";
 import { WalletScreens } from "../Main";
 import EditBalanceSheet from "../components/Sheets/EditBalanceSheet";
 import WalletList from "../components/Wallet/WalletList";
@@ -21,7 +12,6 @@ import { useEffect, useState } from "react";
 import SubscriptionList from "../components/Wallet/SubscriptionList";
 import WalletLoader from "../components/WalletLoader";
 import Colors from "@/constants/Colors";
-import { AnimatedNumber } from "@/components";
 
 const styles = StyleSheet.create({
   container: {

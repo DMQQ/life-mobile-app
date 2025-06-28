@@ -6,6 +6,7 @@ import SubscriptionItem from "./SubscriptionItem";
 import Animated, { SharedValue } from "react-native-reanimated";
 import WalletLimits from "../Limits";
 import { RefreshControl } from "react-native-gesture-handler";
+import { useNavigation } from "@react-navigation/native";
 
 interface Subscription {
   id: string;
@@ -70,6 +71,8 @@ export default function SubscriptionList({ onScroll, contentContainerStyle }: Su
 
   const [refreshing, setRefreshing] = useState(false);
 
+  const navigation = useNavigation();
+
   const onRefresh = useCallback(() => {
     setRefreshing(true);
     refetch();
@@ -127,6 +130,9 @@ export default function SubscriptionList({ onScroll, contentContainerStyle }: Su
               index={index}
               onPress={() => {
                 console.log("Subscription pressed:", subscription.id);
+                navigation.navigate("Subscription", {
+                  subscriptionId: subscription.id,
+                });
               }}
             />
           ))}

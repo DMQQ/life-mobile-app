@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState } from "react";
 import { View, Text, ScrollView, StyleSheet, ActivityIndicator } from "react-native";
 import { useQuery, gql } from "@apollo/client";
 import moment from "moment";
@@ -6,11 +6,11 @@ import Ripple from "react-native-material-ripple";
 import { AntDesign, MaterialIcons, Ionicons, FontAwesome5 } from "@expo/vector-icons";
 import { MenuView } from "@react-native-menu/menu";
 import DateTimePicker from "react-native-modal-datetime-picker";
-import Animated, { FadeInDown, FadeIn, FadeOut } from "react-native-reanimated";
+import Animated, { FadeInDown, FadeIn } from "react-native-reanimated";
 import Colors from "@/constants/Colors";
 import Layout from "@/constants/Layout";
 import { AnimatedNumber } from "@/components";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useRefresh } from "@/utils/context/RefreshContext";
 
 interface ZeroExpenseStreak {
   start: string;
@@ -47,6 +47,7 @@ const getStreakLength = (start: string, end: string): number => {
 const AnimatedItem = ({
   label,
   value,
+  previousValue,
   icon,
   formatType = "currency",
   width,
@@ -54,6 +55,7 @@ const AnimatedItem = ({
 }: {
   label: string;
   value: number | string;
+  previousValue?: number;
   icon?: React.ReactNode;
   formatType?: "currency" | "percentage" | "number" | "days";
   width?: number;
@@ -75,17 +77,38 @@ const AnimatedItem = ({
     }
   };
 
+  const getComparisonText = () => {
+    if (previousValue === undefined || previousValue === 0) return null;
+
+    const formatValue = getFormatValue();
+    const change = ((numericValue - previousValue) / previousValue) * 100;
+    const isPositive = change > 0;
+    const isNeutral = Math.abs(change) < 0.1;
+
+    if (isNeutral) return `vs ${formatValue(previousValue)}`;
+
+    const arrow = isPositive ? "↗" : "↘";
+    const color = isPositive ? "#4CAF50" : "#F44336";
+
+    return (
+      <Text style={[styles.comparisonText, { color }]}>
+        {arrow} vs {formatValue(previousValue)}
+      </Text>
+    );
+  };
+
   return (
     <Animated.View entering={FadeInDown.delay(index * 75)}>
-      <Ripple style={[styles.item, { width: width || (Layout.screen.width - 30 - 10) / 2 }]}>
+      <Ripple style={[styles.item, { width: width || (Layout.screen.width - 30 - 10) / 2, height: 90 }]}>
         <Animated.View entering={FadeIn.delay((index + 1) * 85)}>{icon}</Animated.View>
-        <View>
+        <View style={styles.itemContent}>
           {typeof value === "string" && isNaN(numericValue) ? (
             <Text style={styles.itemValue}>{value}</Text>
           ) : (
             <AnimatedNumber style={styles.itemValue} value={numericValue} formatValue={getFormatValue()} />
           )}
           <Text style={styles.itemLabel}>{label}</Text>
+          {getComparisonText()}
         </View>
       </Ripple>
     </Animated.View>
@@ -138,31 +161,40 @@ const StreakTile = ({
 
 export default function ZeroExpenseStats() {
   const [dateRange, setDateRange] = useState<[string, string]>([
-    moment().subtract(3, "weeks").format("YYYY-MM-DD"),
+    moment().startOf("month").format("YYYY-MM-DD"),
     moment().format("YYYY-MM-DD"),
   ]);
   const [showStartDatePicker, setShowStartDatePicker] = useState(false);
   const [showEndDatePicker, setShowEndDatePicker] = useState(false);
 
+  const lastMonthRange = useMemo<[string, string]>(() => {
+    const currentStart = moment(dateRange[0]);
+    const currentEnd = moment(dateRange[1]);
+    const daysDiff = currentEnd.diff(currentStart, "days");
+
+    const lastMonthEnd = currentStart.clone().subtract(1, "day");
+    const lastMonthStart = lastMonthEnd.clone().subtract(daysDiff, "days");
+
+    return [lastMonthStart.format("YYYY-MM-DD"), lastMonthEnd.format("YYYY-MM-DD")];
+  }, [dateRange]);
+
   const {
     data: zeroSpendings,
     loading,
     error,
+    refetch,
   } = useQuery(GET_ZERO_SPENDINGS, {
     variables: { startDate: dateRange[0], endDate: dateRange[1] },
-    onError: (error) => console.error("Zero spendings query error:", error),
   });
 
-  const data: ZeroExpenseDays | null = zeroSpendings?.statisticsZeroExpenseDays;
+  const { data: lastMonthSpendings, refetch: refetchZeroLast } = useQuery(GET_ZERO_SPENDINGS, {
+    variables: { startDate: lastMonthRange[0], endDate: lastMonthRange[1] },
+  });
 
-  const longestStreak = useMemo(() => {
-    if (!data?.streak?.length) return null;
-    return data.streak.reduce((longest, current) => {
-      const currentLength = getStreakLength(current.start, current.end);
-      const longestLength = getStreakLength(longest.start, longest.end);
-      return currentLength > longestLength ? current : longest;
-    });
-  }, [data?.streak]);
+  useRefresh([refetch, refetchZeroLast], [dateRange]);
+
+  const data: ZeroExpenseDays | null = zeroSpendings?.statisticsZeroExpenseDays;
+  const lastMonthData: ZeroExpenseDays | null = lastMonthSpendings?.statisticsZeroExpenseDays;
 
   const currentStreak = useMemo(() => {
     if (!data?.streak?.length) return null;
@@ -171,7 +203,10 @@ export default function ZeroExpenseStats() {
   }, [data?.streak]);
 
   const totalDays = moment(dateRange[1]).diff(moment(dateRange[0]), "days") + 1;
+  const lastMonthTotalDays = moment(lastMonthRange[1]).diff(moment(lastMonthRange[0]), "days") + 1;
+
   const successRate = data ? (data.days.length / totalDays) * 100 : 0;
+  const lastMonthSuccessRate = lastMonthData ? (lastMonthData.days.length / lastMonthTotalDays) * 100 : 0;
 
   const handleStartDateConfirm = (date: Date) => {
     const formattedDate = moment(date).format("YYYY-MM-DD");
@@ -258,8 +293,9 @@ export default function ZeroExpenseStats() {
 
         <View style={styles.statsGrid}>
           <AnimatedItem
-            label="Zero expense days"
-            value={data.days.length}
+            label="No spending days"
+            value={data.days.length + "d"}
+            previousValue={lastMonthData?.days.length}
             icon={<MaterialIcons name="event-available" size={25} color={Colors.secondary} />}
             formatType="number"
             index={0}
@@ -267,6 +303,7 @@ export default function ZeroExpenseStats() {
           <AnimatedItem
             label="Success rate"
             value={successRate}
+            previousValue={lastMonthSuccessRate}
             icon={<Ionicons name="trending-up" size={25} color="lightgreen" />}
             formatType="percentage"
             index={1}
@@ -274,6 +311,7 @@ export default function ZeroExpenseStats() {
           <AnimatedItem
             label="Money saved"
             value={data.saved}
+            previousValue={lastMonthData?.saved}
             icon={<FontAwesome5 name="piggy-bank" size={25} color="lightgreen" />}
             formatType="currency"
             index={2}
@@ -281,24 +319,11 @@ export default function ZeroExpenseStats() {
           <AnimatedItem
             label="Avg saved/day"
             value={data.avg}
+            previousValue={lastMonthData?.avg}
             icon={<MaterialIcons name="attach-money" size={25} color={Colors.warning} />}
             formatType="currency"
             index={3}
           />
-          {/* <AnimatedItem
-            label="Longest streak"
-            value={longestStreak ? getStreakLength(longestStreak.start, longestStreak.end) : 0}
-            icon={<Ionicons name="flame" size={25} color={Colors.warning} />}
-            formatType="days"
-            index={4}
-          />
-          <AnimatedItem
-            label="Total streaks"
-            value={data.streak.length}
-            icon={<Ionicons name="flame" size={25} color={Colors.error} />}
-            formatType="number"
-            index={5}
-          /> */}
         </View>
 
         {data?.streak?.length > 0 && (
@@ -448,6 +473,9 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary_light,
     borderRadius: 15,
   },
+  itemContent: {
+    flex: 1,
+  },
   itemValue: {
     color: "#fff",
     fontSize: 16,
@@ -457,6 +485,11 @@ const styles = StyleSheet.create({
     color: "grey",
     fontSize: 12,
     marginTop: 2,
+  },
+  comparisonText: {
+    fontSize: 12,
+    marginTop: 1,
+    fontWeight: "500",
   },
   sectionTitle: {
     color: "#fff",

@@ -48,14 +48,10 @@ interface Props {
 const AvailableBalanceWidget = ({ data, loading }: Props) => {
   if (loading) return <View style={styles.loadingContainer} />;
 
-  const { wallet, statistics: stats, lastMonthSpendings } = data;
+  const { wallet, statistics: stats } = data;
 
   const targetAmount = wallet?.income * (wallet?.monthlyPercentageTarget / 100);
   const spentPercentage = targetAmount ? (stats?.expense / targetAmount) * 100 : 0;
-  const trendPercentage = lastMonthSpendings?.expense
-    ? ((stats?.expense - lastMonthSpendings?.expense) / lastMonthSpendings?.expense) * 100
-    : 0;
-  const isIncreasing = trendPercentage > 0;
 
   const remainingBudget = targetAmount - stats?.expense;
   const now = new Date();
@@ -133,13 +129,15 @@ const MetricCard = ({
     }
   };
 
+  const color = getStatusColor();
+
   return (
     <View style={styles.metricCard}>
       <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 5 }}>
-        <MaterialCommunityIcons name={icon} size={18} color={Colors.secondary_light_2} />
+        <MaterialCommunityIcons name={icon} size={18} color={status === "neutral" ? Colors.secondary_light_1 : color} />
 
         <AnimatedNumber
-          style={[styles.metricValue, { color: getStatusColor() }]}
+          style={[styles.metricValue, { color: color }]}
           formatValue={(val) => (!Number.isNaN(+value) ? val + "" : (prefix ?? "") + val + "zł")}
           value={Number.isNaN(Number(value)) ? +value.replace(/\D/g, "") : Number(value)}
         />

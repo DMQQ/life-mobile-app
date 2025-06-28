@@ -283,7 +283,7 @@ const quickActions: QuickActionsMap = {
   ],
 };
 
-export default function AddGoalEntry({ route, navigation }: AddGoalEntryProps) {
+export default function AddGoalEntry({ route, navigation }: any) {
   const { id } = route.params;
   const { goals, upsertStats } = useGoal();
   const goal = goals.find((goal: Goal) => goal.id === id);

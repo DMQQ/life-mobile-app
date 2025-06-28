@@ -1,21 +1,59 @@
-import { FlatList, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import Colors from "@/constants/Colors";
 import Header from "@/components/ui/Header/Header";
 import { AntDesign } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Ripple from "react-native-material-ripple";
 
-import { Group, useFlashCards, useGroups, useGroupStats } from "../hooks";
+import { Group, useGroups, useGroupStats } from "../hooks";
 import moment from "moment";
 import { useNavigation } from "@react-navigation/native";
-import Animated, { FadeIn, useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated";
+import Animated, { FadeIn, FadeOut, useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated";
 import { ScreenProps } from "@/types";
 import { FlashList } from "@shopify/flash-list";
+import { Skeleton } from "@/components";
 
 const AnimatedFlashList = Animated.createAnimatedComponent(FlashList);
 
+const AnimatedLoader = () => {
+  return (
+    <Animated.View
+      exiting={FadeOut.duration(250)}
+      style={[
+        StyleSheet.absoluteFillObject,
+        {
+          backgroundColor: Colors.primary,
+          zIndex: 1000,
+          justifyContent: "center",
+          alignItems: "center",
+          paddingTop: 125,
+        },
+      ]}
+    >
+      <Skeleton>
+        <View style={{ flex: 1, paddingHorizontal: 15 }}>
+          <View style={{ alignItems: "flex-end" }}>
+            <Skeleton.Item width={25} height={25} style={{ borderRadius: 10 }} />
+          </View>
+
+          <View style={{ paddingTop: 40, paddingBottom: 20 }}>
+            <Skeleton.Item width={(w) => w * 0.65} height={65} style={{ marginTop: 10 }} />
+            <Skeleton.Item width={(w) => w * 0.4} height={15} style={{ marginTop: 10 }} />
+          </View>
+
+          <View>
+            <Skeleton.Item width={(w) => w - 30} height={120} style={{ marginTop: 10 }} />
+            <Skeleton.Item width={(w) => w - 30} height={120} style={{ marginTop: 10 }} />
+            <Skeleton.Item width={(w) => w - 30} height={120} style={{ marginTop: 10 }} />
+          </View>
+        </View>
+      </Skeleton>
+    </Animated.View>
+  );
+};
+
 export default function NotesScreen({ navigation }: ScreenProps<any>) {
-  const { groups } = useGroups();
+  const { groups, loading } = useGroups();
 
   const scrollY = useSharedValue(0);
 
@@ -29,7 +67,8 @@ export default function NotesScreen({ navigation }: ScreenProps<any>) {
   );
 
   return (
-    <SafeAreaView style={{ padding: 0, paddingBottom: 70, flex: 1 }}>
+    <SafeAreaView style={{ padding: 0, flex: 1 }}>
+      {loading && <AnimatedLoader />}
       <Header
         scrollY={scrollY}
         animated={true}
@@ -50,7 +89,7 @@ export default function NotesScreen({ navigation }: ScreenProps<any>) {
         onScroll={onAnimatedScrollHandler}
         contentContainerStyle={{
           paddingHorizontal: 15,
-          paddingBottom: 100,
+          paddingBottom: 60,
         }}
         scrollEventThrottle={16}
         removeClippedSubviews

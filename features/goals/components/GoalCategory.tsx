@@ -43,7 +43,7 @@ export const GoalCategory = ({ name, icon, description, entries = [], onPress, .
           goalThreshold={rest.target}
         />
       </View>
-      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end" }}>
+      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end", paddingVertical: 10 }}>
         <View>
           <Text style={{ color: "#fff", marginTop: 15 }}>{name}</Text>
           <Text style={{ color: "#fff" }}>{description}</Text>

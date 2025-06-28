@@ -8,6 +8,7 @@ import { CompositeScreenProps, NavigatorScreenParams, ParamListBase, RouteProp }
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 import { StackNavigationProp } from "@react-navigation/stack";
+import { Icons } from "./features/wallet/components/ExpenseIcon";
 
 export interface ScreenProps<Route extends keyof RootStackParamList> {
   navigation: StackNavigationProp<RootStackParamList, Route>;
@@ -91,6 +92,23 @@ export interface Wallet {
   expenses: Expense[];
 }
 
+export interface Subscription {
+  id: string;
+  isActive: boolean;
+  nextBillingDate: string;
+  dateStart: string;
+
+  description: string;
+
+  expenses: Expense[];
+
+  amount: number;
+
+  category: keyof typeof Icons;
+
+  billingCycle: "monthly" | "yearly" | "weekly" | "daily";
+}
+
 export interface Expense {
   id: string;
   amount: number;
@@ -98,16 +116,11 @@ export interface Expense {
   date: string;
   type: string;
   balanceBeforeInteraction: number;
-  category: string;
+  category: keyof typeof Icons;
 
   spontaneousRate: number;
 
-  subscription: {
-    id: string;
-    isActive: boolean;
-    nextBillingDate: string;
-    dateStart: string;
-  } | null;
+  subscription: Subscription | null;
 
   location: { id: string; kind: string; name: string; latitude: number; longitude: number } | null;
 

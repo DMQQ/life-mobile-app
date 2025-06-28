@@ -10,6 +10,7 @@ import ExpoenseFiltersSheet from "./components/Sheets/ExpenseFiltersSheet";
 import WalletContextProvider from "./components/WalletContext";
 import Expense from "./pages/Expense";
 import { useEffect } from "react";
+import SubscriptionScreen from "./pages/Subscription";
 
 interface WalletRootStack extends ParamListBase {
   Wallet: {
@@ -87,6 +88,8 @@ export default function WalletScreens({ navigation, route }: WalletScreens<"Wall
             presentation: "modal",
           }}
         />
+
+        <Stack.Screen name="Subscription" component={SubscriptionScreen} options={{ presentation: "modal" }} />
       </Stack.Navigator>
     </WalletContextProvider>
   );

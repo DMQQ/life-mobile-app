@@ -6,6 +6,7 @@ import { gql, useQuery } from "@apollo/client";
 import { AntDesign } from "@expo/vector-icons";
 import moment from "moment";
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, withDelay } from "react-native-reanimated";
+import { useRefresh } from "@/utils/context/RefreshContext";
 
 const labels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
@@ -112,6 +113,8 @@ const CompactSpendingChart = ({}: CompactSpendingChartProps) => {
 
   const prevQuery = useQuery(STATISTICS_DAY_OF_WEEK, { variables: { startDate: previousDateRange[0], endDate: previousDateRange[1] } });
 
+  useRefresh([query.refetch, prevQuery.refetch], [dateRange, previousDateRange]);
+
   const { chartData, maxValue, total, prevTotal, percentageChange } = useMemo(() => {
     const data = (query.data?.statisticsDayOfWeek || []) as any;
     const prevData = (prevQuery.data?.statisticsDayOfWeek || []) as any;
@@ -216,7 +219,8 @@ const CompactSpendingChart = ({}: CompactSpendingChartProps) => {
       <View style={styles.footer}>
         <View style={styles.totalContainer}>
           <Text style={styles.prevAmount}>{Math.round(prevTotal)}zł</Text>
-          <Text style={styles.totalLabel}>Last week</Text>
+          <Text style={styles.totalLabel}>{previousDateRange.map((d) => d.split("-").slice(1).join("-")).join(" to ")}</Text>
+          <Text style={[styles.totalLabel, { fontSize: 15 }]}>Last week</Text>
         </View>
 
         <View style={styles.tinyLegendContainer}>
@@ -232,7 +236,8 @@ const CompactSpendingChart = ({}: CompactSpendingChartProps) => {
 
         <View style={styles.totalContainer}>
           <Text style={styles.totalAmount}>{Math.round(total)}zł</Text>
-          <Text style={styles.totalLabel}>This week</Text>
+          <Text style={styles.totalLabel}>{dateRange.map((d) => d.split("-").slice(1).join("-")).join(" to ")}</Text>
+          <Text style={[styles.totalLabel, { fontSize: 15 }]}>This week</Text>
         </View>
       </View>
     </View>
@@ -350,17 +355,19 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   totalAmount: {
-    fontSize: 18,
+    fontSize: 24,
     fontWeight: "bold",
     color: Colors.text_light,
+    marginBottom: 2,
   },
   prevAmount: {
-    fontSize: 18,
+    fontSize: 24,
     fontWeight: "bold",
     color: Color(Colors.text_light).alpha(0.7).string(),
+    marginBottom: 2,
   },
   totalLabel: {
-    fontSize: 10,
+    fontSize: 9,
     color: Colors.text_light,
     opacity: 0.6,
   },

@@ -4,7 +4,6 @@ import { ScreenProps } from "@/types";
 import { useAppSelector } from "@/utils/redux";
 import { GET_MAIN_SCREEN } from "@/utils/schemas/GET_MAIN_SCREEN";
 import { gql, useQuery } from "@apollo/client";
-import { ScrollView } from "react-native-gesture-handler";
 import Header from "@/components/ui/Header/Header";
 import { AntDesign } from "@expo/vector-icons";
 import moment from "moment";
@@ -12,8 +11,8 @@ import useOffline from "@/utils/hooks/useOffline";
 import SkeletonPlaceholder from "@/components/SkeletonLoader/Skeleton";
 import { View, Modal, TouchableOpacity, Text, StyleSheet, RefreshControl } from "react-native";
 import Layout from "@/constants/Layout";
-import Animated, { FadeIn, FadeOut, LinearTransition, useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated";
-import { useCallback, useState } from "react";
+import Animated, { FadeOut, LinearTransition, useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated";
+import { useState } from "react";
 import * as SplashScreen from "expo-splash-screen";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import WorkoutWidget from "../workout/components/WorkoutWidget";
@@ -23,6 +22,7 @@ import Feedback from "react-native-haptic-feedback";
 import { BlurView } from "expo-blur";
 import SettingsModal from "./components/SettingsModal";
 import useAppBackground from "@/utils/hooks/useAppBackground";
+import RefreshContextProvider, { useRefresh } from "@/utils/context/RefreshContext";
 
 const LoadingSkeleton = () => {
   const insets = useSafeAreaInsets();
@@ -88,16 +88,6 @@ const LoadingSkeleton = () => {
   );
 };
 
-const NotificationBadge = ({ count }: { count: number }) => {
-  if (count === 0) return null;
-
-  return (
-    <View style={styles.badge}>
-      <Text style={styles.badgeText}>{count > 9 ? "+" : count}</Text>
-    </View>
-  );
-};
-
 const styles = StyleSheet.create({
   badge: {
     position: "absolute",
@@ -157,7 +147,7 @@ const styles = StyleSheet.create({
   },
 });
 
-export default function Root({ navigation }: ScreenProps<"Root">) {
+function Root({ navigation }: ScreenProps<"Root">) {
   const workout = useAppSelector((s) => s.workout);
   const user = useAppSelector((s) => s.user);
   const offline = useOffline("RootScreen");
@@ -191,21 +181,11 @@ export default function Root({ navigation }: ScreenProps<"Root">) {
   const data = offline.isOffline ? offline.data || {} : home;
   const edge = useSafeAreaInsets();
 
-  const refetchApp = useCallback(() => Promise.any([refetchNotifications, refetchHome]), []);
+  const { refreshing, refresh } = useRefresh([refetchHome, refetchNotifications], []);
 
   useAppBackground({
-    onForeground: refetchApp,
+    onForeground: refresh,
   });
-
-  const [refreshing, setRefreshing] = useState(false);
-
-  const onRefresh = useCallback(() => {
-    setRefreshing(true);
-    refetchApp();
-    setTimeout(() => {
-      setRefreshing(false);
-    }, 2000);
-  }, []);
 
   const handleNotificationPress = () => {
     Feedback.trigger("impactLight");
@@ -238,8 +218,6 @@ export default function Root({ navigation }: ScreenProps<"Root">) {
     []
   );
 
-  const targetAmount = home?.wallet?.income * (home?.wallet?.monthlyPercentageTarget / 100);
-  const spentPercentage = targetAmount ? (home?.monthlySpendings?.expense / targetAmount) * 100 : 0;
   const trendPercentage = home?.lastMonthSpendings?.expense
     ? ((home?.monthlySpendings?.expense - home?.lastMonthSpendings?.expense) / home?.lastMonthSpendings?.expense) * 100
     : 0;
@@ -279,7 +257,7 @@ export default function Root({ navigation }: ScreenProps<"Root">) {
           paddingHorizontal: 15,
           paddingBottom: 100,
         }}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} />}
       >
         <AvailableBalanceWidget
           data={{ wallet: home?.wallet, statistics: home?.monthlySpendings, lastMonthSpendings: home?.lastMonthSpendings }}
@@ -316,5 +294,13 @@ export default function Root({ navigation }: ScreenProps<"Root">) {
 
       <SettingsModal visible={showSettings} onClose={closeSettings} />
     </Animated.View>
+  );
+}
+
+export default function RootScreen(props: ScreenProps<"Root">) {
+  return (
+    <RefreshContextProvider>
+      <Root {...props} />
+    </RefreshContextProvider>
   );
 }

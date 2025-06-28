@@ -7,15 +7,17 @@ export default function SwipeFlashCardsScreen({ navigation, route }: any) {
   const [cards, setCards] = useState(flashCards);
 
   const onSwipeLeft = (id: string) => {
-    setCards((prev) => prev.slice(1));
-
-    reviewFlashCard(id, false);
+    setTimeout(() => {
+      setCards((prev) => prev.slice(1));
+      reviewFlashCard(id, false);
+    }, 300);
   };
 
   const onSwipeRight = (id: string) => {
-    setCards((prev) => prev.slice(1));
-
-    reviewFlashCard(id, true);
+    setTimeout(() => {
+      setCards((prev) => prev.slice(1));
+      reviewFlashCard(id, true);
+    }, 300);
   };
 
   useEffect(() => {
@@ -90,10 +92,10 @@ const SwipeableCard: React.FC<SwipeableCardProps> = ({ card, index, onSwipeLeft,
     })
     .onEnd(() => {
       if (position.value.x > SCREEN_WIDTH * 0.3) {
-        position.value = withSpring({ x: SCREEN_WIDTH + 100, y: 100 }, { duration: 250 });
+        position.value = withSpring({ x: SCREEN_WIDTH + 100, y: 100 });
         runOnJS(onSwipeRight)();
       } else if (position.value.x < -SCREEN_WIDTH * 0.3) {
-        position.value = withSpring({ x: -SCREEN_WIDTH - 100, y: 100 }, { duration: 250 });
+        position.value = withSpring({ x: -SCREEN_WIDTH - 100, y: 100 });
         runOnJS(onSwipeLeft)();
       } else {
         position.value = withSpring({ x: 0, y: 0 });
@@ -122,7 +124,6 @@ const SwipeableCard: React.FC<SwipeableCardProps> = ({ card, index, onSwipeLeft,
           }),
         },
       ],
-      opacity: withTiming(1 - index * 0.2),
     }),
     [index]
   );

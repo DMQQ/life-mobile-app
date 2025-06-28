@@ -1,16 +1,54 @@
 import { useGoal } from "../hooks/hooks";
-import { FlatList, SafeAreaView, Text, View } from "react-native";
+import { FlatList, SafeAreaView, StyleSheet, Text, View } from "react-native";
 import { GoalCategory } from "../components/GoalCategory";
 import Header from "@/components/ui/Header/Header";
 import { AntDesign } from "@expo/vector-icons";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Animated, { useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated";
+import Animated, { FadeOut, useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated";
 import { FlashList } from "@shopify/flash-list";
+import { Skeleton } from "@/components";
+import Colors from "@/constants/Colors";
 
 const AnimatedFlashList = Animated.createAnimatedComponent(FlashList);
 
+const AnimatedLoader = () => {
+  return (
+    <Animated.View
+      exiting={FadeOut.duration(250)}
+      style={[
+        StyleSheet.absoluteFillObject,
+        {
+          backgroundColor: Colors.primary,
+          zIndex: 1000,
+          justifyContent: "center",
+          alignItems: "center",
+          paddingTop: 125,
+        },
+      ]}
+    >
+      <Skeleton>
+        <View style={{ flex: 1, paddingHorizontal: 15 }}>
+          <View style={{ alignItems: "flex-end" }}>
+            <Skeleton.Item width={25} height={25} style={{ borderRadius: 10 }} />
+          </View>
+
+          <View style={{ paddingTop: 40, paddingBottom: 20 }}>
+            <Skeleton.Item width={(w) => w * 0.65} height={65} style={{ marginTop: 10 }} />
+            <Skeleton.Item width={(w) => w * 0.4} height={15} style={{ marginTop: 10 }} />
+          </View>
+
+          <View>
+            <Skeleton.Item width={(w) => w - 30} height={200} style={{ marginTop: 10 }} />
+            <Skeleton.Item width={(w) => w - 30} height={200} style={{ marginTop: 10 }} />
+            <Skeleton.Item width={(w) => w - 30} height={200} style={{ marginTop: 10 }} />
+          </View>
+        </View>
+      </Skeleton>
+    </Animated.View>
+  );
+};
+
 export default function Goals({ navigation }: any) {
-  const { goals } = useGoal();
+  const { goals, loading } = useGoal();
 
   const scrollY = useSharedValue(0);
 
@@ -23,17 +61,9 @@ export default function Goals({ navigation }: any) {
     []
   );
 
-  const renderGoalsContent = ({ contentStyle, labelStyle }: any) => (
-    <>
-      <Text style={[{ fontSize: 60, fontWeight: "bold", color: "#fff", letterSpacing: 1 }, contentStyle]}>Goals</Text>
-      <Animated.Text style={[{ color: "rgba(255,255,255,0.6)", fontSize: 16, textAlign: "center", opacity: 0.8 }, labelStyle]}>
-        {goals.length} Active Goals
-      </Animated.Text>
-    </>
-  );
-
   return (
-    <SafeAreaView style={{ padding: 0, flex: 1, paddingBottom: 70 }}>
+    <SafeAreaView style={{ padding: 0, flex: 1 }}>
+      {loading && <AnimatedLoader />}
       <Header
         scrollY={scrollY}
         animated={true}
@@ -62,7 +92,7 @@ export default function Goals({ navigation }: any) {
         onScroll={onAnimatedScrollHandler}
         contentContainerStyle={{
           padding: 15,
-          paddingBottom: 100,
+          paddingBottom: 60,
         }}
         scrollEventThrottle={16}
         removeClippedSubviews
