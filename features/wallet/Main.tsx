@@ -5,8 +5,7 @@ import { StackScreenProps } from "@/types";
 import Colors from "@/constants/Colors";
 import WalletCharts from "./pages/WalletCharts";
 import CreateExpenseModal from "./pages/CreateExpense";
-
-import ExpoenseFiltersSheet from "./components/Sheets/ExpenseFiltersSheet";
+import Filters from "./pages/Filters";
 import WalletContextProvider from "./components/WalletContext";
 import Expense from "./pages/Expense";
 import { useEffect } from "react";
@@ -83,7 +82,7 @@ export default function WalletScreens({ navigation, route }: WalletScreens<"Wall
 
         <Stack.Screen
           name="Filters"
-          component={ExpoenseFiltersSheet}
+          component={Filters}
           options={{
             presentation: "modal",
           }}

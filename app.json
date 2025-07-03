@@ -89,7 +89,8 @@
           "imageWidth": 200
         }
       ],
-      "expo-quick-actions"
+      "expo-quick-actions",
+      "expo-build-properties"
     ],
     "extra": {
       "eas": {

@@ -8,6 +8,7 @@ import Animated, { LinearTransition } from "react-native-reanimated";
 import WeeklyComparisonChart from "./WalletChart";
 import ZeroExpenseStats from "@/features/wallet/components/WalletChart/ZeroSpendings";
 import { AnimatedNumber } from "@/components";
+import dayjs from "dayjs";
 
 const Typography = {
   display: { fontSize: 48, fontWeight: "700", letterSpacing: -1 },
@@ -54,10 +55,9 @@ const AvailableBalanceWidget = ({ data, loading }: Props) => {
   const spentPercentage = targetAmount ? (stats?.expense / targetAmount) * 100 : 0;
 
   const remainingBudget = targetAmount - stats?.expense;
-  const now = new Date();
-  const daysLeft = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate() - now.getDate();
+  const daysLeft = Math.abs(dayjs().diff(dayjs().endOf("month"), "day") + 1);
   const dailyBudgetLeft = daysLeft > 0 ? remainingBudget / daysLeft : 0;
-  const savings = wallet?.income - stats?.expense;
+  const savings = wallet?.income + stats?.income - stats?.expense;
 
   const isOverBudget = spentPercentage > 100;
   const isDailyBudgetNegative = dailyBudgetLeft < 0;
@@ -134,7 +134,12 @@ const MetricCard = ({
   return (
     <View style={styles.metricCard}>
       <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 5 }}>
-        <MaterialCommunityIcons name={icon} size={18} color={status === "neutral" ? Colors.secondary_light_1 : color} />
+        <MaterialCommunityIcons
+          name={icon}
+          size={25}
+          color={status === "neutral" ? Colors.secondary_light_1 : color}
+          style={{ transform: [{ translateY: -2.5 }] }}
+        />
 
         <AnimatedNumber
           style={[styles.metricValue, { color: color }]}
@@ -229,8 +234,9 @@ const styles = StyleSheet.create({
   },
   metricValue: {
     ...Typography.title,
-    fontSize: 20,
-    lineHeight: 24,
+    fontSize: 24,
+    lineHeight: 25,
+    fontWeight: "700",
   },
   metricLabel: {
     ...Typography.overline,

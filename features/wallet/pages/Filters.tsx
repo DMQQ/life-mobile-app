@@ -1,26 +1,22 @@
-import BottomSheet, { BottomSheetGorhom } from "@/components/ui/BottomSheet/BottomSheet";
-import Select from "@/components/ui/Select/Select";
 import Input from "@/components/ui/TextInput/TextInput";
 import Layout from "@/constants/Layout";
-import { forwardRef, useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Text, View } from "react-native";
-import { Icons } from "../Wallet/WalletItem";
-import { useWalletContext, type Action, type Filters } from "../WalletContext";
+import { useWalletContext, type Action, type Filters } from "../components/WalletContext";
 import Button from "@/components/ui/Button/Button";
-import { useBottomSheet } from "@gorhom/bottom-sheet";
 import SegmentedButtons from "@/components/ui/SegmentedButtons";
 import DateTimePicker from "react-native-modal-datetime-picker";
 import { formatDate } from "@/utils/functions/parseDate";
-import moment from "moment";
-import CategorySelect from "../Wallet/CategorySelect";
+import CategorySelect from "../components/Wallet/CategorySelect";
 import { ScrollView } from "react-native-gesture-handler";
 import Color from "color";
 import Colors from "@/constants/Colors";
 import { useNavigation } from "@react-navigation/native";
-import useGetWallet from "../../hooks/useGetWallet";
 import Header from "@/components/ui/Header/Header";
 import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons";
-import { CategoryUtils } from "../ExpenseIcon";
+import { CategoryUtils } from "../components/ExpenseIcon";
+import { AnimatedSelector } from "@/components";
+import dayjs from "dayjs";
 
 interface ExpenseFiltersProps {
   filters: Filters;
@@ -33,12 +29,6 @@ export default function ExpenseFiltersSheet() {
 }
 
 const Forms = (props: ExpenseFiltersProps) => {
-  // const { close } = useBottomSheet();
-
-  const onFocus = () => {
-    // animatedIndex.value > 0 ? collapse() : expand();
-  };
-
   const onQueryTextChange = (text: string) => {
     props.dispatch({ type: "SET_QUERY", payload: text });
   };
@@ -59,8 +49,10 @@ const Forms = (props: ExpenseFiltersProps) => {
     }
   }, [localQuery]);
 
+  const quickDates = useMemo(() => [{ label: "Today", value: [dayjs().format("YYYY-MM-DD")] }], []);
+
   return (
-    <ScrollView style={{ flex: 1, height: Layout.screen.height, paddingTop: 15 }}>
+    <View style={{ flex: 1 }}>
       <Header
         goBack
         backIcon={<AntDesign name="close" size={24} color="white" />}
@@ -74,14 +66,8 @@ const Forms = (props: ExpenseFiltersProps) => {
           },
         ]}
       />
-      <View style={{ flex: 1, paddingHorizontal: 15, marginTop: 15 }}>
-        <Input
-          value={localQuery}
-          onChangeText={setLocalQuery}
-          placeholder="Search for a transaction"
-          onFocus={() => onFocus()}
-          placeholderTextColor="gray"
-        />
+      <ScrollView style={{ flex: 1, padding: 15 }}>
+        <Input value={localQuery} onChangeText={setLocalQuery} placeholder="Search for a transaction" placeholderTextColor="gray" />
 
         <View
           style={{
@@ -94,11 +80,10 @@ const Forms = (props: ExpenseFiltersProps) => {
             keyboardAppearance="dark"
             keyboardType="numeric"
             name="amount.from"
-            label="Amount Min"
+            label="Min spent"
             value={props.filters.amount.min.toString()}
             placeholder="From"
             containerStyle={{ flex: 1 }}
-            onFocus={() => onFocus()}
             right={<Text style={{ color: "#fff" }}>zł</Text>}
             style={{ textAlign: "center" }}
             onChangeText={(text) =>
@@ -124,12 +109,11 @@ const Forms = (props: ExpenseFiltersProps) => {
             keyboardAppearance="dark"
             keyboardType="numeric"
             name="amount.to"
-            label="Amount Max"
+            label="Max spent"
             value={props.filters.amount.max.toString()}
             placeholder="to"
             containerStyle={{ flex: 1 }}
             style={{ textAlign: "center" }}
-            onFocus={() => onFocus()}
             onChangeText={(text) =>
               props.dispatch({
                 type: "SET_AMOUNT_MAX",
@@ -141,29 +125,20 @@ const Forms = (props: ExpenseFiltersProps) => {
 
         <ChooseDateRange dispatch={props.dispatch} filters={props.filters} />
 
-        <Input.Label text="Description" error={false} labelStyle={{ marginTop: 15 }} />
+        <Input.Label text="Type" error={false} labelStyle={{ marginTop: 15 }} />
 
-        <SegmentedButtons
-          containerStyle={{
-            marginTop: 5,
-            borderRadius: 12.5,
-            width: Layout.screen.width - 30,
-          }}
-          buttonStyle={{ height: 45, borderRadius: 10, padding: 5 }}
-          buttonTextStyle={{ fontSize: 14 }}
-          buttons={[
-            { text: "All", value: "all" },
-            { text: "Income", value: "income" },
-            { text: "Expense", value: "expense" },
-          ]}
-          value={props.filters.type || "all"}
-          onChange={(value) => {
+        <AnimatedSelector
+          items={["all", "income", "expense", "refunded"] as string[]}
+          onItemSelect={(value: any) => {
             if (value === "all") {
               props.dispatch({ type: "SET_TYPE", payload: undefined });
               return;
             }
             props.dispatch({ type: "SET_TYPE", payload: value });
           }}
+          containerStyle={{ backgroundColor: Colors.primary, marginTop: 5, marginBottom: 15 }}
+          selectedItem={props.filters.type || "all"}
+          scale={1}
         />
 
         <Input.Label text="Category" error={false} labelStyle={{ marginBottom: 10 }} />
@@ -172,15 +147,27 @@ const Forms = (props: ExpenseFiltersProps) => {
           maxSelectHeight={250}
           multiSelect
           closeOnSelect={false}
-          onFocusChange={() => onFocus()}
           selected={Array.isArray(props?.filters?.category) ? props?.filters?.category : [props?.filters?.category]}
           setSelected={(selected) => {
             props.dispatch({ type: "SET_CATEGORY", payload: selected.map(CategoryUtils.getCategoryParent) });
           }}
           isActive={(category) => props.filters.category.includes(category)}
         />
+        {/* Query for top 5 categories and list here as buttons */}
+      </ScrollView>
+      <View style={{ padding: 15, paddingBottom: 30 }}>
+        <Button
+          variant="primary"
+          type="contained"
+          onPress={() => navigation.goBack()}
+          style={{
+            borderRadius: 100,
+          }}
+        >
+          Close Filters
+        </Button>
       </View>
-    </ScrollView>
+    </View>
   );
 };
 

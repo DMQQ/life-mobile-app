@@ -103,11 +103,15 @@ const STATISTICS_DAY_OF_WEEK = gql`
 interface CompactSpendingChartProps {}
 
 const CompactSpendingChart = ({}: CompactSpendingChartProps) => {
-  const dateRange = useMemo(() => [moment().subtract(1, "weeks").format("YYYY-MM-DD"), moment().format("YYYY-MM-DD")], []);
+  const dateRange = useMemo(() => [moment().startOf("isoWeek").format("YYYY-MM-DD"), moment().endOf("isoWeek").format("YYYY-MM-DD")], []);
 
-  const previousDateRange = useMemo(() => {
-    return [moment(dateRange[0]).subtract(1, "weeks").format("YYYY-MM-DD"), moment(dateRange[1]).subtract(1, "weeks").format("YYYY-MM-DD")];
-  }, [dateRange]);
+  const previousDateRange = useMemo(
+    () => [
+      moment().subtract(1, "weeks").startOf("isoWeek").format("YYYY-MM-DD"),
+      moment().subtract(1, "weeks").endOf("isoWeek").format("YYYY-MM-DD"),
+    ],
+    []
+  );
 
   const query = useQuery(STATISTICS_DAY_OF_WEEK, { variables: { startDate: dateRange[0], endDate: dateRange[1] } });
 

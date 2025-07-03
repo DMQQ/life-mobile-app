@@ -147,9 +147,8 @@ const styles = StyleSheet.create({
   },
 });
 
-function Root({ navigation }: ScreenProps<"Root">) {
+function Root({}: ScreenProps<"Root">) {
   const workout = useAppSelector((s) => s.workout);
-  const user = useAppSelector((s) => s.user);
   const offline = useOffline("RootScreen");
 
   const [loading, setLoading] = useState(true);
@@ -166,13 +165,18 @@ function Root({ navigation }: ScreenProps<"Root">) {
     },
     onCompleted: async (data) => {
       await offline.save("RootScreen", data);
-      setLoading(false);
       await SplashScreen.hideAsync();
+
+      setTimeout(() => {
+        setLoading(false);
+      }, 500);
     },
     onError: (er) => {
       console.log("Error fetching data", er);
-      setLoading(false);
       SplashScreen.hideAsync();
+      setTimeout(() => {
+        setLoading(false);
+      }, 500);
     },
   });
 

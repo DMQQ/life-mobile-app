@@ -155,6 +155,10 @@ export default function SubscriptionList({ onScroll, contentContainerStyle }: Su
               index={index + groupedData.active.length}
               onPress={() => {
                 console.log("Subscription pressed:", subscription.id);
+
+                navigation.navigate("Subscription", {
+                  subscriptionId: subscription.id,
+                });
               }}
             />
           ))}

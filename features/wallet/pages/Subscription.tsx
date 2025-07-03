@@ -6,10 +6,11 @@ import moment from "moment";
 import Ripple from "react-native-material-ripple";
 
 import Header from "@/components/ui/Header/Header";
-import Colors, { secondary_candidates } from "@/constants/Colors";
+import Colors from "@/constants/Colors";
 import WalletItem, { CategoryIcon } from "../components/Wallet/WalletItem";
 import { parseDate } from "@/utils/functions/parseDate";
 import { Expense, Subscription } from "@/types";
+import useSubscription from "../hooks/useSubscription";
 
 interface SubscriptionDetailsProps {
   route: { params: { subscriptionId: string } };
@@ -53,26 +54,10 @@ const SUBSCRIPTION_QUERY = gql`
   }
 `;
 
-const TOGGLE_SUBSCRIPTION = gql`
-  mutation ToggleSubscription($subscriptionId: ID!) {
-    toggleSubscription(subscriptionId: $subscriptionId) {
-      id
-      isActive
-      nextBillingDate
-    }
-  }
-`;
-
-const DELETE_SUBSCRIPTION = gql`
-  mutation DeleteSubscription($subscriptionId: ID!) {
-    deleteSubscription(subscriptionId: $subscriptionId)
-  }
-`;
-
 export default function SubscriptionDetails({ route, navigation }: SubscriptionDetailsProps) {
   const { subscriptionId } = route.params;
 
-  const { data, loading, error } = useQuery(SUBSCRIPTION_QUERY, {
+  const { data, loading, error, refetch } = useQuery(SUBSCRIPTION_QUERY, {
     variables: { id: subscriptionId },
   });
 
@@ -83,17 +68,6 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
       setSubscription(data.subscription);
     }
   }, [data?.subscription]);
-
-  const [toggleSubscription, { loading: toggleLoading }] = useMutation(TOGGLE_SUBSCRIPTION);
-  const [deleteSubscription, { loading: deleteLoading }] = useMutation(DELETE_SUBSCRIPTION);
-
-  if (loading || !subscription) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={Colors.secondary} />
-      </View>
-    );
-  }
 
   const formatBillingCycle = (cycle: Pick<Subscription, "billingCycle">["billingCycle"]) => {
     const cycles = {
@@ -106,7 +80,7 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
   };
 
   const getSubscriptionDuration = () => {
-    const start = moment(+subscription.dateStart);
+    const start = moment(subscription?.dateStart ? new Date(+subscription?.dateStart) : new Date());
     const now = moment();
     const duration = moment.duration(now.diff(start));
 
@@ -124,77 +98,74 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
     return "Started today";
   };
 
-  const totalSpent = subscription.expenses.reduce((sum, expense) => sum + expense.amount, 0);
-  const avgMonthlySpend = subscription.expenses.length > 0 ? totalSpent / subscription.expenses.length : 0;
-  const daysUntilNext = moment(parseInt(subscription.nextBillingDate)).diff(moment(), "days");
+  const totalSpent = subscription?.expenses.reduce((sum, expense) => sum + expense.amount, 0) || 0;
+  const avgMonthlySpend = (subscription?.expenses?.length || 0) > 0 ? totalSpent / (subscription?.expenses?.length || 0) : 0;
+  const daysUntilNext = moment(parseInt(subscription?.nextBillingDate || "0")).diff(moment(), "days");
   const isOverdue = daysUntilNext < 0;
 
-  const sortedExpenses = [...subscription.expenses].sort((a, b) => moment(b.date).diff(moment(a.date)));
+  const sortedExpenses = [...(subscription?.expenses || [])].sort((a, b) => moment(b.date).diff(moment(a.date)));
 
-  const handleToggleSubscription = () => {
-    const action = subscription.isActive ? "disable" : "enable";
+  const sub = useSubscription();
+  const isSubscriptionLoading = sub.createSubscriptionState.loading || sub.cancelSubscriptionState.loading;
 
-    Alert.alert(
-      `${action.charAt(0).toUpperCase() + action.slice(1)} Subscription`,
-      `Are you sure you want to ${action} this subscription?`,
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-        {
-          text: "Yes",
-          onPress: async () => {
-            try {
-              const result = await toggleSubscription({
+  const hasSubscription = !!subscription?.id;
+
+  const isSubscriptionActive = hasSubscription && subscription?.isActive;
+
+  const handleSubscriptionAction = () => {
+    const actionTitle = hasSubscription
+      ? isSubscriptionActive
+        ? "Disable Subscription"
+        : "Enable Subscription"
+      : "Create Monthly Subscription";
+
+    Alert.alert(actionTitle, `Are you sure you want to ${actionTitle.toLowerCase()}?`, [
+      {
+        onPress: async () => {
+          try {
+            if (isSubscriptionActive && subscription?.id) {
+              const result = await sub.cancelSubscription({
                 variables: { subscriptionId: subscription.id },
               });
 
-              if (result.data?.toggleSubscription) {
-                setSubscription((prev) => ({
-                  ...prev,
-                  ...result.data.toggleSubscription,
-                }));
+              if (result.data?.cancelSubscription) {
+                setSubscription(result.data.cancelSubscription);
+                refetch();
               }
-            } catch (error) {
-              Alert.alert("Error", "Failed to update subscription. Please try again.");
-            }
-          },
-        },
-      ]
-    );
-  };
+            } else {
+              const result = await sub.createSubscription({
+                variables: { expenseId: subscription?.id },
+              });
 
-  const handleDeleteSubscription = () => {
-    Alert.alert("Delete Subscription", "Are you sure you want to delete this subscription? This action cannot be undone.", [
-      {
-        text: "Cancel",
-        style: "cancel",
-      },
-      {
-        text: "Delete",
-        style: "destructive",
-        onPress: async () => {
-          try {
-            await deleteSubscription({
-              variables: { subscriptionId: subscription.id },
-            });
-            navigation.goBack();
+              if (result.data?.createSubscription) {
+                setSubscription(result.data.createSubscription);
+                refetch();
+              }
+            }
           } catch (error) {
-            Alert.alert("Error", "Failed to delete subscription. Please try again.");
+            Alert.alert("Error", "Failed to update subscription. Please try again.");
           }
         },
+        text: "Yes",
+      },
+      {
+        onPress: () => {},
+        text: "Cancel",
       },
     ]);
-  };
-
-  const handleEditSubscription = () => {
-    navigation.navigate("EditSubscription", { subscription });
   };
 
   const handleExpensePress = (expense: Expense) => {
     navigation.navigate("Expense", { expense });
   };
+
+  if (loading || !subscription) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={Colors.secondary} />
+      </View>
+    );
+  }
 
   return (
     <View style={{ flex: 1, paddingTop: 15, paddingBottom: 55 }}>
@@ -298,8 +269,8 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
           )}
 
           <Ripple
-            onPress={handleToggleSubscription}
-            disabled={toggleLoading}
+            onPress={handleSubscriptionAction}
+            disabled={isSubscriptionLoading}
             style={[
               styles.row,
               {
@@ -309,7 +280,7 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
               },
             ]}
           >
-            {toggleLoading ? (
+            {isSubscriptionLoading ? (
               <ActivityIndicator size="small" color="#fff" />
             ) : (
               <Text

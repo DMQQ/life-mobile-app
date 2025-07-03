@@ -76,15 +76,13 @@ export default function CreateFlashCards({ navigation, route }: any) {
   ];
 
   return (
-    <View style={{ flex: 1, padding: 15 }}>
-      <View style={{ flex: 1, paddingBottom: 15 }}>
-        <CustomTabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
+    <ScrollView style={{ flex: 1, padding: 15, paddingBottom: 30 }}>
+      <CustomTabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
 
-        {activeTab === "json" && <JSONImportForm groupId={groupId} navigation={navigation} />}
-        {activeTab === "ai" && <AIGeneratedFlashCards groupId={groupId} />}
-        {activeTab === "manual" && <FlashCardForm groupId={groupId} />}
-      </View>
-    </View>
+      {activeTab === "json" && <JSONImportForm groupId={groupId} navigation={navigation} />}
+      {activeTab === "ai" && <AIGeneratedFlashCards groupId={groupId} />}
+      {activeTab === "manual" && <FlashCardForm groupId={groupId} />}
+    </ScrollView>
   );
 }
 

@@ -219,6 +219,7 @@ export default function BottomTab({ navigation, state, insets }: BottomTabBarPro
         <Btn
           index={3}
           onLongPress={() => {
+            Feedback.trigger("impactMedium");
             navigation.navigate({
               name: "WalletScreens",
               params: {
@@ -234,6 +235,8 @@ export default function BottomTab({ navigation, state, insets }: BottomTabBarPro
         <Btn
           index={4}
           onLongPress={() => {
+            Feedback.trigger("impactMedium");
+
             navigation.navigate({
               name: "TimelineScreens",
               params: {

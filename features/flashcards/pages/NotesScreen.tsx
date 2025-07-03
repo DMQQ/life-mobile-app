@@ -12,6 +12,7 @@ import Animated, { FadeIn, FadeOut, useAnimatedScrollHandler, useSharedValue } f
 import { ScreenProps } from "@/types";
 import { FlashList } from "@shopify/flash-list";
 import { Skeleton } from "@/components";
+import { useMemo } from "react";
 
 const AnimatedFlashList = Animated.createAnimatedComponent(FlashList);
 
@@ -66,6 +67,11 @@ export default function NotesScreen({ navigation }: ScreenProps<any>) {
     []
   );
 
+  const groupsSorted = useMemo(() => {
+    if (!groups || groups.length === 0) return [];
+    return [...groups]?.sort((a, b) => b.createdAt.localeCompare(a.createdAt)) || [];
+  }, [groups]);
+
   return (
     <SafeAreaView style={{ padding: 0, flex: 1 }}>
       {loading && <AnimatedLoader />}
@@ -82,7 +88,7 @@ export default function NotesScreen({ navigation }: ScreenProps<any>) {
         animatedSubtitle={`${groups?.length || 0} Groups`}
       />
       <AnimatedFlashList
-        data={groups}
+        data={groupsSorted}
         estimatedItemSize={150}
         renderItem={({ item: group, index }: any) => <FlashCardGroup {...group} index={index} length={groups.length} />}
         keyExtractor={(key: any) => key.id.toString()}
