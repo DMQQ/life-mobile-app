@@ -100,6 +100,7 @@ export default function SubscriptionList({ onScroll, contentContainerStyle }: Su
 
   return (
     <AnimatedScrollView
+      keyboardDismissMode={"on-drag"}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       onScroll={onScroll}
       scrollEventThrottle={16}

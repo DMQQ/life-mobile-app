@@ -9,6 +9,8 @@ import Colors from "@/constants/Colors";
 import Ripple from "react-native-material-ripple";
 import SnapCarousel from "../components/FlashCards/CardSwiper";
 import SuccessBar from "../components/SuccessBar";
+import useTrackScroll from "@/utils/hooks/ui/useTrackScroll";
+import Animated from "react-native-reanimated";
 
 export default function FlashCardScreen({ navigation, route }: any) {
   const groupId = route.params?.groupId;
@@ -31,9 +33,12 @@ export default function FlashCardScreen({ navigation, route }: any) {
     ]);
   };
 
+  const [scrollY, onScroll] = useTrackScroll();
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <Header
+        scrollY={scrollY}
         title="Flashcards"
         buttons={[
           {
@@ -42,9 +47,12 @@ export default function FlashCardScreen({ navigation, route }: any) {
           },
         ]}
         goBack
+        initialHeight={60}
       />
 
-      <FlatList
+      <Animated.FlatList
+        style={{ paddingTop: 60 }}
+        onScroll={onScroll}
         ListHeaderComponent={
           <View style={{ marginBottom: 15 }}>
             <SnapCarousel

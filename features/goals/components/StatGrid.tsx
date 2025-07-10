@@ -158,7 +158,7 @@ const GitHubActivityGrid: React.FC<GitHubActivityGridProps> = ({
 
   return (
     <View style={styles.container}>
-      <ScrollView ref={scrollViewRef} horizontal showsHorizontalScrollIndicator={false} scrollEnabled>
+      <ScrollView keyboardDismissMode={"on-drag"} ref={scrollViewRef} horizontal showsHorizontalScrollIndicator={false} scrollEnabled>
         <View style={styles.calendarContainer}>
           <View style={styles.gridContainer}>
             <View style={styles.grid}>

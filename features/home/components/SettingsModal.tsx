@@ -189,7 +189,7 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
           </View>
 
           <View style={styles.settingsContainer}>
-            <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+            <ScrollView style={styles.content} showsVerticalScrollIndicator={false} keyboardDismissMode={"on-drag"}>
               <View style={styles.profileSection}>
                 {/* Profile Card */}
                 <View style={styles.profileCard}>

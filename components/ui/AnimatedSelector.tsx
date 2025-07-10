@@ -133,7 +133,13 @@ export default function AnimatedSelector<T>({
 
   return (
     <Animated.View style={[styles.container, containerStyle, containerAnimatedStyle]}>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+      <ScrollView
+        keyboardDismissMode="on-drag"
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+      >
         <Animated.View style={[styles.selector, { backgroundColor: selectorColor }, indicatorStyle]} />
         {items.map((item, index) => (
           <SelectorButton key={`${renderItem(item)}-${index}`} item={item} index={index} />

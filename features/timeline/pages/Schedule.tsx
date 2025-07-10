@@ -31,7 +31,7 @@ export default function ScheduleScreen({ navigation, route }: TimelineScreenProp
 
   return (
     <>
-      <ScrollView style={{ flex: 1 }}>
+      <ScrollView style={{ flex: 1 }} keyboardDismissMode={"on-drag"}>
         <TimeTable
           fromHour={0}
           date={moment(selected).toDate()}

@@ -66,6 +66,7 @@ const Forms = (props: ExpenseFiltersProps) => {
           height: 60,
           paddingTop: 15,
         }}
+        initialHeight={60}
         scrollY={scrollY}
         goBack
         backIcon={<AntDesign name="close" size={24} color="white" />}
@@ -80,10 +81,12 @@ const Forms = (props: ExpenseFiltersProps) => {
         ]}
       />
       <Animated.ScrollView
+        keyboardDismissMode={"on-drag"}
         onScroll={onScroll}
         style={{
           flex: 1,
           padding: 15,
+          paddingTop: 90,
         }}
       >
         <Input value={localQuery} onChangeText={setLocalQuery} placeholder="Search for a transaction" placeholderTextColor="gray" />

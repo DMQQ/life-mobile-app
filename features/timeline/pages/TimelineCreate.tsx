@@ -71,7 +71,7 @@ export default function CreateTimeLineEventModal({ route, navigation }: Timeline
         }}
       />
       <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
-        <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 15 }}>
+        <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 15 }} keyboardDismissMode={"on-drag"}>
           {!isEditing && <SuggestedEvents date={route.params.selectedDate} />}
 
           <ValidatedInput

@@ -12,7 +12,7 @@ export default function Main() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Goals" component={Goals} />
       <Stack.Screen name="CreateGoal" component={CreateGoal} options={{ title: "Create Goal", presentation: "modal" }} />
-      <Stack.Screen name="Goal" component={Goal} options={{ title: "Goal", presentation: "modal" }} />
+      <Stack.Screen name="Goal" component={Goal} options={{ title: "Goal" }} />
       <Stack.Screen name="UpdateGoalEntry" component={UpdateGoalEntry} options={{ title: "Update Goal Entry", presentation: "modal" }} />
       <Stack.Screen
         name="IconPicker"

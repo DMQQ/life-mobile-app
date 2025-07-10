@@ -18,6 +18,7 @@ import { AnimatedNumber } from "@/components";
 import Ripple from "react-native-material-ripple";
 import { BlurView } from "expo-blur";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { memo } from "react";
 
 const AnimatedBlur = Animated.createAnimatedComponent(BlurView);
 
@@ -43,90 +44,109 @@ function Header(props: {
   onAnimatedTitleLongPress?: () => void;
   subtitleStyles?: StyleProp<TextStyle>;
   initialHeight?: number;
+  textContainerStyle?: StyleProp<TextStyle>;
 }) {
   const navigation = useNavigation();
-
   const insets = useSafeAreaInsets();
 
   const animatedContainerStyle = useAnimatedStyle(() => {
-    if (!props.scrollY || !props.animated) return {};
+    if (!props.scrollY || !props.animated || typeof props.scrollY.value !== "number") return {};
+
+    const scrollValue = Math.max(0, Math.min(props.scrollY.value, 200));
 
     return {
-      marginTop: interpolate(props.scrollY.value, [0, 200], [15, 0], Extrapolation.CLAMP),
+      marginTop: interpolate(scrollValue, [0, 200], [15, 0], Extrapolation.CLAMP),
       height: 0,
     };
   }, [props.scrollY, props.animated]);
 
   const animatedContentStyle = useAnimatedStyle(() => {
-    if (!props.scrollY || !props.animated) return {};
+    if (!props.scrollY || !props.animated || typeof props.scrollY.value !== "number") return {};
+
+    const scrollValue = Math.max(0, Math.min(props.scrollY.value, 200));
 
     return {
       transform: [
         {
-          scale: interpolate(props.scrollY.value, [0, 200], [1, 0.35], Extrapolation.CLAMP),
+          scale: interpolate(scrollValue, [0, 200], [1, 0.35], Extrapolation.CLAMP),
         },
       ],
-      top: interpolate(props.scrollY.value, [0, 200], [insets.top * 2, insets.top / 2 + 10], Extrapolation.CLAMP),
-      left: interpolate(props.scrollY.value, [0, 200], [25, -120], Extrapolation.CLAMP),
+      top: interpolate(scrollValue, [0, 200], [insets.top * 2, insets.top / 2 + 10], Extrapolation.CLAMP),
+      left: interpolate(scrollValue, [0, 200], [15, -115], Extrapolation.CLAMP),
     };
-  }, [props.scrollY, props.animated]);
+  }, [props.scrollY, props.animated, insets.top]);
 
   const animatedLabelStyle = useAnimatedStyle(() => {
-    if (!props.scrollY || !props.animated) return {};
+    if (!props.scrollY || !props.animated || typeof props.scrollY.value !== "number") return {};
+
+    const scrollValue = Math.max(0, Math.min(props.scrollY.value, 100));
 
     return {
-      opacity: interpolate(props.scrollY.value, [0, 100], [1, 0], Extrapolation.CLAMP),
+      opacity: interpolate(scrollValue, [0, 100], [1, 0], Extrapolation.CLAMP),
     };
   }, [props.scrollY, props.animated]);
 
   const displayValue = props.animatedValueLoading && props.animatedValue === undefined ? " ..." : (props.animatedValue || 0).toFixed(2);
 
-  const animatedBlurProps = useAnimatedProps(() => ({
-    intensity: interpolate(props.scrollY?.value || 0, [0, 200], [0, 80], Extrapolation.CLAMP),
-  }));
+  const animatedBlurProps = useAnimatedProps(() => {
+    const scrollValue = Math.max(0, Math.min(props.scrollY?.value || 0, 200));
+    return {
+      intensity: interpolate(scrollValue, [0, 200], [0, 80], Extrapolation.CLAMP),
+    };
+  }, [props.scrollY]);
 
-  const animatedBlurStyle = useAnimatedStyle(() => ({
-    backgroundColor: interpolateColor(props.scrollY?.value || 0, [0, 200], ["rgba(0,0,0,0.0)", "rgba(0,0,0,0.3)"], "RGB"),
-  }));
+  const animatedBlurStyle = useAnimatedStyle(() => {
+    const scrollValue = Math.max(0, Math.min(props.scrollY?.value || 0, 200));
+    return {
+      backgroundColor: interpolateColor(scrollValue, [0, 200], ["rgba(0,0,0,0.0)", "rgba(0,0,0,0.3)"], "RGB"),
+    };
+  }, [props.scrollY]);
 
-  const animatedHeight = useAnimatedStyle(
-    () => ({
-      height: props.animated ? interpolate(props.scrollY?.value || 0, [0, 200], [props.initialHeight || 200, 0], Extrapolation.CLAMP) : 40,
-    }),
-    []
-  );
+  const animatedHeight = useAnimatedStyle(() => {
+    if (!props.animated) return { height: 0 };
+
+    const scrollValue = Math.max(0, Math.min(props.scrollY?.value || 0, 200));
+    return {
+      height: interpolate(scrollValue, [0, 200], [props.initialHeight || 200, 0], Extrapolation.CLAMP),
+    };
+  }, [props.animated, props.scrollY, props.initialHeight]);
 
   return (
     <>
-      <AnimatedBlur
-        tint="dark"
-        animatedProps={animatedBlurProps}
-        style={[styles.blurContainer, { paddingTop: insets.top, height: insets.top + 50 }, animatedBlurStyle, props.containerStyle]}
-      >
-        {props.goBack && (
-          <IconButton
-            onPress={throttle(() => navigation.canGoBack() && navigation.goBack(), 250)}
-            icon={props.backIcon || <AntDesign name="arrowleft" size={24} color="#fff" />}
-          />
-        )}
+      <AnimatedBlur tint="dark" animatedProps={animatedBlurProps} style={styles.blurContainer}>
+        <Animated.View
+          style={[
+            { flexDirection: "row", paddingHorizontal: 15, justifyContent: "space-between", alignItems: "center" },
+            { paddingTop: insets.top, height: insets.top + 50 },
+            animatedBlurStyle,
+            props.containerStyle,
+          ]}
+        >
+          {props.goBack && (
+            <IconButton
+              onPress={throttle(() => navigation.canGoBack() && navigation.goBack(), 250)}
+              icon={props.backIcon || <AntDesign name="arrowleft" size={24} color="#fff" />}
+            />
+          )}
 
-        {props.titleAnimatedStyle && props.title && (
-          <Animated.Text style={[styles.animatedTitle, props.titleAnimatedStyle]}>{props.title}</Animated.Text>
-        )}
+          {props.titleAnimatedStyle && props.title && (
+            <Animated.Text style={[styles.animatedTitle, props.titleAnimatedStyle]}>{props.title}</Animated.Text>
+          )}
 
-        {props.children}
+          {props.children}
 
-        <Animated.View style={styles.iconContainer}>
-          {(props.buttons || []).map((button, index) => (
-            <IconButton style={button.style} key={index} onPress={throttle(button.onPress, 250)} icon={button.icon} />
-          ))}
+          <Animated.View style={styles.iconContainer}>
+            {(props.buttons || []).map((button, index) => (
+              <IconButton style={button.style} key={index} onPress={throttle(button.onPress, 250)} icon={button.icon} />
+            ))}
+          </Animated.View>
         </Animated.View>
       </AnimatedBlur>
 
       {(props.animatedTitle || props.animatedValue !== undefined) && (
         <Animated.View style={[styles.container, props.animated && animatedContainerStyle]}>
           <Animated.View style={[styles.buttonContainer, props.animated && animatedContentStyle]}>
-            <Ripple onLongPress={props.onAnimatedTitleLongPress}>
+            <Ripple onLongPress={props.onAnimatedTitleLongPress} style={props.textContainerStyle}>
               {props.animatedValue !== undefined ? (
                 <AnimatedNumber
                   delay={250}
@@ -168,11 +188,6 @@ const styles = StyleSheet.create({
     zIndex: 210,
   },
   blurContainer: {
-    flexDirection: "row",
-    padding: 10,
-    paddingHorizontal: 15,
-    justifyContent: "space-between",
-    alignItems: "center",
     position: "absolute",
     top: 0,
     width: Layout.screen.width,
@@ -199,14 +214,14 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
   },
   container: {
-    width: Layout.screen.width,
     flexDirection: "row",
-    paddingHorizontal: 20,
     marginBottom: 40,
     zIndex: 200,
-    backgroundColor: "red",
   },
-  buttonContainer: { position: "absolute", left: 0, zIndex: 200 },
+  buttonContainer: {
+    position: "absolute",
+    zIndex: 200,
+  },
 });
 
-export default Header;
+export default memo(Header);

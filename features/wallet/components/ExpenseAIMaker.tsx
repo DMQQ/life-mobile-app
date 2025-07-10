@@ -370,7 +370,10 @@ export function FloatingProcessingView({
             </View>
             {showExpense && (
               <Animated.View entering={FadeIn}>
-                <Animated.ScrollView style={{ maxHeight: Layout.window.height / 2, flex: 1, paddingVertical: 10, paddingBottom: 5 }}>
+                <Animated.ScrollView
+                  keyboardDismissMode={"on-drag"}
+                  style={{ maxHeight: Layout.window.height / 2, flex: 1, paddingVertical: 10, paddingBottom: 5 }}
+                >
                   <WalletItem
                     {...(expense as any)}
                     subExpenseStyle={{

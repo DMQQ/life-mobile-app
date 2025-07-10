@@ -35,7 +35,12 @@ export const GoalCategory = ({ name, icon, description, entries = [], onPress, .
   }, [entries]);
 
   return (
-    <View style={{ padding: 10, backgroundColor: Colors.primary_lighter, borderRadius: 15, marginBottom: 15 }}>
+    <Ripple
+      onPress={() => {
+        navigation.navigate("Goal", { id: rest.id });
+      }}
+      style={{ padding: 20, backgroundColor: Colors.primary_lighter, borderRadius: 15, marginBottom: 15 }}
+    >
       <View style={{ pointerEvents: "box-none" }}>
         <GoalActivityGrid
           contributionData={contributionData}
@@ -43,27 +48,13 @@ export const GoalCategory = ({ name, icon, description, entries = [], onPress, .
           goalThreshold={rest.target}
         />
       </View>
-      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end", paddingVertical: 10 }}>
+      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end" }}>
         <View>
           <Text style={{ color: "#fff", marginTop: 15 }}>{name}</Text>
           <Text style={{ color: "#fff" }}>{description}</Text>
         </View>
-
-        <Ripple
-          onPress={() => {
-            navigation.navigate("Goal", { id: rest.id });
-          }}
-          style={{
-            backgroundColor: lowOpacity(Colors.secondary, 0.15),
-            borderRadius: 10,
-            paddingHorizontal: 10,
-            paddingVertical: 5,
-          }}
-        >
-          <Text style={{ color: Colors.secondary }}>More</Text>
-        </Ripple>
       </View>
-    </View>
+    </Ripple>
   );
 };
 

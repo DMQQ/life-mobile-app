@@ -13,6 +13,7 @@ import Color from "color";
 import DayEntry from "../components/GoalEntry";
 import Button from "@/components/ui/Button/Button";
 import GitHubActivityGrid from "../components/StatGrid";
+import Animated, { useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated";
 
 // Updated Goal component
 export default function Goal({ route, navigation }: any) {
@@ -45,29 +46,42 @@ export default function Goal({ route, navigation }: any) {
     }));
   }, [goal.entries]);
 
+  const scrollY = useSharedValue(0);
+  const onScroll = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollY.value = event.contentOffset.y;
+    },
+  });
+
   return (
     <View style={{ padding: 0, flex: 1, paddingVertical: 15, paddingBottom: 25 }}>
-      <Header goBack />
-      <View style={{ paddingHorizontal: 15, flex: 1, paddingTop: 15 }}>
-        <View style={{ padding: 10, backgroundColor: Colors.primary_lighter, borderRadius: 10, marginBottom: 15 }}>
-          <GitHubActivityGrid contributionData={contributionData} primaryColor={secondary_candidates[0]} goalThreshold={goal.target} />
-        </View>
-
-        <FlatList
+      <Header scrollY={scrollY} goBack initialHeight={60} animated />
+      <View style={{ paddingHorizontal: 15, flex: 1, paddingTop: 60 }}>
+        <Animated.FlatList
+          onScroll={onScroll}
           data={data}
           keyExtractor={(item) => item.id}
           renderItem={({ item, index }) => <DayEntry index={index} entry={{ ...item, ...goal }} />}
           contentContainerStyle={styles.list}
           showsVerticalScrollIndicator={false}
           ListHeaderComponent={
-            <View style={{ marginBottom: 20, flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-              <View>
-                <Text style={{ fontSize: 24, fontWeight: "600", color: "#fff" }}>{goal?.name}</Text>
-                <Text style={{ fontSize: 16, color: "rgba(255,255,255,0.9)", marginTop: 5 }}>{goal?.description}</Text>
+            <View>
+              <View style={{ padding: 10, backgroundColor: Colors.primary_lighter, borderRadius: 10, marginBottom: 15 }}>
+                <GitHubActivityGrid
+                  contributionData={contributionData}
+                  primaryColor={secondary_candidates[0]}
+                  goalThreshold={goal.target}
+                />
               </View>
+              <View style={{ flexDirection: "row", justifyContent: "space-between", paddingVertical: 30 }}>
+                <View>
+                  <Text style={{ fontSize: 24, fontWeight: "600", color: "#fff" }}>{goal?.name}</Text>
+                  <Text style={{ fontSize: 16, color: "rgba(255,255,255,0.9)", marginTop: 5 }}>{goal?.description}</Text>
+                </View>
 
-              <View style={{ padding: 10, borderRadius: 100, backgroundColor: Colors.secondary }}>
-                <MaterialCommunityIcons name={goal?.icon} size={30} color="#fff" style={{ marginLeft: "auto" }} />
+                <View style={{ padding: 10, borderRadius: 100, backgroundColor: Colors.secondary }}>
+                  <MaterialCommunityIcons name={goal?.icon} size={30} color="#fff" style={{ marginLeft: "auto" }} />
+                </View>
               </View>
             </View>
           }

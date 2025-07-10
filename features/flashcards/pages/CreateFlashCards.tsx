@@ -76,7 +76,7 @@ export default function CreateFlashCards({ navigation, route }: any) {
   ];
 
   return (
-    <ScrollView style={{ flex: 1, padding: 15, paddingBottom: 30 }}>
+    <ScrollView style={{ flex: 1, padding: 15, paddingBottom: 30 }} keyboardDismissMode={"on-drag"}>
       <CustomTabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
 
       {activeTab === "json" && <JSONImportForm groupId={groupId} navigation={navigation} />}

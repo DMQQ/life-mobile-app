@@ -488,6 +488,7 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
                     />
                   </View>
                   <Animated.ScrollView
+                    keyboardDismissMode={"on-drag"}
                     layout={LinearTransition}
                     horizontal
                     showsHorizontalScrollIndicator={false}

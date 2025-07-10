@@ -1,15 +1,12 @@
 import Button from "@/components/ui/Button/Button";
 import Header from "@/components/ui/Header/Header";
-import ScreenContainer from "@/components/ui/ScreenContainer";
 import ValidatedInput from "@/components/ui/ValidatedInput";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Formik, FormikProps } from "formik";
-import { FlatList, ScrollView, Text, View, StyleSheet, ViewStyle, TextStyle, TextInput } from "react-native";
+import { FlatList, ScrollView, Text, View, StyleSheet, TextInput } from "react-native";
 import Colors from "@/constants/Colors";
 import { useGoal } from "../hooks/hooks";
-import Layout from "@/constants/Layout";
 import Ripple from "react-native-material-ripple";
-import RangeSlider from "@/components/ui/RangePicker";
 import { useState, useEffect } from "react";
 import * as yup from "yup";
 import RangePickers from "../components/RangePicker";
@@ -372,11 +369,18 @@ export default function CreateGoal({ navigation }: CreateGoalProps): JSX.Element
 
   return (
     <View style={styles.container}>
-      <Header goBack title="Create New Goal" />
+      <Header
+        goBack
+        title="Create New Goal"
+        containerStyle={{
+          height: 60,
+          paddingTop: 10,
+        }}
+      />
       <Formik<FormValues> validationSchema={validationSchema} onSubmit={onSubmit} initialValues={initialValues}>
         {(f: FormikProps<FormValues>) => (
           <>
-            <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
+            <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent} keyboardDismissMode={"on-drag"}>
               {/* Icon Selector */}
               <View style={styles.iconSelectorContainer}>
                 <Ripple

@@ -55,6 +55,7 @@ const SnapCarousel: React.FC<SnapCarouselProps> = ({ items, itemWidth = SCREEN_W
   return (
     <View style={styles.container}>
       <Animated.ScrollView
+        keyboardDismissMode={"on-drag"}
         horizontal
         showsHorizontalScrollIndicator={false}
         snapToInterval={itemWidth + gap}

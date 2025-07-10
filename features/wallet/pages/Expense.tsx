@@ -335,7 +335,7 @@ export default function Expense({ route: { params }, navigation }: any) {
   });
 
   return (
-    <View style={{ flex: 1, paddingTop: 15, paddingBottom: 55 }}>
+    <View style={{ flex: 1 }}>
       <Header
         containerStyle={{
           height: 60,
@@ -356,8 +356,8 @@ export default function Expense({ route: { params }, navigation }: any) {
         goBack
         backIcon={<AntDesign name="close" size={24} color="white" />}
       />
-      <Animated.ScrollView onScroll={onScroll} keyboardDismissMode={"on-drag"} style={{ flex: 1, marginTop: 5 }}>
-        <View style={{ marginBottom: 30, marginTop: 15, paddingHorizontal: 15 }}>
+      <Animated.ScrollView onScroll={onScroll} keyboardDismissMode={"on-drag"} style={{ flex: 1, paddingTop: 90 }}>
+        <View style={{ marginBottom: 30, paddingHorizontal: 15 }}>
           <View
             style={[
               styles.row,
@@ -525,6 +525,7 @@ export default function Expense({ route: { params }, navigation }: any) {
             </View>
           </View>
         )}
+        <View style={{ height: 80 }} />
       </Animated.ScrollView>
     </View>
   );
@@ -534,7 +535,7 @@ import * as ImagePicker from "expo-image-picker";
 import Layout from "@/constants/Layout";
 import ImageViewerModal from "../components/ImageViewer";
 import MapPicker from "../components/Map";
-import Animated, { LinearTransition, useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated";
+import Animated, { useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated";
 import SubexpenseStack from "../components/SubexpenseStack";
 
 const FileUpload = (props: { id: string; images: any[] }) => {

@@ -59,6 +59,7 @@ const CalendarTimetable = ({ events, selected, children, onScroll }: CustomTimel
 
   return (
     <Animated.ScrollView
+      keyboardDismissMode={"on-drag"}
       style={{ flex: 1, paddingBottom: 100 }}
       onScroll={onScroll}
       showsVerticalScrollIndicator={false}

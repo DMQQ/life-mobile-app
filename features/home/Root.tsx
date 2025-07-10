@@ -3,7 +3,7 @@ import AvailableBalanceWidget from "@/features/home/components/WalletWidget";
 import { ScreenProps } from "@/types";
 import { useAppSelector } from "@/utils/redux";
 import { GET_MAIN_SCREEN } from "@/utils/schemas/GET_MAIN_SCREEN";
-import { gql, useQuery } from "@apollo/client";
+import { useQuery } from "@apollo/client";
 import Header from "@/components/ui/Header/Header";
 import { AntDesign } from "@expo/vector-icons";
 import moment from "moment";
@@ -11,7 +11,7 @@ import useOffline from "@/utils/hooks/useOffline";
 import SkeletonPlaceholder from "@/components/SkeletonLoader/Skeleton";
 import { View, Modal, TouchableOpacity, Text, StyleSheet, RefreshControl } from "react-native";
 import Layout from "@/constants/Layout";
-import Animated, { FadeOut, LinearTransition, useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated";
+import Animated, { FadeOut, LinearTransition } from "react-native-reanimated";
 import { useState } from "react";
 import * as SplashScreen from "expo-splash-screen";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -23,6 +23,7 @@ import { BlurView } from "expo-blur";
 import SettingsModal from "./components/SettingsModal";
 import useAppBackground from "@/utils/hooks/useAppBackground";
 import RefreshContextProvider, { useRefresh } from "@/utils/context/RefreshContext";
+import useTrackScroll from "@/utils/hooks/ui/useTrackScroll";
 
 const LoadingSkeleton = () => {
   const insets = useSafeAreaInsets();
@@ -211,16 +212,7 @@ function Root({}: ScreenProps<"Root">) {
     setShowSettings(false);
   };
 
-  const scrollY = useSharedValue(0);
-
-  const onAnimatedScrollHandler = useAnimatedScrollHandler(
-    {
-      onScroll(event) {
-        scrollY.value = event.contentOffset.y;
-      },
-    },
-    []
-  );
+  const [scrollY, onScroll] = useTrackScroll();
 
   const trendPercentage = home?.lastMonthSpendings?.expense
     ? ((home?.monthlySpendings?.expense - home?.lastMonthSpendings?.expense) / home?.lastMonthSpendings?.expense) * 100
@@ -228,19 +220,16 @@ function Root({}: ScreenProps<"Root">) {
   const isIncreasing = trendPercentage > 0;
 
   return (
-    <Animated.View style={{ padding: 0, flex: 1 }} layout={LinearTransition.delay(100)}>
+    <Animated.View style={{ flex: 1 }} layout={LinearTransition.delay(100)}>
       {loading && <LoadingSkeleton />}
       <Header
         goBack={false}
         animatedValue={parseFloat(home?.monthlySpendings?.expense || 0)}
         animatedValueLoading={loading && data?.wallet?.balance === undefined}
-        animatedValueFormat={(value) => `-${value?.toFixed(2)}zł`}
-        animatedSubtitle={`Spent ${isIncreasing ? "↑" : "↓"} ${Math.abs(trendPercentage).toFixed(1)}% ${
-          isIncreasing ? "more" : "less"
-        } than last month`}
+        animatedValueFormat={(value) => `${value?.toFixed(2)}zł`}
+        animatedSubtitle={`This month spendings, ${Math.abs(trendPercentage).toFixed(1)}% ${isIncreasing ? "more" : "less"} vs last month`}
         scrollY={scrollY}
         animated={true}
-        subtitleStyles={{ textAlign: "center", color: Colors.secondary }}
         buttons={[
           {
             icon: <AntDesign name="bells" size={20} color="#fff" />,
@@ -254,12 +243,15 @@ function Root({}: ScreenProps<"Root">) {
       />
 
       <Animated.ScrollView
+        scrollToOverflowEnabled={false}
+        overScrollMode={"never"}
+        keyboardDismissMode={"on-drag"}
         scrollEventThrottle={16}
-        onScroll={onAnimatedScrollHandler}
+        onScroll={onScroll}
         style={{ flex: 1 }}
         contentContainerStyle={{
           paddingHorizontal: 15,
-          paddingBottom: 100,
+          paddingBottom: 120,
         }}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} />}
       >

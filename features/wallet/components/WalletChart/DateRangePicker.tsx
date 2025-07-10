@@ -56,6 +56,7 @@ const DateRangePicker = (props: { filters: Filters; dispatch: React.Dispatch<Act
 
   return (
     <ScrollView
+      keyboardDismissMode={"on-drag"}
       showsHorizontalScrollIndicator={false}
       horizontal
       style={{

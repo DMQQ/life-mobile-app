@@ -167,7 +167,7 @@ const ClearFiltersButton = () => {
     <Animated.View
       entering={FadeInDown.delay(100)}
       exiting={FadeOutDown}
-      style={{ position: "absolute", bottom: 60, width: Layout.screen.width, justifyContent: "center", alignItems: "center" }}
+      style={{ position: "absolute", bottom: 100, width: Layout.screen.width, justifyContent: "center", alignItems: "center" }}
     >
       <Ripple style={styles.filtersButton} onPress={clearFilters}>
         <Text style={{ color: Colors.secondary_light_2 }}>

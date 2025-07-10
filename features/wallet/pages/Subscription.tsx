@@ -177,7 +177,7 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
   }
 
   return (
-    <View style={{ flex: 1, paddingTop: 15, paddingBottom: 55 }}>
+    <View style={{ flex: 1 }}>
       <Header
         containerStyle={{
           height: 60,
@@ -190,8 +190,8 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
         initialHeight={1}
       />
 
-      <Animated.ScrollView onScroll={onScroll} style={{ flex: 1, marginTop: 5 }}>
-        <View style={{ marginBottom: 30, marginTop: 15, paddingHorizontal: 15 }}>
+      <Animated.ScrollView onScroll={onScroll} style={{ flex: 1, paddingTop: 90 }}>
+        <View style={{ marginBottom: 30, paddingHorizontal: 15 }}>
           <View
             style={[
               styles.row,
@@ -360,6 +360,7 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
             <Text style={styles.emptySubtext}>Payments will appear here once the subscription becomes active</Text>
           </View>
         )}
+        <View style={{ height: 80 }} />
       </Animated.ScrollView>
     </View>
   );

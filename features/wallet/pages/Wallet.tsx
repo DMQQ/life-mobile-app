@@ -1,7 +1,7 @@
 import Header from "@/components/ui/Header/Header";
 import { AntDesign, FontAwesome, Ionicons } from "@expo/vector-icons";
 import { SafeAreaView, StyleSheet, View } from "react-native";
-import Animated, { FadeOut, useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated";
+import Animated, { FadeOut } from "react-native-reanimated";
 import { WalletScreens } from "../Main";
 import EditBalanceSheet from "../components/Sheets/EditBalanceSheet";
 import WalletList from "../components/Wallet/WalletList";
@@ -12,6 +12,7 @@ import { useEffect, useState } from "react";
 import SubscriptionList from "../components/Wallet/SubscriptionList";
 import WalletLoader from "../components/WalletLoader";
 import Colors from "@/constants/Colors";
+import useTrackScroll from "@/utils/hooks/ui/useTrackScroll";
 
 const styles = StyleSheet.create({
   container: {
@@ -55,16 +56,7 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
     refs: { bottomSheetRef, editBalanceRef },
   } = useWalletContext();
 
-  const scrollY = useSharedValue<number>(0);
-
-  const onAnimatedScrollHandler = useAnimatedScrollHandler(
-    {
-      onScroll(event) {
-        scrollY.value = event.contentOffset.y;
-      },
-    },
-    []
-  );
+  const [scrollY, onScroll] = useTrackScroll();
 
   useEffect(() => {
     if (route.params?.expenseId && data?.wallet) {
@@ -103,7 +95,6 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
       <Header
         scrollY={scrollY}
         animated={true}
-        subtitleStyles={{ textAlign: "center" }}
         buttons={[
           {
             onPress: () => {
@@ -134,14 +125,14 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
       />
 
       {showSubscriptionsView ? (
-        <SubscriptionList onScroll={onAnimatedScrollHandler} scrollY={scrollY} />
+        <SubscriptionList onScroll={onScroll} scrollY={scrollY} />
       ) : (
         <WalletList
           filtersActive={filtersActive}
           isLocked={loading || !data || endReached}
           refetch={refetch}
           scrollY={scrollY}
-          onScroll={onAnimatedScrollHandler}
+          onScroll={onScroll}
           wallet={data?.wallet}
           onEndReached={onEndReached}
         />

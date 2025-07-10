@@ -62,7 +62,7 @@ export default function Goals({ navigation }: any) {
   );
 
   return (
-    <View style={{ padding: 0, flex: 1 }}>
+    <View style={{ flex: 1 }}>
       {loading && <AnimatedLoader />}
       <Header
         scrollY={scrollY}
