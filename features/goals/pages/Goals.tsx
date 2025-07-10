@@ -62,7 +62,7 @@ export default function Goals({ navigation }: any) {
   );
 
   return (
-    <SafeAreaView style={{ padding: 0, flex: 1 }}>
+    <View style={{ padding: 0, flex: 1 }}>
       {loading && <AnimatedLoader />}
       <Header
         scrollY={scrollY}
@@ -97,6 +97,6 @@ export default function Goals({ navigation }: any) {
         scrollEventThrottle={16}
         removeClippedSubviews
       />
-    </SafeAreaView>
+    </View>
   );
 }

@@ -187,6 +187,7 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
         title="Subscription Details"
         goBack
         backIcon={<AntDesign name="close" size={24} color="white" />}
+        initialHeight={1}
       />
 
       <Animated.ScrollView onScroll={onScroll} style={{ flex: 1, marginTop: 5 }}>

@@ -228,7 +228,7 @@ function Root({}: ScreenProps<"Root">) {
   const isIncreasing = trendPercentage > 0;
 
   return (
-    <Animated.View style={{ padding: 0, flex: 1, paddingTop: edge.top }} layout={LinearTransition.delay(100)}>
+    <Animated.View style={{ padding: 0, flex: 1 }} layout={LinearTransition.delay(100)}>
       {loading && <LoadingSkeleton />}
       <Header
         goBack={false}

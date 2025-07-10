@@ -44,7 +44,6 @@ function Header(props: {
   subtitleStyles?: StyleProp<TextStyle>;
   initialHeight?: number;
 }) {
-  props.initialHeight ??= 150;
   const navigation = useNavigation();
 
   const insets = useSafeAreaInsets();
@@ -67,7 +66,7 @@ function Header(props: {
           scale: interpolate(props.scrollY.value, [0, 200], [1, 0.35], Extrapolation.CLAMP),
         },
       ],
-      top: interpolate(props.scrollY.value, [0, 200], [insets.top, -insets.top / 2 + 10], Extrapolation.CLAMP),
+      top: interpolate(props.scrollY.value, [0, 200], [insets.top * 2, insets.top / 2 + 10], Extrapolation.CLAMP),
       left: interpolate(props.scrollY.value, [0, 200], [25, -120], Extrapolation.CLAMP),
     };
   }, [props.scrollY, props.animated]);
@@ -92,7 +91,7 @@ function Header(props: {
 
   const animatedHeight = useAnimatedStyle(
     () => ({
-      height: interpolate(props.scrollY?.value || 0, [0, 200], [props.initialHeight ?? 150, 0], Extrapolation.CLAMP),
+      height: props.animated ? interpolate(props.scrollY?.value || 0, [0, 200], [props.initialHeight || 200, 0], Extrapolation.CLAMP) : 40,
     }),
     []
   );

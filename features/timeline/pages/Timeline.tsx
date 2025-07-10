@@ -70,7 +70,7 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
   const eventsCount = timeline.data?.timeline?.length || 0;
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <View style={{ flex: 1 }}>
       <Header
         scrollY={scrollY}
         animated={true}
@@ -161,6 +161,6 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
           </View>
         </DayTimeline>
       )}
-    </SafeAreaView>
+    </View>
   );
 }

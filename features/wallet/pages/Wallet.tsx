@@ -1,6 +1,6 @@
 import Header from "@/components/ui/Header/Header";
 import { AntDesign, FontAwesome, Ionicons } from "@expo/vector-icons";
-import { SafeAreaView, StyleSheet } from "react-native";
+import { SafeAreaView, StyleSheet, View } from "react-native";
 import Animated, { FadeOut, useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated";
 import { WalletScreens } from "../Main";
 import EditBalanceSheet from "../components/Sheets/EditBalanceSheet";
@@ -93,7 +93,7 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
     );
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <View style={{ flex: 1 }}>
       {loading && (
         <Animated.View exiting={FadeOut.duration(250)} style={[StyleSheet.absoluteFillObject, styles.overlay]}>
           <WalletLoader />
@@ -148,6 +148,6 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
       )}
 
       <EditBalanceSheet />
-    </SafeAreaView>
+    </View>
   );
 }
