@@ -326,9 +326,22 @@ export default function Expense({ route: { params }, navigation }: any) {
     }
   };
 
+  const scrollY = useSharedValue(0);
+
+  const onScroll = useAnimatedScrollHandler({
+    onScroll: (ev) => {
+      scrollY.value = ev.contentOffset.y;
+    },
+  });
+
   return (
     <View style={{ flex: 1, paddingTop: 15, paddingBottom: 55 }}>
       <Header
+        containerStyle={{
+          height: 60,
+          paddingTop: 15,
+        }}
+        scrollY={scrollY}
         buttons={[
           {
             icon: <Feather name="trash" size={20} color="white" />,
@@ -343,12 +356,12 @@ export default function Expense({ route: { params }, navigation }: any) {
         goBack
         backIcon={<AntDesign name="close" size={24} color="white" />}
       />
-      <ScrollView style={{ flex: 1, marginTop: 5 }}>
+      <Animated.ScrollView onScroll={onScroll} keyboardDismissMode={"on-drag"} style={{ flex: 1, marginTop: 5 }}>
         <View style={{ marginBottom: 30, marginTop: 15, paddingHorizontal: 15 }}>
           <View
             style={[
               styles.row,
-              { marginTop: 15, padding: 0, flexWrap: "wrap", backgroundColor: "transparent", marginVertical: 20, alignItems: "center" },
+              { marginTop: 0, padding: 0, flexWrap: "wrap", backgroundColor: "transparent", marginVertical: 20, alignItems: "center" },
             ]}
           >
             <Txt size={35} color={"#fff"}>
@@ -512,7 +525,7 @@ export default function Expense({ route: { params }, navigation }: any) {
             </View>
           </View>
         )}
-      </ScrollView>
+      </Animated.ScrollView>
     </View>
   );
 }
@@ -521,7 +534,7 @@ import * as ImagePicker from "expo-image-picker";
 import Layout from "@/constants/Layout";
 import ImageViewerModal from "../components/ImageViewer";
 import MapPicker from "../components/Map";
-import Animated, { LinearTransition } from "react-native-reanimated";
+import Animated, { LinearTransition, useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated";
 import SubexpenseStack from "../components/SubexpenseStack";
 
 const FileUpload = (props: { id: string; images: any[] }) => {

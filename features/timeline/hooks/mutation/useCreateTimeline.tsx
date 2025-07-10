@@ -9,6 +9,7 @@ import { Platform, ToastAndroid } from "react-native";
 import * as Yup from "yup";
 import { GET_MONTHLY_EVENTS } from "../general/useTimeline";
 import moment from "moment";
+import { GET_MAIN_SCREEN, getMainScreenBaseVariables } from "@/utils/schemas/GET_MAIN_SCREEN";
 
 const initialValues = {
   title: "",
@@ -65,7 +66,10 @@ export default function useCreateTimeline(props: { selectedDate: string }) {
             date: moment().format("YYYY-MM-DD"),
           },
         },
-        "GetRootView",
+        {
+          query: GET_MAIN_SCREEN,
+          variables: getMainScreenBaseVariables(),
+        },
       ],
 
       update(cache, { data: { createTimeline } }) {

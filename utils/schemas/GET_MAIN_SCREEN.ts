@@ -1,4 +1,5 @@
 import { gql } from "@apollo/client";
+import moment from "moment";
 
 export const GET_MAIN_SCREEN = gql`
   query GetRootView($range: [String!]!, $lastRange: [String!]!) {
@@ -40,3 +41,13 @@ export const GET_MAIN_SCREEN = gql`
     expense
   }
 `;
+
+export const getMainScreenBaseVariables = () => {
+  return {
+    range: [moment().startOf("month").format("YYYY-MM-DD"), moment().endOf("month").format("YYYY-MM-DD")],
+    lastRange: [
+      moment().subtract(1, "month").startOf("month").format("YYYY-MM-DD"),
+      moment().subtract(1, "month").endOf("month").format("YYYY-MM-DD"),
+    ],
+  };
+};

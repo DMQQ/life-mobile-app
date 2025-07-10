@@ -169,7 +169,7 @@ function Root({}: ScreenProps<"Root">) {
 
       setTimeout(() => {
         setLoading(false);
-      }, 500);
+      }, 1000);
     },
     onError: (er) => {
       console.log("Error fetching data", er);

@@ -19,7 +19,7 @@ import DailySpendingChart from "../components/WalletChart/DailySpendingChart";
 import WalletContextProvider from "../components/WalletContext";
 import Ripple from "react-native-material-ripple";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
+import Animated, { FadeIn, FadeOut, useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated";
 import Feedback from "react-native-haptic-feedback";
 import MonthlyCategoryComparison from "../components/WalletChart/MonthlyComparison";
 import CalendarHeatmap from "../components/WalletChart/MonthlySpendingHeatMap";
@@ -29,6 +29,8 @@ import { CategoryUtils } from "../components/ExpenseIcon";
 import useGetLegendData from "../hooks/useGetLegendData";
 import ChartLoader from "../components/WalletChart/ChartLoader";
 import LimitsComparison from "../components/WalletChart/LimitsComparison";
+
+const AnimatedVirtualizedList = Animated.createAnimatedComponent(VirtualizedList);
 
 const styles = StyleSheet.create({
   tilesContainer: {
@@ -221,6 +223,14 @@ function WalletCharts({ navigation }: any) {
 
   const monthDiff = moment(filters.date.from).diff(moment(filters.date.to));
 
+  const scrollY = useSharedValue(0);
+
+  const onScroll = useAnimatedScrollHandler({
+    onScroll: (ev) => {
+      scrollY.value = ev.contentOffset.y;
+    },
+  });
+
   return (
     <View style={{ paddingTop: 15, paddingBottom: insets.bottom }}>
       {loading && (
@@ -229,8 +239,19 @@ function WalletCharts({ navigation }: any) {
         </Animated.View>
       )}
 
-      <Header buttons={headerButtons} goBack backIcon={<AntDesign name="close" size={24} color="white" />} />
-      <VirtualizedList
+      <Header
+        initialHeight={60}
+        scrollY={scrollY}
+        buttons={headerButtons}
+        goBack
+        backIcon={<AntDesign name="close" size={24} color="white" />}
+        containerStyle={{
+          height: 60,
+          paddingTop: 15,
+        }}
+      />
+      <AnimatedVirtualizedList
+        onScroll={onScroll}
         ref={listRef}
         ListHeaderComponent={
           <View style={styles.listHeader}>
@@ -271,13 +292,13 @@ function WalletCharts({ navigation }: any) {
         data={selectedCategoryData.slice(0, step)}
         getItem={(data, index) => data[index]}
         getItemCount={(data) => data.length}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item: any) => item.id}
         contentContainerStyle={{ padding: 15 }}
         bounces
         removeClippedSubviews
         initialNumToRender={5}
         onEndReached={onEndReached}
-        renderItem={({ item }) => (
+        renderItem={({ item }: any) => (
           <WalletItem
             handlePress={() => {
               navigation.navigate("Expense", {

@@ -46,6 +46,7 @@ const AnimatedLoader = () => {
             <Skeleton.Item width={(w) => w - 30} height={120} style={{ marginTop: 10 }} />
             <Skeleton.Item width={(w) => w - 30} height={120} style={{ marginTop: 10 }} />
             <Skeleton.Item width={(w) => w - 30} height={120} style={{ marginTop: 10 }} />
+            <Skeleton.Item width={(w) => w - 30} height={120} style={{ marginTop: 10 }} />
           </View>
         </View>
       </Skeleton>

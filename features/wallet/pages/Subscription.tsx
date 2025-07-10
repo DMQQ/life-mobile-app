@@ -11,6 +11,7 @@ import WalletItem, { CategoryIcon } from "../components/Wallet/WalletItem";
 import { parseDate } from "@/utils/functions/parseDate";
 import { Expense, Subscription } from "@/types";
 import useSubscription from "../hooks/useSubscription";
+import Animated, { useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated";
 
 interface SubscriptionDetailsProps {
   route: { params: { subscriptionId: string } };
@@ -159,6 +160,14 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
     navigation.navigate("Expense", { expense });
   };
 
+  const scrollY = useSharedValue(0);
+
+  const onScroll = useAnimatedScrollHandler({
+    onScroll: (ev) => {
+      scrollY.value = ev.contentOffset.y;
+    },
+  });
+
   if (loading || !subscription) {
     return (
       <View style={styles.loadingContainer}>
@@ -170,29 +179,22 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
   return (
     <View style={{ flex: 1, paddingTop: 15, paddingBottom: 55 }}>
       <Header
+        containerStyle={{
+          height: 60,
+          paddingTop: 15,
+        }}
+        scrollY={scrollY}
         title="Subscription Details"
-        // buttons={[
-        //   {
-        //     icon: <Feather name="trash" size={20} color="white" />,
-        //     onPress: handleDeleteSubscription,
-        //   },
-        //   {
-        //     icon: <Feather name="edit-2" size={20} color="white" />,
-        //     onPress: handleEditSubscription,
-        //     style: { marginLeft: 5 },
-        //   },
-        // ]}
         goBack
         backIcon={<AntDesign name="close" size={24} color="white" />}
       />
 
-      <ScrollView style={{ flex: 1, marginTop: 5 }}>
+      <Animated.ScrollView onScroll={onScroll} style={{ flex: 1, marginTop: 5 }}>
         <View style={{ marginBottom: 30, marginTop: 15, paddingHorizontal: 15 }}>
           <View
             style={[
               styles.row,
               {
-                marginTop: 15,
                 padding: 0,
                 flexWrap: "wrap",
                 backgroundColor: "transparent",
@@ -357,7 +359,7 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
             <Text style={styles.emptySubtext}>Payments will appear here once the subscription becomes active</Text>
           </View>
         )}
-      </ScrollView>
+      </Animated.ScrollView>
     </View>
   );
 }

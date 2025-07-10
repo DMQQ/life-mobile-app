@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import { Text, View } from "react-native";
 import { useWalletContext, type Action, type Filters } from "../components/WalletContext";
 import Button from "@/components/ui/Button/Button";
-import SegmentedButtons from "@/components/ui/SegmentedButtons";
 import DateTimePicker from "react-native-modal-datetime-picker";
 import { formatDate } from "@/utils/functions/parseDate";
 import CategorySelect from "../components/Wallet/CategorySelect";
@@ -17,6 +16,7 @@ import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons";
 import { CategoryUtils } from "../components/ExpenseIcon";
 import { AnimatedSelector } from "@/components";
 import dayjs from "dayjs";
+import Animated, { useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated";
 
 interface ExpenseFiltersProps {
   filters: Filters;
@@ -51,9 +51,22 @@ const Forms = (props: ExpenseFiltersProps) => {
 
   const quickDates = useMemo(() => [{ label: "Today", value: [dayjs().format("YYYY-MM-DD")] }], []);
 
+  const scrollY = useSharedValue(0);
+
+  const onScroll = useAnimatedScrollHandler({
+    onScroll: (ev) => {
+      scrollY.value = ev.contentOffset.y;
+    },
+  });
+
   return (
     <View style={{ flex: 1 }}>
       <Header
+        containerStyle={{
+          height: 60,
+          paddingTop: 15,
+        }}
+        scrollY={scrollY}
         goBack
         backIcon={<AntDesign name="close" size={24} color="white" />}
         buttons={[
@@ -66,7 +79,13 @@ const Forms = (props: ExpenseFiltersProps) => {
           },
         ]}
       />
-      <ScrollView style={{ flex: 1, padding: 15 }}>
+      <Animated.ScrollView
+        onScroll={onScroll}
+        style={{
+          flex: 1,
+          padding: 15,
+        }}
+      >
         <Input value={localQuery} onChangeText={setLocalQuery} placeholder="Search for a transaction" placeholderTextColor="gray" />
 
         <View
@@ -154,7 +173,7 @@ const Forms = (props: ExpenseFiltersProps) => {
           isActive={(category) => props.filters.category.includes(category)}
         />
         {/* Query for top 5 categories and list here as buttons */}
-      </ScrollView>
+      </Animated.ScrollView>
       <View style={{ padding: 15, paddingBottom: 30 }}>
         <Button
           variant="primary"
