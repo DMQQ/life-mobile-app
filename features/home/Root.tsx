@@ -16,7 +16,7 @@ import { useState } from "react";
 import * as SplashScreen from "expo-splash-screen";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import WorkoutWidget from "../workout/components/WorkoutWidget";
-import WalletNotifications, { useGetNotifications } from "../wallet/components/WalletNotifications";
+import WalletNotifications, { useGetNotifications } from "../wallet/components/Wallet/WalletNotifications";
 import Colors from "@/constants/Colors";
 import Feedback from "react-native-haptic-feedback";
 import { BlurView } from "expo-blur";

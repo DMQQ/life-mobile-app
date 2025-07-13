@@ -25,7 +25,7 @@ import MonthlyCategoryComparison from "../components/WalletChart/MonthlyComparis
 import CalendarHeatmap from "../components/WalletChart/MonthlySpendingHeatMap";
 import moment from "moment";
 import HourlySpendingsHeatMap from "../components/WalletChart/HourlyHeatMap";
-import { CategoryUtils } from "../components/ExpenseIcon";
+import { CategoryUtils } from "../components/Expense/ExpenseIcon";
 import useGetLegendData from "../hooks/useGetLegendData";
 import ChartLoader from "../components/WalletChart/ChartLoader";
 import LimitsComparison from "../components/WalletChart/LimitsComparison";

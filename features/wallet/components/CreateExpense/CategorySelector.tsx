@@ -1,5 +1,5 @@
 import Animated, { FadeIn, FadeInDown, LinearTransition } from "react-native-reanimated";
-import { CategoryUtils, Icons } from "../ExpenseIcon";
+import { CategoryUtils, Icons } from "../Expense/ExpenseIcon";
 import { useEffect, useRef, useState } from "react";
 import Input from "@/components/ui/TextInput/TextInput";
 import Colors from "@/constants/Colors";

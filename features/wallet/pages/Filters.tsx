@@ -6,14 +6,14 @@ import { useWalletContext, type Action, type Filters } from "../components/Walle
 import Button from "@/components/ui/Button/Button";
 import DateTimePicker from "react-native-modal-datetime-picker";
 import { formatDate } from "@/utils/functions/parseDate";
-import CategorySelect from "../components/Wallet/CategorySelect";
+import CategorySelect from "../components/CreateExpense/CategorySelect";
 import { ScrollView } from "react-native-gesture-handler";
 import Color from "color";
 import Colors from "@/constants/Colors";
 import { useNavigation } from "@react-navigation/native";
 import Header from "@/components/ui/Header/Header";
 import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons";
-import { CategoryUtils } from "../components/ExpenseIcon";
+import { CategoryUtils } from "../components/Expense/ExpenseIcon";
 import { AnimatedSelector } from "@/components";
 import dayjs from "dayjs";
 import Animated, { useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated";

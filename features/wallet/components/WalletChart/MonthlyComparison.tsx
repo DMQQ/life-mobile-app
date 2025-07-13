@@ -8,7 +8,7 @@ import lowOpacity from "@/utils/functions/lowOpacity";
 import { gql, useQuery } from "@apollo/client";
 import moment from "moment";
 import ChartTemplate, { Types } from "./ChartTemplate";
-import { CategoryUtils, Icons } from "../ExpenseIcon";
+import { CategoryUtils, Icons } from "../Expense/ExpenseIcon";
 
 const GET_MONTHLY_CATEGORY_COMPARISON = gql`
   query MonthlyCategoryComparison($months: [String!]!) {

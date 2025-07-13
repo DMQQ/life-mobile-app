@@ -27,12 +27,10 @@ interface CustomTimelineProps {
 
   selected: string;
 
-  children: ReactNode;
-
   onScroll: (event: any) => void;
 }
 
-const CalendarTimetable = ({ events, selected, children, onScroll }: CustomTimelineProps) => {
+const CalendarTimetable = ({ events, selected, onScroll }: CustomTimelineProps) => {
   const items = useMemo(
     () =>
       events.map((t, index) => ({
@@ -65,7 +63,6 @@ const CalendarTimetable = ({ events, selected, children, onScroll }: CustomTimel
       showsVerticalScrollIndicator={false}
       scrollEventThrottle={16}
     >
-      {children}
       <TimeTable
         fromHour={minHour > 0 ? minHour : minHour}
         toHour={maxHour < 23 ? maxHour + 1 : maxHour}

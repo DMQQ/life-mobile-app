@@ -7,7 +7,7 @@ import Button from "@/components/ui/Button/Button";
 import lowOpacity from "@/utils/functions/lowOpacity";
 import { gql, useQuery } from "@apollo/client";
 import moment from "moment";
-import { CategoryUtils, Icons } from "../ExpenseIcon";
+import { CategoryUtils, Icons } from "../Expense/ExpenseIcon";
 import ChartTemplate from "./ChartTemplate";
 
 const LIMITS_COMPARISON = gql`

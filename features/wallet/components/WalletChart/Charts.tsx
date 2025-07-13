@@ -3,7 +3,7 @@ import { BarChart, barDataItem } from "react-native-gifted-charts";
 import Colors from "@/constants/Colors";
 import Color from "color";
 import Layout from "@/constants/Layout";
-import { Icons } from "../ExpenseIcon";
+import { Icons } from "../Expense/ExpenseIcon";
 import lowOpacity from "@/utils/functions/lowOpacity";
 
 interface ChartsProps {

@@ -3,14 +3,14 @@ import { AntDesign, FontAwesome, Ionicons } from "@expo/vector-icons";
 import { SafeAreaView, StyleSheet, View } from "react-native";
 import Animated, { FadeOut } from "react-native-reanimated";
 import { WalletScreens } from "../Main";
-import EditBalanceSheet from "../components/Sheets/EditBalanceSheet";
+import EditBalanceSheet from "../components/Wallet/EditBalanceSheet";
 import WalletList from "../components/Wallet/WalletList";
 import { useWalletContext } from "../components/WalletContext";
 import useGetWallet from "../hooks/useGetWallet";
-import InitializeWallet from "../components/InitializeWallet";
+import InitializeWallet from "../components/Wallet/InitializeWallet";
 import { useEffect, useState } from "react";
-import SubscriptionList from "../components/Wallet/SubscriptionList";
-import WalletLoader from "../components/WalletLoader";
+import SubscriptionList from "../components/Subscription/SubscriptionList";
+import WalletLoader from "../components/Wallet/WalletLoader";
 import Colors from "@/constants/Colors";
 import useTrackScroll from "@/utils/hooks/ui/useTrackScroll";
 

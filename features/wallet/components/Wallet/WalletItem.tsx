@@ -3,7 +3,7 @@ import moment from "moment";
 import Colors from "@/constants/Colors";
 import Ripple from "react-native-material-ripple";
 import Animated, { AnimatedStyle, FadeIn, FadeOut, LinearTransition } from "react-native-reanimated";
-import { CategoryIcon, Icons } from "../ExpenseIcon";
+import { CategoryIcon, Icons } from "../Expense/ExpenseIcon";
 import { Expense } from "@/types";
 import { useState } from "react";
 import Feedback from "react-native-haptic-feedback";
@@ -22,9 +22,9 @@ export interface WalletElement extends Expense {
   note?: string;
 }
 
-export { Icons } from "../ExpenseIcon";
+export { Icons } from "../Expense/ExpenseIcon";
 
-export { CategoryIcon } from "../ExpenseIcon";
+export { CategoryIcon } from "../Expense/ExpenseIcon";
 
 interface WalletItemProps extends WalletElement {}
 

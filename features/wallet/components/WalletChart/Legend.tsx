@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from "react-native";
 import Ripple from "react-native-material-ripple";
 import Colors from "@/constants/Colors";
 import Color from "color";
-import { CategoryIcon, CategoryUtils, Icons } from "../ExpenseIcon";
+import { CategoryIcon, CategoryUtils, Icons } from "../Expense/ExpenseIcon";
 import lowOpacity from "@/utils/functions/lowOpacity";
 import { useEffect, useMemo, useState } from "react";
 import { AntDesign } from "@expo/vector-icons";

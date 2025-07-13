@@ -11,7 +11,7 @@ import Ripple from "react-native-material-ripple";
 import { init, useWalletContext } from "../WalletContext";
 import { gql, useQuery } from "@apollo/client";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import WalletLimits from "../Limits";
+import WalletLimits from "./Limits";
 import { getInvalidExpenses } from "../../pages/WalletCharts";
 import Layout from "@/constants/Layout";
 import Color from "color";

@@ -2,7 +2,7 @@ import Select, { Props } from "@/components/ui/Select/Select";
 import Layout from "@/constants/Layout";
 import Color from "color";
 import Colors from "@/constants/Colors";
-import { CategoryIcon, CategoryUtils, Icons } from "../ExpenseIcon";
+import { CategoryIcon, CategoryUtils, Icons } from "../Expense/ExpenseIcon";
 import lowOpacity from "@/utils/functions/lowOpacity";
 import { Text, View } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";

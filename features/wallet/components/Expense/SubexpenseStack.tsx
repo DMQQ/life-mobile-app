@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import Animated, { Layout, useAnimatedStyle, withSpring, useSharedValue } from "react-native-reanimated";
-import WalletItem from "./Wallet/WalletItem";
+import WalletItem from "../Wallet/WalletItem";
 import Colors from "@/constants/Colors";
 import { AntDesign } from "@expo/vector-icons";
 

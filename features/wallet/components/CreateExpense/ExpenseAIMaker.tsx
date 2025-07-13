@@ -434,9 +434,9 @@ import { useNavigation } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
 import { Expense } from "@/types";
-import WalletItem from "./Wallet/WalletItem";
 import Ripple from "react-native-material-ripple";
-import useDeleteActivity from "../hooks/useDeleteActivity";
+import WalletItem from "../Wallet/WalletItem";
+import useDeleteActivity from "../../hooks/useDeleteActivity";
 
 export default function ExpenseAIMaker({ initialOpen, setExpense }: { initialOpen?: boolean; setExpense?: (expense: Expense) => void }) {
   const navigation = useNavigation<any>();

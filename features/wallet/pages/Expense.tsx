@@ -15,7 +15,7 @@ import { gql, useLazyQuery, useMutation, useQuery } from "@apollo/client";
 import axios from "axios";
 import Url from "@/constants/Url";
 
-import { CategoryUtils } from "../components/ExpenseIcon";
+import { CategoryUtils } from "../components/Expense/ExpenseIcon";
 
 const similarCategories = {
   food: ["drinks"],
@@ -533,10 +533,10 @@ export default function Expense({ route: { params }, navigation }: any) {
 
 import * as ImagePicker from "expo-image-picker";
 import Layout from "@/constants/Layout";
-import ImageViewerModal from "../components/ImageViewer";
-import MapPicker from "../components/Map";
+import ImageViewerModal from "../components/Expense/ImageViewer";
+import MapPicker from "../components/Expense/Map";
 import Animated, { useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated";
-import SubexpenseStack from "../components/SubexpenseStack";
+import SubexpenseStack from "../components/Expense/SubexpenseStack";
 
 const FileUpload = (props: { id: string; images: any[] }) => {
   const [files, setFiles] = useState<{ id: string; url: string }[]>(props.images ?? []);

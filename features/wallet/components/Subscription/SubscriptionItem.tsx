@@ -2,7 +2,7 @@ import { View, Text, StyleSheet } from "react-native";
 import moment from "moment";
 import Colors, { secondary_candidates } from "@/constants/Colors";
 import Ripple from "react-native-material-ripple";
-import { CategoryIcon } from "../ExpenseIcon";
+import { CategoryIcon } from "../Expense/ExpenseIcon";
 import { useMemo, useState } from "react";
 import Feedback from "react-native-haptic-feedback";
 import Animated, { FadeIn, FadeOut, LinearTransition } from "react-native-reanimated";

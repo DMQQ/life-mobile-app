@@ -8,7 +8,7 @@ import { CompositeScreenProps, NavigatorScreenParams, ParamListBase, RouteProp }
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 import { StackNavigationProp } from "@react-navigation/stack";
-import { Icons } from "./features/wallet/components/ExpenseIcon";
+import { Icons } from "./features/wallet/components/Expense/ExpenseIcon";
 
 export interface ScreenProps<Route extends keyof RootStackParamList> {
   navigation: StackNavigationProp<RootStackParamList, Route>;

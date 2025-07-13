@@ -99,10 +99,10 @@ export default function TimelineDetails({
 
   const taskRef = useRef<BottomSheetType>(null);
 
-  const safearea = useSafeAreaInsets();
+  const insets = useSafeAreaInsets();
 
   return (
-    <View style={{ backgroundColor: Colors.primary, marginBottom: 50, marginTop: Platform.OS === "ios" ? safearea.top : 0 }}>
+    <View style={{ backgroundColor: Colors.primary, marginBottom: insets.bottom + 30 }}>
       <TimelineHeader
         title={data?.title.slice(0, 18)}
         scrollY={scrollY}

@@ -4,7 +4,7 @@ import { Text, View, StyleSheet, TouchableOpacity, ScrollView, FlatList } from "
 import Colors from "@/constants/Colors";
 import Ripple from "react-native-material-ripple";
 import Feedback from "react-native-haptic-feedback";
-import { CategoryIcon } from "./ExpenseIcon";
+import { CategoryIcon } from "../Expense/ExpenseIcon";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { BlurView } from "expo-blur";
 import lowOpacity from "@/utils/functions/lowOpacity";

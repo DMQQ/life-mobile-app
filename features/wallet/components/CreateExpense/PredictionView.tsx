@@ -13,8 +13,8 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 import { useEffect } from "react";
-import { ExpensePrediction } from "../hooks/usePredictCategory";
-import { CategoryIcon, CategoryUtils, Icons } from "./ExpenseIcon";
+import { ExpensePrediction } from "../../hooks/usePredictCategory";
+import { CategoryIcon, CategoryUtils, Icons } from "../Expense/ExpenseIcon";
 import Layout from "@/constants/Layout";
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";

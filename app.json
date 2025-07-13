@@ -16,9 +16,11 @@
       "fallbackToCacheTimeout": 0,
       "url": "https://u.expo.dev/5596a83c-661a-4477-806f-ee4c8a125f7e"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
-      "buildNumber": "20250703",
+      "buildNumber": "20250710",
       "supportsTablet": true,
       "infoPlist": {
         "NSFaceIDUsageDescription": "Allow $(PRODUCT_NAME) to use Face ID.",
@@ -27,7 +29,9 @@
         "ITSAppUsesNonExemptEncryption": false
       },
       "bundleIdentifier": "com.dmq.mylifemobile",
-      "associatedDomains": ["applinks:life.dmqq.dev"]
+      "associatedDomains": [
+        "applinks:life.dmqq.dev"
+      ]
     },
     "android": {
       "googleServicesFile": "./google-services.json",
@@ -57,7 +61,10 @@
               "scheme": "mylife"
             }
           ],
-          "category": ["BROWSABLE", "DEFAULT"]
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         }
       ]
     },

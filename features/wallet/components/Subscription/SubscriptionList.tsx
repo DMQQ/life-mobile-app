@@ -4,7 +4,7 @@ import Colors, { Sizing } from "@/constants/Colors";
 import { useCallback, useMemo, useState } from "react";
 import SubscriptionItem from "./SubscriptionItem";
 import Animated, { SharedValue } from "react-native-reanimated";
-import WalletLimits from "../Limits";
+import WalletLimits from "../Wallet/Limits";
 import { RefreshControl } from "react-native-gesture-handler";
 import { useNavigation } from "@react-navigation/native";
 

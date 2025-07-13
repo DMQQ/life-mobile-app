@@ -49,6 +49,7 @@ export default memo(ChartLoader);
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingTop: 15,
   },
   header: {
     padding: 20,

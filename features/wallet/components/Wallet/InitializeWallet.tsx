@@ -4,7 +4,7 @@ import Layout from "@/constants/Layout";
 import { gql, useMutation } from "@apollo/client";
 import { useState } from "react";
 import { ActivityIndicator, Text } from "react-native";
-import { GET_WALLET } from "../hooks/useGetWallet";
+import { GET_WALLET } from "../../hooks/useGetWallet";
 import { GET_MAIN_SCREEN } from "@/utils/schemas/GET_MAIN_SCREEN";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 
