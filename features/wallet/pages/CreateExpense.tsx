@@ -1,29 +1,24 @@
-import moment from "moment"
-import { ActivityIndicator, Alert, Keyboard, StyleSheet, Text, TouchableWithoutFeedback, View } from "react-native"
-import Colors from "@/constants/Colors"
-import { useCallback, useRef, useState } from "react"
-import Ripple from "react-native-material-ripple"
-import Layout from "@/constants/Layout"
-import WalletItem, { Icons } from "../components/Wallet/WalletItem"
-import { AntDesign, Ionicons } from "@expo/vector-icons"
-import lowOpacity from "@/utils/functions/lowOpacity"
-import Animated, { FadeIn, useAnimatedStyle, withTiming } from "react-native-reanimated"
-import DateTimePicker from "react-native-modal-datetime-picker"
-import IconButton from "@/components/ui/IconButton/IconButton"
-import Color from "color"
-import Input from "@/components/ui/TextInput/TextInput"
-import BottomSheet, { BottomSheetBackdrop } from "@gorhom/bottom-sheet"
-import NumbersPad from "../components/CreateExpense/NumberPad"
-import CategorySelector from "../components/CreateExpense/CategorySelector"
-import { FlatList } from "react-native-gesture-handler"
-import Feedback from "react-native-haptic-feedback"
 import Button from "@/components/ui/Button/Button"
-import { SpontaneousRateSelector } from "../components/CreateExpense/SpontaneousRate"
-import PredictionView from "../components/CreateExpense/PredictionView"
-import ExpenseAIMaker from "../components/CreateExpense/ExpenseAIMaker"
-import useCreateExpensePage from "@/features/wallet/hooks/useCreateExpensePage"
+import IconButton from "@/components/ui/IconButton/IconButton"
+import Colors from "@/constants/Colors"
+import Layout from "@/constants/Layout"
 import OptionsPicker from "@/features/wallet/components/CreateExpense/OptionsPicker"
+import useCreateExpensePage from "@/features/wallet/hooks/useCreateExpensePage"
+import { AntDesign } from "@expo/vector-icons"
+import BottomSheet, { BottomSheetBackdrop } from "@gorhom/bottom-sheet"
+import moment from "moment"
+import { useCallback, useRef, useState } from "react"
+import { Alert, Keyboard, StyleSheet, Text, TouchableWithoutFeedback, View } from "react-native"
+import { FlatList } from "react-native-gesture-handler"
+import DateTimePicker from "react-native-modal-datetime-picker"
+import Animated, { FadeIn, interpolate, useAnimatedStyle } from "react-native-reanimated"
+import CategorySelector from "../components/CreateExpense/CategorySelectorView"
+import ExpenseAIMaker from "../components/CreateExpense/ExpenseAIMaker"
 import NameInput from "../components/CreateExpense/NameInput"
+import NumbersPad from "../components/CreateExpense/NumberPad"
+import PredictionView from "../components/CreateExpense/PredictionView"
+import { SpontaneousRateSelector } from "../components/CreateExpense/SpontaneousRate"
+import WalletItem, { Icons } from "../components/Wallet/WalletItem"
 
 const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1)
 
@@ -64,16 +59,11 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
 
     const [isInputFocused, setIsInputFocused] = useState(false)
 
-    const scale = (n: number) => {
-        "worklet"
-        return Math.max(90 - n * 3.5, 35)
-    }
-
     const animatedAmount = useAnimatedStyle(
         () => ({
             transform: [{ translateX: transformX.value }],
 
-            fontSize: withTiming(scale(amount.length), { duration: 100 }),
+            fontSize: interpolate(amount.length, [0, 1, 2, 3, 4, 10], [90, 80, 70, 60, 50, 40], "clamp"),
         }),
         [amount],
     )
