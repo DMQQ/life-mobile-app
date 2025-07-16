@@ -1,9 +1,10 @@
 import Colors from "@/constants/Colors"
 import { Todos } from "@/types"
 import Color from "color"
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { StyleSheet, View } from "react-native"
 import { Surface, Text } from "react-native-paper"
+import CompletionBar from "./CompletionBar"
 import TodoHeader from "./TodoHeader"
 import TodoItem from "./TodoItem"
 import TodoTransferDialog from "./TodoTransferDialog"
@@ -38,23 +39,40 @@ export default function TimelineTodos(props: { todos: Todos[]; timelineId: strin
         setShowTransferDialog(true)
     }
 
+    const sortedTodos = useMemo(() => {
+        return [...props.todos].sort((a, b) => {
+            if (a.isCompleted && !b.isCompleted) return 1
+            if (!a.isCompleted && b.isCompleted) return -1
+
+            return -1
+        })
+    }, [props.todos])
+
+    const taskCompletionProgressBar = useMemo(() => {
+        let count = 0
+
+        if (sortedTodos === undefined) return 0
+
+        for (let todo of sortedTodos || []) {
+            if (todo.isCompleted) count += 1
+        }
+
+        return Math.trunc((count / sortedTodos?.length) * 100)
+    }, [sortedTodos])
+
     return (
         <>
             <View style={styles.container}>
-                <TodoHeader
-                    todos={props.todos}
-                    onAddTodo={handleAddTodo}
-                    onLongPress={handleLongPress}
-                />
+                <TodoHeader todos={sortedTodos} onAddTodo={handleAddTodo} onLongPress={handleLongPress} />
+
+                {sortedTodos.length > 0 && (
+                    <View style={{ marginBottom: 16 }}>
+                        <CompletionBar percentage={taskCompletionProgressBar} />
+                    </View>
+                )}
 
                 {props.todos.length > 0 ? (
-                    props.todos.map((todo) => (
-                        <TodoItem
-                            key={todo.id}
-                            timelineId={props.timelineId}
-                            {...todo}
-                        />
-                    ))
+                    sortedTodos.map((todo) => <TodoItem key={todo.id} timelineId={props.timelineId} {...todo} />)
                 ) : (
                     <Surface style={styles.emptyState} elevation={1}>
                         <Text variant="bodyLarge" style={styles.emptyText}>

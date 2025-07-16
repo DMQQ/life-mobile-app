@@ -63,8 +63,8 @@ export default forwardRef<
             <View style={styles.container}>
                 <View style={styles.header}>
                     <View>
-                        <Text style={[styles.title, { color: theme.colors.secondary }]}>Create Todos</Text>
-                        <Text variant="bodyMedium" style={[styles.subtitle, { color: theme.colors.onSurfaceVariant }]}>
+                        <Text style={[styles.title, { color: Colors.secondary }]}>Create Todos</Text>
+                        <Text variant="bodyMedium" style={[styles.subtitle, { color: Colors.text_light }]}>
                             {todoCount} todo{todoCount !== 1 ? "s" : ""} ready to save
                         </Text>
                     </View>

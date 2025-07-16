@@ -86,8 +86,8 @@ export default function TodoItem(todo: Todos & { timelineId: string }) {
                             <Checkbox
                                 status={todo.isCompleted ? "checked" : "unchecked"}
                                 onPress={handleToggleComplete}
-                                uncheckedColor={theme.colors.outline}
-                                color={theme.colors.secondary}
+                                uncheckedColor={Colors.primary_darker}
+                                color={Colors.secondary}
                             />
                         </View>
 
@@ -96,9 +96,7 @@ export default function TodoItem(todo: Todos & { timelineId: string }) {
                             style={[
                                 styles.todoText,
                                 {
-                                    color: todo.isCompleted
-                                        ? theme.colors.onSurfaceVariant
-                                        : theme.colors.onSurface,
+                                    color: todo.isCompleted ? Colors.secondary_light_1 : theme.colors.onSurface,
                                 },
                                 todo.isCompleted && styles.completedText,
                             ]}

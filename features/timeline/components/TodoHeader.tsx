@@ -1,3 +1,4 @@
+import Colors from "@/constants/Colors"
 import { Todos } from "@/types"
 import { Pressable, StyleSheet, View } from "react-native"
 import { Chip, Text, useTheme } from "react-native-paper"
@@ -31,14 +32,12 @@ interface TodoHeaderProps {
 
 export default function TodoHeader({ todos, onAddTodo, onLongPress }: TodoHeaderProps) {
     const theme = useTheme()
-    const completedCount = todos.filter(todo => todo.isCompleted).length
+    const completedCount = todos.filter((todo) => todo.isCompleted).length
 
     return (
         <View style={styles.header}>
             <View style={styles.titleContainer}>
-                <Text variant="headlineSmall" style={{ color: theme.colors.secondary, fontWeight: "600" }}>
-                    Todos
-                </Text>
+                <Text style={{ color: Colors.text_light, fontWeight: "600", fontSize: 20 }}>Todos</Text>
                 <Chip
                     mode="outlined"
                     style={{
@@ -61,9 +60,7 @@ export default function TodoHeader({ todos, onAddTodo, onLongPress }: TodoHeader
                     },
                 ]}
             >
-                <Text style={{ color: theme.colors.onSecondary, fontWeight: "600", fontSize: 14 }}>
-                    + Add Todo
-                </Text>
+                <Text style={{ color: theme.colors.onSecondary, fontWeight: "600", fontSize: 14 }}>+ Add Todo</Text>
             </Pressable>
         </View>
     )

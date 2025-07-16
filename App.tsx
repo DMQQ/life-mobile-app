@@ -5,7 +5,7 @@ import { getItemAsync } from "expo-secure-store"
 import * as SplashScreen from "expo-splash-screen"
 import { StatusBar } from "expo-status-bar"
 import { GestureHandlerRootView } from "react-native-gesture-handler"
-import { MD3DarkTheme, ThemeProvider as PaperThemeProvider } from "react-native-paper"
+import { MD2DarkTheme, MD3DarkTheme, ThemeProvider as PaperThemeProvider } from "react-native-paper"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { Provider } from "react-redux"
 import ErrorBoundary from "./components/ErrorBoundary"
@@ -16,18 +16,20 @@ import ThemeContextProvider from "./utils/context/ThemeContext"
 import { STORE_KEY } from "./utils/hooks/useUser"
 import { store } from "./utils/redux"
 
-const Md3ThemeExtended = {
-    ...MD3DarkTheme,
+export const Md3ThemeExtended = {
+    ...MD2DarkTheme,
+    roundness: MD3DarkTheme.roundness,
     colors: {
-        ...MD3DarkTheme.colors,
-        primary: Colors.primary,
-        primaryContainer: Colors.primary_light,
-        secondary: Colors.secondary,
-        secondaryContainer: Colors.secondary_light_1,
+        ...MD2DarkTheme.colors,
+        primary: Colors.secondary,
+        primaryContainer: Colors.secondary_dark_1,
+        secondary: Colors.primary_lighter,
+        secondaryContainer: Colors.primary_light,
         tertiary: Colors.ternary,
-        tertiaryContainer: Colors.ternary_light_1,
-        surface: Colors.primary_dark,
-        surfaceVariant: Colors.primary_darker,
+
+        surface: Colors.primary_lighter,
+        surfaceVariant: Colors.primary_light,
+        surfaceDisabled: Colors.primary_lighter,
         background: Colors.primary,
         error: Colors.error,
         onPrimary: Colors.text_light,
@@ -36,10 +38,18 @@ const Md3ThemeExtended = {
         onSurface: Colors.text_light,
         onBackground: Colors.text_light,
         onError: Colors.text_light,
-        outline: Colors.primary_lighter,
-        outlineVariant: Colors.primary_light,
+        outline: Colors.primary_light,
+        outlineVariant: Colors.primary_lighter,
+        elevation: {
+            level0: Colors.primary_lighter,
+            level1: Colors.primary_lighter,
+            level2: Colors.primary_lighter,
+            level3: Colors.primary_lighter,
+            level4: Colors.primary_lighter,
+            level5: Colors.primary_lighter,
+        },
     },
-}
+} as typeof MD2DarkTheme
 
 SplashScreen.preventAutoHideAsync()
 
