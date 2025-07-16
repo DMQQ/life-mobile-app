@@ -26,9 +26,11 @@ interface CustomTimelineProps {
     selected: string
 
     onScroll: (event: any) => void
+
+    onLongPress?: (event: TimelineEvent) => void
 }
 
-const CalendarTimetable = ({ events, selected, onScroll }: CustomTimelineProps) => {
+const CalendarTimetable = ({ events, selected, onScroll, onLongPress }: CustomTimelineProps) => {
     const items = useMemo(
         () =>
             events.map((t, index) => ({
@@ -56,7 +58,7 @@ const CalendarTimetable = ({ events, selected, onScroll }: CustomTimelineProps) 
     return (
         <Animated.ScrollView
             keyboardDismissMode={"on-drag"}
-            style={{ flex: 1, paddingBottom: 100 }}
+            style={{ flex: 1, paddingBottom: 100, marginTop: 15 }}
             onScroll={onScroll}
             showsVerticalScrollIndicator={false}
             scrollEventThrottle={16}
@@ -111,6 +113,7 @@ const CalendarTimetable = ({ events, selected, onScroll }: CustomTimelineProps) 
                                     backgroundColor: backgroundColor,
                                     borderRadius: 5,
                                     overflow: "hidden",
+                                    width: props.style.width - 25,
                                 },
                                 props.item.timeline.isCompleted && {
                                     opacity: 0.5,
@@ -128,6 +131,7 @@ const CalendarTimetable = ({ events, selected, onScroll }: CustomTimelineProps) 
                                     alignItems: "flex-start",
                                 }}
                                 isSmall={props.style.height < 100}
+                                onLongPress={() => onLongPress?.(props.item.timeline)}
                             />
                         </View>
                     )

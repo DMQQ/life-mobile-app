@@ -1,5 +1,5 @@
 import { Skeleton } from "@/components"
-import DeleteGoalsGroupDialog from "@/components/ui/Dialog/DeleteGoalsDialog"
+import DeleteGoalsGroupDialog from "@/components/ui/Dialog/Delete/DeleteGoalsDialog"
 import Header from "@/components/ui/Header/Header"
 import Colors from "@/constants/Colors"
 import { AntDesign } from "@expo/vector-icons"

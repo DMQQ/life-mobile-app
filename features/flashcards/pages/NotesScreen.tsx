@@ -5,7 +5,7 @@ import { StyleSheet, Text, View } from "react-native"
 import Ripple from "react-native-material-ripple"
 
 import { Skeleton } from "@/components"
-import DeleteFlashCardGroupDialog from "@/components/ui/Dialog/DeleteGroupDialog"
+import DeleteFlashCardGroupDialog from "@/components/ui/Dialog/Delete/DeleteGroupDialog"
 import { ScreenProps } from "@/types"
 import { useNavigation } from "@react-navigation/native"
 import { FlashList } from "@shopify/flash-list"

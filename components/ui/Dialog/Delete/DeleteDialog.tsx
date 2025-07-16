@@ -1,30 +1,21 @@
 import Colors from "@/constants/Colors"
 import lowOpacity from "@/utils/functions/lowOpacity"
-import { gql, useMutation } from "@apollo/client"
 import { AntDesign } from "@expo/vector-icons"
-import Dialog from "./Dialog"
+import Dialog from "../Dialog"
 
-export default function DeleteGoalsGroupDialog(props: {
+export interface DeleteDialogProps {
     onDismiss: () => void
     isVisible: boolean
     children?: React.ReactNode
+
+    remove: () => Promise<any>
 
     item?: {
         id: string
         name: string
     }
-}) {
-    const [removeGroup, { error, data }] = useMutation(
-        gql`
-            mutation {
-                removeGoalsGroup
-            }
-        `,
-        {
-            refetchQueries: ["GetGroups"],
-        },
-    )
-
+}
+export default function DeleteDialog(props: DeleteDialogProps) {
     return (
         <Dialog
             icon={<AntDesign name="delete" size={20} color={Colors.error} />}
@@ -52,9 +43,8 @@ export default function DeleteGoalsGroupDialog(props: {
                     onPress: async () => {
                         if (!props.item?.id) return
 
-                        await removeGroup({
-                            variables: { groupId: props.item.id },
-                        })
+                        await props.remove()
+
                         props.onDismiss()
                     },
                 },

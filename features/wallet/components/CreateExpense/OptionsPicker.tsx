@@ -1,14 +1,14 @@
-import Animated, { LinearTransition } from "react-native-reanimated"
-import Ripple from "react-native-material-ripple"
 import Colors from "@/constants/Colors"
+import Layout from "@/constants/Layout"
+import { SpontaneousRateChip } from "@/features/wallet/components/CreateExpense/SpontaneousRate"
+import { CategoryUtils, Icons } from "@/features/wallet/components/Expense/ExpenseIcon"
 import lowOpacity from "@/utils/functions/lowOpacity"
-import { StyleSheet, Text, View } from "react-native"
 import { AntDesign, Entypo } from "@expo/vector-icons"
 import Color from "color"
 import moment from "moment/moment"
-import { CategoryUtils, Icons } from "@/features/wallet/components/Expense/ExpenseIcon"
-import { SpontaneousRateChip } from "@/features/wallet/components/CreateExpense/SpontaneousRate"
-import Layout from "@/constants/Layout"
+import { StyleSheet, Text, View } from "react-native"
+import Ripple from "react-native-material-ripple"
+import Animated, { LinearTransition } from "react-native-reanimated"
 
 type Type = "expense" | "income" | null
 
@@ -121,7 +121,7 @@ export default function OptionsPicker({
                     {
                         backgroundColor:
                             category === "none"
-                                ? Colors.primary_light
+                                ? Colors.primary_lighter
                                 : lowOpacity(Icons[category]?.backgroundColor, 0.2),
                     },
                 ]}
@@ -185,5 +185,6 @@ const styles = StyleSheet.create({
         gap: 15,
         minWidth: (Layout.screen.width - 30 - 30) / 3,
         flex: 1,
+        backgroundColor: Colors.primary_lighter,
     },
 })

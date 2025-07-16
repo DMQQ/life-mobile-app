@@ -27,7 +27,7 @@ export default function AmountDisplay({
         () => ({
             transform: [{ translateX: transformX.value }],
 
-            fontSize: interpolate(amount.length, [0, 1, 2, 3, 4, 10], [90, 80, 70, 60, 50, 40], "clamp"),
+            fontSize: interpolate(amount.length, [0, 10, 15], [90, 60, 35], "clamp"),
         }),
         [amount],
     )
@@ -41,7 +41,7 @@ export default function AmountDisplay({
                 </Animated.Text>
 
                 {subExpensesLength > 0 && (
-                    <Text style={{ color: "rgba(255,255,255,0.7)", fontSize: 12, textAlign: "center" }}>
+                    <Text style={{ color: "rgba(255,255,255,0.7)", fontSize: 15, textAlign: "center" }}>
                         {subExpensesLength} item for ~{calculateSubExpensesTotal().toFixed(2)}zł
                     </Text>
                 )}
@@ -49,9 +49,7 @@ export default function AmountDisplay({
 
             {moment(date).isAfter(moment()) && type && amount != "0" && (
                 <View style={styles.scheduledContainer}>
-                    <Text style={styles.scheduledText}>
-                        {type} will be added on {moment(date).format("DD MMMM YYYY")}
-                    </Text>
+                    <Text style={styles.scheduledText}>scheduled for {moment(date).format("DD MMMM YYYY")}</Text>
                 </View>
             )}
         </View>
@@ -65,7 +63,7 @@ const styles = StyleSheet.create({
         width: "100%",
         alignItems: "center",
         flexDirection: "row",
-        paddingTop: 30,
+        paddingTop: 45,
         paddingHorizontal: 15,
     },
     scheduledContainer: { position: "absolute", justifyContent: "center", alignItems: "center", bottom: 25 },

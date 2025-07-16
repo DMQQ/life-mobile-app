@@ -69,9 +69,9 @@ const NumpadNumber = (props: {
     const onPress = () => {
         Feedback.trigger("impactLight")
 
-        props.num === "C" && props.rotateBackButton ? props.navigation.goBack() : props.onPress()
+        scale.value = withSequence(withSpring(0.8, { duration: 100 }), withSpring(1, { duration: 200 }))
 
-        scale.value = withSequence(withSpring(1.5, { duration: 100 }), withSpring(1, { duration: 200 }))
+        props.num === "C" && props.rotateBackButton ? props.navigation.goBack() : props.onPress()
     }
 
     const animatedScale = useAnimatedStyle(

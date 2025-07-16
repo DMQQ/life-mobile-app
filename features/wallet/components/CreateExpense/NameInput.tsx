@@ -52,11 +52,13 @@ export default function NameInput({
     return (
         <Input
             containerStyle={{
-                borderRadius: 25,
+                borderRadius: 20,
                 backgroundColor: isInputFocused
                     ? Color(Colors.primary_light).lighten(0.25).hex()
-                    : Colors.primary_light,
-                borderColor: isInputFocused ? Color(Colors.primary).lighten(2.5).hex() : Colors.primary_lighter,
+                    : Colors.primary_lighter,
+                borderColor: isInputFocused
+                    ? Color(Colors.primary).lighten(1.5).hex()
+                    : Color(Colors.primary_lighter).lighten(0.25).hex(),
             }}
             placeholder={isSubExpenseMode ? "Add sub-expense" : "What are you spending on?"}
             style={styles.input}
@@ -160,13 +162,14 @@ const styles = StyleSheet.create({
         borderRadius: 100,
     },
     save: {
-        paddingHorizontal: 15,
+        paddingHorizontal: 12.5,
         paddingVertical: 5,
-        borderRadius: 8,
+        borderRadius: 12.5,
         backgroundColor: Colors.secondary,
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "center",
         gap: 7.5,
+        marginRight: 5,
     },
 })

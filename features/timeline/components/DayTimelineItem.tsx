@@ -2,9 +2,8 @@ import { AntDesign, MaterialIcons } from "@expo/vector-icons"
 import { useNavigation } from "@react-navigation/native"
 import moment from "moment"
 import { useMemo } from "react"
-import { Alert, StyleProp, Text, ToastAndroid, View, ViewStyle } from "react-native"
+import { StyleProp, Text, View, ViewStyle } from "react-native"
 import Ripple from "react-native-material-ripple"
-import useRemoveTimelineMutation from "../hooks/mutation/useRemoveTimelineMutation"
 import { GetTimelineQuery } from "../hooks/query/useGetTimeLineQuery"
 import timelineStyles from "./timeline.styles"
 
@@ -15,10 +14,10 @@ export default function DayTimelineItem(
         styles?: StyleProp<ViewStyle>
 
         isSmall: boolean
+
+        onLongPress?: () => void
     },
 ) {
-    const { remove } = useRemoveTimelineMutation(timeline)
-
     const navigation = useNavigation<any>()
 
     const onPress = () => {
@@ -34,28 +33,6 @@ export default function DayTimelineItem(
     const start = moment(timeline.beginTime, "HH:mm").format("HH:mm")
 
     const end = moment(timeline.endTime, "HH:mm").format("HH:mm")
-
-    const onLongPress = async () => {
-        Alert.alert(
-            "Delete Timeline",
-            "Are you sure you want to delete this timeline?",
-            [
-                {
-                    text: "Cancel",
-                    style: "cancel",
-                },
-                {
-                    text: "Delete",
-                    onPress: async () => {
-                        await remove()
-
-                        ToastAndroid.show("Event deleted", ToastAndroid.SHORT)
-                    },
-                },
-            ],
-            { userInterfaceStyle: "dark", cancelable: true },
-        )
-    }
 
     const isExpired = useMemo(() => {
         const now = moment()
@@ -77,7 +54,11 @@ export default function DayTimelineItem(
     }, [timeline.date, timeline.beginTime, timeline.endTime, timeline.isCompleted])
 
     return (
-        <Ripple onLongPress={onLongPress} onPress={onPress} style={[timelineStyles.itemContainer, timeline.styles]}>
+        <Ripple
+            onLongPress={timeline.onLongPress}
+            onPress={onPress}
+            style={[timelineStyles.itemContainer, timeline.styles]}
+        >
             <View style={{ flex: 1 }}>
                 <View style={[timelineStyles.itemContainerTitleRow]}>
                     <View style={{ flexDirection: "row", gap: 5 }}>
