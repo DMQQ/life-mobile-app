@@ -1,14 +1,14 @@
-import Input from "@/components/ui/TextInput/TextInput"
-import Color from "color"
-import Colors from "@/constants/Colors"
-import Feedback from "react-native-haptic-feedback"
-import { ActivityIndicator, StyleSheet, Text } from "react-native"
-import { AntDesign, Ionicons } from "@expo/vector-icons"
-import Ripple from "react-native-material-ripple"
 import { IconButton } from "@/components"
-import lowOpacity from "@/utils/functions/lowOpacity"
-import { Icons } from "../Expense/ExpenseIcon"
+import Input from "@/components/ui/TextInput/TextInput"
+import Colors from "@/constants/Colors"
 import Layout from "@/constants/Layout"
+import lowOpacity from "@/utils/functions/lowOpacity"
+import { AntDesign, Ionicons } from "@expo/vector-icons"
+import Color from "color"
+import { ActivityIndicator, StyleSheet, Text } from "react-native"
+import Feedback from "react-native-haptic-feedback"
+import Ripple from "react-native-material-ripple"
+import { Icons } from "../Expense/ExpenseIcon"
 
 interface NameInputProps {
     isInputFocused: boolean
@@ -29,7 +29,7 @@ interface NameInputProps {
         isEditing?: boolean
     }
 
-    SubExpenses?: any[]
+    subExpensesLength: number
 }
 
 export default function NameInput({
@@ -47,7 +47,7 @@ export default function NameInput({
     applyPrediction,
     handleSubmit,
     params,
-    SubExpenses = [],
+    subExpensesLength = 0,
 }: NameInputProps) {
     return (
         <Input
@@ -82,7 +82,7 @@ export default function NameInput({
                                     fontWeight: "900",
                                 }}
                             >
-                                {SubExpenses.length}
+                                {subExpensesLength}
                             </Text>
                         ) : (
                             <AntDesign name="switcher" size={18} color="rgba(255,255,255,0.7)" />

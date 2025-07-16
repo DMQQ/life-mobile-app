@@ -1,14 +1,14 @@
-import useCreateActivity from "@/features/wallet/hooks/useCreateActivity"
-import { useApolloClient } from "@apollo/client"
-import { useEditExpense } from "@/features/wallet/hooks/useEditExpense"
-import { useCallback, useEffect, useState } from "react"
-import moment from "moment/moment"
 import { Icons } from "@/features/wallet/components/Expense/ExpenseIcon"
-import { cancelAnimation, useSharedValue, withSpring } from "react-native-reanimated"
+import useCreateActivity from "@/features/wallet/hooks/useCreateActivity"
+import { useEditExpense } from "@/features/wallet/hooks/useEditExpense"
+import usePredictExpense from "@/features/wallet/hooks/usePredictCategory"
 import { useUploadSubExpense } from "@/features/wallet/hooks/useUploadSubExpense"
 import { Expense } from "@/types"
+import { useApolloClient } from "@apollo/client"
 import { useNavigation } from "@react-navigation/native"
-import usePredictExpense from "@/features/wallet/hooks/usePredictCategory"
+import moment from "moment/moment"
+import { useCallback, useEffect, useState } from "react"
+import { cancelAnimation, useSharedValue, withSpring } from "react-native-reanimated"
 
 interface SubExpense {
     id: string
@@ -106,8 +106,6 @@ export default function useCreateExpensePage(
                 await client?.refetchQueries({
                     include: ["GetWallet", "Limits", "StatisticsDayOfWeek", "GetZeroSpendings"],
                 })
-
-                console.log("Refetched queries successfully")
             } catch (error) {
                 console.log("Error refetching queries:", error)
             }
@@ -309,36 +307,43 @@ export default function useCreateExpensePage(
     }
 
     return {
-        setAmount,
-        setExpense,
-        prediction,
-        handleAmountChange,
-        handleAddSubexpense,
-        applyPrediction,
-        canPredict,
-        handleToggleSubExpenseMode,
-        handleSubmit,
-        type,
-        amount,
-        SubExpenses,
-        calculateSubExpensesTotal,
-        transformX,
-        name,
-        setName,
-        isSubExpenseMode,
-        date,
-        setDate,
-        changeView,
-        isValid,
-        loading,
-        category,
-        setType,
-        setIsSubExpenseMode,
-        setChangeView,
-        spontaneousRate,
-        setSpontaneousRate,
-        setSubExpenses,
-        setCategory,
-        setIsSubscription,
+        state: {
+            prediction,
+            canPredict,
+            type,
+            amount,
+            SubExpenses,
+            name,
+            isSubExpenseMode,
+            date,
+            isValid,
+            loading,
+            category,
+            changeView,
+            spontaneousRate,
+        },
+        methods: {
+            setAmount,
+            setExpense,
+            handleAmountChange,
+            handleAddSubexpense,
+            applyPrediction,
+            handleToggleSubExpenseMode,
+            handleSubmit,
+            calculateSubExpensesTotal,
+            setName,
+            setDate,
+            setType,
+            setIsSubExpenseMode,
+            setChangeView,
+            spontaneousRate,
+            setSpontaneousRate,
+            setSubExpenses,
+            setCategory,
+            setIsSubscription,
+        },
+        animated: {
+            transformX,
+        },
     }
 }

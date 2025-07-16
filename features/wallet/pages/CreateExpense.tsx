@@ -1,277 +1,137 @@
-import Button from "@/components/ui/Button/Button"
 import IconButton from "@/components/ui/IconButton/IconButton"
-import Colors from "@/constants/Colors"
 import Layout from "@/constants/Layout"
 import OptionsPicker from "@/features/wallet/components/CreateExpense/OptionsPicker"
 import useCreateExpensePage from "@/features/wallet/hooks/useCreateExpensePage"
 import { AntDesign } from "@expo/vector-icons"
-import BottomSheet, { BottomSheetBackdrop } from "@gorhom/bottom-sheet"
+import BottomSheet from "@gorhom/bottom-sheet"
 import moment from "moment"
 import { useCallback, useRef, useState } from "react"
-import { Alert, Keyboard, StyleSheet, Text, TouchableWithoutFeedback, View } from "react-native"
-import { FlatList } from "react-native-gesture-handler"
+import { Keyboard, StyleSheet, TouchableWithoutFeedback, View } from "react-native"
 import DateTimePicker from "react-native-modal-datetime-picker"
-import Animated, { FadeIn, interpolate, useAnimatedStyle } from "react-native-reanimated"
+import Animated, { FadeIn } from "react-native-reanimated"
+import { date } from "yup"
+import AmountDisplay from "../components/CreateExpense/AmountDisplay"
 import CategorySelector from "../components/CreateExpense/CategorySelectorView"
 import ExpenseAIMaker from "../components/CreateExpense/ExpenseAIMaker"
 import NameInput from "../components/CreateExpense/NameInput"
 import NumbersPad from "../components/CreateExpense/NumberPad"
 import PredictionView from "../components/CreateExpense/PredictionView"
 import { SpontaneousRateSelector } from "../components/CreateExpense/SpontaneousRate"
-import WalletItem, { Icons } from "../components/Wallet/WalletItem"
-
-const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1)
+import SubExpenseSheet from "../components/CreateExpense/SubexpenseSheet"
+import { Icons } from "../components/Wallet/WalletItem"
 
 export default function CreateExpenseModal({ navigation, route: { params } }: any) {
-    const {
-        setExpense,
-        handleToggleSubExpenseMode,
-        handleSubmit,
-        handleAmountChange,
-        amount,
-        prediction,
-        applyPrediction,
-        SubExpenses,
-        calculateSubExpensesTotal,
-        transformX,
-        name,
-        setName,
-        isSubExpenseMode,
-        type,
-        date,
-        setDate,
-        changeView,
-        isValid,
-        loading,
-        canPredict,
-        category,
-        setType,
-        setChangeView,
-        setIsSubExpenseMode,
-        setSpontaneousRate,
-        spontaneousRate,
-        setSubExpenses,
-        setIsSubscription,
-        setCategory,
-    } = useCreateExpensePage(params)
+    const { state, methods, animated } = useCreateExpensePage(params)
 
     const [spontaneousView, setSpontaneousView] = useState(false)
 
     const [isInputFocused, setIsInputFocused] = useState(false)
 
-    const animatedAmount = useAnimatedStyle(
-        () => ({
-            transform: [{ translateX: transformX.value }],
-
-            fontSize: interpolate(amount.length, [0, 1, 2, 3, 4, 10], [90, 80, 70, 60, 50, 40], "clamp"),
-        }),
-        [amount],
-    )
-
     const subexpenseSheetRef = useRef<BottomSheet>(null)
 
-    const renderBackdrop = useCallback(
-        (props: any) => <BottomSheetBackdrop {...props} appearsOnIndex={0} disappearsOnIndex={-1} />,
-        [],
-    )
+    const onPressCategorySelector = useCallback((item: string) => {
+        methods.setIsSubscription(item === "subscription")
+
+        methods.setCategory(item as keyof typeof Icons)
+        methods.setChangeView(false)
+    }, [])
 
     return (
         <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
             <View style={{ flex: 1 }}>
                 <View style={styles.container}>
-                    {prediction && <PredictionView applyPrediction={applyPrediction} {...prediction} />}
+                    {state.prediction && (
+                        <PredictionView applyPrediction={methods.applyPrediction} {...state.prediction} />
+                    )}
 
                     <IconButton
-                        style={{ position: "absolute", top: 15, left: 15, zIndex: 100 }}
+                        style={styles.cameraIcon}
                         onPress={() => navigation.goBack()}
                         icon={<AntDesign name="close" size={24} color="rgba(255,255,255,0.7)" />}
                     />
 
-                    <ExpenseAIMaker setExpense={setExpense} initialOpen={params?.shouldOpenPhotoPicker || false} />
+                    <ExpenseAIMaker
+                        setExpense={methods.setExpense}
+                        initialOpen={params?.shouldOpenPhotoPicker || false}
+                    />
 
-                    <View style={styles.amountContainer}>
-                        <View>
-                            <Animated.Text style={[{ color: "#fff", fontWeight: "bold" }, animatedAmount]}>
-                                {amount}
-                                <Text style={{ fontSize: 20 }}>zł</Text>
-                            </Animated.Text>
+                    <AmountDisplay
+                        type={state.type || ""}
+                        amount={state.amount}
+                        subExpensesLength={state.SubExpenses.length}
+                        date={state.date || ""}
+                        calculateSubExpensesTotal={methods.calculateSubExpensesTotal}
+                        transformX={animated.transformX}
+                    />
 
-                            {SubExpenses.length > 0 && (
-                                <Text style={{ color: "rgba(255,255,255,0.7)", fontSize: 12, textAlign: "center" }}>
-                                    {SubExpenses.length} subexpenses for ~{calculateSubExpensesTotal().toFixed(2)}zł
-                                </Text>
-                            )}
-                        </View>
-
-                        {moment(date).isAfter(moment()) && type && amount != "0" && (
-                            <View style={styles.scheduledContainer}>
-                                <Text style={styles.scheduledText}>
-                                    {capitalize(type || "")} of {amount}zł will be scheduled for {"\n"}{" "}
-                                    {moment(date).format("DD MMMM YYYY")}
-                                </Text>
-                            </View>
-                        )}
-                    </View>
-
-                    <View style={{ marginTop: 20, flex: 1, gap: 15, maxHeight: Layout.screen.height / 1.75 - 5 }}>
+                    <View style={styles.contentContainer}>
                         <View
                             style={{
                                 borderRadius: 35,
                                 flex: 1,
                             }}
                         >
-                            {!changeView && !spontaneousView && (
+                            {!state.changeView && !spontaneousView && (
                                 <Animated.View entering={FadeIn} style={{ gap: 5 }}>
                                     <View style={{ flexDirection: "row", width: "100%", alignItems: "center" }}>
                                         <NameInput
+                                            {...state}
+                                            {...methods}
+                                            subExpensesLength={state.SubExpenses.length}
+                                            canPredict={!!state.canPredict}
                                             isInputFocused={isInputFocused}
-                                            name={name}
                                             setIsInputFocused={setIsInputFocused}
-                                            setName={setName}
-                                            isSubExpenseMode={isSubExpenseMode}
-                                            handleToggleSubExpenseMode={handleToggleSubExpenseMode}
                                             subexpenseSheetRef={subexpenseSheetRef}
-                                            loading={loading}
-                                            isValid={isValid}
-                                            prediction={prediction}
-                                            canPredict={!!canPredict}
-                                            applyPrediction={applyPrediction}
-                                            handleSubmit={handleSubmit}
                                             params={params}
                                         />
                                     </View>
-                                    <OptionsPicker
-                                        type={type}
-                                        setType={setType}
-                                        category={category}
-                                        setCategory={setCategory}
-                                        setChangeView={setChangeView}
-                                        setSpontaneousView={setSpontaneousView}
-                                        spontaneousRate={spontaneousRate}
-                                        setDate={setDate}
-                                        date={date}
-                                    />
+                                    <OptionsPicker {...state} {...methods} setSpontaneousView={setSpontaneousView} />
                                 </Animated.View>
                             )}
 
-                            {changeView && !spontaneousView && (
+                            {state.changeView && !spontaneousView && (
                                 <CategorySelector
                                     dismiss={() => {
-                                        setChangeView(false)
-                                        setCategory("none")
+                                        methods.setChangeView(false)
+                                        methods.setCategory("none")
                                     }}
-                                    current={category}
-                                    onPress={(item) => {
-                                        setIsSubscription(item === "subscription")
-
-                                        setCategory(item as keyof typeof Icons)
-                                        setChangeView(false)
-                                    }}
+                                    current={state.category}
+                                    onPress={onPressCategorySelector}
                                 />
                             )}
 
                             {spontaneousView && (
                                 <SpontaneousRateSelector
-                                    value={spontaneousRate}
-                                    setValue={setSpontaneousRate}
+                                    value={state.spontaneousRate}
+                                    setValue={methods.setSpontaneousRate}
                                     dismiss={() => setSpontaneousView(false)}
                                 />
                             )}
 
-                            {!changeView && !spontaneousView && (
+                            {!state.changeView && !spontaneousView && (
                                 <NumbersPad
-                                    rotateBackButton={amount === "0" && SubExpenses.length === 0}
-                                    handleAmountChange={handleAmountChange}
+                                    rotateBackButton={state.amount === "0" && state.SubExpenses.length === 0}
+                                    handleAmountChange={methods.handleAmountChange}
                                 />
                             )}
                         </View>
                     </View>
                 </View>
 
-                <BottomSheet
+                <SubExpenseSheet
                     ref={subexpenseSheetRef}
-                    index={-1}
-                    snapPoints={[Layout.screen.height / 1.6]}
-                    enablePanDownToClose
-                    backdropComponent={renderBackdrop}
-                    backgroundStyle={{ backgroundColor: Colors.primary }}
-                    handleIndicatorStyle={{ backgroundColor: Colors.secondary }}
-                >
-                    <View style={{ flex: 1, padding: 15 }}>
-                        <FlatList
-                            data={SubExpenses}
-                            showsHorizontalScrollIndicator={false}
-                            ListEmptyComponent={
-                                <View style={{ flex: 1 }}>
-                                    <View
-                                        style={{
-                                            height: Layout.screen.height / 1.6 - 130,
-                                            justifyContent: "center",
-                                        }}
-                                    >
-                                        <Text
-                                            style={{
-                                                color: "rgba(255,255,255,0.7)",
-                                                fontSize: 18,
-                                                textAlign: "center",
-                                                padding: 15,
-                                            }}
-                                        >
-                                            No subexpenses added yet.{"\n"}Press the button below to add one.
-                                        </Text>
-                                    </View>
-
-                                    <Button
-                                        onPress={() => {
-                                            subexpenseSheetRef.current?.close()
-                                            setIsSubExpenseMode(true)
-                                        }}
-                                        style={{
-                                            borderRadius: 100,
-                                        }}
-                                    >
-                                        Add Subexpense
-                                    </Button>
-                                </View>
-                            }
-                            renderItem={({ item }) => (
-                                <WalletItem
-                                    handlePress={() => {
-                                        Alert.alert("Delete", "Are you sure you want to delete this subexpense?", [
-                                            {
-                                                text: "Cancel",
-                                                style: "cancel",
-                                            },
-                                            {
-                                                text: "Delete",
-                                                onPress: () => {
-                                                    setSubExpenses((prev) => prev.filter((i) => i.id !== item.id))
-                                                },
-                                            },
-                                        ])
-                                    }}
-                                    {...({
-                                        ...item,
-                                        amount: item.amount.toString(),
-                                        date: moment(date).format("YYYY-MM-DD"),
-                                        type: "expense",
-                                        category: item.category,
-                                    } as any)}
-                                    files={[]}
-                                    subexpenses={[]}
-                                    containerStyle={{ backgroundColor: Colors.primary_lighter }}
-                                />
-                            )}
-                        />
-                    </View>
-                </BottomSheet>
+                    setSubExpenses={methods.setSubExpenses}
+                    SubExpenses={state.SubExpenses}
+                    setIsSubExpenseMode={methods.setIsSubExpenseMode}
+                    date={state.date}
+                />
 
                 <DateTimePicker
                     isVisible={date == null}
                     onConfirm={(date) => {
-                        setDate(moment(date).format("YYYY-MM-DD"))
+                        methods.setDate(moment(date).format("YYYY-MM-DD"))
                     }}
-                    onCancel={() => setDate(moment().format("YYYY-MM-DD"))}
+                    onCancel={() => methods.setDate(moment().format("YYYY-MM-DD"))}
                 />
             </View>
         </TouchableWithoutFeedback>
@@ -296,17 +156,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
 
-    amountContainer: {
-        height: 250,
-        justifyContent: "center",
-        width: "100%",
-        alignItems: "center",
-        flexDirection: "row",
-        paddingTop: 30,
-        paddingHorizontal: 15,
-    },
+    contentContainer: { marginTop: 20, flex: 1, gap: 15, maxHeight: Layout.screen.height / 1.75 - 5 },
 
-    scheduledContainer: { position: "absolute", justifyContent: "center", alignItems: "center", bottom: -15 },
-
-    scheduledText: { color: "rgba(255,255,255,0.7)", fontWeight: "600", fontSize: 13, textAlign: "center" },
+    cameraIcon: { position: "absolute", top: 15, left: 15, zIndex: 100 },
 })
