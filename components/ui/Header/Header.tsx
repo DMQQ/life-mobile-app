@@ -98,7 +98,7 @@ function Header(props: {
     const animatedBlurStyle = useAnimatedStyle(() => {
         const scrollValue = Math.max(0, Math.min(props.scrollY?.value || 0, 200))
         return {
-            backgroundColor: interpolateColor(scrollValue, [0, 200], ["rgba(0,0,0,0.0)", "rgba(0,0,0,0.3)"], "RGB"),
+            backgroundColor: interpolateColor(scrollValue, [0, 200], ["rgba(0,0,0,0.0)", "rgba(0,0,0,0.1)"], "RGB"),
         }
     }, [props.scrollY])
 

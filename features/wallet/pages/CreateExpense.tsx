@@ -37,108 +37,110 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
     }, [])
 
     return (
-        <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-            <>
-                <View style={{ flex: 1 }}>
-                    <View style={styles.container}>
-                        {state.prediction && (
-                            <PredictionView applyPrediction={methods.applyPrediction} {...state.prediction} />
-                        )}
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View style={{ flex: 1 }}>
+                <>
+                    <View style={{ flex: 1 }}>
+                        <View style={styles.container}>
+                            {state.prediction && (
+                                <PredictionView applyPrediction={methods.applyPrediction} {...state.prediction} />
+                            )}
 
-                        <IconButton
-                            style={styles.cameraIcon}
-                            onPress={() => navigation.goBack()}
-                            icon={<AntDesign name="close" size={24} color="rgba(255,255,255,0.7)" />}
-                        />
+                            <IconButton
+                                style={styles.cameraIcon}
+                                onPress={() => navigation.goBack()}
+                                icon={<AntDesign name="close" size={24} color="rgba(255,255,255,0.7)" />}
+                            />
 
-                        <ExpenseAIMaker
-                            setExpense={methods.setExpense}
-                            initialOpen={params?.shouldOpenPhotoPicker || false}
-                        />
+                            <ExpenseAIMaker
+                                setExpense={methods.setExpense}
+                                initialOpen={params?.shouldOpenPhotoPicker || false}
+                            />
 
-                        <AmountDisplay
-                            type={state.type || ""}
-                            amount={state.amount}
-                            subExpensesLength={state.SubExpenses.length}
-                            date={state.date || ""}
-                            calculateSubExpensesTotal={methods.calculateSubExpensesTotal}
-                            transformX={animated.transformX}
-                        />
+                            <AmountDisplay
+                                type={state.type || ""}
+                                amount={state.amount}
+                                subExpensesLength={state.SubExpenses.length}
+                                date={state.date || ""}
+                                calculateSubExpensesTotal={methods.calculateSubExpensesTotal}
+                                transformX={animated.transformX}
+                            />
 
-                        <View style={styles.contentContainer}>
-                            <View
-                                style={{
-                                    borderRadius: 35,
-                                    flex: 1,
-                                }}
-                            >
-                                {!state.changeView && !spontaneousView && (
-                                    <Animated.View entering={FadeIn} style={{ gap: 5 }}>
-                                        <View style={{ flexDirection: "row", width: "100%", alignItems: "center" }}>
-                                            <NameInput
+                            <View style={styles.contentContainer}>
+                                <View
+                                    style={{
+                                        borderRadius: 35,
+                                        flex: 1,
+                                    }}
+                                >
+                                    {!state.changeView && !spontaneousView && (
+                                        <Animated.View entering={FadeIn} style={{ gap: 5 }}>
+                                            <View style={{ flexDirection: "row", width: "100%", alignItems: "center" }}>
+                                                <NameInput
+                                                    {...state}
+                                                    {...methods}
+                                                    subExpensesLength={state.SubExpenses.length}
+                                                    canPredict={!!state.canPredict}
+                                                    isInputFocused={isInputFocused}
+                                                    setIsInputFocused={setIsInputFocused}
+                                                    subexpenseSheetRef={subexpenseSheetRef}
+                                                    params={params}
+                                                />
+                                            </View>
+                                            <OptionsPicker
                                                 {...state}
                                                 {...methods}
-                                                subExpensesLength={state.SubExpenses.length}
-                                                canPredict={!!state.canPredict}
-                                                isInputFocused={isInputFocused}
-                                                setIsInputFocused={setIsInputFocused}
-                                                subexpenseSheetRef={subexpenseSheetRef}
-                                                params={params}
+                                                setSpontaneousView={setSpontaneousView}
                                             />
-                                        </View>
-                                        <OptionsPicker
-                                            {...state}
-                                            {...methods}
-                                            setSpontaneousView={setSpontaneousView}
+                                        </Animated.View>
+                                    )}
+
+                                    {state.changeView && !spontaneousView && (
+                                        <CategorySelector
+                                            dismiss={() => {
+                                                methods.setChangeView(false)
+                                                methods.setCategory("none")
+                                            }}
+                                            current={state.category}
+                                            onPress={onPressCategorySelector}
                                         />
-                                    </Animated.View>
-                                )}
+                                    )}
 
-                                {state.changeView && !spontaneousView && (
-                                    <CategorySelector
-                                        dismiss={() => {
-                                            methods.setChangeView(false)
-                                            methods.setCategory("none")
-                                        }}
-                                        current={state.category}
-                                        onPress={onPressCategorySelector}
-                                    />
-                                )}
+                                    {spontaneousView && (
+                                        <SpontaneousRateSelector
+                                            value={state.spontaneousRate}
+                                            setValue={methods.setSpontaneousRate}
+                                            dismiss={() => setSpontaneousView(false)}
+                                        />
+                                    )}
 
-                                {spontaneousView && (
-                                    <SpontaneousRateSelector
-                                        value={state.spontaneousRate}
-                                        setValue={methods.setSpontaneousRate}
-                                        dismiss={() => setSpontaneousView(false)}
-                                    />
-                                )}
-
-                                {!state.changeView && !spontaneousView && (
-                                    <NumbersPad
-                                        rotateBackButton={state.amount === "0" && state.SubExpenses.length === 0}
-                                        handleAmountChange={methods.handleAmountChange}
-                                    />
-                                )}
+                                    {!state.changeView && !spontaneousView && (
+                                        <NumbersPad
+                                            rotateBackButton={state.amount === "0" && state.SubExpenses.length === 0}
+                                            handleAmountChange={methods.handleAmountChange}
+                                        />
+                                    )}
+                                </View>
                             </View>
                         </View>
-                    </View>
 
-                    <SubExpenseSheet
-                        ref={subexpenseSheetRef}
-                        setSubExpenses={methods.setSubExpenses}
-                        SubExpenses={state.SubExpenses}
-                        setIsSubExpenseMode={methods.setIsSubExpenseMode}
-                        date={state.date}
+                        <SubExpenseSheet
+                            ref={subexpenseSheetRef}
+                            setSubExpenses={methods.setSubExpenses}
+                            SubExpenses={state.SubExpenses}
+                            setIsSubExpenseMode={methods.setIsSubExpenseMode}
+                            date={state.date}
+                        />
+                    </View>
+                    <DateTimePicker
+                        isVisible={typeof state.date !== "string"}
+                        onConfirm={(date) => {
+                            methods.setDate(moment(date).format("YYYY-MM-DD"))
+                        }}
+                        onCancel={() => methods.setDate(moment().format("YYYY-MM-DD"))}
                     />
-                </View>
-                <DateTimePicker
-                    isVisible={typeof state.date !== "string"}
-                    onConfirm={(date) => {
-                        methods.setDate(moment(date).format("YYYY-MM-DD"))
-                    }}
-                    onCancel={() => methods.setDate(moment().format("YYYY-MM-DD"))}
-                />
-            </>
+                </>
+            </View>
         </TouchableWithoutFeedback>
     )
 }
@@ -165,10 +167,11 @@ const styles = StyleSheet.create({
         padding: 15,
         flex: 1,
         gap: 15,
-        maxHeight: Layout.screen.height / 1.7,
+        maxHeight: Layout.screen.height / 1.65,
         backgroundColor: Colors.primary_light,
         borderTopRightRadius: 30,
         borderTopLeftRadius: 30,
+        paddingBottom: 30,
     },
 
     cameraIcon: { position: "absolute", top: 15, left: 15, zIndex: 100 },

@@ -94,8 +94,7 @@ const NumpadNumber = (props: {
         <View style={{ width: "30%", height: 75, overflow: "hidden" }}>
             <AnimatedRipple
                 rippleCentered
-                rippleColor={Colors.secondary}
-                rippleSize={50}
+                rippleColor={Colors.primary_light}
                 onPress={onPress}
                 onLongPress={() => {
                     if (interval.current) clearInterval(interval.current!)

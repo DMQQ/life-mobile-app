@@ -44,7 +44,7 @@ export default function TimelineTodos(props: { todos: Todos[]; timelineId: strin
             if (a.isCompleted && !b.isCompleted) return 1
             if (!a.isCompleted && b.isCompleted) return -1
 
-            return -1
+            return a.id.localeCompare(b.id)
         })
     }, [props.todos])
 

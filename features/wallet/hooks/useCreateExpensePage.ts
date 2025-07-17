@@ -24,9 +24,7 @@ export default function useCreateExpensePage(
         type: "expense" | "income"
     },
 ) {
-    const { createExpense, loading } = useCreateActivity({
-        onCompleted() {},
-    })
+    const { createExpense, loading } = useCreateActivity({})
     const navigation = useNavigation()
 
     const client = useApolloClient()

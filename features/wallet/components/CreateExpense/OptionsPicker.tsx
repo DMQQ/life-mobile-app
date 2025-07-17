@@ -7,6 +7,7 @@ import { AntDesign, Entypo } from "@expo/vector-icons"
 import Color from "color"
 import moment from "moment/moment"
 import { StyleSheet, Text, View } from "react-native"
+import Haptic from "react-native-haptic-feedback"
 import Ripple from "react-native-material-ripple"
 import Animated, { LinearTransition } from "react-native-reanimated"
 
@@ -68,6 +69,14 @@ export default function OptionsPicker({
 
     const typeButtonText =
         type == null ? "Select type" : type === "expense" ? "Expense" : type === "income" ? "Income" : "Refunded"
+
+    const onPressWithFeedback = (callback: () => void) => {
+        return () => {
+            Haptic.trigger("impactLight")
+            callback()
+        }
+    }
+
     return (
         <Animated.ScrollView
             keyboardDismissMode={"on-drag"}
@@ -78,7 +87,7 @@ export default function OptionsPicker({
             contentContainerStyle={{ gap: 10 }}
         >
             <Ripple
-                onPress={() => setType((p) => (p === "expense" ? "income" : "expense"))}
+                onPress={onPressWithFeedback(() => setType((p) => (p === "expense" ? "income" : "expense")))}
                 style={[
                     styles.chip,
                     {
@@ -102,7 +111,10 @@ export default function OptionsPicker({
                 </Text>
             </Ripple>
 
-            <Ripple onPress={() => setDate(null)} style={[styles.chip, { backgroundColor: Colors.primary_lighter }]}>
+            <Ripple
+                onPress={onPressWithFeedback(() => setDate(null))}
+                style={[styles.chip, { backgroundColor: Colors.primary_lighter }]}
+            >
                 <AntDesign name="calendar" size={15} color="rgba(255,255,255,0.7)" />
                 <Text
                     style={{
@@ -115,7 +127,7 @@ export default function OptionsPicker({
             </Ripple>
 
             <Ripple
-                onPress={() => setChangeView((p) => !p)}
+                onPress={onPressWithFeedback(() => setChangeView((p) => !p))}
                 style={[
                     styles.chip,
                     {
@@ -141,10 +153,10 @@ export default function OptionsPicker({
             </Ripple>
             <SpontaneousRateChip
                 value={spontaneousRate}
-                onPress={() => {
+                onPress={onPressWithFeedback(() => {
                     setChangeView(false)
                     setSpontaneousView(true)
-                }}
+                })}
             />
         </Animated.ScrollView>
     )

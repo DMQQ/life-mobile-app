@@ -2,11 +2,11 @@ import BottomSheet from "@/components/ui/BottomSheet/BottomSheet"
 import Button from "@/components/ui/Button/Button"
 import Input from "@/components/ui/TextInput/TextInput"
 import Colors from "@/constants/Colors"
-import useKeyboard from "@/utils/hooks/useKeyboard"
 import BottomSheetType from "@gorhom/bottom-sheet"
 import Color from "color"
 import { forwardRef, useEffect, useRef, useState } from "react"
 import { ActivityIndicator, Keyboard, StyleSheet, View } from "react-native"
+import { ScrollView } from "react-native-gesture-handler"
 import { Card, Chip, IconButton, Text, useTheme } from "react-native-paper"
 import useTodos, { Action, TodoInput as ITodoInput } from "../hooks/general/useTodos"
 
@@ -38,6 +38,8 @@ const styles = StyleSheet.create({
     saveButton: {
         marginTop: 8,
         marginBottom: 16,
+        borderRadius: 20,
+        flexDirection: "row-reverse",
     },
 })
 
@@ -52,15 +54,13 @@ export default forwardRef<
         ;(ref as any).current?.close()
     })
     const theme = useTheme()
-    const keyboardHeight = useKeyboard()
     const todoCount = state.todos.filter((todo) => todo.value.trim().length > 0).length
 
-    // Calculate dynamic snap points based on keyboard height
     const snapPoints = ["90%"]
 
     return (
         <BottomSheet ref={ref} snapPoints={snapPoints}>
-            <View style={styles.container}>
+            <ScrollView style={styles.container} keyboardDismissMode="on-drag">
                 <View style={styles.header}>
                     <View>
                         <Text style={[styles.title, { color: Colors.secondary }]}>Create Todos</Text>
@@ -80,7 +80,8 @@ export default forwardRef<
                 </View>
 
                 <TodosList dispatch={dispatch} todos={state.todos} />
-
+            </ScrollView>
+            <View style={{ padding: 15 }}>
                 <Button
                     disabled={loading || todoCount === 0}
                     onPress={onSaveTodos}
@@ -97,7 +98,7 @@ export default forwardRef<
 
 const TodosList = ({ todos, dispatch }: { todos: ITodoInput[]; dispatch: React.Dispatch<Action> }) => {
     const onAddTodo = (value: string) => {
-        dispatch({ type: "add", payload: value })
+        dispatch({ type: "add", payload: value.trim() })
     }
 
     const onRemoveTodo = (todo: ITodoInput) => {
@@ -198,7 +199,7 @@ export const TodoInput = ({ onAddTodo }: { onAddTodo: (value: string) => any }) 
                 <IconButton
                     icon="plus"
                     size={22}
-                    iconColor={text.trim() ? theme.colors.secondary : theme.colors.onSurfaceVariant}
+                    iconColor={text.trim() ? Colors.secondary : Colors.primary_lighter}
                     onPress={onSubmit}
                     disabled={!text.trim()}
                 />
@@ -208,8 +209,15 @@ export const TodoInput = ({ onAddTodo }: { onAddTodo: (value: string) => any }) 
             onChangeText={setText}
             placeholder="What needs to be done?"
             onSubmitEditing={onSubmit}
-            multiline
+            multiline={true}
             numberOfLines={1}
+            blurOnSubmit={true}
+            onEndEditing={onSubmit}
+            returnKeyLabel="Add todo"
+            returnKeyType="done"
+            enterKeyHint="done"
+            keyboardAppearance="dark"
+            enablesReturnKeyAutomatically
         />
     )
 }
