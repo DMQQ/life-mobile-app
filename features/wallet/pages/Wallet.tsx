@@ -1,7 +1,7 @@
 import Header from "@/components/ui/Header/Header"
 import Colors from "@/constants/Colors"
 import useTrackScroll from "@/utils/hooks/ui/useTrackScroll"
-import { AntDesign, FontAwesome, Ionicons } from "@expo/vector-icons"
+import { AntDesign, Feather, Ionicons } from "@expo/vector-icons"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { SafeAreaView, StyleSheet, View } from "react-native"
 import Animated, { FadeOut, SharedValue } from "react-native-reanimated"
@@ -86,7 +86,7 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
                         return newValue
                     })
                 },
-                icon: <FontAwesome name="exchange" size={20} color="#fff" />,
+                icon: <Feather name="repeat" size={20} color="#fff" />,
             },
 
             {

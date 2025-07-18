@@ -51,48 +51,8 @@ function Header(props: {
      */
     renderAnimatedItem?: (props: { scrollY: SharedValue<number> | undefined }) => JSX.Element | ReactNode | null
 }) {
-    const navigation = useNavigation()
     const insets = useSafeAreaInsets()
-
-    const animatedContainerStyle = useAnimatedStyle(() => {
-        if (!props.scrollY || !props.animated || typeof props.scrollY.value !== "number") return {}
-
-        const scrollValue = Math.max(0, Math.min(props.scrollY.value, 200))
-
-        return {
-            marginTop: interpolate(scrollValue, [0, 200], [15, 0], Extrapolation.CLAMP),
-            height: 0,
-        }
-    }, [props.scrollY, props.animated])
-
-    const animatedContentStyle = useAnimatedStyle(() => {
-        if (!props.scrollY || !props.animated || typeof props.scrollY.value !== "number") return {}
-
-        const scrollValue = Math.max(0, Math.min(props.scrollY.value, 200))
-
-        return {
-            transform: [
-                {
-                    scale: interpolate(scrollValue, [0, 200], [1, 0.35], Extrapolation.CLAMP),
-                },
-            ],
-            top: interpolate(scrollValue, [0, 200], [insets.top * 2, insets.top / 2 + 10], Extrapolation.CLAMP),
-            left: interpolate(scrollValue, [0, 200], [15, -115], Extrapolation.CLAMP),
-        }
-    }, [props.scrollY, props.animated, insets.top])
-
-    const animatedLabelStyle = useAnimatedStyle(() => {
-        if (!props.scrollY || !props.animated || typeof props.scrollY.value !== "number") return {}
-
-        const scrollValue = Math.max(0, Math.min(props.scrollY.value, 100))
-
-        return {
-            opacity: interpolate(scrollValue, [0, 100], [1, 0], Extrapolation.CLAMP),
-        }
-    }, [props.scrollY, props.animated])
-
-    const displayValue =
-        props.animatedValueLoading && props.animatedValue === undefined ? " ..." : (props.animatedValue || 0).toFixed(2)
+    const navigation = useNavigation()
 
     const animatedBlurProps = useAnimatedProps(() => {
         const scrollValue = Math.max(0, Math.min(props.scrollY?.value || 0, 200))
@@ -164,40 +124,97 @@ function Header(props: {
                 </Animated.View>
             </AnimatedBlur>
 
-            {(props.animatedTitle || props.animatedValue !== undefined) && (
-                <Animated.View style={[styles.container, props.animated && animatedContainerStyle]}>
-                    <Animated.View style={[styles.buttonContainer, props.animated && animatedContentStyle]}>
-                        <Ripple onLongPress={props.onAnimatedTitleLongPress} style={props.textContainerStyle}>
-                            {props.animatedValue !== undefined ? (
-                                <AnimatedNumber
-                                    delay={250}
-                                    value={parseFloat(displayValue)}
-                                    style={[styles.numericTitle, props.animated ? animatedContentStyle : {}]}
-                                    formatValue={props.animatedValueFormat || ((value) => `${value.toFixed(2)}`)}
-                                />
-                            ) : (
-                                <Text style={[styles.title, props.animated && animatedContentStyle]}>
-                                    {props.animatedTitle}
-                                </Text>
-                            )}
-
-                            {props.animatedSubtitle && (
-                                <Animated.Text
-                                    style={[
-                                        styles.subTitle,
-                                        props.animated && animatedLabelStyle,
-                                        props.subtitleStyles || {},
-                                    ]}
-                                >
-                                    {props.animatedSubtitle}
-                                </Animated.Text>
-                            )}
-                        </Ripple>
-                    </Animated.View>
-                </Animated.View>
-            )}
+            {(props.animatedTitle || props.animatedValue !== undefined) && <AnimatedContent {...props} />}
             <Animated.View style={animatedHeight} />
         </>
+    )
+}
+
+interface AnimatedContentProps {
+    animated?: boolean
+    animatedTitle?: string
+    animatedSubtitle?: string
+    animatedValue?: number
+    animatedValueFormat?: (value: number) => string
+    onAnimatedTitleLongPress?: () => void
+    subtitleStyles?: StyleProp<TextStyle>
+    textContainerStyle?: StyleProp<TextStyle>
+
+    scrollY?: SharedValue<number>
+    animatedValueLoading?: boolean
+}
+
+const AnimatedContent = ({ ...props }: AnimatedContentProps) => {
+    const insets = useSafeAreaInsets()
+
+    const animatedContainerStyle = useAnimatedStyle(() => {
+        "worklet"
+        if (!props.scrollY || !props.animated || typeof props.scrollY.value !== "number") return {}
+
+        const scrollValue = Math.max(0, Math.min(props.scrollY.value, 200))
+
+        return {
+            marginTop: interpolate(scrollValue, [0, 200], [15, 0], Extrapolation.CLAMP),
+            height: 0,
+        }
+    }, [props.scrollY, props.animated])
+
+    const animatedContentStyle = useAnimatedStyle(() => {
+        "worklet"
+        if (!props.scrollY || !props.animated) return {}
+
+        const scrollValue = props.scrollY.value
+        const clampedValue = Math.max(0, Math.min(scrollValue, 200))
+        const scale = interpolate(clampedValue, [0, 200], [1, 0.35], Extrapolation.CLAMP)
+
+        return {
+            transform: [{ scale }],
+            top: interpolate(clampedValue, [0, 200], [insets.top * 2, insets.top / 2 + 10], Extrapolation.CLAMP),
+            left: interpolate(clampedValue, [0, 200], [15, -115], Extrapolation.CLAMP),
+        }
+    }, [props.animated, insets.top])
+
+    const animatedLabelStyle = useAnimatedStyle(() => {
+        "worklet"
+        if (!props.scrollY || !props.animated || typeof props.scrollY.value !== "number") return {}
+
+        const scrollValue = Math.max(0, Math.min(props.scrollY.value, 100))
+
+        return {
+            opacity: interpolate(scrollValue, [0, 100], [1, 0], Extrapolation.CLAMP),
+        }
+    }, [props.scrollY, props.animated])
+
+    const displayValue =
+        props.animatedValueLoading && props.animatedValue === undefined ? " ..." : (props.animatedValue || 0).toFixed(2)
+
+    return (
+        <Animated.View style={[styles.container, props.animated && animatedContainerStyle]}>
+            <Animated.View style={[styles.buttonContainer, props.animated && animatedContentStyle]}>
+                <Ripple onLongPress={props.onAnimatedTitleLongPress} style={props.textContainerStyle}>
+                    {props.animatedValue !== undefined ? (
+                        <AnimatedNumber
+                            delay={250}
+                            value={parseFloat(displayValue)}
+                            style={[styles.numericTitle]}
+                            formatValue={props.animatedValueFormat || ((value) => `${value.toFixed(2)}`)}
+                        />
+                    ) : (
+                        <Text style={[styles.title, props.animated && animatedContentStyle]}>
+                            {props.animatedTitle}
+                        </Text>
+                    )}
+
+                    {props.animatedSubtitle && (
+                        <Animated.Text
+                            style={[styles.subTitle, props.animated && animatedLabelStyle, props.subtitleStyles || {}]}
+                        >
+                            {props.animatedSubtitle}
+                        </Animated.Text>
+                    )}
+                </Ripple>
+            </Animated.View>
+        </Animated.View>
     )
 }
 

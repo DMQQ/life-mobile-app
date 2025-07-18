@@ -1,7 +1,7 @@
 import { IconButton } from "@/components"
 import { AntDesign, Ionicons } from "@expo/vector-icons"
 import { useNavigation } from "@react-navigation/native"
-import { memo, useState } from "react"
+import { memo, useEffect, useState } from "react"
 import { TextInput, View } from "react-native"
 import Animated, { Extrapolation, interpolate, SharedValue, useAnimatedStyle } from "react-native-reanimated"
 import { useWalletContext } from "../WalletContext"
@@ -14,6 +14,10 @@ const AnimatedSearchInput = ({ scrollY }: AnimatedSearchInputProps) => {
     const navigation = useNavigation<any>()
     const wallet = useWalletContext()
     const [value, setValue] = useState("")
+
+    useEffect(() => {
+        setValue(wallet.filters.query)
+    }, [wallet.filters.query])
 
     const animatedStyle = useAnimatedStyle(() => {
         const scrollValue = scrollY?.value ?? 0

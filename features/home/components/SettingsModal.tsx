@@ -1,5 +1,5 @@
 import Button from "@/components/ui/Button/Button"
-import Colors, { CustomThemeOptions } from "@/constants/Colors"
+import Colors from "@/constants/Colors"
 import useUser from "@/utils/hooks/useUser"
 import { AntDesign } from "@expo/vector-icons"
 import AsyncStorage from "@react-native-async-storage/async-storage"
@@ -10,6 +10,229 @@ import { useState } from "react"
 import { FlatList, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import Feedback from "react-native-haptic-feedback"
 import Ripple from "react-native-material-ripple"
+
+interface ColorPalette {
+    name: string
+    primary: string
+    secondary: string
+    ternary: string
+    category: string
+}
+
+const colorPalettes: ColorPalette[] = [
+    // Popular Apps
+    {
+        name: "Discord",
+        primary: "#2C2F33",
+        secondary: "#7289DA",
+        ternary: "#99AAB5",
+        category: "Apps",
+    },
+    {
+        name: "Spotify",
+        primary: "#191414",
+        secondary: "#1DB954",
+        ternary: "#1ED760",
+        category: "Apps",
+    },
+    {
+        name: "GitHub",
+        primary: "#0D1117",
+        secondary: "#238636",
+        ternary: "#F85149",
+        category: "Apps",
+    },
+    {
+        name: "Slack",
+        primary: "#1A1D29",
+        secondary: "#4A154B",
+        ternary: "#ECB22E",
+        category: "Apps",
+    },
+    {
+        name: "VS Code",
+        primary: "#1E1E1E",
+        secondary: "#007ACC",
+        ternary: "#FF6B35",
+        category: "Apps",
+    },
+    {
+        name: "Twitter X",
+        primary: "#15202B",
+        secondary: "#1DA1F2",
+        ternary: "#657786",
+        category: "Apps",
+    },
+
+    // Material Design
+    {
+        name: "Material Dark",
+        primary: "#121212",
+        secondary: "#BB86FC",
+        ternary: "#03DAC6",
+        category: "Material",
+    },
+    {
+        name: "Material Blue",
+        primary: "#1A1A1A",
+        secondary: "#2196F3",
+        ternary: "#FF5722",
+        category: "Material",
+    },
+    {
+        name: "Material Purple",
+        primary: "#121212",
+        secondary: "#9C27B0",
+        ternary: "#4CAF50",
+        category: "Material",
+    },
+
+    // Dark Themes
+    {
+        name: "Midnight Steel",
+        primary: "#0d0f14",
+        secondary: "#00C896",
+        ternary: "#7B84FF",
+        category: "Dark",
+    },
+    {
+        name: "Obsidian Blue",
+        primary: "#1C2128",
+        secondary: "#00BFFF",
+        ternary: "#8685EF",
+        category: "Dark",
+    },
+    {
+        name: "Charcoal Dreams",
+        primary: "#1C1C1C",
+        secondary: "#F6B161",
+        ternary: "#DB56F9",
+        category: "Dark",
+    },
+    {
+        name: "Deep Sea",
+        primary: "#001F3F",
+        secondary: "#00B894",
+        ternary: "#AEEEEE",
+        category: "Dark",
+    },
+    {
+        name: "Cyber Noir",
+        primary: "#0B0D11",
+        secondary: "#00FFA3",
+        ternary: "#FF1A56",
+        category: "Dark",
+    },
+    {
+        name: "Raven Wing",
+        primary: "#161A1F",
+        secondary: "#34FA85",
+        ternary: "#6056F9",
+        category: "Dark",
+    },
+    {
+        name: "Forest Dusk",
+        primary: "#2E3A24",
+        secondary: "#6B8E23",
+        ternary: "#A9DFBF",
+        category: "Dark",
+    },
+    {
+        name: "Stormy Night",
+        primary: "#2F3640",
+        secondary: "#D63031",
+        ternary: "#00BFFF",
+        category: "Dark",
+    },
+    {
+        name: "Violet Shadow",
+        primary: "#1A1D24",
+        secondary: "#BE15A8",
+        ternary: "#F9F156",
+        category: "Dark",
+    },
+    {
+        name: "Arctic Steel",
+        primary: "#12141A",
+        secondary: "#56E4F9",
+        ternary: "#C2E7FF",
+        category: "Dark",
+    },
+    {
+        name: "Ember Dark",
+        primary: "#101217",
+        secondary: "#FFA51A",
+        ternary: "#F95656",
+        category: "Dark",
+    },
+    {
+        name: "Sapphire Night",
+        primary: "#0C0E13",
+        secondary: "#008CFF",
+        ternary: "#34A3FA",
+        category: "Dark",
+    },
+
+    // Gaming & Tech
+    {
+        name: "Neo Tokyo",
+        primary: "#111418",
+        secondary: "#FF0080",
+        ternary: "#00FFFF",
+        category: "Gaming",
+    },
+    {
+        name: "Matrix",
+        primary: "#000000",
+        secondary: "#00FF41",
+        ternary: "#008F11",
+        category: "Gaming",
+    },
+    {
+        name: "Tron Legacy",
+        primary: "#0A0A0A",
+        secondary: "#6FC3DF",
+        ternary: "#FFF200",
+        category: "Gaming",
+    },
+    {
+        name: "Cyberpunk",
+        primary: "#1A0B33",
+        secondary: "#E842A5",
+        ternary: "#42E8E8",
+        category: "Gaming",
+    },
+
+    // Luxury & Premium
+    {
+        name: "Royal Depth",
+        primary: "#0A0B0F",
+        secondary: "#4B0082",
+        ternary: "#9370DB",
+        category: "Luxury",
+    },
+    {
+        name: "Gold Standard",
+        primary: "#1A1516",
+        secondary: "#FFD700",
+        ternary: "#CD7F32",
+        category: "Luxury",
+    },
+    {
+        name: "Platinum Elite",
+        primary: "#2A2A2A",
+        secondary: "#E5E4E2",
+        ternary: "#C0C0C0",
+        category: "Luxury",
+    },
+    {
+        name: "Rose Gold",
+        primary: "#1E1E1E",
+        secondary: "#E8B4B8",
+        ternary: "#F7CAC9",
+        category: "Luxury",
+    },
+]
 
 const styles = StyleSheet.create({
     modalContainer: {
@@ -94,55 +317,59 @@ const styles = StyleSheet.create({
         fontWeight: "600",
         marginBottom: 20,
     },
-    colorSectionHeader: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        marginVertical: 15,
-    },
-    colorSectionTitle: {
-        color: "#fff",
-        fontSize: 16,
+    categoryHeader: {
+        color: "rgba(255, 255, 255, 0.7)",
+        fontSize: 14,
         fontWeight: "600",
+        marginTop: 15,
+        marginBottom: 10,
+        textTransform: "uppercase",
     },
-    expandButton: {
+    paletteGrid: {
+        marginBottom: 20,
+    },
+    paletteRow: {
+        justifyContent: "space-around",
+        marginBottom: 8,
+    },
+    paletteItem: {
+        width: 150,
+        overflow: "hidden",
+        borderWidth: 2,
+        borderColor: "transparent",
+        height: 80,
+    },
+    selectedPalette: {
+        backgroundColor: Colors.primary_lighter,
+        borderRadius: 20,
+    },
+    paletteContent: {
         padding: 8,
+        height: "100%",
+        justifyContent: "space-between",
     },
-    colorPicker: {
+    paletteName: {
+        color: "#fff",
+        fontSize: 11,
+        fontWeight: "600",
         marginBottom: 10,
     },
-    colorOption: {
+    colorSwatch: {
+        flexDirection: "row",
+        gap: 3,
+    },
+    colorCircle: {
         width: 40,
         height: 40,
-        borderRadius: 20,
-        margin: 5,
-        borderWidth: 1,
+        borderRadius: 40,
+        borderWidth: 0.5,
         borderColor: "rgba(255, 255, 255, 0.2)",
-    },
-    selectedColorOption: {
-        borderWidth: 3,
-        borderColor: "white",
-    },
-    applyButtonContainer: {
-        borderRadius: 16,
-        overflow: "hidden",
-        marginBottom: 20,
-        borderWidth: 1,
-        borderColor: "rgba(255, 255, 255, 0.1)",
-    },
-    applyButtonContent: {
-        padding: 15,
-        backgroundColor: "rgba(0, 0, 0, 0.2)",
     },
     signoutButtonContainer: {
         borderRadius: 16,
         overflow: "hidden",
         borderWidth: 1,
         borderColor: "rgba(255, 0, 0, 0.3)",
-    },
-    signoutButtonContent: {
-        backgroundColor: "rgba(220, 53, 69, 0.2)",
-        padding: 0,
     },
 })
 
@@ -153,6 +380,7 @@ interface SettingsModalProps {
 
 export default function SettingsModal({ visible, onClose }: SettingsModalProps) {
     const { removeUser, user } = useUser()
+    const [selectedPalette, setSelectedPalette] = useState<ColorPalette | null>(null)
 
     const handleSignout = async () => {
         await removeUser()
@@ -164,16 +392,12 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
         onClose()
     }
 
-    const setCustomTheme = async (schema: { primary: string; secondary: string }) => {
-        await SecureStore.setItemAsync("color_scheme_primary", schema.primary)
-        await SecureStore.setItemAsync("color_scheme_secondary", schema.secondary)
+    const setCustomTheme = async (palette: ColorPalette) => {
+        await SecureStore.setItemAsync("color_scheme_primary", palette.primary)
+        await SecureStore.setItemAsync("color_scheme_secondary", palette.secondary)
+        await SecureStore.setItemAsync("color_scheme_ternary", palette.ternary)
         await reloadAppAsync()
     }
-
-    const [primary, setPrimary] = useState<string | null>(null)
-    const [secondary, setSecondary] = useState<string | null>(null)
-    const [expandedPrimary, setExpandedPrimary] = useState(false)
-    const [expandedSecondary, setExpandedSecondary] = useState(false)
 
     const handleClose = () => {
         Feedback.trigger("impactLight")
@@ -181,19 +405,45 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
     }
 
     const handleApplyTheme = async () => {
-        if (primary && secondary) {
+        if (selectedPalette) {
             Feedback.trigger("impactMedium")
-            await setCustomTheme({ primary, secondary })
+            await setCustomTheme(selectedPalette)
         }
     }
 
-    const getPrimaryColors = () => {
-        return expandedPrimary ? CustomThemeOptions.primary : CustomThemeOptions.primary.slice(0, 14)
+    const handlePaletteSelect = (palette: ColorPalette) => {
+        Feedback.trigger("selection")
+        setSelectedPalette(palette)
     }
 
-    const getSecondaryColors = () => {
-        return expandedSecondary ? CustomThemeOptions.secondary : CustomThemeOptions.secondary.slice(0, 14)
-    }
+    const groupedPalettes = colorPalettes.reduce(
+        (acc, palette) => {
+            if (!acc[palette.category]) {
+                acc[palette.category] = []
+            }
+            acc[palette.category].push(palette)
+            return acc
+        },
+        {} as Record<string, ColorPalette[]>,
+    )
+
+    const renderPaletteItem = ({ item }: { item: ColorPalette }) => (
+        <Ripple
+            onPress={() => handlePaletteSelect(item)}
+            style={[styles.paletteItem, selectedPalette?.name === item.name && styles.selectedPalette]}
+        >
+            <View style={styles.paletteContent}>
+                <Text style={styles.paletteName} numberOfLines={2}>
+                    {item.name}
+                </Text>
+                <View style={styles.colorSwatch}>
+                    <View style={[styles.colorCircle, { backgroundColor: item.primary }]} />
+                    <View style={[styles.colorCircle, { backgroundColor: item.secondary }]} />
+                    <View style={[styles.colorCircle, { backgroundColor: item.ternary }]} />
+                </View>
+            </View>
+        </Ripple>
+    )
 
     return (
         <Modal
@@ -232,90 +482,29 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
                                 <View style={styles.themeSection}>
                                     <BlurView intensity={60} tint="dark">
                                         <View style={styles.themeSectionContent}>
-                                            <Text style={styles.themeSectionTitle}>Custom color theme!</Text>
+                                            <Text style={styles.themeSectionTitle}>Choose Color Palette</Text>
 
-                                            <View style={styles.colorSectionHeader}>
-                                                <Text style={styles.colorSectionTitle}>Primary</Text>
-                                                <TouchableOpacity
-                                                    onPress={() => {
-                                                        Feedback.trigger("selection")
-                                                        setExpandedPrimary(!expandedPrimary)
-                                                    }}
-                                                    style={styles.expandButton}
-                                                >
-                                                    <AntDesign
-                                                        name={expandedPrimary ? "up" : "down"}
-                                                        size={16}
-                                                        color="#fff"
-                                                    />
-                                                </TouchableOpacity>
-                                            </View>
-                                            <View style={styles.colorPicker}>
-                                                <FlatList
-                                                    numColumns={7}
-                                                    data={getPrimaryColors()}
-                                                    keyExtractor={(item) => item}
-                                                    showsHorizontalScrollIndicator={false}
-                                                    renderItem={({ item }) => (
-                                                        <Ripple
-                                                            onPress={() => {
-                                                                Feedback.trigger("selection")
-                                                                setPrimary(item)
-                                                            }}
-                                                            style={[
-                                                                styles.colorOption,
-                                                                { backgroundColor: item },
-                                                                primary === item && styles.selectedColorOption,
-                                                            ]}
+                                            <View style={styles.paletteGrid}>
+                                                {Object.entries(groupedPalettes).map(([category, palettes]) => (
+                                                    <View key={category}>
+                                                        <Text style={styles.categoryHeader}>{category}</Text>
+                                                        <FlatList
+                                                            horizontal
+                                                            data={palettes}
+                                                            renderItem={renderPaletteItem}
+                                                            keyExtractor={(item) => item.name}
+                                                            showsVerticalScrollIndicator={false}
                                                         />
-                                                    )}
-                                                />
-                                            </View>
-
-                                            <View style={styles.colorSectionHeader}>
-                                                <Text style={styles.colorSectionTitle}>Secondary</Text>
-                                                <TouchableOpacity
-                                                    onPress={() => {
-                                                        Feedback.trigger("selection")
-                                                        setExpandedSecondary(!expandedSecondary)
-                                                    }}
-                                                    style={styles.expandButton}
-                                                >
-                                                    <AntDesign
-                                                        name={expandedSecondary ? "up" : "down"}
-                                                        size={16}
-                                                        color="#fff"
-                                                    />
-                                                </TouchableOpacity>
-                                            </View>
-                                            <View style={styles.colorPicker}>
-                                                <FlatList
-                                                    numColumns={7}
-                                                    data={getSecondaryColors()}
-                                                    keyExtractor={(item) => item}
-                                                    showsHorizontalScrollIndicator={false}
-                                                    renderItem={({ item }) => (
-                                                        <Ripple
-                                                            onPress={() => {
-                                                                Feedback.trigger("selection")
-                                                                setSecondary(item)
-                                                            }}
-                                                            style={[
-                                                                styles.colorOption,
-                                                                { backgroundColor: item },
-                                                                secondary === item && styles.selectedColorOption,
-                                                            ]}
-                                                        />
-                                                    )}
-                                                />
+                                                    </View>
+                                                ))}
                                             </View>
 
                                             <Button
-                                                style={{ marginTop: 30 }}
+                                                style={{ marginTop: 20 }}
                                                 onPress={handleApplyTheme}
-                                                disabled={!primary || !secondary}
+                                                disabled={!selectedPalette}
                                             >
-                                                Apply Custom Theme
+                                                Apply Selected Palette
                                             </Button>
                                         </View>
                                     </BlurView>
