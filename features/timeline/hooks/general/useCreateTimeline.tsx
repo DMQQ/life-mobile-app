@@ -9,6 +9,7 @@ import useGetTimelineById from "../query/useGetTimelineById"
 import { DATE_FORMAT } from "@/utils/functions/parseDate"
 import { useApolloClient } from "@apollo/client"
 import BottomSheetType from "@gorhom/bottom-sheet"
+import { GET_TIMELINE_QUERY } from "../query/useGetTimeLineQuery"
 import { GET_MONTHLY_EVENTS } from "./useTimeline"
 
 export default function useCreateTimeline({ route, navigation }: TimelineScreenProps<"TimelineCreate">) {
@@ -54,9 +55,19 @@ export default function useCreateTimeline({ route, navigation }: TimelineScreenP
             await handleSubmit(input)
         }
 
-        await client.refetchQueries({
-            include: [GET_MONTHLY_EVENTS],
-        })
+        await Promise.any([
+            client.refetchQueries({
+                include: [GET_MONTHLY_EVENTS],
+            }),
+            client.query({
+                query: GET_TIMELINE_QUERY,
+                variables: { date: input.date },
+            }),
+            client.query({
+                query: GET_TIMELINE_QUERY,
+                variables: { date: initialEditFormValues.date },
+            }),
+        ])
     }
 
     const f = useFormik({
@@ -75,23 +86,6 @@ export default function useCreateTimeline({ route, navigation }: TimelineScreenP
     }
 
     const [optionsVisible, setOptionsVisible] = useState(false)
-
-    // useEffect(() => {
-    //   navigation.setOptions({
-    //     header: (props: any) => (
-    //       <TimelineCreateHeader
-    //         {...props}
-    //         handleChangeDate={handleChangeDate}
-    //         selectedDate={route.params.selectedDate}
-    //         onToggleOptions={() => {
-    //           f.resetForm();
-    //           Platform.OS === "android" &&
-    //             ToastAndroid.show("Form reseted", ToastAndroid.SHORT);
-    //         }}
-    //       />
-    //     ),
-    //   });
-    // }, [optionsVisible, f.values.date]);
 
     return {
         f,

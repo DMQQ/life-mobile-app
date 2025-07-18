@@ -3,7 +3,7 @@ import throttle from "@/utils/functions/throttle"
 import { AntDesign } from "@expo/vector-icons"
 import { useNavigation } from "@react-navigation/native"
 import { BlurView } from "expo-blur"
-import { memo } from "react"
+import { memo, ReactNode } from "react"
 import { StyleProp, StyleSheet, Text, TextStyle, ViewStyle } from "react-native"
 import Ripple from "react-native-material-ripple"
 import Animated, {
@@ -44,6 +44,12 @@ function Header(props: {
     subtitleStyles?: StyleProp<TextStyle>
     initialHeight?: number
     textContainerStyle?: StyleProp<TextStyle>
+    /**
+     * Renders an animated item that is displayed under the main header content but within the blur view
+     * @param props scrollY - SharedValue of the scroll position
+     * @returns JSX.Element | ReactNode | null
+     */
+    renderAnimatedItem?: (props: { scrollY: SharedValue<number> | undefined }) => JSX.Element | ReactNode | null
 }) {
     const navigation = useNavigation()
     const insets = useSafeAreaInsets()
@@ -114,44 +120,47 @@ function Header(props: {
     return (
         <>
             <AnimatedBlur tint="dark" animatedProps={animatedBlurProps} style={styles.blurContainer}>
-                <Animated.View
-                    style={[
-                        {
-                            flexDirection: "row",
-                            paddingHorizontal: 15,
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                        },
-                        { paddingTop: insets.top, height: insets.top + 50 },
-                        animatedBlurStyle,
-                        props.containerStyle,
-                    ]}
-                >
-                    {props.goBack && (
-                        <IconButton
-                            onPress={throttle(() => navigation.canGoBack() && navigation.goBack(), 250)}
-                            icon={props.backIcon || <AntDesign name="arrowleft" size={24} color="#fff" />}
-                        />
-                    )}
-
-                    {props.titleAnimatedStyle && props.title && (
-                        <Animated.Text style={[styles.animatedTitle, props.titleAnimatedStyle]}>
-                            {props.title}
-                        </Animated.Text>
-                    )}
-
-                    {props.children}
-
-                    <Animated.View style={styles.iconContainer}>
-                        {(props.buttons || []).map((button, index) => (
+                <Animated.View style={animatedBlurStyle}>
+                    <Animated.View
+                        style={[
+                            {
+                                flexDirection: "row",
+                                paddingHorizontal: 15,
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                            },
+                            { paddingTop: insets.top, height: insets.top + 50 },
+                            props.containerStyle,
+                        ]}
+                    >
+                        {props.goBack && (
                             <IconButton
-                                style={button.style}
-                                key={index}
-                                onPress={throttle(button.onPress, 250)}
-                                icon={button.icon}
+                                onPress={throttle(() => navigation.canGoBack() && navigation.goBack(), 250)}
+                                icon={props.backIcon || <AntDesign name="arrowleft" size={24} color="#fff" />}
                             />
-                        ))}
+                        )}
+
+                        {props.titleAnimatedStyle && props.title && (
+                            <Animated.Text style={[styles.animatedTitle, props.titleAnimatedStyle]}>
+                                {props.title}
+                            </Animated.Text>
+                        )}
+
+                        {props.children}
+
+                        <Animated.View style={styles.iconContainer}>
+                            {(props.buttons || []).map((button, index) => (
+                                <IconButton
+                                    style={button.style}
+                                    key={index}
+                                    onPress={throttle(button.onPress, 250)}
+                                    icon={button.icon}
+                                />
+                            ))}
+                        </Animated.View>
                     </Animated.View>
+
+                    {props.renderAnimatedItem && props.renderAnimatedItem({ scrollY: props.scrollY })}
                 </Animated.View>
             </AnimatedBlur>
 

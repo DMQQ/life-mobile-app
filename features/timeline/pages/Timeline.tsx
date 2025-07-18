@@ -6,7 +6,7 @@ import NotFound from "@/features/home/components/NotFound"
 import { AntDesign, FontAwesome, MaterialIcons } from "@expo/vector-icons"
 import dayjs from "dayjs"
 import moment from "moment"
-import { useState } from "react"
+import { useCallback, useState } from "react"
 import { View, VirtualizedList } from "react-native"
 import Animated, { useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated"
 import DayTimeline from "../components/DayTimeline"
@@ -46,8 +46,30 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
 
     const [selectedEventForDeletion, setSelectedEventForDeletion] = useState<GetTimelineQuery | null>(null)
 
+    const renderItem = useCallback(
+        ({ item }: { item: any }): any =>
+            (
+                <TimelineItem
+                    styles={{
+                        backgroundColor: Colors.primary_lighter,
+                        borderRadius: 15,
+                        padding: 20,
+                        marginBottom: 10,
+                        zIndex: 1,
+                    }}
+                    key={item.id}
+                    location="timeline"
+                    {...item}
+                    onLongPress={() => {
+                        setSelectedEventForDeletion(item)
+                    }}
+                />
+            ) as any,
+        [],
+    )
+
     return (
-        <View style={{ flex: 1, padding: 15 }}>
+        <View style={{ flex: 1 }}>
             <Header
                 scrollY={scrollY}
                 animated={true}
@@ -109,25 +131,7 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
                     keyExtractor={(item: any) => item.id}
                     getItem={(data, index) => data[index] as GetTimelineQuery}
                     getItemCount={(data) => data.length}
-                    renderItem={({ item }: { item: any }): any =>
-                        (
-                            <TimelineItem
-                                styles={{
-                                    backgroundColor: Colors.primary_lighter,
-                                    borderRadius: 15,
-                                    padding: 20,
-                                    marginBottom: 10,
-                                    zIndex: 1,
-                                }}
-                                key={item.id}
-                                location="timeline"
-                                {...item}
-                                onLongPress={() => {
-                                    setSelectedEventForDeletion(item)
-                                }}
-                            />
-                        ) as any
-                    }
+                    renderItem={renderItem}
                 />
             ) : (
                 <DayTimeline
