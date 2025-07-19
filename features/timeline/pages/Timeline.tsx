@@ -3,11 +3,12 @@ import DeleteTimelineEvent from "@/components/ui/Dialog/Delete/DeleteTimelineEve
 import Header from "@/components/ui/Header/Header"
 import Colors from "@/constants/Colors"
 import NotFound from "@/features/home/components/NotFound"
-import { AntDesign, FontAwesome, MaterialIcons } from "@expo/vector-icons"
+import { AntDesign, Feather } from "@expo/vector-icons"
 import dayjs from "dayjs"
 import moment from "moment"
-import { useCallback, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { View, VirtualizedList } from "react-native"
+import Feedback from "react-native-haptic-feedback"
 import Animated, { useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated"
 import DayTimeline from "../components/DayTimeline"
 import { TimelineScreenLoader } from "../components/LoaderSkeleton"
@@ -61,11 +62,25 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
                     location="timeline"
                     {...item}
                     onLongPress={() => {
+                        Feedback.trigger("impactMedium")
                         setSelectedEventForDeletion(item)
                     }}
                 />
             ) as any,
         [],
+    )
+
+    const dateListMemoized = useMemo(
+        () => (
+            <DateList
+                onMenuPress={() => timeline.setSwitchView("calendar")}
+                dayEvents={timeline.dayEventsSorted}
+                selectedDate={timeline.selected}
+                setSelected={timeline.setSelected}
+                translateY={translateY}
+            />
+        ),
+        [timeline.dayEventsSorted, timeline.selected],
     )
 
     return (
@@ -75,13 +90,11 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
                 animated={true}
                 buttons={[
                     {
-                        onPress: timeline.onViewToggle,
-                        icon:
-                            timeline.switchView === "date-list" ? (
-                                <FontAwesome name="list-alt" size={20} color="#fff" />
-                            ) : (
-                                <MaterialIcons name="view-agenda" size={20} color="#fff" />
-                            ),
+                        onPress: () => {
+                            timeline.onViewToggle()
+                            scrollY.value = 0
+                        },
+                        icon: <Feather name="repeat" size={20} color="#fff" />,
                     },
                     {
                         icon: <AntDesign name="plus" size={20} color="#fff" />,
@@ -91,37 +104,22 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
                 animatedTitle={dayjs(timeline.selected).format("DD MMMM")}
                 animatedSubtitle={`${selectedDateFormatted} • ${eventsCount} Events`}
             />
-            <View style={{ paddingTop: 215 }}>
-                <DateList
-                    onMenuPress={() => timeline.setSwitchView("calendar")}
-                    dayEvents={timeline.dayEventsSorted}
-                    selectedDate={timeline.selected}
-                    setSelected={timeline.setSelected}
-                    translateY={translateY}
-                />
-            </View>
-
-            {timeline.loading ? (
-                <TimelineScreenLoader loading />
-            ) : timeline.data?.timeline?.length === 0 ? (
-                <View
-                    style={{
-                        padding: 15,
-                        flex: 1,
-                        justifyContent: "center",
-                        alignItems: "center",
-                        marginTop: 25,
-                    }}
-                >
-                    <NotFound selectedDate={timeline.selected} />
-                </View>
-            ) : null}
 
             {timeline.switchView !== "timeline" ? (
                 <AnimatedVirtualizedList
+                    ListHeaderComponent={<View style={{ paddingBottom: 30 }}>{dateListMemoized}</View>}
+                    ListEmptyComponent={
+                        <ListEmptyComponent
+                            isLoading={timeline.loading}
+                            length={eventsCount}
+                            selectedDate={timeline.selected}
+                        />
+                    }
                     onScroll={scrollHandler}
                     contentContainerStyle={{
-                        paddingBottom: 100,
+                        paddingBottom: (timeline.data?.timeline?.length || 0) > 0 ? 120 : 0,
+                        padding: 15,
+                        paddingTop: 215,
                     }}
                     CellRendererComponent={({ index, style, ...rest }) => {
                         const newStyle = [style, { zIndex: -1 }]
@@ -144,9 +142,23 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
                     events={timeline.data?.timeline || []}
                     theme={{}}
                     onLongPress={(item) => {
+                        Feedback.trigger("impactMedium")
                         setSelectedEventForDeletion(item as GetTimelineQuery)
                     }}
-                />
+                >
+                    <View style={{ paddingHorizontal: 15, paddingBottom: 30 }}>
+                        {dateListMemoized}
+                        {timeline.data?.timeline?.length === 0 && (
+                            <View style={{ height: 225, marginTop: 30 }}>
+                                <ListEmptyComponent
+                                    isLoading={timeline.loading}
+                                    length={eventsCount}
+                                    selectedDate={timeline.selected}
+                                />
+                            </View>
+                        )}
+                    </View>
+                </DayTimeline>
             )}
 
             <DeleteTimelineEvent
@@ -164,3 +176,28 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
         </View>
     )
 }
+
+interface ListEmptyComponentProps {
+    isLoading: boolean
+
+    length: number
+
+    selectedDate: string
+}
+
+const ListEmptyComponent = (props: ListEmptyComponentProps) =>
+    props.isLoading ? (
+        <TimelineScreenLoader loading />
+    ) : props.length === 0 ? (
+        <View
+            style={{
+                padding: 15,
+                flex: 1,
+                justifyContent: "center",
+                alignItems: "center",
+                marginTop: 25,
+            }}
+        >
+            <NotFound selectedDate={props.selectedDate} />
+        </View>
+    ) : null

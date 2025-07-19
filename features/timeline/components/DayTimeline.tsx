@@ -28,9 +28,14 @@ interface CustomTimelineProps {
     onScroll: (event: any) => void
 
     onLongPress?: (event: TimelineEvent) => void
+
+    /**
+     * Header
+     */
+    children?: React.ReactNode
 }
 
-const CalendarTimetable = ({ events, selected, onScroll, onLongPress }: CustomTimelineProps) => {
+const CalendarTimetable = ({ events, selected, onScroll, onLongPress, children }: CustomTimelineProps) => {
     const items = useMemo(
         () =>
             events.map((t, index) => ({
@@ -55,19 +60,22 @@ const CalendarTimetable = ({ events, selected, onScroll, onLongPress }: CustomTi
 
     const maxHour = Math.max(...(events.map((v) => +trimTime(v.endTime, 1)) || []))
 
+    if (items?.length === 0) return <View style={{ paddingTop: 215, flex: 1 }}>{children}</View>
+
     return (
         <Animated.ScrollView
             keyboardDismissMode={"on-drag"}
-            style={{ flex: 1, paddingBottom: 100, marginTop: 15 }}
+            style={{ flex: 1, paddingBottom: items?.length > 0 ? 100 : 0, paddingTop: 215 }}
             onScroll={onScroll}
             showsVerticalScrollIndicator={false}
             scrollEventThrottle={16}
             bounces={items.length > 4}
             overScrollMode={items.length > 4 ? "always" : "never"}
         >
+            {children}
             <TimeTable
-                fromHour={minHour > 0 ? minHour : minHour}
-                toHour={maxHour < 23 ? maxHour + 1 : maxHour}
+                fromHour={Math.max(minHour, 0)}
+                toHour={Math.min(maxHour + 2, 24)}
                 date={moment(selected).toDate()}
                 stickyHours
                 style={{
@@ -139,6 +147,7 @@ const CalendarTimetable = ({ events, selected, onScroll, onLongPress }: CustomTi
                     )
                 }}
             />
+            {items?.length > 0 && <View style={{ height: 120 }} />}
         </Animated.ScrollView>
     )
 }

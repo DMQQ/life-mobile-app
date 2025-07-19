@@ -9,6 +9,7 @@ import { Text, View } from "react-native"
 import Ripple from "react-native-material-ripple"
 import Animated from "react-native-reanimated"
 import { SafeAreaView } from "react-native-safe-area-context"
+import Feedback from "react-native-haptic-feedback"
 import SnapCarousel from "../components/FlashCards/CardSwiper"
 import FlipCard from "../components/FlashCards/FlashCard"
 import SuccessBar from "../components/SuccessBar"
@@ -83,6 +84,7 @@ export default function FlashCardScreen({ navigation, route }: any) {
                 renderItem={({ item }) => (
                     <Ripple
                         onLongPress={() => {
+                            Feedback.trigger("impactMedium")
                             setSelectedGroupForDeletion(item)
                         }}
                         style={{ paddingHorizontal: 15, marginBottom: 15 }}

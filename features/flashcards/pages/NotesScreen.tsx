@@ -3,6 +3,7 @@ import Colors from "@/constants/Colors"
 import { AntDesign } from "@expo/vector-icons"
 import { StyleSheet, Text, View } from "react-native"
 import Ripple from "react-native-material-ripple"
+import Feedback from "react-native-haptic-feedback"
 
 import { Skeleton } from "@/components"
 import DeleteFlashCardGroupDialog from "@/components/ui/Dialog/Delete/DeleteGroupDialog"
@@ -100,6 +101,7 @@ export default function NotesScreen({ navigation }: ScreenProps<any>) {
                             index={index}
                             length={groups.length}
                             onLongPress={() => {
+                                Feedback.trigger("impactMedium")
                                 setSelectedGroupForDeletion(group)
                             }}
                         />

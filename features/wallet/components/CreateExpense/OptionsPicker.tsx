@@ -93,6 +93,7 @@ export default function OptionsPicker({
                     {
                         backgroundColor: typeBackgroundColor,
                         gap: 10,
+                        borderColor: typeBackgroundColor,
                     },
                 ]}
             >
@@ -126,31 +127,37 @@ export default function OptionsPicker({
                 </Text>
             </Ripple>
 
-            <Ripple
-                onPress={onPressWithFeedback(() => setChangeView((p) => !p))}
-                style={[
-                    styles.chip,
-                    {
-                        backgroundColor:
-                            category === "none"
-                                ? Colors.primary_lighter
-                                : lowOpacity(Icons[category]?.backgroundColor, 0.2),
-                    },
-                ]}
-            >
-                {Icons[category].icon}
-                <Text
-                    style={{
-                        color:
-                            category === "none"
-                                ? "rgba(255,255,255,0.7)"
-                                : Color(Icons[category]?.backgroundColor).lighten(0.25).hex(),
-                        fontSize: 15,
-                    }}
+            {type !== "income" && (
+                <Ripple
+                    onPress={onPressWithFeedback(() => setChangeView((p) => !p))}
+                    style={[
+                        styles.chip,
+                        {
+                            backgroundColor:
+                                category === "none"
+                                    ? Colors.primary_lighter
+                                    : lowOpacity(Icons[category]?.backgroundColor, 0.2),
+                            borderColor:
+                                category === "none"
+                                    ? styles.chip.borderColor
+                                    : lowOpacity(Icons[category]?.backgroundColor, 0.2),
+                        },
+                    ]}
                 >
-                    {category === "none" ? "Select category" : CategoryUtils.getCategoryName(category)}
-                </Text>
-            </Ripple>
+                    {Icons[category].icon}
+                    <Text
+                        style={{
+                            color:
+                                category === "none"
+                                    ? "rgba(255,255,255,0.7)"
+                                    : Color(Icons[category]?.backgroundColor).lighten(0.25).hex(),
+                            fontSize: 15,
+                        }}
+                    >
+                        {category === "none" ? "Select category" : CategoryUtils.getCategoryName(category)}
+                    </Text>
+                </Ripple>
+            )}
             <SpontaneousRateChip
                 value={spontaneousRate}
                 onPress={onPressWithFeedback(() => {
@@ -190,7 +197,7 @@ const styles = StyleSheet.create({
     chip: {
         padding: 10,
         paddingHorizontal: 20,
-        borderRadius: 10,
+        borderRadius: 15,
         justifyContent: "center",
         alignItems: "center",
         flexDirection: "row",
@@ -198,5 +205,7 @@ const styles = StyleSheet.create({
         minWidth: (Layout.screen.width - 30 - 30) / 3,
         flex: 1,
         backgroundColor: Colors.primary_lighter,
+        borderColor: Color(Colors.primary_lighter).lighten(0.25).hex(),
+        borderWidth: 2,
     },
 })

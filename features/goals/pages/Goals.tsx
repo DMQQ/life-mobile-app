@@ -7,6 +7,7 @@ import { FlashList } from "@shopify/flash-list"
 import { useState } from "react"
 import { StyleSheet, View } from "react-native"
 import Animated, { FadeOut, useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated"
+import Feedback from "react-native-haptic-feedback"
 import { GoalCategory } from "../components/GoalCategory"
 import { useGoal } from "../hooks/hooks"
 
@@ -93,6 +94,7 @@ export default function Goals({ navigation }: any) {
                             navigation.navigate("Goal", { id: item.id })
                         }}
                         onLongPress={() => {
+                            Feedback.trigger("impactMedium")
                             setSelectedGroupForDeletion(item)
                         }}
                         {...item}

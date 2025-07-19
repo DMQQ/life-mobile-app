@@ -9,6 +9,7 @@ import { useDispatch } from "react-redux";
 import Colors from "@/constants/Colors";
 import { AntDesign } from "@expo/vector-icons";
 import { notesActions } from "@/utils/redux/notes/notes";
+import Feedback from "react-native-haptic-feedback";
 
 const Gap = 20;
 
@@ -116,6 +117,7 @@ export default function Note(props: NoteProps) {
   const dispatch = useDispatch();
 
   const removeNote = () => {
+    Feedback.trigger("impactMedium");
     Alert.alert(
       "Remove",
       "Action cannot be reversed",

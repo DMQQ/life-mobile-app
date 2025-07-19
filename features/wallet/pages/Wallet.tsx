@@ -4,6 +4,7 @@ import useTrackScroll from "@/utils/hooks/ui/useTrackScroll"
 import { AntDesign, Feather, Ionicons } from "@expo/vector-icons"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { SafeAreaView, StyleSheet, View } from "react-native"
+import Haptic from "react-native-haptic-feedback"
 import Animated, { FadeOut, SharedValue } from "react-native-reanimated"
 import { WalletScreens } from "../Main"
 import AnimatedHeaderSearch from "../components/Wallet/AnimatedHeaderSearch"
@@ -68,6 +69,7 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
     const balance = loading && data?.wallet?.balance === undefined ? " ..." : (data?.wallet?.balance || 0).toFixed(2)
 
     const handleShowEditSheet = () => {
+        Haptic.trigger("impactMedium")
         editBalanceRef.current?.expand()
     }
 

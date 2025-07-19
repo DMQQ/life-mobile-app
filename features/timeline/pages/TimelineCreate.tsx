@@ -8,7 +8,7 @@ import { AntDesign } from "@expo/vector-icons"
 import Color from "color"
 import moment from "moment"
 import { useState } from "react"
-import { ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from "react-native"
+import { ActivityIndicator, Platform, ScrollView, StyleSheet, Text, View } from "react-native"
 import Ripple from "react-native-material-ripple"
 import DateTimePicker from "react-native-modal-datetime-picker"
 import Animated, { useAnimatedKeyboard, useAnimatedStyle } from "react-native-reanimated"
@@ -64,6 +64,7 @@ export default function CreateTimeLineEventModal({ route, navigation }: Timeline
     const keyboard = useAnimatedKeyboard()
 
     const animatedKeyboardStyle = useAnimatedStyle(() => {
+        if (route.params.mode === "edit") return {}
         return {
             transform: [
                 {
@@ -71,7 +72,7 @@ export default function CreateTimeLineEventModal({ route, navigation }: Timeline
                 },
             ],
         }
-    })
+    }, [route.params.mode])
 
     return (
         <View style={{ flex: 1, paddingBottom: insets.bottom }}>
@@ -83,115 +84,114 @@ export default function CreateTimeLineEventModal({ route, navigation }: Timeline
                     f.resetForm()
                 }}
             />
-            <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
-                <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 15 }} keyboardDismissMode={"on-drag"}>
-                    <Animated.View style={animatedKeyboardStyle}>
-                        {!isEditing && <SuggestedEvents date={route.params.selectedDate} />}
 
-                        <ValidatedInput
-                            placeholder="Like  'take out the trash' etc.."
-                            name="title"
-                            label="Event's title*"
-                            showLabel
-                            formik={f}
-                            helperStyle={{ marginLeft: 2.5 }}
+            <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 15 }} keyboardDismissMode={"on-drag"}>
+                <Animated.View style={animatedKeyboardStyle}>
+                    {!isEditing && <SuggestedEvents date={route.params.selectedDate} />}
+
+                    <ValidatedInput
+                        placeholder="Like  'take out the trash' etc.."
+                        name="title"
+                        label="Event's title*"
+                        showLabel
+                        formik={f}
+                        helperStyle={{ marginLeft: 2.5 }}
+                    />
+                    <ValidatedInput
+                        showLabel
+                        label="Event's content"
+                        numberOfLines={
+                            isEditing ? f.values.desc.split("\n").length + 10 : f.values.desc.split("\n").length + 3
+                        }
+                        style={{
+                            ...(Platform.OS === "ios" && {
+                                minHeight: (numberOfLines <= 5 ? 5 : numberOfLines) * 20,
+                            }),
+                        }}
+                        multiline
+                        placeholder="What you wanted to do"
+                        name="desc"
+                        formik={f}
+                        scrollEnabled
+                        textAlignVertical="top"
+                    />
+
+                    <ValidatedInput.Label error={false} text="Time range*" />
+                    <View style={styles.timeContainer}>
+                        <Ripple style={{ flex: 1, padding: 5 }} onPress={() => setTimePicker("begin")}>
+                            <Text style={styles.timeText}>{f.values.begin.split(":").slice(0, 2).join(":")}</Text>
+                        </Ripple>
+
+                        <Text style={{ color: "gray", padding: 5 }}>to</Text>
+
+                        <Ripple style={{ flex: 1, padding: 5 }} onPress={() => setTimePicker("end")}>
+                            <Text style={styles.timeText}>{f.values.end.split(":").slice(0, 2).join(":")}</Text>
+                        </Ripple>
+                    </View>
+
+                    <View style={{ marginTop: 10 }}>
+                        <ValidatedInput.Label error={false} text="How to send you notifications?" />
+                        <SegmentedButtons
+                            containerStyle={{
+                                borderRadius: 15,
+                                backgroundColor: Colors.primary_light,
+                            }}
+                            buttonTextStyle={{ fontWeight: "400" }}
+                            buttonStyle={{
+                                margin: 10,
+                                height: 40,
+                            }}
+                            buttons={radioOptions.map((prev) => ({
+                                text: prev.label,
+                                value: prev.value,
+                            }))}
+                            value={f.values.notification}
+                            onChange={(val) => f.setFieldValue("notification", val)}
                         />
-                        <ValidatedInput
-                            showLabel
-                            label="Event's content"
-                            numberOfLines={
-                                isEditing ? f.values.desc.split("\n").length + 10 : f.values.desc.split("\n").length + 3
+                    </View>
+
+                    <TimePickerModal
+                        isVisible={!!timePicker}
+                        onConfirm={(currentlySelectedTime) => {
+                            let finalDate = moment(currentlySelectedTime)
+
+                            if (timePicker === "begin") {
+                                f.setFieldValue("begin", finalDate.format("HH:mm"))
+
+                                if (finalDate.isAfter(moment(f.values.end, "HH:mm"))) {
+                                    f.setFieldValue("end", finalDate.add(1, "hours").format("HH:mm"))
+                                }
                             }
-                            style={{
-                                ...(Platform.OS === "ios" && {
-                                    minHeight: (numberOfLines <= 5 ? 5 : numberOfLines) * 20,
-                                }),
-                            }}
-                            multiline
-                            placeholder="What you wanted to do"
-                            name="desc"
-                            formik={f}
-                            scrollEnabled
-                            textAlignVertical="top"
-                        />
 
-                        <ValidatedInput.Label error={false} text="Time range*" />
-                        <View style={styles.timeContainer}>
-                            <Ripple style={{ flex: 1, padding: 5 }} onPress={() => setTimePicker("begin")}>
-                                <Text style={styles.timeText}>{f.values.begin.split(":").slice(0, 2).join(":")}</Text>
-                            </Ripple>
+                            if (timePicker === "end") {
+                                f.setFieldValue("end", finalDate.format("HH:mm"))
 
-                            <Text style={{ color: "gray", padding: 5 }}>to</Text>
-
-                            <Ripple style={{ flex: 1, padding: 5 }} onPress={() => setTimePicker("end")}>
-                                <Text style={styles.timeText}>{f.values.end.split(":").slice(0, 2).join(":")}</Text>
-                            </Ripple>
-                        </View>
-
-                        <View style={{ marginTop: 10 }}>
-                            <ValidatedInput.Label error={false} text="How to send you notifications?" />
-                            <SegmentedButtons
-                                containerStyle={{
-                                    borderRadius: 15,
-                                    backgroundColor: Colors.primary_light,
-                                }}
-                                buttonTextStyle={{ fontWeight: "400" }}
-                                buttonStyle={{
-                                    margin: 10,
-                                    height: 40,
-                                }}
-                                buttons={radioOptions.map((prev) => ({
-                                    text: prev.label,
-                                    value: prev.value,
-                                }))}
-                                value={f.values.notification}
-                                onChange={(val) => f.setFieldValue("notification", val)}
-                            />
-                        </View>
-
-                        <TimePickerModal
-                            isVisible={!!timePicker}
-                            onConfirm={(currentlySelectedTime) => {
-                                let finalDate = moment(currentlySelectedTime)
-
-                                if (timePicker === "begin") {
-                                    f.setFieldValue("begin", finalDate.format("HH:mm"))
-
-                                    if (finalDate.isAfter(moment(f.values.end, "HH:mm"))) {
-                                        f.setFieldValue("end", finalDate.add(1, "hours").format("HH:mm"))
-                                    }
+                                if (finalDate.isBefore(moment(f.values.begin, "HH:mm"))) {
+                                    f.setFieldValue("begin", finalDate.subtract(1, "hours").format("HH:mm"))
                                 }
+                            }
 
-                                if (timePicker === "end") {
-                                    f.setFieldValue("end", finalDate.format("HH:mm"))
+                            setTimePicker("")
+                        }}
+                        onCancel={() => setTimePicker("")}
+                    />
 
-                                    if (finalDate.isBefore(moment(f.values.begin, "HH:mm"))) {
-                                        f.setFieldValue("begin", finalDate.subtract(1, "hours").format("HH:mm"))
-                                    }
-                                }
+                    <DateTimePicker
+                        mode="date"
+                        isVisible={datePicker}
+                        onConfirm={(currentlySelectedDate) => {
+                            handleChangeDate(currentlySelectedDate)
+                            navigation.setParams({
+                                selectedDate: moment(currentlySelectedDate).format("YYYY-MM-DD"),
+                            })
+                            setDatePicker(false)
+                        }}
+                        onCancel={() => setDatePicker(false)}
+                    />
 
-                                setTimePicker("")
-                            }}
-                            onCancel={() => setTimePicker("")}
-                        />
-
-                        <DateTimePicker
-                            mode="date"
-                            isVisible={datePicker}
-                            onConfirm={(currentlySelectedDate) => {
-                                handleChangeDate(currentlySelectedDate)
-                                navigation.setParams({
-                                    selectedDate: moment(currentlySelectedDate).format("YYYY-MM-DD"),
-                                })
-                                setDatePicker(false)
-                            }}
-                            onCancel={() => setDatePicker(false)}
-                        />
-
-                        <CreateRepeatableTimeline formik={f} ref={sheetRef as any} />
-                    </Animated.View>
-                </ScrollView>
-            </KeyboardAvoidingView>
+                    <CreateRepeatableTimeline formik={f} ref={sheetRef as any} />
+                </Animated.View>
+            </ScrollView>
             <SubmitButton
                 f={f}
                 openSheet={() => sheetRef.current?.expand()}
