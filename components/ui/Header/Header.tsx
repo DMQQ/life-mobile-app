@@ -21,6 +21,8 @@ import IconButton from "../IconButton/IconButton"
 
 const AnimatedBlur = Animated.createAnimatedComponent(BlurView)
 
+const THRESHOLD = 200
+
 function Header(props: {
     buttons?: {
         onPress: () => void
@@ -51,17 +53,22 @@ function Header(props: {
 
     const animatedBlurProps = useAnimatedProps(() => {
         "worklet"
-        const scrollValue = Math.max(0, Math.min(props.scrollY?.value || 0, 200))
+        const scrollValue = Math.max(0, Math.min(props.scrollY?.value || 0, THRESHOLD))
         return {
-            intensity: interpolate(scrollValue, [0, 200], [0, 80], Extrapolation.CLAMP),
+            intensity: interpolate(scrollValue, [0, THRESHOLD], [0, 80], Extrapolation.CLAMP),
         }
     }, [props.scrollY])
 
     const animatedBlurStyle = useAnimatedStyle(() => {
         "worklet"
-        const scrollValue = Math.max(0, Math.min(props.scrollY?.value || 0, 200))
+        const scrollValue = Math.max(0, Math.min(props.scrollY?.value || 0, THRESHOLD))
         return {
-            backgroundColor: interpolateColor(scrollValue, [0, 200], ["rgba(0,0,0,0.0)", "rgba(0,0,0,0.1)"], "RGB"),
+            backgroundColor: interpolateColor(
+                scrollValue,
+                [0, THRESHOLD],
+                ["rgba(0,0,0,0.0)", "rgba(0,0,0,0.1)"],
+                "RGB",
+            ),
         }
     }, [props.scrollY])
 
@@ -107,7 +114,7 @@ function Header(props: {
                                 <IconButton
                                     style={button.style}
                                     key={index}
-                                    onPress={throttle(button.onPress, 200)}
+                                    onPress={throttle(button.onPress, 250)}
                                     icon={button.icon}
                                 />
                             ))}
@@ -145,10 +152,10 @@ const AnimatedContent = memo(({ ...props }: AnimatedContentProps) => {
             return { marginTop: 15, height: 0 }
         }
 
-        const scrollValue = Math.max(0, Math.min(props.scrollY.value, 200))
+        const scrollValue = Math.max(0, Math.min(props.scrollY.value, THRESHOLD))
 
         return {
-            marginTop: interpolate(scrollValue, [0, 200], [15, 0], Extrapolation.CLAMP),
+            marginTop: interpolate(scrollValue, [0, THRESHOLD], [15, 0], Extrapolation.CLAMP),
             height: 0,
         }
     }, [props.scrollY, props.animated])
@@ -163,14 +170,21 @@ const AnimatedContent = memo(({ ...props }: AnimatedContentProps) => {
             }
         }
 
+        const N_THRESHOLD = THRESHOLD * 0.8
+
         const scrollValue = props.scrollY.value
-        const clampedValue = Math.max(0, Math.min(scrollValue, 200))
-        const scale = interpolate(clampedValue, [0, 200], [1, 0.35], Extrapolation.CLAMP)
+        const clampedValue = Math.max(0, Math.min(scrollValue, N_THRESHOLD))
+        const scale = interpolate(clampedValue, [0, N_THRESHOLD], [1, 0.35], Extrapolation.CLAMP)
 
         return {
             transform: [{ scale }],
-            top: interpolate(clampedValue, [0, 200], [insets.top * 2, insets.top / 2 + 10], Extrapolation.CLAMP),
-            left: interpolate(clampedValue, [0, 200], [15, -115], Extrapolation.CLAMP),
+            top: interpolate(
+                clampedValue,
+                [0, N_THRESHOLD],
+                [insets.top * 2, insets.top / 2 + 10],
+                Extrapolation.CLAMP,
+            ),
+            left: interpolate(clampedValue, [0, N_THRESHOLD], [15, -115], Extrapolation.CLAMP),
         }
     }, [props.scrollY, props.animated, insets.top])
 
@@ -262,11 +276,11 @@ const styles = StyleSheet.create({
     container: {
         flexDirection: "row",
         marginBottom: 40,
-        zIndex: 200,
+        zIndex: THRESHOLD,
     },
     buttonContainer: {
         position: "absolute",
-        zIndex: 200,
+        zIndex: THRESHOLD,
     },
 })
 
