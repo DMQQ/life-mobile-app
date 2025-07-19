@@ -30,7 +30,7 @@ const AnimatedSearchInput = ({ scrollY }: AnimatedSearchInputProps) => {
         const scrollValue = scrollY?.value ?? 0
 
         return {
-            opacity: interpolate(scrollValue, [0, 150, 175, 200], [0, 0.1, 0.85, 1], Extrapolation.CLAMP),
+            opacity: interpolate(scrollValue, [0, 150, 175, 200], [0, 0, 0.75, 1], Extrapolation.CLAMP),
             transform: [
                 {
                     translateY: interpolate(scrollValue, [0, 200], [-25, 0], Extrapolation.CLAMP),

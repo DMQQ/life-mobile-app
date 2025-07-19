@@ -6,11 +6,10 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import { SafeAreaView, StyleSheet, View } from "react-native"
 import Animated, { FadeOut, SharedValue } from "react-native-reanimated"
 import { WalletScreens } from "../Main"
-import SubscriptionList from "../components/Subscription/SubscriptionList"
 import AnimatedHeaderSearch from "../components/Wallet/AnimatedHeaderSearch"
 import EditBalanceSheet from "../components/Wallet/EditBalanceSheet"
 import InitializeWallet from "../components/Wallet/InitializeWallet"
-import WalletList from "../components/Wallet/WalletList"
+import WalletList2 from "../components/Wallet/WalletList2"
 import WalletLoader from "../components/Wallet/WalletLoader"
 import { useWalletContext } from "../components/WalletContext"
 import useGetWallet from "../hooks/useGetWallet"
@@ -51,7 +50,7 @@ const styles = StyleSheet.create({
 })
 
 export default function WalletScreen({ navigation, route }: WalletScreens<"Wallet">) {
-    const { data, loading, refetch, onEndReached, endReached, filtersActive, error } = useGetWallet()
+    const { data, loading, refetch, onEndReached, error } = useGetWallet()
 
     const {
         refs: { bottomSheetRef, editBalanceRef },
@@ -138,19 +137,14 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
                 renderAnimatedItem={renderAnimatedItem}
             />
 
-            {showSubscriptionsView ? (
-                <SubscriptionList onScroll={onScroll} scrollY={scrollY} />
-            ) : (
-                <WalletList
-                    filtersActive={filtersActive}
-                    isLocked={loading || !data || endReached}
-                    refetch={refetch}
-                    scrollY={scrollY}
-                    onScroll={onScroll}
-                    wallet={data?.wallet}
-                    onEndReached={onEndReached}
-                />
-            )}
+            <WalletList2
+                refetch={refetch}
+                onScroll={onScroll}
+                wallet={data?.wallet}
+                onEndReached={onEndReached}
+                showSubscriptions={showSubscriptionsView}
+                showExpenses={!showSubscriptionsView}
+            />
 
             <EditBalanceSheet />
         </View>

@@ -1,10 +1,10 @@
 import Colors, { Sizing } from "@/constants/Colors"
-import { gql, useQuery } from "@apollo/client"
 import { useNavigation } from "@react-navigation/native"
 import { useCallback, useMemo, useState } from "react"
 import { NativeScrollEvent, NativeSyntheticEvent, ScrollView, StyleSheet, Text, View } from "react-native"
 import { RefreshControl } from "react-native-gesture-handler"
 import Animated, { SharedValue } from "react-native-reanimated"
+import useGetSubscriptions from "../../hooks/useGetSubscriptions"
 import WalletLimits from "../Wallet/Limits"
 import SubscriptionItem from "./SubscriptionItem"
 
@@ -35,27 +35,7 @@ interface SubscriptionListProps {
 const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView)
 
 export default function SubscriptionList({ onScroll, contentContainerStyle }: SubscriptionListProps) {
-    const { data, loading, refetch } = useQuery(gql`
-        query Subscriptions {
-            subscriptions {
-                id
-                amount
-                dateStart
-                dateEnd
-                description
-                isActive
-                nextBillingDate
-                billingCycle
-                expenses {
-                    amount
-                    id
-                    date
-                    description
-                    category
-                }
-            }
-        }
-    `)
+    const { data, loading, refetch } = useGetSubscriptions()
 
     const groupedData = useMemo(() => {
         if (!data?.subscriptions) return { active: [], inactive: [] }

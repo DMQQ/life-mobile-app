@@ -3,7 +3,7 @@ import throttle from "@/utils/functions/throttle"
 import { AntDesign } from "@expo/vector-icons"
 import { useNavigation } from "@react-navigation/native"
 import { BlurView } from "expo-blur"
-import { memo, ReactNode } from "react"
+import { memo, ReactNode, useMemo } from "react"
 import { StyleProp, StyleSheet, Text, TextStyle, ViewStyle } from "react-native"
 import Ripple from "react-native-material-ripple"
 import Animated, {
@@ -44,17 +44,13 @@ function Header(props: {
     subtitleStyles?: StyleProp<TextStyle>
     initialHeight?: number
     textContainerStyle?: StyleProp<TextStyle>
-    /**
-     * Renders an animated item that is displayed under the main header content but within the blur view
-     * @param props scrollY - SharedValue of the scroll position
-     * @returns JSX.Element | ReactNode | null
-     */
     renderAnimatedItem?: (props: { scrollY: SharedValue<number> | undefined }) => JSX.Element | ReactNode | null
 }) {
     const insets = useSafeAreaInsets()
     const navigation = useNavigation()
 
     const animatedBlurProps = useAnimatedProps(() => {
+        "worklet"
         const scrollValue = Math.max(0, Math.min(props.scrollY?.value || 0, 200))
         return {
             intensity: interpolate(scrollValue, [0, 200], [0, 80], Extrapolation.CLAMP),
@@ -62,24 +58,22 @@ function Header(props: {
     }, [props.scrollY])
 
     const animatedBlurStyle = useAnimatedStyle(() => {
+        "worklet"
         const scrollValue = Math.max(0, Math.min(props.scrollY?.value || 0, 200))
         return {
             backgroundColor: interpolateColor(scrollValue, [0, 200], ["rgba(0,0,0,0.0)", "rgba(0,0,0,0.1)"], "RGB"),
         }
     }, [props.scrollY])
 
-    // const animatedHeight = useAnimatedStyle(() => {
-    //     if (!props.animated) return { height: 0 }
-
-    //     const scrollValue = Math.max(0, Math.min(props.scrollY?.value || 0, 200))
-    //     return {
-    //         height: interpolate(scrollValue, [0, 200], [props.initialHeight || 200, 0], Extrapolation.CLAMP),
-    //     }
-    // }, [props.animated, props.scrollY, props.initialHeight])
+    const memodRenderItem = useMemo(() => props.renderAnimatedItem?.({ scrollY: props.scrollY }), [])
 
     return (
         <>
-            <AnimatedBlur tint="dark" animatedProps={animatedBlurProps} style={styles.blurContainer}>
+            <AnimatedBlur
+                tint="dark"
+                animatedProps={animatedBlurProps}
+                style={[styles.blurContainer, { overflow: "hidden" }]}
+            >
                 <Animated.View style={animatedBlurStyle}>
                     <Animated.View
                         style={[
@@ -113,19 +107,18 @@ function Header(props: {
                                 <IconButton
                                     style={button.style}
                                     key={index}
-                                    onPress={throttle(button.onPress, 250)}
+                                    onPress={throttle(button.onPress, 200)}
                                     icon={button.icon}
                                 />
                             ))}
                         </Animated.View>
                     </Animated.View>
 
-                    {props.renderAnimatedItem && props.renderAnimatedItem({ scrollY: props.scrollY })}
+                    {props.renderAnimatedItem && memodRenderItem}
                 </Animated.View>
             </AnimatedBlur>
 
             {(props.animatedTitle || props.animatedValue !== undefined) && <AnimatedContent {...props} />}
-            {/* <Animated.View style={animatedHeight} /> */}
         </>
     )
 }
@@ -139,12 +132,11 @@ interface AnimatedContentProps {
     onAnimatedTitleLongPress?: () => void
     subtitleStyles?: StyleProp<TextStyle>
     textContainerStyle?: StyleProp<TextStyle>
-
     scrollY?: SharedValue<number>
     animatedValueLoading?: boolean
 }
 
-const AnimatedContent = ({ ...props }: AnimatedContentProps) => {
+const AnimatedContent = memo(({ ...props }: AnimatedContentProps) => {
     const insets = useSafeAreaInsets()
 
     const animatedContainerStyle = useAnimatedStyle(() => {
@@ -224,7 +216,7 @@ const AnimatedContent = ({ ...props }: AnimatedContentProps) => {
             </Animated.View>
         </Animated.View>
     )
-}
+})
 
 const styles = StyleSheet.create({
     iconContainer: {

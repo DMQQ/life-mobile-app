@@ -1,10 +1,20 @@
 import React, { useState } from "react"
-import { StyleProp, Text, TextInput, TextInputProps, TextStyle, View, ViewStyle } from "react-native"
+import {
+    StyleProp,
+    Text,
+    TextInput,
+    TextInputComponent,
+    TextInputProps,
+    TextStyle,
+    View,
+    ViewStyle,
+} from "react-native"
 import Colors from "../../../constants/Colors"
 import { Theme, useTheme } from "../../../utils/context/ThemeContext"
 import styles from "./styles"
 
 import * as Icons from "@expo/vector-icons"
+import { BottomSheetTextInput } from "@gorhom/bottom-sheet"
 import Color from "color"
 import Ripple from "react-native-material-ripple"
 
@@ -78,6 +88,8 @@ export interface InputProps extends TextInputProps {
     size?: "small" | "medium" | "large"
 
     label?: string
+
+    useBottomSheetInput?: boolean
 }
 
 export default function Input({
@@ -94,6 +106,9 @@ export default function Input({
     left,
     right,
     onBlur,
+
+    useBottomSheetInput = false,
+
     ...rest
 }: InputProps) {
     const [isFocused, setIsFocused] = useState(false)
@@ -123,6 +138,8 @@ export default function Input({
         }
         return {}
     }
+
+    const TextInputComponent = useBottomSheetInput ? BottomSheetTextInput : TextInput
 
     return (
         <View style={[styles.container, rest.containerStyle]}>
@@ -156,7 +173,7 @@ export default function Input({
                         {typeof left === "function" ? left(renderComponentProps) : left}
                     </View>
                 )}
-                <TextInput
+                <TextInputComponent
                     value={value}
                     onChangeText={setValue}
                     placeholderTextColor={error ? "#ff3030" : "white"}
