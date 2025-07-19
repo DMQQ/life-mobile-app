@@ -109,6 +109,7 @@ export default function NotesScreen({ navigation }: ScreenProps<any>) {
                     contentContainerStyle={{
                         paddingHorizontal: 15,
                         paddingBottom: 60,
+                        paddingTop: 200,
                     }}
                     scrollEventThrottle={16}
                     removeClippedSubviews

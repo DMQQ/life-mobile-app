@@ -81,6 +81,8 @@ export default function Goals({ navigation }: any) {
                 ]}
             />
             <AnimatedFlashList
+                bounces={goals?.length > 4}
+                overScrollMode={goals?.length > 4 ? "always" : "never"}
                 data={goals}
                 estimatedItemSize={100}
                 renderItem={({ item, index }: any) => (
@@ -101,6 +103,7 @@ export default function Goals({ navigation }: any) {
                 contentContainerStyle={{
                     paddingHorizontal: 15,
                     paddingBottom: 60,
+                    paddingTop: 200,
                 }}
                 scrollEventThrottle={16}
                 removeClippedSubviews

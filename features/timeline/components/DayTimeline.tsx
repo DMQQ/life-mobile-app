@@ -62,6 +62,8 @@ const CalendarTimetable = ({ events, selected, onScroll, onLongPress }: CustomTi
             onScroll={onScroll}
             showsVerticalScrollIndicator={false}
             scrollEventThrottle={16}
+            bounces={items.length > 4}
+            overScrollMode={items.length > 4 ? "always" : "never"}
         >
             <TimeTable
                 fromHour={minHour > 0 ? minHour : minHour}

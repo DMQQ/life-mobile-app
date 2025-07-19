@@ -2,7 +2,7 @@ import { GET_GOALS } from "@/features/goals/hooks/hooks"
 import { gql, useMutation } from "@apollo/client"
 import DeleteDialog, { DeleteDialogProps } from "./DeleteDialog"
 
-export default function DeleteGoalsGroupDialog(props: DeleteDialogProps) {
+export default function DeleteGoalsGroupDialog(props: Omit<DeleteDialogProps, "remove">) {
     const [removeGroup, { error, data }] = useMutation(
         gql`
             mutation DeleteGoalsCategory($id: ID!) {

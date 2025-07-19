@@ -91,13 +91,15 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
                 animatedTitle={dayjs(timeline.selected).format("DD MMMM")}
                 animatedSubtitle={`${selectedDateFormatted} • ${eventsCount} Events`}
             />
-            <DateList
-                onMenuPress={() => timeline.setSwitchView("calendar")}
-                dayEvents={timeline.dayEventsSorted}
-                selectedDate={timeline.selected}
-                setSelected={timeline.setSelected}
-                translateY={translateY}
-            />
+            <View style={{ paddingTop: 215 }}>
+                <DateList
+                    onMenuPress={() => timeline.setSwitchView("calendar")}
+                    dayEvents={timeline.dayEventsSorted}
+                    selectedDate={timeline.selected}
+                    setSelected={timeline.setSelected}
+                    translateY={translateY}
+                />
+            </View>
 
             {timeline.loading ? (
                 <TimelineScreenLoader loading />
@@ -120,7 +122,6 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
                     onScroll={scrollHandler}
                     contentContainerStyle={{
                         paddingBottom: 100,
-                        paddingTop: 15,
                     }}
                     CellRendererComponent={({ index, style, ...rest }) => {
                         const newStyle = [style, { zIndex: -1 }]
@@ -132,6 +133,8 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
                     getItem={(data, index) => data[index] as GetTimelineQuery}
                     getItemCount={(data) => data.length}
                     renderItem={renderItem}
+                    bounces={(timeline?.data?.timeline.length || 0) > 4}
+                    overScrollMode={(timeline?.data?.timeline.length || 0) > 4 ? "always" : "never"}
                 />
             ) : (
                 <DayTimeline

@@ -68,14 +68,14 @@ function Header(props: {
         }
     }, [props.scrollY])
 
-    const animatedHeight = useAnimatedStyle(() => {
-        if (!props.animated) return { height: 0 }
+    // const animatedHeight = useAnimatedStyle(() => {
+    //     if (!props.animated) return { height: 0 }
 
-        const scrollValue = Math.max(0, Math.min(props.scrollY?.value || 0, 200))
-        return {
-            height: interpolate(scrollValue, [0, 200], [props.initialHeight || 200, 0], Extrapolation.CLAMP),
-        }
-    }, [props.animated, props.scrollY, props.initialHeight])
+    //     const scrollValue = Math.max(0, Math.min(props.scrollY?.value || 0, 200))
+    //     return {
+    //         height: interpolate(scrollValue, [0, 200], [props.initialHeight || 200, 0], Extrapolation.CLAMP),
+    //     }
+    // }, [props.animated, props.scrollY, props.initialHeight])
 
     return (
         <>
@@ -125,7 +125,7 @@ function Header(props: {
             </AnimatedBlur>
 
             {(props.animatedTitle || props.animatedValue !== undefined) && <AnimatedContent {...props} />}
-            <Animated.View style={animatedHeight} />
+            {/* <Animated.View style={animatedHeight} /> */}
         </>
     )
 }
@@ -149,7 +149,9 @@ const AnimatedContent = ({ ...props }: AnimatedContentProps) => {
 
     const animatedContainerStyle = useAnimatedStyle(() => {
         "worklet"
-        if (!props.scrollY || !props.animated || typeof props.scrollY.value !== "number") return {}
+        if (!props.scrollY || !props.animated || typeof props.scrollY.value !== "number") {
+            return { marginTop: 15, height: 0 }
+        }
 
         const scrollValue = Math.max(0, Math.min(props.scrollY.value, 200))
 
@@ -161,7 +163,13 @@ const AnimatedContent = ({ ...props }: AnimatedContentProps) => {
 
     const animatedContentStyle = useAnimatedStyle(() => {
         "worklet"
-        if (!props.scrollY || !props.animated) return {}
+        if (!props.scrollY || !props.animated || typeof props.scrollY.value !== "number") {
+            return {
+                transform: [{ scale: 1 }],
+                top: insets.top * 2,
+                left: 15,
+            }
+        }
 
         const scrollValue = props.scrollY.value
         const clampedValue = Math.max(0, Math.min(scrollValue, 200))
@@ -172,11 +180,13 @@ const AnimatedContent = ({ ...props }: AnimatedContentProps) => {
             top: interpolate(clampedValue, [0, 200], [insets.top * 2, insets.top / 2 + 10], Extrapolation.CLAMP),
             left: interpolate(clampedValue, [0, 200], [15, -115], Extrapolation.CLAMP),
         }
-    }, [props.animated, insets.top])
+    }, [props.scrollY, props.animated, insets.top])
 
     const animatedLabelStyle = useAnimatedStyle(() => {
         "worklet"
-        if (!props.scrollY || !props.animated || typeof props.scrollY.value !== "number") return {}
+        if (!props.scrollY || !props.animated || typeof props.scrollY.value !== "number") {
+            return { opacity: 1 }
+        }
 
         const scrollValue = Math.max(0, Math.min(props.scrollY.value, 100))
 
@@ -200,9 +210,7 @@ const AnimatedContent = ({ ...props }: AnimatedContentProps) => {
                             formatValue={props.animatedValueFormat || ((value) => `${value.toFixed(2)}`)}
                         />
                     ) : (
-                        <Text style={[styles.title, props.animated && animatedContentStyle]}>
-                            {props.animatedTitle}
-                        </Text>
+                        <Text style={[styles.title]}>{props.animatedTitle}</Text>
                     )}
 
                     {props.animatedSubtitle && (

@@ -14,14 +14,7 @@ interface MainContentProps {
     onScroll: (event: any) => void
 }
 
-export default function MainContent({ 
-    data, 
-    home, 
-    loading, 
-    refreshing, 
-    refresh, 
-    onScroll 
-}: MainContentProps) {
+export default function MainContent({ data, home, loading, refreshing, refresh, onScroll }: MainContentProps) {
     const workout = useAppSelector((s) => s.workout)
 
     return (
@@ -35,6 +28,7 @@ export default function MainContent({
             contentContainerStyle={{
                 paddingHorizontal: 15,
                 paddingBottom: 120,
+                paddingTop: 200,
             }}
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} />}
         >

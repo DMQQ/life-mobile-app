@@ -2,7 +2,7 @@ import Colors from "@/constants/Colors"
 import { Todos } from "@/types"
 import Color from "color"
 import { Pressable, StyleSheet, View } from "react-native"
-import { Card, Checkbox, Text, useTheme } from "react-native-paper"
+import { ActivityIndicator, Card, Checkbox, Text, useTheme } from "react-native-paper"
 import Animated, { FadeInDown, FadeOutUp, LinearTransition } from "react-native-reanimated"
 import useCompleteTodo from "../hooks/mutation/useCompleteTodo"
 import useRemoveTodo from "../hooks/mutation/useRemoveTodo"
@@ -36,6 +36,10 @@ const styles = StyleSheet.create({
     checkbox: {
         backgroundColor: Color(Colors.primary_lighter).lighten(0.5).hex(),
         borderRadius: 12,
+        width: 40,
+        height: 40,
+        alignItems: "center",
+        justifyContent: "center",
     },
     completedText: {
         textDecorationLine: "line-through",
@@ -44,8 +48,8 @@ const styles = StyleSheet.create({
 })
 
 export default function TodoItem(todo: Todos & { timelineId: string }) {
-    const removeTodo = useRemoveTodo(todo)
-    const { completeTodo } = useCompleteTodo({
+    const [removeTodo, { loading: removeLoading }] = useRemoveTodo(todo)
+    const [completeTodo, { loading: completeLoading }] = useCompleteTodo({
         todoId: todo.id,
         timelineId: todo.timelineId,
         currentlyCompleted: todo.isCompleted,
@@ -55,6 +59,8 @@ export default function TodoItem(todo: Todos & { timelineId: string }) {
     const handleToggleComplete = () => {
         completeTodo()
     }
+
+    const isLoading = removeLoading || completeLoading
 
     return (
         <Animated.View layout={LinearTransition.delay(100)} entering={FadeInDown} exiting={FadeOutUp}>
@@ -83,12 +89,16 @@ export default function TodoItem(todo: Todos & { timelineId: string }) {
                 >
                     <View style={styles.todoLeft}>
                         <View style={styles.checkbox}>
-                            <Checkbox
-                                status={todo.isCompleted ? "checked" : "unchecked"}
-                                onPress={handleToggleComplete}
-                                uncheckedColor={Colors.primary_darker}
-                                color={Colors.secondary}
-                            />
+                            {isLoading ? (
+                                <ActivityIndicator size="small" color={Colors.secondary} />
+                            ) : (
+                                <Checkbox
+                                    status={todo.isCompleted ? "checked" : "unchecked"}
+                                    onPress={handleToggleComplete}
+                                    uncheckedColor={Colors.primary_darker}
+                                    color={Colors.secondary}
+                                />
+                            )}
                         </View>
 
                         <Text

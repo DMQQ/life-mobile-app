@@ -3,6 +3,7 @@ import { AntDesign, Ionicons } from "@expo/vector-icons"
 import { useNavigation } from "@react-navigation/native"
 import { memo, useEffect, useState } from "react"
 import { TextInput, View } from "react-native"
+import Haptics from "react-native-haptic-feedback"
 import Animated, { Extrapolation, interpolate, SharedValue, useAnimatedStyle } from "react-native-reanimated"
 import { useWalletContext } from "../WalletContext"
 
@@ -14,6 +15,12 @@ const AnimatedSearchInput = ({ scrollY }: AnimatedSearchInputProps) => {
     const navigation = useNavigation<any>()
     const wallet = useWalletContext()
     const [value, setValue] = useState("")
+
+    const [isFocused, setIsFocused] = useState(false)
+
+    const handleFocus = () => {
+        setIsFocused((p) => !p)
+    }
 
     useEffect(() => {
         setValue(wallet.filters.query)
@@ -34,6 +41,7 @@ const AnimatedSearchInput = ({ scrollY }: AnimatedSearchInputProps) => {
     }, [scrollY])
 
     const onSubmit = () => {
+        Haptics.trigger("impactLight")
         if (value.trim() === "") return
         wallet.dispatch({ type: "SET_QUERY", payload: value })
     }
@@ -53,35 +61,36 @@ const AnimatedSearchInput = ({ scrollY }: AnimatedSearchInputProps) => {
                 animatedStyle,
             ]}
         >
-            <View style={{ flex: 1, position: "relative", flexDirection: "row" }}>
+            <View
+                style={{
+                    flex: 1,
+                    position: "relative",
+                    flexDirection: "row",
+                    backgroundColor: `rgba(0,0,0,0.${isFocused ? 15 : 1})`,
+                    padding: 5,
+                    borderRadius: 15,
+                    borderWidth: 1,
+                    borderColor: `rgba(255,255,255,0.${isFocused ? 15 : 2})`,
+                }}
+            >
+                <IconButton
+                    icon={<Ionicons name="options" size={24} color="#fff" />}
+                    onPress={() => {
+                        Haptics.trigger("impactLight")
+                        navigation.navigate("Filters")
+                    }}
+                />
                 <TextInput
                     value={value}
                     onChangeText={setValue}
-                    style={{
-                        backgroundColor: "rgba(0,0,0,0.1)",
-                        padding: 12.5,
-                        borderRadius: 15,
-                        borderWidth: 1,
-                        borderColor: "rgba(255,255,255,0.2)",
-                        fontSize: 15,
-                        color: "#fff",
-                        flex: 1,
-                    }}
+                    style={{ fontSize: 15, flex: 1, color: "#fff", paddingHorizontal: 10 }}
                     onEndEditing={onSubmit}
                     onSubmitEditing={onSubmit}
+                    onFocus={handleFocus}
+                    onBlur={handleFocus}
                 />
-                <IconButton
-                    style={{ position: "absolute", right: 10, top: 7.5 }}
-                    icon={<AntDesign name="search1" size={20} color="#fff" />}
-                    onPress={onSubmit}
-                />
+                <IconButton icon={<AntDesign name="search1" size={20} color="#fff" />} onPress={onSubmit} />
             </View>
-            <IconButton
-                icon={<Ionicons name="options" size={24} color="#fff" />}
-                onPress={() => {
-                    navigation.navigate("Filters")
-                }}
-            />
         </Animated.View>
     )
 }

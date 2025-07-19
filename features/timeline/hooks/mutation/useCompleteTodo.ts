@@ -2,7 +2,7 @@ import { gql, useMutation } from "@apollo/client"
 import { GET_TIMELINE } from "../query/useGetTimelineById"
 
 export default function useCompleteTodo(props: { todoId: string; timelineId: string; currentlyCompleted?: boolean }) {
-    const [completeTodo, { error }] = useMutation(
+    const [completeTodo, state] = useMutation(
         gql`
             mutation CompleteTodo($todoId: ID!, $isCompleted: Boolean!) {
                 completeTimelineTodo(id: $todoId, isCompleted: $isCompleted) {
@@ -44,8 +44,8 @@ export default function useCompleteTodo(props: { todoId: string; timelineId: str
         },
     )
 
-    return {
-        completeTodo: (isCompleted?: boolean) => {
+    return [
+        (isCompleted?: boolean) => {
             const newCompletedState = isCompleted ?? !props.currentlyCompleted
             return completeTodo({
                 variables: {
@@ -54,5 +54,6 @@ export default function useCompleteTodo(props: { todoId: string; timelineId: str
                 },
             })
         },
-    }
+        state,
+    ] as const
 }
