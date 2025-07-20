@@ -24,6 +24,8 @@ const primary = getItem("color_scheme_primary") ?? "#0d0f14"
 
 const secondary = getItem("color_scheme_secondary") ?? secondary_candidates[secondary_candidates.length - 1]
 
+const foreground = getItem("color_scheme_foreground") ?? "#FFFFFF"
+
 export const randColor = () => secondary_candidates[Math.floor(Math.random() * secondary_candidates.length)]
 
 const ternary = "#7B84FF"
@@ -52,6 +54,11 @@ const theme = {
 
     text_light: "#FAF8FF",
     text_dark: "gray",
+
+    foreground,
+
+    foreground_secondary: Color(foreground).alpha(0.7).string(), // 70% opacity
+    foreground_disabled: Color(foreground).alpha(0.4).string(),
 } as const
 
 export default theme

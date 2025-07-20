@@ -93,7 +93,7 @@ export default function OptionsPicker({
                     {
                         backgroundColor: typeBackgroundColor,
                         gap: 10,
-                        borderColor: typeBackgroundColor,
+                        borderColor: type == null ? styles.chip.borderColor : typeBackgroundColor,
                     },
                 ]}
             >

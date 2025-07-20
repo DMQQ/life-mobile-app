@@ -10,6 +10,7 @@ import { useState } from "react"
 import { FlatList, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import Feedback from "react-native-haptic-feedback"
 import Ripple from "react-native-material-ripple"
+import { TextInput } from "react-native-paper"
 
 interface ColorPalette {
     name: string
@@ -20,217 +21,145 @@ interface ColorPalette {
 }
 
 const colorPalettes: ColorPalette[] = [
-    // Popular Apps
     {
-        name: "Discord",
-        primary: "#2C2F33",
-        secondary: "#7289DA",
-        ternary: "#99AAB5",
-        category: "Apps",
-    },
-    {
-        name: "Spotify",
-        primary: "#191414",
-        secondary: "#1DB954",
-        ternary: "#1ED760",
-        category: "Apps",
-    },
-    {
-        name: "GitHub",
-        primary: "#0D1117",
-        secondary: "#238636",
-        ternary: "#F85149",
-        category: "Apps",
-    },
-    {
-        name: "Slack",
-        primary: "#1A1D29",
-        secondary: "#4A154B",
-        ternary: "#ECB22E",
-        category: "Apps",
-    },
-    {
-        name: "VS Code",
-        primary: "#1E1E1E",
-        secondary: "#007ACC",
-        ternary: "#FF6B35",
-        category: "Apps",
-    },
-    {
-        name: "Twitter X",
-        primary: "#15202B",
-        secondary: "#1DA1F2",
-        ternary: "#657786",
-        category: "Apps",
-    },
-
-    // Material Design
-    {
-        name: "Material Dark",
-        primary: "#121212",
-        secondary: "#BB86FC",
-        ternary: "#03DAC6",
-        category: "Material",
-    },
-    {
-        name: "Material Blue",
-        primary: "#1A1A1A",
-        secondary: "#2196F3",
-        ternary: "#FF5722",
-        category: "Material",
-    },
-    {
-        name: "Material Purple",
-        primary: "#121212",
-        secondary: "#9C27B0",
-        ternary: "#4CAF50",
-        category: "Material",
-    },
-
-    // Dark Themes
-    {
-        name: "Midnight Steel",
-        primary: "#0d0f14",
+        name: "Classic Money",
+        primary: "#0D1421",
         secondary: "#00C896",
-        ternary: "#7B84FF",
-        category: "Dark",
+        ternary: "#FFA726",
+        category: "Finance",
     },
     {
-        name: "Obsidian Blue",
-        primary: "#1C2128",
-        secondary: "#00BFFF",
-        ternary: "#8685EF",
-        category: "Dark",
-    },
-    {
-        name: "Charcoal Dreams",
-        primary: "#1C1C1C",
-        secondary: "#F6B161",
-        ternary: "#DB56F9",
-        category: "Dark",
-    },
-    {
-        name: "Deep Sea",
-        primary: "#001F3F",
-        secondary: "#00B894",
-        ternary: "#AEEEEE",
-        category: "Dark",
-    },
-    {
-        name: "Cyber Noir",
-        primary: "#0B0D11",
-        secondary: "#00FFA3",
-        ternary: "#FF1A56",
-        category: "Dark",
-    },
-    {
-        name: "Raven Wing",
-        primary: "#161A1F",
-        secondary: "#34FA85",
-        ternary: "#6056F9",
-        category: "Dark",
-    },
-    {
-        name: "Forest Dusk",
-        primary: "#2E3A24",
-        secondary: "#6B8E23",
-        ternary: "#A9DFBF",
-        category: "Dark",
-    },
-    {
-        name: "Stormy Night",
-        primary: "#2F3640",
-        secondary: "#D63031",
-        ternary: "#00BFFF",
-        category: "Dark",
-    },
-    {
-        name: "Violet Shadow",
-        primary: "#1A1D24",
-        secondary: "#BE15A8",
-        ternary: "#F9F156",
-        category: "Dark",
-    },
-    {
-        name: "Arctic Steel",
-        primary: "#12141A",
-        secondary: "#56E4F9",
-        ternary: "#C2E7FF",
-        category: "Dark",
-    },
-    {
-        name: "Ember Dark",
-        primary: "#101217",
-        secondary: "#FFA51A",
-        ternary: "#F95656",
-        category: "Dark",
-    },
-    {
-        name: "Sapphire Night",
-        primary: "#0C0E13",
-        secondary: "#008CFF",
-        ternary: "#34A3FA",
-        category: "Dark",
-    },
-
-    // Gaming & Tech
-    {
-        name: "Neo Tokyo",
-        primary: "#111418",
+        name: "Neon Crypto",
+        primary: "#0A0A0A",
         secondary: "#FF0080",
         ternary: "#00FFFF",
-        category: "Gaming",
+        category: "Finance",
     },
     {
-        name: "Matrix",
-        primary: "#000000",
-        secondary: "#00FF41",
-        ternary: "#008F11",
-        category: "Gaming",
+        name: "Ocean Savings",
+        primary: "#0F1B2E",
+        secondary: "#87CEEB",
+        ternary: "#FF69B4",
+        category: "Finance",
     },
     {
-        name: "Tron Legacy",
-        primary: "#0A0A0A",
-        secondary: "#6FC3DF",
-        ternary: "#FFF200",
-        category: "Gaming",
+        name: "Purple Wealth",
+        primary: "#1A0D1F",
+        secondary: "#9D4EDD",
+        ternary: "#FFD60A",
+        category: "Finance",
     },
     {
-        name: "Cyberpunk",
-        primary: "#1A0B33",
-        secondary: "#E842A5",
-        ternary: "#42E8E8",
-        category: "Gaming",
+        name: "Frost Finance",
+        primary: "#0C1618",
+        secondary: "#00E5FF",
+        ternary: "#B39DDB",
+        category: "Finance",
     },
-
-    // Luxury & Premium
     {
-        name: "Royal Depth",
-        primary: "#0A0B0F",
-        secondary: "#4B0082",
-        ternary: "#9370DB",
-        category: "Luxury",
+        name: "Ruby Budget",
+        primary: "#1F0B0B",
+        secondary: "#FF6B6B",
+        ternary: "#4ECDC4",
+        category: "Finance",
     },
     {
         name: "Gold Standard",
         primary: "#1A1516",
         secondary: "#FFD700",
         ternary: "#CD7F32",
-        category: "Luxury",
+        category: "Finance",
     },
     {
-        name: "Platinum Elite",
-        primary: "#2A2A2A",
-        secondary: "#E5E4E2",
-        ternary: "#C0C0C0",
-        category: "Luxury",
+        name: "Mint Minimalist",
+        primary: "#151B19",
+        secondary: "#98FB98",
+        ternary: "#F0E68C",
+        category: "Finance",
     },
     {
-        name: "Rose Gold",
-        primary: "#1E1E1E",
+        name: "Coral Expense",
+        primary: "#1A1111",
+        secondary: "#FF7F7F",
+        ternary: "#40E0D0",
+        category: "Finance",
+    },
+    {
+        name: "Steel Money",
+        primary: "#1C1C1C",
+        secondary: "#B0C4DE",
+        ternary: "#FFA500",
+        category: "Finance",
+    },
+    {
+        name: "Electric Blue",
+        primary: "#0B0F1A",
+        secondary: "#1E90FF",
+        ternary: "#FFB347",
+        category: "Finance",
+    },
+    {
+        name: "Sunset Budget",
+        primary: "#1F1611",
+        secondary: "#FF8C69",
+        ternary: "#20B2AA",
+        category: "Finance",
+    },
+    {
+        name: "Emerald Bank",
+        primary: "#0F1A0F",
+        secondary: "#50C878",
+        ternary: "#DA70D6",
+        category: "Finance",
+    },
+    {
+        name: "Lavender Ledger",
+        primary: "#1A1624",
+        secondary: "#E6E6FA",
+        ternary: "#FF6347",
+        category: "Finance",
+    },
+    {
+        name: "Silver Stack",
+        primary: "#181818",
+        secondary: "#C0C0C0",
+        ternary: "#32CD32",
+        category: "Finance",
+    },
+    {
+        name: "Peachy Pay",
+        primary: "#1A1613",
+        secondary: "#FFCBA4",
+        ternary: "#9370DB",
+        category: "Finance",
+    },
+    {
+        name: "Turquoise Tracker",
+        primary: "#0D1A1A",
+        secondary: "#40E0D0",
+        ternary: "#F08080",
+        category: "Finance",
+    },
+    {
+        name: "Rose Gold Pro",
+        primary: "#1F1719",
         secondary: "#E8B4B8",
-        ternary: "#F7CAC9",
-        category: "Luxury",
+        ternary: "#87CEEB",
+        category: "Finance",
+    },
+    {
+        name: "Amber Account",
+        primary: "#1A1608",
+        secondary: "#FFBF00",
+        ternary: "#8A2BE2",
+        category: "Finance",
+    },
+    {
+        name: "Slate Saver",
+        primary: "#2F4F4F",
+        secondary: "#98FB98",
+        ternary: "#FFB6C1",
+        category: "Finance",
     },
 ]
 
@@ -317,6 +246,28 @@ const styles = StyleSheet.create({
         fontWeight: "600",
         marginBottom: 20,
     },
+    themeToggle: {
+        flexDirection: "row",
+        marginBottom: 20,
+        backgroundColor: "rgba(255, 255, 255, 0.1)",
+        borderRadius: 12,
+        padding: 4,
+    },
+    toggleButton: {
+        flex: 1,
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 8,
+        alignItems: "center",
+    },
+    activeToggle: {
+        backgroundColor: Colors.primary_lighter,
+    },
+    toggleText: {
+        color: "#fff",
+        fontSize: 14,
+        fontWeight: "600",
+    },
     categoryHeader: {
         color: "rgba(255, 255, 255, 0.7)",
         fontSize: 14,
@@ -333,15 +284,15 @@ const styles = StyleSheet.create({
         marginBottom: 8,
     },
     paletteItem: {
-        width: 150,
         overflow: "hidden",
         borderWidth: 2,
         borderColor: "transparent",
-        height: 80,
+        height: 170,
+        width: 60,
     },
     selectedPalette: {
         backgroundColor: Colors.primary_lighter,
-        borderRadius: 20,
+        borderRadius: 100,
     },
     paletteContent: {
         padding: 8,
@@ -350,12 +301,12 @@ const styles = StyleSheet.create({
     },
     paletteName: {
         color: "#fff",
-        fontSize: 11,
+        fontSize: 9,
         fontWeight: "600",
         marginBottom: 10,
     },
     colorSwatch: {
-        flexDirection: "row",
+        flexDirection: "column",
         gap: 3,
     },
     colorCircle: {
@@ -364,6 +315,76 @@ const styles = StyleSheet.create({
         borderRadius: 40,
         borderWidth: 0.5,
         borderColor: "rgba(255, 255, 255, 0.2)",
+    },
+    customColorSection: {
+        marginBottom: 20,
+    },
+    colorPickerContainer: {
+        marginBottom: 20,
+    },
+    colorTypeSelector: {
+        flexDirection: "row",
+        marginBottom: 15,
+        backgroundColor: "rgba(255, 255, 255, 0.1)",
+        borderRadius: 8,
+        padding: 2,
+    },
+    colorTypeButton: {
+        flex: 1,
+        paddingVertical: 8,
+        paddingHorizontal: 12,
+        borderRadius: 6,
+        alignItems: "center",
+    },
+    activeColorType: {
+        backgroundColor: "rgba(255, 255, 255, 0.2)",
+    },
+    colorTypeText: {
+        color: "#fff",
+        fontSize: 12,
+        fontWeight: "600",
+    },
+    colorPicker: {
+        marginBottom: 15,
+    },
+    colorInput: {
+        backgroundColor: "rgba(255, 255, 255, 0.1)",
+        marginBottom: 15,
+    },
+    quickColors: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        gap: 10,
+        marginBottom: 15,
+    },
+    quickColorItem: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        borderWidth: 2,
+        borderColor: "rgba(255, 255, 255, 0.3)",
+    },
+    selectedQuickColor: {
+        borderColor: "#fff",
+        borderWidth: 3,
+    },
+    customPreview: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        marginBottom: 15,
+    },
+    previewColor: {
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+        borderWidth: 2,
+        borderColor: "rgba(255, 255, 255, 0.3)",
+    },
+    colorLabel: {
+        color: "rgba(255, 255, 255, 0.7)",
+        fontSize: 12,
+        textAlign: "center",
+        marginTop: 5,
     },
     signoutButtonContainer: {
         borderRadius: 16,
@@ -381,6 +402,13 @@ interface SettingsModalProps {
 export default function SettingsModal({ visible, onClose }: SettingsModalProps) {
     const { removeUser, user } = useUser()
     const [selectedPalette, setSelectedPalette] = useState<ColorPalette | null>(null)
+    const [isCustomMode, setIsCustomMode] = useState(false)
+    const [customColors, setCustomColors] = useState({
+        primary: "#0D1421",
+        secondary: "#00C896",
+        ternary: "#FFA726",
+    })
+    const [activeColorType, setActiveColorType] = useState<"primary" | "secondary" | "ternary">("primary")
 
     const handleSignout = async () => {
         await removeUser()
@@ -405,7 +433,16 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
     }
 
     const handleApplyTheme = async () => {
-        if (selectedPalette) {
+        if (isCustomMode) {
+            Feedback.trigger("impactMedium")
+            await setCustomTheme({
+                name: "Custom",
+                primary: customColors.primary,
+                secondary: customColors.secondary,
+                ternary: customColors.ternary,
+                category: "Custom",
+            })
+        } else if (selectedPalette) {
             Feedback.trigger("impactMedium")
             await setCustomTheme(selectedPalette)
         }
@@ -414,6 +451,34 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
     const handlePaletteSelect = (palette: ColorPalette) => {
         Feedback.trigger("selection")
         setSelectedPalette(palette)
+        setIsCustomMode(false)
+    }
+
+    const handleColorChange = (color: string) => {
+        if (color.startsWith("#") && (color.length === 4 || color.length === 7)) {
+            setCustomColors((prev) => ({
+                ...prev,
+                [activeColorType]: color,
+            }))
+        }
+    }
+
+    const getQuickColors = () => {
+        if (activeColorType === "primary") {
+            return ["#0D1421", "#1A1A1A", "#121212", "#0F1419", "#1E1E1E", "#2F2F2F", "#1C1C1C", "#0A0A0A"]
+        } else if (activeColorType === "secondary") {
+            return ["#00C896", "#FF0080", "#87CEEB", "#9D4EDD", "#00E5FF", "#FF6B6B", "#FFD700", "#98FB98"]
+        } else {
+            return ["#FFA726", "#00FFFF", "#FF69B4", "#FFD60A", "#B39DDB", "#4ECDC4", "#CD7F32", "#F0E68C"]
+        }
+    }
+
+    const handleModeToggle = (isCustom: boolean) => {
+        Feedback.trigger("selection")
+        setIsCustomMode(isCustom)
+        if (isCustom) {
+            setSelectedPalette(null)
+        }
     }
 
     const groupedPalettes = colorPalettes.reduce(
@@ -433,7 +498,7 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
             style={[styles.paletteItem, selectedPalette?.name === item.name && styles.selectedPalette]}
         >
             <View style={styles.paletteContent}>
-                <Text style={styles.paletteName} numberOfLines={2}>
+                <Text style={styles.paletteName} numberOfLines={1}>
                     {item.name}
                 </Text>
                 <View style={styles.colorSwatch}>
@@ -444,6 +509,8 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
             </View>
         </Ripple>
     )
+
+    const canApply = isCustomMode || selectedPalette !== null
 
     return (
         <Modal
@@ -484,27 +551,128 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
                                         <View style={styles.themeSectionContent}>
                                             <Text style={styles.themeSectionTitle}>Choose Color Palette</Text>
 
-                                            <View style={styles.paletteGrid}>
-                                                {Object.entries(groupedPalettes).map(([category, palettes]) => (
-                                                    <View key={category}>
-                                                        <Text style={styles.categoryHeader}>{category}</Text>
-                                                        <FlatList
-                                                            horizontal
-                                                            data={palettes}
-                                                            renderItem={renderPaletteItem}
-                                                            keyExtractor={(item) => item.name}
-                                                            showsVerticalScrollIndicator={false}
-                                                        />
-                                                    </View>
-                                                ))}
+                                            <View style={styles.themeToggle}>
+                                                <TouchableOpacity
+                                                    style={[styles.toggleButton, !isCustomMode && styles.activeToggle]}
+                                                    onPress={() => handleModeToggle(false)}
+                                                >
+                                                    <Text style={styles.toggleText}>Presets</Text>
+                                                </TouchableOpacity>
+                                                <TouchableOpacity
+                                                    style={[styles.toggleButton, isCustomMode && styles.activeToggle]}
+                                                    onPress={() => handleModeToggle(true)}
+                                                >
+                                                    <Text style={styles.toggleText}>Custom</Text>
+                                                </TouchableOpacity>
                                             </View>
+
+                                            {!isCustomMode ? (
+                                                <View style={styles.paletteGrid}>
+                                                    {Object.entries(groupedPalettes).map(([category, palettes]) => (
+                                                        <View key={category}>
+                                                            <Text style={styles.categoryHeader}>{category}</Text>
+                                                            <FlatList
+                                                                horizontal
+                                                                data={palettes}
+                                                                renderItem={renderPaletteItem}
+                                                                keyExtractor={(item) => item.name}
+                                                                showsVerticalScrollIndicator={false}
+                                                            />
+                                                        </View>
+                                                    ))}
+                                                </View>
+                                            ) : (
+                                                <View style={styles.customColorSection}>
+                                                    <View style={styles.colorTypeSelector}>
+                                                        {(["primary", "secondary", "ternary"] as const).map((type) => (
+                                                            <TouchableOpacity
+                                                                key={type}
+                                                                style={[
+                                                                    styles.colorTypeButton,
+                                                                    activeColorType === type && styles.activeColorType,
+                                                                ]}
+                                                                onPress={() => setActiveColorType(type)}
+                                                            >
+                                                                <Text style={styles.colorTypeText}>
+                                                                    {type.charAt(0).toUpperCase() + type.slice(1)}
+                                                                </Text>
+                                                            </TouchableOpacity>
+                                                        ))}
+                                                    </View>
+
+                                                    <View style={styles.colorPickerContainer}>
+                                                        <TextInput
+                                                            mode="outlined"
+                                                            label={`${activeColorType.charAt(0).toUpperCase() + activeColorType.slice(1)} Color`}
+                                                            value={customColors[activeColorType]}
+                                                            onChangeText={handleColorChange}
+                                                            style={styles.colorInput}
+                                                            theme={{
+                                                                colors: {
+                                                                    text: "#fff",
+                                                                    placeholder: "rgba(255, 255, 255, 0.6)",
+                                                                    primary: Colors.primary_lighter,
+                                                                    outline: "rgba(255, 255, 255, 0.3)",
+                                                                },
+                                                            }}
+                                                            textColor="#fff"
+                                                            placeholder="#000000"
+                                                        />
+
+                                                        <View style={styles.quickColors}>
+                                                            {getQuickColors().map((color) => (
+                                                                <TouchableOpacity
+                                                                    key={color}
+                                                                    style={[
+                                                                        styles.quickColorItem,
+                                                                        { backgroundColor: color },
+                                                                        customColors[activeColorType] === color &&
+                                                                            styles.selectedQuickColor,
+                                                                    ]}
+                                                                    onPress={() => handleColorChange(color)}
+                                                                />
+                                                            ))}
+                                                        </View>
+                                                    </View>
+
+                                                    <View style={styles.customPreview}>
+                                                        <View style={{ alignItems: "center" }}>
+                                                            <View
+                                                                style={[
+                                                                    styles.previewColor,
+                                                                    { backgroundColor: customColors.primary },
+                                                                ]}
+                                                            />
+                                                            <Text style={styles.colorLabel}>Primary</Text>
+                                                        </View>
+                                                        <View style={{ alignItems: "center" }}>
+                                                            <View
+                                                                style={[
+                                                                    styles.previewColor,
+                                                                    { backgroundColor: customColors.secondary },
+                                                                ]}
+                                                            />
+                                                            <Text style={styles.colorLabel}>Secondary</Text>
+                                                        </View>
+                                                        <View style={{ alignItems: "center" }}>
+                                                            <View
+                                                                style={[
+                                                                    styles.previewColor,
+                                                                    { backgroundColor: customColors.ternary },
+                                                                ]}
+                                                            />
+                                                            <Text style={styles.colorLabel}>Ternary</Text>
+                                                        </View>
+                                                    </View>
+                                                </View>
+                                            )}
 
                                             <Button
                                                 style={{ marginTop: 20 }}
                                                 onPress={handleApplyTheme}
-                                                disabled={!selectedPalette}
+                                                disabled={!canApply}
                                             >
-                                                Apply Selected Palette
+                                                {isCustomMode ? "Apply Custom Colors" : "Apply Selected Palette"}
                                             </Button>
                                         </View>
                                     </BlurView>
