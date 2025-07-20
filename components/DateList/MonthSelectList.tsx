@@ -1,6 +1,6 @@
 import { Padding, Rounded } from "@/constants/Values"
 import moment from "moment"
-import { useCallback, useEffect, useRef } from "react"
+import { memo, useCallback, useEffect, useRef } from "react"
 import { FlatList, Text } from "react-native"
 import Ripple from "react-native-material-ripple"
 import Colors from "../../constants/Colors"
@@ -18,11 +18,10 @@ const getItemLayout = (_: any, index: number) => ({
     offset: 110 * index,
 })
 
-export default function MonthSelectList(props: MonthSelectListProps) {
+function MonthSelectList(props: MonthSelectListProps) {
     const listRef = useRef<FlatList>(null)
 
     useEffect(() => {
-        console.log(props.selected, moment.months())
         listRef.current?.scrollToItem({
             item: moment.months().find((m) => m === props.selected),
             animated: false,
@@ -65,3 +64,5 @@ export default function MonthSelectList(props: MonthSelectListProps) {
         />
     )
 }
+
+export default memo(MonthSelectList)

@@ -7,7 +7,7 @@ import { AntDesign, Feather } from "@expo/vector-icons"
 import dayjs from "dayjs"
 import moment from "moment"
 import { useCallback, useMemo, useState } from "react"
-import { View, VirtualizedList } from "react-native"
+import { RefreshControl, View, VirtualizedList } from "react-native"
 import Feedback from "react-native-haptic-feedback"
 import Animated, { useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated"
 import DayTimeline from "../components/DayTimeline"
@@ -73,15 +73,22 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
     const dateListMemoized = useMemo(
         () => (
             <DateList
-                onMenuPress={() => timeline.setSwitchView("calendar")}
                 dayEvents={timeline.dayEventsSorted}
                 selectedDate={timeline.selected}
                 setSelected={timeline.setSelected}
-                translateY={translateY}
             />
         ),
-        [timeline.dayEventsSorted, timeline.selected],
+        [timeline.selected, timeline.dayEventsSorted],
     )
+    const [refreshing, setRefreshing] = useState(false)
+
+    const onRefresh = async () => {
+        setRefreshing(true)
+
+        await timeline.refetch()
+
+        setRefreshing(false)
+    }
 
     return (
         <View style={{ flex: 1 }}>
@@ -107,6 +114,7 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
 
             {timeline.switchView !== "timeline" ? (
                 <AnimatedVirtualizedList
+                    refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
                     ListHeaderComponent={<View style={{ paddingBottom: 30 }}>{dateListMemoized}</View>}
                     ListEmptyComponent={
                         <ListEmptyComponent
@@ -120,10 +128,6 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
                         paddingBottom: (timeline.data?.timeline?.length || 0) > 0 ? 120 : 0,
                         padding: 15,
                         paddingTop: 215,
-                    }}
-                    CellRendererComponent={({ index, style, ...rest }) => {
-                        const newStyle = [style, { zIndex: -1 }]
-                        return <View style={newStyle} {...rest} />
                     }}
                     data={(timeline.data?.timeline as GetTimelineQuery[]) || []}
                     initialNumToRender={3}
@@ -145,6 +149,7 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
                         Feedback.trigger("impactMedium")
                         setSelectedEventForDeletion(item as GetTimelineQuery)
                     }}
+                    refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
                 >
                     <View style={{ paddingHorizontal: 15, paddingBottom: 30 }}>
                         {dateListMemoized}

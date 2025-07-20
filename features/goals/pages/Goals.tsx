@@ -5,9 +5,9 @@ import Colors from "@/constants/Colors"
 import { AntDesign } from "@expo/vector-icons"
 import { FlashList } from "@shopify/flash-list"
 import { useState } from "react"
-import { StyleSheet, View } from "react-native"
-import Animated, { FadeOut, useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated"
+import { RefreshControl, StyleSheet, View } from "react-native"
 import Feedback from "react-native-haptic-feedback"
+import Animated, { FadeOut, useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated"
 import { GoalCategory } from "../components/GoalCategory"
 import { useGoal } from "../hooks/hooks"
 
@@ -51,7 +51,7 @@ const AnimatedLoader = () => {
 }
 
 export default function Goals({ navigation }: any) {
-    const { goals, loading } = useGoal()
+    const { goals, loading, refetchGoals } = useGoal()
 
     const scrollY = useSharedValue(0)
 
@@ -65,6 +65,16 @@ export default function Goals({ navigation }: any) {
     )
 
     const [selectedGroupForDeletion, setSelectedGroupForDeletion] = useState<{ id: string; name: string } | null>(null)
+
+    const [refreshing, setRefreshing] = useState(false)
+
+    const onRefresh = async () => {
+        setRefreshing(true)
+
+        await refetchGoals()
+
+        setRefreshing(false)
+    }
 
     return (
         <View style={{ flex: 1 }}>
@@ -84,6 +94,7 @@ export default function Goals({ navigation }: any) {
             <AnimatedFlashList
                 bounces={goals?.length > 4}
                 overScrollMode={goals?.length > 4 ? "always" : "never"}
+                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
                 data={goals}
                 estimatedItemSize={100}
                 renderItem={({ item, index }: any) => (

@@ -2,7 +2,7 @@ import { GET_GROUPS } from "@/features/flashcards/hooks"
 import { gql, useMutation } from "@apollo/client"
 import DeleteDialog, { DeleteDialogProps } from "./DeleteDialog"
 
-export default function DeleteFlashCardGroupDialog(props: DeleteDialogProps) {
+export default function DeleteFlashCardGroupDialog(props: Omit<DeleteDialogProps, "remove">) {
     const [removeGroup, { error, data }] = useMutation(
         gql`
             mutation DeleteFlashCardGroup($groupId: String!) {

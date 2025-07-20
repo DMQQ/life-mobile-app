@@ -1,9 +1,9 @@
 import Header from "@/components/ui/Header/Header"
 import Colors from "@/constants/Colors"
 import { AntDesign } from "@expo/vector-icons"
-import { StyleSheet, Text, View } from "react-native"
-import Ripple from "react-native-material-ripple"
+import { RefreshControl, StyleSheet, Text, View } from "react-native"
 import Feedback from "react-native-haptic-feedback"
+import Ripple from "react-native-material-ripple"
 
 import { Skeleton } from "@/components"
 import DeleteFlashCardGroupDialog from "@/components/ui/Dialog/Delete/DeleteGroupDialog"
@@ -56,7 +56,7 @@ const AnimatedLoader = () => {
 }
 
 export default function NotesScreen({ navigation }: ScreenProps<any>) {
-    const { groups, loading } = useGroups()
+    const { groups, loading, refetch } = useGroups()
 
     const scrollY = useSharedValue(0)
 
@@ -75,6 +75,16 @@ export default function NotesScreen({ navigation }: ScreenProps<any>) {
     }, [groups])
 
     const [selectedGroupForDeletion, setSelectedGroupForDeletion] = useState<Group | null>(null)
+
+    const [refreshing, setRefreshing] = useState(false)
+
+    const onRefresh = async () => {
+        setRefreshing(true)
+
+        await refetch()
+
+        setRefreshing(false)
+    }
 
     return (
         <>
@@ -115,6 +125,7 @@ export default function NotesScreen({ navigation }: ScreenProps<any>) {
                     }}
                     scrollEventThrottle={16}
                     removeClippedSubviews
+                    refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
                 />
             </View>
             <DeleteFlashCardGroupDialog

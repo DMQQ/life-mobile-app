@@ -1,6 +1,6 @@
 import { gql, useQuery } from "@apollo/client"
 import moment from "moment"
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { ToastAndroid } from "react-native"
 import { TimelineScreenProps } from "../../types"
 import useGetTimeLineQuery from "../query/useGetTimeLineQuery"
@@ -28,38 +28,33 @@ const groupDates = (dates: { date: string }[]) => {
 export default function useTimeline({ route, navigation }: TimelineScreenProps<"Timeline">) {
     const { data, selected, setSelected, loading, error } = useGetTimeLineQuery()
 
-    const [fetchDate, setFetchDate] = useState(moment().format("YYYY-MM-DD"))
-
-    useEffect(() => {
-        const selectedMonth = moment(selected).month()
-        const currentMonth = moment(fetchDate).month()
-
-        if (selectedMonth !== currentMonth) {
-            setFetchDate(selected)
-        }
-    }, [selected])
-
     const { data: monthData, refetch } = useQuery(GET_MONTHLY_EVENTS, {
-        variables: { date: fetchDate },
+        variables: { date: moment(selected).startOf("month").format("YYYY-MM-DD") },
 
         onError: (err) => ToastAndroid.show("Oh! Something went wrong", ToastAndroid.SHORT),
     })
 
-    const onDayPress = (day: { dateString: string }) => setSelected(day.dateString)
+    const onDayPress = useCallback((day: { dateString: string }) => setSelected(day.dateString), [setSelected])
 
-    const createTimeline = () =>
-        navigation.navigate("TimelineCreate", {
-            selectedDate: selected,
-            mode: "create",
-        })
+    const createTimeline = useCallback(
+        () =>
+            navigation.navigate("TimelineCreate", {
+                selectedDate: selected,
+                mode: "create",
+            }),
+        [navigation, selected],
+    )
 
     const dayEventsSorted = useMemo(() => groupDates(monthData?.timelineMonth || []), [monthData?.timelineMonth])
 
-    const displayDate = moment().format("YYYY-MM-DD") === selected ? `Today (${selected})` : selected
+    const displayDate = useMemo(
+        () => (moment().format("YYYY-MM-DD") === selected ? `Today (${selected})` : selected),
+        [selected],
+    )
 
     const [switchView, setSwitchView] = useState<"date-list" | "calendar" | "timeline">("timeline")
 
-    const onViewToggle = () => {
+    const onViewToggle = useCallback(() => {
         const views = ["date-list", "timeline"]
 
         setSwitchView((prev) => {
@@ -67,7 +62,7 @@ export default function useTimeline({ route, navigation }: TimelineScreenProps<"
 
             return views[(index + 1) % views.length] as "date-list" | "timeline"
         })
-    }
+    }, [])
 
     return {
         data,

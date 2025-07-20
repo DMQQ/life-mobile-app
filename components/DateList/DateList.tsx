@@ -1,9 +1,8 @@
 import { Padding } from "@/constants/Values"
 import { useNavigation } from "@react-navigation/native"
 import moment, { Moment } from "moment"
-import { memo, useCallback, useEffect, useRef, useState } from "react"
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { View, VirtualizedList } from "react-native"
-import Animated, { SharedValue, useAnimatedStyle } from "react-native-reanimated"
 import Date from "./Date"
 import MonthSelectList from "./MonthSelectList"
 import { createDates } from "./fns"
@@ -13,14 +12,9 @@ import Colors from "@/constants/Colors"
 interface DateListProps {
     selectedDate: string
     setSelected: React.Dispatch<React.SetStateAction<string>>
-    onMenuPress: Function
     dayEvents: {
         [key: string]: number
     }
-
-    translateY?: SharedValue<number>
-
-    showMonth?: boolean
 }
 
 const date = (today: Moment, month: string) => {
@@ -35,11 +29,16 @@ const getItemLayout = (_: any, index: number) => ({
     offset: (75 + 5 * 2) * index,
 })
 
-const DateList = memo(({ selectedDate, setSelected, dayEvents, translateY, showMonth = true }: DateListProps) => {
-    const today = moment(selectedDate)
-    const [month, setMonth] = useState(moment.months()[today.month()])
+const getItem = (arr: any, i: number) => arr[i] as any
 
-    const [dates, setDates] = useState<string[]>(createDates(moment()))
+const keyExtractor = (item: string) => item
+
+const getItemCount = (arr: any) => arr.length
+
+const DateList = memo(({ selectedDate, setSelected, dayEvents }: DateListProps) => {
+    const [month, setMonth] = useState(() => moment.months()[moment(selectedDate).month()])
+
+    const [dates, setDates] = useState<string[]>(() => createDates(moment()))
 
     const listRef = useRef<VirtualizedList<string>>(null)
 
@@ -92,40 +91,32 @@ const DateList = memo(({ selectedDate, setSelected, dayEvents, translateY, showM
         [selectedDate, dayEvents],
     )
 
-    const followWithTranslate = useAnimatedStyle(() => {
-        // if ((translateY?.value || 0) < 140) return {};
-        // return {
-        //   transform: [{ translateY: (translateY?.value ?? 0) - 140 }],
-        //   zIndex: 1000,
-        //   position: "relative",
-        // };
-        return {}
-    })
+    const initialNumToRender = useMemo(() => (moment(selectedDate).get("d") < 5 ? 5 : 31), [selectedDate])
 
     return (
         <View style={{ backgroundColor: Colors.primary }}>
             <MonthSelectList selected={month} onPress={onMonthChange} />
-            <Animated.View style={followWithTranslate}>
-                <VirtualizedList
-                    initialNumToRender={today.get("d") < 5 ? 5 : 31}
-                    snapToInterval={snapInterval}
-                    snapToAlignment="start"
-                    decelerationRate="fast"
-                    removeClippedSubviews
-                    showsHorizontalScrollIndicator={false}
-                    getItemLayout={getItemLayout}
-                    ref={listRef}
-                    horizontal
-                    getItem={(arr, i) => arr[i] as any}
-                    getItemCount={(it) => it.length}
-                    data={dates}
-                    keyExtractor={(item) => item}
-                    renderItem={renderItem}
-                    style={{ backgroundColor: Colors.primary }}
-                />
-            </Animated.View>
+            <VirtualizedList
+                initialNumToRender={initialNumToRender}
+                snapToInterval={snapInterval}
+                snapToAlignment="start"
+                decelerationRate="fast"
+                removeClippedSubviews
+                showsHorizontalScrollIndicator={false}
+                getItemLayout={getItemLayout}
+                ref={listRef}
+                horizontal
+                getItem={getItem}
+                getItemCount={getItemCount}
+                data={dates}
+                keyExtractor={keyExtractor}
+                renderItem={renderItem}
+                style={{ backgroundColor: Colors.primary }}
+            />
         </View>
     )
 })
 
-export default DateList
+export default memo(DateList, (prev, next) => {
+    return prev.selectedDate === next.selectedDate && JSON.stringify(prev.dayEvents) === JSON.stringify(next.dayEvents)
+})

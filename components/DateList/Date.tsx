@@ -88,4 +88,4 @@ const DateComponent = (props: DateProps) => {
     )
 }
 
-export default DateComponent
+export default memo(DateComponent)

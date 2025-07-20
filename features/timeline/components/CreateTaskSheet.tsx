@@ -2,12 +2,14 @@ import BottomSheet from "@/components/ui/BottomSheet/BottomSheet"
 import Button from "@/components/ui/Button/Button"
 import Input from "@/components/ui/TextInput/TextInput"
 import Colors from "@/constants/Colors"
+import useKeyboard from "@/utils/hooks/useKeyboard"
 import BottomSheetType from "@gorhom/bottom-sheet"
 import Color from "color"
 import { forwardRef, useEffect, useRef, useState } from "react"
 import { ActivityIndicator, Keyboard, StyleSheet, View } from "react-native"
 import { ScrollView } from "react-native-gesture-handler"
 import { Card, Chip, IconButton, Text, useTheme } from "react-native-paper"
+import { useSafeAreaInsets } from "react-native-safe-area-context"
 import useTodos, { Action, TodoInput as ITodoInput } from "../hooks/general/useTodos"
 
 const styles = StyleSheet.create({
@@ -24,12 +26,12 @@ const styles = StyleSheet.create({
         marginBottom: 16,
     },
     title: {
-        fontSize: 22,
+        fontSize: 20,
         fontWeight: "600",
     },
     subtitle: {
         marginTop: 2,
-        opacity: 0.8,
+        fontSize: 12,
     },
     todosList: {
         flex: 1,
@@ -37,8 +39,7 @@ const styles = StyleSheet.create({
     },
     saveButton: {
         marginTop: 8,
-        marginBottom: 16,
-        borderRadius: 20,
+        borderRadius: 100,
         flexDirection: "row-reverse",
     },
 })
@@ -56,15 +57,31 @@ export default forwardRef<
     const theme = useTheme()
     const todoCount = state.todos.filter((todo) => todo.value.trim().length > 0).length
 
-    const snapPoints = ["90%"]
+    const snapPoints = ["60%"]
+
+    const insets = useSafeAreaInsets()
+
+    const keyboard = useKeyboard()
+
+    useEffect(() => {
+        if (!keyboard) ref?.current.collapse()
+    }, [keyboard])
 
     return (
-        <BottomSheet ref={ref} snapPoints={snapPoints}>
+        <BottomSheet
+            ref={ref}
+            snapPoints={snapPoints}
+            onChange={(index) => {
+                if (index === -1) {
+                    Keyboard.dismiss()
+                }
+            }}
+        >
             <ScrollView style={styles.container} keyboardDismissMode="on-drag">
                 <View style={styles.header}>
                     <View>
-                        <Text style={[styles.title, { color: Colors.secondary }]}>Create Todos</Text>
-                        <Text variant="bodyMedium" style={[styles.subtitle, { color: Colors.text_light }]}>
+                        <Text style={[styles.title]}>Create Todos</Text>
+                        <Text variant="bodySmall" style={[styles.subtitle, { color: Colors.text_dark }]}>
                             {todoCount} todo{todoCount !== 1 ? "s" : ""} ready to save
                         </Text>
                     </View>
@@ -72,7 +89,7 @@ export default forwardRef<
                     <Chip
                         mode="outlined"
                         onPress={() => dispatch({ type: "clear", payload: undefined })}
-                        style={{ borderColor: theme.colors.error }}
+                        style={{ borderColor: theme.colors.error, backgroundColor: "transparent" }}
                         textStyle={{ color: theme.colors.error }}
                     >
                         Clear All
@@ -81,7 +98,7 @@ export default forwardRef<
 
                 <TodosList dispatch={dispatch} todos={state.todos} />
             </ScrollView>
-            <View style={{ padding: 15 }}>
+            <View style={{ paddingHorizontal: 15, marginBottom: insets.bottom, paddingTop: 15 }}>
                 <Button
                     disabled={loading || todoCount === 0}
                     onPress={onSaveTodos}
@@ -189,6 +206,7 @@ export const TodoInput = ({ onAddTodo }: { onAddTodo: (value: string) => any }) 
 
     return (
         <Input
+            useBottomSheetInput
             inputRef={ref}
             style={{
                 margin: 0,
