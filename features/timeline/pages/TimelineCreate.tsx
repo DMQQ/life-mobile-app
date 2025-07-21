@@ -222,10 +222,10 @@ const SubmitButton = (props: SubmitButtonProps) => (
                 width: 35,
                 marginRight: 15,
             }}
-            icon={<AntDesign name="calendar" color="#fff" size={20} />}
+            icon={<AntDesign name="calendar" color={Colors.foreground} size={20} />}
         />
         <Button
-            icon={props.isLoading ? <ActivityIndicator style={{ marginRight: 5 }} size={18} color={"#fff"} /> : null}
+            icon={props.isLoading ? <ActivityIndicator style={{ marginRight: 5 }} size={18} color={Colors.foreground} /> : null}
             disabled={!(props.f.isValid && !props.f.isSubmitting && props.f.dirty)}
             type="contained"
             callback={() => props.f.handleSubmit()}

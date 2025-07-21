@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import Animated, { interpolateColor, useAnimatedStyle, useDerivedValue, withSpring } from "react-native-reanimated";
+import Colors from "@/constants/Colors";
 
 interface SuccessBarProps {
   correctAnswers: number;
@@ -48,7 +49,7 @@ const styles = StyleSheet.create({
     height: "100%",
   },
   text: {
-    color: "#fff",
+    color: Colors.foreground,
     fontSize: 12,
   },
 });

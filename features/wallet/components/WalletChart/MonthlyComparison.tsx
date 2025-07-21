@@ -410,7 +410,7 @@ const styles = StyleSheet.create({
     marginRight: 15,
   },
   monthLegendText: {
-    color: "#fff",
+    color: Colors.foreground,
     fontSize: 13,
   },
   colorIndicator: {
@@ -426,7 +426,7 @@ const styles = StyleSheet.create({
     minHeight: 300,
   },
   loadingText: {
-    color: "#fff",
+    color: Colors.foreground,
     fontSize: 16,
   },
   errorContainer: {
@@ -451,7 +451,7 @@ const styles = StyleSheet.create({
     width: Layout.screen.width - 60,
   },
   noDataText: {
-    color: "#fff",
+    color: Colors.foreground,
     fontSize: 16,
   },
   chartWrapper: {
@@ -467,7 +467,7 @@ const styles = StyleSheet.create({
     paddingRight: 5,
   },
   yAxisLabel: {
-    color: "#fff",
+    color: Colors.foreground,
     fontSize: 10,
   },
   chartContent: {
@@ -498,7 +498,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   categoryLabelText: {
-    color: "#fff",
+    color: Colors.foreground,
     fontSize: 12,
     fontWeight: "bold",
     backgroundColor: Color(Colors.primary).lighten(0.3).string(),
@@ -550,17 +550,17 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   tooltipTitle: {
-    color: "#fff",
+    color: Colors.foreground,
     fontWeight: "bold",
     fontSize: 14,
   },
   tooltipValue: {
-    color: "#fff",
+    color: Colors.foreground,
     fontSize: 16,
     marginVertical: 5,
   },
   tooltipCategory: {
-    color: "#fff",
+    color: Colors.foreground,
     fontSize: 12,
     opacity: 0.8,
   },

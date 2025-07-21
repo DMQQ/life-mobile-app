@@ -58,8 +58,8 @@ export const GoalCategory = ({ name, icon, description, entries = [], onPress, .
             </View>
             <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end" }}>
                 <View>
-                    <Text style={{ color: "#fff", marginTop: 15 }}>{name}</Text>
-                    <Text style={{ color: "#fff" }}>{description}</Text>
+                    <Text style={{ color: Colors.foreground, marginTop: 15 }}>{name}</Text>
+                    <Text style={{ color: Colors.foreground }}>{description}</Text>
                 </View>
             </View>
         </Ripple>

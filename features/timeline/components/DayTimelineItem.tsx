@@ -4,6 +4,7 @@ import moment from "moment"
 import { useMemo } from "react"
 import { StyleProp, Text, View, ViewStyle } from "react-native"
 import Ripple from "react-native-material-ripple"
+import Colors from "@/constants/Colors"
 import { GetTimelineQuery } from "../hooks/query/useGetTimeLineQuery"
 import timelineStyles from "./timeline.styles"
 
@@ -64,11 +65,11 @@ export default function DayTimelineItem(
                     <View style={{ flexDirection: "row", gap: 5 }}>
                         <View>
                             {timeline.isCompleted ? (
-                                <AntDesign name="check" color={"#fff"} size={18} />
+                                <AntDesign name="check" color={Colors.foreground} size={18} />
                             ) : isExpired ? (
-                                <AntDesign name="clockcircle" size={18} color={"#fff"} />
+                                <AntDesign name="clockcircle" size={18} color={Colors.foreground} />
                             ) : (
-                                <MaterialIcons name="pending" color={"#fff"} size={18} />
+                                <MaterialIcons name="pending" color={Colors.foreground} size={18} />
                             )}
                         </View>
                         <Text
@@ -114,12 +115,12 @@ export default function DayTimelineItem(
                         </Text>
                         <View style={{ flexDirection: "row", gap: 10 }}>
                             {timeline.todos.length > 0 && (
-                                <Text style={{ color: "#fff" }}>
+                                <Text style={{ color: Colors.foreground }}>
                                     {timeline.todos.length} {timeline.todos.length > 1 ? "todos" : "todo"}
                                 </Text>
                             )}
                             {timeline.images.length > 0 && (
-                                <Text style={{ color: "#fff" }}>
+                                <Text style={{ color: Colors.foreground }}>
                                     {timeline.images.length} {timeline.images.length > 1 ? "images" : "image"}
                                 </Text>
                             )}

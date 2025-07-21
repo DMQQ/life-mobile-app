@@ -69,10 +69,10 @@ const Forms = (props: ExpenseFiltersProps) => {
         initialHeight={60}
         scrollY={scrollY}
         goBack
-        backIcon={<AntDesign name="close" size={24} color="white" />}
+        backIcon={<AntDesign name="close" size={24} color={Colors.foreground} />}
         buttons={[
           {
-            icon: <MaterialCommunityIcons size={24} name="trash-can-outline" color={"#fff"} />,
+            icon: <MaterialCommunityIcons size={24} name="trash-can-outline" color={Colors.foreground} />,
             onPress: () => {
               props.dispatch({ type: "RESET" });
               navigation.goBack();
@@ -106,7 +106,7 @@ const Forms = (props: ExpenseFiltersProps) => {
             value={props.filters.amount.min.toString()}
             placeholder="From"
             containerStyle={{ flex: 1 }}
-            right={<Text style={{ color: "#fff" }}>zł</Text>}
+            right={<Text style={{ color: Colors.foreground }}>zł</Text>}
             style={{ textAlign: "center" }}
             onChangeText={(text) =>
               props.dispatch({
@@ -127,7 +127,7 @@ const Forms = (props: ExpenseFiltersProps) => {
             to
           </Text>
           <Input
-            right={<Text style={{ color: "#fff" }}>zł</Text>}
+            right={<Text style={{ color: Colors.foreground }}>zł</Text>}
             keyboardAppearance="dark"
             keyboardType="numeric"
             name="amount.to"
@@ -206,7 +206,7 @@ const ChooseDateRange = (props: { filters: Filters; dispatch: (action: Action) =
           color="secondary"
           fontStyle={{
             fontSize: 16,
-            color: !!props.filters.date.from ? "white" : "gray",
+            color: !!props.filters.date.from ? Colors.foreground : "gray",
           }}
         >
           {props.filters.date.from || "Date start"}
@@ -227,7 +227,7 @@ const ChooseDateRange = (props: { filters: Filters; dispatch: (action: Action) =
           color="secondary"
           fontStyle={{
             fontSize: 16,
-            color: !!props.filters.date.to ? "white" : "gray",
+            color: !!props.filters.date.to ? Colors.foreground : "gray",
           }}
         >
           {props.filters.date.to || "Date end"}

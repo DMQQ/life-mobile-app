@@ -26,7 +26,7 @@ const styles = StyleSheet.create({
   },
 
   heading: {
-    color: "#fff",
+    color: Colors.foreground,
     fontSize: 18,
     fontWeight: "600",
   },
@@ -36,7 +36,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   buttonText: {
-    color: "#fff",
+    color: Colors.foreground,
     fontSize: 15,
   },
 
@@ -48,7 +48,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     padding: 10,
     fontWeight: "bold",
-    color: "#fff",
+    color: Colors.foreground,
   },
 
   actionButton: {

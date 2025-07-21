@@ -22,7 +22,7 @@ const Note = (props: { marginRight: number; text: string }) => (
     <Text
       numberOfLines={5}
       style={{
-        color: "#fff",
+        color: Colors.foreground,
         fontSize: 22,
         fontWeight: "bold",
         marginBottom: 5,

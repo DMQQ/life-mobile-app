@@ -35,7 +35,7 @@ export default function AccountActions({ navigation }: any) {
     >
       <Text
         style={{
-          color: "#fff",
+          color: Colors.foreground,
           fontSize: Sizing.heading,
           fontWeight: "bold",
           marginBottom: 10,
@@ -45,12 +45,12 @@ export default function AccountActions({ navigation }: any) {
       </Text>
 
       <Ripple style={{ padding: 2.5, paddingHorizontal: 5, marginBottom: 10 }} onPress={() => navigation.navigate("Settings")}>
-        <Text style={{ color: "#fff" }}>Settings</Text>
+        <Text style={{ color: Colors.foreground }}>Settings</Text>
       </Ripple>
 
       <Button
         onPress={handleSignout}
-        fontStyle={{ color: "#fff", fontSize: 16 }}
+        fontStyle={{ color: Colors.foreground, fontSize: 16 }}
         style={{
           borderRadius: 100,
         }}

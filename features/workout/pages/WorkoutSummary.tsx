@@ -32,7 +32,7 @@ export default function WorkoutSummary({ navigation }: WorkoutScreenProps<"Worko
     <Button
       onPress={() => handleRunSkipped()}
       fontStyle={{
-        color: "#fff",
+        color: Colors.foreground,
         fontSize: 15,
       }}
       style={{

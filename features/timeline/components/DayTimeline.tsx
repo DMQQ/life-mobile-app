@@ -70,7 +70,7 @@ const CalendarTimetable = ({
     const renderItem = useCallback((props: any) => {
         const backgroundColor = secondary_candidates[props.item.id % secondary_candidates.length]
 
-        const textColor = "#fff"
+        const textColor = Colors.foreground
 
         return (
             <View
@@ -112,7 +112,7 @@ const CalendarTimetable = ({
                 flex: 1,
             },
             time: {
-                color: "#fff",
+                color: Colors.foreground,
                 fontSize: 15,
             },
             timeContainer: {
@@ -122,7 +122,7 @@ const CalendarTimetable = ({
                 zIndex: 100,
             },
             lines: {
-                borderColor: Color("#fff").darken(0.8).string(),
+                borderColor: Color(Colors.foreground).darken(0.8).string(),
             },
 
             nowLine: {

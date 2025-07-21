@@ -33,7 +33,7 @@ export const Item = ({ label, value, icon, formatValue = true, width }: ItemProp
   >
     {icon}
     <View>
-      <Text style={{ color: "#fff", fontSize: 17, fontWeight: "bold" }}>
+      <Text style={{ color: Colors.foreground, fontSize: 17, fontWeight: "bold" }}>
         {formatValue ? (typeof value === "number" ? value.toFixed(2) + "zł" : value) : value}
       </Text>
       <Text style={{ color: "grey", fontSize: 13, marginTop: 2.5 }}>{label}</Text>
@@ -123,7 +123,7 @@ export default function StatisticsSummary() {
         <View style={{ flex: 1 }}>
           {view === "current" ? (
             <>
-              <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 18 }}>Statistics Summary</Text>
+              <Text style={{ color: Colors.foreground, fontWeight: "bold", fontSize: 18 }}>Statistics Summary</Text>
 
               <Text style={{ color: "gray", marginTop: 5 }}>
                 From {filters.date.from} to {filters.date.to}
@@ -131,7 +131,7 @@ export default function StatisticsSummary() {
             </>
           ) : (
             <>
-              <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 18 }}>Difference in spendings</Text>
+              <Text style={{ color: Colors.foreground, fontWeight: "bold", fontSize: 18 }}>Difference in spendings</Text>
               <Text style={{ color: "gray", marginTop: 5 }}>
                 Dates {oppositeRange[0]} to {oppositeRange[1]}
               </Text>
@@ -193,12 +193,12 @@ export default function StatisticsSummary() {
           <Item
             label={"Top category"}
             value={capitalize(stats.statistics.theMostCommonCategory)}
-            icon={<MaterialIcons name="category" size={24} color="white" />}
+            icon={<MaterialIcons name="category" size={24} color={Colors.foreground} />}
           />
           <Item
             label="Uncommon category"
             value={capitalize(stats.statistics.theLeastCommonCategory)}
-            icon={<MaterialIcons name="category" size={24} color="white" />}
+            icon={<MaterialIcons name="category" size={24} color={Colors.foreground} />}
           />
         </View>
       ) : (
@@ -245,12 +245,12 @@ export default function StatisticsSummary() {
                 <Item
                   label="Top category"
                   value={capitalize(lastRangeStatistics.data.statistics.theMostCommonCategory)}
-                  icon={<MaterialIcons name="category" size={24} color="white" />}
+                  icon={<MaterialIcons name="category" size={24} color={Colors.foreground} />}
                 />
                 <Item
                   label="Meh category"
                   value={capitalize(lastRangeStatistics.data.statistics.theLeastCommonCategory)}
-                  icon={<MaterialIcons name="category" size={24} color="white" />}
+                  icon={<MaterialIcons name="category" size={24} color={Colors.foreground} />}
                 />
               </>
             )}

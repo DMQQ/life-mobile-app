@@ -44,7 +44,7 @@ export default function CategorySelect<T>(props: CategorySelectProps<T>) {
           }}
         >
           <CategoryIcon type="expense" category={item.item} clear />
-          <Text style={{ color: "#fff", fontSize: 16, marginLeft: 10, fontWeight: "bold" }}>
+          <Text style={{ color: Colors.foreground, fontSize: 16, marginLeft: 10, fontWeight: "bold" }}>
             {CategoryUtils.getCategoryName(item.item)}
           </Text>
           {props.isActive(item.item) && (

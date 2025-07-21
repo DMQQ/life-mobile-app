@@ -113,11 +113,11 @@ export default function TimelineDetails({
                     <LoaderSkeleton />
                 ) : (
                     <View style={styles.container}>
-                        <Text selectable selectionColor={"#fff"} style={styles.title}>
+                        <Text selectable selectionColor={Colors.foreground} style={styles.title}>
                             {data?.title}
                         </Text>
 
-                        <Text selectionColor={"#fff"} selectable style={styles.contentText}>
+                        <Text selectionColor={Colors.foreground} selectable style={styles.contentText}>
                             {data?.description || "(no content)"}
                         </Text>
 
@@ -137,7 +137,7 @@ export default function TimelineDetails({
             </Animated.ScrollView>
 
             <AnimatedRipple style={[fabAnimatedStyle, styles.fab]} onPress={onFabPress}>
-                <AntDesign name="edit" color={"#fff"} size={25} />
+                <AntDesign name="edit" color={Colors.foreground} size={25} />
             </AnimatedRipple>
 
             <CreateTaskSheet ref={taskRef} timelineId={data?.id} />

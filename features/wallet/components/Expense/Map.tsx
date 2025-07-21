@@ -233,7 +233,7 @@ const MapPicker = (props: Pick<ExpenseType, "location"> & { id: string }) => {
   return (
     <View style={{ padding: 15, marginBottom: 40 }}>
       <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-        <Txt size={20} color={"#fff"}>
+        <Txt size={20} color={Colors.foreground}>
           {assignedMarker?.name || "Select location"}
         </Txt>
 
@@ -247,10 +247,10 @@ const MapPicker = (props: Pick<ExpenseType, "location"> & { id: string }) => {
               });
             }}
           >
-            <AntDesign name="search1" size={20} color="#fff" />
+            <AntDesign name="search1" size={20} color={Colors.foreground} />
           </Ripple>
           <Ripple onPress={() => setEditMode((p) => !p)}>
-            <Feather name="edit-2" size={20} color={editMode ? Colors.secondary : "#fff"} />
+            <Feather name="edit-2" size={20} color={editMode ? Colors.secondary : Colors.foreground} />
           </Ripple>
         </View>
       </View>
@@ -366,7 +366,7 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 15,
     marginTop: 10,
-    color: "#fff",
+    color: Colors.foreground,
     backgroundColor: Colors.secondary_dark_1,
     padding: 5,
     paddingHorizontal: 15,
@@ -384,7 +384,7 @@ const styles = StyleSheet.create({
   },
   calloutContainer: {
     width: 160,
-    backgroundColor: "white",
+    backgroundColor: Colors.foreground,
     borderRadius: 8,
     padding: 10,
     shadowColor: "#000",
@@ -414,7 +414,7 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   calloutButtonText: {
-    color: "white",
+    color: Colors.foreground,
     fontWeight: "bold",
     fontSize: 12,
   },

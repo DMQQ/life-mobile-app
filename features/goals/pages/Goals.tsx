@@ -87,7 +87,7 @@ export default function Goals({ navigation }: any) {
                 buttons={[
                     {
                         onPress: () => navigation.navigate("CreateGoal"),
-                        icon: <AntDesign name="plus" size={20} color="#fff" />,
+                        icon: <AntDesign name="plus" size={20} color={Colors.foreground} />,
                     },
                 ]}
             />

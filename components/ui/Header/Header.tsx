@@ -1,3 +1,4 @@
+import Colors from "@/constants/Colors"
 import Layout from "@/constants/Layout"
 import throttle from "@/utils/functions/throttle"
 import { AntDesign } from "@expo/vector-icons"
@@ -97,7 +98,7 @@ function Header(props: {
                         {props.goBack && (
                             <IconButton
                                 onPress={throttle(() => navigation.canGoBack() && navigation.goBack(), 250)}
-                                icon={props.backIcon || <AntDesign name="arrowleft" size={24} color="#fff" />}
+                                icon={props.backIcon || <AntDesign name="arrowleft" size={24} color={Colors.foreground} />}
                             />
                         )}
 
@@ -241,7 +242,7 @@ const styles = StyleSheet.create({
         zIndex: 250,
     },
     animatedTitle: {
-        color: "#fff",
+        color: Colors.foreground,
         fontSize: 16,
         fontWeight: "600",
         letterSpacing: 0.5,
@@ -262,7 +263,7 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 60,
         fontWeight: "bold",
-        color: "#fff",
+        color: Colors.foreground,
         letterSpacing: 1,
         width: Layout.screen.width - 30,
     },
@@ -270,7 +271,7 @@ const styles = StyleSheet.create({
         fontSize: 60,
         fontWeight: "bold",
         textAlign: "center",
-        color: "#fff",
+        color: Colors.foreground,
         letterSpacing: 1,
     },
     container: {

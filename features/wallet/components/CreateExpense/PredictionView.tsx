@@ -30,7 +30,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    color: "#fff",
+    color: Colors.foreground,
     fontSize: 15,
     marginLeft: 10,
     fontWeight: "bold",
@@ -42,7 +42,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   date: {
-    color: "#fff",
+    color: Colors.foreground,
     fontSize: 10,
     marginLeft: 10,
     lineHeight: 15,
@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   price: {
-    color: "#fff",
+    color: Colors.foreground,
     fontSize: 16,
     fontWeight: "600",
   },
@@ -100,7 +100,7 @@ const styles = StyleSheet.create({
     zIndex: 100,
   },
   aiLabelText: {
-    color: "#fff",
+    color: Colors.foreground,
     fontSize: 9,
     fontWeight: "bold",
   },

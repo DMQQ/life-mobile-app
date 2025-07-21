@@ -4,6 +4,7 @@ import Ripple, { RippleProps } from "react-native-material-ripple"
 
 import { BUTTON_BORDER_RADIUS, BUTTON_SIZE, BUTTON_TYPES, VARIANTS, styles } from "./assets"
 
+import Colors from "@/constants/Colors"
 import lowOpacity from "@/utils/functions/lowOpacity"
 import Color from "color"
 
@@ -57,7 +58,7 @@ export default function Button({
     }
 
     const textStyle = {
-        color: Color(type === "outlined" ? mainColor : "#fff")
+        color: Color(type === "outlined" ? mainColor : Colors.foreground)
             .alpha(disabled ? 0.5 : 1)
             .string(),
     }
@@ -103,7 +104,7 @@ export const ViewMoreButton = (props: { onPress: () => any; text: string; disabl
     >
         <Text
             style={{
-                color: "#fff",
+                color: Colors.foreground,
                 fontSize: 15,
             }}
         >

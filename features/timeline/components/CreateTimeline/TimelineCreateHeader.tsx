@@ -3,6 +3,7 @@ import { Platform, StyleSheet, Text, View } from "react-native";
 import Ripple from "react-native-material-ripple";
 import { NativeStackHeaderProps } from "@react-navigation/native-stack";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Colors from "@/constants/Colors";
 
 const styles = StyleSheet.create({
   header: {
@@ -13,7 +14,7 @@ const styles = StyleSheet.create({
   },
 
   eventTitle: {
-    color: "#fff",
+    color: Colors.foreground,
     fontSize: 20,
     fontWeight: "bold",
     marginRight: 2.5,
@@ -30,7 +31,7 @@ export default function TimelineCreateHeader(
   return (
     <View style={[styles.header]}>
       <Ripple style={{ padding: 10 }} onPress={props.navigation.goBack}>
-        <AntDesign name="arrowleft" color="#fff" size={23} />
+        <AntDesign name="arrowleft" color={Colors.foreground} size={23} />
       </Ripple>
 
       {props.selectedDate.split(";").length === 1 && (
@@ -39,7 +40,7 @@ export default function TimelineCreateHeader(
         </Ripple>
       )}
       <Ripple style={{ padding: 10 }} onPress={props.onToggleOptions}>
-        <Feather name="trash" color={"#fff"} size={20} />
+        <Feather name="trash" color={Colors.foreground} size={20} />
       </Ripple>
     </View>
   );

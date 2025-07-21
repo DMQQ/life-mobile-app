@@ -60,13 +60,13 @@ const styles = StyleSheet.create({
         marginTop: 10,
     },
     expenseTitle: {
-        color: "#fff",
+        color: Colors.foreground,
         fontSize: 24,
         fontWeight: "bold",
         marginBottom: 15,
     },
     totalText: {
-        color: "#fff",
+        color: Colors.foreground,
         fontSize: 22,
         fontWeight: "bold",
     },
@@ -215,13 +215,13 @@ function WalletCharts({ navigation }: any) {
         () => [
             {
                 icon: (
-                    <MaterialIcons name="bar-chart" size={25} color={chartType === "bar" ? Colors.secondary : "#fff"} />
+                    <MaterialIcons name="bar-chart" size={25} color={chartType === "bar" ? Colors.secondary : Colors.foreground} />
                 ),
                 onPress: () => setChartType("bar"),
             },
             {
                 icon: (
-                    <MaterialIcons name="pie-chart" size={20} color={chartType === "pie" ? Colors.secondary : "#fff"} />
+                    <MaterialIcons name="pie-chart" size={20} color={chartType === "pie" ? Colors.secondary : Colors.foreground} />
                 ),
                 onPress: () => setChartType("pie"),
             },
@@ -259,7 +259,7 @@ function WalletCharts({ navigation }: any) {
                 scrollY={scrollY}
                 buttons={headerButtons}
                 goBack
-                backIcon={<AntDesign name="close" size={24} color="white" />}
+                backIcon={<AntDesign name="close" size={24} color={Colors.foreground} />}
                 containerStyle={{
                     height: 60,
                     paddingTop: 15,
@@ -297,7 +297,7 @@ function WalletCharts({ navigation }: any) {
 
                         {selectedCategoryData.length > 0 && (
                             <View style={{ width: Layout.screen.width - 30, marginTop: 25 }}>
-                                <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 18 }}>
+                                <Text style={{ color: Colors.foreground, fontWeight: "bold", fontSize: 18 }}>
                                     Selected category:{" "}
                                     <Text
                                         style={{

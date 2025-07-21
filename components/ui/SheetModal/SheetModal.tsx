@@ -26,7 +26,7 @@ export default function SheetModal(props: SheetModalProps) {
         >
           <Text
             style={{
-              color: "#fff",
+              color: Colors.foreground,
               fontSize: 30,
               fontWeight: "bold",
               padding: 10,

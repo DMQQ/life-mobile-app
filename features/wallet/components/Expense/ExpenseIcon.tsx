@@ -67,7 +67,7 @@ export const Icons = {
     backgroundColor: "#33FF57",
   },
   edit: {
-    icon: <Ionicons name="create" color="#fff" size={20} />,
+    icon: <Ionicons name="create" color={Colors.foreground} size={20} />,
     backgroundColor: "gray",
   },
   income: {

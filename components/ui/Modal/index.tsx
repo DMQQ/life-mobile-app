@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import { View, Text } from "react-native";
 import RNModal, { ModalProps } from "react-native-modal";
+import Colors from "@/constants/Colors";
 import Layout from "../../../constants/Layout";
 
 interface IModalProps extends Partial<ModalProps> {
@@ -52,7 +53,7 @@ export default function Modal({
                   fontSize: 25,
                   fontWeight: "bold",
                   marginBottom: 5,
-                  color: "#fff",
+                  color: Colors.foreground,
                 }}
               >
                 {title}

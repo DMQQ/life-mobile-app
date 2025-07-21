@@ -171,7 +171,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     countText: {
-        color: "#fff",
+        color: Colors.foreground,
         fontSize: 12,
         fontWeight: "bold",
     },

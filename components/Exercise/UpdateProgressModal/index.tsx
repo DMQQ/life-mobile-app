@@ -83,7 +83,7 @@ export default function UpdateProgressModal({
       >
         <Text
           style={{
-            color: "#fff",
+            color: Colors.foreground,
             fontSize: 30,
             fontWeight: "bold",
             marginBottom: 20,

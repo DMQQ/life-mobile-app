@@ -55,7 +55,7 @@ const styles = StyleSheet.create({
         justifyContent: "center",
     },
     title: {
-        color: "#fff",
+        color: Colors.foreground,
         fontSize: 14,
         fontWeight: "bold",
         marginBottom: 2,
@@ -257,7 +257,7 @@ export function FloatingProcessingView({
     })
 
     const getStepIcon = (step: string) => {
-        const iconProps = { size: 20, color: "#fff" }
+        const iconProps = { size: 20, color: Colors.foreground }
 
         switch (step) {
             case "compress":

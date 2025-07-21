@@ -510,7 +510,7 @@ const styles = StyleSheet.create({
         justifyContent: "center",
     },
     countText: {
-        color: "#fff",
+        color: Colors.foreground,
         fontSize: 12,
         fontWeight: "bold",
     },

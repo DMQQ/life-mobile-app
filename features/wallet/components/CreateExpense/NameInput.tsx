@@ -80,7 +80,7 @@ export default function NameInput({
                                     width: 18,
                                     height: 18,
                                     textAlign: "center",
-                                    color: "#fff",
+                                    color: Colors.foreground,
                                     fontWeight: "900",
                                 }}
                             >
@@ -113,25 +113,25 @@ export default function NameInput({
                     disabled={!isValid && !prediction && !canPredict}
                 >
                     {loading ? (
-                        <ActivityIndicator size={14} color="#fff" />
+                        <ActivityIndicator size={14} color={Colors.foreground} />
                     ) : isValid ? (
                         <AntDesign
                             name="save"
                             size={20}
-                            color={isValid || canPredict ? "#fff" : lowOpacity(Colors.secondary_light_1, 0.5)}
+                            color={isValid || canPredict ? Colors.foreground : lowOpacity(Colors.secondary_light_1, 0.5)}
                         />
                     ) : (
                         <Ionicons
                             name="color-wand-sharp"
                             size={20}
-                            color={isValid || canPredict ? "#fff" : lowOpacity(Colors.secondary_light_1, 0.5)}
+                            color={isValid || canPredict ? Colors.foreground : lowOpacity(Colors.secondary_light_1, 0.5)}
                         />
                     )}
                     <Text
                         style={{
                             color:
                                 isValid || (!isValid && prediction)
-                                    ? "#fff"
+                                    ? Colors.foreground
                                     : lowOpacity(Colors.secondary_light_1, 0.5),
                             fontSize: 14,
                             fontWeight: "500",

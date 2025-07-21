@@ -104,7 +104,7 @@ export default forwardRef<
                     onPress={onSaveTodos}
                     style={styles.saveButton}
                     fontStyle={{ fontSize: 16 }}
-                    icon={loading && <ActivityIndicator style={{ marginHorizontal: 10 }} color="#fff" size="small" />}
+                    icon={loading && <ActivityIndicator style={{ marginHorizontal: 10 }} color={Colors.foreground} size="small" />}
                 >
                     Save {todoCount} todo{todoCount !== 1 ? "s" : ""}
                 </Button>

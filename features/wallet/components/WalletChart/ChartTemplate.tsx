@@ -47,7 +47,7 @@ export default function ChartTemplate({ children, title, description, types, ini
     <View style={styles.container}>
       <View style={{ marginBottom: 15 }}>
         <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 10 }}>
-          <Text style={{ color: "#fff", fontSize: 20, fontWeight: 600, marginBottom: 5 }}>{title}</Text>
+          <Text style={{ color: Colors.foreground, fontSize: 20, fontWeight: 600, marginBottom: 5 }}>{title}</Text>
 
           <MenuView
             onPressAction={(ev) => {
@@ -80,8 +80,8 @@ export default function ChartTemplate({ children, title, description, types, ini
             ]}
           >
             <Ripple style={styles.dateToggleButton}>
-              <AntDesign name="clockcircleo" size={20} color="#fff" />
-              <Text style={{ color: "#fff", fontSize: 12, textAlign: "center", fontWeight: "600" }}>
+              <AntDesign name="clockcircleo" size={20} color={Colors.foreground} />
+              <Text style={{ color: Colors.foreground, fontSize: 12, textAlign: "center", fontWeight: "600" }}>
                 {moment(dateRange[0]).format("DD.MM")} - {moment(dateRange[1]).format("DD.MM")}
               </Text>
             </Ripple>

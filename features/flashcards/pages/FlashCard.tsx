@@ -31,7 +31,7 @@ export default function FlashCardScreen({ navigation, route }: any) {
                 title="Flashcards"
                 buttons={[
                     {
-                        icon: <AntDesign name="plus" size={20} color={"#fff"} />,
+                        icon: <AntDesign name="plus" size={20} color={Colors.foreground} />,
                         onPress: () => navigation.navigate("CreateFlashCards", { groupId }),
                     },
                 ]}
@@ -66,7 +66,7 @@ export default function FlashCardScreen({ navigation, route }: any) {
                         <Text
                             style={{
                                 fontSize: 30,
-                                color: "#fff",
+                                color: Colors.foreground,
                                 fontWeight: "bold",
                                 paddingHorizontal: 20,
                                 marginTop: 30,
@@ -74,7 +74,7 @@ export default function FlashCardScreen({ navigation, route }: any) {
                         >
                             Flashcards
                         </Text>
-                        <Text style={{ color: "#fff", paddingHorizontal: 20 }}>
+                        <Text style={{ color: Colors.foreground, paddingHorizontal: 20 }}>
                             {groupStats?.totalCards} cards in total, {groupStats?.averageSuccessRate.toFixed(2)} average
                             success rate, {groupStats?.masteredCards.toFixed(2)} mastered cards total success rate
                         </Text>
@@ -90,8 +90,8 @@ export default function FlashCardScreen({ navigation, route }: any) {
                         style={{ paddingHorizontal: 15, marginBottom: 15 }}
                     >
                         <View style={{ backgroundColor: Colors.primary_lighter, borderRadius: 15, padding: 15 }}>
-                            <Text style={{ color: "#fff", fontSize: 18, fontWeight: "600" }}>{item.question}</Text>
-                            <Text style={{ color: "#fff", marginTop: 10 }}>{item.answer}</Text>
+                            <Text style={{ color: Colors.foreground, fontSize: 18, fontWeight: "600" }}>{item.question}</Text>
+                            <Text style={{ color: Colors.foreground, marginTop: 10 }}>{item.answer}</Text>
 
                             <Text style={{ color: "rgba(255,255,255,0.6)", marginTop: 10 }}>
                                 Why? {item?.explanation}

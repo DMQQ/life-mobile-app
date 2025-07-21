@@ -1,4 +1,5 @@
 import { IconButton } from "@/components"
+import Colors from "@/constants/Colors"
 import { AntDesign, Ionicons } from "@expo/vector-icons"
 import { useNavigation } from "@react-navigation/native"
 import { memo, useEffect, useState } from "react"
@@ -74,7 +75,7 @@ const AnimatedSearchInput = ({ scrollY }: AnimatedSearchInputProps) => {
                 }}
             >
                 <IconButton
-                    icon={<Ionicons name="options" size={24} color="#fff" />}
+                    icon={<Ionicons name="options" size={24} color={Colors.foreground} />}
                     onPress={() => {
                         Haptics.trigger("impactLight")
                         navigation.navigate("Filters")
@@ -83,13 +84,13 @@ const AnimatedSearchInput = ({ scrollY }: AnimatedSearchInputProps) => {
                 <TextInput
                     value={value}
                     onChangeText={setValue}
-                    style={{ fontSize: 15, flex: 1, color: "#fff", paddingHorizontal: 10 }}
+                    style={{ fontSize: 15, flex: 1, color: Colors.foreground, paddingHorizontal: 10 }}
                     onEndEditing={onSubmit}
                     onSubmitEditing={onSubmit}
                     onFocus={handleFocus}
                     onBlur={handleFocus}
                 />
-                <IconButton icon={<AntDesign name="search1" size={20} color="#fff" />} onPress={onSubmit} />
+                <IconButton icon={<AntDesign name="search1" size={20} color={Colors.foreground} />} onPress={onSubmit} />
             </View>
         </Animated.View>
     )

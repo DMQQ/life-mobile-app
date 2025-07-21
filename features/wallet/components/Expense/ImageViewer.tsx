@@ -1,6 +1,7 @@
 import { Modal, View, StyleSheet, TouchableOpacity } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Colors from "@/constants/Colors";
 import { GesturedImage } from "@/features/timeline/pages/ImagesPreview";
 
 const ImageViewerModal = ({ selectedImage, onClose }: any) => {
@@ -12,7 +13,7 @@ const ImageViewerModal = ({ selectedImage, onClose }: any) => {
     <Modal transparent visible={selectedImage != null} animationType="fade" onRequestClose={onClose}>
       <View style={styles.modalContainer}>
         <TouchableOpacity style={[styles.closeButton, { top: insets.top + 10 }]} onPress={onClose}>
-          <AntDesign name="close" size={24} color="#fff" />
+          <AntDesign name="close" size={24} color={Colors.foreground} />
         </TouchableOpacity>
 
         <GesturedImage uri={selectedImage} />

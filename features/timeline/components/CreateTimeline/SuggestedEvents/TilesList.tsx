@@ -13,7 +13,7 @@ const styles = StyleSheet.create({
   },
 
   tileTitle: {
-    color: "#fff",
+    color: Colors.foreground,
     fontSize: 22,
     fontWeight: "bold",
     letterSpacing: 0.5,

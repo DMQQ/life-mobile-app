@@ -401,7 +401,7 @@ export default function WalletLimits() {
                         padding: 15,
                     }}
                 >
-                    <Text style={{ fontSize: 22, color: "#fff", fontWeight: "bold", marginBottom: 25 }}>
+                    <Text style={{ fontSize: 22, color: Colors.foreground, fontWeight: "bold", marginBottom: 25 }}>
                         Create limit
                     </Text>
                     <Formik
@@ -500,7 +500,7 @@ const styles = StyleSheet.create({
     header: {
         fontSize: 18,
         fontWeight: "600",
-        color: "#fff",
+        color: Colors.foreground,
     },
     budgetIndicator: {
         fontSize: 12,
@@ -528,7 +528,7 @@ const styles = StyleSheet.create({
         fontWeight: "500",
     },
     activeTabText: {
-        color: "#fff",
+        color: Colors.foreground,
         fontWeight: "600",
     },
     loadingContainer: {
@@ -584,13 +584,13 @@ const styles = StyleSheet.create({
         marginBottom: 8,
     },
     categoryText: {
-        color: "#fff",
+        color: Colors.foreground,
         fontWeight: "600",
         fontSize: 15,
         flex: 1,
     },
     amountText: {
-        color: "#fff",
+        color: Colors.foreground,
         fontSize: 14,
         fontWeight: "600",
     },

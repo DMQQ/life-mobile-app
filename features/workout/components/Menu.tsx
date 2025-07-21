@@ -31,7 +31,7 @@ const styles = StyleSheet.create({
 const IconButton = (props: { color: string; onPress: Function; icon: string; delay?: number }) => (
   <Animated.View entering={SlideInRight.delay(props.delay || 0)} exiting={SlideOutRight.delay(props.delay || 0)}>
     <Ripple onPress={() => props.onPress()} style={[styles.iconButton, { backgroundColor: props.color || Colors.secondary }]}>
-      <Ionicons color={"#fff"} size={30} name={props.icon as any} />
+      <Ionicons color={Colors.foreground} size={30} name={props.icon as any} />
     </Ripple>
   </Animated.View>
 );

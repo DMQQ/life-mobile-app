@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
         backgroundColor: "rgba(0, 0, 0, 0.2)",
     },
     badgeText: {
-        color: "white",
+        color: Colors.foreground,
         fontSize: 12,
         fontWeight: "bold",
         alignItems: "center",

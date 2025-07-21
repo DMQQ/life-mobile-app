@@ -42,7 +42,7 @@ function MonthSelectList(props: MonthSelectListProps) {
                     alignItems: "center",
                 }}
             >
-                <Text style={{ color: "#fff", fontSize: 16 }}>{month}</Text>
+                <Text style={{ color: Colors.foreground, fontSize: 16 }}>{month}</Text>
             </Ripple>
         ),
         [props.selected],

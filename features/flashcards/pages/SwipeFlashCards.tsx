@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
         elevation: 5,
     },
     cardText: {
-        color: "#fff",
+        color: Colors.foreground,
         fontSize: 24,
         textAlign: "center",
         padding: 20,
@@ -207,7 +207,7 @@ const styles = StyleSheet.create({
         height: "100%",
     },
     text: {
-        color: "#fff",
+        color: Colors.foreground,
         fontSize: 12,
     },
 })
@@ -229,7 +229,7 @@ const ProggressBar: React.FC<SuccessBarProps> = ({ max, current }) => {
 
     const barStyle = useAnimatedStyle(() => ({
         width: `${percentage.value * 100}%`,
-        backgroundColor: "#fff",
+        backgroundColor: Colors.foreground,
     }))
 
     return (

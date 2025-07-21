@@ -1,6 +1,7 @@
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import ScreenContainer from "@/components/ui/ScreenContainer";
 import { InteractionManager, Text, Image, Dimensions, StyleSheet } from "react-native";
+import Colors from "@/constants/Colors";
 import Layout from "@/constants/Layout";
 import { useEffect, useLayoutEffect, useState } from "react";
 import useGetTimelineById from "../hooks/query/useGetTimelineById";
@@ -36,7 +37,7 @@ export default function ImagesPreview({ route, navigation }: TimelineScreenProps
               });
             }}
           >
-            <Text style={{ color: "#fff" }}>Next</Text>
+            <Text style={{ color: Colors.foreground }}>Next</Text>
           </Ripple>
         ) : null,
     });
@@ -57,7 +58,7 @@ export default function ImagesPreview({ route, navigation }: TimelineScreenProps
       <Ripple style={{ position: "absolute", left: 10, top: insets.top + 10, zIndex: 1000 }}>
         <IconButton
           onPress={throttle(() => navigation.canGoBack() && navigation.goBack(), 250)}
-          icon={<AntDesign name="arrowleft" size={24} color="#fff" />}
+          icon={<AntDesign name="arrowleft" size={24} color={Colors.foreground} />}
         />
       </Ripple>
       <GesturedImage uri={route.params.selectedImage} />

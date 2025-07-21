@@ -76,7 +76,7 @@ export default function SegmentedButtons(props: SegmentedButtonsProps) {
             style={[
               {
                 //  color: Colors.secondary,
-                color: "#fff",
+                color: Colors.foreground,
                 fontSize: 16,
                 letterSpacing: 0.5,
                 fontWeight: "bold",

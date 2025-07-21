@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 18,
         fontWeight: "600",
-        color: "#fff",
+        color: Colors.foreground,
         marginBottom: 5,
     },
     subtitle: {
@@ -189,7 +189,7 @@ const styles = StyleSheet.create({
         borderRadius: 20,
     },
     rateValue: {
-        color: "#fff",
+        color: Colors.foreground,
         fontWeight: "bold",
         fontSize: 14,
     },

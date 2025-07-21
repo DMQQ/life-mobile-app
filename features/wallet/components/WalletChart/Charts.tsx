@@ -17,12 +17,12 @@ export default function Charts({ data, onPress }: ChartsProps) {
       onPress={onPress}
       width={Layout.screen.width - 60}
       height={Layout.screen.height / 3.5}
-      sideColor={"#fff"}
+      sideColor={Colors.foreground}
       barWidth={35}
       noOfSections={3}
       barBorderRadius={4}
       frontColor={Colors.secondary}
-      yAxisTextStyle={{ color: "#fff" }}
+      yAxisTextStyle={{ color: Colors.foreground }}
       rulesColor={Color(Colors.primary).lighten(1.5).string()}
       data={
         data.map((item) => ({

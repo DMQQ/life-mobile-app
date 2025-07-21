@@ -25,7 +25,7 @@ const styles = StyleSheet.create({
         fontSize: 60,
         fontWeight: "bold",
         textAlign: "center",
-        color: "#fff",
+        color: Colors.foreground,
         letterSpacing: 1,
     },
     expense_item: {
@@ -87,16 +87,16 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
                         return newValue
                     })
                 },
-                icon: <Feather name="repeat" size={20} color="#fff" />,
+                icon: <Feather name="repeat" size={20} color={Colors.foreground} />,
             },
 
             {
                 onPress: () => navigation.navigate("Charts"),
-                icon: <Ionicons name="stats-chart" size={20} color="#fff" />,
+                icon: <Ionicons name="stats-chart" size={20} color={Colors.foreground} />,
             },
             {
                 onPress: () => navigation.navigate("CreateExpense"),
-                icon: <AntDesign name="plus" size={20} color="#fff" />,
+                icon: <AntDesign name="plus" size={20} color={Colors.foreground} />,
             },
         ],
         [],

@@ -140,7 +140,7 @@ export default function Select({
         >
           <Text
             style={{
-              color: isSelected ? "#fff" : Colors.secondary,
+              color: isSelected ? Colors.foreground : Colors.secondary,
               fontSize: 18,
             }}
           >
@@ -224,7 +224,7 @@ export default function Select({
             <View>
               <Entypo
                 name="chevron-down"
-                color={isFocused ? Colors.secondary : "#fff"}
+                color={isFocused ? Colors.secondary : Colors.foreground}
                 size={25}
                 style={{
                   transform: [{ rotate: isFocused ? "180deg" : "0deg" }],
@@ -238,7 +238,7 @@ export default function Select({
                 numberOfLines={1}
                 style={{
                   fontSize: 18,
-                  color: isFocused ? Colors.secondary : selected.some((v) => v.trim().length > 0) ? "#fff" : "gray",
+                  color: isFocused ? Colors.secondary : selected.some((v) => v.trim().length > 0) ? Colors.foreground : "gray",
                   flex: 1,
                   paddingHorizontal: 20,
                 }}

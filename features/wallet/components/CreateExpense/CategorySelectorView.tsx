@@ -74,7 +74,7 @@ const CategorySelector = (props: { current: string; onPress: (item: string) => v
 
               {item[0]?.includes(":") ? (
                 <View style={{ flex: 1, justifyContent: "center", gap: 5 }}>
-                  <Text style={{ color: lowOpacity("#fff", 0.75), textTransform: "capitalize", fontSize: 10 }}>
+                  <Text style={{ color: lowOpacity(Colors.foreground, 0.75), textTransform: "capitalize", fontSize: 10 }}>
                     {CategoryUtils.getCategoryParent(item[0])}
                   </Text>
                   <Text
@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#fff",
+    color: Colors.foreground,
     marginBottom: 5,
   },
   subtitle: {
@@ -180,7 +180,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   indicatorText: {
-    color: "#fff",
+    color: Colors.foreground,
     fontSize: 16,
     fontWeight: "bold",
   },

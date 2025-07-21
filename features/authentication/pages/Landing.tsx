@@ -11,7 +11,7 @@ export default function Landing({ navigation }: any) {
     <ScreenContainer>
       <Text
         style={{
-          color: "#fff",
+          color: Colors.foreground,
           fontSize: 24,
           fontWeight: "bold",
         }}

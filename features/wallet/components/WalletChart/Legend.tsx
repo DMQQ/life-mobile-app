@@ -83,7 +83,7 @@ const Legend = (props: LegendProps) => {
               style={[
                 styles.totalText,
                 {
-                  color: isExcluded ? "rgba(255,255,255,0.5)" : "#fff",
+                  color: isExcluded ? "rgba(255,255,255,0.5)" : Colors.foreground,
                 },
               ]}
             >
@@ -149,7 +149,7 @@ const Legend = (props: LegendProps) => {
     <View style={styles.tilesContainer}>
       <View style={{ width: "100%", marginBottom: 10, flexDirection: "row", justifyContent: "space-between" }}>
         <View>
-          <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 18 }}>Chart legend</Text>
+          <Text style={{ color: Colors.foreground, fontWeight: "bold", fontSize: 18 }}>Chart legend</Text>
           <Text style={{ color: "gray", marginTop: 5 }}>Detailed percentage of your expenses</Text>
         </View>
 
@@ -174,7 +174,7 @@ const Legend = (props: LegendProps) => {
   );
 };
 
-const blueText = "#fff";
+const blueText = Colors.foreground;
 
 const styles = StyleSheet.create({
   tilesContainer: {
@@ -207,13 +207,13 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   expenseTitle: {
-    color: "#fff",
+    color: Colors.foreground,
     fontSize: 24,
     fontWeight: "bold",
     marginBottom: 15,
   },
   totalText: {
-    color: "#fff",
+    color: Colors.foreground,
     fontSize: 22,
     fontWeight: "bold",
   },

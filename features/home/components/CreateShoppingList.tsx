@@ -19,7 +19,7 @@ export default function CreateShoppingList() {
         alignItems: "center",
       }}
     >
-      <Text style={{ color: "#fff", fontSize: 18, fontWeight: "bold" }}>
+      <Text style={{ color: Colors.foreground, fontSize: 18, fontWeight: "bold" }}>
         Shopping list
       </Text>
 

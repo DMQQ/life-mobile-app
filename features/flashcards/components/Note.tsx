@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
   },
   tag: {
     backgroundColor: Colors.secondary,
-    color: "#fff",
+    color: Colors.foreground,
     paddingHorizontal: 15,
     padding: 5,
     borderRadius: 100,
@@ -145,9 +145,9 @@ export default function Note(props: NoteProps) {
         <View style={{ flexDirection: "row" }}>
           <Text style={styles.tag}>{props.createdAt!}</Text>
 
-          {props.pinned && <AntDesign name="pushpin" color={"#fff"} size={20} style={styles.tag} />}
+          {props.pinned && <AntDesign name="pushpin" color={Colors.foreground} size={20} style={styles.tag} />}
 
-          {props.secure && <AntDesign name="lock1" color={"#fff"} size={20} style={[styles.tag, { marginLeft: 5 }]} />}
+          {props.secure && <AntDesign name="lock1" color={Colors.foreground} size={20} style={[styles.tag, { marginLeft: 5 }]} />}
         </View>
       </View>
 

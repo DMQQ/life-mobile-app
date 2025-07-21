@@ -6,7 +6,7 @@ const iconColor = Color(Colors.primary).lighten(4.5).hex();
 
 export default StyleSheet.create({
   dayHeader: {
-    color: "#ffffffda",
+    color: Colors.foreground + "da",
     fontSize: 17,
     fontWeight: "bold",
     marginLeft: 15,
@@ -34,7 +34,7 @@ export default StyleSheet.create({
     fontSize: 22,
   },
   itemDescription: {
-    color: "rgba(255,255,255,0.7)",
+    color: Colors.foreground_secondary,
     fontSize: 17,
     marginTop: 5,
   },
@@ -44,7 +44,7 @@ export default StyleSheet.create({
   },
 
   eventTitle: {
-    color: "#fff",
+    color: Colors.foreground,
     fontSize: 20,
     fontWeight: "bold",
     marginRight: 2.5,
@@ -85,7 +85,7 @@ export default StyleSheet.create({
   listHeadingText: {
     fontWeight: "bold",
     paddingHorizontal: 5,
-    color: "#ffffffda",
+    color: Colors.foreground + "da",
     fontSize: 22,
     marginLeft: 5,
   },

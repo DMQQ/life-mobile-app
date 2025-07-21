@@ -197,7 +197,7 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                 scrollY={scrollY}
                 title="Subscription Details"
                 goBack
-                backIcon={<AntDesign name="close" size={24} color="white" />}
+                backIcon={<AntDesign name="close" size={24} color={Colors.foreground} />}
                 initialHeight={1}
             />
 
@@ -215,12 +215,12 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                             },
                         ]}
                     >
-                        <Txt size={35} color="#fff">
+                        <Txt size={35} color={Colors.foreground}>
                             {subscription.description}
                         </Txt>
 
                         <View style={{ marginTop: 2.5 }}>
-                            <Txt size={20} color={"#fff"}>
+                            <Txt size={20} color={Colors.foreground}>
                                 {subscription.amount.toFixed(2)}
                                 <Text style={{ fontSize: 16 }}>zł</Text>
                             </Txt>
@@ -253,7 +253,7 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                                     alignItems: "center",
                                 }}
                             >
-                                <Text style={{ color: "#fff", textTransform: "uppercase" }}>
+                                <Text style={{ color: Colors.foreground, textTransform: "uppercase" }}>
                                     {subscription.isActive ? " Active" : " Inactive"}
                                 </Text>
                             </View>
@@ -316,7 +316,7 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                         ]}
                     >
                         {isSubscriptionLoading ? (
-                            <ActivityIndicator size="small" color="#fff" />
+                            <ActivityIndicator size="small" color={Colors.foreground} />
                         ) : (
                             <Text
                                 style={{
@@ -334,7 +334,7 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                 {subscription.expenses.length > 0 && (
                     <>
                         <View style={{ paddingHorizontal: 15, marginBottom: 25 }}>
-                            <Txt size={20} color="#fff">
+                            <Txt size={20} color={Colors.foreground}>
                                 Statistics
                             </Txt>
 
@@ -357,7 +357,7 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                         </View>
 
                         <View style={{ paddingHorizontal: 15, marginBottom: 25 }}>
-                            <Txt size={20} color="#fff">
+                            <Txt size={20} color={Colors.foreground}>
                                 Payment History
                             </Txt>
 
@@ -430,7 +430,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     statValue: {
-        color: "#fff",
+        color: Colors.foreground,
         fontSize: 18,
         fontWeight: "bold",
         marginBottom: 5,
@@ -445,7 +445,7 @@ const styles = StyleSheet.create({
         padding: 40,
     },
     emptyText: {
-        color: "#fff",
+        color: Colors.foreground,
         fontSize: 18,
         fontWeight: "600",
         marginBottom: 8,

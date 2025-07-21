@@ -81,14 +81,14 @@ export default function Workouts({ navigation }: WorkoutScreenProps<"Workouts">)
 
       <ScrollView horizontal pagingEnabled scrollEnabled={false}>
         <WorkoutsList navigation={navigation} workouts={query.data?.workouts || []} />
-        <View style={{ width: L.screen.width, backgroundColor: "#fff" }}></View>
+        <View style={{ width: L.screen.width, backgroundColor: Colors.foreground }}></View>
       </ScrollView>
 
       <Menu isVisible={isVisible} navigation={navigation} setIsVisible={setIsVisible} />
 
       {!isVisible && (
         <Ripple onPress={() => setIsVisible((p) => !p)} style={styles.menuButton}>
-          <Ionicons color={"#fff"} size={30} name={"menu"} />
+          <Ionicons color={Colors.foreground} size={30} name={"menu"} />
         </Ripple>
       )}
     </ScreenContainer>

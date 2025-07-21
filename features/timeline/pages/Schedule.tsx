@@ -42,7 +42,7 @@ export default function ScheduleScreen({ navigation, route }: TimelineScreenProp
               flex: 1,
             },
             time: {
-              color: "#fff",
+              color: Colors.foreground,
               fontSize: 15,
             },
             timeContainer: {
@@ -52,7 +52,7 @@ export default function ScheduleScreen({ navigation, route }: TimelineScreenProp
               zIndex: 100,
             },
             lines: {
-              borderColor: Color("#fff").darken(0.8).string(),
+              borderColor: Color(Colors.foreground).darken(0.8).string(),
             },
 
             nowLine: {
@@ -97,7 +97,7 @@ export default function ScheduleScreen({ navigation, route }: TimelineScreenProp
               >
                 <Text
                   style={{
-                    color: "#fff",
+                    color: Colors.foreground,
                     fontSize: 15,
                     fontWeight: "bold",
                     letterSpacing: 0.5,
@@ -108,7 +108,7 @@ export default function ScheduleScreen({ navigation, route }: TimelineScreenProp
 
                 <Text
                   style={{
-                    color: "#fff",
+                    color: Colors.foreground,
                     fontSize: 10,
                   }}
                 >

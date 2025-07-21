@@ -53,7 +53,7 @@ export default function SuggestedEvents(props: SuggestedEventsProps) {
 
   return (
     <View style={styles.container}>
-      <Text style={{ color: "#fff", fontSize: 24, fontWeight: "bold" }}>
+      <Text style={{ color: Colors.foreground, fontSize: 24, fontWeight: "bold" }}>
         Commonly used events
       </Text>
       <Text style={{ color: "rgba(255,255,255,0.6)", fontSize: 13 }}>
@@ -85,8 +85,8 @@ export default function SuggestedEvents(props: SuggestedEventsProps) {
             onPress={() => setIsVisible(true)}
             onLayout={() => setIsVisible(true)}
           >
-            <Text style={{ color: "#fff", fontSize: 17 }}>Set time</Text>
-            <Text style={{ color: "#fff", fontSize: 17 }}>
+            <Text style={{ color: Colors.foreground, fontSize: 17 }}>Set time</Text>
+            <Text style={{ color: Colors.foreground, fontSize: 17 }}>
               {time?.toLocaleTimeString("pl-PL", {
                 hour: "2-digit",
                 minute: "2-digit",
@@ -123,7 +123,7 @@ export default function SuggestedEvents(props: SuggestedEventsProps) {
               <ActivityIndicator
                 style={{ marginHorizontal: 10 }}
                 size="small"
-                color="#fff"
+                color={Colors.foreground}
               />
             )
           }

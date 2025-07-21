@@ -50,7 +50,7 @@ const styles = StyleSheet.create({
     lineHeight: 110,
     textAlign: "center",
   },
-  text: { color: "#fff", fontSize: 18, fontWeight: "bold" },
+  text: { color: Colors.foreground, fontSize: 18, fontWeight: "bold" },
   stop: {
     borderRadius: 5,
     padding: 10,

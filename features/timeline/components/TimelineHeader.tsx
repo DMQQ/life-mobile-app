@@ -21,7 +21,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 10,
   },
-  title: { color: "#fff", fontSize: 20, fontWeight: "bold" },
+  title: { color: Colors.foreground, fontSize: 20, fontWeight: "bold" },
   button: {
     flexDirection: "row",
     alignItems: "center",
@@ -30,7 +30,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: 100,
   },
-  buttonText: { fontSize: 16, fontWeight: "600", color: "#fff", marginLeft: 5 },
+  buttonText: { fontSize: 16, fontWeight: "600", color: Colors.foreground, marginLeft: 5 },
 });
 
 const AnimatedRipple = Animated.createAnimatedComponent(Ripple);
@@ -65,7 +65,7 @@ const Header = (props: {
   return (
     <View style={styles.container}>
       <Ripple onPress={handleBack} style={{ padding: 10 }}>
-        <AntDesign name="arrowleft" size={20} color={"#fff"} />
+        <AntDesign name="arrowleft" size={20} color={Colors.foreground} />
       </Ripple>
 
       <Animated.Text style={[styles.title, titleAnimatedStyle]}>
@@ -78,7 +78,7 @@ const Header = (props: {
         style={styles.button}
       >
         {props.isCompleted && (
-          <AntDesign name="checkcircle" size={18} color={"#fff"} />
+          <AntDesign name="checkcircle" size={18} color={Colors.foreground} />
         )}
         <Animated.Text
           entering={FadeIn.delay(100)}

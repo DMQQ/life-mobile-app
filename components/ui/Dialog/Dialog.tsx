@@ -235,12 +235,12 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     title: {
-        color: "#fff",
+        color: Colors.foreground,
         fontSize: 25,
         fontWeight: "bold",
     },
     description: {
-        color: "#fff",
+        color: Colors.foreground,
         fontSize: 16,
     },
     buttonsContainer: {

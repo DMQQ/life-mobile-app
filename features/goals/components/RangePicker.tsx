@@ -181,12 +181,12 @@ const styles = StyleSheet.create({
     minWidth: 60,
   },
   valueText: {
-    color: "#FFFFFF",
+    color: Colors.foreground,
     fontWeight: "bold",
     fontSize: 18,
   },
   valueInput: {
-    color: "#FFFFFF",
+    color: Colors.foreground,
     fontWeight: "bold",
     fontSize: 18,
     textAlign: "center",

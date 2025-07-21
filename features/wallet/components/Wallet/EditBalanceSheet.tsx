@@ -62,7 +62,7 @@ export default function EditBalanceSheet() {
                 <Text style={{ color: Colors.error, marginTop: 10 }}>This action cannot be undone.</Text>
 
                 <Button
-                    icon={loading && <ActivityIndicator style={{ marginHorizontal: 10 }} size="small" color="white" />}
+                    icon={loading && <ActivityIndicator style={{ marginHorizontal: 10 }} size="small" color={Colors.foreground} />}
                     fontStyle={{ fontSize: 16 }}
                     style={{ flexDirection: "row-reverse", marginTop: 15 }}
                     onPress={onPress}

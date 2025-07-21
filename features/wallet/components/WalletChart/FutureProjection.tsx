@@ -71,7 +71,7 @@ export default function FutureProjection({ data, income, currentBalance: current
         value: Math.round(runningBalance),
         label: moment().add(i, "months").format("MMM"),
         expenses: Math.round(averageMonthlyExpense),
-        labelTextStyle: { color: "#fff" },
+        labelTextStyle: { color: Colors.foreground },
       };
     }) as barDataItem[];
   }, [data, income, currentBalanceProps]);
@@ -79,7 +79,7 @@ export default function FutureProjection({ data, income, currentBalance: current
   return (
     <View style={{ overflow: "hidden", marginVertical: 20 }}>
       <View style={{ width: "100%", marginBottom: 10 }}>
-        <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 18 }}>Balance projection</Text>
+        <Text style={{ color: Colors.foreground, fontWeight: "bold", fontSize: 18 }}>Balance projection</Text>
         <Text style={{ color: "gray", marginTop: 5 }}>Takes current spending average and calculates the balance</Text>
       </View>
 
@@ -108,8 +108,8 @@ export default function FutureProjection({ data, income, currentBalance: current
           dataPointsRadius={4}
           dataPointsShape="circle"
           // Text styles
-          yAxisTextStyle={{ color: "#fff" }}
-          xAxisLabelTextStyle={{ color: "#fff" }}
+          yAxisTextStyle={{ color: Colors.foreground }}
+          xAxisLabelTextStyle={{ color: Colors.foreground }}
           hideRules
           yAxisTextNumberOfLines={1}
           yAxisLabelWidth={60}
@@ -127,7 +127,7 @@ export default function FutureProjection({ data, income, currentBalance: current
             gap: 8,
           }}
         >
-          <Text style={{ fontSize: 14, color: "#fff" }}>Average Expenses</Text>
+          <Text style={{ fontSize: 14, color: Colors.foreground }}>Average Expenses</Text>
           <Text style={{ fontSize: 25, fontWeight: "600", color: Colors.secondary }}>{projectionData[0]?.expenses.toLocaleString()}zł</Text>
         </View>
 
@@ -140,7 +140,7 @@ export default function FutureProjection({ data, income, currentBalance: current
             gap: 8,
           }}
         >
-          <Text style={{ fontSize: 14, color: "#fff" }}>Projection for (9mo)</Text>
+          <Text style={{ fontSize: 14, color: Colors.foreground }}>Projection for (9mo)</Text>
           <Text style={{ fontSize: 25, fontWeight: "600", color: Colors.secondary }}>
             {projectionData[projectionData.length - 1]?.value.toLocaleString()}zł
           </Text>

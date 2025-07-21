@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   title: {
-    color: "#fff",
+    color: Colors.foreground,
     fontSize: 17,
     fontWeight: "bold",
     flex: 1,
@@ -308,7 +308,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   expenseDescription: {
-    color: "#fff",
+    color: Colors.foreground,
     fontSize: 15,
     fontWeight: "500",
     marginBottom: 4,

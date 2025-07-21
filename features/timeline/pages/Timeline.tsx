@@ -101,10 +101,10 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
                             timeline.onViewToggle()
                             scrollY.value = 0
                         },
-                        icon: <Feather name="repeat" size={20} color="#fff" />,
+                        icon: <Feather name="repeat" size={20} color={Colors.foreground} />,
                     },
                     {
-                        icon: <AntDesign name="plus" size={20} color="#fff" />,
+                        icon: <AntDesign name="plus" size={20} color={Colors.foreground} />,
                         onPress: () => timeline.createTimeline(),
                     },
                 ]}

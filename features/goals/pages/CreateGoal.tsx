@@ -502,7 +502,7 @@ export default function CreateGoal({ navigation }: CreateGoalProps): JSX.Element
                       <MaterialCommunityIcons
                         name={category.icon}
                         size={20}
-                        color={unitCategory === category.value ? "#FFFFFF" : "rgba(255,255,255,0.8)"}
+                        color={unitCategory === category.value ? Colors.foreground : Colors.foreground_secondary}
                         style={styles.categoryIcon}
                       />
                       <Text style={[styles.categoryText, unitCategory === category.value && styles.categoryTextActive]}>
@@ -650,13 +650,13 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255,255,255,0.1)",
   },
   sectionTitle: {
-    color: "#FFFFFF",
+    color: Colors.foreground,
     fontWeight: "600",
     fontSize: 18,
     marginBottom: 15,
   },
   categorySectionTitle: {
-    color: "#FFFFFF",
+    color: Colors.foreground,
     fontWeight: "600",
     fontSize: 16,
     marginBottom: 10,
@@ -673,7 +673,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   rangeValueText: {
-    color: "#FFFFFF",
+    color: Colors.foreground,
     fontSize: 20,
     fontWeight: "600",
   },
@@ -699,7 +699,7 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   multiplierTextActive: {
-    color: "#FFFFFF",
+    color: Colors.foreground,
   },
   sliderContainer: {
     marginTop: 10,
@@ -712,7 +712,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.secondary,
   },
   sliderHandle: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: Colors.foreground,
     borderWidth: 2,
     borderColor: Colors.secondary,
   },
@@ -743,7 +743,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   searchInput: {
-    color: "#FFFFFF",
+    color: Colors.foreground,
     flex: 1,
     height: 50,
     fontSize: 16,
@@ -773,7 +773,7 @@ const styles = StyleSheet.create({
     color: "rgba(255,255,255,0.8)",
   },
   categoryTextActive: {
-    color: "#FFFFFF",
+    color: Colors.foreground,
     fontWeight: "500",
   },
   subcategoryScrollView: {
@@ -797,7 +797,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   subcategoryTextActive: {
-    color: "#FFFFFF",
+    color: Colors.foreground,
     fontWeight: "500",
   },
   unitsFlatList: {
@@ -825,7 +825,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   unitTextActive: {
-    color: "#FFFFFF",
+    color: Colors.foreground,
     fontWeight: "500",
   },
   noResultsContainer: {
@@ -834,7 +834,7 @@ const styles = StyleSheet.create({
     padding: 30,
   },
   noResultsText: {
-    color: "#FFFFFF",
+    color: Colors.foreground,
     fontSize: 18,
     marginTop: 10,
   },
@@ -850,7 +850,7 @@ const styles = StyleSheet.create({
     borderTopColor: "rgba(255,255,255,0.1)",
   },
   customUnitLabel: {
-    color: "#FFFFFF",
+    color: Colors.foreground,
     fontSize: 16,
     marginBottom: 10,
   },
@@ -859,7 +859,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.08)",
     borderRadius: 10,
     padding: 12,
-    color: "#FFFFFF",
+    color: Colors.foreground,
     fontSize: 16,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.15)",

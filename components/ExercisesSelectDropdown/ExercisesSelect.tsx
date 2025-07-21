@@ -68,7 +68,7 @@ export default function ExercisesSelect({
           }}
         >
           <View>
-            <Text style={{ color: "#fff", fontSize: 20 }}>{item.title}</Text>
+            <Text style={{ color: Colors.foreground, fontSize: 20 }}>{item.title}</Text>
             <Text
               style={{ color: "#ffffff84", fontSize: 15 }}
               numberOfLines={2}

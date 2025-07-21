@@ -79,7 +79,7 @@ const DateComponent = (props: DateProps) => {
             style={[styles.container, { backgroundColor: dateItemBg }]}
         >
             <Dots tasks={tasks} />
-            <Text style={{ color: "#fff", fontSize: 32, fontWeight: "bold" }}>{date.getDate()}</Text>
+            <Text style={{ color: Colors.foreground, fontSize: 32, fontWeight: "bold" }}>{date.getDate()}</Text>
             <Text style={{ color: "#ffffffcb", fontSize: 17 }}>
                 {date.getDay() === 0 ? "Sun" : moment.weekdays()[date.getDay()].slice(0, 3)}
             </Text>

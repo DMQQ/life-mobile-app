@@ -149,7 +149,7 @@ const StreakTile = ({
           </View>
         )}
         <View style={styles.streakMainContent}>
-          <Text style={[styles.streakLengthHorizontal, { color: isLongest ? "#000" : "#fff" }]}>{actualLength} days</Text>
+          <Text style={[styles.streakLengthHorizontal, { color: isLongest ? "#000" : Colors.foreground }]}>{actualLength} days</Text>
           <Text style={[styles.streakDateHorizontal, { color: isLongest ? "#555" : "rgba(255,255,255,0.9)" }]}>
             {moment(streak.start).format("MMM D")} - {moment(streak.end).format("MMM D")}
           </Text>
@@ -276,7 +276,7 @@ export default function ZeroExpenseStats() {
             ]}
           >
             <Ripple style={styles.dateToggleButton}>
-              <AntDesign name="clockcircleo" size={16} color="#fff" />
+              <AntDesign name="clockcircleo" size={16} color={Colors.foreground} />
               <Text style={styles.dateToggleText}>
                 {moment(dateRange[0]).format("DD.MM")} - {moment(dateRange[1]).format("DD.MM")}
               </Text>
@@ -416,7 +416,7 @@ const styles = StyleSheet.create({
     marginBottom: 25,
   },
   headerTitle: {
-    color: "#fff",
+    color: Colors.foreground,
     fontWeight: "bold",
     fontSize: 18,
   },
@@ -435,7 +435,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   dateToggleText: {
-    color: "#fff",
+    color: Colors.foreground,
     fontSize: 11,
     textAlign: "center",
     fontWeight: "600",
@@ -448,12 +448,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   currentStreakText: {
-    color: "#fff",
+    color: Colors.foreground,
     fontSize: 16,
     fontWeight: "bold",
   },
   currentStreakSubtext: {
-    color: "#fff",
+    color: Colors.foreground,
     fontSize: 12,
     opacity: 0.8,
     marginTop: 4,
@@ -477,7 +477,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   itemValue: {
-    color: "#fff",
+    color: Colors.foreground,
     fontSize: 16,
     fontWeight: "bold",
   },
@@ -492,7 +492,7 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   sectionTitle: {
-    color: "#fff",
+    color: Colors.foreground,
     fontWeight: "bold",
     fontSize: 18,
     marginBottom: 15,

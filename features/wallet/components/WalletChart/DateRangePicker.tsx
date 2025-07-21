@@ -160,7 +160,7 @@ const CustomDatePicker = (props: { filters: Filters; dispatch: React.Dispatch<Ac
           <>
             <Text
               style={{
-                color: lastPressed === "start" && showDatePicker ? "#fff" : Colors.secondary,
+                color: lastPressed === "start" && showDatePicker ? Colors.foreground : Colors.secondary,
               }}
             >
               {startDate && startDate.format("DD/MM/YYYY")}
@@ -168,7 +168,7 @@ const CustomDatePicker = (props: { filters: Filters; dispatch: React.Dispatch<Ac
             <Text>{" - "}</Text>
             <Text
               style={{
-                color: lastPressed === "end" && showDatePicker ? "#fff" : Colors.secondary,
+                color: lastPressed === "end" && showDatePicker ? Colors.foreground : Colors.secondary,
               }}
             >
               {endDate && endDate.format("DD/MM/YYYY")}

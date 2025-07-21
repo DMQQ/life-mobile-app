@@ -80,7 +80,7 @@ export default function Goal({ route, navigation }: any) {
                                 style={{ flexDirection: "row", justifyContent: "space-between", paddingVertical: 30 }}
                             >
                                 <View>
-                                    <Text style={{ fontSize: 24, fontWeight: "600", color: "#fff" }}>{goal?.name}</Text>
+                                    <Text style={{ fontSize: 24, fontWeight: "600", color: Colors.foreground }}>{goal?.name}</Text>
                                     <Text style={{ fontSize: 16, color: "rgba(255,255,255,0.9)", marginTop: 5 }}>
                                         {goal?.description}
                                     </Text>
@@ -90,7 +90,7 @@ export default function Goal({ route, navigation }: any) {
                                     <MaterialCommunityIcons
                                         name={goal?.icon}
                                         size={30}
-                                        color="#fff"
+                                        color={Colors.foreground}
                                         style={{ marginLeft: "auto" }}
                                     />
                                 </View>
@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
     day: {
         fontSize: 20,
         fontWeight: "600",
-        color: "#fff",
+        color: Colors.foreground,
     },
     currentDay: {
         color: "#2196F3",
@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
     value: {
         fontSize: 18,
         fontWeight: "500",
-        color: "#fff",
+        color: Colors.foreground,
     },
     emptyText: {
         color: "#666",

@@ -1,6 +1,7 @@
 import moment from "moment"
 import { StyleSheet, Text, View } from "react-native"
 import Animated, { interpolate, SharedValue, useAnimatedStyle } from "react-native-reanimated"
+import Colors from "@/constants/Colors"
 
 interface AmountDisplayProps {
     amount: string
@@ -35,7 +36,7 @@ export default function AmountDisplay({
     return (
         <View style={styles.container}>
             <View>
-                <Animated.Text style={[{ color: "#fff", fontWeight: "bold", textAlign: "center" }, animatedAmount]}>
+                <Animated.Text style={[{ color: Colors.foreground, fontWeight: "bold", textAlign: "center" }, animatedAmount]}>
                     {amount}
                     <Text style={{ fontSize: 20 }}>zł</Text>
                 </Animated.Text>

@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
     zIndex: 2,
   },
   title: {
-    color: "#fff",
+    color: Colors.foreground,
     fontSize: 20,
     fontWeight: "bold",
     lineHeight: 27.5,
@@ -204,7 +204,7 @@ const styles = StyleSheet.create({
     zIndex: 100,
   },
   countBadgeText: {
-    color: "#fff",
+    color: Colors.foreground,
     fontSize: 12,
     fontWeight: "bold",
   },

@@ -37,7 +37,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary_lighter,
   },
   title: {
-    color: "#fff",
+    color: Colors.foreground,
     fontSize: 14,
     marginLeft: 10,
     fontWeight: "bold",
@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   price: {
-    color: "#fff",
+    color: Colors.foreground,
     fontSize: 16,
     fontWeight: "600",
   },

@@ -32,7 +32,7 @@ export default function SubcategoryList(props: {
             },
           ]}
         >
-          <Text style={{ color: "#fff" }}>{item}</Text>
+          <Text style={{ color: Colors.foreground }}>{item}</Text>
         </Pressable>
       )}
     />

@@ -52,7 +52,7 @@ export default function ErrorMessageModal(props: {
 
           <Text
             style={{
-              color: "#fff",
+              color: Colors.foreground,
               fontSize: 19,
               paddingVertical: 15,
             }}

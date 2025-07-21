@@ -350,17 +350,17 @@ export default function Expense({ route: { params }, navigation }: any) {
                 scrollY={scrollY}
                 buttons={[
                     {
-                        icon: <Feather name="trash" size={20} color="white" />,
+                        icon: <Feather name="trash" size={20} color={Colors.foreground} />,
                         onPress: handleDelete,
                     },
                     {
-                        icon: <Feather name="edit-2" size={20} color="white" />,
+                        icon: <Feather name="edit-2" size={20} color={Colors.foreground} />,
                         onPress: handleEdit,
                         style: { marginLeft: 5 },
                     },
                 ]}
                 goBack
-                backIcon={<AntDesign name="close" size={24} color="white" />}
+                backIcon={<AntDesign name="close" size={24} color={Colors.foreground} />}
             />
             <Animated.ScrollView
                 onScroll={onScroll}
@@ -381,7 +381,7 @@ export default function Expense({ route: { params }, navigation }: any) {
                             },
                         ]}
                     >
-                        <Txt size={35} color={"#fff"}>
+                        <Txt size={35} color={Colors.foreground}>
                             {capitalize(selected?.description)}
                         </Txt>
 
@@ -407,7 +407,7 @@ export default function Expense({ route: { params }, navigation }: any) {
                             <SubexpenseStack selected={selected} handleDeleteSubExpense={handleDeleteSubExpense} />
 
                             <View style={{ marginBottom: 15, marginTop: 10 }}>
-                                <Txt size={20} color={"#fff"}>
+                                <Txt size={20} color={Colors.foreground}>
                                     Expense details
                                 </Txt>
                             </View>
@@ -577,7 +577,7 @@ export default function Expense({ route: { params }, navigation }: any) {
 
                 {similar?.wallet?.expenses?.length > 1 && (
                     <View style={{ paddingHorizontal: 15, marginBottom: 25 }}>
-                        <Txt size={20} color={"#fff"}>
+                        <Txt size={20} color={Colors.foreground}>
                             Recent similar expenses
                         </Txt>
 
@@ -688,16 +688,16 @@ const FileUpload = (props: { id: string; images: any[] }) => {
     return (
         <View style={{ paddingHorizontal: 15, marginBottom: 40 }}>
             <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                <Txt size={20} color={"#fff"}>
+                <Txt size={20} color={Colors.foreground}>
                     Attachments
                 </Txt>
 
                 <View style={{ flexDirection: "row", gap: 20 }}>
                     <Ripple onPress={handleTakePhoto}>
-                        <AntDesign name="camerao" size={24} color={"#fff"} />
+                        <AntDesign name="camerao" size={24} color={Colors.foreground} />
                     </Ripple>
                     <Ripple onPress={handleImagesSelect}>
-                        <AntDesign name="plus" size={24} color={"#fff"} onPress={handleImagesSelect} />
+                        <AntDesign name="plus" size={24} color={Colors.foreground} onPress={handleImagesSelect} />
                     </Ripple>
                 </View>
             </View>
@@ -759,7 +759,7 @@ const styles = StyleSheet.create({
     text: {
         fontSize: 15,
         marginTop: 10,
-        color: "#fff",
+        color: Colors.foreground,
         backgroundColor: Colors.secondary_dark_1,
         padding: 5,
         paddingHorizontal: 15,

@@ -404,7 +404,7 @@ export default function AddGoalEntry({ route, navigation }: any) {
                 padding: 10,
               }}
             >
-              <Text style={{ color: "#fff", fontWeight: "500" }}>{date}</Text>
+              <Text style={{ color: Colors.foreground, fontWeight: "500" }}>{date}</Text>
             </Ripple>
           </View>
 
@@ -421,7 +421,7 @@ export default function AddGoalEntry({ route, navigation }: any) {
             {/* Goal icon and value display */}
             <View style={{ alignItems: "center" }}>
               <View style={{ flexDirection: "row", gap: 15, alignItems: "center" }}>
-                <Animated.Text style={[{ color: "#fff", fontWeight: "bold" }, animatedAmount]}>
+                <Animated.Text style={[{ color: Colors.foreground, fontWeight: "bold" }, animatedAmount]}>
                   {amount}
                   <Text style={{ fontSize: 16, color: "rgba(255,255,255,0.7)" }}> {goal?.unit}</Text>
                 </Animated.Text>
@@ -586,9 +586,9 @@ const NumpadNumber = (props: { onPress: VoidFunction; num: string | number; rota
         ]}
       >
         {props.num === "C" ? (
-          <Entypo name="chevron-left" size={40} color="#fff" />
+          <Entypo name="chevron-left" size={40} color={Colors.foreground} />
         ) : (
-          <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 24 }}>{props.num}</Text>
+          <Text style={{ color: Colors.foreground, fontWeight: "bold", fontSize: 24 }}>{props.num}</Text>
         )}
       </AnimatedRipple>
     </View>
@@ -630,7 +630,7 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   quickValueTextActive: {
-    color: "#FFFFFF",
+    color: Colors.foreground,
     fontWeight: "600",
   },
 });

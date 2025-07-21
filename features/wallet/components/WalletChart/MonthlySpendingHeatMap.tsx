@@ -166,13 +166,13 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   dayNumber: {
-    color: "#fff",
+    color: Colors.foreground,
     fontSize: 16,
     fontWeight: "bold",
     marginBottom: 2,
   },
   dayValue: {
-    color: "#fff",
+    color: Colors.foreground,
     fontSize: 10,
     textAlign: "center",
     fontWeight: "500",
@@ -190,13 +190,13 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   tooltipTitle: {
-    color: "#fff",
+    color: Colors.foreground,
     fontWeight: "bold",
     fontSize: 16,
     marginBottom: 8,
   },
   tooltipValue: {
-    color: "#fff",
+    color: Colors.foreground,
     fontSize: 14,
     marginBottom: 4,
   },
@@ -207,7 +207,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   legendTitle: {
-    color: "#fff",
+    color: Colors.foreground,
     fontSize: 14,
     marginBottom: 10,
   },
@@ -227,7 +227,7 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   legendText: {
-    color: "#fff",
+    color: Colors.foreground,
     fontSize: 10,
   },
   loadingContainer: {
@@ -237,7 +237,7 @@ const styles = StyleSheet.create({
     minHeight: 300,
   },
   loadingText: {
-    color: "#fff",
+    color: Colors.foreground,
     fontSize: 16,
   },
   errorContainer: {

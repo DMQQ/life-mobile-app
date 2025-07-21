@@ -229,7 +229,7 @@ const ExerciseActionTile = ({ exercises, item, addExercise }: ExerciseActionTile
       }}
     >
       <View style={{ flex: 3 }}>
-        <Text style={{ color: "#fff", fontSize: 20 }}>{item.title}</Text>
+        <Text style={{ color: Colors.foreground, fontSize: 20 }}>{item.title}</Text>
         <Text style={{ color: "#ffffff84", fontSize: 15 }} numberOfLines={2}>
           {item.description}
         </Text>

@@ -95,7 +95,7 @@ export default function NotesScreen({ navigation }: ScreenProps<any>) {
                     animated={true}
                     buttons={[
                         {
-                            icon: <AntDesign name="plus" size={20} color={"#fff"} />,
+                            icon: <AntDesign name="plus" size={20} color={Colors.foreground} />,
                             onPress: () => navigation.navigate("CreateFlashCardGroup"),
                         },
                     ]}
@@ -171,7 +171,7 @@ const FlashCardGroup = (group: Group & { index: number; length: number; onLongPr
                 }}
             >
                 <Text style={{ color: Colors.secondary, fontSize: 20, fontWeight: "bold" }}>{group.name}</Text>
-                <Text style={{ color: "#fff", fontSize: 15 }}>{group.description}</Text>
+                <Text style={{ color: Colors.foreground, fontSize: 15 }}>{group.description}</Text>
 
                 {groupStats && (
                     <Animated.View entering={FadeIn} style={{ gap: 15 }}>

@@ -34,7 +34,7 @@ const ListContainer = (props: {
               })
             }
           >
-            <Entypo name="list" color={"#fff"} size={25} />
+            <Entypo name="list" color={Colors.foreground} size={25} />
           </Ripple>
         </View>
 
@@ -47,7 +47,7 @@ const ListContainer = (props: {
           }}
           onPress={props.onPress}
         >
-          <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 13 }}>
+          <Text style={{ color: Colors.foreground, fontWeight: "bold", fontSize: 13 }}>
             CREATE EVENT
           </Text>
         </Ripple>

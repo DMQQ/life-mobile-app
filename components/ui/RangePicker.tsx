@@ -1,6 +1,7 @@
 import { memo, useEffect, useRef, useState } from "react"
 import { Animated, View } from "react-native"
 import { PanGestureHandler } from "react-native-gesture-handler"
+import Colors from "@/constants/Colors"
 
 interface RangeSliderProps {
     range: number[]
@@ -128,7 +129,7 @@ function RangeSlider({
             <Animated.View
                 style={{
                     aspectRatio: 1,
-                    backgroundColor: "white",
+                    backgroundColor: Colors.foreground,
                     borderRadius: handleSize / 2,
                     height: undefined,
                     marginTop: -((handleSize - barHeight) / 2),

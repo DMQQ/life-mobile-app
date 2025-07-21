@@ -1,5 +1,6 @@
 import Button from "@/components/ui/Button/Button";
 import Input from "@/components/ui/TextInput/TextInput";
+import Colors from "@/constants/Colors";
 import Layout from "@/constants/Layout";
 import { gql, useMutation } from "@apollo/client";
 import { useState } from "react";
@@ -35,7 +36,7 @@ export default function InitializeWallet() {
 
   return (
     <Animated.View entering={FadeIn} exiting={FadeOut} style={{ flex: 1, justifyContent: "center", alignItems: "center", gap: 15 }}>
-      <Text style={{ fontSize: 30, color: "#fff", fontWeight: "bold" }}>Welcome to wallet!</Text>
+      <Text style={{ fontSize: 30, color: Colors.foreground, fontWeight: "bold" }}>Welcome to wallet!</Text>
       {step > 0 && (
         <Input
           placeholder="Initial balance"
@@ -52,7 +53,7 @@ export default function InitializeWallet() {
         style={{ padding: 10, borderRadius: 100, paddingHorizontal: 15 }}
         fontStyle={{ fontSize: 14, textTransform: "none", textAlign: "center" }}
       >
-        {loading ? <ActivityIndicator size={12} color={"#fff"} /> : "Start using wallet!"}
+        {loading ? <ActivityIndicator size={12} color={Colors.foreground} /> : "Start using wallet!"}
       </Button>
     </Animated.View>
   );

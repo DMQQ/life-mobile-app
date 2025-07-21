@@ -176,13 +176,13 @@ export default function Input({
                 <TextInputComponent
                     value={value}
                     onChangeText={setValue}
-                    placeholderTextColor={error ? "#ff3030" : "white"}
+                    placeholderTextColor={error ? "#ff3030" : Colors.foreground}
                     style={[
                         styles.input,
                         style,
                         {
                             borderWidth: 0,
-                            color: error ? "#ff3030" : isFocused ? theme.colors.secondary : "white",
+                            color: error ? "#ff3030" : isFocused ? theme.colors.secondary : Colors.foreground,
                         },
                     ]}
                     {...rest}
@@ -241,7 +241,7 @@ Input.Icon = ({
             <Component
                 {...props}
                 size={props.size || 25}
-                color={props.isError ? Colors.error : props.isFocused ? props.theme.colors.secondary : "#fff"}
+                color={props.isError ? Colors.error : props.isFocused ? props.theme.colors.secondary : Colors.foreground}
             />
         </Ripple>
     )

@@ -57,10 +57,10 @@ const CustomTabs = ({
                         backgroundColor: activeTab === tab.value ? Colors.secondary : "transparent",
                     }}
                 >
-                    <Ionicons name={tab.icon as any} size={18} color="#fff" style={{ marginRight: 6 }} />
+                    <Ionicons name={tab.icon as any} size={18} color={Colors.foreground} style={{ marginRight: 6 }} />
                     <Text
                         style={{
-                            color: "#fff",
+                            color: Colors.foreground,
                             fontSize: 14,
                             fontWeight: activeTab === tab.value ? "bold" : "normal",
                         }}
@@ -228,7 +228,7 @@ const JSONImportForm = ({ groupId, navigation }: { groupId: string; navigation: 
             </ScrollView>
 
             <Button
-                icon={loading && <ActivityIndicator size="small" color={"#fff"} />}
+                icon={loading && <ActivityIndicator size="small" color={Colors.foreground} />}
                 disabled={!text || loading}
                 onPress={handleSubmit}
                 style={{ marginTop: 15 }}
@@ -409,7 +409,7 @@ const AIGeneratedFlashCards = ({ groupId }: { groupId: string }) => {
                                 marginBottom: 15,
                             }}
                         >
-                            <Text style={{ color: "#fff", fontSize: 16, fontWeight: "bold" }}>
+                            <Text style={{ color: Colors.foreground, fontSize: 16, fontWeight: "bold" }}>
                                 Cards ({selectedCards.size}/{state.data.generateAIFlashcards.length})
                             </Text>
                             <View style={{ flexDirection: "row", gap: 15 }}>
@@ -444,7 +444,7 @@ const AIGeneratedFlashCards = ({ groupId }: { groupId: string }) => {
                                         <View style={{ flex: 1 }}>
                                             <Text
                                                 style={{
-                                                    color: "#fff",
+                                                    color: Colors.foreground,
                                                     fontWeight: "600",
                                                     fontSize: 13,
                                                     marginBottom: 4,
@@ -479,7 +479,7 @@ const AIGeneratedFlashCards = ({ groupId }: { groupId: string }) => {
                 <View style={{ marginBottom: insets.bottom + 15 }}>
                     <Button
                         onPress={saveSelectedCards}
-                        icon={saving && <ActivityIndicator size="small" color="#fff" />}
+                        icon={saving && <ActivityIndicator size="small" color={Colors.foreground} />}
                         style={{
                             backgroundColor: Colors.secondary,
                             borderRadius: 100,

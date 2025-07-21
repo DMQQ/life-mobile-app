@@ -1,5 +1,5 @@
 import Button from "@/components/ui/Button/Button"
-import { Sizing } from "@/constants/Colors"
+import Colors, { Sizing } from "@/constants/Colors"
 import Layout from "@/constants/Layout"
 import { useNavigation } from "@react-navigation/native"
 import moment from "moment"
@@ -16,12 +16,12 @@ const styles = StyleSheet.create({
         justifyContent: "center",
     },
     heading: {
-        color: "#fff",
+        color: Colors.foreground,
         fontSize: Sizing.subHead + 2,
         fontWeight: "bold",
     },
     content: {
-        color: "#fff",
+        color: Colors.foreground,
         fontSize: 17,
         flex: 1,
         flexWrap: "wrap",

@@ -25,7 +25,7 @@ const DayEntry = ({ entry, index }: DayEntryProps) => {
     const isCurrentDay = date.isSame(moment(), "day")
 
     const getProgressColor = () => {
-        if (!entry.min || !entry.max || !entry.target) return "#fff"
+        if (!entry.min || !entry.max || !entry.target) return Colors.foreground
 
         if (entry.value < entry.min) return "#F44336" // Red
         if (entry.value < entry.target) return "#f29232ff" // Red
@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
     day: {
         fontSize: 20,
         fontWeight: "600",
-        color: "#fff",
+        color: Colors.foreground,
     },
     currentDay: {
         color: "#2196F3",

@@ -29,13 +29,13 @@ export default function PieChart(props: PieChartProps) {
       showValuesAsLabels
       showValuesAsTooltipText
       showTooltip
-      textColor="#fff"
+      textColor={Colors.foreground}
       innerRadius={90}
       centerLabelComponent={() => (
         <View>
           <Text
             style={{
-              color: "#fff",
+              color: Colors.foreground,
               fontSize: 20,
               fontWeight: "bold",
             }}

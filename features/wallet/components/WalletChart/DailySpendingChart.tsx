@@ -69,7 +69,7 @@ function DailySpendingChart({ dateRange }: { dateRange: [string, string] }) {
     const alignedCurrent = sortedDays.map((day) => ({
       value: Math.round(currentGrouped[day] || 0),
       label: day.toString(),
-      labelTextStyle: { color: "#fff" },
+      labelTextStyle: { color: Colors.foreground },
       dataPointText: currentGrouped[day] > 0 ? `${Math.round(currentGrouped[day])}zł` : "",
       dataPointColor: secondary_candidates[0],
       day: day,
@@ -112,7 +112,7 @@ function DailySpendingChart({ dateRange }: { dateRange: [string, string] }) {
   if (currentQuery.loading || previousQuery.loading) {
     return (
       <View style={{ height: Layout.screen.height / 3.5, justifyContent: "center", alignItems: "center" }}>
-        <Text style={{ color: "#fff" }}>Loading...</Text>
+        <Text style={{ color: Colors.foreground }}>Loading...</Text>
       </View>
     );
   }
@@ -120,7 +120,7 @@ function DailySpendingChart({ dateRange }: { dateRange: [string, string] }) {
   if (!groupedCurrentData.length) {
     return (
       <View style={{ height: Layout.screen.height / 3.5, justifyContent: "center", alignItems: "center" }}>
-        <Text style={{ color: "#fff" }}>No data available</Text>
+        <Text style={{ color: Colors.foreground }}>No data available</Text>
       </View>
     );
   }
@@ -136,7 +136,7 @@ function DailySpendingChart({ dateRange }: { dateRange: [string, string] }) {
         thickness2={3}
         noOfSections={3}
         maxValue={Math.max(maxSpending * 1.1, 100)}
-        yAxisTextStyle={{ color: "#fff" }}
+        yAxisTextStyle={{ color: Colors.foreground }}
         rulesColor={Color(Colors.primary).lighten(1.5).string()}
         yAxisThickness={0}
         xAxisThickness={0}
@@ -165,11 +165,11 @@ function DailySpendingChart({ dateRange }: { dateRange: [string, string] }) {
       <View style={{ flexDirection: "row", gap: 8, marginTop: 20 }}>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
           <View style={{ width: 12, height: 3, backgroundColor: secondary_candidates[0], borderRadius: 2 }} />
-          <Text style={{ fontSize: 12, color: "#fff" }}>Current Period ({periodLabel})</Text>
+          <Text style={{ fontSize: 12, color: Colors.foreground }}>Current Period ({periodLabel})</Text>
         </View>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
           <View style={{ width: 12, height: 3, backgroundColor: secondary_candidates[5], borderRadius: 2 }} />
-          <Text style={{ fontSize: 12, color: "#fff" }}>Previous Period ({periodLabel})</Text>
+          <Text style={{ fontSize: 12, color: Colors.foreground }}>Previous Period ({periodLabel})</Text>
         </View>
       </View>
 
@@ -183,7 +183,7 @@ function DailySpendingChart({ dateRange }: { dateRange: [string, string] }) {
             gap: 5,
           }}
         >
-          <Text style={{ fontSize: 14, color: "#fff" }}>Daily Average</Text>
+          <Text style={{ fontSize: 14, color: Colors.foreground }}>Daily Average</Text>
           <Text style={{ fontSize: 25, fontWeight: "600", color: Colors.secondary }}>{Math.round(currentAverage).toLocaleString()}zł</Text>
           <Text style={{ fontSize: 12, color: changePercent >= 0 ? "#4ade80" : "#f87171" }}>
             {changePercent >= 0 ? "+" : ""}
@@ -200,7 +200,7 @@ function DailySpendingChart({ dateRange }: { dateRange: [string, string] }) {
             gap: 5,
           }}
         >
-          <Text style={{ fontSize: 14, color: "#fff" }}>Peak Day</Text>
+          <Text style={{ fontSize: 14, color: Colors.foreground }}>Peak Day</Text>
           <Text style={{ fontSize: 25, fontWeight: "600", color: Colors.secondary }}>{maxSpending.toLocaleString()}zł</Text>
         </View>
       </View>
