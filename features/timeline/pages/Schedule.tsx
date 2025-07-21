@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
-import { ScrollView, Text, View } from "react-native";
+import { ScrollView, View } from "react-native";
+import Text from "@/components/ui/Text/Text";
 import Color from "color";
 import Colors, { secondary_candidates } from "@/constants/Colors";
 import TimeTable from "react-native-calendar-timetable";
@@ -96,9 +97,9 @@ export default function ScheduleScreen({ navigation, route }: TimelineScreenProp
                 }}
               >
                 <Text
+                  variant="body"
                   style={{
                     color: Colors.foreground,
-                    fontSize: 15,
                     fontWeight: "bold",
                     letterSpacing: 0.5,
                   }}
@@ -107,9 +108,9 @@ export default function ScheduleScreen({ navigation, route }: TimelineScreenProp
                 </Text>
 
                 <Text
+                  variant="caption"
                   style={{
                     color: Colors.foreground,
-                    fontSize: 10,
                   }}
                 >
                   {trimTime(props.item.timeline.beginTime)} to {trimTime(props.item.timeline.endTime)}

@@ -1,5 +1,6 @@
 import Colors from "@/constants/Colors";
-import { FlatList, Pressable, Text } from "react-native";
+import { FlatList, Pressable } from "react-native";
+import Text from "@/components/ui/Text/Text";
 
 export default function SubcategoryList(props: {
   selected: { categories?: string[] };
@@ -32,7 +33,7 @@ export default function SubcategoryList(props: {
             },
           ]}
         >
-          <Text style={{ color: Colors.foreground }}>{item}</Text>
+          <Text variant="body" style={{ color: Colors.foreground }}>{item}</Text>
         </Pressable>
       )}
     />

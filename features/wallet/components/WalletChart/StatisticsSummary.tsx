@@ -1,4 +1,5 @@
-import { Text, View } from "react-native";
+import { View } from "react-native";
+import Text from "@/components/ui/Text/Text";
 import useGetStatistics, { WalletStatisticsResponse } from "../../hooks/useGetStatistics";
 import Layout from "@/constants/Layout";
 import { FontAwesome5, Ionicons, MaterialIcons } from "@expo/vector-icons";
@@ -33,10 +34,10 @@ export const Item = ({ label, value, icon, formatValue = true, width }: ItemProp
   >
     {icon}
     <View>
-      <Text style={{ color: Colors.foreground, fontSize: 17, fontWeight: "bold" }}>
+      <Text variant="body" style={{ color: Colors.foreground, fontWeight: "bold" }}>
         {formatValue ? (typeof value === "number" ? value.toFixed(2) + "zł" : value) : value}
       </Text>
-      <Text style={{ color: "grey", fontSize: 13, marginTop: 2.5 }}>{label}</Text>
+      <Text variant="caption" style={{ color: "grey", marginTop: 2.5 }}>{label}</Text>
     </View>
   </View>
 );
@@ -123,16 +124,16 @@ export default function StatisticsSummary() {
         <View style={{ flex: 1 }}>
           {view === "current" ? (
             <>
-              <Text style={{ color: Colors.foreground, fontWeight: "bold", fontSize: 18 }}>Statistics Summary</Text>
+              <Text variant="body" style={{ color: Colors.foreground, fontWeight: "bold" }}>Statistics Summary</Text>
 
-              <Text style={{ color: "gray", marginTop: 5 }}>
+              <Text variant="body" style={{ color: "gray", marginTop: 5 }}>
                 From {filters.date.from} to {filters.date.to}
               </Text>
             </>
           ) : (
             <>
-              <Text style={{ color: Colors.foreground, fontWeight: "bold", fontSize: 18 }}>Difference in spendings</Text>
-              <Text style={{ color: "gray", marginTop: 5 }}>
+              <Text variant="body" style={{ color: Colors.foreground, fontWeight: "bold" }}>Difference in spendings</Text>
+              <Text variant="body" style={{ color: "gray", marginTop: 5 }}>
                 Dates {oppositeRange[0]} to {oppositeRange[1]}
               </Text>
             </>
@@ -151,7 +152,7 @@ export default function StatisticsSummary() {
                 borderRadius: 10,
               }}
             >
-              <Text style={{ color: Colors.secondary }}>{view === "current" ? "Last range" : "Current range"}</Text>
+              <Text variant="body" style={{ color: Colors.secondary }}>{view === "current" ? "Last range" : "Current range"}</Text>
             </Ripple>
           </View>
         )}
@@ -208,37 +209,37 @@ export default function StatisticsSummary() {
               label={"Total expenses: " + getValue("expense")}
               formatValue={false}
               value={percentDiff("expense")}
-              icon={<Text style={{ fontSize: 25, color: "red", marginRight: 2.5 }}>%</Text>}
+              icon={<Text variant="subheading" style={{ color: "red", marginRight: 2.5 }}>%</Text>}
             />
             <Item
               label={"Total income" + getValue("income")}
               formatValue={false}
               value={percentDiff("income")}
-              icon={<Text style={{ fontSize: 25, color: "lightgreen", marginRight: 2.5 }}>%</Text>}
+              icon={<Text variant="subheading" style={{ color: "lightgreen", marginRight: 2.5 }}>%</Text>}
             />
             <Item
               label={"Min expense" + getValue("min")}
               formatValue={false}
               value={percentDiff("min")}
-              icon={<Text style={{ fontSize: 25, color: "red", marginRight: 2.5 }}>%</Text>}
+              icon={<Text variant="subheading" style={{ color: "red", marginRight: 2.5 }}>%</Text>}
             />
             <Item
               label={"Max expense" + getValue("max")}
               formatValue={false}
               value={percentDiff("max")}
-              icon={<Text style={{ fontSize: 25, color: "lightgreen", marginRight: 2.5 }}>%</Text>}
+              icon={<Text variant="subheading" style={{ color: "lightgreen", marginRight: 2.5 }}>%</Text>}
             />
             <Item
               label={"Average purchase" + getValue("average")}
               formatValue={false}
               value={percentDiff("average")}
-              icon={<Text style={{ fontSize: 25, color: "red", marginRight: 2.5 }}>%</Text>}
+              icon={<Text variant="subheading" style={{ color: "red", marginRight: 2.5 }}>%</Text>}
             />
             <Item
               label={"Total count" + getValue("count", "")}
               formatValue={false}
               value={percentDiff("count")}
-              icon={<Text style={{ fontSize: 25, color: "lightgreen", marginRight: 2.5 }}>%</Text>}
+              icon={<Text variant="subheading" style={{ color: "lightgreen", marginRight: 2.5 }}>%</Text>}
             />
             {lastRangeStatistics?.data && (
               <>

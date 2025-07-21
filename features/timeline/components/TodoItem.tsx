@@ -1,9 +1,10 @@
 import { Card } from "@/components"
 import Checkbox from "@/components/ui/Checkbox"
+import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
 import { Todos } from "@/types"
 import Color from "color"
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native"
+import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native"
 import Haptic from "react-native-haptic-feedback"
 import Animated, { FadeInDown, FadeOutUp, LinearTransition } from "react-native-reanimated"
 import useCompleteTodo from "../hooks/mutation/useCompleteTodo"
@@ -32,7 +33,6 @@ const styles = StyleSheet.create({
     },
     todoText: {
         marginLeft: 16,
-        fontSize: 16,
         lineHeight: 24,
         flex: 1,
     },
@@ -96,11 +96,10 @@ export default function TodoItem(todo: Todos & { timelineId: string; index: numb
                         </View>
 
                         <Text
+                            variant="subtitle"
+                            color={todo.isCompleted ? Colors.secondary_light_1 : Colors.text_light}
                             style={[
                                 styles.todoText,
-                                {
-                                    color: todo.isCompleted ? Colors.secondary_light_1 : Colors.text_light,
-                                },
                                 todo.isCompleted && styles.completedText,
                             ]}
                         >

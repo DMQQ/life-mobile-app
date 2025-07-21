@@ -1,12 +1,13 @@
 import { Card } from "@/components"
 import Button from "@/components/ui/Button/Button"
 import Overlay from "@/components/ui/Overlay/Overlay"
+import Text from "@/components/ui/Text/Text"
 import Input from "@/components/ui/TextInput/TextInput"
 import Colors from "@/constants/Colors"
 import L from "@/constants/Layout"
 import { Todos } from "@/types"
 import { useState } from "react"
-import { StyleSheet, Text, View } from "react-native"
+import { StyleSheet, View } from "react-native"
 import useTransferTodos from "../hooks/mutation/useTransferTodos"
 
 const styles = StyleSheet.create({
@@ -23,7 +24,6 @@ const styles = StyleSheet.create({
     },
     title: {
         marginBottom: 16,
-        fontWeight: "600",
     },
     input: {
         width: "100%",
@@ -55,22 +55,14 @@ export default function TodoTransferDialog({ visible, onClose, todos }: TodoTran
         <Overlay opacity={0.8} onClose={onClose} isVisible={visible}>
             <View style={styles.container}>
                 <Card style={styles.dialog}>
-                    <Text
-                        style={[
-                            styles.title,
-                            {
-                                color: Colors.foreground,
-                            },
-                        ]}
-                    >
+                    <Text variant="subheading" style={styles.title}>
                         Transfer Todos
                     </Text>
 
                     <Text
-                        style={{
-                            color: Colors.text_light,
-                            marginBottom: 16,
-                        }}
+                        variant="body"
+                        color={Colors.text_light}
+                        style={{ marginBottom: 16 }}
                     >
                         Enter the timeline ID where you want to transfer {todos.length} todo
                         {todos.length !== 1 ? "s" : ""}

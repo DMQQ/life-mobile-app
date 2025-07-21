@@ -5,7 +5,8 @@ import { AntDesign } from "@expo/vector-icons";
 import { useState, useMemo } from "react";
 import { DateData, MarkedDates } from "react-native-calendars/src/types";
 import { ApolloQueryResult } from "@apollo/client";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
+import Text from "@/components/ui/Text/Text";
 import { useTheme } from "@/utils/context/ThemeContext";
 
 interface CalendarProps {

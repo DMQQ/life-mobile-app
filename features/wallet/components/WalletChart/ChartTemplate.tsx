@@ -1,6 +1,7 @@
 import { AntDesign } from "@expo/vector-icons";
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
+import Text from "@/components/ui/Text/Text";
 import Colors from "@/constants/Colors";
 import moment from "moment";
 import DateTimePicker from "react-native-modal-datetime-picker";
@@ -47,7 +48,7 @@ export default function ChartTemplate({ children, title, description, types, ini
     <View style={styles.container}>
       <View style={{ marginBottom: 15 }}>
         <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 10 }}>
-          <Text style={{ color: Colors.foreground, fontSize: 20, fontWeight: 600, marginBottom: 5 }}>{title}</Text>
+          <Text variant="body" style={{ color: Colors.foreground, fontWeight: "bold", fontSize: 18, marginBottom: 5 }}>{title}</Text>
 
           <MenuView
             onPressAction={(ev) => {
@@ -81,14 +82,14 @@ export default function ChartTemplate({ children, title, description, types, ini
           >
             <Ripple style={styles.dateToggleButton}>
               <AntDesign name="clockcircleo" size={20} color={Colors.foreground} />
-              <Text style={{ color: Colors.foreground, fontSize: 12, textAlign: "center", fontWeight: "600" }}>
+              <Text variant="caption" style={{ color: Colors.foreground, textAlign: "center", fontWeight: "600" }}>
                 {moment(dateRange[0]).format("DD.MM")} - {moment(dateRange[1]).format("DD.MM")}
               </Text>
             </Ripple>
           </MenuView>
         </View>
 
-        <Text style={{ color: "rgba(255,255,255,0.6)" }}>{description}</Text>
+        <Text variant="caption" style={{ color: "gray" }}>{description}</Text>
       </View>
 
       {types && types.length > 0 && (

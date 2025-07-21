@@ -1,4 +1,5 @@
-import { View, Text, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
+import Text from "@/components/ui/Text/Text";
 import { useState, useEffect, memo, useMemo } from "react";
 import Colors from "../../../constants/Colors";
 import Ripple from "react-native-material-ripple";
@@ -106,13 +107,13 @@ function TimeKeeper(props: TimeKeeperProps) {
       }}
     >
       <View style={{ justifyContent: "center" }}>
-        <Text style={styles.headline}>
+        <Text variant="body" style={styles.headline}>
           {props.headLineText || "Scored time"}
         </Text>
-        <Text style={styles.timer}>{parseTime(time)}</Text>
+        <Text variant="heading" style={styles.timer}>{parseTime(time)}</Text>
       </View>
       <View style={{ justifyContent: "center" }}>
-        <Text style={styles.text}>{props.text}</Text>
+        <Text variant="body" style={styles.text}>{props.text}</Text>
       </View>
       {/* Controls */}
       <View style={{ flexDirection: "row", marginTop: 20 }}>
@@ -128,7 +129,7 @@ function TimeKeeper(props: TimeKeeperProps) {
         </Ripple>
 
         <Ripple onPress={onCompleted} style={styles.finish}>
-          <Text style={styles.finishText}>
+          <Text variant="title" style={styles.finishText}>
             {props?.finishButtonText || "Finish"}
           </Text>
         </Ripple>

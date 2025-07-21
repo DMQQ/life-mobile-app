@@ -1,11 +1,12 @@
 import Color from "color";
-import { StyleSheet, View, Text, ToastAndroid, Alert, ViewStyle, StyleProp } from "react-native";
+import { StyleSheet, View, ToastAndroid, Alert, ViewStyle, StyleProp } from "react-native";
 
 import Ripple from "react-native-material-ripple";
 import { useNavigation } from "@react-navigation/core";
 import * as LocalAuthentication from "expo-local-authentication";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
+import Text from "@/components/ui/Text/Text";
 import Colors from "@/constants/Colors";
 import { AntDesign } from "@expo/vector-icons";
 import { notesActions } from "@/utils/redux/notes/notes";
@@ -33,8 +34,6 @@ const styles = StyleSheet.create({
 
   title: {
     color: Colors.secondary,
-    fontSize: 20,
-    fontWeight: "bold",
   },
   tag: {
     backgroundColor: Colors.secondary,
@@ -140,10 +139,10 @@ export default function Note(props: NoteProps) {
   return (
     <Ripple style={[styles.container, props.containerStyles]} onPress={onPress} onLongPress={removeNote}>
       <View style={styles.header}>
-        <Text style={styles.title}>{noteTitle}</Text>
+        <Text variant="subheading" style={styles.title}>{noteTitle}</Text>
 
         <View style={{ flexDirection: "row" }}>
-          <Text style={styles.tag}>{props.createdAt!}</Text>
+          <Text variant="caption" style={styles.tag}>{props.createdAt!}</Text>
 
           {props.pinned && <AntDesign name="pushpin" color={Colors.foreground} size={20} style={styles.tag} />}
 
@@ -161,9 +160,8 @@ export default function Note(props: NoteProps) {
             </View>
           ) : (
             <Text
-              style={{
-                color: "#ffffff7b",
-              }}
+              variant="body"
+              color="#ffffff7b"
               numberOfLines={3}
             >
               {props.text}

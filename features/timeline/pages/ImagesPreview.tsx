@@ -1,6 +1,6 @@
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import ScreenContainer from "@/components/ui/ScreenContainer";
-import { InteractionManager, Text, Image, Dimensions, StyleSheet } from "react-native";
+import { InteractionManager, Image, Dimensions, StyleSheet } from "react-native";
 import Colors from "@/constants/Colors";
 import Layout from "@/constants/Layout";
 import { useEffect, useLayoutEffect, useState } from "react";
@@ -14,6 +14,7 @@ import { AntDesign } from "@expo/vector-icons";
 import IconButton from "@/components/ui/IconButton/IconButton";
 import throttle from "@/utils/functions/throttle";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Text from "@/components/ui/Text/Text";
 
 export default function ImagesPreview({ route, navigation }: TimelineScreenProps<"ImagesPreview">) {
   const { data } = useGetTimelineById(route.params.timelineId! as string, {
@@ -37,7 +38,7 @@ export default function ImagesPreview({ route, navigation }: TimelineScreenProps
               });
             }}
           >
-            <Text style={{ color: Colors.foreground }}>Next</Text>
+            <Text variant="body" color={Colors.foreground}>Next</Text>
           </Ripple>
         ) : null,
     });

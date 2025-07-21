@@ -5,7 +5,8 @@ import Layout from "@/constants/Layout"
 import lowOpacity from "@/utils/functions/lowOpacity"
 import { AntDesign, Ionicons } from "@expo/vector-icons"
 import Color from "color"
-import { ActivityIndicator, StyleSheet, Text } from "react-native"
+import { ActivityIndicator, StyleSheet } from "react-native"
+import Text from "@/components/ui/Text/Text"
 import Feedback from "react-native-haptic-feedback"
 import Ripple from "react-native-material-ripple"
 import { Icons } from "../Expense/ExpenseIcon"
@@ -76,6 +77,7 @@ export default function NameInput({
                     icon={
                         isSubExpenseMode ? (
                             <Text
+                                variant="body"
                                 style={{
                                     width: 18,
                                     height: 18,
@@ -128,12 +130,12 @@ export default function NameInput({
                         />
                     )}
                     <Text
+                        variant="caption"
                         style={{
                             color:
                                 isValid || (!isValid && prediction)
                                     ? Colors.foreground
                                     : lowOpacity(Colors.secondary_light_1, 0.5),
-                            fontSize: 14,
                             fontWeight: "500",
                             lineHeight: 20,
                         }}

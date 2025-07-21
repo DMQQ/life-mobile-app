@@ -1,5 +1,6 @@
 import { gql, useMutation } from "@apollo/client"
 import { useNavigation } from "@react-navigation/native"
+import { GET_MONTHLY_EVENTS } from "../general/useTimeline"
 import useGetTimelineById, { GET_TIMELINE } from "../query/useGetTimelineById"
 import { GET_TIMELINE_QUERY } from "../query/useGetTimeLineQuery"
 
@@ -80,12 +81,22 @@ export default function useEditTimeline(timelineId: string, isEditing: boolean) 
             navigation.canGoBack() && navigation.goBack()
         },
 
-        refetchQueries: [
-            {
-                query: GET_TIMELINE_QUERY,
-                variables: { date: data?.date },
-            },
-        ],
+        refetchQueries: (result) => {
+            return [
+                {
+                    query: GET_TIMELINE_QUERY,
+                    variables: { date: result.data?.editTimeline?.date },
+                },
+                {
+                    query: GET_TIMELINE_QUERY,
+                    variables: { date: initialFormProps?.date },
+                },
+                {
+                    query: GET_MONTHLY_EVENTS,
+                    variables: { date: result.data?.editTimeline?.date },
+                },
+            ]
+        },
     })
 
     const editTimeline = async (input: typeof initialFormProps, date: string) => {

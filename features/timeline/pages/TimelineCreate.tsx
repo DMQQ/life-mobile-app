@@ -8,11 +8,12 @@ import { AntDesign } from "@expo/vector-icons"
 import Color from "color"
 import moment from "moment"
 import { useState } from "react"
-import { ActivityIndicator, Platform, ScrollView, StyleSheet, Text, View } from "react-native"
+import { ActivityIndicator, Platform, ScrollView, StyleSheet, View } from "react-native"
 import Ripple from "react-native-material-ripple"
 import DateTimePicker from "react-native-modal-datetime-picker"
 import Animated, { useAnimatedKeyboard, useAnimatedStyle } from "react-native-reanimated"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
+import Text from "@/components/ui/Text/Text"
 import CreateRepeatableTimeline from "../components/CreateTimeline/CreateRepeatableTimeline"
 import SuggestedEvents from "../components/CreateTimeline/SuggestedEvents/SuggestedEvents"
 import TimelineCreateHeader from "../components/CreateTimeline/TimelineCreateHeader"
@@ -34,9 +35,7 @@ const styles = StyleSheet.create({
     },
     timeText: {
         color: Colors.secondary,
-        fontSize: 25,
         textAlign: "center",
-        fontWeight: "bold",
     },
 })
 
@@ -119,13 +118,13 @@ export default function CreateTimeLineEventModal({ route, navigation }: Timeline
                     <ValidatedInput.Label error={false} text="Time range*" />
                     <View style={styles.timeContainer}>
                         <Ripple style={{ flex: 1, padding: 5 }} onPress={() => setTimePicker("begin")}>
-                            <Text style={styles.timeText}>{f.values.begin.split(":").slice(0, 2).join(":")}</Text>
+                            <Text variant="title" style={styles.timeText}>{f.values.begin.split(":").slice(0, 2).join(":")}</Text>
                         </Ripple>
 
-                        <Text style={{ color: "gray", padding: 5 }}>to</Text>
+                        <Text variant="body" style={{ color: "gray", padding: 5 }}>to</Text>
 
                         <Ripple style={{ flex: 1, padding: 5 }} onPress={() => setTimePicker("end")}>
-                            <Text style={styles.timeText}>{f.values.end.split(":").slice(0, 2).join(":")}</Text>
+                            <Text variant="title" style={styles.timeText}>{f.values.end.split(":").slice(0, 2).join(":")}</Text>
                         </Ripple>
                     </View>
 

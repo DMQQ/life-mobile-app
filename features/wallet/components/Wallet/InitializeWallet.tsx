@@ -4,10 +4,11 @@ import Colors from "@/constants/Colors";
 import Layout from "@/constants/Layout";
 import { gql, useMutation } from "@apollo/client";
 import { useState } from "react";
-import { ActivityIndicator, Text } from "react-native";
+import { ActivityIndicator } from "react-native";
 import { GET_WALLET } from "../../hooks/useGetWallet";
 import { GET_MAIN_SCREEN } from "@/utils/schemas/GET_MAIN_SCREEN";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
+import Text from "@/components/ui/Text/Text";
 
 export default function InitializeWallet() {
   const [createWallet, { loading, error }] = useMutation(
@@ -36,7 +37,7 @@ export default function InitializeWallet() {
 
   return (
     <Animated.View entering={FadeIn} exiting={FadeOut} style={{ flex: 1, justifyContent: "center", alignItems: "center", gap: 15 }}>
-      <Text style={{ fontSize: 30, color: Colors.foreground, fontWeight: "bold" }}>Welcome to wallet!</Text>
+      <Text variant="title" color={Colors.foreground}>Welcome to wallet!</Text>
       {step > 0 && (
         <Input
           placeholder="Initial balance"

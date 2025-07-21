@@ -1,7 +1,8 @@
 import Input from "@/components/ui/TextInput/TextInput";
 import Layout from "@/constants/Layout";
 import { useEffect, useMemo, useState } from "react";
-import { Text, View } from "react-native";
+import { View } from "react-native";
+import Text from "@/components/ui/Text/Text";
 import { useWalletContext, type Action, type Filters } from "../components/WalletContext";
 import Button from "@/components/ui/Button/Button";
 import DateTimePicker from "react-native-modal-datetime-picker";
@@ -106,7 +107,7 @@ const Forms = (props: ExpenseFiltersProps) => {
             value={props.filters.amount.min.toString()}
             placeholder="From"
             containerStyle={{ flex: 1 }}
-            right={<Text style={{ color: Colors.foreground }}>zł</Text>}
+            right={<Text variant="body" style={{ color: Colors.foreground }}>zł</Text>}
             style={{ textAlign: "center" }}
             onChangeText={(text) =>
               props.dispatch({
@@ -116,9 +117,9 @@ const Forms = (props: ExpenseFiltersProps) => {
             }
           />
           <Text
+            variant="body"
             style={{
               color: "gray",
-              fontSize: 16,
               alignSelf: "center",
               marginHorizontal: 10,
               marginTop: 15,
@@ -127,7 +128,7 @@ const Forms = (props: ExpenseFiltersProps) => {
             to
           </Text>
           <Input
-            right={<Text style={{ color: Colors.foreground }}>zł</Text>}
+            right={<Text variant="body" style={{ color: Colors.foreground }}>zł</Text>}
             keyboardAppearance="dark"
             keyboardType="numeric"
             name="amount.to"
@@ -212,9 +213,9 @@ const ChooseDateRange = (props: { filters: Filters; dispatch: (action: Action) =
           {props.filters.date.from || "Date start"}
         </Button>
         <Text
+          variant="body"
           style={{
             color: "gray",
-            fontSize: 16,
             alignSelf: "center",
             marginHorizontal: 10,
           }}

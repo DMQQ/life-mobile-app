@@ -135,8 +135,6 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
                     getItem={(data, index) => data[index] as GetTimelineQuery}
                     getItemCount={(data) => data.length}
                     renderItem={renderItem}
-                    bounces={(timeline?.data?.timeline.length || 0) > 4}
-                    overScrollMode={(timeline?.data?.timeline.length || 0) > 4 ? "always" : "never"}
                 />
             ) : (
                 <DayTimeline
@@ -173,6 +171,7 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
                         ? {
                               id: selectedEventForDeletion.id,
                               name: selectedEventForDeletion.title,
+                              date: selectedEventForDeletion.date,
                           }
                         : undefined
                 }

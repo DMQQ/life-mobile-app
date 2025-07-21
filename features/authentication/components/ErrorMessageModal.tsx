@@ -1,6 +1,6 @@
 import Colors from "@/constants/Colors";
 import { Modal } from "react-native";
-import { Text } from "react-native";
+import Text from "@/components/ui/Text/Text";
 import Layout from "@/constants/Layout";
 
 import Overlay from "@/components/ui/Overlay/Overlay";
@@ -31,9 +31,9 @@ export default function ErrorMessageModal(props: {
           }}
         >
           <Text
+            variant="heading"
             style={{
               color: Colors.secondary,
-              fontSize: 40,
               fontWeight: "bold",
               marginBottom: 15,
             }}
@@ -41,9 +41,9 @@ export default function ErrorMessageModal(props: {
             Ops!
           </Text>
           <Text
+            variant="title"
             style={{
               color: Colors.secondary,
-              fontSize: 25,
               fontWeight: "bold",
             }}
           >
@@ -51,14 +51,14 @@ export default function ErrorMessageModal(props: {
           </Text>
 
           <Text
+            variant="body"
             style={{
               color: Colors.foreground,
-              fontSize: 19,
               paddingVertical: 15,
             }}
           >
             It seems there's an issue with your credentials. Please double-check your username and password and try again. Need help?{" "}
-            <Text style={{ textDecorationLine: "underline" }}>Click 'Forgot Password'</Text>
+            <Text variant="body" style={{ textDecorationLine: "underline" }}>Click 'Forgot Password'</Text>
           </Text>
 
           <Button style={{ marginTop: 15 }} size="xl" onPress={props.onRetry || props.onDismiss}>

@@ -1,7 +1,8 @@
 import { Padding, Rounded } from "@/constants/Values"
 import moment from "moment"
 import { memo, useCallback, useEffect, useRef } from "react"
-import { FlatList, Text } from "react-native"
+import { FlatList } from "react-native"
+import Text from "@/components/ui/Text/Text"
 import Ripple from "react-native-material-ripple"
 import Colors from "../../constants/Colors"
 
@@ -42,7 +43,7 @@ function MonthSelectList(props: MonthSelectListProps) {
                     alignItems: "center",
                 }}
             >
-                <Text style={{ color: Colors.foreground, fontSize: 16 }}>{month}</Text>
+                <Text variant="body" style={{ color: Colors.foreground }}>{month}</Text>
             </Ripple>
         ),
         [props.selected],

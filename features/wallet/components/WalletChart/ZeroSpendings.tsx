@@ -1,4 +1,5 @@
 import { AnimatedNumber } from "@/components"
+import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
 import Layout from "@/constants/Layout"
 import { useRefresh } from "@/utils/context/RefreshContext"
@@ -7,7 +8,7 @@ import { AntDesign, FontAwesome5, Ionicons, MaterialIcons } from "@expo/vector-i
 import { MenuView } from "@react-native-menu/menu"
 import moment from "moment"
 import React, { useMemo, useState } from "react"
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from "react-native"
+import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native"
 import Ripple from "react-native-material-ripple"
 import DateTimePicker from "react-native-modal-datetime-picker"
 import Animated, { FadeIn, FadeInDown } from "react-native-reanimated"
@@ -91,7 +92,7 @@ const AnimatedItem = ({
         const color = isPositive ? "#4CAF50" : "#F44336"
 
         return (
-            <Text style={[styles.comparisonText, { color }]}>
+            <Text variant="caption" style={[styles.comparisonText, { color }]}>
                 {arrow} vs {formatValue(previousValue)}
             </Text>
         )
@@ -103,12 +104,18 @@ const AnimatedItem = ({
                 <Animated.View entering={FadeIn.delay((index + 1) * 85)}>{icon}</Animated.View>
                 <View style={styles.itemContent}>
                     {typeof value === "string" && isNaN(numericValue) ? (
-                        <Text style={styles.itemValue}>{value}</Text>
+                        <Text variant="heading" style={styles.itemValue}>
+                            {value}
+                        </Text>
                     ) : (
                         <AnimatedNumber style={styles.itemValue} value={numericValue} formatValue={getFormatValue()} />
                     )}
-                    <Text style={styles.itemLabel}>{label}</Text>
+
                     {getComparisonText()}
+
+                    <Text variant="caption" style={styles.itemLabel}>
+                        {label}
+                    </Text>
                 </View>
             </Ripple>
         </Animated.View>
@@ -145,14 +152,20 @@ const StreakTile = ({
             <View style={styles.streakContentRow}>
                 {isLongest && (
                     <View style={styles.crownIcon}>
-                        <Text style={styles.crownEmoji}>👑</Text>
+                        <Text variant="body" style={styles.crownEmoji}>
+                            👑
+                        </Text>
                     </View>
                 )}
                 <View style={styles.streakMainContent}>
-                    <Text style={[styles.streakLengthHorizontal, { color: isLongest ? "#000" : Colors.foreground }]}>
+                    <Text
+                        variant="body"
+                        style={[styles.streakLengthHorizontal, { color: isLongest ? "#000" : Colors.foreground }]}
+                    >
                         {actualLength} days
                     </Text>
                     <Text
+                        variant="caption"
                         style={[styles.streakDateHorizontal, { color: isLongest ? "#555" : "rgba(255,255,255,0.9)" }]}
                     >
                         {moment(streak.start).format("MMM D")} - {moment(streak.end).format("MMM D")}
@@ -236,7 +249,9 @@ export default function ZeroExpenseStats() {
         return (
             <View style={styles.container}>
                 <View style={styles.errorContainer}>
-                    <Text style={styles.errorText}>Unable to load zero expense data</Text>
+                    <Text variant="subtitle" color={Colors.error}>
+                        Unable to load zero expense data
+                    </Text>
                 </View>
             </View>
         )
@@ -247,8 +262,10 @@ export default function ZeroExpenseStats() {
             <ScrollView showsVerticalScrollIndicator={false}>
                 <View style={styles.header}>
                     <View style={{ flex: 1 }}>
-                        <Text style={styles.headerTitle}>Zero Expense Analytics</Text>
-                        <Text style={styles.headerSubtitle}>
+                        <Text variant="body" style={styles.headerTitle}>
+                            Zero Expense Analytics
+                        </Text>
+                        <Text variant="caption" style={styles.headerSubtitle}>
                             {moment(dateRange[0]).format("MMM D")} - {moment(dateRange[1]).format("MMM D, YYYY")}
                         </Text>
                     </View>
@@ -281,7 +298,7 @@ export default function ZeroExpenseStats() {
                     >
                         <Ripple style={styles.dateToggleButton}>
                             <AntDesign name="clockcircleo" size={16} color={Colors.foreground} />
-                            <Text style={styles.dateToggleText}>
+                            <Text variant="caption" style={styles.dateToggleText}>
                                 {moment(dateRange[0]).format("DD.MM")} - {moment(dateRange[1]).format("DD.MM")}
                             </Text>
                         </Ripple>
@@ -290,10 +307,10 @@ export default function ZeroExpenseStats() {
 
                 {currentStreak && (
                     <View style={styles.currentStreakAlert}>
-                        <Text style={styles.currentStreakText}>
+                        <Text variant="subtitle" style={styles.currentStreakText}>
                             🔥 Current streak: {getStreakLength(currentStreak.start, currentStreak.end)} days!
                         </Text>
-                        <Text style={styles.currentStreakSubtext}>
+                        <Text variant="caption" style={styles.currentStreakSubtext}>
                             Started {moment(currentStreak.start).format("MMM D, YYYY")}
                         </Text>
                     </View>
@@ -336,16 +353,18 @@ export default function ZeroExpenseStats() {
 
                 {data?.streak?.length > 0 && (
                     <Animated.View entering={FadeInDown.delay(75 * 6 + 50)} style={styles.streaksSection}>
-                        <Text style={styles.sectionTitle}>
+                        <Text variant="body" style={styles.sectionTitle}>
                             Streak History {data?.streak?.length && `(${data.streak.length})`}
                         </Text>
                         {data.streak.length === 0 ? (
                             <View style={styles.noStreaksContainer}>
-                                <Text style={styles.noStreaksIcon}>🎯</Text>
-                                <Text style={styles.noStreaksText}>
+                                <Text variant="heading" style={styles.noStreaksIcon}>
+                                    🎯
+                                </Text>
+                                <Text variant="subtitle" style={styles.noStreaksText}>
                                     No streaks recorded yet. Start your first streak today!
                                 </Text>
-                                <Text style={styles.noStreaksSubtext}>
+                                <Text variant="caption" style={styles.noStreaksSubtext}>
                                     A streak starts when you have consecutive days without expenses
                                 </Text>
                             </View>
@@ -419,8 +438,6 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     errorText: {
-        color: Colors.error,
-        fontSize: 16,
         textAlign: "center",
     },
     header: {
@@ -431,13 +448,12 @@ const styles = StyleSheet.create({
     },
     headerTitle: {
         color: Colors.foreground,
-        fontWeight: "bold",
         fontSize: 18,
+        fontWeight: "600",
     },
     headerSubtitle: {
         color: "gray",
         marginTop: 5,
-        fontSize: 13,
     },
     dateToggleButton: {
         backgroundColor: Colors.secondary,
@@ -450,9 +466,7 @@ const styles = StyleSheet.create({
     },
     dateToggleText: {
         color: Colors.foreground,
-        fontSize: 11,
         textAlign: "center",
-        fontWeight: "600",
     },
     currentStreakAlert: {
         backgroundColor: Colors.secondary,
@@ -463,12 +477,9 @@ const styles = StyleSheet.create({
     },
     currentStreakText: {
         color: Colors.foreground,
-        fontSize: 16,
-        fontWeight: "bold",
     },
     currentStreakSubtext: {
         color: Colors.foreground,
-        fontSize: 12,
         opacity: 0.8,
         marginTop: 4,
     },
@@ -493,23 +504,19 @@ const styles = StyleSheet.create({
     },
     itemValue: {
         color: Colors.foreground,
-        fontSize: 16,
         fontWeight: "bold",
+        fontSize: 17,
     },
     itemLabel: {
         color: "grey",
-        fontSize: 12,
         marginTop: 2,
+        fontSize: 12,
     },
     comparisonText: {
-        fontSize: 12,
         marginTop: 1,
-        fontWeight: "500",
     },
     sectionTitle: {
         color: Colors.foreground,
-        fontWeight: "bold",
-        fontSize: 18,
         marginBottom: 15,
     },
     streaksSection: {
@@ -529,20 +536,16 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     noStreaksIcon: {
-        fontSize: 32,
         marginBottom: 10,
     },
     noStreaksText: {
         color: Colors.text_light,
         textAlign: "center",
-        fontSize: 16,
-        fontWeight: "500",
         marginBottom: 8,
     },
     noStreaksSubtext: {
         color: Colors.text_dark,
         textAlign: "center",
-        fontSize: 12,
     },
     streakTileHorizontal: {
         width: 180,
@@ -568,25 +571,19 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
     },
-    crownEmoji: {
-        fontSize: 20,
-    },
+    crownEmoji: {},
     streakMainContent: {
         flex: 1,
         justifyContent: "center",
     },
     streakLengthHorizontal: {
-        fontSize: 18,
-        fontWeight: "bold",
         marginBottom: 2,
         textShadowColor: "rgba(0,0,0,0.3)",
         textShadowOffset: { width: 1, height: 1 },
         textShadowRadius: 2,
     },
     streakDateHorizontal: {
-        fontSize: 10,
         lineHeight: 12,
-        fontWeight: "500",
     },
     streakProgressHorizontal: {
         position: "absolute",

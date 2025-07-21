@@ -2,9 +2,10 @@ import { AntDesign, MaterialIcons } from "@expo/vector-icons"
 import { useNavigation } from "@react-navigation/native"
 import moment from "moment"
 import { useMemo } from "react"
-import { StyleProp, Text, View, ViewStyle } from "react-native"
+import { StyleProp, View, ViewStyle } from "react-native"
 import Ripple from "react-native-material-ripple"
 import Colors from "@/constants/Colors"
+import Text from "@/components/ui/Text/Text"
 import { GetTimelineQuery } from "../hooks/query/useGetTimeLineQuery"
 import timelineStyles from "./timeline.styles"
 
@@ -73,10 +74,10 @@ export default function DayTimelineItem(
                             )}
                         </View>
                         <Text
+                            variant="subtitle"
                             numberOfLines={1}
                             style={[
                                 timelineStyles.itemTitle,
-                                { fontSize: 16 },
                                 { ...(timeline.textColor && { color: timeline.textColor }) },
                             ]}
                         >
@@ -84,6 +85,7 @@ export default function DayTimelineItem(
                         </Text>
                     </View>
                     <Text
+                        variant="caption"
                         style={[
                             timelineStyles.itemTimeLeft,
                             { ...(timeline.textColor && { color: timeline.textColor }) },
@@ -104,10 +106,11 @@ export default function DayTimelineItem(
                         }}
                     >
                         <Text
+                            variant="caption"
                             numberOfLines={3}
                             style={[
                                 timelineStyles.itemDescription,
-                                { flex: 1, fontSize: 14 },
+                                { flex: 1 },
                                 { ...(timeline.textColor && { color: timeline.textColor }) },
                             ]}
                         >
@@ -115,12 +118,12 @@ export default function DayTimelineItem(
                         </Text>
                         <View style={{ flexDirection: "row", gap: 10 }}>
                             {timeline.todos.length > 0 && (
-                                <Text style={{ color: Colors.foreground }}>
+                                <Text variant="caption" color={Colors.foreground}>
                                     {timeline.todos.length} {timeline.todos.length > 1 ? "todos" : "todo"}
                                 </Text>
                             )}
                             {timeline.images.length > 0 && (
-                                <Text style={{ color: Colors.foreground }}>
+                                <Text variant="caption" color={Colors.foreground}>
                                     {timeline.images.length} {timeline.images.length > 1 ? "images" : "image"}
                                 </Text>
                             )}

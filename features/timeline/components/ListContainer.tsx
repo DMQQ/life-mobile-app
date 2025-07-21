@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import timelineStyles from "./timeline.styles";
-import { Text, View } from "react-native";
+import { View } from "react-native";
+import Text from "@/components/ui/Text/Text";
 import Ripple from "react-native-material-ripple";
 import { Entypo } from "@expo/vector-icons";
 import TimelineItem from "./TimelineItem";
@@ -47,7 +48,7 @@ const ListContainer = (props: {
           }}
           onPress={props.onPress}
         >
-          <Text style={{ color: Colors.foreground, fontWeight: "bold", fontSize: 13 }}>
+          <Text variant="caption" style={{ color: Colors.foreground, fontWeight: "bold" }}>
             CREATE EVENT
           </Text>
         </Ripple>

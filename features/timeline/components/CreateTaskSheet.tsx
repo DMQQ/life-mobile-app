@@ -1,6 +1,7 @@
 import { Card, IconButton } from "@/components"
 import BottomSheet from "@/components/ui/BottomSheet/BottomSheet"
 import Button from "@/components/ui/Button/Button"
+import Text from "@/components/ui/Text/Text"
 import Input from "@/components/ui/TextInput/TextInput"
 import Colors from "@/constants/Colors"
 import { useTheme } from "@/utils/context/ThemeContext"
@@ -9,7 +10,7 @@ import { AntDesign } from "@expo/vector-icons"
 import BottomSheetType from "@gorhom/bottom-sheet"
 import Color from "color"
 import { forwardRef, useEffect, useRef, useState } from "react"
-import { ActivityIndicator, Keyboard, StyleSheet, Text, View } from "react-native"
+import { ActivityIndicator, Keyboard, StyleSheet, View } from "react-native"
 import { ScrollView } from "react-native-gesture-handler"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import useTodos, { Action, TodoInput as ITodoInput } from "../hooks/general/useTodos"
@@ -28,13 +29,10 @@ const styles = StyleSheet.create({
         marginBottom: 16,
     },
     title: {
-        fontSize: 20,
-        fontWeight: "600",
         color: Colors.foreground,
     },
     subtitle: {
         marginTop: 2,
-        fontSize: 12,
     },
     todosList: {
         flex: 1,
@@ -83,8 +81,8 @@ export default forwardRef<
             <ScrollView style={styles.container} keyboardDismissMode="on-drag">
                 <View style={styles.header}>
                     <View>
-                        <Text style={[styles.title]}>Create Todos</Text>
-                        <Text style={[styles.subtitle, { color: Colors.text_dark }]}>
+                        <Text variant="subheading" style={styles.title}>Create Todos</Text>
+                        <Text variant="caption" color={Colors.text_dark} style={styles.subtitle}>
                             {todoCount} todo{todoCount !== 1 ? "s" : ""} ready to save
                         </Text>
                     </View>
@@ -177,10 +175,9 @@ const Todo = (
                 }}
             >
                 <Text
+                    variant="body"
                     style={{
-                        color: Colors.foreground,
                         flex: 1,
-                        fontSize: 15,
                     }}
                 >
                     {todo.value}

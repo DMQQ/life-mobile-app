@@ -1,4 +1,5 @@
-import { View, Text, StyleProp, TextStyle, ViewStyle } from "react-native";
+import { View, StyleProp, TextStyle, ViewStyle } from "react-native";
+import Text from "@/components/ui/Text/Text";
 import Layout from "../../../constants/Layout";
 import Colors from "../../../constants/Colors";
 import Color from "color";
@@ -73,11 +74,11 @@ export default function SegmentedButtons(props: SegmentedButtonsProps) {
         >
           {value.icon}
           <Text
+            variant="body"
             style={[
               {
                 //  color: Colors.secondary,
                 color: Colors.foreground,
-                fontSize: 16,
                 letterSpacing: 0.5,
                 fontWeight: "bold",
               },

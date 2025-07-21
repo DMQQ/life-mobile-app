@@ -2,7 +2,8 @@ import { gql, useQuery } from "@apollo/client"
 import { AntDesign, MaterialIcons } from "@expo/vector-icons"
 import moment from "moment"
 import React, { useEffect, useState } from "react"
-import { ActivityIndicator, Alert, StyleSheet, Text, View } from "react-native"
+import { ActivityIndicator, Alert, StyleSheet, View } from "react-native"
+import Text from "@/components/ui/Text/Text"
 import Ripple from "react-native-material-ripple"
 
 import Header from "@/components/ui/Header/Header"
@@ -29,6 +30,7 @@ const Txt = ({
     color?: string
 }) => (
     <Text
+        variant={size >= 24 ? "subheading" : size >= 20 ? "subtitle" : "body"}
         style={{
             color,
             fontSize: size,
@@ -222,14 +224,14 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                         <View style={{ marginTop: 2.5 }}>
                             <Txt size={20} color={Colors.foreground}>
                                 {subscription.amount.toFixed(2)}
-                                <Text style={{ fontSize: 16 }}>zł</Text>
+                                <Text variant="body">zł</Text>
                             </Txt>
                         </View>
                     </View>
 
                     <View style={[styles.row, { paddingVertical: 0, paddingLeft: 5 }]}>
                         <CategoryIcon type="expense" category="subscriptions" />
-                        <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>
+                        <Text variant="body" style={{ color: Colors.secondary_light_2 }}>
                             {formatBillingCycle(subscription.billingCycle)} Subscription
                         </Text>
                     </View>
@@ -241,7 +243,7 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                             color={Colors.ternary}
                             style={{ paddingHorizontal: 7.5, padding: 2.5 }}
                         />
-                        <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>
+                        <Text variant="body" style={{ color: Colors.secondary_light_2 }}>
                             Status:{" "}
                             <View
                                 style={{
@@ -253,7 +255,7 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                                     alignItems: "center",
                                 }}
                             >
-                                <Text style={{ color: Colors.foreground, textTransform: "uppercase" }}>
+                                <Text variant="body" style={{ color: Colors.foreground, textTransform: "uppercase" }}>
                                     {subscription.isActive ? " Active" : " Inactive"}
                                 </Text>
                             </View>
@@ -267,7 +269,7 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                             color={Colors.ternary}
                             style={{ paddingHorizontal: 7.5, padding: 2.5 }}
                         />
-                        <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>
+                        <Text variant="body" style={{ color: Colors.secondary_light_2 }}>
                             Started: {parseDate(+subscription.dateStart)}
                         </Text>
                     </View>
@@ -279,7 +281,7 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                             color={Colors.ternary}
                             style={{ paddingHorizontal: 7.5, padding: 2.5 }}
                         />
-                        <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>
+                        <Text variant="body" style={{ color: Colors.secondary_light_2 }}>
                             Running for: {getSubscriptionDuration()}
                         </Text>
                     </View>
@@ -293,9 +295,9 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                                 style={{ paddingHorizontal: 7.5, padding: 2.5 }}
                             />
                             <Text
+                                variant="body"
                                 style={{
                                     color: isOverdue ? "#F07070" : Colors.secondary_light_2,
-                                    fontSize: 18,
                                 }}
                             >
                                 {isOverdue ? "Overdue" : `Next billing: ${parseDate(+subscription.nextBillingDate)}`}
@@ -319,9 +321,9 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                             <ActivityIndicator size="small" color={Colors.foreground} />
                         ) : (
                             <Text
+                                variant="body"
                                 style={{
                                     color: subscription.isActive ? "rgba(255,59,48,0.9)" : "rgba(52,199,89,0.9)",
-                                    fontSize: 16,
                                     fontWeight: "bold",
                                 }}
                             >

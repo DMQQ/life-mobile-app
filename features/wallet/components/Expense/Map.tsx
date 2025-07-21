@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, ReactNode } from "react";
-import { View, Alert, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Alert, TouchableOpacity, StyleSheet } from "react-native";
+import Text from "@/components/ui/Text/Text";
 import Map, { PROVIDER_DEFAULT, Marker, Callout } from "react-native-maps";
 import { AntDesign, Feather } from "@expo/vector-icons";
 import * as Location from "expo-location";
@@ -52,6 +53,7 @@ const findClosestPoint = (points: Point[], currentLocation: Point) => {
 
 const Txt = (props: { children: ReactNode; size: number; color?: any }) => (
   <Text
+    variant={props.size >= 24 ? "subheading" : props.size >= 20 ? "subtitle" : "body"}
     style={{
       color: props.color ?? Colors.secondary,
       fontSize: props.size,
@@ -312,10 +314,10 @@ const MapPicker = (props: Pick<ExpenseType, "location"> & { id: string }) => {
           >
             <Callout tooltip onPress={() => handleAssignLocation(item.id)}>
               <View style={styles.calloutContainer}>
-                <Text style={styles.calloutTitle}>{item.name}</Text>
-                <Text style={styles.calloutDescription}>{item.kind}</Text>
+                <Text variant="body" style={styles.calloutTitle}>{item.name}</Text>
+                <Text variant="caption" style={styles.calloutDescription}>{item.kind}</Text>
                 <View style={styles.calloutButton}>
-                  <Text style={styles.calloutButtonText}>Assign Location</Text>
+                  <Text variant="caption" style={styles.calloutButtonText}>Assign Location</Text>
                 </View>
               </View>
             </Callout>
@@ -333,8 +335,8 @@ const MapPicker = (props: Pick<ExpenseType, "location"> & { id: string }) => {
           >
             <Callout>
               <View style={styles.calloutContainer}>
-                <Text style={styles.calloutTitle}>{selectedMarker.name}</Text>
-                <Text style={styles.calloutDescription}>Selected Location</Text>
+                <Text variant="body" style={styles.calloutTitle}>{selectedMarker.name}</Text>
+                <Text variant="caption" style={styles.calloutDescription}>Selected Location</Text>
               </View>
             </Callout>
           </Marker>
@@ -351,8 +353,8 @@ const MapPicker = (props: Pick<ExpenseType, "location"> & { id: string }) => {
           >
             <Callout>
               <View style={styles.calloutContainer}>
-                <Text style={styles.calloutTitle}>{assignedMarker.name}</Text>
-                <Text style={styles.calloutDescription}>Assigned Location</Text>
+                <Text variant="body" style={styles.calloutTitle}>{assignedMarker.name}</Text>
+                <Text variant="caption" style={styles.calloutDescription}>Assigned Location</Text>
               </View>
             </Callout>
           </Marker>

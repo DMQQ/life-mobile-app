@@ -90,7 +90,21 @@ const AnimatedSearchInput = ({ scrollY }: AnimatedSearchInputProps) => {
                     onFocus={handleFocus}
                     onBlur={handleFocus}
                 />
-                <IconButton icon={<AntDesign name="search1" size={20} color={Colors.foreground} />} onPress={onSubmit} />
+                {wallet.filters.query === value && (wallet.filters.query !== "" || value !== "") ? (
+                    <IconButton
+                        icon={<AntDesign name="close" size={20} color={Colors.foreground} />}
+                        onPress={() => {
+                            Haptics.trigger("impactLight")
+                            setValue("")
+                            wallet.dispatch({ type: "SET_QUERY", payload: "" })
+                        }}
+                    />
+                ) : (
+                    <IconButton
+                        icon={<AntDesign name="search1" size={20} color={Colors.foreground} />}
+                        onPress={onSubmit}
+                    />
+                )}
             </View>
         </Animated.View>
     )

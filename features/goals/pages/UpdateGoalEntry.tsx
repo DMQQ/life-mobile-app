@@ -1,5 +1,6 @@
 import moment from "moment";
-import { Keyboard, StyleSheet, Text, View, TouchableWithoutFeedback } from "react-native";
+import { Keyboard, StyleSheet, View, TouchableWithoutFeedback } from "react-native";
+import Text from "@/components/ui/Text/Text";
 import Colors from "@/constants/Colors";
 import { memo, useCallback, useRef, useState } from "react";
 import Ripple from "react-native-material-ripple";
@@ -404,7 +405,7 @@ export default function AddGoalEntry({ route, navigation }: any) {
                 padding: 10,
               }}
             >
-              <Text style={{ color: Colors.foreground, fontWeight: "500" }}>{date}</Text>
+              <Text variant="body" style={{ color: Colors.foreground, fontWeight: "500" }}>{date}</Text>
             </Ripple>
           </View>
 
@@ -423,13 +424,13 @@ export default function AddGoalEntry({ route, navigation }: any) {
               <View style={{ flexDirection: "row", gap: 15, alignItems: "center" }}>
                 <Animated.Text style={[{ color: Colors.foreground, fontWeight: "bold" }, animatedAmount]}>
                   {amount}
-                  <Text style={{ fontSize: 16, color: "rgba(255,255,255,0.7)" }}> {goal?.unit}</Text>
+                  <Text variant="body" style={{ color: "rgba(255,255,255,0.7)" }}> {goal?.unit}</Text>
                 </Animated.Text>
               </View>
               <View style={{ flexDirection: "row", gap: 5 }}>
                 <MaterialCommunityIcons name={goal?.icon || "progress-check"} size={22.5} color={Colors.secondary} />
 
-                <Text style={{ color: "rgba(255,255,255,0.7)", marginBottom: 15, fontSize: 18 }}>{goal?.name}</Text>
+                <Text variant="body" style={{ color: "rgba(255,255,255,0.7)", marginBottom: 15 }}>{goal?.name}</Text>
               </View>
             </View>
           </View>
@@ -445,7 +446,7 @@ export default function AddGoalEntry({ route, navigation }: any) {
                 {/* Quick Values */}
                 {quickValues.length > 0 && (
                   <View>
-                    <Text style={{ color: "rgba(255,255,255,0.7)", fontSize: 16, marginBottom: 10, fontWeight: "500" }}>Quick Values</Text>
+                    <Text variant="body" style={{ color: "rgba(255,255,255,0.7)", marginBottom: 10, fontWeight: "500" }}>Quick Values</Text>
                     <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
                       <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10, justifyContent: "flex-start" }}>
                         {quickValues.map((item, index) => (
@@ -588,7 +589,7 @@ const NumpadNumber = (props: { onPress: VoidFunction; num: string | number; rota
         {props.num === "C" ? (
           <Entypo name="chevron-left" size={40} color={Colors.foreground} />
         ) : (
-          <Text style={{ color: Colors.foreground, fontWeight: "bold", fontSize: 24 }}>{props.num}</Text>
+          <Text variant="subheading" style={{ color: Colors.foreground, fontWeight: "bold" }}>{props.num}</Text>
         )}
       </AnimatedRipple>
     </View>

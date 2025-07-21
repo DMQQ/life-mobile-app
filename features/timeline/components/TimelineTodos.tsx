@@ -1,9 +1,10 @@
 import { Card } from "@/components"
+import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
 import { Todos } from "@/types"
 import Color from "color"
 import { useState } from "react"
-import { StyleSheet, Text, View } from "react-native"
+import { StyleSheet, View } from "react-native"
 import TodoHeader from "./TodoHeader"
 import TodoItem from "./TodoItem"
 import TodoTransferDialog from "./TodoTransferDialog"
@@ -49,7 +50,7 @@ export default function TimelineTodos(props: { sortedTodos: Todos[]; timelineId:
                     ))
                 ) : (
                     <Card style={styles.emptyState}>
-                        <Text style={styles.emptyText}>No todos yet. Tap "Add Todo" to get started!</Text>
+                        <Text variant="body" style={styles.emptyText}>No todos yet. Tap "Add Todo" to get started!</Text>
                     </Card>
                 )}
             </View>

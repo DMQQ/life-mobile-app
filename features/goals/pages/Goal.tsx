@@ -5,7 +5,8 @@ import { MaterialCommunityIcons } from "@expo/vector-icons"
 import Color from "color"
 import moment from "moment"
 import { useMemo } from "react"
-import { StyleSheet, Text, View } from "react-native"
+import { StyleSheet, View } from "react-native"
+import Text from "@/components/ui/Text/Text"
 import Animated, { useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated"
 import DayEntry from "../components/GoalEntry"
 import GitHubActivityGrid from "../components/StatGrid"
@@ -80,8 +81,8 @@ export default function Goal({ route, navigation }: any) {
                                 style={{ flexDirection: "row", justifyContent: "space-between", paddingVertical: 30 }}
                             >
                                 <View>
-                                    <Text style={{ fontSize: 24, fontWeight: "600", color: Colors.foreground }}>{goal?.name}</Text>
-                                    <Text style={{ fontSize: 16, color: "rgba(255,255,255,0.9)", marginTop: 5 }}>
+                                    <Text variant="subheading" style={{ fontWeight: "600", color: Colors.foreground }}>{goal?.name}</Text>
+                                    <Text variant="body" style={{ color: "rgba(255,255,255,0.9)", marginTop: 5 }}>
                                         {goal?.description}
                                     </Text>
                                 </View>
@@ -97,7 +98,7 @@ export default function Goal({ route, navigation }: any) {
                             </View>
                         </View>
                     }
-                    ListEmptyComponent={<Text style={styles.emptyText}>No entries yet</Text>}
+                    ListEmptyComponent={<Text variant="body" style={styles.emptyText}>No entries yet</Text>}
                 />
                 <Button
                     onPress={() => {

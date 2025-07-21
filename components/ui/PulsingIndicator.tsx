@@ -1,47 +1,43 @@
-import lowOpacity from "@/utils/functions/lowOpacity"
+import Colors from "@/constants/Colors"
 import React, { useEffect } from "react"
+import { View } from "react-native"
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withRepeat, withTiming } from "react-native-reanimated"
-import { Colors } from "react-native/Libraries/NewAppScreen"
 
 interface PulsingIndicatorProps {
     size?: number
     color?: string
-    backgroundColor?: string
     duration?: number
-    scaleRange?: number
     style?: any
 }
 
 const PulsingIndicator: React.FC<PulsingIndicatorProps> = ({
-    size = 12.5,
+    size = 8,
     color = Colors.secondary,
-    backgroundColor = lowOpacity(Colors.secondary, 0.5),
     duration = 1000,
-    scaleRange = 1.5,
     style,
 }) => {
     const scale = useSharedValue(1)
-    const opacity = useSharedValue(1)
+    const opacity = useSharedValue(0.8)
 
     useEffect(() => {
         scale.value = withRepeat(
-            withTiming(scaleRange, {
+            withTiming(2.5, {
                 duration,
-                easing: Easing.bezier(0.4, 0, 0.6, 1),
+                easing: Easing.out(Easing.quad),
             }),
             -1,
             true,
         )
 
         opacity.value = withRepeat(
-            withTiming(0.3, {
+            withTiming(0.25, {
                 duration,
-                easing: Easing.bezier(0.4, 0, 0.6, 1),
+                easing: Easing.out(Easing.quad),
             }),
             -1,
             true,
         )
-    }, [duration, scaleRange])
+    }, [duration, scale, opacity])
 
     const animatedStyle = useAnimatedStyle(() => ({
         transform: [{ scale: scale.value }],
@@ -49,25 +45,35 @@ const PulsingIndicator: React.FC<PulsingIndicatorProps> = ({
     }))
 
     return (
-        <Animated.View
+        <View
             style={[
                 {
                     position: "absolute",
-                    top: -5,
-                    right: 0,
-                    width: size,
-                    height: size,
-                    backgroundColor,
-                    borderRadius: size / 2,
-                    justifyContent: "center",
-                    alignItems: "center",
+                    bottom: -7,
+                    left: -7,
+                    width: size * 6,
+                    height: size * 6,
                 },
                 style,
             ]}
         >
+            <View
+                style={{
+                    width: size,
+                    height: size,
+                    borderRadius: size / 2,
+                    backgroundColor: color,
+                    position: "absolute",
+                    top: 15,
+                    right: 20,
+                }}
+            />
             <Animated.View
                 style={[
                     {
+                        position: "absolute",
+                        top: 15,
+                        right: 20,
                         width: size,
                         height: size,
                         borderRadius: size / 2,
@@ -76,7 +82,7 @@ const PulsingIndicator: React.FC<PulsingIndicatorProps> = ({
                     animatedStyle,
                 ]}
             />
-        </Animated.View>
+        </View>
     )
 }
 

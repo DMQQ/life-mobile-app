@@ -1,7 +1,8 @@
 import Colors from "@/constants/Colors"
+import Text from "@/components/ui/Text/Text"
 import { Todos } from "@/types"
 import Color from "color"
-import { Pressable, StyleSheet, Text, View } from "react-native"
+import { Pressable, StyleSheet, View } from "react-native"
 
 const styles = StyleSheet.create({
     header: {
@@ -37,12 +38,12 @@ export default function TodoHeader({ todos, onAddTodo, onLongPress }: TodoHeader
     return (
         <View style={styles.header}>
             <View style={styles.titleContainer}>
-                <Text style={{ color: Colors.text_light, fontWeight: "600", fontSize: 20 }}>Todos</Text>
+                <Text variant="subheading" color={Colors.text_light}>Todos</Text>
                 <Text
+                    variant="body"
                     style={{
                         marginLeft: 12,
                         alignSelf: "center",
-                        color: Colors.foreground,
                     }}
                 >
                     {completedCount}/{todos.length}
@@ -59,7 +60,7 @@ export default function TodoHeader({ todos, onAddTodo, onLongPress }: TodoHeader
                     },
                 ]}
             >
-                <Text style={{ color: Colors.text_light, fontWeight: "500", fontSize: 14 }}>+ Add Todo</Text>
+                <Text variant="caption" color={Colors.text_light}>+ Add Todo</Text>
             </Pressable>
         </View>
     )

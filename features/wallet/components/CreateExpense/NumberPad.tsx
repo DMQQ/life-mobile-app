@@ -2,7 +2,8 @@ import Colors from "@/constants/Colors"
 import { Entypo } from "@expo/vector-icons"
 import { useNavigation } from "@react-navigation/native"
 import { memo, useRef } from "react"
-import { Text, View } from "react-native"
+import { View } from "react-native"
+import Text from "@/components/ui/Text/Text"
 import Feedback from "react-native-haptic-feedback"
 import Ripple from "react-native-material-ripple"
 import Animated, {
@@ -113,7 +114,7 @@ const NumpadNumber = (props: {
                 {props.num === "C" ? (
                     <Entypo name="chevron-left" size={40} color={Colors.foreground} />
                 ) : (
-                    <Text style={{ color: Colors.foreground, fontWeight: "bold", fontSize: 28 }}>{props.num}</Text>
+                    <Text variant="title" style={{ color: Colors.foreground, fontWeight: "bold" }}>{props.num}</Text>
                 )}
             </AnimatedRipple>
         </View>

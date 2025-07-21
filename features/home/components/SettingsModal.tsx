@@ -1,5 +1,6 @@
 import { AnimatedSelector, TextInput } from "@/components"
 import Button from "@/components/ui/Button/Button"
+import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
 import Layout from "@/constants/Layout"
 import useUser from "@/utils/hooks/useUser"
@@ -9,7 +10,7 @@ import { reloadAppAsync } from "expo"
 import { BlurView } from "expo-blur"
 import * as SecureStore from "expo-secure-store"
 import { useState } from "react"
-import { FlatList, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native"
+import { FlatList, Modal, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native"
 import Feedback from "react-native-haptic-feedback"
 import Ripple from "react-native-material-ripple"
 
@@ -212,8 +213,6 @@ const styles = StyleSheet.create({
     },
     modalTitle: {
         color: Colors.text_light,
-        fontSize: 18,
-        fontWeight: "bold",
     },
     closeButton: {
         padding: 8,
@@ -242,13 +241,9 @@ const styles = StyleSheet.create({
     },
     signedAsText: {
         color: "#fff",
-        fontSize: 25,
-        fontWeight: "bold",
     },
     emailText: {
         color: "rgba(255,255,255,0.6)",
-        fontSize: 20,
-        fontWeight: "bold",
         marginTop: 5,
     },
     themeSection: {
@@ -264,8 +259,6 @@ const styles = StyleSheet.create({
     },
     themeSectionTitle: {
         color: "#fff",
-        fontSize: 18,
-        fontWeight: "600",
         marginBottom: 20,
     },
     themeToggle: {
@@ -287,13 +280,9 @@ const styles = StyleSheet.create({
     },
     toggleText: {
         color: "#fff",
-        fontSize: 14,
-        fontWeight: "600",
     },
     categoryHeader: {
         color: "rgba(255, 255, 255, 0.7)",
-        fontSize: 14,
-        fontWeight: "600",
         marginTop: 15,
         marginBottom: 10,
         textTransform: "uppercase",
@@ -323,8 +312,6 @@ const styles = StyleSheet.create({
     },
     paletteName: {
         color: "#fff",
-        fontSize: 9,
-        fontWeight: "600",
         marginBottom: 10,
     },
     colorSwatch: {
@@ -363,8 +350,6 @@ const styles = StyleSheet.create({
     },
     colorTypeText: {
         color: "#fff",
-        fontSize: 12,
-        fontWeight: "600",
     },
     colorPicker: {
         marginBottom: 15,
@@ -402,7 +387,6 @@ const styles = StyleSheet.create({
     },
     colorLabel: {
         color: "rgba(255, 255, 255, 0.7)",
-        fontSize: 12,
         textAlign: "center",
         marginTop: 5,
     },
@@ -527,7 +511,7 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
             style={[styles.paletteItem, selectedPalette?.name === item.name && styles.selectedPalette]}
         >
             <View style={styles.paletteContent}>
-                <Text style={styles.paletteName} numberOfLines={1}>
+                <Text variant="caption" style={styles.paletteName} numberOfLines={1}>
                     {item.name}
                 </Text>
                 <View style={styles.colorSwatch}>
@@ -554,7 +538,7 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
                 <BlurView intensity={80} tint="dark" style={styles.blurBackground} />
                 <View style={styles.modalContent}>
                     <View style={styles.modalHeader}>
-                        <Text style={styles.modalTitle}>Settings</Text>
+                        <Text variant="body" style={styles.modalTitle}>Settings</Text>
                         <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
                             <AntDesign name="close" size={24} color={Colors.text_light} />
                         </TouchableOpacity>
@@ -570,8 +554,8 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
                                 <View style={styles.profileCard}>
                                     <BlurView intensity={60} tint="dark">
                                         <View style={styles.profileContent}>
-                                            <Text style={styles.signedAsText}>Signed as</Text>
-                                            <Text style={styles.emailText}>{user?.email}</Text>
+                                            <Text variant="title" style={styles.signedAsText}>Signed as</Text>
+                                            <Text variant="subheading" style={styles.emailText}>{user?.email}</Text>
                                         </View>
                                     </BlurView>
                                 </View>
@@ -579,7 +563,7 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
                                 <View style={styles.themeSection}>
                                     <BlurView intensity={60} tint="dark">
                                         <View style={styles.themeSectionContent}>
-                                            <Text style={styles.themeSectionTitle}>Choose Color Palette</Text>
+                                            <Text variant="body" style={styles.themeSectionTitle}>Choose Color Palette</Text>
 
                                             {/* <View style={styles.themeToggle}>
                                                 <TouchableOpacity
@@ -615,7 +599,7 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
                                                 <View style={styles.paletteGrid}>
                                                     {Object.entries(groupedPalettes).map(([category, palettes]) => (
                                                         <View key={category}>
-                                                            <Text style={styles.categoryHeader}>{category}</Text>
+                                                            <Text variant="caption" style={styles.categoryHeader}>{category}</Text>
                                                             <FlatList
                                                                 horizontal
                                                                 data={palettes}
@@ -692,7 +676,7 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
                                                                     { backgroundColor: customColors.primary },
                                                                 ]}
                                                             />
-                                                            <Text style={styles.colorLabel}>Primary</Text>
+                                                            <Text variant="caption" style={styles.colorLabel}>Primary</Text>
                                                         </View>
                                                         <View style={{ alignItems: "center" }}>
                                                             <View
@@ -701,7 +685,7 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
                                                                     { backgroundColor: customColors.secondary },
                                                                 ]}
                                                             />
-                                                            <Text style={styles.colorLabel}>Secondary</Text>
+                                                            <Text variant="caption" style={styles.colorLabel}>Secondary</Text>
                                                         </View>
                                                         <View style={{ alignItems: "center" }}>
                                                             <View
@@ -710,7 +694,7 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
                                                                     { backgroundColor: customColors.ternary },
                                                                 ]}
                                                             />
-                                                            <Text style={styles.colorLabel}>Ternary</Text>
+                                                            <Text variant="caption" style={styles.colorLabel}>Ternary</Text>
                                                         </View>
                                                         <View style={{ alignItems: "center" }}>
                                                             <View
@@ -719,7 +703,7 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
                                                                     { backgroundColor: customColors.foreground },
                                                                 ]}
                                                             />
-                                                            <Text style={styles.colorLabel}>Foreground</Text>
+                                                            <Text variant="caption" style={styles.colorLabel}>Foreground</Text>
                                                         </View>
                                                     </View>
                                                 </View>

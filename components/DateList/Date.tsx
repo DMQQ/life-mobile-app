@@ -3,7 +3,8 @@ import { Rounded } from "@/constants/Values"
 import Color from "color"
 import moment from "moment"
 import { memo } from "react"
-import { StyleSheet, Text, View } from "react-native"
+import { StyleSheet, View } from "react-native"
+import Text from "@/components/ui/Text/Text"
 import Haptic from "react-native-haptic-feedback"
 import Ripple from "react-native-material-ripple"
 import Animated, { FadeIn } from "react-native-reanimated"
@@ -79,11 +80,11 @@ const DateComponent = (props: DateProps) => {
             style={[styles.container, { backgroundColor: dateItemBg }]}
         >
             <Dots tasks={tasks} />
-            <Text style={{ color: Colors.foreground, fontSize: 32, fontWeight: "bold" }}>{date.getDate()}</Text>
-            <Text style={{ color: "#ffffffcb", fontSize: 17 }}>
+            <Text variant="title" style={{ color: Colors.foreground, fontWeight: "bold" }}>{date.getDate()}</Text>
+            <Text variant="body" style={{ color: "#ffffffcb" }}>
                 {date.getDay() === 0 ? "Sun" : moment.weekdays()[date.getDay()].slice(0, 3)}
             </Text>
-            <Text style={{ color: "#ffffff8c", fontSize: 11 }}>{months[date.getMonth()].slice(0, 3)}</Text>
+            <Text variant="caption" style={{ color: "#ffffff8c" }}>{months[date.getMonth()].slice(0, 3)}</Text>
         </Ripple>
     )
 }

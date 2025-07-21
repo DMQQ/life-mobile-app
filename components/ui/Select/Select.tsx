@@ -1,4 +1,5 @@
-import { View, Text, TouchableOpacity, ListRenderItem, StyleProp, ViewStyle, Pressable, LayoutChangeEvent, StyleSheet } from "react-native";
+import { View, TouchableOpacity, ListRenderItem, StyleProp, ViewStyle, Pressable, LayoutChangeEvent, StyleSheet } from "react-native";
+import Text from "@/components/ui/Text/Text";
 import Layout from "../../../constants/Layout";
 import Colors from "../../../constants/Colors";
 import Color from "color";
@@ -139,9 +140,9 @@ export default function Select({
           }}
         >
           <Text
+            variant="body"
             style={{
               color: isSelected ? Colors.foreground : Colors.secondary,
-              fontSize: 18,
             }}
           >
             {item}
@@ -235,9 +236,9 @@ export default function Select({
               rest.renderCustomSelected
             ) : (
               <Text
+                variant="body"
                 numberOfLines={1}
                 style={{
-                  fontSize: 18,
                   color: isFocused ? Colors.secondary : selected.some((v) => v.trim().length > 0) ? Colors.foreground : "gray",
                   flex: 1,
                   paddingHorizontal: 20,

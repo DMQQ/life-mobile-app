@@ -6,7 +6,8 @@ import wrapWithFunction from "@/utils/functions/wrapFn"
 import { AntDesign, MaterialIcons } from "@expo/vector-icons"
 import moment from "moment"
 import { useCallback, useMemo, useRef, useState } from "react"
-import { StyleSheet, Text, View, VirtualizedList } from "react-native"
+import { StyleSheet, View, VirtualizedList } from "react-native"
+import Text from "@/components/ui/Text/Text"
 import Feedback from "react-native-haptic-feedback"
 import Ripple from "react-native-material-ripple"
 import Animated, { FadeOut, useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated"
@@ -297,12 +298,12 @@ function WalletCharts({ navigation }: any) {
 
                         {selectedCategoryData.length > 0 && (
                             <View style={{ width: Layout.screen.width - 30, marginTop: 25 }}>
-                                <Text style={{ color: Colors.foreground, fontWeight: "bold", fontSize: 18 }}>
+                                <Text variant="body" style={{ color: Colors.foreground, fontWeight: "bold" }}>
                                     Selected category:{" "}
                                     <Text
+                                        variant="body"
                                         style={{
                                             color: barData.find((c) => c.label === selected)?.color,
-                                            fontSize: 18,
                                             textTransform: "capitalize",
                                         }}
                                     >
@@ -337,7 +338,7 @@ function WalletCharts({ navigation }: any) {
                     <>
                         {selectedCategoryData.length > step && (
                             <Ripple onPress={() => setStep(selectedCategoryData.length)}>
-                                <Text style={styles.viewAll}>View all</Text>
+                                <Text variant="body" style={styles.viewAll}>View all</Text>
                             </Ripple>
                         )}
                         <StatisticsSummary />

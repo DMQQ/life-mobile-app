@@ -1,4 +1,5 @@
-import { Pressable, StyleSheet, Text, VirtualizedList } from "react-native";
+import { Pressable, StyleSheet, VirtualizedList } from "react-native";
+import Text from "@/components/ui/Text/Text";
 import { CommonEvents } from "../CommonEvents.data";
 import Animated from "react-native-reanimated";
 import Colors from "@/constants/Colors";
@@ -57,9 +58,9 @@ const Tile = ({ item, selected, ...props }: TileProps) => {
       ]}
     >
       <Animated.View>
-        <Text style={styles.tileTitle}>{item.name}</Text>
+        <Text variant="title" style={styles.tileTitle}>{item.name}</Text>
 
-        <Text style={styles.tileContent}>{item.content}</Text>
+        <Text variant="body" style={styles.tileContent}>{item.content}</Text>
       </Animated.View>
     </Pressable>
   );

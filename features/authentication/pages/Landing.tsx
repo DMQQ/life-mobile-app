@@ -1,4 +1,5 @@
-import { Image, Text, View } from "react-native";
+import { Image, View } from "react-native";
+import Text from "@/components/ui/Text/Text";
 import ScreenContainer from "@/components/ui/ScreenContainer";
 import Button from "@/components/ui/Button/Button";
 
@@ -10,9 +11,9 @@ export default function Landing({ navigation }: any) {
   return (
     <ScreenContainer>
       <Text
+        variant="title"
         style={{
           color: Colors.foreground,
-          fontSize: 24,
           fontWeight: "bold",
         }}
       >

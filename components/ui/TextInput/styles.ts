@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import Colors from "/Users/dmq/Desktop/projects/life/life-mobile-app/constants/Colors";
+import Colors from "../../../constants/Colors";
 
 const styles = StyleSheet.create({
   container: {

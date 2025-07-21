@@ -1,11 +1,12 @@
 import Colors from "@/constants/Colors"
 import Layout from "@/constants/Layout"
+import Text from "@/components/ui/Text/Text"
 import { StackScreenProps } from "@/types"
 import { AntDesign, Feather } from "@expo/vector-icons"
 import BottomSheetType from "@gorhom/bottom-sheet"
 import Color from "color"
 import { useCallback, useMemo, useRef } from "react"
-import { StyleSheet, Text, View } from "react-native"
+import { StyleSheet, View } from "react-native"
 import Ripple from "react-native-material-ripple"
 import Animated, { Extrapolation, interpolate, SharedValue, useAnimatedStyle } from "react-native-reanimated"
 import FileList from "../components/FileList"
@@ -24,8 +25,6 @@ const AnimatedRipple = Animated.createAnimatedComponent(Ripple)
 const styles = StyleSheet.create({
     title: {
         marginBottom: 10,
-        fontSize: 32.5,
-        fontWeight: "bold",
         color: Colors.secondary,
     },
     container: {
@@ -33,7 +32,6 @@ const styles = StyleSheet.create({
         minHeight: Layout.screen.height - 120,
     },
     contentText: {
-        fontSize: 20,
         color: "rgba(255,255,255,0.7)",
     },
     timelineIdText: {
@@ -165,7 +163,7 @@ export default function TimelineDetails({
 
                         <FileList timelineId={data?.id} />
 
-                        <Text selectable style={styles.timelineIdText}>
+                        <Text variant="caption" selectable style={styles.timelineIdText}>
                             Event unique id: {data?.id}
                         </Text>
                     </View>
@@ -197,7 +195,7 @@ const AnimatedProgressBar = ({ percentage, scrollY }: { percentage: number; scro
                 { paddingHorizontal: 15, paddingBottom: 15 },
             ]}
         >
-            <Text style={{ fontSize: 10, color: "#fff", marginBottom: 2.5 }}>Task completion progress</Text>
+            <Text variant="caption" color="#fff" style={{ marginBottom: 2.5 }}>Task completion progress</Text>
             <CompletionBar percentage={percentage} />
         </Animated.View>
     )

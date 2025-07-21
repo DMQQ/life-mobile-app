@@ -1,8 +1,9 @@
 import { Button } from "@/components"
+import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
 import { AntDesign } from "@expo/vector-icons"
 import { BlurView } from "expo-blur"
-import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native"
+import { Modal, StyleSheet, TouchableOpacity, View } from "react-native"
 import Feedback from "react-native-haptic-feedback"
 import WalletNotifications, { useGetNotifications } from "../../wallet/components/Wallet/WalletNotifications"
 import useReadAllNotifications from "../../wallet/hooks/useReadAllNotifications"
@@ -34,8 +35,6 @@ const styles = StyleSheet.create({
     },
     modalTitle: {
         color: Colors.text_light,
-        fontSize: 18,
-        fontWeight: "bold",
     },
     closeButton: {
         padding: 8,
@@ -46,8 +45,6 @@ const styles = StyleSheet.create({
     },
     badgeText: {
         color: Colors.foreground,
-        fontSize: 12,
-        fontWeight: "bold",
         alignItems: "center",
         transform: [{ translateY: -1 }],
     },
@@ -89,11 +86,11 @@ export default function NotificationsModal({ visible, onClose }: NotificationsMo
                 <BlurView intensity={80} tint="dark" style={styles.blurBackground} />
                 <View style={styles.modalContent}>
                     <View style={styles.modalHeader}>
-                        <Text style={styles.modalTitle}>Notifications</Text>
+                        <Text variant="body" style={styles.modalTitle}>Notifications</Text>
                         <View style={styles.headerActions}>
                             {unreadCount > 0 && (
                                 <Button type="outlined" onPress={handleClearAll}>
-                                    <Text style={styles.badgeText}>Clear all {unreadCount}</Text>
+                                    <Text variant="caption" style={styles.badgeText}>Clear all {unreadCount}</Text>
                                 </Button>
                             )}
                             <TouchableOpacity onPress={closeNotifications} style={styles.closeButton}>

@@ -1,6 +1,7 @@
 import Button from "@/components/ui/Button/Button";
 import Colors from "@/constants/Colors";
-import { ActivityIndicator, Text, View } from "react-native";
+import { ActivityIndicator, View } from "react-native";
+import Text from "@/components/ui/Text/Text";
 import Ripple from "react-native-material-ripple";
 import { StyleSheet } from "react-native";
 import useSuggestedEvents from "./useSuggestedEvents";
@@ -53,10 +54,10 @@ export default function SuggestedEvents(props: SuggestedEventsProps) {
 
   return (
     <View style={styles.container}>
-      <Text style={{ color: Colors.foreground, fontSize: 24, fontWeight: "bold" }}>
+      <Text variant="subheading" style={{ color: Colors.foreground }}>
         Commonly used events
       </Text>
-      <Text style={{ color: "rgba(255,255,255,0.6)", fontSize: 13 }}>
+      <Text variant="caption" style={{ color: "rgba(255,255,255,0.6)" }}>
         Quick, premade events to use
       </Text>
 
@@ -67,7 +68,7 @@ export default function SuggestedEvents(props: SuggestedEventsProps) {
 
       {hasSubCategory && (
         <>
-          <Text style={{ color: "rgba(255,255,255,0.6)", fontSize: 13 }}>
+          <Text variant="caption" style={{ color: "rgba(255,255,255,0.6)" }}>
             Press to set category
           </Text>
           <SubcategoryList
@@ -85,8 +86,8 @@ export default function SuggestedEvents(props: SuggestedEventsProps) {
             onPress={() => setIsVisible(true)}
             onLayout={() => setIsVisible(true)}
           >
-            <Text style={{ color: Colors.foreground, fontSize: 17 }}>Set time</Text>
-            <Text style={{ color: Colors.foreground, fontSize: 17 }}>
+            <Text variant="body" style={{ color: Colors.foreground }}>Set time</Text>
+            <Text variant="body" style={{ color: Colors.foreground }}>
               {time?.toLocaleTimeString("pl-PL", {
                 hour: "2-digit",
                 minute: "2-digit",

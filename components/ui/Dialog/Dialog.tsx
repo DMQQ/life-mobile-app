@@ -2,7 +2,8 @@ import Colors from "@/constants/Colors"
 import Layout from "@/constants/Layout"
 import { AntDesign } from "@expo/vector-icons"
 import { useState } from "react"
-import { ActivityIndicator, StyleSheet, Text, TextStyle, View, ViewStyle } from "react-native"
+import { ActivityIndicator, StyleSheet, TextStyle, View, ViewStyle } from "react-native"
+import Text from "@/components/ui/Text/Text"
 import Animated, { FadeInDown, FadeOutDown } from "react-native-reanimated"
 import Button, { ButtonProps } from "../Button/Button"
 import IconButton from "../IconButton/IconButton"
@@ -156,8 +157,8 @@ export default function Dialog({
                     {(iconPosition === "center" || iconPosition === "left") && renderIcon()}
 
                     <View style={{ gap: 15 }}>
-                        <Text style={[styles.title, titleStyle]}>{title}</Text>
-                        {description && <Text style={[styles.description, descriptionStyle]}>{description}</Text>}
+                        <Text variant="subheading" style={[styles.title, titleStyle]}>{title}</Text>
+                        {description && <Text variant="body" style={[styles.description, descriptionStyle]}>{description}</Text>}
                     </View>
 
                     <View>{children}</View>

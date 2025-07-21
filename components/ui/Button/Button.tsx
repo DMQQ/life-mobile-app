@@ -1,10 +1,11 @@
 import React from "react"
-import { StyleProp, Text, TextStyle, View, ViewStyle } from "react-native"
+import { StyleProp, TextStyle, View, ViewStyle } from "react-native"
 import Ripple, { RippleProps } from "react-native-material-ripple"
 
 import { BUTTON_BORDER_RADIUS, BUTTON_SIZE, BUTTON_TYPES, VARIANTS, styles } from "./assets"
 
 import Colors from "@/constants/Colors"
+import Text from "@/components/ui/Text/Text"
 import lowOpacity from "@/utils/functions/lowOpacity"
 import Color from "color"
 
@@ -86,7 +87,7 @@ export default function Button({
             {...rest}
         >
             {/* {!!badge && <Badge amount={badge} left />} */}
-            {typeof children !== "undefined" && <Text style={[styles.text, textStyle, fontStyle]}>{children}</Text>}
+            {typeof children !== "undefined" && <Text variant="body" style={[styles.text, textStyle, fontStyle]}>{children}</Text>}
             <View style={iconStyle}>{icon}</View>
         </Ripple>
     )
@@ -103,9 +104,9 @@ export const ViewMoreButton = (props: { onPress: () => any; text: string; disabl
         }}
     >
         <Text
+            variant="body"
             style={{
                 color: Colors.foreground,
-                fontSize: 15,
             }}
         >
             {props.text}

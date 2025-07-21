@@ -1,7 +1,8 @@
 import moment from "moment"
-import { StyleSheet, Text, View } from "react-native"
+import { StyleSheet, View } from "react-native"
 import Animated, { interpolate, SharedValue, useAnimatedStyle } from "react-native-reanimated"
 import Colors from "@/constants/Colors"
+import Text from "@/components/ui/Text/Text"
 
 interface AmountDisplayProps {
     amount: string
@@ -38,11 +39,11 @@ export default function AmountDisplay({
             <View>
                 <Animated.Text style={[{ color: Colors.foreground, fontWeight: "bold", textAlign: "center" }, animatedAmount]}>
                     {amount}
-                    <Text style={{ fontSize: 20 }}>zł</Text>
+                    <Text variant="body" style={{ fontSize: 20 }}>zł</Text>
                 </Animated.Text>
 
                 {subExpensesLength > 0 && (
-                    <Text style={{ color: "rgba(255,255,255,0.7)", fontSize: 15, textAlign: "center" }}>
+                    <Text variant="body" style={{ color: "rgba(255,255,255,0.7)", textAlign: "center" }}>
                         {subExpensesLength} item for ~{calculateSubExpensesTotal().toFixed(2)}zł
                     </Text>
                 )}
@@ -50,7 +51,7 @@ export default function AmountDisplay({
 
             {moment(date).isAfter(moment()) && type && amount != "0" && (
                 <View style={styles.scheduledContainer}>
-                    <Text style={styles.scheduledText}>scheduled for {moment(date).format("DD MMMM YYYY")}</Text>
+                    <Text variant="caption" style={styles.scheduledText}>scheduled for {moment(date).format("DD MMMM YYYY")}</Text>
                 </View>
             )}
         </View>
@@ -71,7 +72,6 @@ const styles = StyleSheet.create({
 
     scheduledText: {
         color: "rgba(255,255,255,0.7)",
-        fontSize: 12,
         textAlign: "center",
     },
 })
