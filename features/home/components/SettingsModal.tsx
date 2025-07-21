@@ -1,5 +1,7 @@
+import { AnimatedSelector, TextInput } from "@/components"
 import Button from "@/components/ui/Button/Button"
 import Colors from "@/constants/Colors"
+import Layout from "@/constants/Layout"
 import useUser from "@/utils/hooks/useUser"
 import { AntDesign } from "@expo/vector-icons"
 import AsyncStorage from "@react-native-async-storage/async-storage"
@@ -10,7 +12,6 @@ import { useState } from "react"
 import { FlatList, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import Feedback from "react-native-haptic-feedback"
 import Ripple from "react-native-material-ripple"
-import { TextInput } from "react-native-paper"
 
 interface ColorPalette {
     name: string
@@ -368,10 +369,7 @@ const styles = StyleSheet.create({
     colorPicker: {
         marginBottom: 15,
     },
-    colorInput: {
-        backgroundColor: "rgba(255, 255, 255, 0.1)",
-        marginBottom: 15,
-    },
+    colorInput: {},
     quickColors: {
         flexDirection: "row",
         flexWrap: "wrap",
@@ -583,7 +581,7 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
                                         <View style={styles.themeSectionContent}>
                                             <Text style={styles.themeSectionTitle}>Choose Color Palette</Text>
 
-                                            <View style={styles.themeToggle}>
+                                            {/* <View style={styles.themeToggle}>
                                                 <TouchableOpacity
                                                     style={[styles.toggleButton, !isCustomMode && styles.activeToggle]}
                                                     onPress={() => handleModeToggle(false)}
@@ -596,7 +594,22 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
                                                 >
                                                     <Text style={styles.toggleText}>Custom</Text>
                                                 </TouchableOpacity>
-                                            </View>
+                                            </View> */}
+
+                                            <AnimatedSelector
+                                                items={["Presets", "Custom"]}
+                                                selectedItem={isCustomMode ? "Custom" : "Presets"}
+                                                onItemSelect={(item) => {
+                                                    handleModeToggle(item === "Custom")
+                                                }}
+                                                containerStyle={{
+                                                    width: Layout.screen.width - 60,
+                                                    backgroundColor: "transparent",
+                                                    marginBottom: 20,
+                                                }}
+                                                buttonWidth={(Layout.screen.width - 70) / 2}
+                                                buttonStyle={{ backgroundColor: undefined }}
+                                            />
 
                                             {!isCustomMode ? (
                                                 <View style={styles.paletteGrid}>
@@ -615,7 +628,7 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
                                                 </View>
                                             ) : (
                                                 <View style={styles.customColorSection}>
-                                                    <View style={styles.colorTypeSelector}>
+                                                    {/* <View style={styles.colorTypeSelector}>
                                                         {(
                                                             ["primary", "secondary", "ternary", "foreground"] as const
                                                         ).map((type) => (
@@ -632,25 +645,27 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
                                                                 </Text>
                                                             </TouchableOpacity>
                                                         ))}
-                                                    </View>
+                                                    </View> */}
+                                                    <AnimatedSelector
+                                                        items={["primary", "secondary", "ternary", "foreground"]}
+                                                        selectedItem={activeColorType}
+                                                        onItemSelect={(item) => setActiveColorType(item as any)}
+                                                        containerStyle={{
+                                                            width: Layout.screen.width - 60,
+                                                            backgroundColor: "transparent",
+                                                            marginBottom: 20,
+                                                        }}
+                                                        buttonWidth={(Layout.screen.width - 70) / 4}
+                                                        buttonStyle={{ backgroundColor: undefined }}
+                                                        textStyle={{ fontSize: 10 }}
+                                                    />
 
                                                     <View style={styles.colorPickerContainer}>
                                                         <TextInput
-                                                            mode="outlined"
                                                             label={`${activeColorType.charAt(0).toUpperCase() + activeColorType.slice(1)} Color`}
                                                             value={customColors[activeColorType]}
                                                             onChangeText={handleColorChange}
                                                             style={styles.colorInput}
-                                                            theme={{
-                                                                colors: {
-                                                                    text: "#fff",
-                                                                    placeholder: "rgba(255, 255, 255, 0.6)",
-                                                                    primary: Colors.primary_lighter,
-                                                                    outline: "rgba(255, 255, 255, 0.3)",
-                                                                },
-                                                            }}
-                                                            textColor="#fff"
-                                                            placeholder="#000000"
                                                         />
 
                                                         <View style={styles.quickColors}>

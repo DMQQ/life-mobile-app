@@ -1,6 +1,7 @@
-import { AntDesign } from "@expo/vector-icons"
-import Feedback from "react-native-haptic-feedback"
+import PulsingIndicator from "@/components/ui/PulsingIndicator"
 import Colors from "@/constants/Colors"
+import { AntDesign } from "@expo/vector-icons"
+import { View } from "react-native"
 
 interface HeaderActionsProps {
     onNotificationPress: () => void
@@ -9,18 +10,21 @@ interface HeaderActionsProps {
 
 export default function HeaderActions({ onNotificationPress, onSettingsPress }: HeaderActionsProps) {
     const handleNotificationPress = () => {
-        Feedback.trigger("impactLight")
         onNotificationPress()
     }
 
     const handleSettingsPress = () => {
-        Feedback.trigger("impactLight")
         onSettingsPress()
     }
 
     return [
         {
-            icon: <AntDesign name="bells" size={20} color={Colors.foreground} />,
+            icon: (
+                <View style={{ position: "relative" }}>
+                    <AntDesign name="bells" size={20} color={Colors.foreground} />
+                    <PulsingIndicator />
+                </View>
+            ),
             onPress: handleNotificationPress,
         },
         {

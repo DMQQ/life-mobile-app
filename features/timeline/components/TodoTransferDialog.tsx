@@ -1,11 +1,12 @@
+import { Card } from "@/components"
 import Button from "@/components/ui/Button/Button"
-import Input from "@/components/ui/TextInput/TextInput"
 import Overlay from "@/components/ui/Overlay/Overlay"
+import Input from "@/components/ui/TextInput/TextInput"
+import Colors from "@/constants/Colors"
 import L from "@/constants/Layout"
 import { Todos } from "@/types"
 import { useState } from "react"
-import { StyleSheet, View } from "react-native"
-import { Surface, Text, useTheme } from "react-native-paper"
+import { StyleSheet, Text, View } from "react-native"
 import useTransferTodos from "../hooks/mutation/useTransferTodos"
 
 const styles = StyleSheet.create({
@@ -18,6 +19,7 @@ const styles = StyleSheet.create({
         padding: 24,
         borderRadius: 20,
         width: L.screen.width - 48,
+        backgroundColor: Colors.primary_lighter,
     },
     title: {
         marginBottom: 16,
@@ -39,7 +41,6 @@ interface TodoTransferDialogProps {
 
 export default function TodoTransferDialog({ visible, onClose, todos }: TodoTransferDialogProps) {
     const [dialogText, setDialogText] = useState("")
-    const theme = useTheme()
     const handleTransfer = useTransferTodos(todos, dialogText)
 
     const onTransfer = async () => {
@@ -53,27 +54,26 @@ export default function TodoTransferDialog({ visible, onClose, todos }: TodoTran
     return (
         <Overlay opacity={0.8} onClose={onClose} isVisible={visible}>
             <View style={styles.container}>
-                <Surface style={styles.dialog} elevation={3}>
+                <Card style={styles.dialog}>
                     <Text
-                        variant="headlineSmall"
                         style={[
                             styles.title,
                             {
-                                color: theme.colors.secondary,
+                                color: Colors.foreground,
                             },
                         ]}
                     >
                         Transfer Todos
                     </Text>
-                    
+
                     <Text
-                        variant="bodyMedium"
                         style={{
-                            color: theme.colors.onSurfaceVariant,
+                            color: Colors.text_light,
                             marginBottom: 16,
                         }}
                     >
-                        Enter the timeline ID where you want to transfer {todos.length} todo{todos.length !== 1 ? 's' : ''}
+                        Enter the timeline ID where you want to transfer {todos.length} todo
+                        {todos.length !== 1 ? "s" : ""}
                     </Text>
 
                     <Input
@@ -86,17 +86,13 @@ export default function TodoTransferDialog({ visible, onClose, todos }: TodoTran
                         autoCapitalize="none"
                         autoCorrect={false}
                     />
-                    
+
                     <View style={{ flexDirection: "row", gap: 12, marginTop: 16 }}>
-                        <Button
-                            style={{ flex: 1 }}
-                            type="outlined"
-                            onPress={onClose}
-                        >
+                        <Button style={{ flex: 1, padding: 10, borderWidth: 1 }} type="outlined" onPress={onClose}>
                             Cancel
                         </Button>
                         <Button
-                            style={{ flex: 1 }}
+                            style={{ flex: 1, padding: 10 }}
                             type="contained"
                             onPress={onTransfer}
                             disabled={!dialogText.trim()}
@@ -104,7 +100,7 @@ export default function TodoTransferDialog({ visible, onClose, todos }: TodoTran
                             Transfer
                         </Button>
                     </View>
-                </Surface>
+                </Card>
             </View>
         </Overlay>
     )

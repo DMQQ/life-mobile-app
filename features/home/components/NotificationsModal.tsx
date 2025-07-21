@@ -1,9 +1,9 @@
+import { Button } from "@/components"
 import Colors from "@/constants/Colors"
 import { AntDesign } from "@expo/vector-icons"
 import { BlurView } from "expo-blur"
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import Feedback from "react-native-haptic-feedback"
-import { Chip } from "react-native-paper"
 import WalletNotifications, { useGetNotifications } from "../../wallet/components/Wallet/WalletNotifications"
 import useReadAllNotifications from "../../wallet/hooks/useReadAllNotifications"
 
@@ -92,9 +92,9 @@ export default function NotificationsModal({ visible, onClose }: NotificationsMo
                         <Text style={styles.modalTitle}>Notifications</Text>
                         <View style={styles.headerActions}>
                             {unreadCount > 0 && (
-                                <Chip mode="outlined" onPress={handleClearAll}>
+                                <Button type="outlined" onPress={handleClearAll}>
                                     <Text style={styles.badgeText}>Clear all {unreadCount}</Text>
-                                </Chip>
+                                </Button>
                             )}
                             <TouchableOpacity onPress={closeNotifications} style={styles.closeButton}>
                                 <AntDesign name="close" size={24} color={Colors.text_light} />

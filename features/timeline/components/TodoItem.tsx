@@ -1,19 +1,22 @@
+import { Card } from "@/components"
+import Checkbox from "@/components/ui/Checkbox"
 import Colors from "@/constants/Colors"
 import { Todos } from "@/types"
 import Color from "color"
-import { Pressable, StyleSheet, View } from "react-native"
-import { ActivityIndicator, Card, Checkbox, Text, useTheme } from "react-native-paper"
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native"
+import Haptic from "react-native-haptic-feedback"
 import Animated, { FadeInDown, FadeOutUp, LinearTransition } from "react-native-reanimated"
 import useCompleteTodo from "../hooks/mutation/useCompleteTodo"
 import useRemoveTodo from "../hooks/mutation/useRemoveTodo"
 
 const styles = StyleSheet.create({
     todoCard: {
-        marginBottom: 12,
+        marginBottom: 15,
         elevation: 1,
-        borderRadius: 20,
+        borderRadius: 15,
         borderWidth: 1,
         borderColor: Color(Colors.primary_light).lighten(0.3).hex(),
+        padding: 2.5,
     },
     todoContent: {
         flexDirection: "row",
@@ -34,10 +37,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     checkbox: {
-        backgroundColor: Color(Colors.primary_lighter).lighten(0.5).hex(),
         borderRadius: 12,
-        width: 40,
-        height: 40,
         alignItems: "center",
         justifyContent: "center",
     },
@@ -47,17 +47,22 @@ const styles = StyleSheet.create({
     },
 })
 
-export default function TodoItem(todo: Todos & { timelineId: string }) {
+export default function TodoItem(todo: Todos & { timelineId: string; index: number }) {
     const [removeTodo, { loading: removeLoading }] = useRemoveTodo(todo)
     const [completeTodo, { loading: completeLoading }] = useCompleteTodo({
         todoId: todo.id,
         timelineId: todo.timelineId,
         currentlyCompleted: todo.isCompleted,
     })
-    const theme = useTheme()
 
     const handleToggleComplete = () => {
+        Haptic.trigger("impactLight")
         completeTodo()
+    }
+
+    const handleRemoveTodo = () => {
+        Haptic.trigger("impactLight")
+        removeTodo()
     }
 
     const isLoading = removeLoading || completeLoading
@@ -65,6 +70,8 @@ export default function TodoItem(todo: Todos & { timelineId: string }) {
     return (
         <Animated.View layout={LinearTransition.delay(100)} entering={FadeInDown} exiting={FadeOutUp}>
             <Card
+                animated
+                entering={FadeInDown.delay(todo.index * 50)}
                 style={[
                     styles.todoCard,
                     {
@@ -78,35 +85,21 @@ export default function TodoItem(todo: Todos & { timelineId: string }) {
                     },
                 ]}
             >
-                <Pressable
-                    onLongPress={() => removeTodo()}
-                    onPress={handleToggleComplete}
-                    style={styles.todoContent}
-                    android_ripple={{
-                        color: theme.colors.primary,
-                        borderless: false,
-                    }}
-                >
+                <Pressable onLongPress={handleRemoveTodo} onPress={handleToggleComplete} style={styles.todoContent}>
                     <View style={styles.todoLeft}>
                         <View style={styles.checkbox}>
                             {isLoading ? (
                                 <ActivityIndicator size="small" color={Colors.secondary} />
                             ) : (
-                                <Checkbox
-                                    status={todo.isCompleted ? "checked" : "unchecked"}
-                                    onPress={handleToggleComplete}
-                                    uncheckedColor={Colors.primary_darker}
-                                    color={Colors.secondary}
-                                />
+                                <Checkbox checked={todo.isCompleted} onPress={handleToggleComplete} size={28} />
                             )}
                         </View>
 
                         <Text
-                            variant="bodyLarge"
                             style={[
                                 styles.todoText,
                                 {
-                                    color: todo.isCompleted ? Colors.secondary_light_1 : theme.colors.onSurface,
+                                    color: todo.isCompleted ? Colors.secondary_light_1 : Colors.text_light,
                                 },
                                 todo.isCompleted && styles.completedText,
                             ]}

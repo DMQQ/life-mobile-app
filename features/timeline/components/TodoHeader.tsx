@@ -1,7 +1,7 @@
 import Colors from "@/constants/Colors"
 import { Todos } from "@/types"
-import { Pressable, StyleSheet, View } from "react-native"
-import { Chip, Text, useTheme } from "react-native-paper"
+import Color from "color"
+import { Pressable, StyleSheet, Text, View } from "react-native"
 
 const styles = StyleSheet.create({
     header: {
@@ -13,6 +13,7 @@ const styles = StyleSheet.create({
     titleContainer: {
         flexDirection: "row",
         alignItems: "center",
+        justifyContent: "center",
     },
     addButton: {
         paddingHorizontal: 16,
@@ -31,23 +32,21 @@ interface TodoHeaderProps {
 }
 
 export default function TodoHeader({ todos, onAddTodo, onLongPress }: TodoHeaderProps) {
-    const theme = useTheme()
     const completedCount = todos.filter((todo) => todo.isCompleted).length
 
     return (
         <View style={styles.header}>
             <View style={styles.titleContainer}>
                 <Text style={{ color: Colors.text_light, fontWeight: "600", fontSize: 20 }}>Todos</Text>
-                <Chip
-                    mode="outlined"
+                <Text
                     style={{
                         marginLeft: 12,
                         alignSelf: "center",
+                        color: Colors.foreground,
                     }}
-                    textStyle={{ fontSize: 12 }}
                 >
                     {completedCount}/{todos.length}
-                </Chip>
+                </Text>
             </View>
 
             <Pressable
@@ -56,11 +55,11 @@ export default function TodoHeader({ todos, onAddTodo, onLongPress }: TodoHeader
                 style={[
                     styles.addButton,
                     {
-                        backgroundColor: theme.colors.secondary,
+                        backgroundColor: Color(Colors.primary_lighter).lighten(0.15).hex(),
                     },
                 ]}
             >
-                <Text style={{ color: theme.colors.onSecondary, fontWeight: "600", fontSize: 14 }}>+ Add Todo</Text>
+                <Text style={{ color: Colors.text_light, fontWeight: "500", fontSize: 14 }}>+ Add Todo</Text>
             </Pressable>
         </View>
     )

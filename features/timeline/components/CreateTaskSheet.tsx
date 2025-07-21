@@ -1,14 +1,16 @@
+import { Card, IconButton } from "@/components"
 import BottomSheet from "@/components/ui/BottomSheet/BottomSheet"
 import Button from "@/components/ui/Button/Button"
 import Input from "@/components/ui/TextInput/TextInput"
 import Colors from "@/constants/Colors"
+import { useTheme } from "@/utils/context/ThemeContext"
 import useKeyboard from "@/utils/hooks/useKeyboard"
+import { AntDesign } from "@expo/vector-icons"
 import BottomSheetType from "@gorhom/bottom-sheet"
 import Color from "color"
 import { forwardRef, useEffect, useRef, useState } from "react"
-import { ActivityIndicator, Keyboard, StyleSheet, View } from "react-native"
+import { ActivityIndicator, Keyboard, StyleSheet, Text, View } from "react-native"
 import { ScrollView } from "react-native-gesture-handler"
-import { Card, Chip, IconButton, Text, useTheme } from "react-native-paper"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import useTodos, { Action, TodoInput as ITodoInput } from "../hooks/general/useTodos"
 
@@ -28,6 +30,7 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 20,
         fontWeight: "600",
+        color: Colors.foreground,
     },
     subtitle: {
         marginTop: 2,
@@ -81,30 +84,44 @@ export default forwardRef<
                 <View style={styles.header}>
                     <View>
                         <Text style={[styles.title]}>Create Todos</Text>
-                        <Text variant="bodySmall" style={[styles.subtitle, { color: Colors.text_dark }]}>
+                        <Text style={[styles.subtitle, { color: Colors.text_dark }]}>
                             {todoCount} todo{todoCount !== 1 ? "s" : ""} ready to save
                         </Text>
                     </View>
 
-                    <Chip
-                        mode="outlined"
+                    <Button
+                        type="text"
                         onPress={() => dispatch({ type: "clear", payload: undefined })}
-                        style={{ borderColor: theme.colors.error, backgroundColor: "transparent" }}
-                        textStyle={{ color: theme.colors.error }}
+                        style={{
+                            borderWidth: 1,
+                            borderColor: Colors.error,
+                            backgroundColor: "transparent",
+                            padding: 5,
+                            paddingHorizontal: 10,
+                        }}
+                        fontStyle={{ color: Colors.error, fontSize: 13, textTransform: "none" }}
                     >
                         Clear All
-                    </Chip>
+                    </Button>
                 </View>
 
                 <TodosList dispatch={dispatch} todos={state.todos} />
             </ScrollView>
-            <View style={{ paddingHorizontal: 15, marginBottom: insets.bottom, paddingTop: 15 }}>
+            <View style={{ paddingHorizontal: 15, marginBottom: insets.bottom * 2 + 15, paddingTop: 15 }}>
                 <Button
                     disabled={loading || todoCount === 0}
                     onPress={onSaveTodos}
                     style={styles.saveButton}
                     fontStyle={{ fontSize: 16 }}
-                    icon={loading && <ActivityIndicator style={{ marginHorizontal: 10 }} color={Colors.foreground} size="small" />}
+                    icon={
+                        loading && (
+                            <ActivityIndicator
+                                style={{ marginHorizontal: 10 }}
+                                color={Colors.foreground}
+                                size="small"
+                            />
+                        )
+                    }
                 >
                     Save {todoCount} todo{todoCount !== 1 ? "s" : ""}
                 </Button>
@@ -139,8 +156,6 @@ const Todo = (
         onRemove: () => any
     },
 ) => {
-    const theme = useTheme()
-
     return (
         <Card
             style={{
@@ -149,6 +164,7 @@ const Todo = (
                 backgroundColor: Color(Colors.primary_lighter).lighten(0.1).hex(),
                 borderWidth: 1,
                 borderColor: Color(Colors.primary_light).lighten(0.2).hex(),
+                padding: 5,
             }}
         >
             <View
@@ -161,9 +177,8 @@ const Todo = (
                 }}
             >
                 <Text
-                    variant="bodyMedium"
                     style={{
-                        color: theme.colors.onSurface,
+                        color: Colors.foreground,
                         flex: 1,
                         fontSize: 15,
                     }}
@@ -172,9 +187,7 @@ const Todo = (
                 </Text>
 
                 <IconButton
-                    icon="close"
-                    size={18}
-                    iconColor={theme.colors.error}
+                    icon={<AntDesign name="close" size={18} color={Colors.error} />}
                     onPress={todo.onRemove}
                     style={{ margin: 0, marginLeft: 8 }}
                 />
@@ -215,14 +228,18 @@ export const TodoInput = ({ onAddTodo }: { onAddTodo: (value: string) => any }) 
             }}
             right={
                 <IconButton
-                    icon="plus"
-                    size={22}
-                    iconColor={text.trim() ? Colors.secondary : Colors.primary_lighter}
+                    icon={
+                        <AntDesign
+                            name="plus"
+                            size={20}
+                            color={text.trim() ? Colors.secondary : Colors.primary_lighter}
+                        />
+                    }
                     onPress={onSubmit}
                     disabled={!text.trim()}
                 />
             }
-            placeholderTextColor={theme.colors.onSurfaceVariant}
+            placeholderTextColor={Colors.text_dark}
             value={text}
             onChangeText={setText}
             placeholder="What needs to be done?"

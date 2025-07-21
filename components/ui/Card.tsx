@@ -2,9 +2,9 @@ import Layout from "@/constants/Layout"
 import { StyleSheet, View, ViewProps } from "react-native"
 import Animated, { AnimatedProps } from "react-native-reanimated"
 
-type ContainerProps<T = false> = T extends AnimatedProps<ViewProps> ? AnimatedProps<ViewProps> : ViewProps
+type ContainerProps<T = boolean> = T extends AnimatedProps<ViewProps> ? AnimatedProps<ViewProps> : ViewProps
 
-type CardProps<K = false> = ContainerProps<K> & {
+type CardProps<K = boolean> = ContainerProps<K> & {
     animated?: K
     children?: React.ReactNode
 }

@@ -6,6 +6,7 @@ import { useNavigation } from "@react-navigation/native"
 import { BlurView } from "expo-blur"
 import { memo, ReactNode, useMemo } from "react"
 import { StyleProp, StyleSheet, Text, TextStyle, ViewStyle } from "react-native"
+import Haptic from "react-native-haptic-feedback"
 import Ripple from "react-native-material-ripple"
 import Animated, {
     AnimatedStyle,
@@ -48,6 +49,7 @@ function Header(props: {
     initialHeight?: number
     textContainerStyle?: StyleProp<TextStyle>
     renderAnimatedItem?: (props: { scrollY: SharedValue<number> | undefined }) => JSX.Element | ReactNode | null
+    isScreenModal?: boolean
 }) {
     const insets = useSafeAreaInsets()
     const navigation = useNavigation()
@@ -73,7 +75,9 @@ function Header(props: {
         }
     }, [props.scrollY])
 
-    const memodRenderItem = useMemo(() => props.renderAnimatedItem?.({ scrollY: props.scrollY }), [])
+    const memodRenderItem = useMemo(() => {
+        return props.renderAnimatedItem?.({ scrollY: props.scrollY })
+    }, [props.renderAnimatedItem])
 
     return (
         <>
@@ -91,14 +95,19 @@ function Header(props: {
                                 justifyContent: "space-between",
                                 alignItems: "center",
                             },
-                            { paddingTop: insets.top, height: insets.top + 50 },
+                            {
+                                paddingTop: !props.isScreenModal ? insets.top : 0,
+                                height: !props.isScreenModal ? insets.top + 50 : props.initialHeight || 60,
+                            },
                             props.containerStyle,
                         ]}
                     >
                         {props.goBack && (
                             <IconButton
                                 onPress={throttle(() => navigation.canGoBack() && navigation.goBack(), 250)}
-                                icon={props.backIcon || <AntDesign name="arrowleft" size={24} color={Colors.foreground} />}
+                                icon={
+                                    props.backIcon || <AntDesign name="arrowleft" size={24} color={Colors.foreground} />
+                                }
                             />
                         )}
 
@@ -115,7 +124,10 @@ function Header(props: {
                                 <IconButton
                                     style={button.style}
                                     key={index}
-                                    onPress={throttle(button.onPress, 250)}
+                                    onPress={throttle(() => {
+                                        button.onPress()
+                                        Haptic.trigger("impactLight")
+                                    }, 250)}
                                     icon={button.icon}
                                 />
                             ))}
@@ -142,9 +154,11 @@ interface AnimatedContentProps {
     textContainerStyle?: StyleProp<TextStyle>
     scrollY?: SharedValue<number>
     animatedValueLoading?: boolean
+
+    isScreenModal?: boolean
 }
 
-const AnimatedContent = memo(({ ...props }: AnimatedContentProps) => {
+const AnimatedContent = memo(({ isScreenModal = false, ...props }: AnimatedContentProps) => {
     const insets = useSafeAreaInsets()
 
     const animatedContainerStyle = useAnimatedStyle(() => {
@@ -182,12 +196,12 @@ const AnimatedContent = memo(({ ...props }: AnimatedContentProps) => {
             top: interpolate(
                 clampedValue,
                 [0, N_THRESHOLD],
-                [insets.top * 2, insets.top / 2 + 10],
+                [insets.top * (isScreenModal ? 1 : 2), isScreenModal ? -25 : insets.top / 2 + 15],
                 Extrapolation.CLAMP,
             ),
             left: interpolate(clampedValue, [0, N_THRESHOLD], [15, -115], Extrapolation.CLAMP),
         }
-    }, [props.scrollY, props.animated, insets.top])
+    }, [props.scrollY, props.animated, insets.top, isScreenModal])
 
     const animatedLabelStyle = useAnimatedStyle(() => {
         "worklet"
@@ -199,6 +213,8 @@ const AnimatedContent = memo(({ ...props }: AnimatedContentProps) => {
 
         return {
             opacity: interpolate(scrollValue, [0, 100], [1, 0], Extrapolation.CLAMP),
+
+            display: scrollValue > 100 ? "none" : "flex",
         }
     }, [props.scrollY, props.animated])
 
