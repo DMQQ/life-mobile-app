@@ -1,11 +1,11 @@
+import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
 import Layout from "@/constants/Layout"
-import Text from "@/components/ui/Text/Text"
 import { StackScreenProps } from "@/types"
 import { AntDesign, Feather } from "@expo/vector-icons"
 import BottomSheetType from "@gorhom/bottom-sheet"
 import Color from "color"
-import { useCallback, useMemo, useRef } from "react"
+import { useCallback, useMemo, useRef, useState } from "react"
 import { StyleSheet, View } from "react-native"
 import Ripple from "react-native-material-ripple"
 import Animated, { Extrapolation, interpolate, SharedValue, useAnimatedStyle } from "react-native-reanimated"
@@ -16,9 +16,11 @@ import useCompleteTimeline from "../hooks/mutation/useCompleteTimeline"
 import useGetTimelineById from "../hooks/query/useGetTimelineById"
 
 import { Header } from "@/components"
+import DeleteTimelineEvent from "@/components/ui/Dialog/Delete/DeleteTimelineEvent"
 import useTrackScroll from "@/utils/hooks/ui/useTrackScroll"
 import CompletionBar from "../components/CompletionBar"
 import CreateTaskSheet from "../components/CreateTaskSheet"
+import { GetTimelineQuery } from "../hooks/query/useGetTimeLineQuery"
 
 const AnimatedRipple = Animated.createAnimatedComponent(Ripple)
 
@@ -82,7 +84,9 @@ export default function TimelineDetails({
         () => [
             {
                 icon: <Feather name="trash" size={20} color={Colors.error} />,
-                onPress: () => {},
+                onPress: () => {
+                    setSelectedEventForDeletion(data)
+                },
             },
             {
                 icon: <Feather name="edit-2" size={20} color={Colors.foreground} />,
@@ -99,7 +103,7 @@ export default function TimelineDetails({
                 onPress: completeTimeline,
             },
         ],
-        [data?.isCompleted],
+        [data?.isCompleted, data],
     )
 
     const sortedTodos = useMemo(() => {
@@ -132,13 +136,14 @@ export default function TimelineDetails({
         [taskCompletionProgressBar, sortedTodos],
     )
 
+    const [selectedEventForDeletion, setSelectedEventForDeletion] = useState<GetTimelineQuery | null>(null)
+
     return (
         <View style={{ backgroundColor: Colors.primary }}>
             <Header
                 scrollY={scrollY}
                 animated={true}
                 animatedTitle={capitalize(data?.title)}
-                animatedSubtitle={capitalize(data?.description)}
                 isScreenModal
                 initialHeight={60}
                 buttons={buttons}
@@ -147,7 +152,7 @@ export default function TimelineDetails({
             <Animated.ScrollView
                 keyboardDismissMode={"on-drag"}
                 style={{ padding: 15 }}
-                contentContainerStyle={{ paddingBottom: 50, paddingTop: 120 }}
+                contentContainerStyle={{ paddingBottom: 50, paddingTop: 200 }}
                 onScroll={onScroll}
                 showsVerticalScrollIndicator={false}
             >
@@ -155,6 +160,7 @@ export default function TimelineDetails({
                     <LoaderSkeleton />
                 ) : (
                     <View style={styles.container}>
+                        <Text variant="body">{data?.description || "No description provided for this event."}</Text>
                         <TimelineTodos
                             expandSheet={() => taskRef.current?.snapToIndex(0)}
                             timelineId={data?.id}
@@ -169,6 +175,20 @@ export default function TimelineDetails({
                     </View>
                 )}
             </Animated.ScrollView>
+
+            <DeleteTimelineEvent
+                isVisible={!!selectedEventForDeletion}
+                item={
+                    selectedEventForDeletion
+                        ? {
+                              id: selectedEventForDeletion.id,
+                              name: selectedEventForDeletion.title,
+                              date: selectedEventForDeletion.date,
+                          }
+                        : undefined
+                }
+                onDismiss={() => setSelectedEventForDeletion(null)}
+            />
 
             <CreateTaskSheet ref={taskRef} timelineId={data?.id} />
         </View>
@@ -195,7 +215,9 @@ const AnimatedProgressBar = ({ percentage, scrollY }: { percentage: number; scro
                 { paddingHorizontal: 15, paddingBottom: 15 },
             ]}
         >
-            <Text variant="caption" color="#fff" style={{ marginBottom: 2.5 }}>Task completion progress</Text>
+            <Text variant="caption" color="#fff" style={{ marginBottom: 2.5 }}>
+                Task completion progress
+            </Text>
             <CompletionBar percentage={percentage} />
         </Animated.View>
     )

@@ -1,10 +1,10 @@
 import { memo } from "react"
-import { Text, TextStyle } from "react-native"
-import Animated, { AnimateStyle, FadeInDown } from "react-native-reanimated"
+import { TextStyle } from "react-native"
+import Animated, { AnimatedStyle, FadeInDown } from "react-native-reanimated"
 
 interface AnimatedNumberProps {
     value: number
-    style?: TextStyle | TextStyle[] | AnimateStyle<TextStyle>
+    style?: TextStyle | TextStyle[] | AnimatedStyle<TextStyle>
     formatValue?: (value: number) => string
     delay?: number
 }
@@ -17,15 +17,16 @@ const AnimatedNumber = memo<AnimatedNumberProps>(
         return (
             <Animated.View style={{ flexDirection: "row", alignItems: "baseline" }}>
                 {characters.map((char, index) => (
-                    <Animated.View
+                    <Animated.Text
                         key={`${value}-${index}-${char}`}
                         entering={FadeInDown.delay(delay + index * 25)
                             .springify()
                             .damping(20)
                             .stiffness(200)}
+                        style={style}
                     >
-                        <Text style={style}>{char}</Text>
-                    </Animated.View>
+                        {char}
+                    </Animated.Text>
                 ))}
             </Animated.View>
         )

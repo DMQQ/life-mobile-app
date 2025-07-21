@@ -127,7 +127,7 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
                     contentContainerStyle={{
                         paddingBottom: (timeline.data?.timeline?.length || 0) > 0 ? 120 : 0,
                         padding: 15,
-                        paddingTop: 215,
+                        paddingTop: 250,
                     }}
                     data={(timeline.data?.timeline as GetTimelineQuery[]) || []}
                     initialNumToRender={3}

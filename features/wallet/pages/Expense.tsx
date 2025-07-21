@@ -15,7 +15,7 @@ import useDeleteActivity from "../hooks/useDeleteActivity"
 import useRefund from "../hooks/useRefundExpense"
 import useSubscription from "../hooks/useSubscription"
 
-import { CategoryUtils } from "../components/Expense/ExpenseIcon"
+import { CategoryUtils, Icons } from "../components/Expense/ExpenseIcon"
 
 const similarCategories = {
     food: ["drinks"],
@@ -343,10 +343,14 @@ export default function Expense({ route: { params }, navigation }: any) {
     return (
         <View style={{ flex: 1 }}>
             <Header
-                containerStyle={{
-                    height: 60,
-                    paddingTop: 15,
-                }}
+                animated
+                animatedTitle={capitalize(selected?.description)}
+                isScreenModal
+                initialHeight={60}
+                renderAnimatedItem={({ scrollY }) => (
+                    <AnimatedExpenseHeaderItem expense={selected} scrollY={scrollY!} />
+                )}
+                titleAnimatedStyle={{ flexWrap: "nowrap" }}
                 scrollY={scrollY}
                 buttons={[
                     {
@@ -359,13 +363,12 @@ export default function Expense({ route: { params }, navigation }: any) {
                         style: { marginLeft: 5 },
                     },
                 ]}
-                goBack
-                backIcon={<AntDesign name="close" size={24} color={Colors.foreground} />}
+                initialTitleFontSize={selected?.description?.length > 25 ? 40 : 60}
             />
             <Animated.ScrollView
                 onScroll={onScroll}
                 keyboardDismissMode={"on-drag"}
-                style={{ flex: 1, paddingTop: insets.top + 30 }}
+                style={{ flex: 1, paddingTop: 250 }}
             >
                 <View style={{ marginBottom: 30, paddingHorizontal: 15 }}>
                     <View
@@ -381,10 +384,6 @@ export default function Expense({ route: { params }, navigation }: any) {
                             },
                         ]}
                     >
-                        <Txt size={35} color={Colors.foreground}>
-                            {capitalize(selected?.description)}
-                        </Txt>
-
                         <View style={{ marginTop: 2.5 }}>
                             <Txt
                                 size={20}
@@ -604,9 +603,83 @@ export default function Expense({ route: { params }, navigation }: any) {
     )
 }
 
+const AnimatedExpenseHeaderItem = ({
+    scrollY,
+    expense,
+}: {
+    scrollY: Animated.SharedValue<number>
+    expense: ExpenseType
+}) => {
+    return (
+        <Animated.View
+            style={[
+                useAnimatedStyle(() => {
+                    const scrollValue = scrollY?.value ?? 0
+
+                    return {
+                        opacity: interpolate(scrollValue, [0, 130, 150, 160], [0, 0, 0.75, 1], Extrapolation.CLAMP),
+                        transform: [
+                            {
+                                translateY: interpolate(scrollValue, [0, 160], [-25, 0], Extrapolation.CLAMP),
+                            },
+                            { scale: interpolate(scrollValue, [0, 160], [0.5, 1], Extrapolation.CLAMP) },
+                        ],
+                    }
+                }, [scrollY]),
+                { paddingHorizontal: 15 },
+            ]}
+        >
+            <View
+                style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    marginTop: 10,
+                }}
+            >
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                    <CategoryIcon
+                        type={expense?.type as "expense" | "income"}
+                        category={(expense?.category || "none") as any}
+                    />
+
+                    <Text style={{ color: Icons[expense?.category]?.backgroundColor, fontSize: 18, fontWeight: 600 }}>
+                        {expense?.category.split(":").map(capitalize).join(" / ")}
+                    </Text>
+                </View>
+                <Text
+                    style={{
+                        color:
+                            expense.type === "refunded"
+                                ? Colors.secondary_light_2
+                                : expense.type === "expense"
+                                  ? "#F07070"
+                                  : "#66E875",
+                        fontSize: 18,
+                        fontWeight: 600,
+                    }}
+                >
+                    {expense?.type === "refunded"
+                        ? (expense?.amount * -1).toFixed(2)
+                        : expense?.type === "expense"
+                          ? (expense?.amount * -1).toFixed(2)
+                          : expense?.amount.toFixed(2)}
+                    <Text style={{ fontSize: 16 }}>zł</Text>
+                </Text>
+            </View>
+        </Animated.View>
+    )
+}
+
 import Layout from "@/constants/Layout"
 import * as ImagePicker from "expo-image-picker"
-import Animated, { useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated"
+import Animated, {
+    Extrapolation,
+    interpolate,
+    useAnimatedScrollHandler,
+    useAnimatedStyle,
+    useSharedValue,
+} from "react-native-reanimated"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import ImageViewerModal from "../components/Expense/ImageViewer"
 import MapPicker from "../components/Expense/Map"
