@@ -71,7 +71,7 @@ const AnimatedItem = ({
             case "percentage":
                 return (val: number) => `${val.toFixed(1)}%`
             case "days":
-                return (val: number) => `${Math.round(val)} days`
+                return (val: number) => `${Math.round(val)} day${val !== 1 ? "s" : ""}`
             case "number":
             default:
                 return (val: number) => Math.round(val).toString()
@@ -318,18 +318,18 @@ export default function ZeroExpenseStats() {
 
                 <View style={styles.statsGrid}>
                     <AnimatedItem
-                        label="No spending days"
-                        value={data.days.length + "d"}
+                        label="Saved days"
+                        value={data.days.length + "days"}
                         previousValue={lastMonthData?.days.length}
-                        icon={<MaterialIcons name="event-available" size={25} color={Colors.secondary} />}
-                        formatType="number"
+                        icon={<MaterialIcons name="event-available" size={30} color={Colors.secondary} />}
+                        formatType="days"
                         index={0}
                     />
                     <AnimatedItem
                         label="Success rate"
                         value={successRate}
                         previousValue={lastMonthSuccessRate}
-                        icon={<Ionicons name="trending-up" size={25} color="lightgreen" />}
+                        icon={<Ionicons name="trending-up" size={30} color="lightgreen" />}
                         formatType="percentage"
                         index={1}
                     />
@@ -337,7 +337,7 @@ export default function ZeroExpenseStats() {
                         label="Money saved"
                         value={data.saved}
                         previousValue={lastMonthData?.saved}
-                        icon={<FontAwesome5 name="piggy-bank" size={25} color="lightgreen" />}
+                        icon={<FontAwesome5 name="piggy-bank" size={30} color="lightgreen" />}
                         formatType="currency"
                         index={2}
                     />
@@ -345,7 +345,7 @@ export default function ZeroExpenseStats() {
                         label="Avg saved/day"
                         value={data.avg}
                         previousValue={lastMonthData?.avg}
-                        icon={<MaterialIcons name="attach-money" size={25} color={Colors.warning} />}
+                        icon={<MaterialIcons name="attach-money" size={30} color={Colors.warning} />}
                         formatType="currency"
                         index={3}
                     />
@@ -449,7 +449,7 @@ const styles = StyleSheet.create({
     headerTitle: {
         color: Colors.foreground,
         fontSize: 18,
-        fontWeight: "600",
+        fontWeight: "bold",
     },
     headerSubtitle: {
         color: "gray",
@@ -467,6 +467,8 @@ const styles = StyleSheet.create({
     dateToggleText: {
         color: Colors.foreground,
         textAlign: "center",
+        fontWeight: "600",
+        fontSize: 13,
     },
     currentStreakAlert: {
         backgroundColor: Colors.secondary,
@@ -514,6 +516,7 @@ const styles = StyleSheet.create({
     },
     comparisonText: {
         marginTop: 1,
+        fontSize: 12,
     },
     sectionTitle: {
         color: Colors.foreground,

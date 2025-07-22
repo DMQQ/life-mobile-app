@@ -363,7 +363,7 @@ export default function Expense({ route: { params }, navigation }: any) {
                         style: { marginLeft: 5 },
                     },
                 ]}
-                initialTitleFontSize={selected?.description?.length > 25 ? 40 : 60}
+                initialTitleFontSize={selected?.description?.length > 25 ? 40 : 50}
             />
             <Animated.ScrollView
                 onScroll={onScroll}
@@ -597,7 +597,7 @@ export default function Expense({ route: { params }, navigation }: any) {
                         </View>
                     </View>
                 )}
-                <View style={{ height: 80 }} />
+                <View style={{ height: 250, width: 100 }} />
             </Animated.ScrollView>
         </View>
     )
@@ -626,7 +626,7 @@ const AnimatedExpenseHeaderItem = ({
                         ],
                     }
                 }, [scrollY]),
-                { paddingHorizontal: 15 },
+                { paddingHorizontal: 15, paddingLeft: 10 },
             ]}
         >
             <View
@@ -634,7 +634,6 @@ const AnimatedExpenseHeaderItem = ({
                     flexDirection: "row",
                     alignItems: "center",
                     justifyContent: "space-between",
-                    marginTop: 10,
                 }}
             >
                 <View style={{ flexDirection: "row", alignItems: "center" }}>

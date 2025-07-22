@@ -1,8 +1,8 @@
+import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
 import Layout from "@/constants/Layout"
 import { View } from "react-native"
 import Animated, { useAnimatedStyle, withDelay, withTiming } from "react-native-reanimated"
-import Text from "@/components/ui/Text/Text"
 
 export default function CompletionBar({ percentage = 0 }: { percentage: number }) {
     const widthStyle = useAnimatedStyle(
@@ -16,7 +16,7 @@ export default function CompletionBar({ percentage = 0 }: { percentage: number }
     return (
         <View
             style={{
-                padding: 7.5,
+                padding: 5,
                 borderRadius: 15,
                 backgroundColor: Colors.primary_dark,
                 justifyContent: "center",
@@ -26,7 +26,7 @@ export default function CompletionBar({ percentage = 0 }: { percentage: number }
                 style={[
                     {
                         borderRadius: 100,
-                        height: 7.5,
+                        height: 10,
                         backgroundColor: Colors.secondary,
                     },
                     widthStyle,

@@ -40,6 +40,8 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         alignItems: "center",
         justifyContent: "center",
+        width: 28,
+        height: 28,
     },
     completedText: {
         textDecorationLine: "line-through",
@@ -98,10 +100,7 @@ export default function TodoItem(todo: Todos & { timelineId: string; index: numb
                         <Text
                             variant="subtitle"
                             color={todo.isCompleted ? Colors.secondary_light_1 : Colors.text_light}
-                            style={[
-                                styles.todoText,
-                                todo.isCompleted && styles.completedText,
-                            ]}
+                            style={[styles.todoText, todo.isCompleted && styles.completedText]}
                         >
                             {todo.title}
                         </Text>

@@ -320,7 +320,7 @@ export default function WalletList2({
                     }
                 }}
                 onScroll={onScroll}
-                contentContainerStyle={{ padding: 15, paddingTop: 250, paddingBottom: 120 }}
+                contentContainerStyle={{ padding: 15, paddingTop: 275, paddingBottom: 120 }}
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
                 onEndReached={onEndReached}
                 onEndReachedThreshold={0.5}

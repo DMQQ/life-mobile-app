@@ -244,7 +244,7 @@ const styles = StyleSheet.create({
     },
     metricLabel: {
         ...Typography.overline,
-        color: Colors.text_dark,
+        color: Colors.secondary_light_2,
         textAlign: "center",
         textTransform: "uppercase",
     },

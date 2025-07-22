@@ -3,6 +3,7 @@ import Layout from "@/constants/Layout"
 import throttle from "@/utils/functions/throttle"
 import { AntDesign } from "@expo/vector-icons"
 import { useNavigation } from "@react-navigation/native"
+import Color from "color"
 import { BlurView } from "expo-blur"
 import { memo, ReactNode, useMemo } from "react"
 import { StyleProp, StyleSheet, TextStyle, View, ViewStyle } from "react-native"
@@ -91,6 +92,8 @@ interface HeaderProps {
     initialTitleFontSize?: number
 }
 
+const blurOverlayColor = Color(Colors.primary).alpha(0.1).toString()
+
 function Header(props: HeaderProps) {
     const insets = useSafeAreaInsets()
     const navigation = useNavigation()
@@ -110,7 +113,7 @@ function Header(props: HeaderProps) {
             backgroundColor: interpolateColor(
                 scrollValue,
                 [0, THRESHOLD],
-                ["rgba(0,0,0,0.0)", "rgba(0,0,0,0.1)"],
+                ["rgba(0,0,0,0.0)", blurOverlayColor],
                 "RGB",
             ),
         }
@@ -304,9 +307,8 @@ const styles = StyleSheet.create({
         zIndex: 100,
     },
     subTitle: {
-        color: "rgba(255,255,255,0.6)",
-        fontSize: 16,
-        opacity: 0.8,
+        color: Colors.secondary_light_2,
+        fontSize: 13,
         width: Layout.screen.width - 30,
     },
     title: {

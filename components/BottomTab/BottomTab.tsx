@@ -1,6 +1,7 @@
 import { Padding } from "@/constants/Values"
 import { Feather, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons"
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs"
+import Color from "color"
 import moment from "moment"
 import { useEffect } from "react"
 import { Platform, StyleSheet } from "react-native"
@@ -22,6 +23,8 @@ import { useTheme } from "../../utils/context/ThemeContext"
 import useKeyboard from "../../utils/hooks/useKeyboard"
 import BlurSurface from "../ui/BlurSurface"
 
+const blurOverlayColor = Color(Colors.primary).alpha(0.1).toString()
+
 const styles = StyleSheet.create({
     container: {
         width: Layout.screen.width,
@@ -42,7 +45,7 @@ const styles = StyleSheet.create({
     innerContainer: {
         flexDirection: "row",
         justifyContent: "space-between",
-        backgroundColor: "rgba(0,0,0,0.1)",
+        backgroundColor: blurOverlayColor,
         position: "relative",
     },
     activeIndicator: {

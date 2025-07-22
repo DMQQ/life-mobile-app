@@ -1,10 +1,10 @@
 import BottomSheet from "@/components/ui/BottomSheet/BottomSheet"
 import Button from "@/components/ui/Button/Button"
+import Text from "@/components/ui/Text/Text"
 import Input from "@/components/ui/TextInput/TextInput"
 import Colors from "@/constants/Colors"
 import { useState } from "react"
 import { ActivityIndicator, Keyboard, View } from "react-native"
-import Text from "@/components/ui/Text/Text"
 import useEditWallet from "../../hooks/useEditWallet"
 import { useWalletContext } from "../WalletContext"
 
@@ -60,10 +60,20 @@ export default function EditBalanceSheet() {
                     This will set your balance to the value you enter. It will not affect your expenses or income.
                 </Text>
 
-                <Text variant="body" style={{ color: Colors.error, marginTop: 10 }}>This action cannot be undone.</Text>
+                <Text variant="body" style={{ color: Colors.error, marginTop: 10 }}>
+                    This action cannot be undone.
+                </Text>
 
                 <Button
-                    icon={loading && <ActivityIndicator style={{ marginHorizontal: 10 }} size="small" color={Colors.foreground} />}
+                    icon={
+                        loading && (
+                            <ActivityIndicator
+                                style={{ marginHorizontal: 10 }}
+                                size="small"
+                                color={Colors.foreground}
+                            />
+                        )
+                    }
                     fontStyle={{ fontSize: 16 }}
                     style={{ flexDirection: "row-reverse", marginTop: 15 }}
                     onPress={onPress}

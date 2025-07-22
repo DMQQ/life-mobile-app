@@ -148,6 +148,7 @@ export default function TimelineDetails({
                 initialHeight={60}
                 buttons={buttons}
                 renderAnimatedItem={renderAnimatedItem}
+                initialTitleFontSize={data?.title?.length > 25 ? 40 : 50}
             />
             <Animated.ScrollView
                 keyboardDismissMode={"on-drag"}
@@ -215,9 +216,6 @@ const AnimatedProgressBar = ({ percentage, scrollY }: { percentage: number; scro
                 { paddingHorizontal: 15, paddingBottom: 15 },
             ]}
         >
-            <Text variant="caption" color="#fff" style={{ marginBottom: 2.5 }}>
-                Task completion progress
-            </Text>
             <CompletionBar percentage={percentage} />
         </Animated.View>
     )

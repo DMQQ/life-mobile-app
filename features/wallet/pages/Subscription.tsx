@@ -1,9 +1,9 @@
+import Text from "@/components/ui/Text/Text"
 import { gql, useQuery } from "@apollo/client"
 import { AntDesign, MaterialIcons } from "@expo/vector-icons"
 import moment from "moment"
 import React, { useEffect, useState } from "react"
 import { ActivityIndicator, Alert, StyleSheet, View } from "react-native"
-import Text from "@/components/ui/Text/Text"
 import Ripple from "react-native-material-ripple"
 
 import Header from "@/components/ui/Header/Header"
@@ -192,18 +192,21 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
     return (
         <View style={{ flex: 1 }}>
             <Header
-                containerStyle={{
-                    height: 60,
-                    paddingTop: 15,
-                }}
+                animated
+                animatedTitle={subscription.description}
+                isScreenModal
+                initialHeight={60}
+                titleAnimatedStyle={{ flexWrap: "nowrap" }}
                 scrollY={scrollY}
-                title="Subscription Details"
-                goBack
-                backIcon={<AntDesign name="close" size={24} color={Colors.foreground} />}
-                initialHeight={1}
+                buttons={[]}
+                initialTitleFontSize={subscription?.description?.length > 25 ? 40 : 50}
             />
 
-            <Animated.ScrollView onScroll={onScroll} style={{ flex: 1, paddingTop: insets.top + 30 }}>
+            <Animated.ScrollView
+                keyboardDismissMode={"on-drag"}
+                onScroll={onScroll}
+                style={{ flex: 1, paddingTop: 250 }}
+            >
                 <View style={{ marginBottom: 30, paddingHorizontal: 15 }}>
                     <View
                         style={[
@@ -217,10 +220,6 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                             },
                         ]}
                     >
-                        <Txt size={35} color={Colors.foreground}>
-                            {subscription.description}
-                        </Txt>
-
                         <View style={{ marginTop: 2.5 }}>
                             <Txt size={20} color={Colors.foreground}>
                                 {subscription.amount.toFixed(2)}
@@ -398,7 +397,7 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                         </Text>
                     </View>
                 )}
-                <View style={{ height: 80 }} />
+                <View style={{ height: 250, width: 100 }} />
             </Animated.ScrollView>
         </View>
     )

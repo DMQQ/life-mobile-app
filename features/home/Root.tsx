@@ -6,7 +6,7 @@ import useAppBackground from "@/utils/hooks/useAppBackground"
 import { GET_MAIN_SCREEN, getMainScreenBaseVariables } from "@/utils/schemas/GET_MAIN_SCREEN"
 import { useQuery } from "@apollo/client"
 import * as SplashScreen from "expo-splash-screen"
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import Animated, { LinearTransition } from "react-native-reanimated"
 import { useGetNotifications } from "../wallet/components/Wallet/WalletNotifications"
 import HeaderActions from "./components/HeaderActions"
@@ -45,10 +45,15 @@ function Root({}: ScreenProps<"Root">) {
         : 0
     const isIncreasing = trendPercentage > 0
 
-    const headerButtons = HeaderActions({
-        onNotificationPress: () => setShowNotifications(true),
-        onSettingsPress: () => setShowSettings(true),
-    })
+    const headerButtons = useMemo(
+        () =>
+            HeaderActions({
+                onNotificationPress: () => setShowNotifications(true),
+                onSettingsPress: () => setShowSettings(true),
+                hasNotifications: home?.notifications?.length > 0,
+            }),
+        [home?.notifications?.length],
+    )
 
     return (
         <Animated.View style={{ flex: 1 }} layout={LinearTransition.delay(100)}>

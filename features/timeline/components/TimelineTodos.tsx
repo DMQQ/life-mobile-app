@@ -23,7 +23,6 @@ const styles = StyleSheet.create({
         backgroundColor: Color(Colors.primary_lighter).lighten(0.1).hex(),
     },
     emptyText: {
-        marginTop: 16,
         opacity: 0.7,
     },
 })
@@ -50,7 +49,9 @@ export default function TimelineTodos(props: { sortedTodos: Todos[]; timelineId:
                     ))
                 ) : (
                     <Card style={styles.emptyState}>
-                        <Text variant="body" style={styles.emptyText}>No todos yet. Tap "Add Todo" to get started!</Text>
+                        <Text variant="body" style={styles.emptyText}>
+                            No todos yet. Tap "Add Todo" to get started!
+                        </Text>
                     </Card>
                 )}
             </View>

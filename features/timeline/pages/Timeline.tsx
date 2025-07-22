@@ -92,6 +92,7 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
 
     return (
         <View style={{ flex: 1 }}>
+            {timeline.loading && <TimelineScreenLoader />}
             <Header
                 scrollY={scrollY}
                 animated={true}
@@ -127,7 +128,7 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
                     contentContainerStyle={{
                         paddingBottom: (timeline.data?.timeline?.length || 0) > 0 ? 120 : 0,
                         padding: 15,
-                        paddingTop: 250,
+                        paddingTop: 275,
                     }}
                     data={(timeline.data?.timeline as GetTimelineQuery[]) || []}
                     initialNumToRender={3}
@@ -190,9 +191,7 @@ interface ListEmptyComponentProps {
 }
 
 const ListEmptyComponent = (props: ListEmptyComponentProps) =>
-    props.isLoading ? (
-        <TimelineScreenLoader loading />
-    ) : props.length === 0 ? (
+    props.length === 0 ? (
         <View
             style={{
                 padding: 15,

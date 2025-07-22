@@ -6,9 +6,11 @@ import { View } from "react-native"
 interface HeaderActionsProps {
     onNotificationPress: () => void
     onSettingsPress: () => void
+
+    hasNotifications?: boolean
 }
 
-export default function HeaderActions({ onNotificationPress, onSettingsPress }: HeaderActionsProps) {
+export default function HeaderActions({ onNotificationPress, onSettingsPress, hasNotifications }: HeaderActionsProps) {
     const handleNotificationPress = () => {
         onNotificationPress()
     }
@@ -22,7 +24,7 @@ export default function HeaderActions({ onNotificationPress, onSettingsPress }: 
             icon: (
                 <View style={{ position: "relative" }}>
                     <AntDesign name="bells" size={20} color={Colors.foreground} />
-                    <PulsingIndicator />
+                    {hasNotifications && <PulsingIndicator />}
                 </View>
             ),
             onPress: handleNotificationPress,

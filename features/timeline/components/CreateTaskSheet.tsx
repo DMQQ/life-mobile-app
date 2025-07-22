@@ -5,13 +5,14 @@ import Text from "@/components/ui/Text/Text"
 import Input from "@/components/ui/TextInput/TextInput"
 import Colors from "@/constants/Colors"
 import { useTheme } from "@/utils/context/ThemeContext"
-import useKeyboard from "@/utils/hooks/useKeyboard"
 import { AntDesign } from "@expo/vector-icons"
 import BottomSheetType from "@gorhom/bottom-sheet"
+import { useNavigation } from "@react-navigation/native"
 import Color from "color"
-import { forwardRef, useEffect, useRef, useState } from "react"
+import { BlurView } from "expo-blur"
+import { forwardRef, useCallback, useEffect, useRef, useState } from "react"
 import { ActivityIndicator, Keyboard, StyleSheet, View } from "react-native"
-import { ScrollView } from "react-native-gesture-handler"
+import Animated, { useAnimatedKeyboard, useAnimatedStyle } from "react-native-reanimated"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import useTodos, { Action, TodoInput as ITodoInput } from "../hooks/general/useTodos"
 
@@ -45,6 +46,8 @@ const styles = StyleSheet.create({
     },
 })
 
+const AnimatedBlurView = Animated.createAnimatedComponent(BlurView)
+
 export default forwardRef<
     BottomSheetType,
     {
@@ -55,33 +58,50 @@ export default forwardRef<
         Keyboard.dismiss()
         ;(ref as any).current?.close()
     })
-    const theme = useTheme()
     const todoCount = state.todos.filter((todo) => todo.value.trim().length > 0).length
 
     const snapPoints = ["60%"]
 
     const insets = useSafeAreaInsets()
 
-    const keyboard = useKeyboard()
+    const animatedKeyboard = useAnimatedKeyboard()
 
-    useEffect(() => {
-        if (!keyboard) ref?.current.collapse()
-    }, [keyboard])
+    const navigation = useNavigation()
+
+    const keyboardAnimatedPosition = useAnimatedStyle(() => {
+        return {
+            transform: [
+                {
+                    translateY: animatedKeyboard.height.value,
+                },
+            ],
+        }
+    })
+
+    const animatedListExtend = useAnimatedStyle(() => {
+        return {
+            marginBottom: -animatedKeyboard.height.value - 100,
+        }
+    })
+
+    const onChange = useCallback((index: number) => {
+        if (index === -1) {
+            Keyboard.dismiss()
+        }
+
+        navigation.setOptions({
+            gestureEnabled: index === -1,
+        })
+    }, [])
 
     return (
-        <BottomSheet
-            ref={ref}
-            snapPoints={snapPoints}
-            onChange={(index) => {
-                if (index === -1) {
-                    Keyboard.dismiss()
-                }
-            }}
-        >
-            <ScrollView style={styles.container} keyboardDismissMode="on-drag">
+        <BottomSheet ref={ref} snapPoints={snapPoints} onChange={onChange}>
+            <Animated.ScrollView style={[styles.container, animatedListExtend]} keyboardDismissMode="on-drag">
                 <View style={styles.header}>
                     <View>
-                        <Text variant="subheading" style={styles.title}>Create Todos</Text>
+                        <Text variant="subheading" style={styles.title}>
+                            Create Todos
+                        </Text>
                         <Text variant="caption" color={Colors.text_dark} style={styles.subtitle}>
                             {todoCount} todo{todoCount !== 1 ? "s" : ""} ready to save
                         </Text>
@@ -104,8 +124,16 @@ export default forwardRef<
                 </View>
 
                 <TodosList dispatch={dispatch} todos={state.todos} />
-            </ScrollView>
-            <View style={{ paddingHorizontal: 15, marginBottom: insets.bottom * 2 + 15, paddingTop: 15 }}>
+            </Animated.ScrollView>
+
+            <AnimatedBlurView
+                intensity={80}
+                tint="dark"
+                style={[
+                    { paddingHorizontal: 15, paddingBottom: insets.bottom, paddingTop: 15 },
+                    keyboardAnimatedPosition,
+                ]}
+            >
                 <Button
                     disabled={loading || todoCount === 0}
                     onPress={onSaveTodos}
@@ -123,7 +151,7 @@ export default forwardRef<
                 >
                     Save {todoCount} todo{todoCount !== 1 ? "s" : ""}
                 </Button>
-            </View>
+            </AnimatedBlurView>
         </BottomSheet>
     )
 })

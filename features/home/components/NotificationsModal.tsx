@@ -1,6 +1,7 @@
 import { Button } from "@/components"
 import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
+import lowOpacity from "@/utils/functions/lowOpacity"
 import { AntDesign } from "@expo/vector-icons"
 import { BlurView } from "expo-blur"
 import { Modal, StyleSheet, TouchableOpacity, View } from "react-native"
@@ -35,6 +36,7 @@ const styles = StyleSheet.create({
     },
     modalTitle: {
         color: Colors.text_light,
+        fontWeight: "bold",
     },
     closeButton: {
         padding: 8,
@@ -86,11 +88,24 @@ export default function NotificationsModal({ visible, onClose }: NotificationsMo
                 <BlurView intensity={80} tint="dark" style={styles.blurBackground} />
                 <View style={styles.modalContent}>
                     <View style={styles.modalHeader}>
-                        <Text variant="body" style={styles.modalTitle}>Notifications</Text>
+                        <Text variant="body" style={styles.modalTitle}>
+                            Notifications
+                        </Text>
                         <View style={styles.headerActions}>
                             {unreadCount > 0 && (
-                                <Button type="outlined" onPress={handleClearAll}>
-                                    <Text variant="caption" style={styles.badgeText}>Clear all {unreadCount}</Text>
+                                <Button
+                                    type="text"
+                                    onPress={handleClearAll}
+                                    fontStyle={{ fontSize: 13, color: Colors.secondary }}
+                                    style={{
+                                        backgroundColor: lowOpacity(Colors.secondary, 0.15),
+                                        paddingHorizontal: 15,
+                                        paddingVertical: 10,
+                                        borderWidth: 1,
+                                        borderColor: lowOpacity(Colors.secondary, 0.5),
+                                    }}
+                                >
+                                    Clear all ({unreadCount})
                                 </Button>
                             )}
                             <TouchableOpacity onPress={closeNotifications} style={styles.closeButton}>
