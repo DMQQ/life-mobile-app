@@ -1,6 +1,6 @@
 import Text from "@/components/ui/Text/Text"
 import { gql, useQuery } from "@apollo/client"
-import { AntDesign, MaterialIcons } from "@expo/vector-icons"
+import { AntDesign, Feather, MaterialIcons } from "@expo/vector-icons"
 import moment from "moment"
 import React, { useEffect, useState } from "react"
 import { ActivityIndicator, Alert, StyleSheet, View } from "react-native"
@@ -9,11 +9,19 @@ import Ripple from "react-native-material-ripple"
 import Header from "@/components/ui/Header/Header"
 import Colors from "@/constants/Colors"
 import { Expense, Subscription } from "@/types"
+import lowOpacity from "@/utils/functions/lowOpacity"
 import { parseDate } from "@/utils/functions/parseDate"
-import Animated, { useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated"
+import Animated, {
+    Extrapolation,
+    interpolate,
+    useAnimatedScrollHandler,
+    useAnimatedStyle,
+    useSharedValue,
+} from "react-native-reanimated"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import WalletItem, { CategoryIcon } from "../components/Wallet/WalletItem"
 import useSubscription from "../hooks/useSubscription"
+import getModalMarginTop from "../utils/modalMarginTop"
 
 interface SubscriptionDetailsProps {
     route: { params: { subscriptionId: string } }
@@ -198,36 +206,26 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                 initialHeight={60}
                 titleAnimatedStyle={{ flexWrap: "nowrap" }}
                 scrollY={scrollY}
-                buttons={[]}
+                buttons={[
+                    {
+                        icon: <Feather name="edit-2" size={20} color={Colors.foreground} />,
+                        onPress: () => {},
+                    },
+                ]}
                 initialTitleFontSize={subscription?.description?.length > 25 ? 40 : 50}
+                animatedSubtitle={`Amount: ${subscription.amount.toFixed(2)}zł`}
+                subtitleStyles={{ fontSize: 25, color: Colors.secondary_light_2, marginTop: 10, fontWeight: "600" }}
+                renderAnimatedItem={({ scrollY }) => (
+                    <AnimatedSubscriptionHeader scrollY={scrollY!} subscription={subscription} />
+                )}
             />
 
             <Animated.ScrollView
                 keyboardDismissMode={"on-drag"}
                 onScroll={onScroll}
-                style={{ flex: 1, paddingTop: 250 }}
+                style={{ flex: 1, paddingTop: getModalMarginTop(subscription.description) }}
             >
                 <View style={{ marginBottom: 30, paddingHorizontal: 15 }}>
-                    <View
-                        style={[
-                            styles.row,
-                            {
-                                padding: 0,
-                                flexWrap: "wrap",
-                                backgroundColor: "transparent",
-                                marginVertical: 20,
-                                alignItems: "center",
-                            },
-                        ]}
-                    >
-                        <View style={{ marginTop: 2.5 }}>
-                            <Txt size={20} color={Colors.foreground}>
-                                {subscription.amount.toFixed(2)}
-                                <Text variant="body">zł</Text>
-                            </Txt>
-                        </View>
-                    </View>
-
                     <View style={[styles.row, { paddingVertical: 0, paddingLeft: 5 }]}>
                         <CategoryIcon type="expense" category="subscriptions" />
                         <Text variant="body" style={{ color: Colors.secondary_light_2 }}>
@@ -400,6 +398,90 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                 <View style={{ height: 250, width: 100 }} />
             </Animated.ScrollView>
         </View>
+    )
+}
+
+const AnimatedSubscriptionHeader = ({
+    scrollY,
+    subscription,
+}: {
+    scrollY: Animated.SharedValue<number>
+    subscription: Subscription
+}) => {
+    console.log(JSON.stringify(subscription, null, 2))
+
+    return (
+        <Animated.View
+            style={[
+                useAnimatedStyle(() => {
+                    const scrollValue = scrollY?.value ?? 0
+
+                    return {
+                        opacity: interpolate(scrollValue, [0, 130, 150, 160], [0, 0, 0.75, 1], Extrapolation.CLAMP),
+                        transform: [
+                            {
+                                translateY: interpolate(scrollValue, [0, 160], [-25, 0], Extrapolation.CLAMP),
+                            },
+                            { scale: interpolate(scrollValue, [0, 160], [0.5, 1], Extrapolation.CLAMP) },
+                        ],
+                    }
+                }, [scrollY]),
+                { paddingHorizontal: 15, paddingLeft: 10 },
+            ]}
+        >
+            <View
+                style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    paddingBottom: 15,
+                    paddingHorizontal: 5,
+                }}
+            >
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+                    <View
+                        style={{
+                            backgroundColor: lowOpacity(subscription.isActive ? Colors.secondary : Colors.error, 0.2),
+                            paddingHorizontal: 15,
+                            paddingVertical: 5,
+                            borderRadius: 100,
+                            flexDirection: "row",
+                        }}
+                    >
+                        <Text
+                            style={{
+                                color: subscription.isActive ? Colors.secondary : Colors.error,
+                                fontSize: 16,
+                                letterSpacing: 0.5,
+                                fontWeight: "600",
+                            }}
+                        >
+                            {subscription.isActive ? "Active" : "Inactive"}
+                        </Text>
+                    </View>
+                    <Text
+                        style={{
+                            color: Colors.foreground_disabled,
+                            fontSize: 16,
+                        }}
+                    >
+                        Due on{" "}
+                        {moment(parseInt(subscription.nextBillingDate || "0")).diff(moment(), "days") < 0
+                            ? "Overdue"
+                            : moment(parseInt(subscription.nextBillingDate || "0")).format("DD.MM.YYYY")}
+                    </Text>
+                </View>
+                <Text
+                    style={{
+                        color: "#F07070",
+                        fontSize: 18,
+                        fontWeight: 600,
+                    }}
+                >
+                    -{subscription?.amount.toFixed(2)}zł
+                </Text>
+            </View>
+        </Animated.View>
     )
 }
 

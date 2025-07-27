@@ -20,6 +20,8 @@ const BottomSheet = forwardRef<
     return (
         <BottomSheetGorhom
             index={-1}
+            keyboardBlurBehavior="restore"
+            {...props}
             backdropComponent={backdropComponent}
             snapPoints={props.snapPoints}
             ref={ref}
@@ -39,7 +41,6 @@ const BottomSheet = forwardRef<
             containerStyle={{
                 zIndex: 1000,
             }}
-            keyboardBlurBehavior="restore"
         >
             {props.children}
         </BottomSheetGorhom>

@@ -44,6 +44,12 @@ const styles = StyleSheet.create({
         borderRadius: 100,
         flexDirection: "row-reverse",
     },
+    stickyFooter: {
+        position: "absolute",
+        bottom: 0,
+        left: 0,
+        right: 0,
+    },
 })
 
 const AnimatedBlurView = Animated.createAnimatedComponent(BlurView)
@@ -78,12 +84,6 @@ export default forwardRef<
         }
     })
 
-    const animatedListExtend = useAnimatedStyle(() => {
-        return {
-            marginBottom: -animatedKeyboard.height.value - 100,
-        }
-    })
-
     const onChange = useCallback((index: number) => {
         if (index === -1) {
             Keyboard.dismiss()
@@ -96,62 +96,77 @@ export default forwardRef<
 
     return (
         <BottomSheet ref={ref} snapPoints={snapPoints} onChange={onChange}>
-            <Animated.ScrollView style={[styles.container, animatedListExtend]} keyboardDismissMode="on-drag">
-                <View style={styles.header}>
+            <View style={{ flex: 1 }}>
+                <Animated.ScrollView
+                    invertStickyHeaders
+                    stickyHeaderIndices={[0]}
+                    style={[styles.container]}
+                    keyboardDismissMode="on-drag"
+                    contentContainerStyle={{ paddingBottom: 80 }}
+                >
                     <View>
-                        <Text variant="subheading" style={styles.title}>
-                            Create Todos
-                        </Text>
-                        <Text variant="caption" color={Colors.text_dark} style={styles.subtitle}>
-                            {todoCount} todo{todoCount !== 1 ? "s" : ""} ready to save
-                        </Text>
+                        <View style={styles.header}>
+                            <View>
+                                <Text variant="subheading" style={styles.title}>
+                                    Create Todos
+                                </Text>
+                                <Text variant="caption" color={Colors.text_dark} style={styles.subtitle}>
+                                    {todoCount} todo{todoCount !== 1 ? "s" : ""} ready to save
+                                </Text>
+                            </View>
+
+                            <Button
+                                type="text"
+                                onPress={() => dispatch({ type: "clear", payload: undefined })}
+                                style={{
+                                    borderWidth: 1,
+                                    borderColor: Colors.error,
+                                    backgroundColor: "transparent",
+                                    padding: 5,
+                                    paddingHorizontal: 10,
+                                }}
+                                fontStyle={{ color: Colors.error, fontSize: 13, textTransform: "none" }}
+                            >
+                                Clear All
+                            </Button>
+                        </View>
                     </View>
 
-                    <Button
-                        type="text"
-                        onPress={() => dispatch({ type: "clear", payload: undefined })}
-                        style={{
-                            borderWidth: 1,
-                            borderColor: Colors.error,
-                            backgroundColor: "transparent",
-                            padding: 5,
-                            paddingHorizontal: 10,
-                        }}
-                        fontStyle={{ color: Colors.error, fontSize: 13, textTransform: "none" }}
+                    <TodosList dispatch={dispatch} todos={state.todos} />
+                </Animated.ScrollView>
+
+                <Animated.View style={[styles.stickyFooter, keyboardAnimatedPosition]}>
+                    <BlurView
+                        style={[
+                            {
+                                paddingHorizontal: 16,
+                                paddingTop: 8,
+                                borderTopWidth: 1,
+                                borderTopColor: Color(Colors.text_dark).alpha(0.1).string(),
+                                paddingBottom: insets.bottom,
+                            },
+                        ]}
                     >
-                        Clear All
-                    </Button>
-                </View>
-
-                <TodosList dispatch={dispatch} todos={state.todos} />
-            </Animated.ScrollView>
-
-            <AnimatedBlurView
-                intensity={80}
-                tint="dark"
-                style={[
-                    { paddingHorizontal: 15, paddingBottom: insets.bottom, paddingTop: 15 },
-                    keyboardAnimatedPosition,
-                ]}
-            >
-                <Button
-                    disabled={loading || todoCount === 0}
-                    onPress={onSaveTodos}
-                    style={styles.saveButton}
-                    fontStyle={{ fontSize: 16 }}
-                    icon={
-                        loading && (
-                            <ActivityIndicator
-                                style={{ marginHorizontal: 10 }}
-                                color={Colors.foreground}
-                                size="small"
-                            />
-                        )
-                    }
-                >
-                    Save {todoCount} todo{todoCount !== 1 ? "s" : ""}
-                </Button>
-            </AnimatedBlurView>
+                        <Button
+                            disabled={loading || todoCount === 0}
+                            onPress={onSaveTodos}
+                            style={styles.saveButton}
+                            fontStyle={{ fontSize: 16 }}
+                            icon={
+                                loading && (
+                                    <ActivityIndicator
+                                        style={{ marginHorizontal: 10 }}
+                                        color={Colors.foreground}
+                                        size="small"
+                                    />
+                                )
+                            }
+                        >
+                            Save {todoCount} todo{todoCount !== 1 ? "s" : ""}
+                        </Button>
+                    </BlurView>
+                </Animated.View>
+            </View>
         </BottomSheet>
     )
 })
@@ -230,6 +245,10 @@ export const TodoInput = ({ onAddTodo }: { onAddTodo: (value: string) => any }) 
         if (text.trim().length > 0) {
             onAddTodo(text)
             setText("")
+            // Maintain focus after submit
+            setTimeout(() => {
+                ref.current?.focus()
+            }, 100)
         }
     }
 
@@ -271,8 +290,7 @@ export const TodoInput = ({ onAddTodo }: { onAddTodo: (value: string) => any }) 
             onSubmitEditing={onSubmit}
             multiline={true}
             numberOfLines={1}
-            blurOnSubmit={true}
-            onEndEditing={onSubmit}
+            blurOnSubmit={false}
             returnKeyLabel="Add todo"
             returnKeyType="done"
             enterKeyHint="done"

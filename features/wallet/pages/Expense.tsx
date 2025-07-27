@@ -363,44 +363,26 @@ export default function Expense({ route: { params }, navigation }: any) {
                         style: { marginLeft: 5 },
                     },
                 ]}
+                animatedSubtitle={`Amount: ${selected.amount.toFixed(2)}zł`}
+                subtitleStyles={{
+                    fontSize: 25,
+                    color:
+                        selected.type === "refunded"
+                            ? Colors.secondary_light_2
+                            : selected.type === "expense"
+                              ? "#F07070"
+                              : "#66E875",
+                    marginTop: 10,
+                    fontWeight: "600",
+                }}
                 initialTitleFontSize={selected?.description?.length > 25 ? 40 : 50}
             />
             <Animated.ScrollView
                 onScroll={onScroll}
                 keyboardDismissMode={"on-drag"}
-                style={{ flex: 1, paddingTop: 250 }}
+                style={{ flex: 1, paddingTop: getModalMarginTop(selected?.description) }}
             >
                 <View style={{ marginBottom: 30, paddingHorizontal: 15 }}>
-                    <View
-                        style={[
-                            styles.row,
-                            {
-                                marginTop: 0,
-                                padding: 0,
-                                flexWrap: "wrap",
-                                backgroundColor: "transparent",
-                                marginVertical: 20,
-                                alignItems: "center",
-                            },
-                        ]}
-                    >
-                        <View style={{ marginTop: 2.5 }}>
-                            <Txt
-                                size={20}
-                                color={
-                                    selected.type === "refunded"
-                                        ? Colors.secondary_light_2
-                                        : selected.type === "expense"
-                                          ? "#F07070"
-                                          : "#66E875"
-                                }
-                            >
-                                {amount}
-                                <Text style={{ fontSize: 16 }}>zł</Text>
-                            </Txt>
-                        </View>
-                    </View>
-
                     {selected.subexpenses?.length > 0 && (
                         <View style={{ marginTop: 15 }}>
                             <SubexpenseStack selected={selected} handleDeleteSubExpense={handleDeleteSubExpense} />
@@ -683,6 +665,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context"
 import ImageViewerModal from "../components/Expense/ImageViewer"
 import MapPicker from "../components/Expense/Map"
 import SubexpenseStack from "../components/Expense/SubexpenseStack"
+import getModalMarginTop from "../utils/modalMarginTop"
 
 const FileUpload = (props: { id: string; images: any[] }) => {
     const [files, setFiles] = useState<{ id: string; url: string }[]>(props.images ?? [])

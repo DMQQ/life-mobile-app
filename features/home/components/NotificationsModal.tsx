@@ -96,11 +96,11 @@ export default function NotificationsModal({ visible, onClose }: NotificationsMo
                                 <Button
                                     type="text"
                                     onPress={handleClearAll}
-                                    fontStyle={{ fontSize: 13, color: Colors.secondary }}
+                                    fontStyle={{ fontSize: 13, color: Colors.secondary, textTransform: "none" }}
                                     style={{
                                         backgroundColor: lowOpacity(Colors.secondary, 0.15),
                                         paddingHorizontal: 15,
-                                        paddingVertical: 10,
+                                        paddingVertical: 5,
                                         borderWidth: 1,
                                         borderColor: lowOpacity(Colors.secondary, 0.5),
                                     }}

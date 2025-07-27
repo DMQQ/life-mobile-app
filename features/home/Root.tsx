@@ -32,7 +32,7 @@ function Root({}: ScreenProps<"Root">) {
         },
     })
 
-    const { refetch: refetchNotifications } = useGetNotifications()
+    const { refetch: refetchNotifications, data } = useGetNotifications()
     const { refreshing, refresh } = useRefresh([refetchHome, refetchNotifications], [])
     const [scrollY, onScroll] = useTrackScroll()
 
@@ -50,9 +50,9 @@ function Root({}: ScreenProps<"Root">) {
             HeaderActions({
                 onNotificationPress: () => setShowNotifications(true),
                 onSettingsPress: () => setShowSettings(true),
-                hasNotifications: home?.notifications?.length > 0,
+                hasNotifications: data?.notifications?.length > 0,
             }),
-        [home?.notifications?.length],
+        [data?.notifications?.length],
     )
 
     return (
