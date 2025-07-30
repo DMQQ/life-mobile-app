@@ -1,3 +1,4 @@
+import ChipButton from "@/components/ui/Button/ChipButton"
 import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
 import Layout from "@/constants/Layout"
@@ -5,7 +6,6 @@ import Url from "@/constants/Url"
 import { IFile } from "@/types"
 import lowOpacity from "@/utils/functions/lowOpacity"
 import { useApolloClient } from "@apollo/client"
-import { Ionicons } from "@expo/vector-icons"
 import { useNavigation } from "@react-navigation/native"
 import axios from "axios"
 import * as ImagePicker from "expo-image-picker"
@@ -128,6 +128,7 @@ export default function FileList({ timelineId }: FileListProps) {
                     flexDirection: "row",
                     justifyContent: "space-between",
                     marginBottom: 10,
+                    alignItems: "center",
                 }}
             >
                 <Ripple onPress={() => setToggleView((p) => !p)}>
@@ -254,16 +255,12 @@ function UploadFileButton(props: { timelineId: string; refetch: () => Promise<an
     const { handleImagesSelect, loading } = useUploadFiles(props.timelineId, props.refetch)
 
     return (
-        <Ripple onPress={handleImagesSelect} style={styles.uploadButton}>
-            {loading ? (
-                <ActivityIndicator color={Colors.secondary_light_1} style={{ marginRight: 5 }} size={15} />
-            ) : (
-                <Ionicons style={{ marginRight: 5 }} name="create-outline" size={16} color={Colors.secondary_light_1} />
-            )}
-
-            <Text va style={{ color: Colors.secondary_light_1, fontSize: 14 }}>
-                {loading ? "Uploading..." : "Upload files"}
-            </Text>
-        </Ripple>
+        <ChipButton
+            icon={loading ? <ActivityIndicator color={Colors.secondary_light_1} size={15} /> : "upload"}
+            disabled={loading}
+            onPress={handleImagesSelect}
+        >
+            {loading ? "Uploading..." : "Upload files"}
+        </ChipButton>
     )
 }

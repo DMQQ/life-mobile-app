@@ -1,19 +1,17 @@
-import { Card, IconButton } from "@/components"
+import { IconButton } from "@/components"
 import BottomSheet from "@/components/ui/BottomSheet/BottomSheet"
 import Button from "@/components/ui/Button/Button"
 import Text from "@/components/ui/Text/Text"
 import Input from "@/components/ui/TextInput/TextInput"
 import Colors from "@/constants/Colors"
-import Layout from "@/constants/Layout"
-import useKeyboard from "@/utils/hooks/useKeyboard"
 import { AntDesign } from "@expo/vector-icons"
 import BottomSheetType from "@gorhom/bottom-sheet"
 import { useNavigation } from "@react-navigation/native"
 import Color from "color"
 import { BlurView } from "expo-blur"
 import { forwardRef, useCallback, useEffect, useRef, useState } from "react"
-import { ActivityIndicator, Keyboard, StyleSheet, TouchableOpacity, View } from "react-native"
-import Animated, { useAnimatedKeyboard, useAnimatedStyle, withTiming } from "react-native-reanimated"
+import { Keyboard, StyleSheet, View } from "react-native"
+import Animated, { useAnimatedKeyboard, useAnimatedStyle } from "react-native-reanimated"
 import useTodos, { Action, TodoInput as ITodoInput } from "../hooks/general/useTodos"
 
 const styles = StyleSheet.create({
@@ -50,6 +48,53 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
     },
+
+    todoCard: {
+        borderRadius: 16,
+        marginBottom: 12,
+        overflow: "hidden",
+        borderWidth: 1,
+        borderColor: "rgba(255, 255, 255, 0.1)",
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 4,
+        },
+        shadowOpacity: 0.15,
+        shadowRadius: 12,
+        elevation: 8,
+    },
+
+    todoCardRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        paddingVertical: 12,
+        paddingHorizontal: 12,
+    },
+
+    clearAll: {
+        borderWidth: 1,
+        borderColor: Colors.error,
+        backgroundColor: "transparent",
+        padding: 5,
+        paddingHorizontal: 10,
+    },
+
+    blur: {
+        paddingHorizontal: 16,
+        paddingTop: 8,
+        borderTopWidth: 1,
+        borderTopColor: Color(Colors.text_dark).alpha(0.1).string(),
+    },
+    blurBackground: {
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+    },
+    blurContent: {},
 })
 
 export default forwardRef<
@@ -82,7 +127,7 @@ export default forwardRef<
     }, [])
 
     return (
-        <BottomSheet ref={ref} snapPoints={snapPoints} onChange={onChange}>
+        <BottomSheet showBlur ref={ref} snapPoints={snapPoints} onChange={onChange}>
             <View style={{ flex: 1 }}>
                 <Animated.ScrollView
                     invertStickyHeaders
@@ -105,13 +150,7 @@ export default forwardRef<
                             <Button
                                 type="text"
                                 onPress={() => dispatch({ type: "clear", payload: undefined })}
-                                style={{
-                                    borderWidth: 1,
-                                    borderColor: Colors.error,
-                                    backgroundColor: "transparent",
-                                    padding: 5,
-                                    paddingHorizontal: 10,
-                                }}
+                                style={styles.clearAll}
                                 fontStyle={{ color: Colors.error, fontSize: 13, textTransform: "none" }}
                             >
                                 Clear All
@@ -122,26 +161,13 @@ export default forwardRef<
                     <TodosList dispatch={dispatch} todos={state.todos} />
                 </Animated.ScrollView>
 
-                <Animated.View style={[styles.stickyFooter]}>
-                    <BlurView
-                        intensity={40}
-                        tint="dark"
-                        style={[
-                            {
-                                paddingHorizontal: 16,
-                                paddingTop: 8,
-                                borderTopWidth: 1,
-                                borderTopColor: Color(Colors.text_dark).alpha(0.1).string(),
-                            },
-                        ]}
-                    >
-                        <TodoInput
-                            saveTodos={onSaveTodos}
-                            loading={loading}
-                            isOpen={isOpen}
-                            onAddTodo={(v) => dispatch({ type: "add", payload: v.trim() })}
-                        />
-                    </BlurView>
+                <Animated.View style={styles.stickyFooter}>
+                    <TodoInput
+                        saveTodos={onSaveTodos}
+                        loading={loading}
+                        isOpen={isOpen}
+                        onAddTodo={(v) => dispatch({ type: "add", payload: v.trim() })}
+                    />
                 </Animated.View>
             </View>
         </BottomSheet>
@@ -168,25 +194,9 @@ const Todo = (
     },
 ) => {
     return (
-        <Card
-            style={{
-                marginBottom: 8,
-                borderRadius: 12,
-                backgroundColor: Color(Colors.primary_lighter).lighten(0.1).hex(),
-                borderWidth: 1,
-                borderColor: Color(Colors.primary_light).lighten(0.2).hex(),
-                padding: 5,
-            }}
-        >
-            <View
-                style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    paddingVertical: 12,
-                    paddingHorizontal: 12,
-                }}
-            >
+        <View style={styles.todoCard}>
+            <BlurView intensity={50} tint="dark" style={styles.blurBackground} />
+            <View style={[styles.todoCardRow, styles.blurContent]}>
                 <Text
                     variant="body"
                     style={{
@@ -202,11 +212,11 @@ const Todo = (
                     style={{ margin: 0, marginLeft: 8 }}
                 />
             </View>
-        </Card>
+        </View>
     )
 }
 
-export const TodoInput = ({
+const TodoInput = ({
     onAddTodo,
     saveTodos,
     loading,
@@ -224,23 +234,10 @@ export const TodoInput = ({
         if (text.trim().length > 0) {
             onAddTodo(text)
             setText("")
-            // Maintain focus after submit
-
-            ref.current?.focus()
         }
     }
 
     const keyboard = useAnimatedKeyboard()
-
-    const keyboardState = useKeyboard()
-
-    const submitButtonStyle = useAnimatedStyle(() => {
-        return {
-            transform: [
-                { translateX: keyboard.state.value === 4 ? withTiming(0) : withTiming(Layout.screen.width / 2) },
-            ],
-        }
-    })
 
     useEffect(() => {
         if (isOpen) {
@@ -251,66 +248,64 @@ export const TodoInput = ({
     }, [isOpen])
 
     return (
-        <View>
-            <Input
-                autoFocus={isOpen}
-                inputRef={ref}
-                style={{
-                    margin: 0,
-                    backgroundColor: "transparent",
-                    borderWidth: 0,
-                }}
-                right={
-                    keyboardState ? (
-                        <IconButton
-                            icon={
-                                <AntDesign
-                                    name="plus"
-                                    size={20}
-                                    color={text.trim() ? Colors.secondary : Colors.primary_lighter}
+        <View style={{ padding: 15 }}>
+            <View style={{ borderRadius: 30, overflow: "hidden" }}>
+                <BlurView intensity={80} tint="dark" style={styles.blurBackground} />
+                <View style={{ backgroundColor: "rgba(0, 0, 0, 0.2)", borderRadius: 30 }}>
+                    <Input
+                        activeBorderColor={Color(Colors.primary_lighter).lighten(0.3).hex()}
+                        autoFocus={isOpen}
+                        inputRef={ref}
+                        style={{
+                            margin: 0,
+                            borderWidth: 0,
+                            paddingHorizontal: 15,
+                        }}
+                        right={
+                            isOpen && (
+                                <IconButton
+                                    icon={
+                                        <AntDesign
+                                            name="plus"
+                                            size={20}
+                                            color={text.trim() ? Colors.secondary : Colors.primary_lighter}
+                                        />
+                                    }
+                                    onPress={onSubmit}
+                                    disabled={!text.trim()}
                                 />
-                            }
-                            onPress={onSubmit}
-                            disabled={!text.trim()}
+                            )
+                        }
+                        containerStyle={{ borderRadius: 30, backgroundColor: undefined, marginBottom: 0 }}
+                        placeholderTextColor={Colors.text_dark}
+                        value={text}
+                        onChangeText={setText}
+                        placeholder="What needs to be done?"
+                        onSubmitEditing={onSubmit}
+                        numberOfLines={1}
+                        returnKeyLabel="Add todo"
+                        returnKeyType="send"
+                        enterKeyHint="done"
+                        keyboardAppearance="dark"
+                        enablesReturnKeyAutomatically
+                    />
+                    <Animated.View
+                        style={[
+                            { position: "absolute", right: 5, bottom: 5 },
+                            useAnimatedStyle(() => ({
+                                transform: [{ translateX: keyboard.height.value }],
+                            })),
+                        ]}
+                    >
+                        <IconButton
+                            icon={<AntDesign name="check" size={20} color={Colors.text_light} />}
+                            onPress={saveTodos}
+                            disabled={loading}
+                            style={[{ backgroundColor: Colors.secondary, padding: 12.5 }]}
                         />
-                    ) : (
-                        <Animated.View style={submitButtonStyle}>
-                            <TouchableOpacity
-                                onPress={saveTodos}
-                                style={{
-                                    padding: 10,
-                                    paddingVertical: 5,
-                                    backgroundColor: Colors.secondary,
-                                    flexDirection: "row",
-                                    borderRadius: 100,
-                                    alignItems: "center",
-                                }}
-                            >
-                                {loading ? (
-                                    <ActivityIndicator size={15} color={Colors.text_light} />
-                                ) : (
-                                    <AntDesign name="plus" size={15} color={Colors.text_light} />
-                                )}
-                                <Text style={{ color: Colors.text_light, fontSize: 14, marginLeft: 8 }}>
-                                    Save todos
-                                </Text>
-                            </TouchableOpacity>
-                        </Animated.View>
-                    )
-                }
-                containerStyle={{ borderRadius: 20, backgroundColor: undefined }}
-                placeholderTextColor={Colors.text_dark}
-                value={text}
-                onChangeText={setText}
-                placeholder="What needs to be done?"
-                onSubmitEditing={onSubmit}
-                numberOfLines={1}
-                returnKeyLabel="Add todo"
-                returnKeyType="send"
-                enterKeyHint="done"
-                keyboardAppearance="dark"
-                enablesReturnKeyAutomatically
-            />
+                    </Animated.View>
+                </View>
+            </View>
             <Animated.View
                 style={useAnimatedStyle(() => ({
                     height: keyboard.height.value > 20 ? keyboard.height.value : 20,

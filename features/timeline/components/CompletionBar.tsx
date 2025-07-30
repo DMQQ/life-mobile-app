@@ -7,7 +7,7 @@ import Animated, { useAnimatedStyle, withDelay, withTiming } from "react-native-
 export default function CompletionBar({ percentage = 0 }: { percentage: number }) {
     const widthStyle = useAnimatedStyle(
         () => ({
-            width: withDelay(1000, withTiming(((Layout.screen.width - 30) * percentage) / 100)),
+            width: withDelay(1000, withTiming(((Layout.screen.width - 40) * percentage) / 100)),
         }),
 
         [percentage],

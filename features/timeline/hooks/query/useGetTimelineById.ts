@@ -1,4 +1,4 @@
-import { gql, OperationVariables, QueryHookOptions, useLazyQuery, useQuery } from "@apollo/client"
+import { gql, OperationVariables, QueryHookOptions, useQuery } from "@apollo/client"
 
 export const GET_TIMELINE = gql`
     query GetTimeline($id: String!) {
@@ -37,14 +37,4 @@ export default function useGetTimelineById(id: string, headers?: QueryHookOption
     })
 
     return { data: data?.timelineById, refetch, loading }
-}
-
-export const useGetTimelineByIdLazy = (id: string) => {
-    const [reload, { data }] = useLazyQuery(GET_TIMELINE, {
-        variables: {
-            id,
-        },
-    })
-
-    return { data: data?.timelineById, reload }
 }

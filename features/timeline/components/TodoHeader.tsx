@@ -1,8 +1,8 @@
+import ChipButton from "@/components/ui/Button/ChipButton"
 import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
 import { Todos } from "@/types"
-import lowOpacity from "@/utils/functions/lowOpacity"
-import { Pressable, StyleSheet, View } from "react-native"
+import { StyleSheet, View } from "react-native"
 
 const styles = StyleSheet.create({
     header: {
@@ -54,20 +54,9 @@ export default function TodoHeader({ todos, onAddTodo, onLongPress }: TodoHeader
                 </Text>
             </View>
 
-            <Pressable
-                onPress={onAddTodo}
-                onLongPress={onLongPress}
-                style={[
-                    styles.addButton,
-                    {
-                        backgroundColor: lowOpacity(Colors.secondary, 0.2),
-                    },
-                ]}
-            >
-                <Text variant="caption" color={Colors.secondary_light_1}>
-                    Add todo
-                </Text>
-            </Pressable>
+            <ChipButton onPress={onAddTodo} onLongPress={onLongPress} icon="plus">
+                Add todo
+            </ChipButton>
         </View>
     )
 }

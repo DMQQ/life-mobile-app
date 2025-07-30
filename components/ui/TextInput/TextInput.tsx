@@ -1,14 +1,5 @@
 import React, { useState } from "react"
-import {
-    StyleProp,
-    Text,
-    TextInput,
-    TextInputComponent,
-    TextInputProps,
-    TextStyle,
-    View,
-    ViewStyle,
-} from "react-native"
+import { StyleProp, Text, TextInput, TextInputProps, TextStyle, View, ViewStyle } from "react-native"
 import Colors from "../../../constants/Colors"
 import { Theme, useTheme } from "../../../utils/context/ThemeContext"
 import styles from "./styles"
@@ -90,6 +81,8 @@ export interface InputProps extends TextInputProps {
     label?: string
 
     useBottomSheetInput?: boolean
+
+    activeBorderColor?: string
 }
 
 export default function Input({
@@ -106,7 +99,7 @@ export default function Input({
     left,
     right,
     onBlur,
-
+    activeBorderColor = Colors.secondary,
     useBottomSheetInput = false,
 
     ...rest
@@ -161,7 +154,7 @@ export default function Input({
                         borderColor: error
                             ? Colors.error
                             : isFocused
-                              ? Colors.secondary
+                              ? activeBorderColor
                               : Color(Colors.primary).lighten(0.5).hex(),
                         alignItems: "center",
                     },
@@ -241,7 +234,9 @@ Input.Icon = ({
             <Component
                 {...props}
                 size={props.size || 25}
-                color={props.isError ? Colors.error : props.isFocused ? props.theme.colors.secondary : Colors.foreground}
+                color={
+                    props.isError ? Colors.error : props.isFocused ? props.theme.colors.secondary : Colors.foreground
+                }
             />
         </Ripple>
     )

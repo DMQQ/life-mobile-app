@@ -263,7 +263,7 @@ function NotificationCard({
 
     return (
         <Animated.View style={styles.notificationCard} entering={FadeInDown.delay((index + 1) * 75)}>
-            <BlurView intensity={100} tint="dark" style={styles.blurContainer}>
+            <BlurView intensity={50} tint="dark" style={styles.blurContainer}>
                 <Ripple
                     disabled={notification.read}
                     onPress={handlePress}
