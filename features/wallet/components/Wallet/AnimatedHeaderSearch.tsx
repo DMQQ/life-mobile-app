@@ -77,7 +77,6 @@ const AnimatedSearchInput = ({ scrollY }: AnimatedSearchInputProps) => {
                 <IconButton
                     icon={<Ionicons name="options" size={24} color={Colors.foreground} />}
                     onPress={() => {
-                        Haptics.trigger("impactLight")
                         navigation.navigate("Filters")
                     }}
                 />

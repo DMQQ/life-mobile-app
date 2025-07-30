@@ -55,7 +55,7 @@ const AvailableBalanceWidget = ({ data, loading }: Props) => {
     const spentPercentage = targetAmount ? (stats?.expense / targetAmount) * 100 : 0
 
     const remainingBudget = targetAmount - stats?.expense
-    const daysLeft = Math.abs(dayjs().diff(dayjs().endOf("month"), "day") + 1)
+    const daysLeft = Math.abs(dayjs().diff(dayjs().endOf("month"), "day") + 2) // +2 to include today and the last day of the month
     const dailyBudgetLeft = daysLeft > 0 ? remainingBudget / daysLeft : 0
     const savings = wallet?.income + stats?.income - stats?.expense
 

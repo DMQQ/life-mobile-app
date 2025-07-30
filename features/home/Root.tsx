@@ -50,9 +50,9 @@ function Root({}: ScreenProps<"Root">) {
             HeaderActions({
                 onNotificationPress: () => setShowNotifications(true),
                 onSettingsPress: () => setShowSettings(true),
-                hasNotifications: data?.notifications?.length > 0,
+                hasNotifications: (data?.notifications as any[])?.some((n) => !n.read),
             }),
-        [data?.notifications?.length],
+        [data?.notifications],
     )
 
     return (

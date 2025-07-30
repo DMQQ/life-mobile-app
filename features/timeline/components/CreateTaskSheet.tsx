@@ -4,16 +4,16 @@ import Button from "@/components/ui/Button/Button"
 import Text from "@/components/ui/Text/Text"
 import Input from "@/components/ui/TextInput/TextInput"
 import Colors from "@/constants/Colors"
-import { useTheme } from "@/utils/context/ThemeContext"
+import Layout from "@/constants/Layout"
+import useKeyboard from "@/utils/hooks/useKeyboard"
 import { AntDesign } from "@expo/vector-icons"
 import BottomSheetType from "@gorhom/bottom-sheet"
 import { useNavigation } from "@react-navigation/native"
 import Color from "color"
 import { BlurView } from "expo-blur"
 import { forwardRef, useCallback, useEffect, useRef, useState } from "react"
-import { ActivityIndicator, Keyboard, StyleSheet, View } from "react-native"
-import Animated, { useAnimatedKeyboard, useAnimatedStyle } from "react-native-reanimated"
-import { useSafeAreaInsets } from "react-native-safe-area-context"
+import { ActivityIndicator, Keyboard, StyleSheet, TouchableOpacity, View } from "react-native"
+import Animated, { useAnimatedKeyboard, useAnimatedStyle, withTiming } from "react-native-reanimated"
 import useTodos, { Action, TodoInput as ITodoInput } from "../hooks/general/useTodos"
 
 const styles = StyleSheet.create({
@@ -52,37 +52,22 @@ const styles = StyleSheet.create({
     },
 })
 
-const AnimatedBlurView = Animated.createAnimatedComponent(BlurView)
-
 export default forwardRef<
     BottomSheetType,
     {
         timelineId: string
     }
 >(({ timelineId }, ref) => {
+    const [isOpen, setIsOpen] = useState<boolean>(false)
     const { dispatch, loading, onSaveTodos, state } = useTodos(timelineId, () => {
         Keyboard.dismiss()
         ;(ref as any).current?.close()
     })
     const todoCount = state.todos.filter((todo) => todo.value.trim().length > 0).length
 
-    const snapPoints = ["60%"]
-
-    const insets = useSafeAreaInsets()
-
-    const animatedKeyboard = useAnimatedKeyboard()
+    const snapPoints = ["95%"]
 
     const navigation = useNavigation()
-
-    const keyboardAnimatedPosition = useAnimatedStyle(() => {
-        return {
-            transform: [
-                {
-                    translateY: animatedKeyboard.height.value,
-                },
-            ],
-        }
-    })
 
     const onChange = useCallback((index: number) => {
         if (index === -1) {
@@ -92,6 +77,8 @@ export default forwardRef<
         navigation.setOptions({
             gestureEnabled: index === -1,
         })
+
+        setIsOpen(index !== -1)
     }, [])
 
     return (
@@ -135,35 +122,25 @@ export default forwardRef<
                     <TodosList dispatch={dispatch} todos={state.todos} />
                 </Animated.ScrollView>
 
-                <Animated.View style={[styles.stickyFooter, keyboardAnimatedPosition]}>
+                <Animated.View style={[styles.stickyFooter]}>
                     <BlurView
+                        intensity={40}
+                        tint="dark"
                         style={[
                             {
                                 paddingHorizontal: 16,
                                 paddingTop: 8,
                                 borderTopWidth: 1,
                                 borderTopColor: Color(Colors.text_dark).alpha(0.1).string(),
-                                paddingBottom: insets.bottom,
                             },
                         ]}
                     >
-                        <Button
-                            disabled={loading || todoCount === 0}
-                            onPress={onSaveTodos}
-                            style={styles.saveButton}
-                            fontStyle={{ fontSize: 16 }}
-                            icon={
-                                loading && (
-                                    <ActivityIndicator
-                                        style={{ marginHorizontal: 10 }}
-                                        color={Colors.foreground}
-                                        size="small"
-                                    />
-                                )
-                            }
-                        >
-                            Save {todoCount} todo{todoCount !== 1 ? "s" : ""}
-                        </Button>
+                        <TodoInput
+                            saveTodos={onSaveTodos}
+                            loading={loading}
+                            isOpen={isOpen}
+                            onAddTodo={(v) => dispatch({ type: "add", payload: v.trim() })}
+                        />
                     </BlurView>
                 </Animated.View>
             </View>
@@ -172,22 +149,15 @@ export default forwardRef<
 })
 
 const TodosList = ({ todos, dispatch }: { todos: ITodoInput[]; dispatch: React.Dispatch<Action> }) => {
-    const onAddTodo = (value: string) => {
-        dispatch({ type: "add", payload: value.trim() })
-    }
-
     const onRemoveTodo = (todo: ITodoInput) => {
         dispatch({ type: "remove", payload: todo.index })
     }
 
     return (
         <View style={styles.todosList}>
-            <TodoInput onAddTodo={onAddTodo} />
-            <View style={{ marginBottom: 8 }}>
-                {todos.map((todo, index) => (
-                    <Todo key={todo.index} {...todo} onRemove={() => onRemoveTodo(todo)} />
-                ))}
-            </View>
+            {todos.map((todo, index) => (
+                <Todo key={todo.index} {...todo} onRemove={() => onRemoveTodo(todo)} />
+            ))}
         </View>
     )
 }
@@ -236,9 +206,18 @@ const Todo = (
     )
 }
 
-export const TodoInput = ({ onAddTodo }: { onAddTodo: (value: string) => any }) => {
+export const TodoInput = ({
+    onAddTodo,
+    saveTodos,
+    loading,
+    isOpen,
+}: {
+    onAddTodo: (value: string) => any
+    saveTodos: () => any
+    loading: boolean
+    isOpen?: boolean
+}) => {
     const [text, setText] = useState<string>("")
-    const theme = useTheme()
     const ref = useRef<any>()
 
     const onSubmit = () => {
@@ -246,56 +225,98 @@ export const TodoInput = ({ onAddTodo }: { onAddTodo: (value: string) => any }) 
             onAddTodo(text)
             setText("")
             // Maintain focus after submit
-            setTimeout(() => {
-                ref.current?.focus()
-            }, 100)
+
+            ref.current?.focus()
         }
     }
 
-    useEffect(() => {
-        if (ref.current === null || text.trim() === "") return
-        let timeout = setTimeout(() => {
-            ref.current.focus()
-        }, 100)
+    const keyboard = useAnimatedKeyboard()
 
-        return () => clearTimeout(timeout)
-    }, [text])
+    const keyboardState = useKeyboard()
+
+    const submitButtonStyle = useAnimatedStyle(() => {
+        return {
+            transform: [
+                { translateX: keyboard.state.value === 4 ? withTiming(0) : withTiming(Layout.screen.width / 2) },
+            ],
+        }
+    })
+
+    useEffect(() => {
+        if (isOpen) {
+            ref.current?.focus()
+        } else {
+            ref.current?.blur()
+        }
+    }, [isOpen])
 
     return (
-        <Input
-            useBottomSheetInput
-            inputRef={ref}
-            style={{
-                margin: 0,
-                backgroundColor: "transparent",
-                borderWidth: 0,
-            }}
-            right={
-                <IconButton
-                    icon={
-                        <AntDesign
-                            name="plus"
-                            size={20}
-                            color={text.trim() ? Colors.secondary : Colors.primary_lighter}
+        <View>
+            <Input
+                autoFocus={isOpen}
+                inputRef={ref}
+                style={{
+                    margin: 0,
+                    backgroundColor: "transparent",
+                    borderWidth: 0,
+                }}
+                right={
+                    keyboardState ? (
+                        <IconButton
+                            icon={
+                                <AntDesign
+                                    name="plus"
+                                    size={20}
+                                    color={text.trim() ? Colors.secondary : Colors.primary_lighter}
+                                />
+                            }
+                            onPress={onSubmit}
+                            disabled={!text.trim()}
                         />
-                    }
-                    onPress={onSubmit}
-                    disabled={!text.trim()}
-                />
-            }
-            placeholderTextColor={Colors.text_dark}
-            value={text}
-            onChangeText={setText}
-            placeholder="What needs to be done?"
-            onSubmitEditing={onSubmit}
-            multiline={true}
-            numberOfLines={1}
-            blurOnSubmit={false}
-            returnKeyLabel="Add todo"
-            returnKeyType="done"
-            enterKeyHint="done"
-            keyboardAppearance="dark"
-            enablesReturnKeyAutomatically
-        />
+                    ) : (
+                        <Animated.View style={submitButtonStyle}>
+                            <TouchableOpacity
+                                onPress={saveTodos}
+                                style={{
+                                    padding: 10,
+                                    paddingVertical: 5,
+                                    backgroundColor: Colors.secondary,
+                                    flexDirection: "row",
+                                    borderRadius: 100,
+                                    alignItems: "center",
+                                }}
+                            >
+                                {loading ? (
+                                    <ActivityIndicator size={15} color={Colors.text_light} />
+                                ) : (
+                                    <AntDesign name="plus" size={15} color={Colors.text_light} />
+                                )}
+                                <Text style={{ color: Colors.text_light, fontSize: 14, marginLeft: 8 }}>
+                                    Save todos
+                                </Text>
+                            </TouchableOpacity>
+                        </Animated.View>
+                    )
+                }
+                containerStyle={{ borderRadius: 20, backgroundColor: undefined }}
+                placeholderTextColor={Colors.text_dark}
+                value={text}
+                onChangeText={setText}
+                placeholder="What needs to be done?"
+                onSubmitEditing={onSubmit}
+                numberOfLines={1}
+                returnKeyLabel="Add todo"
+                returnKeyType="send"
+                enterKeyHint="done"
+                keyboardAppearance="dark"
+                enablesReturnKeyAutomatically
+            />
+            <Animated.View
+                style={useAnimatedStyle(() => ({
+                    height: keyboard.height.value > 20 ? keyboard.height.value : 20,
+                    width: 100,
+                }))}
+            />
+        </View>
     )
 }

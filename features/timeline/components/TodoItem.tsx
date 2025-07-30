@@ -77,10 +77,8 @@ export default function TodoItem(todo: Todos & { timelineId: string; index: numb
                 style={[
                     styles.todoCard,
                     {
-                        backgroundColor: todo.isCompleted
-                            ? Color(Colors.primary_lighter).lighten(0.05).hex()
-                            : Color(Colors.primary_lighter).lighten(0.15).hex(),
-                        opacity: todo.isCompleted ? 0.8 : 1,
+                        backgroundColor: Colors.primary_lighter,
+                        opacity: todo.isCompleted ? 0.75 : 1,
                         borderColor: todo.isCompleted
                             ? Color(Colors.primary_light).lighten(0.2).hex()
                             : Color(Colors.primary_light).lighten(0.3).hex(),

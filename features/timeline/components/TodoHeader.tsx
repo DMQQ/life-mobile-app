@@ -1,7 +1,7 @@
-import Colors from "@/constants/Colors"
 import Text from "@/components/ui/Text/Text"
+import Colors from "@/constants/Colors"
 import { Todos } from "@/types"
-import Color from "color"
+import lowOpacity from "@/utils/functions/lowOpacity"
 import { Pressable, StyleSheet, View } from "react-native"
 
 const styles = StyleSheet.create({
@@ -17,12 +17,14 @@ const styles = StyleSheet.create({
         justifyContent: "center",
     },
     addButton: {
-        paddingHorizontal: 16,
-        paddingVertical: 8,
+        paddingHorizontal: 15,
+        paddingVertical: 5,
         borderRadius: 100,
         flexDirection: "row",
         alignItems: "center",
         gap: 6,
+        borderWidth: 1,
+        borderColor: Colors.secondary,
     },
 })
 
@@ -38,7 +40,9 @@ export default function TodoHeader({ todos, onAddTodo, onLongPress }: TodoHeader
     return (
         <View style={styles.header}>
             <View style={styles.titleContainer}>
-                <Text variant="subheading" color={Colors.text_light}>Todos</Text>
+                <Text variant="subheading" color={Colors.text_light}>
+                    Todos
+                </Text>
                 <Text
                     variant="body"
                     style={{
@@ -56,11 +60,13 @@ export default function TodoHeader({ todos, onAddTodo, onLongPress }: TodoHeader
                 style={[
                     styles.addButton,
                     {
-                        backgroundColor: Color(Colors.primary_lighter).lighten(0.15).hex(),
+                        backgroundColor: lowOpacity(Colors.secondary, 0.2),
                     },
                 ]}
             >
-                <Text variant="caption" color={Colors.text_light}>+ Add Todo</Text>
+                <Text variant="caption" color={Colors.secondary_light_1}>
+                    Add todo
+                </Text>
             </Pressable>
         </View>
     )

@@ -1,12 +1,23 @@
 import { gql, useMutation } from "@apollo/client"
 import * as Notifications from "expo-notifications"
+import { NOTIFICATIONS_QUERY } from "../components/Wallet/WalletNotifications"
 
 export default function useReadAllNotifications() {
-    const [readAll] = useMutation(gql`
-        mutation ReadAllNotifications {
-            readAllNotifications
-        }
-    `)
+    const [readAll] = useMutation(
+        gql`
+            mutation ReadAllNotifications {
+                readAllNotifications
+            }
+        `,
+        {
+            refetchQueries: [
+                {
+                    query: NOTIFICATIONS_QUERY,
+                    variables: { take: 25, skip: 0 },
+                },
+            ],
+        },
+    )
 
     const readAllNotifications = async () => {
         try {

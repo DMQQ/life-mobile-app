@@ -160,7 +160,10 @@ const StreakTile = ({
                 <View style={styles.streakMainContent}>
                     <Text
                         variant="body"
-                        style={[styles.streakLengthHorizontal, { color: isLongest ? "#000" : Colors.foreground }]}
+                        style={[
+                            styles.streakLengthHorizontal,
+                            { color: isLongest ? "#000" : Colors.foreground, fontWeight: "bold" },
+                        ]}
                     >
                         {actualLength} days
                     </Text>
@@ -521,6 +524,7 @@ const styles = StyleSheet.create({
     sectionTitle: {
         color: Colors.foreground,
         marginBottom: 15,
+        fontWeight: "bold",
     },
     streaksSection: {
         marginBottom: 0,
@@ -581,13 +585,8 @@ const styles = StyleSheet.create({
     },
     streakLengthHorizontal: {
         marginBottom: 2,
-        textShadowColor: "rgba(0,0,0,0.3)",
-        textShadowOffset: { width: 1, height: 1 },
-        textShadowRadius: 2,
     },
-    streakDateHorizontal: {
-        lineHeight: 12,
-    },
+    streakDateHorizontal: {},
     streakProgressHorizontal: {
         position: "absolute",
         bottom: 0,

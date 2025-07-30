@@ -1,9 +1,10 @@
 import { Card } from "@/components"
+import CollapsibleStack from "@/components/ui/CollapsableStack"
 import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
 import { Todos } from "@/types"
 import Color from "color"
-import { useState } from "react"
+import { memo, useCallback, useMemo, useState } from "react"
 import { StyleSheet, View } from "react-native"
 import TodoHeader from "./TodoHeader"
 import TodoItem from "./TodoItem"
@@ -27,7 +28,12 @@ const styles = StyleSheet.create({
     },
 })
 
-export default function TimelineTodos(props: { sortedTodos: Todos[]; timelineId: string; expandSheet: () => void }) {
+export default function TimelineTodos(props: {
+    sortedTodos: Todos[]
+    timelineId: string
+    expandSheet: () => void
+    onDeleteTodo?: (todoId: string) => void
+}) {
     const [showTransferDialog, setShowTransferDialog] = useState(false)
 
     const handleAddTodo = () => {
@@ -38,15 +44,43 @@ export default function TimelineTodos(props: { sortedTodos: Todos[]; timelineId:
         setShowTransferDialog(true)
     }
 
+    const [finishedTodos, notFinishedTodos] = useMemo(() => {
+        return props.sortedTodos.reduce(
+            ([finished, notFinished], todo) => {
+                if (todo.isCompleted) {
+                    finished.push(todo)
+                } else {
+                    notFinished.push(todo)
+                }
+                return [finished, notFinished]
+            },
+            [[] as Todos[], [] as Todos[]],
+        )
+    }, [props.sortedTodos])
+
     return (
         <>
             <View style={styles.container}>
                 <TodoHeader todos={props.sortedTodos} onAddTodo={handleAddTodo} onLongPress={handleLongPress} />
 
-                {props.sortedTodos.length > 0 ? (
-                    props.sortedTodos.map((todo, index) => (
-                        <TodoItem key={todo.id} index={index} timelineId={props.timelineId} {...todo} />
-                    ))
+                {finishedTodos.length > 0 || notFinishedTodos.length > 0 ? (
+                    <>
+                        {notFinishedTodos.map((todo, index) => (
+                            <TodoItem key={todo.id} index={index} timelineId={props.timelineId} {...todo} />
+                        ))}
+
+                        {notFinishedTodos.length === 0 && (
+                            <Card style={{ backgroundColor: Colors.primary_lighter }}>
+                                <Text variant="body" style={styles.emptyText}>
+                                    No active todos. Tap "Add Todo" to get started!
+                                </Text>
+                            </Card>
+                        )}
+
+                        {finishedTodos.length > 0 && (
+                            <FinishedTodosStack todos={finishedTodos} timelineId={props.timelineId} />
+                        )}
+                    </>
                 ) : (
                     <Card style={styles.emptyState}>
                         <Text variant="body" style={styles.emptyText}>
@@ -64,3 +98,27 @@ export default function TimelineTodos(props: { sortedTodos: Todos[]; timelineId:
         </>
     )
 }
+
+const getItemKey = (todo: Todos) => todo.id
+
+const FinishedTodosStack = memo((props: { todos: Todos[]; timelineId: string }) => {
+    const renderItem = useCallback(
+        ({ item, index }: { item: Todos; index: number }) => (
+            <TodoItem key={item.id} index={index} {...item} timelineId={props.timelineId} />
+        ),
+
+        [props.timelineId],
+    )
+
+    return (
+        <CollapsibleStack
+            items={props.todos}
+            title="Completed"
+            onDeleteItem={() => {}}
+            getItemKey={getItemKey}
+            renderItem={renderItem}
+            expandText="Show"
+            collapseText="Hide"
+        />
+    )
+})
