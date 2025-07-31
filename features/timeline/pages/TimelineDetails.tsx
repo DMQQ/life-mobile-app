@@ -79,6 +79,7 @@ export default function TimelineDetails({
     }
 
     const taskRef = useRef<BottomSheetType>(null)
+    const [isSheetOpen, setIsSheetOpen] = useState(false)
 
     const buttons = useMemo(
         () => [
@@ -150,7 +151,10 @@ export default function TimelineDetails({
                     <View style={styles.container}>
                         <Text variant="body">{data?.description || "No description provided for this event."}</Text>
                         <TimelineTodos
-                            expandSheet={() => taskRef.current?.snapToIndex(0)}
+                            expandSheet={() => {
+                                taskRef.current?.snapToIndex(0)
+                                setIsSheetOpen(true)
+                            }}
                             timelineId={data?.id}
                             sortedTodos={data?.todos || []}
                         />
@@ -178,7 +182,14 @@ export default function TimelineDetails({
                 onDismiss={() => setSelectedEventForDeletion(null)}
             />
 
-            <CreateTaskSheet ref={taskRef} timelineId={data?.id} />
+            <CreateTaskSheet
+                isSheetOpen={isSheetOpen}
+                onCloseSheet={() => {
+                    setIsSheetOpen(false)
+                }}
+                ref={taskRef}
+                timelineId={data?.id}
+            />
         </View>
     )
 }

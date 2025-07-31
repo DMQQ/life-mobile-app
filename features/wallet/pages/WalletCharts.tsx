@@ -216,13 +216,21 @@ function WalletCharts({ navigation }: any) {
         () => [
             {
                 icon: (
-                    <MaterialIcons name="bar-chart" size={25} color={chartType === "bar" ? Colors.secondary : Colors.foreground} />
+                    <MaterialIcons
+                        name="bar-chart"
+                        size={25}
+                        color={chartType === "bar" ? Colors.secondary : Colors.foreground}
+                    />
                 ),
                 onPress: () => setChartType("bar"),
             },
             {
                 icon: (
-                    <MaterialIcons name="pie-chart" size={20} color={chartType === "pie" ? Colors.secondary : Colors.foreground} />
+                    <MaterialIcons
+                        name="pie-chart"
+                        size={20}
+                        color={chartType === "pie" ? Colors.secondary : Colors.foreground}
+                    />
                 ),
                 onPress: () => setChartType("pie"),
             },
@@ -260,10 +268,9 @@ function WalletCharts({ navigation }: any) {
                 buttons={headerButtons}
                 goBack
                 backIcon={<AntDesign name="close" size={24} color={Colors.foreground} />}
-                
             />
             <AnimatedVirtualizedList
-                style={{ marginTop: 60 }}
+                style={{ marginTop: 100 }}
                 onScroll={onScroll}
                 ref={listRef}
                 ListHeaderComponent={
@@ -334,7 +341,9 @@ function WalletCharts({ navigation }: any) {
                     <>
                         {selectedCategoryData.length > step && (
                             <Ripple onPress={() => setStep(selectedCategoryData.length)}>
-                                <Text variant="body" style={styles.viewAll}>View all</Text>
+                                <Text variant="body" style={styles.viewAll}>
+                                    View all
+                                </Text>
                             </Ripple>
                         )}
                         <StatisticsSummary />

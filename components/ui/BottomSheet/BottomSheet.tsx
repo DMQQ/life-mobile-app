@@ -19,7 +19,13 @@ const BottomSheet = forwardRef<
 
     const backdropComponent = useCallback(
         (backdropProps: BottomSheetBackdropProps) => (
-            <BottomSheetBackdrop appearsOnIndex={0} disappearsOnIndex={-1} opacity={0.4} {...backdropProps} />
+            <BottomSheetBackdrop
+                enableTouchThrough={false}
+                appearsOnIndex={0}
+                disappearsOnIndex={-1}
+                opacity={0.5}
+                {...backdropProps}
+            />
         ),
         [],
     )

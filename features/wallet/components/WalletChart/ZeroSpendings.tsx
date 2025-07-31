@@ -1,10 +1,11 @@
 import { AnimatedNumber } from "@/components"
+import ChipButton from "@/components/ui/Button/ChipButton"
 import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
 import Layout from "@/constants/Layout"
 import { useRefresh } from "@/utils/context/RefreshContext"
 import { gql, useQuery } from "@apollo/client"
-import { AntDesign, FontAwesome5, Ionicons, MaterialIcons } from "@expo/vector-icons"
+import { FontAwesome5, Ionicons, MaterialIcons } from "@expo/vector-icons"
 import { MenuView } from "@react-native-menu/menu"
 import moment from "moment"
 import React, { useMemo, useState } from "react"
@@ -299,12 +300,9 @@ export default function ZeroExpenseStats() {
                             },
                         ]}
                     >
-                        <Ripple style={styles.dateToggleButton}>
-                            <AntDesign name="clockcircleo" size={16} color={Colors.foreground} />
-                            <Text variant="caption" style={styles.dateToggleText}>
-                                {moment(dateRange[0]).format("DD.MM")} - {moment(dateRange[1]).format("DD.MM")}
-                            </Text>
-                        </Ripple>
+                        <ChipButton icon="clockcircleo">
+                            {`${moment(dateRange[0]).format("DD.MM")} - ${moment(dateRange[1]).format("DD.MM")}`}
+                        </ChipButton>
                     </MenuView>
                 </View>
 

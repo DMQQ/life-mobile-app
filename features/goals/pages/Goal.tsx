@@ -1,12 +1,12 @@
 import Button from "@/components/ui/Button/Button"
 import Header from "@/components/ui/Header/Header"
+import Text from "@/components/ui/Text/Text"
 import Colors, { secondary_candidates } from "@/constants/Colors"
 import { MaterialCommunityIcons } from "@expo/vector-icons"
 import Color from "color"
 import moment from "moment"
 import { useMemo } from "react"
 import { StyleSheet, View } from "react-native"
-import Text from "@/components/ui/Text/Text"
 import Animated, { useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated"
 import DayEntry from "../components/GoalEntry"
 import GitHubActivityGrid from "../components/StatGrid"
@@ -53,8 +53,9 @@ export default function Goal({ route, navigation }: any) {
     return (
         <View style={{ padding: 0, flex: 1, paddingVertical: 15, paddingBottom: 25 }}>
             <Header scrollY={scrollY} goBack initialHeight={60} animated />
-            <View style={{ paddingHorizontal: 15, flex: 1, paddingTop: 60 }}>
+            <View style={{ paddingHorizontal: 15, flex: 1 }}>
                 <Animated.FlatList
+                    style={{ paddingTop: 120 }}
                     onScroll={onScroll}
                     data={data}
                     keyExtractor={(item) => item.id}
@@ -81,7 +82,9 @@ export default function Goal({ route, navigation }: any) {
                                 style={{ flexDirection: "row", justifyContent: "space-between", paddingVertical: 30 }}
                             >
                                 <View>
-                                    <Text variant="subheading" style={{ fontWeight: "600", color: Colors.foreground }}>{goal?.name}</Text>
+                                    <Text variant="subheading" style={{ fontWeight: "600", color: Colors.foreground }}>
+                                        {goal?.name}
+                                    </Text>
                                     <Text variant="body" style={{ color: "rgba(255,255,255,0.9)", marginTop: 5 }}>
                                         {goal?.description}
                                     </Text>
@@ -98,7 +101,11 @@ export default function Goal({ route, navigation }: any) {
                             </View>
                         </View>
                     }
-                    ListEmptyComponent={<Text variant="body" style={styles.emptyText}>No entries yet</Text>}
+                    ListEmptyComponent={
+                        <Text variant="body" style={styles.emptyText}>
+                            No entries yet
+                        </Text>
+                    }
                 />
                 <Button
                     onPress={() => {

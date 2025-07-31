@@ -2,7 +2,6 @@ import { IconButton } from "@/components"
 import BottomSheet from "@/components/ui/BottomSheet/BottomSheet"
 import Button from "@/components/ui/Button/Button"
 import Text from "@/components/ui/Text/Text"
-import Input from "@/components/ui/TextInput/TextInput"
 import Colors from "@/constants/Colors"
 import { AntDesign } from "@expo/vector-icons"
 import BottomSheetType from "@gorhom/bottom-sheet"
@@ -10,8 +9,9 @@ import { useNavigation } from "@react-navigation/native"
 import Color from "color"
 import { BlurView } from "expo-blur"
 import { forwardRef, useCallback, useEffect, useRef, useState } from "react"
-import { Keyboard, StyleSheet, View } from "react-native"
-import Animated, { useAnimatedKeyboard, useAnimatedStyle } from "react-native-reanimated"
+import { Keyboard, StyleSheet, TextInput, View } from "react-native"
+import { FlatList } from "react-native-gesture-handler"
+import Animated, { interpolate, useAnimatedKeyboard, useAnimatedProps, useAnimatedStyle } from "react-native-reanimated"
 import useTodos, { Action, TodoInput as ITodoInput } from "../hooks/general/useTodos"
 
 const styles = StyleSheet.create({
@@ -25,7 +25,8 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
-        marginBottom: 16,
+        marginBottom: 15,
+        paddingHorizontal: 15,
     },
     title: {
         color: Colors.foreground,
@@ -35,7 +36,7 @@ const styles = StyleSheet.create({
     },
     todosList: {
         flex: 1,
-        marginBottom: 12,
+        paddingHorizontal: 15,
     },
     saveButton: {
         marginTop: 8,
@@ -50,7 +51,7 @@ const styles = StyleSheet.create({
     },
 
     todoCard: {
-        borderRadius: 16,
+        borderRadius: 30,
         marginBottom: 12,
         overflow: "hidden",
         borderWidth: 1,
@@ -97,75 +98,71 @@ const styles = StyleSheet.create({
     blurContent: {},
 })
 
+import Feedback from "react-native-haptic-feedback"
+
 export default forwardRef<
     BottomSheetType,
     {
         timelineId: string
+        isSheetOpen?: boolean
+        onCloseSheet?: () => void
     }
->(({ timelineId }, ref) => {
-    const [isOpen, setIsOpen] = useState<boolean>(false)
+>(({ timelineId, isSheetOpen, onCloseSheet }, ref) => {
     const { dispatch, loading, onSaveTodos, state } = useTodos(timelineId, () => {
         Keyboard.dismiss()
         ;(ref as any).current?.close()
+        onCloseSheet?.()
     })
     const todoCount = state.todos.filter((todo) => todo.value.trim().length > 0).length
 
-    const snapPoints = ["90%"]
+    const snapPoints = ["80%"]
 
     const navigation = useNavigation()
 
     const onChange = useCallback((index: number) => {
         if (index === -1) {
             Keyboard.dismiss()
+            onCloseSheet?.()
         }
 
         navigation.setOptions({
             gestureEnabled: index === -1,
         })
-
-        setIsOpen(index !== -1)
     }, [])
 
     return (
         <BottomSheet showBlur ref={ref} snapPoints={snapPoints} onChange={onChange}>
             <View style={{ flex: 1 }}>
-                <Animated.ScrollView
-                    invertStickyHeaders
-                    stickyHeaderIndices={[0]}
-                    style={[styles.container]}
-                    keyboardDismissMode="on-drag"
-                    contentContainerStyle={{ paddingBottom: 80 }}
-                >
+                <View style={styles.header}>
                     <View>
-                        <View style={styles.header}>
-                            <View>
-                                <Text variant="subheading" style={styles.title}>
-                                    Create Todos
-                                </Text>
-                                <Text variant="caption" color={Colors.text_dark} style={styles.subtitle}>
-                                    {todoCount} todo{todoCount !== 1 ? "s" : ""} ready to save
-                                </Text>
-                            </View>
-
-                            <Button
-                                type="text"
-                                onPress={() => dispatch({ type: "clear", payload: undefined })}
-                                style={styles.clearAll}
-                                fontStyle={{ color: Colors.error, fontSize: 13, textTransform: "none" }}
-                            >
-                                Clear All
-                            </Button>
-                        </View>
+                        <Text variant="subheading" style={styles.title}>
+                            Create Todos
+                        </Text>
+                        <Text variant="caption" color={Colors.text_dark} style={styles.subtitle}>
+                            {todoCount} todo{todoCount !== 1 ? "s" : ""} ready to save
+                        </Text>
                     </View>
 
-                    <TodosList dispatch={dispatch} todos={state.todos} />
-                </Animated.ScrollView>
+                    <Button
+                        type="text"
+                        onPress={() => dispatch({ type: "clear", payload: undefined })}
+                        style={styles.clearAll}
+                        fontStyle={{ color: Colors.error, fontSize: 13, textTransform: "none" }}
+                    >
+                        Clear All
+                    </Button>
+                </View>
+
+                <TodosList dispatch={dispatch} todos={state.todos} />
 
                 <Animated.View style={styles.stickyFooter}>
                     <TodoInput
-                        saveTodos={onSaveTodos}
+                        saveTodos={() => {
+                            onSaveTodos()
+                            Feedback.trigger("impactLight")
+                        }}
                         loading={loading}
-                        isOpen={isOpen}
+                        isOpen={isSheetOpen}
                         onAddTodo={(v) => dispatch({ type: "add", payload: v.trim() })}
                     />
                 </Animated.View>
@@ -180,11 +177,14 @@ const TodosList = ({ todos, dispatch }: { todos: ITodoInput[]; dispatch: React.D
     }
 
     return (
-        <View style={styles.todosList}>
-            {todos.map((todo, index) => (
-                <Todo key={todo.index} {...todo} onRemove={() => onRemoveTodo(todo)} />
-            ))}
-        </View>
+        <FlatList
+            style={styles.todosList}
+            data={todos}
+            keyExtractor={(item) => item.index.toString()}
+            renderItem={({ item }) => <Todo {...item} onRemove={() => onRemoveTodo(item)} />}
+            contentContainerStyle={{ paddingBottom: 20 }}
+            keyboardDismissMode="on-drag"
+        />
     )
 }
 
@@ -195,7 +195,7 @@ const Todo = (
 ) => {
     return (
         <View style={styles.todoCard}>
-            <BlurView intensity={50} tint="dark" style={styles.blurBackground} />
+            <BlurView intensity={20} tint="dark" style={styles.blurBackground} />
             <View style={[styles.todoCardRow, styles.blurContent]}>
                 <Text
                     variant="body"
@@ -216,6 +216,8 @@ const Todo = (
     )
 }
 
+const AnimatedBlurView = Animated.createAnimatedComponent(BlurView)
+
 const TodoInput = ({
     onAddTodo,
     saveTodos,
@@ -227,15 +229,28 @@ const TodoInput = ({
     loading: boolean
     isOpen?: boolean
 }) => {
-    const [text, setText] = useState<string>("")
-    const ref = useRef<any>()
+    const [hasText, setHasText] = useState<boolean>(false)
+    const [isFocused, setIsFocused] = useState<boolean>(false)
+    const ref = useRef<TextInput>(null)
+    const textRef = useRef<string>("")
 
     const onSubmit = () => {
-        if (text.trim().length > 0) {
-            onAddTodo(text)
-            setText("")
+        const currentText = textRef.current.trim()
+        if (currentText.length > 0) {
+            onAddTodo(currentText)
+            ref.current?.clear()
+            textRef.current = ""
+            setHasText(false)
         }
     }
+
+    const onTextChange = (text: string) => {
+        textRef.current = text
+        setHasText(text.trim().length > 0)
+    }
+
+    const onFocus = () => setIsFocused(true)
+    const onBlur = () => setIsFocused(false)
 
     const keyboard = useAnimatedKeyboard()
 
@@ -247,51 +262,60 @@ const TodoInput = ({
         }
     }, [isOpen])
 
+    const animatedIntensity = useAnimatedProps(() => ({
+        intensity: interpolate(keyboard.height.value, [0, 300], [0, 30]),
+    }))
+
     return (
         <View style={{ padding: 15 }}>
-            <View style={{ borderRadius: 30, overflow: "hidden" }}>
-                <BlurView intensity={80} tint="dark" style={styles.blurBackground} />
-                <View style={{ backgroundColor: "rgba(0, 0, 0, 0.2)", borderRadius: 30 }}>
-                    <Input
-                        activeBorderColor={Color(Colors.primary_lighter).lighten(0.3).hex()}
-                        autoFocus={isOpen}
-                        inputRef={ref}
+            <View
+                style={{
+                    borderRadius: 30,
+                    overflow: "hidden",
+                    borderWidth: 1,
+                    borderColor: Color(Colors.primary_light).lighten(0.3).hex(),
+                }}
+            >
+                <AnimatedBlurView
+                    style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                    }}
+                    animatedProps={animatedIntensity}
+                >
+                    <TextInput
+                        ref={ref}
                         style={{
-                            margin: 0,
-                            borderWidth: 0,
+                            flex: 1,
                             paddingHorizontal: 15,
+                            paddingVertical: 16,
+                            fontSize: 16,
+                            color: Colors.text_light,
+                            fontFamily: "System",
                         }}
-                        right={
-                            isOpen && (
-                                <IconButton
-                                    icon={
-                                        <AntDesign
-                                            name="plus"
-                                            size={20}
-                                            color={text.trim() ? Colors.secondary : Colors.primary_lighter}
-                                        />
-                                    }
-                                    onPress={onSubmit}
-                                    disabled={!text.trim()}
-                                />
-                            )
-                        }
-                        containerStyle={{ borderRadius: 30, backgroundColor: undefined, marginBottom: 0 }}
-                        placeholderTextColor={Colors.text_dark}
-                        value={text}
-                        onChangeText={setText}
                         placeholder="What needs to be done?"
+                        placeholderTextColor={Colors.text_dark}
+                        onChangeText={onTextChange}
                         onSubmitEditing={onSubmit}
-                        numberOfLines={1}
-                        returnKeyLabel="Add todo"
+                        onFocus={onFocus}
+                        onBlur={onBlur}
                         returnKeyType="send"
-                        enterKeyHint="done"
                         keyboardAppearance="dark"
                         enablesReturnKeyAutomatically
+                        autoFocus={isOpen}
+                        multiline={false}
                     />
+                    {isFocused && hasText && (
+                        <IconButton
+                            icon={<AntDesign name="plus" size={20} color={Colors.secondary} />}
+                            onPress={onSubmit}
+                            style={{ marginRight: 5 }}
+                        />
+                    )}
+
                     <Animated.View
                         style={[
-                            { position: "absolute", right: 5, bottom: 5 },
+                            { position: "absolute", right: 0, bottom: 2.5 },
                             useAnimatedStyle(() => ({
                                 transform: [{ translateX: keyboard.height.value }],
                             })),
@@ -304,7 +328,7 @@ const TodoInput = ({
                             style={[{ backgroundColor: Colors.secondary, padding: 12.5 }]}
                         />
                     </Animated.View>
-                </View>
+                </AnimatedBlurView>
             </View>
             <Animated.View
                 style={useAnimatedStyle(() => ({

@@ -92,8 +92,6 @@ export default function Goals({ navigation }: any) {
                 ]}
             />
             <AnimatedFlashList
-                bounces={goals?.length > 4}
-                overScrollMode={goals?.length > 4 ? "always" : "never"}
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
                 data={goals}
                 estimatedItemSize={100}
