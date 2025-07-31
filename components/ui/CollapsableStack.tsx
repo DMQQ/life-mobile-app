@@ -85,7 +85,6 @@ const CollapsibleItem = React.memo(
         useEffect(() => {
             translateY.value = withSpring(calculatedPosition, springConfig)
             scale.value = withSpring(isExpanded ? 1 : 1 - index * 0.075, springConfig)
-            // opacity.value = withSpring(isExpanded ? 1 : Math.max(0.7, 1 - index * 0.1), springConfig)
         }, [isExpanded, index, calculatedPosition])
 
         const animatedStyle = useAnimatedStyle(() => {
@@ -169,6 +168,11 @@ const CollapsibleStack = React.memo(
         const containerHeight = useSharedValue<number>(200)
         const positionsCalculatedRef = useRef<boolean>(false)
 
+        const itemChangeKey = useMemo(
+            () => items.map((item, index) => getItemKey(item, index)).join(","),
+            [items],
+        )
+
         const handleItemLayout = useCallback(
             (index: number, height: number) => {
                 if (!measuredItemsRef.current.has(index)) {
@@ -184,7 +188,7 @@ const CollapsibleStack = React.memo(
                     }
                 }
             },
-            [items],
+            [itemChangeKey],
         )
 
         const { positions, totalHeight } = useMemo(() => {
@@ -200,7 +204,7 @@ const CollapsibleStack = React.memo(
             }
 
             return { positions, totalHeight }
-        }, [items.length, isExpanded, animation.stackSpacing])
+        }, [itemChangeKey, isExpanded, animation.stackSpacing])
 
         useEffect(() => {
             const allItemsMeasured = items.every((_, index) => itemHeightsRef.current[index] > 0)
@@ -212,7 +216,7 @@ const CollapsibleStack = React.memo(
 
                 containerHeight.value = withTiming(newHeight)
             }
-        }, [isExpanded, totalHeight, items.length, animation.maxVisibleItems, animation.stackSpacing])
+        }, [isExpanded, totalHeight, itemChangeKey, animation.maxVisibleItems, animation.stackSpacing])
 
         const toggleExpand = useCallback((): void => {
             setIsExpanded((prev) => !prev)
@@ -234,10 +238,11 @@ const CollapsibleStack = React.memo(
 
         const shouldShowExpandButton = useMemo(
             () => items.length > animation.maxVisibleItems,
-            [items.length, animation.maxVisibleItems],
+            [itemChangeKey, animation.maxVisibleItems],
         )
 
-        const titleText = useMemo(() => `${title} (${items.length})`, [title, items.length])
+        const titleText = useMemo(() => `${title} (${items.length})`, [title, itemChangeKey])
+
 
         if (items.length === 0) {
             return null
