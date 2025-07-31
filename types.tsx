@@ -3,8 +3,7 @@
  * https://reactnavigation.org/docs/typescript/
  */
 
-import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
-import { CompositeScreenProps, NavigatorScreenParams, ParamListBase, RouteProp } from "@react-navigation/native";
+import { ParamListBase, RouteProp } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -164,6 +163,10 @@ export interface Todos {
   id: string;
   title: string;
   isCompleted: boolean;
+
+  createdAt: string;
+
+  modifiedAt: string;
 }
 
 export interface IFile {

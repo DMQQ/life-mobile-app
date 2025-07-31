@@ -99,7 +99,7 @@ export default function TimelineTodos(props: {
     )
 }
 
-const getItemKey = (todo: Todos) => todo.id
+const getItemKey = (todo: Todos) => todo.id + (todo.isCompleted ? "1" : "0")
 
 const FinishedTodosStack = memo((props: { todos: Todos[]; timelineId: string }) => {
     const renderItem = useCallback(
@@ -110,11 +110,13 @@ const FinishedTodosStack = memo((props: { todos: Todos[]; timelineId: string }) 
         [props.timelineId],
     )
 
+    const onDeleteItem = useCallback(() => {}, [])
+
     return (
         <CollapsibleStack
             items={props.todos}
             title="Completed"
-            onDeleteItem={() => {}}
+            onDeleteItem={onDeleteItem}
             getItemKey={getItemKey}
             renderItem={renderItem}
             expandText="Show"

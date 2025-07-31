@@ -345,7 +345,6 @@ export default function Expense({ route: { params }, navigation }: any) {
             <Header
                 animated
                 animatedTitle={capitalize(selected?.description)}
-                isScreenModal
                 initialHeight={60}
                 renderAnimatedItem={({ scrollY }) => (
                     <AnimatedExpenseHeaderItem expense={selected} scrollY={scrollY!} />

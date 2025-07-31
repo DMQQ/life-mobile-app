@@ -202,7 +202,6 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
             <Header
                 animated
                 animatedTitle={subscription.description}
-                isScreenModal
                 initialHeight={60}
                 titleAnimatedStyle={{ flexWrap: "nowrap" }}
                 scrollY={scrollY}

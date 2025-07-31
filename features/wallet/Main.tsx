@@ -1,15 +1,15 @@
-import { createNativeStackNavigator } from "@react-navigation/native-stack"
-import Wallet from "./pages/Wallet"
-import { ParamListBase } from "@react-navigation/native"
-import { StackScreenProps } from "@/types"
 import Colors from "@/constants/Colors"
-import WalletCharts from "./pages/WalletCharts"
-import CreateExpenseModal from "./pages/CreateExpense"
-import Filters from "./pages/Filters"
-import WalletContextProvider from "./components/WalletContext"
-import Expense from "./pages/Expense"
+import { StackScreenProps } from "@/types"
+import { ParamListBase } from "@react-navigation/native"
+import { createNativeStackNavigator } from "@react-navigation/native-stack"
 import { useEffect } from "react"
+import WalletContextProvider from "./components/WalletContext"
+import CreateExpenseModal from "./pages/CreateExpense"
+import Expense from "./pages/Expense"
+import Filters from "./pages/Filters"
 import SubscriptionScreen from "./pages/Subscription"
+import Wallet from "./pages/Wallet"
+import WalletCharts from "./pages/WalletCharts"
 
 interface WalletRootStack extends ParamListBase {
     Wallet: {
@@ -65,7 +65,7 @@ export default function WalletScreens({ navigation, route }: WalletScreens<"Wall
                     name="Expense"
                     component={Expense}
                     options={{
-                        presentation: "modal",
+                        headerShown: false,
                     }}
                 />
 
@@ -73,7 +73,6 @@ export default function WalletScreens({ navigation, route }: WalletScreens<"Wall
                     name="Charts"
                     component={WalletCharts}
                     options={{
-                        presentation: "modal",
                         headerShown: false,
                     }}
                 />
@@ -88,7 +87,7 @@ export default function WalletScreens({ navigation, route }: WalletScreens<"Wall
                     }}
                 />
 
-                <Stack.Screen name="Subscription" component={SubscriptionScreen} options={{ presentation: "modal" }} />
+                <Stack.Screen name="Subscription" component={SubscriptionScreen}  />
             </Stack.Navigator>
         </WalletContextProvider>
     )

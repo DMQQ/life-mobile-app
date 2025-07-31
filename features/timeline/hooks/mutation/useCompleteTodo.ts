@@ -7,35 +7,50 @@ export default function useCompleteTodo(props: { todoId: string; timelineId: str
             mutation CompleteTodo($todoId: ID!, $isCompleted: Boolean!) {
                 completeTimelineTodo(id: $todoId, isCompleted: $isCompleted) {
                     isCompleted
+                    id
+                    title
+                    modifiedAt
+                    createdAt
                 }
             }
         `,
         {
-            update(cache) {
+            update(cache, { data: mutationResult }) {
                 const data = cache.readQuery({
                     query: GET_TIMELINE,
                     variables: { id: props.timelineId },
                 }) as any
 
-                const todos = data?.timelineById.todos
+                if (!data?.timelineById?.todos) {
+                    return
+                }
+
+                const updatedTodo = mutationResult?.completeTimelineTodo
+                if (!updatedTodo) {
+                    return
+                }
+
+                const todos = data.timelineById.todos
                     .map((todo: any) => {
                         if (todo.id === props.todoId) {
                             return {
                                 ...todo,
-                                isCompleted: !todo.isCompleted,
+                                isCompleted: updatedTodo.isCompleted,
+                                modifiedAt: updatedTodo.modifiedAt,
                             }
                         }
-
                         return todo
                     })
                     .sort((a: any, b: any) => a.isCompleted - b.isCompleted)
+
+                console.log("Updated todos:", todos)
 
                 cache.writeQuery({
                     query: GET_TIMELINE,
                     variables: { id: props.timelineId },
                     data: {
                         timelineById: {
-                            ...data?.timelineById,
+                            ...data.timelineById,
                             todos,
                         },
                     },

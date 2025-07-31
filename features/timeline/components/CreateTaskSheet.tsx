@@ -110,7 +110,7 @@ export default forwardRef<
     })
     const todoCount = state.todos.filter((todo) => todo.value.trim().length > 0).length
 
-    const snapPoints = ["95%"]
+    const snapPoints = ["90%"]
 
     const navigation = useNavigation()
 

@@ -19,7 +19,6 @@ export default function NotesScreens() {
       <SharedStack.Screen
         options={{
           headerShown: false,
-          presentation: "modal",
         }}
         name="Notes"
         component={NotesScreen}

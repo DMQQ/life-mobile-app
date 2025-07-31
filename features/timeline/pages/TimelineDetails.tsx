@@ -106,34 +106,23 @@ export default function TimelineDetails({
         [data?.isCompleted, data],
     )
 
-    const sortedTodos = useMemo(() => {
-        if (!data?.todos) return []
-
-        return [...(data?.todos || [])].sort((a, b) => {
-            if (a.isCompleted && !b.isCompleted) return 1
-            if (!a.isCompleted && b.isCompleted) return -1
-
-            return a.id.localeCompare(b.id)
-        })
-    }, [data?.todos])
-
     const taskCompletionProgressBar = useMemo(() => {
         let count = 0
 
-        if (sortedTodos === undefined || sortedTodos.length === 0) return 0
+        if (data?.todos === undefined || data?.todos?.length === 0) return 0
 
-        for (let todo of sortedTodos || []) {
+        for (let todo of data?.todos || []) {
             if (todo.isCompleted) count += 1
         }
 
-        return Math.trunc((count / sortedTodos?.length) * 100)
-    }, [sortedTodos])
+        return Math.trunc((count / data?.todos?.length) * 100)
+    }, [data?.todos])
 
     const renderAnimatedItem = useCallback(
         ({ scrollY }: { scrollY: SharedValue<number> | undefined }) => (
             <AnimatedProgressBar percentage={taskCompletionProgressBar} scrollY={scrollY!} />
         ),
-        [taskCompletionProgressBar, sortedTodos],
+        [taskCompletionProgressBar, data?.todos],
     )
 
     const [selectedEventForDeletion, setSelectedEventForDeletion] = useState<GetTimelineQuery | null>(null)
@@ -144,8 +133,6 @@ export default function TimelineDetails({
                 scrollY={scrollY}
                 animated={true}
                 animatedTitle={capitalize(data?.title)}
-                isScreenModal
-                initialHeight={60}
                 buttons={buttons}
                 renderAnimatedItem={renderAnimatedItem}
                 initialTitleFontSize={data?.title?.length > 25 ? 40 : 50}
@@ -165,7 +152,7 @@ export default function TimelineDetails({
                         <TimelineTodos
                             expandSheet={() => taskRef.current?.snapToIndex(0)}
                             timelineId={data?.id}
-                            sortedTodos={sortedTodos}
+                            sortedTodos={data?.todos || []}
                         />
 
                         <FileList timelineId={data?.id} />

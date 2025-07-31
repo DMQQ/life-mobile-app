@@ -39,7 +39,7 @@ export default function TimelineScreens({ route, navigation }: RootStackScreenPr
             <Stack.Screen
                 name="TimelineDetails"
                 component={TimelineDetails}
-                options={{ headerShown: false, presentation: "modal" }}
+                options={{ headerShown: false }}
                 initialParams={{
                     timelineId: "",
                 }}

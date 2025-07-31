@@ -1,4 +1,5 @@
 import Header from "@/components/ui/Header/Header"
+import Text from "@/components/ui/Text/Text"
 import Colors, { secondary_candidates } from "@/constants/Colors"
 import Layout from "@/constants/Layout"
 import { Expense } from "@/types"
@@ -7,7 +8,6 @@ import { AntDesign, MaterialIcons } from "@expo/vector-icons"
 import moment from "moment"
 import { useCallback, useMemo, useRef, useState } from "react"
 import { StyleSheet, View, VirtualizedList } from "react-native"
-import Text from "@/components/ui/Text/Text"
 import Feedback from "react-native-haptic-feedback"
 import Ripple from "react-native-material-ripple"
 import Animated, { FadeOut, useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated"
@@ -256,18 +256,14 @@ function WalletCharts({ navigation }: any) {
             )}
 
             <Header
-                initialHeight={60}
                 scrollY={scrollY}
                 buttons={headerButtons}
                 goBack
                 backIcon={<AntDesign name="close" size={24} color={Colors.foreground} />}
-                containerStyle={{
-                    height: 60,
-                    paddingTop: 15,
-                }}
+                
             />
             <AnimatedVirtualizedList
-                style={{ marginTop: 40 }}
+                style={{ marginTop: 60 }}
                 onScroll={onScroll}
                 ref={listRef}
                 ListHeaderComponent={

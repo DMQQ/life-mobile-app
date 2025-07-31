@@ -4,6 +4,8 @@ import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
 import { Todos } from "@/types"
 import Color from "color"
+import dayjs from "dayjs"
+import { useRef } from "react"
 import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native"
 import Haptic from "react-native-haptic-feedback"
 import Animated, { FadeInDown, FadeOutUp, LinearTransition } from "react-native-reanimated"
@@ -57,9 +59,40 @@ export default function TodoItem(todo: Todos & { timelineId: string; index: numb
         currentlyCompleted: todo.isCompleted,
     })
 
+    const tapCountRef = useRef(0)
+    const tapTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+    const isProcessingRef = useRef(false)
+
     const handleToggleComplete = () => {
-        Haptic.trigger("impactLight")
-        completeTodo()
+        if (isProcessingRef.current) return
+        
+        tapCountRef.current += 1
+
+        if (tapTimeoutRef.current) {
+            clearTimeout(tapTimeoutRef.current)
+        }
+
+        if (tapCountRef.current === 1) {
+            tapTimeoutRef.current = setTimeout(() => {
+                tapCountRef.current = 0
+            }, 300)
+        } else if (tapCountRef.current === 2) {
+            if (tapTimeoutRef.current) {
+                clearTimeout(tapTimeoutRef.current)
+            }
+            tapCountRef.current = 0
+            isProcessingRef.current = true
+            
+            Haptic.trigger("impactLight")
+            console.log('Completing todo:', todo.id, 'current state:', todo.isCompleted)
+            completeTodo().then((result) => {
+                console.log('Mutation completed:', result)
+                isProcessingRef.current = false
+            }).catch((error) => {
+                console.error('Mutation error:', error)
+                isProcessingRef.current = false
+            })
+        }
     }
 
     const handleRemoveTodo = () => {
@@ -95,13 +128,22 @@ export default function TodoItem(todo: Todos & { timelineId: string; index: numb
                             )}
                         </View>
 
-                        <Text
-                            variant="subtitle"
-                            color={todo.isCompleted ? Colors.secondary_light_1 : Colors.text_light}
-                            style={[styles.todoText, todo.isCompleted && styles.completedText]}
-                        >
-                            {todo.title}
-                        </Text>
+                        <View style={{ flex: 1 }}>
+                            <Text
+                                variant="subtitle"
+                                color={todo.isCompleted ? Colors.secondary_light_1 : Colors.text_light}
+                                style={[styles.todoText, todo.isCompleted && styles.completedText]}
+                            >
+                                {todo.title.trim()}
+                            </Text>
+                            <Text
+                                variant="caption"
+                                color={Colors.text_dark}
+                                style={{ fontSize: 12, textAlign: "right", marginTop: 5 }}
+                            >
+                                {dayjs(todo.modifiedAt).format("HH:mm - DD/MM")}
+                            </Text>
+                        </View>
                     </View>
                 </Pressable>
             </Card>
