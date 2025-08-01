@@ -41,7 +41,7 @@ export default function ChipButton({ children, icon, ...rest }: PropsWithChildre
                         <AntDesign
                             name={icon as any}
                             size={14}
-                            color={rest.disabled ? Colors.secondary_dark_1 : Colors.secondary_light_1}
+                            color={rest.disabled ? Colors.secondary_dark_1 : Colors.secondary}
                         />
                     ) : (
                         icon
@@ -50,7 +50,7 @@ export default function ChipButton({ children, icon, ...rest }: PropsWithChildre
                     <Text
                         variant="caption"
                         style={[
-                            { fontSize: 14, color: rest.disabled ? Colors.secondary_dark_1 : Colors.secondary_light_1 },
+                            { fontSize: 14, color: rest.disabled ? Colors.secondary_dark_1 : Colors.secondary },
                             rest.textStyle,
                         ]}
                     >

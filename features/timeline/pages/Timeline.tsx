@@ -16,6 +16,7 @@ import TimelineItem from "../components/TimelineItem"
 import useTimeline from "../hooks/general/useTimeline"
 import { GetTimelineQuery } from "../hooks/query/useGetTimeLineQuery"
 import { TimelineScreenProps } from "../types"
+import AnimatedHeaderSearch from "@/components/ui/Header/AnimatedHeaderSearch"
 
 const AnimatedVirtualizedList = Animated.createAnimatedComponent(VirtualizedList)
 
@@ -89,6 +90,7 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
 
         setRefreshing(false)
     }
+    const [query, setQuery] = useState("")
 
     return (
         <View style={{ flex: 1 }}>
@@ -111,6 +113,9 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
                 ]}
                 animatedTitle={dayjs(timeline.selected).format("DD MMMM")}
                 animatedSubtitle={`${selectedDateFormatted} • ${eventsCount} Events`}
+                renderAnimatedItem={(props) => (
+                    <AnimatedHeaderSearch {...props} filterValue={query} setFilterValue={setQuery} />
+                )}
             />
 
             {timeline.switchView !== "timeline" ? (

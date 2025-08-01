@@ -81,7 +81,7 @@ export default function useCreateTimeline(props: { selectedDate: string }) {
                 cache.writeQuery({
                     query: GET_TIMELINE_QUERY,
                     variables: { date: props.selectedDate },
-                    data: { timeline: [createTimeline, ...timeline] },
+                    data: { timeline: [{ ...createTimeline, todos: [], images: [] }, ...timeline] },
                     overwrite: true,
                 })
             },

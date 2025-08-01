@@ -1,3 +1,4 @@
+import CollapsibleStack from "@/components/ui/CollapsableStack"
 import Colors from "@/constants/Colors"
 import lowOpacity from "@/utils/functions/lowOpacity"
 import { gql, useMutation, useQuery } from "@apollo/client"
@@ -7,7 +8,8 @@ import { useEffect, useState } from "react"
 import { FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import Feedback from "react-native-haptic-feedback"
 import Ripple from "react-native-material-ripple"
-import Animated, { FadeInDown } from "react-native-reanimated"
+import Animated, { FadeInDown, FadeOutUp } from "react-native-reanimated"
+import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { CategoryIcon } from "../Expense/ExpenseIcon"
 
 interface Notification {
@@ -67,7 +69,6 @@ const styles = StyleSheet.create({
         borderRadius: 14,
         justifyContent: "center",
         alignItems: "center",
-        backgroundColor: "rgba(255, 255, 255, 0.1)",
     },
     contentContainer: {
         flex: 1,
@@ -221,15 +222,7 @@ export function useGetNotifications() {
     return { ...notification, unreadCount }
 }
 
-function NotificationCard({
-    notification,
-    onDismiss,
-    index,
-}: {
-    notification: Notification
-    onDismiss: (id: string) => void
-    index: number
-}) {
+const useReadNotification = (notification: Notification, onDismiss: (id: string) => any) => {
     const [readNotification] = useMutation(
         gql`
             mutation ReadNotification($id: ID!) {
@@ -260,6 +253,20 @@ function NotificationCard({
             console.error("Error marking notification as read:", error)
         })
     }
+
+    return { handleDismiss, handlePress }
+}
+
+function NotificationCard({
+    notification,
+    onDismiss,
+    index,
+}: {
+    notification: Notification
+    onDismiss: (id: string) => void
+    index: number
+}) {
+    const { handleDismiss, handlePress } = useReadNotification(notification, onDismiss)
 
     return (
         <Animated.View style={styles.notificationCard} entering={FadeInDown.delay((index + 1) * 75)}>
@@ -304,6 +311,94 @@ function NotificationCard({
                     </View>
                 </Ripple>
             </BlurView>
+        </Animated.View>
+    )
+}
+
+export function FloatingNotificationItem({
+    notification,
+    onDismiss,
+    index,
+}: {
+    notification: Notification
+    onDismiss: (id: string) => void
+    index: number
+}) {
+    const { handleDismiss, handlePress } = useReadNotification(notification, onDismiss)
+
+    return (
+        <Animated.View style={[styles.notificationCard]} entering={FadeInDown.delay((index + 1) * 75)}>
+            <BlurView intensity={80} tint="dark" style={styles.blurContainer}>
+                <Ripple
+                    disabled={notification.read}
+                    onPress={handlePress}
+                    rippleColor="rgba(255, 255, 255, 0.1)"
+                    rippleDuration={300}
+                >
+                    <View style={[styles.notificationContent, { paddingRight: 15 }]}>
+                        <View style={[styles.contentContainer, { flexDirection: "row", alignItems: "center", gap: 5 }]}>
+                            <Text style={[styles.title, { fontSize: 14 }]} numberOfLines={2}>
+                                {notification.message.title}
+                            </Text>
+                            <Text style={{ fontSize: 12, color: Colors.secondary, fontWeight: "bold" }}>
+                                {formatTimeAgo(notification.sendAt)}
+                            </Text>
+                        </View>
+
+                        <Text
+                            style={[styles.body, { marginTop: 2.5, marginBottom: 0, fontSize: 12 }]}
+                            numberOfLines={3}
+                        >
+                            {notification.message.body}
+                        </Text>
+
+                        <TouchableOpacity
+                            style={styles.dismissButton}
+                            onPress={handleDismiss}
+                            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                            activeOpacity={0.7}
+                        >
+                            <Text style={styles.dismissText}>×</Text>
+                        </TouchableOpacity>
+                    </View>
+                </Ripple>
+            </BlurView>
+        </Animated.View>
+    )
+}
+
+export function FloatingNotifications() {
+    const { data, loading, error } = useGetNotifications()
+    const insets = useSafeAreaInsets()
+
+    const notifications = (data?.notifications || []) as Notification[]
+
+    if (loading || error) {
+        return null // or a loading spinner
+    }
+
+    return (
+        <Animated.View
+            entering={FadeInDown}
+            exiting={FadeOutUp}
+            style={{ position: "absolute", top: insets.top - 15, left: 15, right: 15, zIndex: 1000 }}
+        >
+            <CollapsibleStack
+                items={
+                    notifications.slice(0, 3)
+                    // .filter((n) => !n.read)
+                }
+                renderItem={({ item, index }: { item: Notification; index: number }) => (
+                    <FloatingNotificationItem notification={item} index={index} onDismiss={() => {}} />
+                )}
+                getItemKey={(item: Notification) => item.id}
+                showHeader={false}
+                animation={{
+                    stackSpacing: 15,
+                    maxVisibleItems: 2,
+                }}
+                expandOnPress
+            />
         </Animated.View>
     )
 }

@@ -121,6 +121,7 @@ const FinishedTodosStack = memo((props: { todos: Todos[]; timelineId: string }) 
             renderItem={renderItem}
             expandText="Show"
             collapseText="Hide"
+            expandOnPress
         />
     )
 })

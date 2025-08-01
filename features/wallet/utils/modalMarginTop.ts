@@ -18,9 +18,7 @@ export default function getModalMarginTop(str: string, baseFontSize = 50) {
 
     const titleHeight = numberOfLines * lineHeight
 
-    const extraPadding = numberOfLines === 1 ? 30 : 15
+    const baseHeaderHeight = 175
 
-    const baseHeaderHeight = 150
-
-    return baseHeaderHeight + titleHeight + extraPadding
+    return baseHeaderHeight + titleHeight + 30
 }

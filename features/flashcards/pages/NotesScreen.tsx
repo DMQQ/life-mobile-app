@@ -7,6 +7,7 @@ import Ripple from "react-native-material-ripple"
 
 import { Skeleton } from "@/components"
 import DeleteFlashCardGroupDialog from "@/components/ui/Dialog/Delete/DeleteGroupDialog"
+import AnimatedHeaderSearch from "@/components/ui/Header/AnimatedHeaderSearch"
 import { ScreenProps } from "@/types"
 import { useNavigation } from "@react-navigation/native"
 import { FlashList } from "@shopify/flash-list"
@@ -86,6 +87,8 @@ export default function NotesScreen({ navigation }: ScreenProps<any>) {
         setRefreshing(false)
     }
 
+    const [query, setQuery] = useState("")
+
     return (
         <>
             <View style={{ padding: 0, flex: 1 }}>
@@ -101,6 +104,9 @@ export default function NotesScreen({ navigation }: ScreenProps<any>) {
                     ]}
                     animatedTitle="FlashCards"
                     animatedSubtitle={`${groups?.length || 0} Groups`}
+                    renderAnimatedItem={(props) => (
+                        <AnimatedHeaderSearch {...props} filterValue={query} setFilterValue={setQuery} />
+                    )}
                 />
                 <AnimatedFlashList
                     data={groupsSorted}

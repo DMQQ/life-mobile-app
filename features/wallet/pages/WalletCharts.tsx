@@ -270,7 +270,7 @@ function WalletCharts({ navigation }: any) {
                 backIcon={<AntDesign name="close" size={24} color={Colors.foreground} />}
             />
             <AnimatedVirtualizedList
-                style={{ marginTop: 100 }}
+                style={{ paddingTop: 100 }}
                 onScroll={onScroll}
                 ref={listRef}
                 ListHeaderComponent={

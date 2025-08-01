@@ -6,15 +6,19 @@ import { memo, useEffect, useState } from "react"
 import { TextInput, View } from "react-native"
 import Haptics from "react-native-haptic-feedback"
 import Animated, { Extrapolation, interpolate, SharedValue, useAnimatedStyle } from "react-native-reanimated"
-import { useWalletContext } from "../WalletContext"
 
 interface AnimatedSearchInputProps {
     scrollY?: SharedValue<number>
+
+    setFilterValue: (value: string) => void
+
+    filterValue: string
+
+    onFiltersPress?: () => void
 }
 
-const AnimatedSearchInput = ({ scrollY }: AnimatedSearchInputProps) => {
+const AnimatedSearchInput = ({ scrollY, setFilterValue, filterValue, onFiltersPress }: AnimatedSearchInputProps) => {
     const navigation = useNavigation<any>()
-    const wallet = useWalletContext()
     const [value, setValue] = useState("")
 
     const [isFocused, setIsFocused] = useState(false)
@@ -24,8 +28,10 @@ const AnimatedSearchInput = ({ scrollY }: AnimatedSearchInputProps) => {
     }
 
     useEffect(() => {
-        setValue(wallet.filters.query)
-    }, [wallet.filters.query])
+        if (filterValue) {
+            setValue(filterValue)
+        }
+    }, [filterValue])
 
     const animatedStyle = useAnimatedStyle(() => {
         const scrollValue = scrollY?.value ?? 0
@@ -44,7 +50,7 @@ const AnimatedSearchInput = ({ scrollY }: AnimatedSearchInputProps) => {
     const onSubmit = () => {
         Haptics.trigger("impactLight")
         if (value.trim() === "") return
-        wallet.dispatch({ type: "SET_QUERY", payload: value })
+        setFilterValue(value.trim())
     }
 
     if (!scrollY) return null
@@ -74,12 +80,12 @@ const AnimatedSearchInput = ({ scrollY }: AnimatedSearchInputProps) => {
                     borderColor: `rgba(255,255,255,0.${isFocused ? 15 : 2})`,
                 }}
             >
-                <IconButton
-                    icon={<Ionicons name="options" size={24} color={Colors.foreground} />}
-                    onPress={() => {
-                        navigation.navigate("Filters")
-                    }}
-                />
+                {onFiltersPress && (
+                    <IconButton
+                        icon={<Ionicons name="options" size={24} color={Colors.foreground} />}
+                        onPress={onFiltersPress}
+                    />
+                )}
                 <TextInput
                     value={value}
                     onChangeText={setValue}
@@ -89,13 +95,13 @@ const AnimatedSearchInput = ({ scrollY }: AnimatedSearchInputProps) => {
                     onFocus={handleFocus}
                     onBlur={handleFocus}
                 />
-                {wallet.filters.query === value && (wallet.filters.query !== "" || value !== "") ? (
+                {filterValue === value && (filterValue.trim() !== "" || value !== "") ? (
                     <IconButton
                         icon={<AntDesign name="close" size={20} color={Colors.foreground} />}
                         onPress={() => {
                             Haptics.trigger("impactLight")
                             setValue("")
-                            wallet.dispatch({ type: "SET_QUERY", payload: "" })
+                            setFilterValue("")
                         }}
                     />
                 ) : (

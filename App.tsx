@@ -15,6 +15,13 @@ import ThemeContextProvider from "./utils/context/ThemeContext"
 import { STORE_KEY } from "./utils/hooks/useUser"
 import { store } from "./utils/redux"
 
+import { loadDevMessages, loadErrorMessages } from "@apollo/client/dev"
+
+if (__DEV__) {
+    loadErrorMessages()
+    loadDevMessages()
+}
+
 SplashScreen.preventAutoHideAsync()
 
 SplashScreen.setOptions({

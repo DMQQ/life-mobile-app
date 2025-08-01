@@ -8,7 +8,7 @@ import { useQuery } from "@apollo/client"
 import * as SplashScreen from "expo-splash-screen"
 import { useMemo, useState } from "react"
 import Animated, { LinearTransition } from "react-native-reanimated"
-import { useGetNotifications } from "../wallet/components/Wallet/WalletNotifications"
+import { FloatingNotifications, useGetNotifications } from "../wallet/components/Wallet/WalletNotifications"
 import HeaderActions from "./components/HeaderActions"
 import LoadingSkeleton from "./components/LoadingSkeleton"
 import MainContent from "./components/MainContent"
@@ -58,6 +58,8 @@ function Root({}: ScreenProps<"Root">) {
     return (
         <Animated.View style={{ flex: 1 }} layout={LinearTransition.delay(100)}>
             {loading && <LoadingSkeleton />}
+
+            <FloatingNotifications />
 
             <Header
                 goBack={false}

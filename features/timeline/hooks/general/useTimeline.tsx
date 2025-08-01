@@ -29,7 +29,7 @@ export default function useTimeline({ route, navigation }: TimelineScreenProps<"
     const { data, selected, setSelected, loading, error } = useGetTimeLineQuery()
 
     const { data: monthData, refetch } = useQuery(GET_MONTHLY_EVENTS, {
-        variables: { date: moment().startOf("month").format("YYYY-MM-DD") },
+        variables: { date: moment(selected).startOf("month").format("YYYY-MM-DD") },
 
         onError: (err) => ToastAndroid.show("Oh! Something went wrong", ToastAndroid.SHORT),
     })

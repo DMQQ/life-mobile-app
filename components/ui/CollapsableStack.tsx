@@ -2,7 +2,7 @@ import Colors from "@/constants/Colors"
 import lowOpacity from "@/utils/functions/lowOpacity"
 import { Feather } from "@expo/vector-icons"
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { StyleSheet, Text, TextStyle, View, ViewStyle } from "react-native"
+import { Pressable, StyleSheet, Text, TextStyle, View, ViewStyle } from "react-native"
 import Animated, { useAnimatedStyle, useSharedValue, withSpring, withTiming } from "react-native-reanimated"
 import ChipButton from "./Button/ChipButton"
 
@@ -26,8 +26,8 @@ type RenderItem<T> = (props: {
 
 interface CollapsibleStackProps<T> {
     items: T[]
-    title: string
-    onDeleteItem: (item: T, index: number) => void
+    title?: string
+    onDeleteItem?: (item: T, index: number) => void
     renderItem: RenderItem<T>
     animation?: {
         maxVisibleItems: number
@@ -45,6 +45,10 @@ interface CollapsibleStackProps<T> {
     collapseText?: string
     iconColor?: string
     getItemKey: (item: T, index: number) => string
+
+    showHeader?: boolean
+
+    expandOnPress?: boolean
 }
 
 interface CollapsibleItemProps<T> {
@@ -85,6 +89,7 @@ const CollapsibleItem = React.memo(
         useEffect(() => {
             translateY.value = withSpring(calculatedPosition, springConfig)
             scale.value = withSpring(isExpanded ? 1 : 1 - index * 0.075, springConfig)
+            opacity.value = withTiming(isExpanded ? 1 : Math.max(0.7, 1 - index * 0.1))
         }, [isExpanded, index, calculatedPosition])
 
         const animatedStyle = useAnimatedStyle(() => {
@@ -161,6 +166,8 @@ const CollapsibleStack = React.memo(
         collapseText = "Collapse",
         iconColor = Colors.secondary_light_1,
         getItemKey,
+        showHeader = true,
+        expandOnPress,
     }: CollapsibleStackProps<T>) => {
         const [isExpanded, setIsExpanded] = useState<boolean>(false)
         const itemHeightsRef = useRef<{ [key: number]: number }>({})
@@ -168,10 +175,7 @@ const CollapsibleStack = React.memo(
         const containerHeight = useSharedValue<number>(200)
         const positionsCalculatedRef = useRef<boolean>(false)
 
-        const itemChangeKey = useMemo(
-            () => items.map((item, index) => getItemKey(item, index)).join(","),
-            [items],
-        )
+        const itemChangeKey = useMemo(() => items.map((item, index) => getItemKey(item, index)).join(","), [items])
 
         const handleItemLayout = useCallback(
             (index: number, height: number) => {
@@ -232,17 +236,11 @@ const CollapsibleStack = React.memo(
         )
 
         const memoizedDeleteHandlers = useMemo(
-            () => items.map((item, index) => () => onDeleteItem(item, index)),
+            () => items.map((item, index) => () => onDeleteItem?.(item, index)),
             [items, onDeleteItem],
         )
 
-        const shouldShowExpandButton = useMemo(
-            () => items.length > animation.maxVisibleItems,
-            [itemChangeKey, animation.maxVisibleItems],
-        )
-
         const titleText = useMemo(() => `${title} (${items.length})`, [title, itemChangeKey])
-
 
         if (items.length === 0) {
             return null
@@ -250,10 +248,10 @@ const CollapsibleStack = React.memo(
 
         return (
             <View style={[defaultStyles.container, customStyles.container]}>
-                <View style={[defaultStyles.header, customStyles.header]}>
-                    <Text style={[defaultStyles.title, customStyles.title]}>{titleText}</Text>
+                {showHeader && (
+                    <View style={[defaultStyles.header, customStyles.header]}>
+                        <Text style={[defaultStyles.title, customStyles.title]}>{titleText}</Text>
 
-                    {shouldShowExpandButton && (
                         <ChipButton
                             onPress={toggleExpand}
                             icon={
@@ -266,27 +264,29 @@ const CollapsibleStack = React.memo(
                         >
                             {isExpanded ? collapseText : expandText}
                         </ChipButton>
-                    )}
-                </View>
+                    </View>
+                )}
 
                 <Animated.View style={containerStyle}>
-                    {items.map((item, index) => (
-                        <CollapsibleItem
-                            key={getItemKey(item, index)}
-                            item={item}
-                            index={index}
-                            isExpanded={isExpanded}
-                            totalCount={items.length}
-                            onDelete={memoizedDeleteHandlers[index]}
-                            expand={toggleExpand}
-                            renderItem={renderItem}
-                            customStyles={customStyles}
-                            maxVisible={animation.maxVisibleItems}
-                            stackSpacing={animation.stackSpacing}
-                            onLayout={handleItemLayout}
-                            calculatedPosition={positions[index] || 0}
-                        />
-                    ))}
+                    <Pressable style={{ flex: 1 }} onPress={expandOnPress ? toggleExpand : undefined}>
+                        {items.map((item, index) => (
+                            <CollapsibleItem
+                                key={getItemKey(item, index)}
+                                item={item}
+                                index={index}
+                                isExpanded={isExpanded}
+                                totalCount={items.length}
+                                onDelete={memoizedDeleteHandlers[index]}
+                                expand={toggleExpand}
+                                renderItem={renderItem}
+                                customStyles={customStyles}
+                                maxVisible={animation.maxVisibleItems}
+                                stackSpacing={animation.stackSpacing}
+                                onLayout={handleItemLayout}
+                                calculatedPosition={positions[index] || 0}
+                            />
+                        ))}
+                    </Pressable>
                 </Animated.View>
             </View>
         )

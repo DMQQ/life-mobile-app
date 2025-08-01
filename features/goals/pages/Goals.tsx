@@ -1,5 +1,6 @@
 import { Skeleton } from "@/components"
 import DeleteGoalsGroupDialog from "@/components/ui/Dialog/Delete/DeleteGoalsDialog"
+import AnimatedHeaderSearch from "@/components/ui/Header/AnimatedHeaderSearch"
 import Header from "@/components/ui/Header/Header"
 import Colors from "@/constants/Colors"
 import { AntDesign } from "@expo/vector-icons"
@@ -76,6 +77,8 @@ export default function Goals({ navigation }: any) {
         setRefreshing(false)
     }
 
+    const [query, setQuery] = useState("")
+
     return (
         <View style={{ flex: 1 }}>
             {loading && <AnimatedLoader />}
@@ -90,6 +93,9 @@ export default function Goals({ navigation }: any) {
                         icon: <AntDesign name="plus" size={20} color={Colors.foreground} />,
                     },
                 ]}
+                renderAnimatedItem={(props) => (
+                    <AnimatedHeaderSearch {...props} filterValue={query} setFilterValue={setQuery} />
+                )}
             />
             <AnimatedFlashList
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
