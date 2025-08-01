@@ -64,6 +64,7 @@ interface CollapsibleItemProps<T> {
     stackSpacing: number
     onLayout: (index: number, height: number) => void
     calculatedPosition: number
+    expandOnPress?: boolean
 }
 
 const CollapsibleItem = React.memo(
@@ -79,6 +80,7 @@ const CollapsibleItem = React.memo(
         maxVisible,
         onLayout,
         calculatedPosition,
+        expandOnPress,
     }: CollapsibleItemProps<T>) => {
         const translateY = useSharedValue<number>(calculatedPosition)
         const scale = useSharedValue<number>(isExpanded ? 1 : 1 - index * 0.075)
@@ -137,14 +139,21 @@ const CollapsibleItem = React.memo(
                     index,
                     isExpanded,
                     totalCount,
-                    onDelete: isExpanded ? onDelete : expand,
+                    onDelete: isExpanded ? onDelete : expandOnPress ? onDelete : expand,
                     expand,
                 }),
-            [item, index, isExpanded, totalCount, onDelete, expand, renderItem],
+            [item, index, isExpanded, totalCount, onDelete, expand, renderItem, expandOnPress],
         )
 
         return (
-            <Animated.View style={[customStyles.itemContainer, animatedStyle]} onLayout={handleLayout}>
+            <Animated.View
+                style={[
+                    customStyles.itemContainer,
+                    animatedStyle,
+                    expandOnPress && { pointerEvents: isExpanded ? "auto" : "none" },
+                ]}
+                onLayout={handleLayout}
+            >
                 {memoizedRenderItem}
             </Animated.View>
         )
@@ -284,6 +293,7 @@ const CollapsibleStack = React.memo(
                                 stackSpacing={animation.stackSpacing}
                                 onLayout={handleItemLayout}
                                 calculatedPosition={positions[index] || 0}
+                                expandOnPress={expandOnPress}
                             />
                         ))}
                     </Pressable>

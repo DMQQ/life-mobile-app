@@ -3,9 +3,10 @@ import Colors from "@/constants/Colors"
 import lowOpacity from "@/utils/functions/lowOpacity"
 import { gql, useMutation, useQuery } from "@apollo/client"
 import { BlurView } from "expo-blur"
+import { LinearGradient } from "expo-linear-gradient"
 import * as Notifications from "expo-notifications"
-import { useEffect, useState } from "react"
-import { FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native"
+import { useCallback, useEffect, useState } from "react"
+import { FlatList, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import Feedback from "react-native-haptic-feedback"
 import Ripple from "react-native-material-ripple"
 import Animated, { FadeInDown, FadeOutUp } from "react-native-reanimated"
@@ -319,24 +320,29 @@ export function FloatingNotificationItem({
     notification,
     onDismiss,
     index,
+    isExpanded,
 }: {
     notification: Notification
     onDismiss: (id: string) => void
     index: number
+    isExpanded?: boolean
 }) {
-    const { handleDismiss, handlePress } = useReadNotification(notification, onDismiss)
+    const { handlePress } = useReadNotification(notification, onDismiss)
 
     return (
-        <Animated.View style={[styles.notificationCard]} entering={FadeInDown.delay((index + 1) * 75)}>
-            <BlurView intensity={80} tint="dark" style={styles.blurContainer}>
-                <Ripple
-                    disabled={notification.read}
-                    onPress={handlePress}
-                    rippleColor="rgba(255, 255, 255, 0.1)"
-                    rippleDuration={300}
-                >
+        <Pressable onPress={handlePress}>
+            <Animated.View
+                style={[styles.notificationCard, { zIndex: isExpanded ? 9999 : index }]}
+                entering={FadeInDown.delay((index + 1) * 75)}
+            >
+                <BlurView intensity={80} tint="dark" style={styles.blurContainer}>
                     <View style={[styles.notificationContent, { paddingRight: 15 }]}>
-                        <View style={[styles.contentContainer, { flexDirection: "row", alignItems: "center", gap: 5 }]}>
+                        <View
+                            style={[
+                                styles.contentContainer,
+                                { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+                            ]}
+                        >
                             <Text style={[styles.title, { fontSize: 14 }]} numberOfLines={2}>
                                 {notification.message.title}
                             </Text>
@@ -351,55 +357,60 @@ export function FloatingNotificationItem({
                         >
                             {notification.message.body}
                         </Text>
-
-                        <TouchableOpacity
-                            style={styles.dismissButton}
-                            onPress={handleDismiss}
-                            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                            activeOpacity={0.7}
-                        >
-                            <Text style={styles.dismissText}>×</Text>
-                        </TouchableOpacity>
                     </View>
-                </Ripple>
-            </BlurView>
-        </Animated.View>
+                </BlurView>
+            </Animated.View>
+        </Pressable>
     )
 }
+
+const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient)
 
 export function FloatingNotifications() {
     const { data, loading, error } = useGetNotifications()
     const insets = useSafeAreaInsets()
 
-    const notifications = (data?.notifications || []) as Notification[]
+    const notifications = ((data?.notifications || []) as Notification[]).filter((n) => !n.read).slice(0, 3)
 
-    if (loading || error) {
-        return null // or a loading spinner
+    const renderItem = useCallback(
+        ({ item, index, isExpanded }: { item: Notification; index: number; isExpanded: boolean }) => (
+            <FloatingNotificationItem notification={item} index={index} onDismiss={() => {}} isExpanded={isExpanded} />
+        ),
+        [],
+    )
+
+    if (loading || error || notifications.length === 0) {
+        return null
     }
 
     return (
-        <Animated.View
+        <AnimatedLinearGradient
+            colors={["rgba(0, 0, 0, 0.65)", "transparent"]}
             entering={FadeInDown}
             exiting={FadeOutUp}
-            style={{ position: "absolute", top: insets.top - 15, left: 15, right: 15, zIndex: 1000 }}
+            style={{
+                position: "absolute",
+                zIndex: 1000,
+                top: 0,
+                left: 0,
+                right: 0,
+                paddingTop: insets.top - 5,
+                paddingHorizontal: 15,
+                paddingBottom: 50,
+            }}
         >
             <CollapsibleStack
-                items={
-                    notifications.slice(0, 3)
-                    // .filter((n) => !n.read)
-                }
-                renderItem={({ item, index }: { item: Notification; index: number }) => (
-                    <FloatingNotificationItem notification={item} index={index} onDismiss={() => {}} />
-                )}
+                items={notifications}
+                renderItem={renderItem}
                 getItemKey={(item: Notification) => item.id}
                 showHeader={false}
                 animation={{
                     stackSpacing: 15,
-                    maxVisibleItems: 2,
+                    maxVisibleItems: 3,
                 }}
                 expandOnPress
             />
-        </Animated.View>
+        </AnimatedLinearGradient>
     )
 }
 
