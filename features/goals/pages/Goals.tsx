@@ -94,7 +94,7 @@ export default function Goals({ navigation }: any) {
                     },
                 ]}
                 renderAnimatedItem={(props) => (
-                    <AnimatedHeaderSearch {...props} filterValue={query} setFilterValue={setQuery} />
+                    <AnimatedHeaderSearch buttonsCount={1} {...props} filterValue={query} setFilterValue={setQuery} />
                 )}
             />
             <AnimatedFlashList

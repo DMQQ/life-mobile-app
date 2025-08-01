@@ -43,8 +43,6 @@ export default function useCompleteTodo(props: { todoId: string; timelineId: str
                     })
                     .sort((a: any, b: any) => a.isCompleted - b.isCompleted)
 
-                console.log("Updated todos:", todos)
-
                 cache.writeQuery({
                     query: GET_TIMELINE,
                     variables: { id: props.timelineId },

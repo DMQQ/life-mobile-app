@@ -164,6 +164,7 @@ const WalletSearch = ({ scrollY }: AnimatedHeaderSearchProps) => {
 
     return (
         <AnimatedHeaderSearch
+            buttonsCount={3}
             onFiltersPress={() => navigation.navigate("Filters")}
             scrollY={scrollY}
             filterValue={wallet.filters.query}

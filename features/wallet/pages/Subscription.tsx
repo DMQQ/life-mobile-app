@@ -225,114 +225,134 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                 style={{ flex: 1, paddingTop: getModalMarginTop(subscription.description) }}
             >
                 <View style={{ marginBottom: 30, paddingHorizontal: 15 }}>
-                    <View style={[styles.row, { paddingVertical: 0, paddingLeft: 5 }]}>
-                        <CategoryIcon type="expense" category="subscriptions" />
-                        <Text variant="body" style={{ color: Colors.secondary_light_2 }}>
-                            {formatBillingCycle(subscription.billingCycle)} Subscription
-                        </Text>
-                    </View>
+                    <View style={{ borderRadius: 15, backgroundColor: Colors.primary_light }}>
+                        <View style={[styles.row, { paddingVertical: 0, paddingLeft: 5 }]}>
+                            <CategoryIcon type="expense" category="subscriptions" />
+                            <Text variant="body" style={{ color: Colors.secondary_light_2 }}>
+                                {formatBillingCycle(subscription.billingCycle)} Subscription
+                            </Text>
+                        </View>
 
-                    <View style={styles.row}>
-                        <MaterialIcons
-                            name={subscription.isActive ? "play-circle-filled" : "pause-circle-filled"}
-                            size={24}
-                            color={Colors.ternary}
-                            style={{ paddingHorizontal: 7.5, padding: 2.5 }}
-                        />
-                        <Text variant="body" style={{ color: Colors.secondary_light_2 }}>
-                            Status:{" "}
-                            <View
-                                style={{
-                                    padding: 2.5,
-                                    paddingHorizontal: 7.5,
-                                    backgroundColor: subscription.isActive ? "green" : Colors.error,
-                                    borderRadius: 10,
-                                    marginTop: -3.5,
-                                    alignItems: "center",
-                                }}
-                            >
-                                <Text variant="body" style={{ color: Colors.foreground, textTransform: "uppercase" }}>
-                                    {subscription.isActive ? " Active" : " Inactive"}
-                                </Text>
-                            </View>
-                        </Text>
-                    </View>
-
-                    <View style={styles.row}>
-                        <AntDesign
-                            name="calendar"
-                            size={24}
-                            color={Colors.ternary}
-                            style={{ paddingHorizontal: 7.5, padding: 2.5 }}
-                        />
-                        <Text variant="body" style={{ color: Colors.secondary_light_2 }}>
-                            Started: {parseDate(+subscription.dateStart)}
-                        </Text>
-                    </View>
-
-                    <View style={styles.row}>
-                        <MaterialIcons
-                            name="schedule"
-                            size={24}
-                            color={Colors.ternary}
-                            style={{ paddingHorizontal: 7.5, padding: 2.5 }}
-                        />
-                        <Text variant="body" style={{ color: Colors.secondary_light_2 }}>
-                            Running for: {getSubscriptionDuration()}
-                        </Text>
-                    </View>
-
-                    {subscription.isActive && (
                         <View style={styles.row}>
                             <MaterialIcons
-                                name="event"
+                                name={subscription.isActive ? "play-circle-filled" : "pause-circle-filled"}
                                 size={24}
                                 color={Colors.ternary}
                                 style={{ paddingHorizontal: 7.5, padding: 2.5 }}
                             />
-                            <Text
-                                variant="body"
-                                style={{
-                                    color: isOverdue ? "#F07070" : Colors.secondary_light_2,
-                                }}
-                            >
-                                {isOverdue ? "Overdue" : `Next billing: ${parseDate(+subscription.nextBillingDate)}`}
+                            <Text variant="body" style={{ color: Colors.secondary_light_2 }}>
+                                Status:{" "}
+                                <View
+                                    style={{
+                                        padding: 2.5,
+                                        paddingHorizontal: 7.5,
+                                        backgroundColor: subscription.isActive ? "green" : Colors.error,
+                                        borderRadius: 10,
+                                        marginTop: -3.5,
+                                        alignItems: "center",
+                                    }}
+                                >
+                                    <Text
+                                        variant="body"
+                                        style={{ color: Colors.foreground, textTransform: "uppercase" }}
+                                    >
+                                        {subscription.isActive ? " Active" : " Inactive"}
+                                    </Text>
+                                </View>
                             </Text>
                         </View>
-                    )}
 
-                    <Ripple
-                        onPress={handleSubscriptionAction}
-                        disabled={isSubscriptionLoading}
-                        style={[
-                            styles.row,
-                            {
-                                marginTop: 10,
-                                justifyContent: "center",
-                                backgroundColor: subscription.isActive ? "rgba(255,59,48,0.2)" : "rgba(52,199,89,0.2)",
-                            },
-                        ]}
-                    >
-                        {isSubscriptionLoading ? (
-                            <ActivityIndicator size="small" color={Colors.foreground} />
-                        ) : (
-                            <Text
-                                variant="body"
-                                style={{
-                                    color: subscription.isActive ? "rgba(255,59,48,0.9)" : "rgba(52,199,89,0.9)",
-                                    fontWeight: "bold",
-                                }}
-                            >
-                                {subscription.isActive ? "Disable Subscription" : "Enable Subscription"}
+                        <View style={styles.row}>
+                            <AntDesign
+                                name="calendar"
+                                size={24}
+                                color={Colors.ternary}
+                                style={{ paddingHorizontal: 7.5, padding: 2.5 }}
+                            />
+                            <Text variant="body" style={{ color: Colors.secondary_light_2 }}>
+                                Started: {parseDate(+subscription.dateStart)}
                             </Text>
+                        </View>
+
+                        <View style={styles.row}>
+                            <MaterialIcons
+                                name="schedule"
+                                size={24}
+                                color={Colors.ternary}
+                                style={{ paddingHorizontal: 7.5, padding: 2.5 }}
+                            />
+                            <Text variant="body" style={{ color: Colors.secondary_light_2 }}>
+                                Running for: {getSubscriptionDuration()}
+                            </Text>
+                        </View>
+
+                        {subscription.isActive && (
+                            <View style={styles.row}>
+                                <MaterialIcons
+                                    name="event"
+                                    size={24}
+                                    color={Colors.ternary}
+                                    style={{ paddingHorizontal: 7.5, padding: 2.5 }}
+                                />
+                                <Text
+                                    variant="body"
+                                    style={{
+                                        color: isOverdue ? "#F07070" : Colors.secondary_light_2,
+                                    }}
+                                >
+                                    {isOverdue
+                                        ? "Overdue"
+                                        : `Next billing: ${parseDate(+subscription.nextBillingDate)}`}
+                                </Text>
+                            </View>
                         )}
-                    </Ripple>
+
+                        <View style={{ padding: 15 }}>
+                            <Ripple
+                                onPress={handleSubscriptionAction}
+                                disabled={isSubscriptionLoading}
+                                style={[
+                                    styles.row,
+                                    {
+                                        marginTop: 10,
+                                        justifyContent: "center",
+                                        backgroundColor: subscription.isActive
+                                            ? "rgba(255,59,48,0.2)"
+                                            : "rgba(52,199,89,0.2)",
+                                        borderRadius: 10,
+                                        paddingVertical: 10,
+                                        paddingHorizontal: 15,
+                                        borderWidth: 1,
+                                        borderColor: subscription.isActive
+                                            ? "rgba(255,59,48,0.5)"
+                                            : "rgba(52,199,89,0.5)",
+                                    },
+                                ]}
+                            >
+                                {isSubscriptionLoading ? (
+                                    <ActivityIndicator size="small" color={Colors.foreground} />
+                                ) : (
+                                    <Text
+                                        variant="body"
+                                        style={{
+                                            color: subscription.isActive
+                                                ? "rgba(255,59,48,0.9)"
+                                                : "rgba(52,199,89,0.9)",
+                                            fontWeight: "bold",
+                                        }}
+                                    >
+                                        {subscription.isActive ? "Disable Subscription" : "Enable Subscription"}
+                                    </Text>
+                                )}
+                            </Ripple>
+                        </View>
+                    </View>
                 </View>
 
                 {subscription.expenses.length > 0 && (
                     <>
                         <View style={{ paddingHorizontal: 15, marginBottom: 25 }}>
-                            <Txt size={20} color={Colors.foreground}>
+                            <Txt size={20} color={Colors.text_light}>
                                 Statistics
                             </Txt>
 
@@ -355,7 +375,7 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                         </View>
 
                         <View style={{ paddingHorizontal: 15, marginBottom: 25 }}>
-                            <Txt size={20} color={Colors.foreground}>
+                            <Txt size={20} color={Colors.text_light}>
                                 Payment History
                             </Txt>
 

@@ -1,3 +1,4 @@
+import ChipButton from "@/components/ui/Button/ChipButton"
 import Colors, { Sizing } from "@/constants/Colors"
 import Layout from "@/constants/Layout"
 import { Expense, Wallet } from "@/types"
@@ -335,6 +336,8 @@ export default function WalletList2({
     )
 }
 
+import Haptics from "react-native-haptic-feedback"
+
 const ClearFiltersButton = () => {
     const { filters, dispatch } = useWalletContext()
 
@@ -377,6 +380,7 @@ const ClearFiltersButton = () => {
     }, [filters])
 
     const clearFilters = () => {
+        Haptics.trigger("impactLight")
         dispatch({ type: "RESET" })
     }
 
@@ -394,12 +398,12 @@ const ClearFiltersButton = () => {
                 alignItems: "center",
             }}
         >
-            <Ripple style={styles.filtersButton} onPress={clearFilters}>
+            <ChipButton style={{ flexDirection: "row", gap: 10 }} onPress={clearFilters}>
                 <Text style={{ color: Colors.secondary_light_2 }}>
                     {diffCount > 0 ? `Reset (${diffCount}) ${diffCount > 1 ? "filters" : "filter"}` : "Reset filters"}
                 </Text>
                 <AntDesign name="close" size={18} color={Colors.secondary_light_2} />
-            </Ripple>
+            </ChipButton>
         </Animated.View>
     )
 }

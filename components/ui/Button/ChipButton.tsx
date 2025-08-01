@@ -75,5 +75,5 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
     },
-    textContainer: { flexDirection: "row", alignItems: "center", gap: 5 },
+    textContainer: { flexDirection: "row", alignItems: "center", gap: 10 },
 })

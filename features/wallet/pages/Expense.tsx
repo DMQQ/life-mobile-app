@@ -394,161 +394,224 @@ export default function Expense({ route: { params }, navigation }: any) {
                         </View>
                     )}
 
-                    {selected?.category && (
-                        <View style={[styles.row, { padding: 0, paddingRight: 10, paddingLeft: 7.5 }]}>
-                            <CategoryIcon
-                                type={selected?.type as "expense" | "income"}
-                                category={(selected?.category || "none") as any}
-                                clear
-                            />
+                    <View
+                        style={{
+                            marginTop: 20,
+                            paddingBottom: 20,
+                            backgroundColor: Colors.primary_light,
+                            borderRadius: 15,
+                        }}
+                    >
+                        {selected?.category && (
+                            <View style={[styles.row, { padding: 0, paddingRight: 10, paddingLeft: 7.5 }]}>
+                                <CategoryIcon
+                                    type={selected?.type as "expense" | "income"}
+                                    category={(selected?.category || "none") as any}
+                                    clear
+                                />
 
-                            <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>
-                                {capitalize(CategoryUtils.getCategoryName(selected?.category || ""))}
-                            </Text>
-                        </View>
-                    )}
+                                <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>
+                                    {capitalize(CategoryUtils.getCategoryName(selected?.category || ""))}
+                                </Text>
+                            </View>
+                        )}
 
-                    <View style={styles.row}>
-                        <AntDesign
-                            name="calendar"
-                            size={24}
-                            color={Colors.ternary}
-                            style={{ paddingHorizontal: 7.5, padding: 2.5 }}
-                        />
-
-                        <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>
-                            {parseDate(selected?.date || "")}
-                        </Text>
-                    </View>
-                    <View style={styles.row}>
-                        <MaterialIcons
-                            name="money"
-                            size={24}
-                            color={Colors.ternary}
-                            style={{ paddingHorizontal: 7.5, padding: 2.5 }}
-                        />
-
-                        <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>
-                            {capitalize(selected?.type)}
-                        </Text>
-                    </View>
-
-                    <View style={styles.row}>
-                        <MaterialIcons
-                            name="money"
-                            size={24}
-                            color={Colors.ternary}
-                            style={{ paddingHorizontal: 7.5, padding: 2.5 }}
-                        />
-
-                        <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>
-                            Balance before: {selected?.balanceBeforeInteraction} zł
-                        </Text>
-                    </View>
-
-                    {/* Refund section */}
-                    <View style={[styles.row]}>
-                        <Ripple
-                            disabled={refundLoading || selected?.type === "refunded"}
-                            onPress={handleRefund}
-                            style={[styles.row, { marginTop: 0, padding: 0, width: "100%" }]}
-                        >
-                            <MaterialIcons
-                                name={selected?.type === "refunded" ? "check-box" : "check-box-outline-blank"}
+                        <View style={styles.row}>
+                            <AntDesign
+                                name="calendar"
                                 size={24}
                                 color={Colors.ternary}
                                 style={{ paddingHorizontal: 7.5, padding: 2.5 }}
                             />
-                            <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }} numberOfLines={1}>
-                                {selected?.type === "refunded"
-                                    ? (selected?.note ?? `Refunded at ${moment().format("YYYY MM DD HH:SS")}`)
-                                    : "Refund"}
+
+                            <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>
+                                {parseDate(selected?.date || "")}
                             </Text>
-                            {refundLoading && (
-                                <ActivityIndicator size="small" color={Colors.ternary} style={{ marginLeft: 10 }} />
-                            )}
-                        </Ripple>
+                        </View>
+                        <View style={styles.row}>
+                            <MaterialIcons
+                                name="money"
+                                size={24}
+                                color={Colors.ternary}
+                                style={{ paddingHorizontal: 7.5, padding: 2.5 }}
+                            />
+
+                            <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>
+                                {capitalize(selected?.type)}
+                            </Text>
+                        </View>
+
+                        <View style={styles.row}>
+                            <MaterialIcons
+                                name="money"
+                                size={24}
+                                color={Colors.ternary}
+                                style={{ paddingHorizontal: 7.5, padding: 2.5 }}
+                            />
+
+                            <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>
+                                Balance before: {selected?.balanceBeforeInteraction} zł
+                            </Text>
+                        </View>
+
+                        {/* Refund section */}
+                        <View style={[{ paddingHorizontal: 15 }]}>
+                            {/* <Ripple
+                                disabled={refundLoading || selected?.type === "refunded"}
+                                onPress={handleRefund}
+                                style={[styles.row, { marginTop: 0, padding: 0, width: "100%" }]}
+                            >
+                                <MaterialIcons
+                                    name={selected?.type === "refunded" ? "check-box" : "check-box-outline-blank"}
+                                    size={24}
+                                    color={Colors.ternary}
+                                    style={{ paddingHorizontal: 7.5, padding: 2.5 }}
+                                />
+                                <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }} numberOfLines={1}>
+                                    {selected?.type === "refunded"
+                                        ? (selected?.note ?? `Refunded at ${moment().format("YYYY MM DD HH:SS")}`)
+                                        : "Refund"}
+                                </Text>
+                                {refundLoading && (
+                                    <ActivityIndicator size="small" color={Colors.ternary} style={{ marginLeft: 10 }} />
+                                )}
+                            </Ripple> */}
+                            <Button
+                                style={{
+                                    marginTop: 10,
+                                    width: "100%",
+                                    backgroundColor: lowOpacity(Colors.error, 0.2),
+                                    borderColor: Colors.error,
+                                    borderWidth: 1,
+                                    borderRadius: 10,
+                                    paddingVertical: 10,
+                                    paddingHorizontal: 15,
+                                    flexDirection: "row-reverse",
+                                    gap: 10,
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                }}
+                                disabled={refundLoading || selected?.type === "refunded"}
+                                onPress={handleRefund}
+                                fontStyle={{
+                                    color: Colors.error,
+                                    fontSize: 16,
+                                    fontWeight: "bold",
+                                    textTransform: "none",
+                                }}
+                                icon={
+                                    selected?.type === "refunded" ? (
+                                        <MaterialIcons name="check-box" size={24} color={Colors.error} />
+                                    ) : (
+                                        <MaterialIcons name="check-box-outline-blank" size={24} color={Colors.error} />
+                                    )
+                                }
+                            >
+                                {selected?.type === "refunded"
+                                    ? (selected?.note?.trim() ?? `Refunded at ${moment().format("YYYY-MM-DD")}`)
+                                    : "Refund"}
+                            </Button>
+                        </View>
                     </View>
 
                     {/* Subscription section */}
-                    <View style={styles.row}>
-                        <MaterialIcons
-                            name={isSubscriptionActive ? "refresh" : "refresh"}
-                            size={24}
-                            color={Colors.ternary}
-                            style={{ paddingHorizontal: 7.5, padding: 2.5 }}
-                        />
-
-                        <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>
-                            {hasSubscription
-                                ? isSubscriptionActive
-                                    ? "Subscription active"
-                                    : "Subscription inactive"
-                                : "Set up subscription"}
-                        </Text>
-
-                        {isSubscriptionLoading && (
-                            <ActivityIndicator size="small" color={Colors.ternary} style={{ marginLeft: 10 }} />
-                        )}
-                    </View>
-
-                    {hasSubscription && (
-                        <>
-                            <View style={styles.row}>
-                                <MaterialIcons
-                                    name="date-range"
-                                    size={24}
-                                    color={Colors.ternary}
-                                    style={{ paddingHorizontal: 7.5, padding: 2.5 }}
-                                />
-                                <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>
-                                    {isSubscriptionActive ? "Next payment: " : "Last payment: "}
-                                    {selected.subscription?.nextBillingDate &&
-                                        moment(+selected?.subscription?.nextBillingDate).format("YYYY-MM-DD")}
-                                </Text>
-                            </View>
-                            <View style={styles.row}>
-                                <MaterialIcons
-                                    name="history"
-                                    size={24}
-                                    color={Colors.ternary}
-                                    style={{ paddingHorizontal: 7.5, padding: 2.5 }}
-                                />
-                                <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>
-                                    {isSubscriptionActive ? "Active since: " : "Created on: "}
-                                    {moment(+selected?.subscription?.dateStart).format("YYYY-MM-DD")}
-                                </Text>
-                            </View>
-                        </>
-                    )}
-
-                    {/* Subscription action button */}
-                    <Ripple
-                        onPress={handleSubscriptionAction}
-                        disabled={isSubscriptionLoading}
-                        style={[
-                            styles.row,
-                            {
-                                marginTop: 10,
-                                justifyContent: "center",
-                                backgroundColor: isSubscriptionActive ? "rgba(255,59,48,0.2)" : "rgba(52,199,89,0.2)",
-                            },
-                        ]}
+                    <View
+                        style={{
+                            marginTop: 20,
+                            paddingBottom: 20,
+                            backgroundColor: Colors.primary_light,
+                            borderRadius: 15,
+                        }}
                     >
-                        <Text
-                            style={{
-                                color: isSubscriptionActive ? "rgba(255,59,48,0.9)" : "rgba(52,199,89,0.9)",
-                                fontSize: 16,
-                                fontWeight: "bold",
-                            }}
-                        >
-                            {hasSubscription
-                                ? isSubscriptionActive
-                                    ? "Disable Subscription"
-                                    : "Enable Subscription"
-                                : "Create Monthly Subscription"}
-                        </Text>
-                    </Ripple>
+                        <View style={styles.row}>
+                            <MaterialIcons
+                                name={isSubscriptionActive ? "refresh" : "refresh"}
+                                size={24}
+                                color={Colors.ternary}
+                                style={{ paddingHorizontal: 7.5, padding: 2.5 }}
+                            />
+
+                            <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>
+                                {hasSubscription
+                                    ? isSubscriptionActive
+                                        ? "Subscription active"
+                                        : "Subscription inactive"
+                                    : "Set up subscription"}
+                            </Text>
+
+                            {isSubscriptionLoading && (
+                                <ActivityIndicator size="small" color={Colors.ternary} style={{ marginLeft: 10 }} />
+                            )}
+                        </View>
+
+                        {hasSubscription && (
+                            <>
+                                <View style={styles.row}>
+                                    <MaterialIcons
+                                        name="date-range"
+                                        size={24}
+                                        color={Colors.ternary}
+                                        style={{ paddingHorizontal: 7.5, padding: 2.5 }}
+                                    />
+                                    <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>
+                                        {isSubscriptionActive ? "Next payment: " : "Last payment: "}
+                                        {selected.subscription?.nextBillingDate &&
+                                            moment(+selected?.subscription?.nextBillingDate).format("YYYY-MM-DD")}
+                                    </Text>
+                                </View>
+                                <View style={styles.row}>
+                                    <MaterialIcons
+                                        name="history"
+                                        size={24}
+                                        color={Colors.ternary}
+                                        style={{ paddingHorizontal: 7.5, padding: 2.5 }}
+                                    />
+                                    <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>
+                                        {isSubscriptionActive ? "Active since: " : "Created on: "}
+                                        {moment(+selected?.subscription?.dateStart).format("YYYY-MM-DD")}
+                                    </Text>
+                                </View>
+                            </>
+                        )}
+
+                        {/* Subscription action button */}
+                        <View style={{ paddingHorizontal: 15, marginTop: 10 }}>
+                            <Ripple
+                                onPress={handleSubscriptionAction}
+                                disabled={isSubscriptionLoading}
+                                style={[
+                                    styles.row,
+                                    {
+                                        justifyContent: "center",
+                                        backgroundColor: isSubscriptionActive
+                                            ? "rgba(255,59,48,0.2)"
+                                            : "rgba(52,199,89,0.2)",
+                                        borderWidth: 1,
+                                        borderColor: isSubscriptionActive
+                                            ? "rgba(255,59,48,0.5)"
+                                            : "rgba(52,199,89,0.5)",
+                                        paddingVertical: 10,
+                                        marginTop: 10,
+                                        borderRadius: 10,
+                                    },
+                                ]}
+                            >
+                                <Text
+                                    style={{
+                                        color: isSubscriptionActive ? "rgba(255,59,48,0.9)" : "rgba(52,199,89,0.9)",
+                                        fontSize: 16,
+                                        fontWeight: "bold",
+                                    }}
+                                >
+                                    {hasSubscription
+                                        ? isSubscriptionActive
+                                            ? "Disable Subscription"
+                                            : "Enable Subscription"
+                                        : "Create Monthly Subscription"}
+                                </Text>
+                            </Ripple>
+                        </View>
+                    </View>
                 </View>
 
                 <FileUpload id={selected.id} images={selected?.files} />
@@ -651,7 +714,9 @@ const AnimatedExpenseHeaderItem = ({
     )
 }
 
+import { Button } from "@/components"
 import Layout from "@/constants/Layout"
+import lowOpacity from "@/utils/functions/lowOpacity"
 import * as ImagePicker from "expo-image-picker"
 import Animated, {
     Extrapolation,

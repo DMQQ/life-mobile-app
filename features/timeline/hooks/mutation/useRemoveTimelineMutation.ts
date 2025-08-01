@@ -1,5 +1,4 @@
 import { gql, useMutation } from "@apollo/client"
-import { useNavigation } from "@react-navigation/native"
 import moment from "moment"
 import { GET_MONTHLY_EVENTS } from "../general/useTimeline"
 import { GET_TIMELINE_QUERY } from "../query/useGetTimeLineQuery"
@@ -10,8 +9,7 @@ const REMOVE_TIMELINE_EVENT_MUTATION = gql`
     }
 `
 
-export default function useRemoveTimelineMutation(timeline: { id: string; date: string }) {
-    const navigation = useNavigation()
+export default function useRemoveTimelineMutation(timeline: { id: string; date: string }, onCompleted?: () => any) {
     const [remove, { loading }] = useMutation(REMOVE_TIMELINE_EVENT_MUTATION, {
         variables: {
             id: timeline.id,
@@ -30,9 +28,7 @@ export default function useRemoveTimelineMutation(timeline: { id: string; date: 
                 },
             ]
         },
-        onCompleted() {
-            navigation.goBack()
-        },
+        onCompleted,
     })
 
     return { remove, loading }

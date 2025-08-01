@@ -25,163 +25,99 @@ interface ColorPalette {
 
 const colorPalettes: ColorPalette[] = [
     {
-        name: "Classic Money",
-        primary: "#0D1421",
-        secondary: "#00C896",
-        ternary: "#FFA726",
-        foreground: "#FFFFFF",
+        name: "Charcoal Mint",
+        primary: "#0D1B1E",
+        secondary: "#00FFB3",
+        ternary: "#F7C948",
+        foreground: "#E6FFF9",
         category: "Finance",
     },
     {
-        name: "Neon Crypto",
-        primary: "#0A0A0A",
-        secondary: "#FF0080",
-        ternary: "#00FFFF",
-        foreground: "#F0F0F0",
+        name: "Noir Emerald",
+        primary: "#101415",
+        secondary: "#50FA7B",
+        ternary: "#FF79C6",
+        foreground: "#F8FFF8",
         category: "Finance",
     },
     {
-        name: "Ocean Savings",
-        primary: "#0F1B2E",
-        secondary: "#87CEEB",
-        ternary: "#FF69B4",
-        foreground: "#E8F4F8",
+        name: "Graphite Mint",
+        primary: "#1A1C1D",
+        secondary: "#A3FFD6",
+        ternary: "#FFD580",
+        foreground: "#F1FFF8",
         category: "Finance",
     },
     {
-        name: "Purple Wealth",
-        primary: "#1A0D1F",
-        secondary: "#9D4EDD",
-        ternary: "#FFD60A",
-        foreground: "#F5F0FF",
+        name: "Velvet Night",
+        primary: "#140D1C",
+        secondary: "#C084FC",
+        ternary: "#FFD6A5",
+        foreground: "#FAF5FF",
         category: "Finance",
     },
     {
-        name: "Frost Finance",
-        primary: "#0C1618",
-        secondary: "#00E5FF",
-        ternary: "#B39DDB",
-        foreground: "#E0F7FF",
+        name: "Deep Jade",
+        primary: "#0E1A17",
+        secondary: "#00DFA2",
+        ternary: "#FF9B85",
+        foreground: "#E6FFF6",
         category: "Finance",
     },
     {
-        name: "Ruby Budget",
-        primary: "#1F0B0B",
-        secondary: "#FF6B6B",
-        ternary: "#4ECDC4",
-        foreground: "#FFE8E8",
+        name: "Dracula Theme",
+        primary: "#282A36",
+        secondary: "#BD93F9",
+        ternary: "#50FA7B",
+        foreground: "#F8F8F2",
         category: "Finance",
     },
     {
-        name: "Gold Standard",
-        primary: "#1A1516",
-        secondary: "#FFD700",
-        ternary: "#CD7F32",
-        foreground: "#FFF8DC",
+        name: "Nord Dark",
+        primary: "#2E3440",
+        secondary: "#88C0D0",
+        ternary: "#EBCB8B",
+        foreground: "#D8DEE9",
         category: "Finance",
     },
     {
-        name: "Mint Minimalist",
-        primary: "#151B19",
-        secondary: "#98FB98",
-        ternary: "#F0E68C",
-        foreground: "#F0FFF0",
+        name: "Midnight Raven",
+        primary: "#08090A",
+        secondary: "#FF4C61",
+        ternary: "#3DDC97",
+        foreground: "#E1E1E1",
         category: "Finance",
     },
     {
-        name: "Coral Expense",
-        primary: "#1A1111",
-        secondary: "#FF7F7F",
-        ternary: "#40E0D0",
-        foreground: "#FFF5F5",
-        category: "Finance",
-    },
-    {
-        name: "Steel Money",
-        primary: "#1C1C1C",
-        secondary: "#B0C4DE",
-        ternary: "#FFA500",
+        name: "Deep Ocean Blue",
+        primary: "#001F3F",
+        secondary: "#01FF70",
+        ternary: "#FFDC00",
         foreground: "#F0F8FF",
         category: "Finance",
     },
     {
-        name: "Electric Blue",
-        primary: "#0B0F1A",
-        secondary: "#1E90FF",
-        ternary: "#FFB347",
-        foreground: "#E6F3FF",
+        name: "Abyssal Blue",
+        primary: "#001526", // very dark blue
+        secondary: "#005F8A", // deep cerulean
+        ternary: "#00B4EF", // bright sky blue
+        foreground: "#E8F9FD", // almost-white cyan
         category: "Finance",
     },
     {
-        name: "Sunset Budget",
-        primary: "#1F1611",
-        secondary: "#FF8C69",
-        ternary: "#20B2AA",
-        foreground: "#FFF8F0",
+        name: "Midnight Sea",
+        primary: "#002A4A", // dark navy
+        secondary: "#0A84FF", // vivid cobalt
+        ternary: "#82CFFD", // soft baby blue
+        foreground: "#F0F8FF", // off-white azure
         category: "Finance",
     },
     {
-        name: "Emerald Bank",
-        primary: "#0F1A0F",
-        secondary: "#50C878",
-        ternary: "#DA70D6",
-        foreground: "#F0FFF4",
-        category: "Finance",
-    },
-    {
-        name: "Lavender Ledger",
-        primary: "#1A1624",
-        secondary: "#E6E6FA",
-        ternary: "#FF6347",
-        foreground: "#FAF0FF",
-        category: "Finance",
-    },
-    {
-        name: "Silver Stack",
-        primary: "#181818",
-        secondary: "#C0C0C0",
-        ternary: "#32CD32",
-        foreground: "#F5F5F5",
-        category: "Finance",
-    },
-    {
-        name: "Peachy Pay",
-        primary: "#1A1613",
-        secondary: "#FFCBA4",
-        ternary: "#9370DB",
-        foreground: "#FFF8F0",
-        category: "Finance",
-    },
-    {
-        name: "Turquoise Tracker",
-        primary: "#0D1A1A",
-        secondary: "#40E0D0",
-        ternary: "#F08080",
-        foreground: "#F0FFFF",
-        category: "Finance",
-    },
-    {
-        name: "Rose Gold Pro",
-        primary: "#1F1719",
-        secondary: "#E8B4B8",
-        ternary: "#87CEEB",
-        foreground: "#FFF0F5",
-        category: "Finance",
-    },
-    {
-        name: "Amber Account",
-        primary: "#1A1608",
-        secondary: "#FFBF00",
-        ternary: "#8A2BE2",
-        foreground: "#FFFBF0",
-        category: "Finance",
-    },
-    {
-        name: "Slate Saver",
-        primary: "#2F4F4F",
-        secondary: "#98FB98",
-        ternary: "#FFB6C1",
-        foreground: "#F8F8FF",
+        name: "Neptune Depths",
+        primary: "#001F3F", // classic navy-black
+        secondary: "#0074D9", // royal blue
+        ternary: "#7FDBFF", // light cyan
+        foreground: "#ECF7FF", // pale blue-white
         category: "Finance",
     },
 ]
@@ -538,7 +474,9 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
                 <BlurView intensity={80} tint="dark" style={styles.blurBackground} />
                 <View style={styles.modalContent}>
                     <View style={styles.modalHeader}>
-                        <Text variant="body" style={styles.modalTitle}>Settings</Text>
+                        <Text variant="body" style={styles.modalTitle}>
+                            Settings
+                        </Text>
                         <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
                             <AntDesign name="close" size={24} color={Colors.text_light} />
                         </TouchableOpacity>
@@ -554,8 +492,12 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
                                 <View style={styles.profileCard}>
                                     <BlurView intensity={60} tint="dark">
                                         <View style={styles.profileContent}>
-                                            <Text variant="title" style={styles.signedAsText}>Signed as</Text>
-                                            <Text variant="subheading" style={styles.emailText}>{user?.email}</Text>
+                                            <Text variant="title" style={styles.signedAsText}>
+                                                Signed as
+                                            </Text>
+                                            <Text variant="subheading" style={styles.emailText}>
+                                                {user?.email}
+                                            </Text>
                                         </View>
                                     </BlurView>
                                 </View>
@@ -563,22 +505,9 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
                                 <View style={styles.themeSection}>
                                     <BlurView intensity={60} tint="dark">
                                         <View style={styles.themeSectionContent}>
-                                            <Text variant="body" style={styles.themeSectionTitle}>Choose Color Palette</Text>
-
-                                            {/* <View style={styles.themeToggle}>
-                                                <TouchableOpacity
-                                                    style={[styles.toggleButton, !isCustomMode && styles.activeToggle]}
-                                                    onPress={() => handleModeToggle(false)}
-                                                >
-                                                    <Text style={styles.toggleText}>Presets</Text>
-                                                </TouchableOpacity>
-                                                <TouchableOpacity
-                                                    style={[styles.toggleButton, isCustomMode && styles.activeToggle]}
-                                                    onPress={() => handleModeToggle(true)}
-                                                >
-                                                    <Text style={styles.toggleText}>Custom</Text>
-                                                </TouchableOpacity>
-                                            </View> */}
+                                            <Text variant="body" style={styles.themeSectionTitle}>
+                                                Choose Color Palette
+                                            </Text>
 
                                             <AnimatedSelector
                                                 items={["Presets", "Custom"]}
@@ -599,7 +528,9 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
                                                 <View style={styles.paletteGrid}>
                                                     {Object.entries(groupedPalettes).map(([category, palettes]) => (
                                                         <View key={category}>
-                                                            <Text variant="caption" style={styles.categoryHeader}>{category}</Text>
+                                                            <Text variant="caption" style={styles.categoryHeader}>
+                                                                {category}
+                                                            </Text>
                                                             <FlatList
                                                                 horizontal
                                                                 data={palettes}
@@ -676,7 +607,9 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
                                                                     { backgroundColor: customColors.primary },
                                                                 ]}
                                                             />
-                                                            <Text variant="caption" style={styles.colorLabel}>Primary</Text>
+                                                            <Text variant="caption" style={styles.colorLabel}>
+                                                                Primary
+                                                            </Text>
                                                         </View>
                                                         <View style={{ alignItems: "center" }}>
                                                             <View
@@ -685,7 +618,9 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
                                                                     { backgroundColor: customColors.secondary },
                                                                 ]}
                                                             />
-                                                            <Text variant="caption" style={styles.colorLabel}>Secondary</Text>
+                                                            <Text variant="caption" style={styles.colorLabel}>
+                                                                Secondary
+                                                            </Text>
                                                         </View>
                                                         <View style={{ alignItems: "center" }}>
                                                             <View
@@ -694,7 +629,9 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
                                                                     { backgroundColor: customColors.ternary },
                                                                 ]}
                                                             />
-                                                            <Text variant="caption" style={styles.colorLabel}>Ternary</Text>
+                                                            <Text variant="caption" style={styles.colorLabel}>
+                                                                Ternary
+                                                            </Text>
                                                         </View>
                                                         <View style={{ alignItems: "center" }}>
                                                             <View
@@ -703,7 +640,9 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
                                                                     { backgroundColor: customColors.foreground },
                                                                 ]}
                                                             />
-                                                            <Text variant="caption" style={styles.colorLabel}>Foreground</Text>
+                                                            <Text variant="caption" style={styles.colorLabel}>
+                                                                Foreground
+                                                            </Text>
                                                         </View>
                                                     </View>
                                                 </View>

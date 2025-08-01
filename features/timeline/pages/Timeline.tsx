@@ -1,5 +1,6 @@
 import DateList from "@/components/DateList/DateList"
 import DeleteTimelineEvent from "@/components/ui/Dialog/Delete/DeleteTimelineEvent"
+import AnimatedHeaderSearch from "@/components/ui/Header/AnimatedHeaderSearch"
 import Header from "@/components/ui/Header/Header"
 import Colors from "@/constants/Colors"
 import NotFound from "@/features/home/components/NotFound"
@@ -16,7 +17,6 @@ import TimelineItem from "../components/TimelineItem"
 import useTimeline from "../hooks/general/useTimeline"
 import { GetTimelineQuery } from "../hooks/query/useGetTimeLineQuery"
 import { TimelineScreenProps } from "../types"
-import AnimatedHeaderSearch from "@/components/ui/Header/AnimatedHeaderSearch"
 
 const AnimatedVirtualizedList = Animated.createAnimatedComponent(VirtualizedList)
 
@@ -114,7 +114,7 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
                 animatedTitle={dayjs(timeline.selected).format("DD MMMM")}
                 animatedSubtitle={`${selectedDateFormatted} • ${eventsCount} Events`}
                 renderAnimatedItem={(props) => (
-                    <AnimatedHeaderSearch {...props} filterValue={query} setFilterValue={setQuery} />
+                    <AnimatedHeaderSearch buttonsCount={2} {...props} filterValue={query} setFilterValue={setQuery} />
                 )}
             />
 

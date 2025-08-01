@@ -105,7 +105,12 @@ export default function NotesScreen({ navigation }: ScreenProps<any>) {
                     animatedTitle="FlashCards"
                     animatedSubtitle={`${groups?.length || 0} Groups`}
                     renderAnimatedItem={(props) => (
-                        <AnimatedHeaderSearch {...props} filterValue={query} setFilterValue={setQuery} />
+                        <AnimatedHeaderSearch
+                            buttonsCount={1}
+                            {...props}
+                            filterValue={query}
+                            setFilterValue={setQuery}
+                        />
                     )}
                 />
                 <AnimatedFlashList

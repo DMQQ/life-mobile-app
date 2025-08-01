@@ -43,8 +43,8 @@ export default function AnimatedSelector<T>({
     containerStyle,
     buttonStyle,
     textStyle,
-    selectorColor = lowOpacity(Colors.secondary, 0.15),
-    activeTextColor = Colors.secondary,
+    selectorColor = lowOpacity(Colors.secondary, 0.2),
+    activeTextColor = Colors.secondary_light_1,
     inactiveTextColor = blueText,
     hapticFeedback = true,
     scale = 1,
@@ -110,7 +110,6 @@ export default function AnimatedSelector<T>({
                         buttonStyle,
                         {
                             borderWidth: 0,
-                            backgroundColor: "transparent",
                         },
                     ]}
                 >
@@ -154,9 +153,7 @@ const styles = StyleSheet.create({
     container: {
         position: "relative",
     },
-    scrollView: {
-        backgroundColor: Colors.primary,
-    },
+    scrollView: {},
     scrollContent: {
         position: "relative",
     },

@@ -16,7 +16,6 @@ import { CategoryUtils } from "../components/Expense/ExpenseIcon"
 import WalletItem, { Icons } from "../components/Wallet/WalletItem"
 import ChartLoader from "../components/WalletChart/ChartLoader"
 import Charts from "../components/WalletChart/Charts"
-import DailySpendingChart from "../components/WalletChart/DailySpendingChart"
 import DateRangePicker from "../components/WalletChart/DateRangePicker"
 import FutureProjection from "../components/WalletChart/FutureProjection"
 import HourlySpendingsHeatMap from "../components/WalletChart/HourlyHeatMap"
@@ -358,8 +357,6 @@ function WalletCharts({ navigation }: any) {
                         <CalendarHeatmap />
 
                         <HourlySpendingsHeatMap />
-
-                        <DailySpendingChart />
                     </>
                 }
             />
