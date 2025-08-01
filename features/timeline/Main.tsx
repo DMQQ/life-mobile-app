@@ -8,6 +8,7 @@ import ScheduleScreen from "./pages/Schedule"
 import Search from "./pages/Search"
 import Timeline from "./pages/Timeline"
 import CreateTimeLineEventModal from "./pages/TimelineCreate"
+import CreateTimelineTodos from "./pages/CreateTimelineTodos"
 import TimelineDetails from "./pages/TimelineDetails"
 import type { TimelineRootStack as RootStackParamList } from "./types"
 
@@ -87,6 +88,18 @@ export default function TimelineScreens({ route, navigation }: RootStackScreenPr
                 component={Search}
                 options={{
                     headerShown: false,
+                }}
+            />
+
+            <Stack.Screen
+                name="CreateTimelineTodos"
+                component={CreateTimelineTodos}
+                options={{
+                    headerShown: false,
+                    presentation: "modal",
+                }}
+                initialParams={{
+                    timelineId: "",
                 }}
             />
         </Stack.Navigator>

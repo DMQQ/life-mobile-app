@@ -95,6 +95,7 @@ export default function TodaysTimelineEvents(props: { data: any[]; loading: bool
                         backgroundColor: Colors.primary_light,
                         borderRadius: 15,
                         padding: 20,
+                        marginBottom: 10,
                     }}
                     key={timeline.id}
                     location="root"

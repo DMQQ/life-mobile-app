@@ -3,9 +3,8 @@ import Colors from "@/constants/Colors"
 import Layout from "@/constants/Layout"
 import { StackScreenProps } from "@/types"
 import { AntDesign, Feather } from "@expo/vector-icons"
-import BottomSheetType from "@gorhom/bottom-sheet"
 import Color from "color"
-import { useCallback, useMemo, useRef, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { StyleSheet, View } from "react-native"
 import Ripple from "react-native-material-ripple"
 import Animated, { Extrapolation, interpolate, SharedValue, useAnimatedStyle } from "react-native-reanimated"
@@ -19,7 +18,6 @@ import { Header } from "@/components"
 import DeleteTimelineEvent from "@/components/ui/Dialog/Delete/DeleteTimelineEvent"
 import useTrackScroll from "@/utils/hooks/ui/useTrackScroll"
 import CompletionBar from "../components/CompletionBar"
-import CreateTaskSheet from "../components/CreateTaskSheet"
 import { GetTimelineQuery } from "../hooks/query/useGetTimeLineQuery"
 
 const AnimatedRipple = Animated.createAnimatedComponent(Ripple)
@@ -78,8 +76,6 @@ export default function TimelineDetails({
         })
     }
 
-    const taskRef = useRef<BottomSheetType>(null)
-    const [isSheetOpen, setIsSheetOpen] = useState(false)
 
     const buttons = useMemo(
         () => [
@@ -152,8 +148,9 @@ export default function TimelineDetails({
                         <Text variant="body">{data?.description || "No description provided for this event."}</Text>
                         <TimelineTodos
                             expandSheet={() => {
-                                taskRef.current?.snapToIndex(0)
-                                setIsSheetOpen(true)
+                                ;(navigation as any).navigate("CreateTimelineTodos", {
+                                    timelineId: data?.id,
+                                })
                             }}
                             timelineId={data?.id}
                             sortedTodos={data?.todos || []}
@@ -182,14 +179,6 @@ export default function TimelineDetails({
                 onDismiss={() => setSelectedEventForDeletion(null)}
             />
 
-            <CreateTaskSheet
-                isSheetOpen={isSheetOpen}
-                onCloseSheet={() => {
-                    setIsSheetOpen(false)
-                }}
-                ref={taskRef}
-                timelineId={data?.id}
-            />
         </View>
     )
 }
