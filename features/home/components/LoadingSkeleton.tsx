@@ -1,4 +1,4 @@
-import SkeletonPlaceholder from "@/components/SkeletonLoader/Skeleton"
+import { default as Skeleton, default as SkeletonPlaceholder } from "@/components/SkeletonLoader/Skeleton"
 import Colors from "@/constants/Colors"
 import Layout from "@/constants/Layout"
 import { StyleSheet, View } from "react-native"
@@ -7,19 +7,24 @@ import { useSafeAreaInsets } from "react-native-safe-area-context"
 
 export default function LoadingSkeleton() {
     const insets = useSafeAreaInsets()
-    
+
     return (
         <Animated.View
             exiting={FadeOut.duration(250)}
             style={[
                 StyleSheet.absoluteFillObject,
-                { top: insets.top, zIndex: 1000, flex: 1, padding: 15, backgroundColor: Colors.primary },
+                { top: insets.top, zIndex: 1000, flex: 1, paddingHorizontal: 15, backgroundColor: Colors.primary },
             ]}
         >
-            <SkeletonPlaceholder size={(size) => size}>
+            <SkeletonPlaceholder size={(size) => ({ width: size.width - 30, height: size.height })}>
                 <View>
+                    <View style={{ justifyContent: "flex-end", gap: 10, flexDirection: "row" }}>
+                        <Skeleton.Item width={25} height={25} style={{ borderRadius: 10 }} />
+                        <Skeleton.Item width={25} height={25} style={{ borderRadius: 10 }} />
+                    </View>
                     {/* Main Balance */}
-                    <SkeletonPlaceholder.Item width={(w) => w - 30} height={35} />
+                    <SkeletonPlaceholder.Item width={(w) => w - 80} height={50} style={{ marginTop: 80 }} />
+                    <SkeletonPlaceholder.Item width={(w) => w / 2} height={20} style={{ marginTop: 10 }} />
 
                     {/* Weekly Overview */}
                     <View
@@ -28,18 +33,18 @@ export default function LoadingSkeleton() {
                             justifyContent: "space-between",
                             alignItems: "center",
                             width: Layout.screen.width - 30,
-                            marginTop: 15,
+                            marginTop: 40,
                         }}
                     >
-                        <SkeletonPlaceholder.Item width={(w) => (w - 30) / 2} height={50} />
-                        <SkeletonPlaceholder.Item width={(w) => (w - 30) / 3.5} height={30} />
+                        {new Array(3).fill(0).map((_, index) => (
+                            <View key={index} style={{ alignItems: "center", justifyContent: "center" }}>
+                                <SkeletonPlaceholder.Item width={(w) => (w - 30) / 3 - 10} height={30} />
+                                <SkeletonPlaceholder.Item width={(w) => (w - 30) / 3 - 10} height={10} marginTop={5} />
+                            </View>
+                        ))}
                     </View>
 
-                    <View style={{ marginTop: 12.5 }}>
-                        <SkeletonPlaceholder.Item width={(w) => w / 2} height={20} />
-                        <SkeletonPlaceholder.Item width={(w) => w - 30} height={20} />
-                        <SkeletonPlaceholder.Item width={(w) => w - 30} height={15} />
-                    </View>
+                    <SkeletonPlaceholder.Item width={(w) => w - 30} height={60} marginTop={30} />
 
                     {/* Recent Transactions */}
                     <View style={{ marginTop: 15 }}>

@@ -28,7 +28,7 @@ export default function MainContent({ data, home, loading, refreshing, refresh, 
             contentContainerStyle={{
                 paddingHorizontal: 15,
                 paddingBottom: 120,
-                paddingTop: 275,
+                paddingTop: 300,
             }}
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} />}
         >

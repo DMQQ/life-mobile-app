@@ -60,7 +60,7 @@ export const TimelineScreenLoader = () => (
                     <Skeleton.Item width={25} height={25} style={{ borderRadius: 10 }} />
                 </View>
 
-                <View style={{ paddingTop: 40, paddingBottom: 15 }}>
+                <View style={{ paddingTop: 65, paddingBottom: 15 }}>
                     <Skeleton.Item width={(w) => w * 0.65} height={65} style={{ marginTop: 10 }} />
                     <Skeleton.Item width={(w) => w * 0.4} height={15} style={{ marginTop: 10 }} />
                 </View>

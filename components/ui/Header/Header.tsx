@@ -200,7 +200,7 @@ const AnimatedContent = memo(
                 top: interpolate(
                     clampedValue,
                     [0, THRESHOLD],
-                    [insets.top * (isScreenModal ? 2 : 2.5), isScreenModal ? 20 : insets.top + 15],
+                    [insets.top * (isScreenModal ? 2 : 3), isScreenModal ? 20 : insets.top + 15],
                     Extrapolation.CLAMP,
                 ),
 

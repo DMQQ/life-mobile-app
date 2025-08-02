@@ -90,10 +90,9 @@ export default function Button2({
             {...rest}
             style={[
                 {
-                    paddingHorizontal: 15,
-                    paddingVertical: 10,
+                    padding: 15,
                     width: "100%",
-                    borderRadius: 20,
+                    borderRadius: 15,
                     justifyContent: "center",
                     alignItems: "center",
                     gap: 10,
