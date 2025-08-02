@@ -1,10 +1,10 @@
 import Colors from "@/constants/Colors"
 import moment from "moment"
-import { ReactElement, useEffect, useState } from "react"
+import { ReactElement, useEffect, useRef, useState } from "react"
 import { View } from "react-native"
 import { Calendar } from "react-native-calendars"
 import ChipButton from "../ui/Button/ChipButton"
-import FloatingMenu from "../ui/FloatingMenu"
+import FloatingMenu, { FloatingMenuRef } from "../ui/FloatingMenu"
 
 const theme = {
     backgroundColor: Colors.primary_lighter,
@@ -43,6 +43,8 @@ export default function DatePicker({
     const [selecting, setSelecting] = useState<"start" | "end" | null>(null)
     const [tempStartDate, setTempStartDate] = useState<Date | null>(null)
 
+    const pickerRef = useRef<FloatingMenuRef>(null)
+
     useEffect(() => {
         if (mode === "single") {
             updateSelectedRange(dates.start, dates.start)
@@ -62,6 +64,7 @@ export default function DatePicker({
                 start: selectedDate,
                 end: selectedDate,
             })
+            pickerRef.current?.close()
             return
         }
 
@@ -91,6 +94,7 @@ export default function DatePicker({
             setDates(finalDates)
             setSelecting(null)
             setTempStartDate(null)
+            pickerRef.current?.close()
         }
     }
 
@@ -144,6 +148,7 @@ export default function DatePicker({
 
     return (
         <FloatingMenu
+            ref={pickerRef}
             menuWidth={320}
             menuHeight={380}
             menuContent={
