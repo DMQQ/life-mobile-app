@@ -395,14 +395,9 @@ export function FloatingProcessingView({
                                 >
                                     <WalletItem
                                         {...(expense as any)}
-                                        subExpenseStyle={{
-                                            backgroundColor: Color(Colors.secondary).darken(0.8).hex(),
-                                        }}
-                                        containerStyle={{ backgroundColor: Color(Colors.secondary).darken(0.75).hex() }}
                                         animatedStyle={{
                                             marginBottom: 0,
                                             marginTop: 5,
-                                            backgroundColor: Color(Colors.secondary).darken(0.75).hex(),
                                         }}
                                     />
                                 </Animated.ScrollView>

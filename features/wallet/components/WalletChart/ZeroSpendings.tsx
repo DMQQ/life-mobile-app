@@ -87,7 +87,12 @@ const AnimatedItem = ({
         const isPositive = change > 0
         const isNeutral = Math.abs(change) < 0.1
 
-        if (isNeutral) return `vs ${formatValue(previousValue)}`
+        if (isNeutral)
+            return (
+                <Text variant="caption" style={[styles.comparisonText]}>
+                    vs {formatValue(previousValue)}
+                </Text>
+            )
 
         const arrow = isPositive ? "↗" : "↘"
         const color = isPositive ? "#4CAF50" : "#F44336"

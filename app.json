@@ -14,11 +14,13 @@
         },
         "updates": {
             "fallbackToCacheTimeout": 0,
-            "url": "https://u.expo.dev/5596a83c-661a-4477-806f-ee4c8a125f7e"
+            "url": "https://u.expo.dev/5596a83c-661a-4477-806f-ee4c8a125f7e",
+            "checkAutomatically": "ON_LOAD",
+            "channel": "production"
         },
         "assetBundlePatterns": ["**/*"],
         "ios": {
-            "buildNumber": "20250804",
+            "buildNumber": "20250805",
             "supportsTablet": true,
             "infoPlist": {
                 "NSFaceIDUsageDescription": "Allow $(PRODUCT_NAME) to use Face ID.",
@@ -92,6 +94,7 @@
             "expo-quick-actions",
             "expo-build-properties"
         ],
+
         "extra": {
             "eas": {
                 "projectId": "5596a83c-661a-4477-806f-ee4c8a125f7e"

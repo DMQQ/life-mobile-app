@@ -659,16 +659,11 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
                                     </BlurView>
                                 </View>
 
-                                <Button
-                                    fontStyle={{ fontSize: 16 }}
-                                    onPress={handleSignout}
-                                    style={{
-                                        marginTop: 30,
-                                        backgroundColor: "rgba(220, 53, 69, 0.8)",
-                                    }}
-                                >
+                                <UpdateButton />
+
+                                <Button2 onPress={handleSignout} color="error" style={{ marginTop: 30 }}>
                                     Signout 👋
-                                </Button>
+                                </Button2>
 
                                 <View style={{ padding: 30 }} />
                             </View>
@@ -677,5 +672,25 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
                 </View>
             </View>
         </Modal>
+    )
+}
+
+import Button2 from "@/components/ui/Button/Button2"
+import { useExpoUpdates } from "@/utils/hooks/useExpoUpdate"
+import React, { useEffect } from "react"
+
+export const UpdateButton: React.FC = () => {
+    const { isUpdateAvailable, isDownloading, checkForUpdate, downloadAndRestart } = useExpoUpdates()
+
+    useEffect(() => {
+        checkForUpdate()
+    }, [])
+
+    if (!isUpdateAvailable) return null
+
+    return (
+        <Button2 icon="download" onPress={downloadAndRestart} disabled={isDownloading}>
+            {isDownloading ? "Updating..." : "Update App"}
+        </Button2>
     )
 }
