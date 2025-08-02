@@ -143,7 +143,10 @@ function Header(props: HeaderProps) {
                 >
                     {props.goBack && (
                         <IconButton
-                            onPress={throttle(() => navigation.canGoBack() && navigation.goBack(), 250)}
+                            onPress={throttle(() => {
+                                Haptic.trigger("impactLight")
+                                navigation.canGoBack() && navigation.goBack()
+                            }, 250)}
                             icon={props.backIcon || <AntDesign name="arrowleft" size={24} color={Colors.foreground} />}
                         />
                     )}

@@ -1,5 +1,4 @@
 import Colors, { secondary_candidates } from "@/constants/Colors"
-import Color from "color"
 import moment from "moment"
 import { memo, useCallback, useMemo } from "react"
 import { ScrollViewProps, View } from "react-native"
@@ -122,7 +121,7 @@ const CalendarTimetable = ({
                 zIndex: 100,
             },
             lines: {
-                borderColor: Color(Colors.foreground).darken(0.8).string(),
+                borderColor: Colors.primary_lighter,
             },
 
             nowLine: {

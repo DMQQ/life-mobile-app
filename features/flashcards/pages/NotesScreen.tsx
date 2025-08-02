@@ -127,7 +127,7 @@ export default function NotesScreen({ navigation }: ScreenProps<any>) {
                     onScroll={onAnimatedScrollHandler}
                     contentContainerStyle={{
                         paddingHorizontal: 15,
-                        paddingBottom: 60,
+                        paddingBottom: 100,
                         paddingTop: 300,
                     }}
                     scrollEventThrottle={16}

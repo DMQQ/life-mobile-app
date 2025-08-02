@@ -49,6 +49,8 @@ interface CollapsibleStackProps<T> {
     showHeader?: boolean
 
     expandOnPress?: boolean
+
+    onChange?: (isExpanded: boolean) => void
 }
 
 interface CollapsibleItemProps<T> {
@@ -177,6 +179,7 @@ const CollapsibleStack = React.memo(
         getItemKey,
         showHeader = true,
         expandOnPress,
+        onChange,
     }: CollapsibleStackProps<T>) => {
         const [isExpanded, setIsExpanded] = useState<boolean>(false)
         const itemHeightsRef = useRef<{ [key: string]: number }>({})
@@ -256,7 +259,12 @@ const CollapsibleStack = React.memo(
         }, [isExpanded, totalHeight, itemChangeKey, animation.maxVisibleItems, animation.stackSpacing])
 
         const toggleExpand = useCallback((): void => {
-            setIsExpanded((prev) => !prev)
+            setIsExpanded((prev) => {
+                if (onChange) {
+                    onChange(!prev)
+                }
+                return !prev
+            })
         }, [])
 
         const containerStyle = useAnimatedStyle(

@@ -49,7 +49,7 @@ export default function Checkbox({ checked, onPress, size = 24, disabled = false
 const styles = StyleSheet.create({
     container: {
         borderWidth: 2,
-        borderColor: Color(Colors.primary_light).lighten(0.3).hex(),
+        borderColor: Color(Colors.primary_lighter).lighten(1).hex(),
         backgroundColor: Color(Colors.primary_lighter).lighten(0.5).hex(),
         alignItems: "center",
         justifyContent: "center",

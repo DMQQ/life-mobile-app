@@ -1,13 +1,13 @@
-import Button from "@/components/ui/Button/Button"
 import Header from "@/components/ui/Header/Header"
 import Text from "@/components/ui/Text/Text"
 import Colors, { secondary_candidates } from "@/constants/Colors"
-import { MaterialCommunityIcons } from "@expo/vector-icons"
+import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons"
 import Color from "color"
 import moment from "moment"
 import { useMemo } from "react"
 import { StyleSheet, View } from "react-native"
 import Animated, { useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated"
+import { SafeAreaView } from "react-native-safe-area-context"
 import DayEntry from "../components/GoalEntry"
 import GitHubActivityGrid from "../components/StatGrid"
 import { useGetGoal } from "../hooks/hooks"
@@ -51,11 +51,22 @@ export default function Goal({ route, navigation }: any) {
     })
 
     return (
-        <View style={{ padding: 0, flex: 1, paddingVertical: 15, paddingBottom: 25 }}>
-            <Header scrollY={scrollY} goBack initialHeight={60} animated />
+        <SafeAreaView style={{ flex: 1 }}>
+            <Header
+                scrollY={scrollY}
+                goBack
+                initialHeight={60}
+                animated
+                buttons={[
+                    {
+                        onPress: () => navigation.navigate("UpdateGoalEntry", { id }),
+                        icon: <AntDesign name="plus" size={20} color={Colors.foreground} />,
+                    },
+                ]}
+            />
             <View style={{ paddingHorizontal: 15, flex: 1 }}>
                 <Animated.FlatList
-                    style={{ paddingTop: 120 }}
+                    style={{ paddingTop: 80 }}
                     onScroll={onScroll}
                     data={data}
                     keyExtractor={(item) => item.id}
@@ -78,18 +89,7 @@ export default function Goal({ route, navigation }: any) {
                                     goalThreshold={goal.target}
                                 />
                             </View>
-                            <View
-                                style={{ flexDirection: "row", justifyContent: "space-between", paddingVertical: 30 }}
-                            >
-                                <View>
-                                    <Text variant="subheading" style={{ fontWeight: "600", color: Colors.foreground }}>
-                                        {goal?.name}
-                                    </Text>
-                                    <Text variant="body" style={{ color: "rgba(255,255,255,0.9)", marginTop: 5 }}>
-                                        {goal?.description}
-                                    </Text>
-                                </View>
-
+                            <View style={{ flexDirection: "row", gap: 10, alignItems: "center", marginVertical: 15 }}>
                                 <View style={{ padding: 10, borderRadius: 100, backgroundColor: Colors.secondary }}>
                                     <MaterialCommunityIcons
                                         name={goal?.icon}
@@ -97,6 +97,14 @@ export default function Goal({ route, navigation }: any) {
                                         color={Colors.foreground}
                                         style={{ marginLeft: "auto" }}
                                     />
+                                </View>
+                                <View>
+                                    <Text variant="subheading" style={{ fontWeight: "600", color: Colors.foreground }}>
+                                        {goal?.name}
+                                    </Text>
+                                    <Text variant="body" style={{ color: "rgba(255,255,255,0.9)", marginTop: 5 }}>
+                                        {goal?.description}
+                                    </Text>
                                 </View>
                             </View>
                         </View>
@@ -106,17 +114,10 @@ export default function Goal({ route, navigation }: any) {
                             No entries yet
                         </Text>
                     }
+                    ListFooterComponent={<View style={{ height: 80, width: "100%" }} />}
                 />
-                <Button
-                    onPress={() => {
-                        navigation.navigate("UpdateGoalEntry", { id })
-                    }}
-                    style={{ borderRadius: 100, marginTop: 15 }}
-                >
-                    Add or update entry
-                </Button>
             </View>
-        </View>
+        </SafeAreaView>
     )
 }
 

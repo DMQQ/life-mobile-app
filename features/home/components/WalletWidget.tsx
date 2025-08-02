@@ -46,10 +46,9 @@ interface Props {
     loading: boolean
 }
 
-const AvailableBalanceWidget = ({ data, loading }: Props) => {
-    if (loading) return <View style={styles.loadingContainer} />
-
-    const { wallet, statistics: stats } = data
+const AvailableBalanceWidget = ({ data }: Props) => {
+    const wallet = data.wallet || {}
+    const stats = data.statistics || {}
 
     const targetAmount = wallet?.income * (wallet?.monthlyPercentageTarget / 100)
     const spentPercentage = targetAmount ? (stats?.expense / targetAmount) * 100 : 0

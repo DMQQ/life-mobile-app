@@ -1,4 +1,3 @@
-import { Skeleton } from "@/components"
 import DeleteGoalsGroupDialog from "@/components/ui/Dialog/Delete/DeleteGoalsDialog"
 import AnimatedHeaderSearch from "@/components/ui/Header/AnimatedHeaderSearch"
 import Header from "@/components/ui/Header/Header"
@@ -6,50 +5,14 @@ import Colors from "@/constants/Colors"
 import { AntDesign } from "@expo/vector-icons"
 import { FlashList } from "@shopify/flash-list"
 import { useState } from "react"
-import { RefreshControl, StyleSheet, View } from "react-native"
+import { RefreshControl, View } from "react-native"
 import Feedback from "react-native-haptic-feedback"
-import Animated, { FadeOut, useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated"
+import Animated, { useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated"
 import { GoalCategory } from "../components/GoalCategory"
+import AnimatedLoader from "../components/GoalsLoader"
 import { useGoal } from "../hooks/hooks"
 
 const AnimatedFlashList = Animated.createAnimatedComponent(FlashList)
-
-const AnimatedLoader = () => {
-    return (
-        <Animated.View
-            exiting={FadeOut.duration(250)}
-            style={[
-                StyleSheet.absoluteFillObject,
-                {
-                    backgroundColor: Colors.primary,
-                    zIndex: 1000,
-                    justifyContent: "center",
-                    alignItems: "center",
-                    paddingTop: 125,
-                },
-            ]}
-        >
-            <Skeleton>
-                <View style={{ flex: 1, paddingHorizontal: 15 }}>
-                    <View style={{ alignItems: "flex-end" }}>
-                        <Skeleton.Item width={25} height={25} style={{ borderRadius: 10 }} />
-                    </View>
-
-                    <View style={{ paddingTop: 65, paddingBottom: 20 }}>
-                        <Skeleton.Item width={(w) => w * 0.65} height={65} style={{ marginTop: 10 }} />
-                        <Skeleton.Item width={(w) => w * 0.4} height={15} style={{ marginTop: 10 }} />
-                    </View>
-
-                    <View>
-                        <Skeleton.Item width={(w) => w - 30} height={200} style={{ marginTop: 10 }} />
-                        <Skeleton.Item width={(w) => w - 30} height={200} style={{ marginTop: 10 }} />
-                        <Skeleton.Item width={(w) => w - 30} height={200} style={{ marginTop: 10 }} />
-                    </View>
-                </View>
-            </Skeleton>
-        </Animated.View>
-    )
-}
 
 export default function Goals({ navigation }: any) {
     const { goals, loading, refetchGoals } = useGoal()
@@ -119,7 +82,7 @@ export default function Goals({ navigation }: any) {
                 onScroll={onAnimatedScrollHandler}
                 contentContainerStyle={{
                     paddingHorizontal: 15,
-                    paddingBottom: 60,
+                    paddingBottom: 100,
                     paddingTop: 300,
                 }}
                 scrollEventThrottle={16}

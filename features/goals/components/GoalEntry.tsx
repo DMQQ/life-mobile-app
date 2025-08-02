@@ -1,3 +1,4 @@
+import { Card } from "@/components"
 import Colors from "@/constants/Colors"
 import lowOpacity from "@/utils/functions/lowOpacity"
 import Color from "color"
@@ -41,7 +42,7 @@ const DayEntry = ({ entry, index }: DayEntryProps) => {
     const isGoalMet = entry.value >= (entry?.target || 0)
 
     return (
-        <View
+        <Card
             style={[
                 styles.dayContainer,
                 index === 0 && {
@@ -116,7 +117,7 @@ const DayEntry = ({ entry, index }: DayEntryProps) => {
                     {isGoalMet ? "🎉  Good Job!" : isCurrentDay ? "👀 Keep trying" : "You didn't meet your goal"}
                 </Text>
             </View>
-        </View>
+        </Card>
     )
 }
 
@@ -124,8 +125,7 @@ const styles = StyleSheet.create({
     dayContainer: {
         flexDirection: "row",
         alignItems: "center",
-        padding: 10,
-        borderRadius: 10,
+
         borderWidth: 2,
         borderColor: Color(Colors.primary_lighter).lighten(1).hex(),
         backgroundColor: Colors.primary_lighter,

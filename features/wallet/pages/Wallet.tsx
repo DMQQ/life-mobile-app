@@ -53,10 +53,6 @@ const styles = StyleSheet.create({
 export default function WalletScreen({ navigation, route }: WalletScreens<"Wallet">) {
     const { data, loading, refetch, onEndReached, error } = useGetWallet()
 
-    const {
-        refs: { bottomSheetRef },
-    } = useWalletContext()
-
     const [scrollY, onScroll] = useTrackScroll()
 
     useEffect(() => {
@@ -79,13 +75,7 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
         () => [
             {
                 onPress: () => {
-                    setShowSubscriptionsView((p) => {
-                        const newValue = !p
-
-                        bottomSheetRef.current?.snapToIndex(showSubscriptionsView ? -1 : 0)
-
-                        return newValue
-                    })
+                    setShowSubscriptionsView((p) => !p)
                 },
                 icon: <Feather name="repeat" size={20} color={Colors.foreground} />,
             },

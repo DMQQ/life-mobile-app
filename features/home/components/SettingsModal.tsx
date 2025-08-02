@@ -221,11 +221,10 @@ const styles = StyleSheet.create({
         borderWidth: 2,
         borderColor: "transparent",
         height: 200,
-        width: 60,
     },
     selectedPalette: {
-        backgroundColor: Colors.primary_lighter,
-        borderRadius: 100,
+        backgroundColor: Colors.primary,
+        borderRadius: 10,
     },
     paletteContent: {
         padding: 8,
@@ -437,10 +436,16 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
                     {item.name}
                 </Text>
                 <View style={styles.colorSwatch}>
-                    <View style={[styles.colorCircle, { backgroundColor: item.primary }]} />
-                    <View style={[styles.colorCircle, { backgroundColor: item.secondary }]} />
-                    <View style={[styles.colorCircle, { backgroundColor: item.ternary }]} />
-                    <View style={[styles.colorCircle, { backgroundColor: item.foreground }]} />
+                    {Object.entries(item)
+                        .slice(1, 5)
+                        .map(([key, value]) => (
+                            <View style={{ flexDirection: "row", gap: 5, alignItems: "center" }} key={key}>
+                                <View style={[styles.colorCircle, { backgroundColor: value }]} />
+                                <Text variant="caption" style={{ color: "#fff", fontSize: 15, fontWeight: "600" }}>
+                                    {value}
+                                </Text>
+                            </View>
+                        ))}
                 </View>
             </View>
         </Ripple>
@@ -529,24 +534,6 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
                                                 </View>
                                             ) : (
                                                 <View style={styles.customColorSection}>
-                                                    {/* <View style={styles.colorTypeSelector}>
-                                                        {(
-                                                            ["primary", "secondary", "ternary", "foreground"] as const
-                                                        ).map((type) => (
-                                                            <TouchableOpacity
-                                                                key={type}
-                                                                style={[
-                                                                    styles.colorTypeButton,
-                                                                    activeColorType === type && styles.activeColorType,
-                                                                ]}
-                                                                onPress={() => setActiveColorType(type)}
-                                                            >
-                                                                <Text style={styles.colorTypeText}>
-                                                                    {type.charAt(0).toUpperCase() + type.slice(1)}
-                                                                </Text>
-                                                            </TouchableOpacity>
-                                                        ))}
-                                                    </View> */}
                                                     <AnimatedSelector
                                                         items={["primary", "secondary", "ternary", "foreground"]}
                                                         selectedItem={activeColorType}

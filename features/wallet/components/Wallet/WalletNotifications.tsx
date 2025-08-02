@@ -5,7 +5,7 @@ import { gql, useMutation, useQuery } from "@apollo/client"
 import { BlurView } from "expo-blur"
 import { LinearGradient } from "expo-linear-gradient"
 import * as Notifications from "expo-notifications"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { FlatList, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import Feedback from "react-native-haptic-feedback"
 import Ripple from "react-native-material-ripple"
@@ -369,8 +369,24 @@ const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient)
 export function FloatingNotifications() {
     const { data, loading, error } = useGetNotifications()
     const insets = useSafeAreaInsets()
+    const [showNotifications, setShowNotifications] = useState(true)
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-    const notifications = ((data?.notifications || []) as Notification[]).filter((n) => !n.read).slice(0, 3)
+    useEffect(() => {
+        if (((data?.notifications || []) as Notification[]).filter((n) => !n.read).length > 0) {
+            setShowNotifications(true)
+
+            timeoutRef.current = setTimeout(() => {
+                setShowNotifications(false)
+            }, 5000)
+
+            return () => {
+                if (timeoutRef.current) clearTimeout(timeoutRef.current)
+            }
+        }
+    }, [data])
+
+    const notifications = ((data?.notifications || []) as Notification[]).filter((n) => !n.read)
 
     const renderItem = useCallback(
         ({ item, index, isExpanded }: { item: Notification; index: number; isExpanded: boolean }) => (
@@ -379,7 +395,7 @@ export function FloatingNotifications() {
         [],
     )
 
-    if (loading || error || notifications.length === 0) {
+    if (loading || error || notifications.length === 0 || !showNotifications) {
         return null
     }
 
@@ -409,6 +425,10 @@ export function FloatingNotifications() {
                     maxVisibleItems: 3,
                 }}
                 expandOnPress
+                onChange={(expanded) => {
+                    setShowNotifications(expanded)
+                    if (timeoutRef.current) clearTimeout(timeoutRef.current as NodeJS.Timeout)
+                }}
             />
         </AnimatedLinearGradient>
     )

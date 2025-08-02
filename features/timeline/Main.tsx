@@ -5,8 +5,6 @@ import { useEffect } from "react"
 import { Platform } from "react-native"
 import CreateTimelineTodos from "./pages/CreateTimelineTodos"
 import ImagesPreview from "./pages/ImagesPreview"
-import ScheduleScreen from "./pages/Schedule"
-import Search from "./pages/Search"
 import Timeline from "./pages/Timeline"
 import CreateTimeLineEventModal from "./pages/TimelineCreate"
 import TimelineDetails from "./pages/TimelineDetails"
@@ -69,26 +67,6 @@ export default function TimelineScreens({ route, navigation }: RootStackScreenPr
                 initialParams={{
                     selectedImage: "",
                     timelineId: "",
-                }}
-            />
-
-            <Stack.Screen
-                name="Schedule"
-                component={ScheduleScreen}
-                options={({ route }) => ({
-                    headerTitle: route.params.selectedDate,
-                    headerTitleAlign: "center",
-                })}
-                initialParams={{
-                    selected: moment().format("YYYY-MM-DD"),
-                }}
-            />
-
-            <Stack.Screen
-                name="Search"
-                component={Search}
-                options={{
-                    headerShown: false,
                 }}
             />
 

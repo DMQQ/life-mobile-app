@@ -1,15 +1,15 @@
+import { Card } from "@/components"
+import Text from "@/components/ui/Text/Text"
 import Colors, { secondary_candidates } from "@/constants/Colors"
+import { Group } from "@/features/flashcards/hooks"
 import { useNavigation } from "@react-navigation/native"
 import { useMemo } from "react"
-import { Text, View } from "react-native"
-import Ripple from "react-native-material-ripple"
-import GoalActivityGrid from "./StatGrid" // Assuming this imports the GitHubActivityGrid component
+import { View } from "react-native"
+import { FadeIn } from "react-native-reanimated"
+import GoalActivityGrid from "./StatGrid"
 
-interface GoalCategoryProps {
-    id: string
-    name: string
+interface GoalCategoryProps extends Group {
     icon: string
-    description: string
     onPress?: () => void
     entries?: {
         id: string
@@ -36,18 +36,17 @@ export const GoalCategory = ({ name, icon, description, entries = [], onPress, .
     }, [entries])
 
     return (
-        <Ripple
+        <Card
+            animated
+            ripple
             onLongPress={rest.onLongPress}
             onPress={() => {
                 navigation.navigate("Goal", { id: rest.id })
             }}
             style={{
-                padding: 20,
-                backgroundColor: Colors.primary_lighter,
-                borderRadius: 15,
                 marginVertical: 7.5,
-                ...(rest.index === (rest.length || 0) - 1 && { marginBottom: 40 }),
             }}
+            entering={FadeIn.delay((rest.index + 1) * 50)}
         >
             <View style={{ pointerEvents: "box-none" }}>
                 <GoalActivityGrid
@@ -56,13 +55,22 @@ export const GoalCategory = ({ name, icon, description, entries = [], onPress, .
                     goalThreshold={rest.target}
                 />
             </View>
-            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end" }}>
+            <View
+                style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "flex-end",
+                    paddingBottom: 5,
+                }}
+            >
                 <View>
-                    <Text style={{ color: Colors.foreground, marginTop: 15 }}>{name}</Text>
-                    <Text style={{ color: Colors.foreground }}>{description}</Text>
+                    <Text style={{ color: Colors.foreground, marginTop: 15, fontSize: 18, fontWeight: "600" }}>
+                        {name}
+                    </Text>
+                    <Text style={{ color: Colors.foreground, fontSize: 16, marginTop: 10 }}>{description}</Text>
                 </View>
             </View>
-        </Ripple>
+        </Card>
     )
 }
 
