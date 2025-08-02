@@ -1,27 +1,27 @@
-import { gql, useMutation, useQuery } from "@apollo/client"
-import { Text, View, StyleSheet, ActivityIndicator, TouchableOpacity, ScrollView } from "react-native"
-import { CategoryIcon, CategoryUtils, Icons } from "../Expense/ExpenseIcon"
-import lowOpacity from "@/utils/functions/lowOpacity"
-import Colors, { secondary_candidates } from "@/constants/Colors"
-import Animated, { FadeIn, LinearTransition } from "react-native-reanimated"
-import Ripple from "react-native-material-ripple"
-import { useEffect, useMemo, useState } from "react"
-import Feedback from "react-native-haptic-feedback"
-import Modal from "@/components/ui/Modal"
-import Layout from "@/constants/Layout"
-import { Formik } from "formik"
-import ValidatedInput from "@/components/ui/ValidatedInput"
-import CategorySelector from "../CreateExpense/CategorySelectorView"
-import Select from "@/components/ui/Select/Select"
-import Button from "@/components/ui/Button/Button"
-import { useWalletContext } from "../WalletContext"
-import * as yup from "yup"
-import moment from "moment"
-import useGetStatistics from "../../hooks/useGetStatistics"
 import { AnimatedSelector } from "@/components"
-import dayjs from "dayjs"
+import Button from "@/components/ui/Button/Button"
+import Modal from "@/components/ui/Modal"
+import Select from "@/components/ui/Select/Select"
+import ValidatedInput from "@/components/ui/ValidatedInput"
+import Colors, { secondary_candidates } from "@/constants/Colors"
+import Layout from "@/constants/Layout"
+import lowOpacity from "@/utils/functions/lowOpacity"
+import { gql, useMutation, useQuery } from "@apollo/client"
 import { AntDesign } from "@expo/vector-icons"
 import Color from "color"
+import dayjs from "dayjs"
+import { Formik } from "formik"
+import moment from "moment"
+import { useEffect, useMemo, useState } from "react"
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from "react-native"
+import Feedback from "react-native-haptic-feedback"
+import Ripple from "react-native-material-ripple"
+import Animated, { FadeIn, LinearTransition } from "react-native-reanimated"
+import * as yup from "yup"
+import useGetStatistics from "../../hooks/useGetStatistics"
+import CategorySelector from "../CreateExpense/CategorySelectorView"
+import { CategoryIcon, CategoryUtils, Icons } from "../Expense/ExpenseIcon"
+import { useWalletContext } from "../WalletContext"
 
 const validationSchema = yup.object().shape({
     category: yup.string().required("Category is required"),
@@ -262,6 +262,8 @@ export default function WalletLimits() {
                                         styles.limitCard,
                                         {
                                             backgroundColor: lowOpacity(iconData.backgroundColor || color, 0.15),
+                                            borderWidth: 1,
+                                            borderColor: lowOpacity(iconData.backgroundColor || color, 0.25),
                                             flexDirection: compactMode ? "column" : "row",
                                             padding: compactMode ? 15 : 22.5,
                                         },

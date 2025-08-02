@@ -1,3 +1,4 @@
+import { Card } from "@/components"
 import Colors from "@/constants/Colors"
 import { Expense } from "@/types"
 import moment from "moment"
@@ -30,9 +31,7 @@ interface WalletItemProps extends WalletElement {}
 
 const styles = StyleSheet.create({
     expense_item: {
-        height: 75,
-        borderRadius: 20,
-        padding: 10,
+        height: 60,
         flexDirection: "row",
         backgroundColor: Colors.primary_lighter,
     },
@@ -141,15 +140,15 @@ export default function WalletItem(
     }
 
     return (
-        <Animated.View
+        <Card
+            animated
             style={[
                 {
                     marginBottom: 15,
                     position: "relative",
-                    backgroundColor: Colors.primary_lighter,
-                    borderRadius: 20,
                 },
-                item.animatedStyle,
+                item.animatedStyle as any,
+                item.containerStyle,
             ]}
             layout={LinearTransition}
         >
@@ -162,7 +161,7 @@ export default function WalletItem(
                     setIsExpanded(!isExpanded)
                 }}
                 disabled={isBalanceEdit}
-                style={[styles.expense_item, item.containerStyle]}
+                style={[styles.expense_item]}
                 onPress={() => item.handlePress()}
             >
                 <CategoryIcon
@@ -243,14 +242,14 @@ export default function WalletItem(
                                 index={index}
                                 containerStyle={{
                                     marginBottom: 0,
+                                    padding: 0,
                                     ...((item.subExpenseStyle as any) || {}),
-                                    backgroundColor: Colors.primary_light,
                                 }}
                             />
                         </Animated.View>
                     ))}
                 </Animated.View>
             )}
-        </Animated.View>
+        </Card>
     )
 }
