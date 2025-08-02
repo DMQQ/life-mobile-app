@@ -6,7 +6,6 @@ import { AntDesign, Feather } from "@expo/vector-icons"
 import Color from "color"
 import { useCallback, useMemo, useState } from "react"
 import { StyleSheet, View } from "react-native"
-import Ripple from "react-native-material-ripple"
 import Animated, { Extrapolation, interpolate, SharedValue, useAnimatedStyle } from "react-native-reanimated"
 import FileList from "../components/FileList"
 import LoaderSkeleton from "../components/LoaderSkeleton"
@@ -19,8 +18,6 @@ import DeleteTimelineEvent from "@/components/ui/Dialog/Delete/DeleteTimelineEve
 import useTrackScroll from "@/utils/hooks/ui/useTrackScroll"
 import CompletionBar from "../components/CompletionBar"
 import { GetTimelineQuery } from "../hooks/query/useGetTimeLineQuery"
-
-const AnimatedRipple = Animated.createAnimatedComponent(Ripple)
 
 const styles = StyleSheet.create({
     title: {
@@ -75,7 +72,6 @@ export default function TimelineDetails({
             timelineId: data?.id,
         })
     }
-
 
     const buttons = useMemo(
         () => [
@@ -137,7 +133,7 @@ export default function TimelineDetails({
             <Animated.ScrollView
                 keyboardDismissMode={"on-drag"}
                 style={{ padding: 15 }}
-                contentContainerStyle={{ paddingBottom: 50, paddingTop: 200 }}
+                contentContainerStyle={{ paddingBottom: 50, paddingTop: 225 }}
                 onScroll={onScroll}
                 showsVerticalScrollIndicator={false}
             >
@@ -178,7 +174,6 @@ export default function TimelineDetails({
                 }
                 onDismiss={() => setSelectedEventForDeletion(null)}
             />
-
         </View>
     )
 }

@@ -1,17 +1,15 @@
 import { AnimatedNumber } from "@/components"
-import ChipButton from "@/components/ui/Button/ChipButton"
+import DatePicker from "@/components/DatePicker"
 import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
 import Layout from "@/constants/Layout"
 import { useRefresh } from "@/utils/context/RefreshContext"
 import { gql, useQuery } from "@apollo/client"
 import { FontAwesome5, Ionicons, MaterialIcons } from "@expo/vector-icons"
-import { MenuView } from "@react-native-menu/menu"
 import moment from "moment"
 import React, { useMemo, useState } from "react"
 import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native"
 import Ripple from "react-native-material-ripple"
-import DateTimePicker from "react-native-modal-datetime-picker"
 import Animated, { FadeIn, FadeInDown } from "react-native-reanimated"
 
 interface ZeroExpenseStreak {
@@ -272,43 +270,23 @@ export default function ZeroExpenseStats() {
                 <View style={styles.header}>
                     <View style={{ flex: 1 }}>
                         <Text variant="body" style={styles.headerTitle}>
-                            Zero Expense Analytics
+                            No spendings
                         </Text>
                         <Text variant="caption" style={styles.headerSubtitle}>
                             {moment(dateRange[0]).format("MMM D")} - {moment(dateRange[1]).format("MMM D, YYYY")}
                         </Text>
                     </View>
-                    <MenuView
-                        onPressAction={(ev) => {
-                            if (ev.nativeEvent.event === "1") {
-                                setShowStartDatePicker(true)
-                            } else if (ev.nativeEvent.event === "2") {
-                                setShowEndDatePicker(true)
-                            }
+
+                    <DatePicker
+                        mode="period"
+                        dates={{
+                            start: moment(dateRange[0]).toDate(),
+                            end: moment(dateRange[1]).toDate(),
                         }}
-                        title="Select date range"
-                        themeVariant="dark"
-                        actions={[
-                            {
-                                id: "1",
-                                title: "Date start",
-                                state: "off",
-                                subtitle: moment(dateRange[0]).format("DD MMMM YYYY"),
-                                image: "calendar",
-                            },
-                            {
-                                id: "2",
-                                title: "Date end",
-                                state: "off",
-                                subtitle: moment(dateRange[1]).format("DD MMMM YYYY"),
-                                image: "calendar",
-                            },
-                        ]}
-                    >
-                        <ChipButton icon="clockcircleo">
-                            {`${moment(dateRange[0]).format("DD.MM")} - ${moment(dateRange[1]).format("DD.MM")}`}
-                        </ChipButton>
-                    </MenuView>
+                        setDates={({ start, end }) =>
+                            setDateRange([moment(start).format("YYYY-MM-DD"), moment(end).format("YYYY-MM-DD")])
+                        }
+                    />
                 </View>
 
                 {currentStreak && (
@@ -398,24 +376,6 @@ export default function ZeroExpenseStats() {
                     </Animated.View>
                 )}
             </ScrollView>
-
-            <DateTimePicker
-                isVisible={showStartDatePicker}
-                mode="date"
-                onConfirm={handleStartDateConfirm}
-                onCancel={() => setShowStartDatePicker(false)}
-                date={moment(dateRange[0]).toDate()}
-                maximumDate={moment(dateRange[1]).toDate()}
-            />
-
-            <DateTimePicker
-                isVisible={showEndDatePicker}
-                mode="date"
-                onConfirm={handleEndDateConfirm}
-                onCancel={() => setShowEndDatePicker(false)}
-                date={moment(dateRange[1]).toDate()}
-                minimumDate={moment(dateRange[0]).toDate()}
-            />
         </View>
     )
 }

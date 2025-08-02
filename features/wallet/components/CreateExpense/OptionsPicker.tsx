@@ -1,3 +1,4 @@
+import DatePicker from "@/components/DatePicker"
 import Colors from "@/constants/Colors"
 import Layout from "@/constants/Layout"
 import { SpontaneousRateChip } from "@/features/wallet/components/CreateExpense/SpontaneousRate"
@@ -5,6 +6,7 @@ import { CategoryUtils, Icons } from "@/features/wallet/components/Expense/Expen
 import lowOpacity from "@/utils/functions/lowOpacity"
 import { AntDesign, Entypo } from "@expo/vector-icons"
 import Color from "color"
+import dayjs from "dayjs"
 import moment from "moment/moment"
 import { StyleSheet, Text, View } from "react-native"
 import Haptic from "react-native-haptic-feedback"
@@ -112,20 +114,28 @@ export default function OptionsPicker({
                 </Text>
             </Ripple>
 
-            <Ripple
-                onPress={onPressWithFeedback(() => setDate(null))}
-                style={[styles.chip, { backgroundColor: Colors.primary_lighter }]}
-            >
-                <AntDesign name="calendar" size={15} color="rgba(255,255,255,0.7)" />
-                <Text
-                    style={{
-                        color: "rgba(255,255,255,0.7)",
-                        fontSize: 14,
-                    }}
-                >
-                    {date ?? moment().format("YYYY-MM-DD")}
-                </Text>
-            </Ripple>
+            <DatePicker
+                mode="single"
+                dates={{ start: date ? moment(date).toDate() : new Date(), end: new Date() }}
+                setDates={(dates) => {
+                    setDate(dayjs(dates.start).format("YYYY-MM-DD"))
+                }}
+                buttonComponent={({ start }) => (
+                    <Ripple
+                        style={[styles.chip, { backgroundColor: Colors.primary_lighter, flex: undefined, height: 45 }]}
+                    >
+                        <AntDesign name="calendar" size={15} color="rgba(255,255,255,0.7)" />
+                        <Text
+                            style={{
+                                color: "rgba(255,255,255,0.7)",
+                                fontSize: 14,
+                            }}
+                        >
+                            {moment(start).format("YYYY-MM-DD")}
+                        </Text>
+                    </Ripple>
+                )}
+            />
 
             {type !== "income" && (
                 <Ripple

@@ -65,7 +65,7 @@ export default function Navigation() {
             }}
         >
             <Tab.Navigator
-                initialRouteName={isLoading ? "Loader" : "Root"}
+                initialRouteName={"Root"}
                 tabBar={renderTab}
                 screenOptions={{
                     headerShown: false,

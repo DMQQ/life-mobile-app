@@ -23,6 +23,12 @@ export default function ChipButton({ children, icon, ...rest }: PropsWithChildre
                 }
                 Haptics.trigger("impactLight")
             }}
+            onLongPress={(ev) => {
+                if (rest.onLongPress) {
+                    rest.onLongPress(ev)
+                }
+                Haptics.trigger("impactMedium")
+            }}
             style={[
                 styles.button,
                 rest.disabled

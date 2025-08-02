@@ -1,6 +1,7 @@
 import Button from "@/components/ui/Button/Button"
 import IconButton from "@/components/ui/IconButton/IconButton"
 import SegmentedButtons from "@/components/ui/SegmentedButtons"
+import Text from "@/components/ui/Text/Text"
 import ValidatedInput from "@/components/ui/ValidatedInput"
 import Colors from "@/constants/Colors"
 import useKeyboard from "@/utils/hooks/useKeyboard"
@@ -13,7 +14,6 @@ import Ripple from "react-native-material-ripple"
 import DateTimePicker from "react-native-modal-datetime-picker"
 import Animated, { useAnimatedKeyboard, useAnimatedStyle } from "react-native-reanimated"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
-import Text from "@/components/ui/Text/Text"
 import CreateRepeatableTimeline from "../components/CreateTimeline/CreateRepeatableTimeline"
 import SuggestedEvents from "../components/CreateTimeline/SuggestedEvents/SuggestedEvents"
 import TimelineCreateHeader from "../components/CreateTimeline/TimelineCreateHeader"
@@ -77,7 +77,12 @@ export default function CreateTimeLineEventModal({ route, navigation }: Timeline
         <View style={{ flex: 1, paddingBottom: insets.bottom }}>
             <TimelineCreateHeader
                 navigation={navigation}
-                handleChangeDate={() => setDatePicker(true)}
+                handleChangeDate={(date) => {
+                    handleChangeDate(date)
+                    navigation.setParams({
+                        selectedDate: moment(date).format("YYYY-MM-DD"),
+                    })
+                }}
                 selectedDate={route.params.selectedDate}
                 onToggleOptions={() => {
                     f.resetForm()
@@ -118,13 +123,19 @@ export default function CreateTimeLineEventModal({ route, navigation }: Timeline
                     <ValidatedInput.Label error={false} text="Time range*" />
                     <View style={styles.timeContainer}>
                         <Ripple style={{ flex: 1, padding: 5 }} onPress={() => setTimePicker("begin")}>
-                            <Text variant="title" style={styles.timeText}>{f.values.begin.split(":").slice(0, 2).join(":")}</Text>
+                            <Text variant="title" style={styles.timeText}>
+                                {f.values.begin.split(":").slice(0, 2).join(":")}
+                            </Text>
                         </Ripple>
 
-                        <Text variant="body" style={{ color: "gray", padding: 5 }}>to</Text>
+                        <Text variant="body" style={{ color: "gray", padding: 5 }}>
+                            to
+                        </Text>
 
                         <Ripple style={{ flex: 1, padding: 5 }} onPress={() => setTimePicker("end")}>
-                            <Text variant="title" style={styles.timeText}>{f.values.end.split(":").slice(0, 2).join(":")}</Text>
+                            <Text variant="title" style={styles.timeText}>
+                                {f.values.end.split(":").slice(0, 2).join(":")}
+                            </Text>
                         </Ripple>
                     </View>
 
@@ -175,19 +186,6 @@ export default function CreateTimeLineEventModal({ route, navigation }: Timeline
                         onCancel={() => setTimePicker("")}
                     />
 
-                    <DateTimePicker
-                        mode="date"
-                        isVisible={datePicker}
-                        onConfirm={(currentlySelectedDate) => {
-                            handleChangeDate(currentlySelectedDate)
-                            navigation.setParams({
-                                selectedDate: moment(currentlySelectedDate).format("YYYY-MM-DD"),
-                            })
-                            setDatePicker(false)
-                        }}
-                        onCancel={() => setDatePicker(false)}
-                    />
-
                     <CreateRepeatableTimeline formik={f} ref={sheetRef as any} />
                 </Animated.View>
             </ScrollView>
@@ -224,7 +222,11 @@ const SubmitButton = (props: SubmitButtonProps) => (
             icon={<AntDesign name="calendar" color={Colors.foreground} size={20} />}
         />
         <Button
-            icon={props.isLoading ? <ActivityIndicator style={{ marginRight: 5 }} size={18} color={Colors.foreground} /> : null}
+            icon={
+                props.isLoading ? (
+                    <ActivityIndicator style={{ marginRight: 5 }} size={18} color={Colors.foreground} />
+                ) : null
+            }
             disabled={!(props.f.isValid && !props.f.isSubmitting && props.f.dirty)}
             type="contained"
             callback={() => props.f.handleSubmit()}

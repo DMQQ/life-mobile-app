@@ -1,8 +1,7 @@
 import { AnimatedSelector } from "@/components"
-import ChipButton from "@/components/ui/Button/ChipButton"
+import DatePicker from "@/components/DatePicker"
 import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
-import { MenuView } from "@react-native-menu/menu"
 import moment from "moment"
 import React from "react"
 import { StyleSheet, View } from "react-native"
@@ -64,40 +63,16 @@ export default function ChartTemplate({
                         {title}
                     </Text>
 
-                    <MenuView
-                        onPressAction={(ev) => {
-                            if (ev.nativeEvent.event === "1") {
-                                setShowStartDatePicker(true)
-                            } else if (ev.nativeEvent.event === "2") {
-                                setShowEndDatePicker(true)
-                            }
+                    <DatePicker
+                        mode="period"
+                        dates={{
+                            start: moment(dateRange[0]).toDate(),
+                            end: moment(dateRange[1]).toDate(),
                         }}
-                        title="Select date range"
-                        themeVariant="dark"
-                        style={{
-                            backgroundColor: Colors.primary,
-                        }}
-                        actions={[
-                            {
-                                id: "1",
-                                title: "Date start",
-                                state: "off",
-                                subtitle: moment(dateRange[0]).format("DD MMMM YYYY"),
-                                image: "calendar",
-                            },
-                            {
-                                id: "2",
-                                title: "Date end",
-                                state: "off",
-                                subtitle: moment(dateRange[1]).format("DD MMMM YYYY"),
-                                image: "calendar",
-                            },
-                        ]}
-                    >
-                        <ChipButton icon="clockcircleo">
-                            {`${moment(dateRange[0]).format("DD.MM")} - ${moment(dateRange[1]).format("DD.MM")}`}
-                        </ChipButton>
-                    </MenuView>
+                        setDates={({ start, end }) =>
+                            setDateRange([moment(start).format("YYYY-MM-DD"), moment(end).format("YYYY-MM-DD")])
+                        }
+                    />
                 </View>
 
                 <Text variant="caption" style={{ color: "gray", marginBottom: 10 }}>
