@@ -271,7 +271,7 @@ function NotificationCard({
 
     return (
         <Animated.View style={styles.notificationCard} entering={FadeInDown.delay((index + 1) * 75)}>
-            <BlurView intensity={50} tint="dark" style={styles.blurContainer}>
+            <BlurView intensity={20} tint="dark" style={styles.blurContainer}>
                 <Ripple
                     disabled={notification.read}
                     onPress={handlePress}
@@ -453,7 +453,7 @@ export default function WalletNotifications({ data, error, loading }: WalletNoti
         return (
             <View style={styles.emptyState}>
                 <View style={styles.emptyIconContainer}>
-                    <BlurView intensity={40} tint="dark" style={styles.emptyIconBlur} />
+                    <BlurView intensity={20} tint="dark" style={styles.emptyIconBlur} />
                     <View
                         style={[
                             styles.emptyIconContent,

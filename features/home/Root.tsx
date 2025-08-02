@@ -1,15 +1,18 @@
 import Header from "@/components/ui/Header/Header"
+import PulsingIndicator from "@/components/ui/PulsingIndicator"
+import Colors from "@/constants/Colors"
 import { ScreenProps } from "@/types"
 import RefreshContextProvider, { useRefresh } from "@/utils/context/RefreshContext"
 import useTrackScroll from "@/utils/hooks/ui/useTrackScroll"
 import useAppBackground from "@/utils/hooks/useAppBackground"
 import { GET_MAIN_SCREEN, getMainScreenBaseVariables } from "@/utils/schemas/GET_MAIN_SCREEN"
 import { useQuery } from "@apollo/client"
+import { AntDesign } from "@expo/vector-icons"
 import * as SplashScreen from "expo-splash-screen"
 import { useMemo, useState } from "react"
+import { View } from "react-native"
 import Animated, { LinearTransition } from "react-native-reanimated"
 import { FloatingNotifications, useGetNotifications } from "../wallet/components/Wallet/WalletNotifications"
-import HeaderActions from "./components/HeaderActions"
 import LoadingSkeleton from "./components/LoadingSkeleton"
 import MainContent from "./components/MainContent"
 import NotificationsModal from "./components/NotificationsModal"
@@ -46,12 +49,21 @@ function Root({}: ScreenProps<"Root">) {
     const isIncreasing = trendPercentage > 0
 
     const headerButtons = useMemo(
-        () =>
-            HeaderActions({
-                onNotificationPress: () => setShowNotifications(true),
-                onSettingsPress: () => setShowSettings(true),
-                hasNotifications: (data?.notifications as any[])?.some((n) => !n.read),
-            }),
+        () => [
+            {
+                icon: (
+                    <View style={{ position: "relative" }}>
+                        <AntDesign name="bells" size={20} color={Colors.foreground} />
+                        {(data?.notifications as any[])?.some((n) => !n.read) && <PulsingIndicator />}
+                    </View>
+                ),
+                onPress: () => setShowNotifications(true),
+            },
+            {
+                icon: <AntDesign name="setting" size={20} color={Colors.foreground} />,
+                onPress: () => setShowSettings(true),
+            },
+        ],
         [data?.notifications],
     )
 

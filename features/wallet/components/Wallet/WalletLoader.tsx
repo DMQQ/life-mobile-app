@@ -79,14 +79,13 @@ const styles = StyleSheet.create({
     },
     walletSection: {
         marginVertical: 50,
+        marginBottom: 30,
     },
     walletCard: {
         marginTop: 20,
         borderRadius: 5,
     },
-    contentSection: {
-        marginTop: 15,
-    },
+    contentSection: {},
     tabsContainer: {
         flexDirection: "row",
         gap: 15,

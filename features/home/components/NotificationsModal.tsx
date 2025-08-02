@@ -85,7 +85,7 @@ export default function NotificationsModal({ visible, onClose }: NotificationsMo
             onRequestClose={closeNotifications}
         >
             <View style={styles.modalContainer}>
-                <BlurView intensity={80} tint="dark" style={styles.blurBackground} />
+                <BlurView intensity={40} tint="dark" style={styles.blurBackground} />
                 <View style={styles.modalContent}>
                     <View style={styles.modalHeader}>
                         <Text variant="body" style={styles.modalTitle}>

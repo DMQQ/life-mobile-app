@@ -471,7 +471,7 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
             onRequestClose={handleClose}
         >
             <View style={styles.modalContainer}>
-                <BlurView intensity={80} tint="dark" style={styles.blurBackground} />
+                <BlurView intensity={40} tint="dark" style={styles.blurBackground} />
                 <View style={styles.modalContent}>
                     <View style={styles.modalHeader}>
                         <Text variant="body" style={styles.modalTitle}>
@@ -490,7 +490,7 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
                         >
                             <View style={styles.profileSection}>
                                 <View style={styles.profileCard}>
-                                    <BlurView intensity={60} tint="dark">
+                                    <BlurView intensity={20} tint="dark">
                                         <View style={styles.profileContent}>
                                             <Text variant="title" style={styles.signedAsText}>
                                                 Signed as
@@ -503,7 +503,7 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
                                 </View>
 
                                 <View style={styles.themeSection}>
-                                    <BlurView intensity={60} tint="dark">
+                                    <BlurView intensity={20} tint="dark">
                                         <View style={styles.themeSectionContent}>
                                             <Text variant="body" style={styles.themeSectionTitle}>
                                                 Choose Color Palette
