@@ -1,11 +1,9 @@
 import { Card } from "@/components"
 import Colors, { secondary_candidates } from "@/constants/Colors"
 import moment from "moment"
-import { useMemo, useState } from "react"
+import { useMemo } from "react"
 import { StyleSheet, Text, View } from "react-native"
-import Feedback from "react-native-haptic-feedback"
-import Ripple from "react-native-material-ripple"
-import Animated, { FadeIn, FadeOut, LinearTransition } from "react-native-reanimated"
+import { FadeIn, LinearTransition } from "react-native-reanimated"
 import { CategoryIcon } from "../Expense/ExpenseIcon"
 
 interface SubscriptionItemProps {
@@ -79,8 +77,6 @@ function getSubscriptionDuration(startDate: string) {
 }
 
 export default function SubscriptionItem({ subscription, index, onPress }: SubscriptionItemProps) {
-    const [isExpanded, setIsExpanded] = useState(false)
-
     const totalSpent = subscription.expenses.reduce((sum, expense) => sum + expense.amount, 0)
     const daysUntilNext = moment(parseInt(subscription.nextBillingDate)).diff(moment(), "days")
     const isOverdue = daysUntilNext < 0
@@ -97,123 +93,69 @@ export default function SubscriptionItem({ subscription, index, onPress }: Subsc
 
     return (
         <Card
+            ripple
             animated
             layout={LinearTransition}
             entering={FadeIn.delay((index + 1) * 50)}
-            style={[
-                styles.container,
-                {
-                    opacity: subscription.isActive ? 1 : 0.7,
-                },
-            ]}
+            style={[styles.container, styles.subscriptionItem]}
+            onPress={() => {
+                onPress()
+            }}
         >
-            <Ripple
-                onLongPress={() => {
-                    if (subscription.expenses.length > 0) {
-                        Feedback.trigger("impactLight")
-                        setIsExpanded(!isExpanded)
-                    }
-                }}
-                onPress={() => {
-                    onPress()
-                }}
-                style={styles.subscriptionItem}
-            >
-                <View style={styles.iconContainer}>
-                    <CategoryIcon type="expense" category="subscriptions" />
+            <View style={styles.iconContainer}>
+                <CategoryIcon type="expense" category="subscriptions" />
+            </View>
+
+            <View style={styles.contentContainer}>
+                <View style={styles.topRow}>
+                    <Text style={styles.title} numberOfLines={1}>
+                        {subscription.description}
+                    </Text>
+                    <View style={styles.amountContainer}>
+                        <Text style={styles.amount}>
+                            -{subscription.amount.toFixed(2)}
+                            <Text style={styles.currency}>zł</Text>
+                        </Text>
+                    </View>
                 </View>
 
-                <View style={styles.contentContainer}>
-                    <View style={styles.topRow}>
-                        <Text style={styles.title} numberOfLines={1}>
-                            {subscription.description}
-                        </Text>
-                        <View style={styles.amountContainer}>
-                            <Text style={styles.amount}>
-                                -{subscription.amount.toFixed(2)}
-                                <Text style={styles.currency}>zł</Text>
-                            </Text>
-                        </View>
-                    </View>
-
-                    <View style={styles.firstDetailsRow}>
-                        <Text style={styles.details}>
-                            {formatBillingCycle(subscription.billingCycle)}
-                            {" • "}
-                            <Text style={{ color: secondary_candidates[2] }}>Running for {subscriptionDuration}</Text>
-                        </Text>
-                    </View>
-
-                    <View style={styles.secondDetailsRow}>
-                        <Text style={styles.details}>
-                            {subscription.isActive ? (
-                                <>
-                                    <Text style={{ color: isOverdue ? "#F07070" : secondary_candidates[0] }}>
-                                        {isOverdue
-                                            ? "Overdue"
-                                            : `Next: ${parseDateToText(subscription.nextBillingDate)}`}
-                                    </Text>
-                                </>
-                            ) : (
-                                <Text style={{ color: "#F07070" }}>Inactive</Text>
-                            )}
-                            {subscription.expenses.length > 0 && (
-                                <>
-                                    {" • "}
-                                    <Text style={{ color: secondary_candidates[1] }}>
-                                        {subscription.expenses.length} payment
-                                        {subscription.expenses.length !== 1 ? "s" : ""}
-                                    </Text>
-                                </>
-                            )}
-                        </Text>
-                    </View>
-
-                    {totalSpent > 0 && (
-                        <View style={styles.totalRow}>
-                            <Text style={styles.totalSpent}>Total spent: {totalSpent.toFixed(2)}zł</Text>
-                        </View>
-                    )}
+                <View style={styles.firstDetailsRow}>
+                    <Text style={styles.details}>
+                        {formatBillingCycle(subscription.billingCycle)}
+                        {" • "}
+                        <Text style={{ color: secondary_candidates[2] }}>Running for {subscriptionDuration}</Text>
+                    </Text>
                 </View>
 
-                {!subscription.isActive && (
-                    <View style={styles.inactiveIndicator}>
-                        <Text style={styles.inactiveText}>•</Text>
-                    </View>
-                )}
-            </Ripple>
-
-            <Animated.View layout={LinearTransition}>
-                {isExpanded && subscription.expenses.length > 0 && (
-                    <Animated.View style={styles.expanded} layout={LinearTransition}>
-                        <Text style={styles.expandedTitle}>Recent Payments</Text>
-
-                        {expenses.slice(0, 5).map((expense, expenseIndex) => (
-                            <Animated.View
-                                key={expense.id}
-                                style={styles.expenseItem}
-                                layout={LinearTransition}
-                                entering={FadeIn.delay(expenseIndex * 50)}
-                                exiting={FadeOut.delay((expenses.length - expenseIndex) * 50)}
-                            >
-                                <View style={styles.expenseLeft}>
-                                    <Text style={styles.expenseDescription} numberOfLines={1}>
-                                        {expense.description}
-                                    </Text>
-                                    <Text style={styles.expenseDate}>
-                                        {moment(expense.date).format("MMM DD, YYYY")}
-                                    </Text>
-                                </View>
-                                <Text style={styles.expenseAmount}>-{expense.amount.toFixed(2)}zł</Text>
-                            </Animated.View>
-                        ))}
-
-                        {subscription.expenses.length > 5 && (
-                            <Text style={styles.moreText}>+{subscription.expenses.length - 5} more payments</Text>
+                <View style={styles.secondDetailsRow}>
+                    <Text style={styles.details}>
+                        {subscription.isActive ? (
+                            <>
+                                <Text style={{ color: isOverdue ? "#F07070" : secondary_candidates[0] }}>
+                                    {isOverdue ? "Overdue" : `Next: ${parseDateToText(subscription.nextBillingDate)}`}
+                                </Text>
+                            </>
+                        ) : (
+                            <Text style={{ color: "#F07070" }}>Inactive</Text>
                         )}
-                    </Animated.View>
+                        {subscription.expenses.length > 0 && (
+                            <>
+                                {" • "}
+                                <Text style={{ color: secondary_candidates[1] }}>
+                                    {subscription.expenses.length} payment
+                                    {subscription.expenses.length !== 1 ? "s" : ""}
+                                </Text>
+                            </>
+                        )}
+                    </Text>
+                </View>
+
+                {totalSpent > 0 && (
+                    <View style={styles.totalRow}>
+                        <Text style={styles.totalSpent}>Total spent: {totalSpent.toFixed(2)}zł</Text>
+                    </View>
                 )}
-            </Animated.View>
+            </View>
         </Card>
     )
 }
@@ -221,7 +163,6 @@ export default function SubscriptionItem({ subscription, index, onPress }: Subsc
 const styles = StyleSheet.create({
     container: {
         marginBottom: 20,
-        borderRadius: 20,
     },
     subscriptionItem: {
         minHeight: 100,
@@ -235,6 +176,7 @@ const styles = StyleSheet.create({
     },
     contentContainer: {
         flex: 1,
+        padding: 5,
     },
     topRow: {
         flexDirection: "row",

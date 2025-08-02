@@ -5,7 +5,6 @@ import moment from "moment"
 import { useState } from "react"
 import { StyleProp, StyleSheet, Text, View, ViewStyle } from "react-native"
 import Feedback from "react-native-haptic-feedback"
-import Ripple from "react-native-material-ripple"
 import Animated, { AnimatedStyle, FadeIn, FadeOut, LinearTransition } from "react-native-reanimated"
 import { CategoryIcon, Icons } from "../Expense/ExpenseIcon"
 
@@ -151,19 +150,18 @@ export default function WalletItem(
                 item.containerStyle,
             ]}
             layout={LinearTransition}
+            ripple
+            onLongPress={async () => {
+                Feedback.trigger("impactLight")
+                if (item.onLongPress) {
+                    item.onLongPress()
+                }
+                setIsExpanded(!isExpanded)
+            }}
+            disabled={isBalanceEdit}
+            onPress={() => item.handlePress()}
         >
-            <Ripple
-                onLongPress={async () => {
-                    Feedback.trigger("impactLight")
-                    if (item.onLongPress) {
-                        item.onLongPress()
-                    }
-                    setIsExpanded(!isExpanded)
-                }}
-                disabled={isBalanceEdit}
-                style={[styles.expense_item]}
-                onPress={() => item.handlePress()}
-            >
+            <View style={{ flexDirection: "row", height: 60 }}>
                 <CategoryIcon
                     type={item.type as "income" | "expense" | "refunded"}
                     category={isBalanceEdit ? "edit" : item.category}
@@ -219,7 +217,7 @@ export default function WalletItem(
                         </Text>
                     </View>
                 )}
-            </Ripple>
+            </View>
 
             {isExpanded && item.subexpenses?.length > 0 && (
                 <Animated.View layout={LinearTransition} style={styles.expanded}>

@@ -570,7 +570,7 @@ export default function Expense({ route: { params }, navigation }: any) {
                         </View>
                     </View>
                 )}
-                <View style={{ height: 250, width: 100 }} />
+                <View style={{ height: 350, width: 100 }} />
             </Animated.ScrollView>
         </View>
     )

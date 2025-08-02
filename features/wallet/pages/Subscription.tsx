@@ -414,7 +414,7 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                         </Text>
                     </View>
                 )}
-                <View style={{ height: 250, width: 100 }} />
+                <View style={{ height: 350, width: 100 }} />
             </Animated.ScrollView>
         </View>
     )
