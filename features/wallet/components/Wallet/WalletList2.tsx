@@ -436,7 +436,7 @@ const MonthExpenseHeader = ({
 
                 <View style={{ flexDirection: "row", alignItems: "center" }}>
                     <Text style={{ color: amount > 0 ? "#66E875" : "#F07070", fontSize: 17, fontWeight: "600" }}>
-                        {amount > 0 ? `+${amount.toFixed(2)}` : amount.toFixed(2)}{" "}
+                        {amount > 0 ? `+${amount.toFixed(2)}` : amount.toFixed(2)}
                         <Text style={{ color: amount > 0 ? "#66E875" : "#F07070", fontSize: 13 }}>zł</Text>
                     </Text>
                 </View>
@@ -472,7 +472,7 @@ const DateHeader = ({ date, sum }: { date: string; sum: [number, number] }) => {
                             fontWeight: "600",
                         }}
                     >
-                        {sum[0] > 0 ? `-${sum[0].toFixed(2)}` : sum[0].toFixed(2)} zł
+                        {sum[0] > 0 ? `-${sum[0].toFixed(2)}` : sum[0].toFixed(2)}zł
                     </Text>
                 )}
                 {sum[0] > 0 && sum[1] > 0 && <Text style={styles.dateText}>/</Text>}
@@ -484,7 +484,7 @@ const DateHeader = ({ date, sum }: { date: string; sum: [number, number] }) => {
                             fontWeight: "600",
                         }}
                     >
-                        {sum[1] > 0 ? `+${sum[1].toFixed(2)}` : sum[1].toFixed(2)} zł
+                        {sum[1] > 0 ? `+${sum[1].toFixed(2)}` : sum[1].toFixed(2)}zł
                     </Text>
                 )}
             </View>
@@ -567,7 +567,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
-        marginBottom: 25,
+        marginTop: 30,
     },
     filtersButton: {
         zIndex: 1000,

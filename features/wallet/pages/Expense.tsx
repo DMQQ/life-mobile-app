@@ -146,8 +146,6 @@ export default function Expense({ route: { params }, navigation }: any) {
         }
     }, [data?.expense])
 
-    const amount = selected?.type === "expense" ? (selected.amount * -1).toFixed(2) : selected?.amount.toFixed(2)
-
     const [refund, { loading: refundLoading }] = useRefund((data) => {
         if (data.refundExpense.type !== "refunded") return
 
@@ -455,62 +453,16 @@ export default function Expense({ route: { params }, navigation }: any) {
                         </View>
 
                         {/* Refund section */}
-                        <View style={[{ paddingHorizontal: 15 }]}>
-                            {/* <Ripple
+                        <View style={[{ paddingHorizontal: 15, marginTop: 15 }]}>
+                            <Button2
+                                color="error"
                                 disabled={refundLoading || selected?.type === "refunded"}
                                 onPress={handleRefund}
-                                style={[styles.row, { marginTop: 0, padding: 0, width: "100%" }]}
-                            >
-                                <MaterialIcons
-                                    name={selected?.type === "refunded" ? "check-box" : "check-box-outline-blank"}
-                                    size={24}
-                                    color={Colors.ternary}
-                                    style={{ paddingHorizontal: 7.5, padding: 2.5 }}
-                                />
-                                <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }} numberOfLines={1}>
-                                    {selected?.type === "refunded"
-                                        ? (selected?.note ?? `Refunded at ${moment().format("YYYY MM DD HH:SS")}`)
-                                        : "Refund"}
-                                </Text>
-                                {refundLoading && (
-                                    <ActivityIndicator size="small" color={Colors.ternary} style={{ marginLeft: 10 }} />
-                                )}
-                            </Ripple> */}
-                            <Button
-                                style={{
-                                    marginTop: 10,
-                                    width: "100%",
-                                    backgroundColor: lowOpacity(Colors.error, 0.2),
-                                    borderColor: Colors.error,
-                                    borderWidth: 1,
-                                    borderRadius: 10,
-                                    paddingVertical: 10,
-                                    paddingHorizontal: 15,
-                                    flexDirection: "row-reverse",
-                                    gap: 10,
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                }}
-                                disabled={refundLoading || selected?.type === "refunded"}
-                                onPress={handleRefund}
-                                fontStyle={{
-                                    color: Colors.error,
-                                    fontSize: 16,
-                                    fontWeight: "bold",
-                                    textTransform: "none",
-                                }}
-                                icon={
-                                    selected?.type === "refunded" ? (
-                                        <MaterialIcons name="check-box" size={24} color={Colors.error} />
-                                    ) : (
-                                        <MaterialIcons name="check-box-outline-blank" size={24} color={Colors.error} />
-                                    )
-                                }
                             >
                                 {selected?.type === "refunded"
                                     ? (selected?.note?.trim() ?? `Refunded at ${moment().format("YYYY-MM-DD")}`)
                                     : "Refund"}
-                            </Button>
+                            </Button2>
                         </View>
                     </View>
 
@@ -576,40 +528,17 @@ export default function Expense({ route: { params }, navigation }: any) {
 
                         {/* Subscription action button */}
                         <View style={{ paddingHorizontal: 15, marginTop: 10 }}>
-                            <Ripple
+                            <Button2
+                                color={hasSubscription ? (isSubscriptionActive ? "error" : "primary") : "primary"}
                                 onPress={handleSubscriptionAction}
                                 disabled={isSubscriptionLoading}
-                                style={[
-                                    styles.row,
-                                    {
-                                        justifyContent: "center",
-                                        backgroundColor: isSubscriptionActive
-                                            ? "rgba(255,59,48,0.2)"
-                                            : "rgba(52,199,89,0.2)",
-                                        borderWidth: 1,
-                                        borderColor: isSubscriptionActive
-                                            ? "rgba(255,59,48,0.5)"
-                                            : "rgba(52,199,89,0.5)",
-                                        paddingVertical: 10,
-                                        marginTop: 10,
-                                        borderRadius: 10,
-                                    },
-                                ]}
                             >
-                                <Text
-                                    style={{
-                                        color: isSubscriptionActive ? "rgba(255,59,48,0.9)" : "rgba(52,199,89,0.9)",
-                                        fontSize: 16,
-                                        fontWeight: "bold",
-                                    }}
-                                >
-                                    {hasSubscription
-                                        ? isSubscriptionActive
-                                            ? "Disable Subscription"
-                                            : "Enable Subscription"
-                                        : "Create Monthly Subscription"}
-                                </Text>
-                            </Ripple>
+                                {hasSubscription
+                                    ? isSubscriptionActive
+                                        ? "Disable Subscription"
+                                        : "Enable Subscription"
+                                    : "Create Monthly Subscription"}
+                            </Button2>
                         </View>
                     </View>
                 </View>
@@ -714,9 +643,8 @@ const AnimatedExpenseHeaderItem = ({
     )
 }
 
-import { Button } from "@/components"
+import Button2 from "@/components/ui/Button/Button2"
 import Layout from "@/constants/Layout"
-import lowOpacity from "@/utils/functions/lowOpacity"
 import * as ImagePicker from "expo-image-picker"
 import Animated, {
     Extrapolation,

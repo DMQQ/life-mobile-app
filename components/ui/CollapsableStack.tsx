@@ -179,30 +179,50 @@ const CollapsibleStack = React.memo(
         expandOnPress,
     }: CollapsibleStackProps<T>) => {
         const [isExpanded, setIsExpanded] = useState<boolean>(false)
-        const itemHeightsRef = useRef<{ [key: number]: number }>({})
-        const measuredItemsRef = useRef<Set<number>>(new Set())
+        const itemHeightsRef = useRef<{ [key: string]: number }>({})
+        const measuredItemsRef = useRef<Set<string>>(new Set())
         const containerHeight = useSharedValue<number>(200)
-        const positionsCalculatedRef = useRef<boolean>(false)
 
-        const itemChangeKey = useMemo(() => items.map((item, index) => getItemKey(item, index)).join(","), [items])
+        const itemChangeKey = useMemo(() => {
+            return items.map((item, index) => getItemKey(item, index)).join(",")
+        }, [items])
+
+        const [measurementKey, setMeasurementKey] = useState(0)
 
         const handleItemLayout = useCallback(
             (index: number, height: number) => {
-                if (!measuredItemsRef.current.has(index)) {
-                    measuredItemsRef.current.add(index)
-                    itemHeightsRef.current[index] = height
+                const itemKey = getItemKey(items[index], index)
+                if (!measuredItemsRef.current.has(itemKey)) {
+                    itemHeightsRef.current[itemKey] = height
+                    measuredItemsRef.current.add(itemKey)
 
-                    // Only trigger animation update when all items are measured
-                    const allMeasured = items.every((_, i) => measuredItemsRef.current.has(i))
-                    if (allMeasured && !positionsCalculatedRef.current) {
-                        positionsCalculatedRef.current = true
-                        // Force a single re-render to update positions
-                        setIsExpanded((prev) => prev)
+                    // Trigger re-render when all items are measured
+                    const allMeasured = items.every((item, i) => measuredItemsRef.current.has(getItemKey(item, i)))
+                    if (allMeasured) {
+                        setMeasurementKey((prev) => prev + 1)
                     }
                 }
             },
-            [itemChangeKey],
+            [items, getItemKey],
         )
+
+        useEffect(() => {
+            const currentKeys = new Set(items.map((item, index) => getItemKey(item, index)))
+
+            const newHeights: { [key: string]: number } = {}
+            const newMeasured = new Set<string>()
+
+            for (const key of currentKeys) {
+                if (itemHeightsRef.current[key]) {
+                    newHeights[key] = itemHeightsRef.current[key]
+                    newMeasured.add(key)
+                }
+            }
+
+            itemHeightsRef.current = newHeights
+            measuredItemsRef.current = newMeasured
+            setMeasurementKey((prev) => prev + 1)
+        }, [itemChangeKey, getItemKey])
 
         const { positions, totalHeight } = useMemo(() => {
             const positions: number[] = []
@@ -211,16 +231,20 @@ const CollapsibleStack = React.memo(
             for (let i = 0; i < items.length; i++) {
                 positions[i] = isExpanded ? totalHeight : i * animation.stackSpacing
 
-                if (isExpanded && itemHeightsRef.current[i]) {
-                    totalHeight += itemHeightsRef.current[i]
+                if (isExpanded) {
+                    const itemKey = getItemKey(items[i], i)
+                    const height = itemHeightsRef.current[itemKey]
+                    if (height) {
+                        totalHeight += height
+                    }
                 }
             }
 
             return { positions, totalHeight }
-        }, [itemChangeKey, isExpanded, animation.stackSpacing])
+        }, [itemChangeKey, isExpanded, animation.stackSpacing, measurementKey, getItemKey])
 
         useEffect(() => {
-            const allItemsMeasured = items.every((_, index) => itemHeightsRef.current[index] > 0)
+            const allItemsMeasured = items.every((item, index) => itemHeightsRef.current[getItemKey(item, index)] > 0)
 
             if (allItemsMeasured || !isExpanded) {
                 const newHeight = isExpanded
@@ -246,7 +270,7 @@ const CollapsibleStack = React.memo(
 
         const memoizedDeleteHandlers = useMemo(
             () => items.map((item, index) => () => onDeleteItem?.(item, index)),
-            [items, onDeleteItem],
+            [itemChangeKey, onDeleteItem],
         )
 
         const titleText = useMemo(() => `${title} (${items.length})`, [title, itemChangeKey])

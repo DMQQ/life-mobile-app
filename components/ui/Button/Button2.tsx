@@ -4,6 +4,8 @@ import { AntDesign } from "@expo/vector-icons"
 import Ripple, { RippleProps } from "react-native-material-ripple"
 import Text from "../Text/Text"
 
+import FeedBack from "react-native-haptic-feedback"
+
 const colors = {
     primary: Colors.secondary,
     secondary: Colors.ternary,
@@ -43,7 +45,7 @@ const variants = {
     },
     tonal: (color: string) => {
         return {
-            backgroundColor: lowOpacity(color, 0.2),
+            backgroundColor: lowOpacity(color, 0.15),
             borderWidth: 1,
             borderColor: color,
         }
@@ -90,7 +92,7 @@ export default function Button2({
             {...rest}
             style={[
                 {
-                    padding: 15,
+                    padding: 10,
                     width: "100%",
                     borderRadius: 15,
                     justifyContent: "center",
@@ -101,9 +103,21 @@ export default function Button2({
                 variantStyle,
                 style,
             ]}
+            onPress={(ev) => {
+                if (rest.onPress) {
+                    rest.onPress(ev)
+                }
+                FeedBack.trigger("impactLight")
+            }}
+            onLongPress={(ev) => {
+                if (rest.onLongPress) {
+                    rest.onLongPress(ev)
+                }
+                FeedBack.trigger("impactMedium")
+            }}
         >
-            {typeof icon === "string" ? <AntDesign name={icon as any} size={14} color={colors[color]} /> : icon}
-            <Text variant="body" style={{ fontWeight: "600", color: getTextColor() }}>
+            {typeof icon === "string" ? <AntDesign name={icon as any} size={15} color={colors[color]} /> : icon}
+            <Text variant="body" style={{ fontWeight: "600", color: getTextColor(), fontSize: 15 }}>
                 {children}
             </Text>
         </Ripple>
