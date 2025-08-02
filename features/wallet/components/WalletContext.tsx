@@ -136,7 +136,6 @@ type WalletContextType = {
   refs: {
     bottomSheetRef: React.MutableRefObject<BottomSheet | null>;
     filtersRef: React.MutableRefObject<BottomSheet | null>;
-    editBalanceRef: React.MutableRefObject<BottomSheet | null>;
   };
 
   calendar: {
@@ -154,7 +153,6 @@ const WalletContext = createContext<WalletContextType>({
   refs: {
     bottomSheetRef: { current: null },
     filtersRef: { current: null },
-    editBalanceRef: { current: null },
   },
 
   calendar: {
@@ -178,7 +176,6 @@ export default function WalletContextProvider({ children }: { children: React.Re
   // Sheets
   const bottomSheetRef = useRef<BottomSheet | null>(null);
   const filtersRef = useRef<BottomSheet | null>(null);
-  const editBalanceRef = useRef<BottomSheet | null>(null);
 
   const memoizedValue = {
     wallet,
@@ -187,7 +184,7 @@ export default function WalletContextProvider({ children }: { children: React.Re
       setCalendarDate: setSelectedCalendarDate,
     },
 
-    refs: { bottomSheetRef, filtersRef, editBalanceRef },
+    refs: { bottomSheetRef, filtersRef },
 
     filters,
     dispatch,

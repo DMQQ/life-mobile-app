@@ -3,12 +3,12 @@ import CollapsibleStack from "@/components/ui/CollapsableStack"
 import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
 import { Todos } from "@/types"
+import { useNavigation } from "@react-navigation/native"
 import Color from "color"
-import { memo, useCallback, useMemo, useState } from "react"
+import { memo, useCallback, useMemo } from "react"
 import { StyleSheet, View } from "react-native"
 import TodoHeader from "./TodoHeader"
 import TodoItem from "./TodoItem"
-import TodoTransferDialog from "./TodoTransferDialog"
 
 const styles = StyleSheet.create({
     container: {
@@ -34,14 +34,15 @@ export default function TimelineTodos(props: {
     expandSheet: () => void
     onDeleteTodo?: (todoId: string) => void
 }) {
-    const [showTransferDialog, setShowTransferDialog] = useState(false)
-
+    const navigation = useNavigation<any>()
     const handleAddTodo = () => {
         props.expandSheet()
     }
 
     const handleLongPress = () => {
-        setShowTransferDialog(true)
+        navigation.navigate("TodosTransferModal", {
+            timelineId: props.timelineId,
+        })
     }
 
     const [finishedTodos, notFinishedTodos] = useMemo(() => {
@@ -89,12 +90,6 @@ export default function TimelineTodos(props: {
                     </Card>
                 )}
             </View>
-
-            <TodoTransferDialog
-                visible={showTransferDialog}
-                onClose={() => setShowTransferDialog(false)}
-                todos={props.sortedTodos}
-            />
         </>
     )
 }

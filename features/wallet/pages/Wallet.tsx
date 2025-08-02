@@ -8,7 +8,6 @@ import { SafeAreaView, StyleSheet, View } from "react-native"
 import Haptic from "react-native-haptic-feedback"
 import Animated, { FadeOut, SharedValue } from "react-native-reanimated"
 import AnimatedHeaderSearch from "../../../components/ui/Header/AnimatedHeaderSearch"
-import EditBalanceSheet from "../components/Wallet/EditBalanceSheet"
 import InitializeWallet from "../components/Wallet/InitializeWallet"
 import WalletList2 from "../components/Wallet/WalletList2"
 import WalletLoader from "../components/Wallet/WalletLoader"
@@ -55,7 +54,7 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
     const { data, loading, refetch, onEndReached, error } = useGetWallet()
 
     const {
-        refs: { bottomSheetRef, editBalanceRef },
+        refs: { bottomSheetRef },
     } = useWalletContext()
 
     const [scrollY, onScroll] = useTrackScroll()
@@ -71,7 +70,7 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
 
     const handleShowEditSheet = () => {
         Haptic.trigger("impactMedium")
-        editBalanceRef.current?.expand()
+        navigation.navigate("EditBalance")
     }
 
     const [showSubscriptionsView, setShowSubscriptionsView] = useState(false)
@@ -148,8 +147,6 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
                 showSubscriptions={showSubscriptionsView}
                 showExpenses={!showSubscriptionsView}
             />
-
-            <EditBalanceSheet />
         </View>
     )
 }

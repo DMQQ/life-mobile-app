@@ -1,6 +1,7 @@
 import Colors from "@/constants/Colors"
 import lowOpacity from "@/utils/functions/lowOpacity"
 import { AntDesign } from "@expo/vector-icons"
+import Haptics from "react-native-haptic-feedback"
 import Dialog from "../Dialog"
 
 export interface DeleteDialogProps {
@@ -42,6 +43,8 @@ export default function DeleteDialog(props: DeleteDialogProps) {
                     },
                     onPress: async () => {
                         if (!props.item?.id) return
+
+                        Haptics.trigger("impactLight")
 
                         await props.remove()
 

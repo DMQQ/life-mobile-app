@@ -3,13 +3,14 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack"
 import moment from "moment"
 import { useEffect } from "react"
 import { Platform } from "react-native"
+import CreateTimelineTodos from "./pages/CreateTimelineTodos"
 import ImagesPreview from "./pages/ImagesPreview"
 import ScheduleScreen from "./pages/Schedule"
 import Search from "./pages/Search"
 import Timeline from "./pages/Timeline"
 import CreateTimeLineEventModal from "./pages/TimelineCreate"
-import CreateTimelineTodos from "./pages/CreateTimelineTodos"
 import TimelineDetails from "./pages/TimelineDetails"
+import TodosTransferModal from "./pages/TodosTransferModal"
 import type { TimelineRootStack as RootStackParamList } from "./types"
 
 const Stack = createNativeStackNavigator<RootStackParamList>()
@@ -100,6 +101,14 @@ export default function TimelineScreens({ route, navigation }: RootStackScreenPr
                 }}
                 initialParams={{
                     timelineId: "",
+                }}
+            />
+            <Stack.Screen
+                name="TodosTransferModal"
+                component={TodosTransferModal}
+                options={{
+                    headerShown: false,
+                    presentation: "modal",
                 }}
             />
         </Stack.Navigator>

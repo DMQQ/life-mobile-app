@@ -25,6 +25,22 @@ interface ColorPalette {
 
 const colorPalettes: ColorPalette[] = [
     {
+        name: "DMQ dark",
+        primary: "#111111",
+        secondary: "#00a97f",
+        ternary: "#8685ef",
+        foreground: "#faf8ff",
+        category: "Finance",
+    },
+    {
+        name: "DMQ2 dark",
+        primary: "#00001E",
+        secondary: "#7985ff",
+        ternary: "#128583",
+        foreground: "#faf8ff",
+        category: "Finance",
+    },
+    {
         name: "Charcoal Mint",
         primary: "#0D1B1E",
         secondary: "#00FFB3",
@@ -65,22 +81,6 @@ const colorPalettes: ColorPalette[] = [
         category: "Finance",
     },
     {
-        name: "Dracula Theme",
-        primary: "#282A36",
-        secondary: "#BD93F9",
-        ternary: "#50FA7B",
-        foreground: "#F8F8F2",
-        category: "Finance",
-    },
-    {
-        name: "Nord Dark",
-        primary: "#2E3440",
-        secondary: "#88C0D0",
-        ternary: "#EBCB8B",
-        foreground: "#D8DEE9",
-        category: "Finance",
-    },
-    {
         name: "Midnight Raven",
         primary: "#08090A",
         secondary: "#FF4C61",
@@ -88,14 +88,7 @@ const colorPalettes: ColorPalette[] = [
         foreground: "#E1E1E1",
         category: "Finance",
     },
-    {
-        name: "Deep Ocean Blue",
-        primary: "#001F3F",
-        secondary: "#01FF70",
-        ternary: "#FFDC00",
-        foreground: "#F0F8FF",
-        category: "Finance",
-    },
+
     {
         name: "Abyssal Blue",
         primary: "#001526", // very dark blue
@@ -104,14 +97,7 @@ const colorPalettes: ColorPalette[] = [
         foreground: "#E8F9FD", // almost-white cyan
         category: "Finance",
     },
-    {
-        name: "Midnight Sea",
-        primary: "#002A4A", // dark navy
-        secondary: "#0A84FF", // vivid cobalt
-        ternary: "#82CFFD", // soft baby blue
-        foreground: "#F0F8FF", // off-white azure
-        category: "Finance",
-    },
+
     {
         name: "Neptune Depths",
         primary: "#001F3F", // classic navy-black

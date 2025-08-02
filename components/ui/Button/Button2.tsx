@@ -75,6 +75,7 @@ export default function Button2({
     variant = "tonal",
     color = "primary",
     icon,
+    disabled,
     ...rest
 }: Button2Props) {
     const selectedColor = colors[color]
@@ -90,9 +91,10 @@ export default function Button2({
     return (
         <Ripple
             {...rest}
+            disabled={disabled}
             style={[
                 {
-                    padding: 10,
+                    padding: 15,
                     width: "100%",
                     borderRadius: 15,
                     justifyContent: "center",
@@ -101,6 +103,7 @@ export default function Button2({
                     flexDirection: "row",
                 },
                 variantStyle,
+                disabled && { opacity: 0.5 },
                 style,
             ]}
             onPress={(ev) => {

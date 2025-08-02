@@ -42,10 +42,7 @@ const styles = StyleSheet.create({
         marginBottom: 5,
         textTransform: "capitalize",
     },
-    icon_container: {
-        padding: 7.5,
-        justifyContent: "center",
-    },
+
     date: {
         color: "rgba(255,255,255,0.65)",
         fontSize: 11,
@@ -63,23 +60,13 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: "600",
     },
-    button: {
-        padding: 5,
-        paddingHorizontal: 7.5,
-        backgroundColor: Colors.primary_light,
-    },
+
     buttonText: {
         color: Colors.secondary,
         fontSize: 20,
         fontWeight: "bold",
     },
-    iconContainer: {
-        justifyContent: "center",
-        alignItems: "center",
-        borderRadius: 100,
-        height: 40,
-        width: 40,
-    },
+
     expanded: {
         padding: 15,
         borderRadius: 20,
@@ -161,8 +148,9 @@ export default function WalletItem(
             disabled={isBalanceEdit}
             onPress={() => item.handlePress()}
         >
-            <View style={{ flexDirection: "row", height: 60 }}>
+            <View style={{ flexDirection: "row", height: 50 }}>
                 <CategoryIcon
+                    style={{ padding: 0 }}
                     type={item.type as "income" | "expense" | "refunded"}
                     category={isBalanceEdit ? "edit" : item.category}
                 />

@@ -96,8 +96,6 @@ const AnimatedSearchInput = ({
         setFilterValue(value.trim())
     }
 
-    console.log({ isFocused })
-
     if (!scrollY) return null
 
     return (

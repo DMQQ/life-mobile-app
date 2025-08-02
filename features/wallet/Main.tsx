@@ -5,6 +5,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack"
 import { useEffect } from "react"
 import WalletContextProvider from "./components/WalletContext"
 import CreateExpenseModal from "./pages/CreateExpense"
+import EditBalance from "./pages/EditBalance"
 import Expense from "./pages/Expense"
 import Filters from "./pages/Filters"
 import SubscriptionScreen from "./pages/Subscription"
@@ -17,6 +18,7 @@ interface WalletRootStack extends ParamListBase {
     }
     Watchlist: undefined
     Charts: undefined
+    EditBalance: undefined
 }
 
 export type WalletScreens<Screen extends keyof WalletRootStack> = StackScreenProps<WalletRootStack, Screen>
@@ -87,7 +89,16 @@ export default function WalletScreens({ navigation, route }: WalletScreens<"Wall
                     }}
                 />
 
-                <Stack.Screen name="Subscription" component={SubscriptionScreen}  />
+                <Stack.Screen name="Subscription" component={SubscriptionScreen as any} />
+
+                <Stack.Screen
+                    name="EditBalance"
+                    component={EditBalance}
+                    options={{
+                        presentation: "modal",
+                        headerShown: false,
+                    }}
+                />
             </Stack.Navigator>
         </WalletContextProvider>
     )

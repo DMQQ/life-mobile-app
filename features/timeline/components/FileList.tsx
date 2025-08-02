@@ -14,7 +14,6 @@ import { ActivityIndicator, FlatList, StyleSheet, ToastAndroid, View } from "rea
 import Ripple from "react-native-material-ripple"
 import Animated from "react-native-reanimated"
 import useGetTimelineById from "../hooks/query/useGetTimelineById"
-import { transition } from "../sharedTransition"
 
 const styles = StyleSheet.create({
     available: {
@@ -138,20 +137,6 @@ export default function FileList({ timelineId }: FileListProps) {
             </View>
 
             <GridImageView data={data} onRemovePhoto={removePhoto} onShowPreview={handleShowPreview} />
-
-            {/* {toggleView ? (  // app crashes here
-        <GridImageView
-          data={data}
-          onRemovePhoto={removePhoto}
-          onShowPreview={handleShowPreview}
-        />
-      ) : (
-        <ListImageView
-          data={data}
-          onRemovePhoto={removePhoto}
-          onShowPreview={handleShowPreview}
-        />
-      )} */}
         </View>
     )
 }
@@ -163,38 +148,6 @@ interface ImageDisplayViewProps {
 }
 
 const GridImageView = memo((props: ImageDisplayViewProps) => {
-    // return (
-    //   <View
-    //     style={{
-    //       flexDirection: "row",
-    //       flexWrap: "wrap",
-    //       justifyContent: "space-between",
-    //     }}
-    //   >
-    //     {props.data?.images.map((item) => (
-    //       <Ripple
-    //         key={item.id}
-    //         onLongPress={() => props.onRemovePhoto(item.id)}
-    //         onPress={() => {
-    //           props.onShowPreview(item);
-    //         }}
-    //       >
-    //         <Animated.Image
-    //           sharedTransitionStyle={transition}
-    //           sharedTransitionTag={`image-${item.url}`}
-    //           key={item.id}
-    //           style={styles.img}
-    //           source={{
-    //             uri: Url.API + "/upload/images/" + item.url,
-    //             height: styles.img.height,
-    //             width: styles.img.width,
-    //           }}
-    //         />
-    //       </Ripple>
-    //     ))}
-    //   </View>
-    // );
-
     return (
         <FlatList
             scrollEnabled={false}
@@ -209,8 +162,6 @@ const GridImageView = memo((props: ImageDisplayViewProps) => {
                     onPress={() => props.onShowPreview(item)}
                 >
                     <Animated.Image
-                        sharedTransitionStyle={transition}
-                        sharedTransitionTag={`image-${item.url}`}
                         style={styles.img}
                         source={{
                             uri: Url.API + "/upload/images/" + item.url,
@@ -223,33 +174,6 @@ const GridImageView = memo((props: ImageDisplayViewProps) => {
         />
     )
 })
-
-const ListImageView = memo((props: ImageDisplayViewProps) => (
-    <FlatList
-        initialNumToRender={3}
-        data={props.data?.images}
-        horizontal
-        keyExtractor={(el) => el.id}
-        renderItem={({ item }) => (
-            <Ripple
-                style={{ marginRight: 10 }}
-                onLongPress={() => props.onRemovePhoto(item.id)}
-                onPress={() => props.onShowPreview(item)}
-            >
-                <Animated.Image
-                    sharedTransitionStyle={transition}
-                    sharedTransitionTag={`image-${item.url}`}
-                    style={styles.img}
-                    source={{
-                        uri: Url.API + "/upload/images/" + item.url,
-                        height: styles.img.height,
-                        width: styles.img.width,
-                    }}
-                />
-            </Ripple>
-        )}
-    />
-))
 
 function UploadFileButton(props: { timelineId: string; refetch: () => Promise<any> }) {
     const { handleImagesSelect, loading } = useUploadFiles(props.timelineId, props.refetch)
