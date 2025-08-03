@@ -371,7 +371,15 @@ export function FloatingNotifications() {
     const insets = useSafeAreaInsets()
     const [showNotifications, setShowNotifications] = useState(true)
     const [autoHideDisabled, setAutoHideDisabled] = useState(false)
+    const [stackExpanded, setStackExpanded] = useState(false)
     const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+    useEffect(() => {
+        if (stackExpanded) {
+            setAutoHideDisabled(true)
+            if (timeoutRef.current) clearTimeout(timeoutRef.current)
+        }
+    }, [stackExpanded])
 
     useEffect(() => {
         if (((data?.notifications || []) as Notification[]).filter((n) => !n.read).length > 0) {
@@ -429,10 +437,7 @@ export function FloatingNotifications() {
                     maxVisibleItems: 3,
                 }}
                 expandOnPress
-                onChange={() => {
-                    setAutoHideDisabled(true)
-                    if (timeoutRef.current) clearTimeout(timeoutRef.current)
-                }}
+                onChange={setStackExpanded}
             />
         </AnimatedLinearGradient>
     )

@@ -1,37 +1,20 @@
 import { AnimatedSelector } from "@/components"
-import Button from "@/components/ui/Button/Button"
-import Modal from "@/components/ui/Modal"
-import Select from "@/components/ui/Select/Select"
-import ValidatedInput from "@/components/ui/ValidatedInput"
 import Colors, { secondary_candidates } from "@/constants/Colors"
 import Layout from "@/constants/Layout"
 import lowOpacity from "@/utils/functions/lowOpacity"
-import { gql, useMutation, useQuery } from "@apollo/client"
+import { gql, useQuery } from "@apollo/client"
 import { AntDesign } from "@expo/vector-icons"
 import Color from "color"
 import dayjs from "dayjs"
-import { Formik } from "formik"
 import moment from "moment"
 import { useEffect, useMemo, useState } from "react"
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from "react-native"
 import Feedback from "react-native-haptic-feedback"
 import Ripple from "react-native-material-ripple"
 import Animated, { FadeIn, LinearTransition } from "react-native-reanimated"
-import * as yup from "yup"
 import useGetStatistics from "../../hooks/useGetStatistics"
-import CategorySelector from "../CreateExpense/CategorySelectorView"
 import { CategoryIcon, CategoryUtils, Icons } from "../Expense/ExpenseIcon"
 import { useWalletContext } from "../WalletContext"
-
-const validationSchema = yup.object().shape({
-    category: yup.string().required("Category is required"),
-    amount: yup
-        .number()
-        .typeError("Amount must be a number")
-        .positive("Amount must be positive")
-        .required("Amount is required"),
-    type: yup.string().required(),
-})
 
 const GET_LIMITS = gql`
     query Limits($range: String!, $date: String) {
@@ -69,7 +52,7 @@ function makePreviousRange(range: string) {
     }
 }
 
-export default function WalletLimits() {
+export default function WalletLimits({ navigation }: { navigation: any }) {
     const [selectedRange, setSelectedRange] = useState("monthly")
 
     const { data: limits, loading, error } = useQuery(GET_LIMITS, { variables: { range: selectedRange } })
@@ -102,9 +85,7 @@ export default function WalletLimits() {
         moment().endOf("month").toDate(),
     ])
 
-    const [categoryPicker, setCategoryPicker] = useState(false)
     const { dispatch, filters } = useWalletContext()
-    const [isCreateLimitModalVisible, setCreateLimitModalVisible] = useState(false)
     const [compactMode, setCompactMode] = useState(true)
     const [height, setHeight] = useState(150)
 
@@ -138,29 +119,6 @@ export default function WalletLimits() {
         return budgetStatus
     }, [walletData, statistics, selectedRange])
 
-    const [createLimit] = useMutation(
-        gql`
-            mutation CreateLimit($input: CreateLimit!) {
-                createLimit(input: $input) {
-                    id
-                }
-            }
-        `,
-        {
-            onCompleted: (_, client) => {
-                setCreateLimitModalVisible(false)
-                setCategoryPicker(false)
-                Feedback.trigger("impactLight")
-            },
-            onError: (error) => {
-                console.log("Error creating limit:", JSON.stringify(error, null, 2))
-            },
-            refetchQueries: ["daily", "weekly", "monthly", "yearly"].map((item) => ({
-                query: GET_LIMITS,
-                variables: { range: item },
-            })),
-        },
-    )
 
     const handleRangeChange = (range: any) => {
         Feedback.trigger("impactLight")
@@ -198,7 +156,10 @@ export default function WalletLimits() {
                 <View style={{ flexDirection: "column" }}>
                     <Ripple
                         onPress={() => setCompactMode((p) => !p)}
-                        onLongPress={() => setCreateLimitModalVisible((p) => !p)}
+                        onLongPress={() => {
+                            Feedback.trigger("impactLight")
+                            navigation.navigate("CreateLimits")
+                        }}
                     >
                         <Text style={styles.header}>Spending Limits</Text>
                     </Ripple>
@@ -389,100 +350,6 @@ export default function WalletLimits() {
                 />
             </View>
 
-            <Modal
-                onBackdropPress={() => setCreateLimitModalVisible(false)}
-                isVisible={isCreateLimitModalVisible}
-                style={{ justifyContent: "center", alignItems: "center" }}
-            >
-                <View
-                    style={{
-                        width: Layout.screen.width * 0.9,
-                        height: Layout.screen.height * 0.5,
-                        backgroundColor: Colors.primary,
-                        borderRadius: 15,
-                        padding: 15,
-                    }}
-                >
-                    <Text style={{ fontSize: 22, color: Colors.foreground, fontWeight: "bold", marginBottom: 25 }}>
-                        Create limit
-                    </Text>
-                    <Formik
-                        validationSchema={validationSchema}
-                        initialValues={{ category: "", amount: "", type: "" }}
-                        onSubmit={(values) => {
-                            createLimit({
-                                variables: {
-                                    input: {
-                                        category: values.category,
-                                        amount: parseFloat(values.amount),
-                                        type: selectedRange,
-                                    },
-                                },
-                            })
-                        }}
-                    >
-                        {(f) => (
-                            <>
-                                <View style={{ flex: 1 }}>
-                                    {!categoryPicker && (
-                                        <ValidatedInput showLabel label="Target limit $$" formik={f} name="amount" />
-                                    )}
-
-                                    {categoryPicker ? (
-                                        <CategorySelector
-                                            current={f.values.category}
-                                            dismiss={() => {
-                                                Feedback.trigger("impactLight")
-                                                setCategoryPicker(false)
-                                            }}
-                                            onPress={(category) => {
-                                                Feedback.trigger("impactLight")
-                                                f.setFieldValue("category", category)
-                                                setCategoryPicker(false)
-                                            }}
-                                        />
-                                    ) : (
-                                        <ValidatedInput
-                                            showLabel
-                                            label="Restricted category"
-                                            formik={f}
-                                            name="category"
-                                            onPress={() => {
-                                                Feedback.trigger("impactLight")
-                                                setCategoryPicker(true)
-                                            }}
-                                        />
-                                    )}
-                                    {!categoryPicker && (
-                                        <>
-                                            <Text style={{ marginVertical: 10 }}>
-                                                <Text style={styles.categoryText}>
-                                                    How often do you want to be reminded?
-                                                </Text>
-                                            </Text>
-                                            <Select
-                                                setSelected={([v]) => {
-                                                    f.handleChange("type")(v)
-                                                    setCategoryPicker(false)
-                                                }}
-                                                options={["daily", "weekly", "monthly", "yearly"]}
-                                                selected={[f.values.type]}
-                                                closeOnSelect
-                                                anchor="top"
-                                            />
-                                        </>
-                                    )}
-                                </View>
-                                {!categoryPicker && (
-                                    <Button disabled={!(f.isValid && f.dirty)} onPress={() => f.handleSubmit()}>
-                                        Save
-                                    </Button>
-                                )}
-                            </>
-                        )}
-                    </Formik>
-                </View>
-            </Modal>
         </Animated.View>
     )
 }

@@ -220,7 +220,7 @@ export default function WalletList2({
         ({ item }: { item: ListItemType }) => {
             switch (item.type) {
                 case "limits":
-                    return <WalletLimits />
+                    return <WalletLimits navigation={navigation} />
 
                 case "subscription-header":
                     return (

@@ -5,6 +5,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack"
 import { useEffect } from "react"
 import WalletContextProvider from "./components/WalletContext"
 import CreateExpenseModal from "./pages/CreateExpense"
+import CreateLimits from "./pages/CreateLimits"
 import EditBalance from "./pages/EditBalance"
 import Expense from "./pages/Expense"
 import Filters from "./pages/Filters"
@@ -19,6 +20,7 @@ interface WalletRootStack extends ParamListBase {
     Watchlist: undefined
     Charts: undefined
     EditBalance: undefined
+    CreateLimits: undefined
 }
 
 export type WalletScreens<Screen extends keyof WalletRootStack> = StackScreenProps<WalletRootStack, Screen>
@@ -94,6 +96,15 @@ export default function WalletScreens({ navigation, route }: WalletScreens<"Wall
                 <Stack.Screen
                     name="EditBalance"
                     component={EditBalance}
+                    options={{
+                        presentation: "modal",
+                        headerShown: false,
+                    }}
+                />
+
+                <Stack.Screen
+                    name="CreateLimits"
+                    component={CreateLimits}
                     options={{
                         presentation: "modal",
                         headerShown: false,

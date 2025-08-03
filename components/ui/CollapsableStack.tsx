@@ -261,12 +261,14 @@ const CollapsibleStack = React.memo(
 
         const toggleExpand = useCallback((): void => {
             setIsExpanded((prev) => {
+                const newValue = !prev
                 if (onChange) {
-                    onChange(!prev)
+                    // Use setTimeout to avoid calling onChange during render
+                    setTimeout(() => onChange(newValue), 0)
                 }
-                return !prev
+                return newValue
             })
-        }, [])
+        }, [onChange])
 
         const containerStyle = useAnimatedStyle(
             () => ({
