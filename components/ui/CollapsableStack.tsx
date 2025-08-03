@@ -3,6 +3,7 @@ import lowOpacity from "@/utils/functions/lowOpacity"
 import { Feather } from "@expo/vector-icons"
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Pressable, StyleSheet, Text, TextStyle, View, ViewStyle } from "react-native"
+import Feedback from "react-native-haptic-feedback"
 import Animated, { useAnimatedStyle, useSharedValue, withSpring, withTiming } from "react-native-reanimated"
 import ChipButton from "./Button/ChipButton"
 
@@ -309,7 +310,17 @@ const CollapsibleStack = React.memo(
                 )}
 
                 <Animated.View style={containerStyle}>
-                    <Pressable style={{ flex: 1 }} onPress={expandOnPress ? toggleExpand : undefined}>
+                    <Pressable
+                        style={{ flex: 1 }}
+                        onPress={
+                            expandOnPress
+                                ? () => {
+                                      toggleExpand()
+                                      Feedback.trigger("impactLight")
+                                  }
+                                : undefined
+                        }
+                    >
                         {items.map((item, index) => (
                             <CollapsibleItem
                                 key={getItemKey(item, index)}

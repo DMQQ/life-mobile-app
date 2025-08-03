@@ -370,21 +370,25 @@ export function FloatingNotifications() {
     const { data, loading, error } = useGetNotifications()
     const insets = useSafeAreaInsets()
     const [showNotifications, setShowNotifications] = useState(true)
+    const [autoHideDisabled, setAutoHideDisabled] = useState(false)
     const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
     useEffect(() => {
         if (((data?.notifications || []) as Notification[]).filter((n) => !n.read).length > 0) {
             setShowNotifications(true)
+            setAutoHideDisabled(false)
 
-            timeoutRef.current = setTimeout(() => {
-                setShowNotifications(false)
-            }, 5000)
+            if (!autoHideDisabled) {
+                timeoutRef.current = setTimeout(() => {
+                    setShowNotifications(false)
+                }, 5000)
+            }
 
             return () => {
                 if (timeoutRef.current) clearTimeout(timeoutRef.current)
             }
         }
-    }, [data])
+    }, [data, autoHideDisabled])
 
     const notifications = ((data?.notifications || []) as Notification[]).filter((n) => !n.read)
 
@@ -425,9 +429,9 @@ export function FloatingNotifications() {
                     maxVisibleItems: 3,
                 }}
                 expandOnPress
-                onChange={(expanded) => {
-                    setShowNotifications(expanded)
-                    if (timeoutRef.current) clearTimeout(timeoutRef.current as NodeJS.Timeout)
+                onChange={() => {
+                    setAutoHideDisabled(true)
+                    if (timeoutRef.current) clearTimeout(timeoutRef.current)
                 }}
             />
         </AnimatedLinearGradient>

@@ -7,7 +7,7 @@ import Url from "@/constants/Url"
 import throttle from "@/utils/functions/throttle"
 import { AntDesign } from "@expo/vector-icons"
 import { useEffect, useLayoutEffect } from "react"
-import { Image, InteractionManager, StyleSheet } from "react-native"
+import { Image, InteractionManager, StyleSheet, TouchableOpacity, View } from "react-native"
 import { Gesture, GestureDetector } from "react-native-gesture-handler"
 import Ripple from "react-native-material-ripple"
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated"
@@ -50,23 +50,18 @@ export default function ImagesPreview({ route, navigation }: TimelineScreenProps
     const insets = useSafeAreaInsets()
 
     return (
-        <ScreenContainer
-            style={{
-                justifyContent: "center",
-                alignItems: "center",
-                padding: 0,
-                backgroundColor: "rgba(0,0,0,0.75)",
-                ...StyleSheet.absoluteFillObject,
-            }}
-        >
-            <Ripple style={{ position: "absolute", left: 10, top: insets.top + 10, zIndex: 1000 }}>
-                <IconButton
-                    onPress={throttle(() => navigation.canGoBack() && navigation.goBack(), 250)}
-                    icon={<AntDesign name="arrowleft" size={24} color={Colors.foreground} />}
-                />
-            </Ripple>
-            <GesturedImage uri={route.params.selectedImage} />
-        </ScreenContainer>
+        <View style={styles.modalContainer}>
+            <GesturedImage uri={route.params.selectedImage} onSingleTap={() => {
+                navigation.canGoBack() && navigation.goBack()
+                console.log("Back pressed")
+            }} />
+            <TouchableOpacity style={[styles.closeButton, { top: insets.top + 10 }]} onPress={() => {
+                navigation.canGoBack() && navigation.goBack()
+                console.log("Back pressed")
+            }}>
+                <AntDesign name="arrowleft" size={24} color={Colors.foreground} />
+            </TouchableOpacity>
+        </View>
     )
 }
 
@@ -106,7 +101,7 @@ export const GesturedImage = (props: { uri: string; onSingleTap?: () => void }) 
     const doubleTapGesture = Gesture.Tap()
         .numberOfTaps(2)
         .maxDuration(250)
-        .onStart((event) => {
+        .onStart(() => {
             if (scale.value !== 1) {
                 scale.value = withSpring(1)
                 translateX.value = withSpring(0)
@@ -123,7 +118,7 @@ export const GesturedImage = (props: { uri: string; onSingleTap?: () => void }) 
 
     const singleTapGesture = Gesture.Tap()
         .maxDuration(250)
-        .onStart(() => {
+        .onEnd(() => {
             if (props.onSingleTap) {
                 runOnJS(props.onSingleTap)()
             }
@@ -183,9 +178,10 @@ export const GesturedImage = (props: { uri: string; onSingleTap?: () => void }) 
         }
     })
 
-    const combinedGesture = Gesture.Exclusive(
+    const combinedGesture = Gesture.Race(
         doubleTapGesture,
-        Gesture.Simultaneous(singleTapGesture, Gesture.Simultaneous(pinchGesture, panGesture)),
+        singleTapGesture,
+        Gesture.Simultaneous(pinchGesture, panGesture),
     )
 
     return (
@@ -194,3 +190,20 @@ export const GesturedImage = (props: { uri: string; onSingleTap?: () => void }) 
         </GestureDetector>
     )
 }
+
+const styles = StyleSheet.create({
+    modalContainer: {
+        flex: 1,
+        backgroundColor: "rgba(0,0,0,0.75)",
+        justifyContent: "center",
+        alignItems: "center",
+        padding: 0,
+        ...StyleSheet.absoluteFillObject,
+    },
+    closeButton: {
+        position: "absolute",
+        left: 10,
+        zIndex: 1000,
+        padding: 5,
+    },
+})

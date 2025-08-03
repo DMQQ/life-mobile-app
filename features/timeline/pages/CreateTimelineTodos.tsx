@@ -165,7 +165,9 @@ const Todo = (
 ) => {
     return (
         <Card style={styles.todoCard}>
-            <Text variant="body">{todo.value}</Text>
+            <Text variant="body" style={{ maxWidth: "95%" }}>
+                {todo.value}
+            </Text>
 
             <IconButton
                 icon={<AntDesign name="close" size={18} color={Colors.error} />}

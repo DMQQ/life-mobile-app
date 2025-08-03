@@ -68,9 +68,10 @@ const styles = StyleSheet.create({
     },
 
     expanded: {
-        padding: 15,
+        padding: 0,
         borderRadius: 20,
-        paddingTop: 20,
+        marginTop: 15,
+        paddingHorizontal: 19,
     },
 })
 
@@ -208,7 +209,15 @@ export default function WalletItem(
             </View>
 
             {isExpanded && item.subexpenses?.length > 0 && (
-                <Animated.View layout={LinearTransition} style={styles.expanded}>
+                <Animated.View
+                    layout={LinearTransition}
+                    style={[
+                        styles.expanded,
+                        {
+                            backgroundColor: Colors.primary_light,
+                        },
+                    ]}
+                >
                     {item.subexpenses.map((subexpense, index) => (
                         <Animated.View
                             key={subexpense.id}
@@ -228,7 +237,8 @@ export default function WalletItem(
                                 index={index}
                                 containerStyle={{
                                     marginBottom: 0,
-                                    padding: 0,
+                                    paddingHorizontal: 0,
+                                    backgroundColor: undefined,
                                     ...((item.subExpenseStyle as any) || {}),
                                 }}
                             />
