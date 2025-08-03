@@ -3,7 +3,8 @@ import Select from "../ui/Select/Select";
 import useUser from "../../utils/hooks/useUser";
 import { useState, useCallback, useEffect } from "react";
 
-import { View, Text, Image } from "react-native";
+import { View, Image } from "react-native";
+import Text from "@/components/ui/Text/Text";
 import { Exercise } from "../../types";
 import Ripple from "react-native-material-ripple";
 import Colors from "../../constants/Colors";
@@ -68,9 +69,10 @@ export default function ExercisesSelect({
           }}
         >
           <View>
-            <Text style={{ color: "#fff", fontSize: 20 }}>{item.title}</Text>
+            <Text variant="subtitle" style={{ color: Colors.foreground }}>{item.title}</Text>
             <Text
-              style={{ color: "#ffffff84", fontSize: 15 }}
+              variant="body"
+              style={{ color: "#ffffff84" }}
               numberOfLines={2}
             >
               {item.description}
@@ -104,14 +106,14 @@ export default function ExercisesSelect({
                 margin: 5,
               }}
             >
-              <Text style={{ color: "#000" }}>{element.title}</Text>
+              <Text variant="body" style={{ color: "#000" }}>{element.title}</Text>
             </View>
           ))}
           {selected.length === 0 && (
             <Text
+              variant="body"
               style={{
                 color: "gray",
-                fontSize: 18,
                 padding: 15,
               }}
             >

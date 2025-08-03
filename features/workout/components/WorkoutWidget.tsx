@@ -17,14 +17,14 @@ const styles = StyleSheet.create({
     marginTop: 15,
   },
   title: {
-    color: "#fff",
+    color: Colors.foreground,
     fontWeight: "bold",
     fontSize: 30,
   },
   button: {
     marginTop: Padding.m,
     padding: Padding.xl,
-    backgroundColor: "#fff",
+    backgroundColor: Colors.foreground,
     borderRadius: Rounded.xxl,
   },
   buttonText: {
@@ -61,8 +61,8 @@ export default function WorkoutWidget() {
       <View style={{ flexDirection: "column", marginBottom: 10 }}>
         <Text style={styles.title}>Active workout</Text>
         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-          <Text style={{ color: "#fff", fontSize: 12, fontWeight: "bold" }}>{capitalize(workout.title)}</Text>
-          <Text style={{ color: "#fff", fontSize: 12, fontWeight: "bold" }}>
+          <Text style={{ color: Colors.foreground, fontSize: 12, fontWeight: "bold" }}>{capitalize(workout.title)}</Text>
+          <Text style={{ color: Colors.foreground, fontSize: 12, fontWeight: "bold" }}>
             {workout.activeExerciseIndex + 1} out of {workout.exercises.length}
           </Text>
         </View>
@@ -76,8 +76,8 @@ export default function WorkoutWidget() {
         }}
       >
         <View style={{ paddingHorizontal: Padding.m, flex: 1 }}>
-          <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 18 }}>{exercise?.title}</Text>
-          <Text style={{ color: "#fff", fontWeight: "400", fontSize: 14 }}>{exercise.muscleGroup}</Text>
+          <Text style={{ color: Colors.foreground, fontWeight: "bold", fontSize: 18 }}>{exercise?.title}</Text>
+          <Text style={{ color: Colors.foreground, fontWeight: "400", fontSize: 14 }}>{exercise.muscleGroup}</Text>
         </View>
         <View style={{ justifyContent: "center" }}>
           <Ripple
@@ -87,7 +87,7 @@ export default function WorkoutWidget() {
               marginRight: 5,
             }}
           >
-            <AntDesign name="play" color={"#fff"} size={30} />
+            <AntDesign name="play" color={Colors.foreground} size={30} />
           </Ripple>
         </View>
       </View>

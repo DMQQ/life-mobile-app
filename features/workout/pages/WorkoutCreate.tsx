@@ -173,7 +173,7 @@ export default function WorkoutCreate({ navigation }: WorkoutScreenProps<"Workou
               disabled={!(f.isValid && f.dirty)}
               size="xl"
               fontStyle={{
-                color: !(f.isValid && f.dirty) ? Colors.secondary : "#fff",
+                color: !(f.isValid && f.dirty) ? Colors.secondary : Colors.foreground,
               }}
               style={{
                 marginTop: 15,

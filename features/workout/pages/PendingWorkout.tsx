@@ -27,7 +27,7 @@ const styles = StyleSheet.create({
 
   exerciseTitle: {
     fontSize: 40,
-    color: "#fff",
+    color: Colors.foreground,
     fontWeight: "bold",
     letterSpacing: 1,
     marginBottom: 5,
@@ -283,14 +283,14 @@ const ActionTab = (props: { onMainButtonPress: Function; text: string; onAddButt
         type="contained"
         color="ternary"
         style={styles.tabButton}
-        fontStyle={{ color: "#fff", fontSize: 17, letterSpacing: 0.5 }}
+        fontStyle={{ color: Colors.foreground, fontSize: 17, letterSpacing: 0.5 }}
       >
         {props.text}
       </Button>
     )}
 
     <Ripple onPress={() => props.onAddButtonPress()} style={styles.addIcon}>
-      <AntDesign name="plus" color={"#fff"} size={30} />
+      <AntDesign name="plus" color={Colors.foreground} size={30} />
     </Ripple>
   </View>
 );

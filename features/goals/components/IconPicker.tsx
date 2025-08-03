@@ -66,7 +66,7 @@ export default function IconPicker({ value, onChange }: IconPickerProps) {
       columnWrapperStyle={styles.row}
       renderItem={({ item }) => (
         <Ripple onPress={() => onChange(item)} style={[styles.iconButton, value === item && styles.selectedIconButton]}>
-          <MaterialCommunityIcons name={item as any} size={ICON_SIZE} color={value === item ? "#fff" : Colors.secondary} />
+          <MaterialCommunityIcons name={item as any} size={ICON_SIZE} color={value === item ? Colors.foreground : Colors.secondary} />
           <Text style={{ marginTop: 10, color: Colors.secondary_light_2, fontSize: 13, textAlign: "center" }}>
             {item.replaceAll("-", " ").split(" ").slice(0, 3).join(" ")}
           </Text>

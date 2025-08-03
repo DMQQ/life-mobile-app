@@ -1,15 +1,12 @@
 import Button from "@/components/ui/Button/Button";
 import Header from "@/components/ui/Header/Header";
-import ScreenContainer from "@/components/ui/ScreenContainer";
 import ValidatedInput from "@/components/ui/ValidatedInput";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Formik, FormikProps } from "formik";
-import { FlatList, ScrollView, Text, View, StyleSheet, ViewStyle, TextStyle, TextInput } from "react-native";
+import { FlatList, ScrollView, Text, View, StyleSheet, TextInput } from "react-native";
 import Colors from "@/constants/Colors";
 import { useGoal } from "../hooks/hooks";
-import Layout from "@/constants/Layout";
 import Ripple from "react-native-material-ripple";
-import RangeSlider from "@/components/ui/RangePicker";
 import { useState, useEffect } from "react";
 import * as yup from "yup";
 import RangePickers from "../components/RangePicker";
@@ -372,11 +369,18 @@ export default function CreateGoal({ navigation }: CreateGoalProps): JSX.Element
 
   return (
     <View style={styles.container}>
-      <Header goBack title="Create New Goal" />
+      <Header
+        goBack
+        title="Create New Goal"
+        containerStyle={{
+          height: 60,
+          paddingTop: 10,
+        }}
+      />
       <Formik<FormValues> validationSchema={validationSchema} onSubmit={onSubmit} initialValues={initialValues}>
         {(f: FormikProps<FormValues>) => (
           <>
-            <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
+            <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent} keyboardDismissMode={"on-drag"}>
               {/* Icon Selector */}
               <View style={styles.iconSelectorContainer}>
                 <Ripple
@@ -498,7 +502,7 @@ export default function CreateGoal({ navigation }: CreateGoalProps): JSX.Element
                       <MaterialCommunityIcons
                         name={category.icon}
                         size={20}
-                        color={unitCategory === category.value ? "#FFFFFF" : "rgba(255,255,255,0.8)"}
+                        color={unitCategory === category.value ? Colors.foreground : Colors.foreground_secondary}
                         style={styles.categoryIcon}
                       />
                       <Text style={[styles.categoryText, unitCategory === category.value && styles.categoryTextActive]}>
@@ -646,13 +650,13 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255,255,255,0.1)",
   },
   sectionTitle: {
-    color: "#FFFFFF",
+    color: Colors.foreground,
     fontWeight: "600",
     fontSize: 18,
     marginBottom: 15,
   },
   categorySectionTitle: {
-    color: "#FFFFFF",
+    color: Colors.foreground,
     fontWeight: "600",
     fontSize: 16,
     marginBottom: 10,
@@ -669,7 +673,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   rangeValueText: {
-    color: "#FFFFFF",
+    color: Colors.foreground,
     fontSize: 20,
     fontWeight: "600",
   },
@@ -695,7 +699,7 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   multiplierTextActive: {
-    color: "#FFFFFF",
+    color: Colors.foreground,
   },
   sliderContainer: {
     marginTop: 10,
@@ -708,7 +712,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.secondary,
   },
   sliderHandle: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: Colors.foreground,
     borderWidth: 2,
     borderColor: Colors.secondary,
   },
@@ -739,7 +743,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   searchInput: {
-    color: "#FFFFFF",
+    color: Colors.foreground,
     flex: 1,
     height: 50,
     fontSize: 16,
@@ -769,7 +773,7 @@ const styles = StyleSheet.create({
     color: "rgba(255,255,255,0.8)",
   },
   categoryTextActive: {
-    color: "#FFFFFF",
+    color: Colors.foreground,
     fontWeight: "500",
   },
   subcategoryScrollView: {
@@ -793,7 +797,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   subcategoryTextActive: {
-    color: "#FFFFFF",
+    color: Colors.foreground,
     fontWeight: "500",
   },
   unitsFlatList: {
@@ -821,7 +825,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   unitTextActive: {
-    color: "#FFFFFF",
+    color: Colors.foreground,
     fontWeight: "500",
   },
   noResultsContainer: {
@@ -830,7 +834,7 @@ const styles = StyleSheet.create({
     padding: 30,
   },
   noResultsText: {
-    color: "#FFFFFF",
+    color: Colors.foreground,
     fontSize: 18,
     marginTop: 10,
   },
@@ -846,7 +850,7 @@ const styles = StyleSheet.create({
     borderTopColor: "rgba(255,255,255,0.1)",
   },
   customUnitLabel: {
-    color: "#FFFFFF",
+    color: Colors.foreground,
     fontSize: 16,
     marginBottom: 10,
   },
@@ -855,7 +859,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.08)",
     borderRadius: 10,
     padding: 12,
-    color: "#FFFFFF",
+    color: Colors.foreground,
     fontSize: 16,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.15)",

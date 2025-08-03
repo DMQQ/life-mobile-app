@@ -1,154 +1,204 @@
-import { Platform, StyleSheet, Text, View } from "react-native";
-import { StackScreenProps } from "@/types";
-import Colors from "@/constants/Colors";
-import Color from "color";
-import FileList from "../components/FileList";
-import useGetTimelineById from "../hooks/query/useGetTimelineById";
-import Ripple from "react-native-material-ripple";
-import Layout from "@/constants/Layout";
-import { AntDesign } from "@expo/vector-icons";
-import TimelineTodos from "../components/TimelineTodos";
-import LoaderSkeleton from "../components/LoaderSkeleton";
-import Animated, { useAnimatedScrollHandler, useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
-import CompletionBar from "../components/CompletionBar";
-import { useMemo, useRef } from "react";
-import useCompleteTimeline from "../hooks/mutation/useCompleteTimeline";
-import TimelineHeader from "../components/TimelineHeader";
-import BottomSheetType from "@gorhom/bottom-sheet";
+import Text from "@/components/ui/Text/Text"
+import Colors from "@/constants/Colors"
+import Layout from "@/constants/Layout"
+import { StackScreenProps } from "@/types"
+import { AntDesign, Feather } from "@expo/vector-icons"
+import Color from "color"
+import { useCallback, useMemo, useState } from "react"
+import { StyleSheet, View } from "react-native"
+import Animated, { Extrapolation, interpolate, SharedValue, useAnimatedStyle } from "react-native-reanimated"
+import FileList from "../components/FileList"
+import LoaderSkeleton from "../components/LoaderSkeleton"
+import TimelineTodos from "../components/TimelineTodos"
+import useCompleteTimeline from "../hooks/mutation/useCompleteTimeline"
+import useGetTimelineById from "../hooks/query/useGetTimelineById"
 
-import CreateTaskSheet from "../components/CreateTaskSheet";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-
-const AnimatedRipple = Animated.createAnimatedComponent(Ripple);
+import { Header } from "@/components"
+import DeleteTimelineEvent from "@/components/ui/Dialog/Delete/DeleteTimelineEvent"
+import useTrackScroll from "@/utils/hooks/ui/useTrackScroll"
+import CompletionBar from "../components/CompletionBar"
+import { GetTimelineQuery } from "../hooks/query/useGetTimeLineQuery"
 
 const styles = StyleSheet.create({
-  title: {
-    marginBottom: 10,
-    fontSize: 32.5,
-    fontWeight: "bold",
-    color: Colors.secondary,
-  },
-  container: {
-    paddingBottom: 20,
-    minHeight: Layout.screen.height - 120,
-  },
-  contentText: {
-    fontSize: 20,
-    color: "rgba(255,255,255,0.7)",
-  },
-  timelineIdText: {
-    color: Color(Colors.primary).lighten(4).string(),
-    marginTop: 25,
-    position: "absolute",
-    bottom: 0,
-  },
-  fab: {
-    padding: 10,
-    position: "absolute",
-    right: 15,
-    bottom: 25,
-    backgroundColor: Colors.secondary,
-    width: 60,
-    height: 60,
-    borderRadius: 100,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-});
+    title: {
+        marginBottom: 10,
+        color: Colors.secondary,
+    },
+    container: {
+        paddingBottom: 20,
+        minHeight: Layout.screen.height - 120,
+    },
+    contentText: {
+        color: "rgba(255,255,255,0.7)",
+    },
+    timelineIdText: {
+        color: Color(Colors.primary).lighten(4).string(),
+        marginTop: 25,
+        position: "absolute",
+        bottom: 0,
+    },
+    fab: {
+        padding: 10,
+        position: "absolute",
+        right: 15,
+        bottom: 25,
+        backgroundColor: Colors.secondary,
+        width: 60,
+        height: 60,
+        borderRadius: 100,
+        justifyContent: "center",
+        alignItems: "center",
+    },
+})
+
+const capitalize = (text: string | undefined) => {
+    if (!text) return ""
+    return text.charAt(0).toUpperCase() + text.slice(1)
+}
 
 export default function TimelineDetails({
-  route,
-  navigation,
+    route,
+    navigation,
 }: StackScreenProps<{ TimelineDetails: { timelineId: string } }, "TimelineDetails">) {
-  const { data, loading } = useGetTimelineById(route.params.timelineId);
-  const [completeTimeline] = useCompleteTimeline(route.params.timelineId);
-  const scrollY = useSharedValue(0);
-  const onScroll = useAnimatedScrollHandler({
-    onScroll(event) {
-      if (scrollY.value) scrollY.value = event.contentOffset.y;
-    },
-  });
+    const { data, loading } = useGetTimelineById(route.params.timelineId)
+    const [completeTimeline] = useCompleteTimeline(route.params.timelineId)
 
-  const taskCompletionProgressBar = useMemo(() => {
-    let count = 0;
+    const [scrollY, onScroll] = useTrackScroll()
 
-    if (data?.todos === undefined) return 0;
-
-    for (let todo of data?.todos || []) {
-      if (todo.isCompleted) count += 1;
+    const onFabPress = () => {
+        ;(navigation as any).navigate("TimelineCreate", {
+            mode: "edit",
+            selectedDate: data?.date,
+            timelineId: data?.id,
+        })
     }
 
-    return Math.trunc((count / data?.todos?.length) * 100);
-  }, [data?.todos]);
+    const buttons = useMemo(
+        () => [
+            {
+                icon: <Feather name="trash" size={20} color={Colors.error} />,
+                onPress: () => {
+                    setSelectedEventForDeletion(data)
+                },
+            },
+            {
+                icon: <Feather name="edit-2" size={20} color={Colors.foreground} />,
+                onPress: onFabPress,
+            },
+            {
+                icon: (
+                    <AntDesign
+                        name={data?.isCompleted ? "check" : "loading1"}
+                        color={data?.isCompleted ? Colors.secondary : Colors.foreground}
+                        size={20}
+                    />
+                ),
+                onPress: completeTimeline,
+            },
+        ],
+        [data?.isCompleted, data],
+    )
 
-  const fabAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [
-      {
-        translateX: scrollY?.value > 40 ? withTiming(100, { duration: 250 }) : withTiming(0, { duration: 250 }),
-      },
-    ] as any,
-  }));
+    const taskCompletionProgressBar = useMemo(() => {
+        let count = 0
 
-  const onFabPress = () => {
-    (navigation as any).navigate("TimelineCreate", {
-      mode: "edit",
-      selectedDate: data?.date,
-      timelineId: data?.id,
-    });
-  };
+        if (data?.todos === undefined || data?.todos?.length === 0) return 0
 
-  const taskRef = useRef<BottomSheetType>(null);
+        for (let todo of data?.todos || []) {
+            if (todo.isCompleted) count += 1
+        }
 
-  const safearea = useSafeAreaInsets();
+        return Math.trunc((count / data?.todos?.length) * 100)
+    }, [data?.todos])
 
-  return (
-    <View style={{ backgroundColor: Colors.primary, marginBottom: 50, marginTop: Platform.OS === "ios" ? safearea.top : 0 }}>
-      <TimelineHeader
-        title={data?.title.slice(0, 18)}
-        scrollY={scrollY}
-        isCompleted={data?.isCompleted}
-        onTaskToggle={completeTimeline}
-        navigation={navigation}
-      />
-      <Animated.ScrollView
-        style={{ padding: 15 }}
-        contentContainerStyle={{ paddingBottom: 50 }}
-        onScroll={onScroll}
-        showsVerticalScrollIndicator={false}
-      >
-        {loading ? (
-          <LoaderSkeleton />
-        ) : (
-          <View style={styles.container}>
-            <Text selectable selectionColor={"#fff"} style={styles.title}>
-              {data?.title}
-            </Text>
+    const renderAnimatedItem = useCallback(
+        ({ scrollY }: { scrollY: SharedValue<number> | undefined }) => (
+            <AnimatedProgressBar percentage={taskCompletionProgressBar} scrollY={scrollY!} />
+        ),
+        [taskCompletionProgressBar, data?.todos],
+    )
 
-            <Text selectionColor={"#fff"} selectable style={styles.contentText}>
-              {data?.description || "(no content)"}
-            </Text>
+    const [selectedEventForDeletion, setSelectedEventForDeletion] = useState<GetTimelineQuery | null>(null)
 
-            <TimelineTodos expandSheet={() => taskRef.current?.snapToIndex(0)} timelineId={data?.id} todos={data?.todos || []} />
-            {data?.todos.length > 0 && (
-              <View style={{ marginTop: 10 }}>
-                <CompletionBar percentage={taskCompletionProgressBar} />
-              </View>
-            )}
+    return (
+        <View style={{ backgroundColor: Colors.primary }}>
+            <Header
+                scrollY={scrollY}
+                animated={true}
+                animatedTitle={capitalize(data?.title)}
+                buttons={buttons}
+                renderAnimatedItem={renderAnimatedItem}
+                initialTitleFontSize={data?.title?.length > 25 ? 40 : 50}
+            />
+            <Animated.ScrollView
+                keyboardDismissMode={"on-drag"}
+                style={{ padding: 15 }}
+                contentContainerStyle={{ paddingBottom: 50, paddingTop: 225 }}
+                onScroll={onScroll}
+                showsVerticalScrollIndicator={false}
+            >
+                {loading ? (
+                    <LoaderSkeleton />
+                ) : (
+                    <View style={styles.container}>
+                        <Text variant="body">{data?.description || "No description provided for this event."}</Text>
+                        <TimelineTodos
+                            expandSheet={() => {
+                                ;(navigation as any).navigate("CreateTimelineTodos", {
+                                    timelineId: data?.id,
+                                })
+                            }}
+                            timelineId={data?.id}
+                            sortedTodos={data?.todos || []}
+                        />
 
-            <FileList timelineId={data?.id} />
+                        <FileList timelineId={data?.id} />
 
-            <Text selectable style={styles.timelineIdText}>
-              Event unique id: {data?.id}
-            </Text>
-          </View>
-        )}
-      </Animated.ScrollView>
+                        <Text variant="caption" selectable style={styles.timelineIdText}>
+                            Event unique id: {data?.id}
+                        </Text>
+                    </View>
+                )}
+            </Animated.ScrollView>
 
-      <AnimatedRipple style={[fabAnimatedStyle, styles.fab]} onPress={onFabPress}>
-        <AntDesign name="edit" color={"#fff"} size={25} />
-      </AnimatedRipple>
+            <DeleteTimelineEvent
+                isVisible={!!selectedEventForDeletion}
+                item={
+                    selectedEventForDeletion
+                        ? {
+                              id: selectedEventForDeletion.id,
+                              name: selectedEventForDeletion.title,
+                              date: selectedEventForDeletion.date,
+                          }
+                        : undefined
+                }
+                onDismiss={() => setSelectedEventForDeletion(null)}
+            />
+        </View>
+    )
+}
 
-      <CreateTaskSheet ref={taskRef} timelineId={data?.id} />
-    </View>
-  );
+const AnimatedProgressBar = ({ percentage, scrollY }: { percentage: number; scrollY: SharedValue<number> }) => {
+    return (
+        <Animated.View
+            style={[
+                useAnimatedStyle(() => {
+                    const scrollValue = scrollY?.value ?? 0
+
+                    return {
+                        opacity: interpolate(scrollValue, [0, 130, 150, 160], [0, 0, 0.75, 1], Extrapolation.CLAMP),
+                        transform: [
+                            {
+                                translateY: interpolate(scrollValue, [0, 160], [-25, 0], Extrapolation.CLAMP),
+                            },
+                            { scale: interpolate(scrollValue, [0, 160], [0.5, 1], Extrapolation.CLAMP) },
+                        ],
+                    }
+                }, [scrollY]),
+                { paddingHorizontal: 15, paddingBottom: 15 },
+            ]}
+        >
+            <CompletionBar percentage={percentage} />
+        </Animated.View>
+    )
 }

@@ -1,4 +1,5 @@
-import { View, Text, TouchableOpacity, ListRenderItem, StyleProp, ViewStyle, Pressable, LayoutChangeEvent, StyleSheet } from "react-native";
+import { View, TouchableOpacity, ListRenderItem, StyleProp, ViewStyle, Pressable, LayoutChangeEvent, StyleSheet } from "react-native";
+import Text from "@/components/ui/Text/Text";
 import Layout from "../../../constants/Layout";
 import Colors from "../../../constants/Colors";
 import Color from "color";
@@ -139,9 +140,9 @@ export default function Select({
           }}
         >
           <Text
+            variant="body"
             style={{
-              color: isSelected ? "#fff" : Colors.secondary,
-              fontSize: 18,
+              color: isSelected ? Colors.foreground : Colors.secondary,
             }}
           >
             {item}
@@ -224,7 +225,7 @@ export default function Select({
             <View>
               <Entypo
                 name="chevron-down"
-                color={isFocused ? Colors.secondary : "#fff"}
+                color={isFocused ? Colors.secondary : Colors.foreground}
                 size={25}
                 style={{
                   transform: [{ rotate: isFocused ? "180deg" : "0deg" }],
@@ -235,10 +236,10 @@ export default function Select({
               rest.renderCustomSelected
             ) : (
               <Text
+                variant="body"
                 numberOfLines={1}
                 style={{
-                  fontSize: 18,
-                  color: isFocused ? Colors.secondary : selected.some((v) => v.trim().length > 0) ? "#fff" : "gray",
+                  color: isFocused ? Colors.secondary : selected.some((v) => v.trim().length > 0) ? Colors.foreground : "gray",
                   flex: 1,
                   paddingHorizontal: 20,
                 }}

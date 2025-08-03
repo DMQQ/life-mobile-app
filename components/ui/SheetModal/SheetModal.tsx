@@ -1,6 +1,7 @@
 import Colors from "@/constants/Colors";
 import { ReactNode } from "react";
-import { Text, View, Modal, Pressable } from "react-native";
+import { View, Modal, Pressable } from "react-native";
+import Text from "@/components/ui/Text/Text";
 
 interface SheetModalProps {
   title: string;
@@ -25,9 +26,9 @@ export default function SheetModal(props: SheetModalProps) {
           style={{ padding: 15, backgroundColor: Colors.primary }}
         >
           <Text
+            variant="title"
             style={{
-              color: "#fff",
-              fontSize: 30,
+              color: Colors.foreground,
               fontWeight: "bold",
               padding: 10,
             }}

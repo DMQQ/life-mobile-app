@@ -19,7 +19,7 @@ const styles = StyleSheet.create({
   calendar: {
     backgroundColor: Colors.primary_light,
     calendarBackground: Colors.primary_light,
-    dayTextColor: "#fff",
+    dayTextColor: Colors.foreground,
     textDisabledColor: "#5e5e5e",
     monthTextColor: Colors.secondary,
     textMonthFontSize: 20,

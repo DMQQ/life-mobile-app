@@ -19,7 +19,7 @@ export const routes = {
       <Icons.Ionicons
         name="home"
         size={ICON_SIZE}
-        color={isFocused ? Colors.secondary : "#fff"}
+        color={isFocused ? Colors.secondary : Colors.foreground}
       />
     ),
   },
@@ -29,7 +29,7 @@ export const routes = {
       <Icons.Ionicons
         name="calendar"
         size={ICON_SIZE}
-        color={isFocused ? Colors.secondary : "#fff"}
+        color={isFocused ? Colors.secondary : Colors.foreground}
       />
     ),
   },
@@ -39,7 +39,7 @@ export const routes = {
       <Icons.Ionicons
         name="body"
         size={ICON_SIZE}
-        color={isFocused ? Colors.secondary : "#fff"}
+        color={isFocused ? Colors.secondary : Colors.foreground}
       />
     ),
   },
@@ -49,7 +49,7 @@ export const routes = {
       <Icons.Ionicons
         name="settings"
         size={ICON_SIZE}
-        color={isFocused ? Colors.secondary : "#fff"}
+        color={isFocused ? Colors.secondary : Colors.foreground}
       />
     ),
   },

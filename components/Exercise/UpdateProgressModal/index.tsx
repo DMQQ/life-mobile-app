@@ -1,4 +1,5 @@
-import { Text, View, Animated, Keyboard } from "react-native";
+import { View, Animated, Keyboard } from "react-native";
+import Text from "@/components/ui/Text/Text";
 import Modal from "react-native-modal";
 import Layout from "../../../constants/Layout";
 import { Formik } from "formik";
@@ -82,9 +83,9 @@ export default function UpdateProgressModal({
         ]}
       >
         <Text
+          variant="title"
           style={{
-            color: "#fff",
-            fontSize: 30,
+            color: Colors.foreground,
             fontWeight: "bold",
             marginBottom: 20,
           }}
@@ -117,9 +118,9 @@ export default function UpdateProgressModal({
                     )}
                     left={(props) => (
                       <Text
+                        variant="body"
                         style={{
                           color: color(props),
-                          fontSize: 18,
                         }}
                       >
                         {capitalize(key)}:

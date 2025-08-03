@@ -1,58 +1,72 @@
-import { gql, useMutation } from "@apollo/client";
-import { GET_TIMELINE } from "../query/useGetTimelineById";
+import { gql, useMutation } from "@apollo/client"
+import { GET_TIMELINE } from "../query/useGetTimelineById"
 
-export default function useCompleteTodo(props: {
-  todoId: string;
-  timelineId: string;
-}) {
-  const [completeTodo] = useMutation(
-    gql`
-      mutation CompleteTodo($todoId: ID!) {
-        completeTimelineTodo(id: $todoId) {
-          isCompleted
-        }
-      }
-    `,
-    {
-      update(cache) {
-        const data = cache.readQuery({
-          query: GET_TIMELINE,
-          variables: { id: props.timelineId },
-        }) as any;
-
-        const todos = data?.timelineById.todos
-          .map((todo: any) => {
-            if (todo.id === props.todoId) {
-              return {
-                ...todo,
-                isCompleted: true,
-              };
+export default function useCompleteTodo(props: { todoId: string; timelineId: string; currentlyCompleted?: boolean }) {
+    const [completeTodo, state] = useMutation(
+        gql`
+            mutation CompleteTodo($todoId: ID!, $isCompleted: Boolean!) {
+                completeTimelineTodo(id: $todoId, isCompleted: $isCompleted) {
+                    isCompleted
+                    id
+                    title
+                    modifiedAt
+                    createdAt
+                }
             }
+        `,
+        {
+            update(cache, { data: mutationResult }) {
+                const data = cache.readQuery({
+                    query: GET_TIMELINE,
+                    variables: { id: props.timelineId },
+                }) as any
 
-            return todo;
-          })
-          .sort((a: any, b: any) => a.isCompleted - b.isCompleted);
+                if (!data?.timelineById?.todos) {
+                    return
+                }
 
-        cache.writeQuery({
-          query: GET_TIMELINE,
-          variables: { id: props.timelineId },
-          data: {
-            timelineById: {
-              ...data?.timelineById,
-              todos,
+                const updatedTodo = mutationResult?.completeTimelineTodo
+                if (!updatedTodo) {
+                    return
+                }
+
+                const todos = data.timelineById.todos
+                    .map((todo: any) => {
+                        if (todo.id === props.todoId) {
+                            return {
+                                ...todo,
+                                isCompleted: updatedTodo.isCompleted,
+                                modifiedAt: updatedTodo.modifiedAt,
+                            }
+                        }
+                        return todo
+                    })
+                    .sort((a: any, b: any) => a.isCompleted - b.isCompleted)
+
+                cache.writeQuery({
+                    query: GET_TIMELINE,
+                    variables: { id: props.timelineId },
+                    data: {
+                        timelineById: {
+                            ...data.timelineById,
+                            todos,
+                        },
+                    },
+                })
             },
-          },
-        });
-      },
-    }
-  );
-
-  return {
-    completeTodo: () =>
-      completeTodo({
-        variables: {
-          todoId: props.todoId,
         },
-      }),
-  };
+    )
+
+    return [
+        (isCompleted?: boolean) => {
+            const newCompletedState = isCompleted ?? !props.currentlyCompleted
+            return completeTodo({
+                variables: {
+                    todoId: props.todoId,
+                    isCompleted: newCompletedState,
+                },
+            })
+        },
+        state,
+    ] as const
 }

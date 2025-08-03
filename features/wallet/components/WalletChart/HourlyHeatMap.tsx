@@ -373,13 +373,13 @@ const HourlySpendingsBarChart = ({ type, dateRange }: { type: string; dateRange?
             <View style={styles.periodLegend}>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
                 <View style={{ width: 12, height: 8, backgroundColor: secondary_candidates[0], borderRadius: 2 }} />
-                <Text style={{ fontSize: 12, color: "#fff" }}>Current Period</Text>
+                <Text style={{ fontSize: 12, color: Colors.foreground }}>Current Period</Text>
               </View>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
                 <View
                   style={{ width: 12, height: 8, backgroundColor: Color(secondary_candidates[0]).alpha(0.25).string(), borderRadius: 2 }}
                 />
-                <Text style={{ fontSize: 12, color: "#fff" }}>Previous Period</Text>
+                <Text style={{ fontSize: 12, color: Colors.foreground }}>Previous Period</Text>
               </View>
             </View>
             {dateRange && previousDateRange && (
@@ -412,7 +412,7 @@ const styles = StyleSheet.create({
     paddingLeft: 2,
   },
   yAxisLabel: {
-    color: "#fff",
+    color: Colors.foreground,
     fontSize: 11,
   },
   chartContent: {
@@ -484,12 +484,12 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   tooltipTitle: {
-    color: "#fff",
+    color: Colors.foreground,
     fontWeight: "bold",
     fontSize: 14,
   },
   tooltipValue: {
-    color: "#fff",
+    color: Colors.foreground,
     fontSize: 12,
     marginVertical: 1,
   },
@@ -505,7 +505,7 @@ const styles = StyleSheet.create({
   },
   dateRangeText: {
     fontSize: 10,
-    color: Color("#fff").alpha(0.7).string(),
+    color: Color(Colors.foreground).alpha(0.7).string(),
     textAlign: "center",
   },
   noDataContainer: {
@@ -518,7 +518,7 @@ const styles = StyleSheet.create({
     width: Layout.screen.width - 60,
   },
   noDataText: {
-    color: "#fff",
+    color: Colors.foreground,
     fontSize: 16,
   },
   loadingContainer: {
@@ -528,7 +528,7 @@ const styles = StyleSheet.create({
     minHeight: 300,
   },
   loadingText: {
-    color: "#fff",
+    color: Colors.foreground,
     fontSize: 16,
   },
   errorContainer: {

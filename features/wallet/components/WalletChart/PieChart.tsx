@@ -1,8 +1,9 @@
 import { PieChart as GFTPieChart } from "react-native-gifted-charts";
 import Colors, { secondary_candidates } from "@/constants/Colors";
 import Layout from "@/constants/Layout";
-import { Text, View } from "react-native";
+import { View } from "react-native";
 import Color from "color";
+import Text from "@/components/ui/Text/Text";
 
 interface PieChartProps {
   onPress: (dt: { label: string; value: number; color: string }) => void;
@@ -29,23 +30,22 @@ export default function PieChart(props: PieChartProps) {
       showValuesAsLabels
       showValuesAsTooltipText
       showTooltip
-      textColor="#fff"
+      textColor={Colors.foreground}
       innerRadius={90}
       centerLabelComponent={() => (
         <View>
           <Text
+            variant="subheading"
             style={{
-              color: "#fff",
-              fontSize: 20,
-              fontWeight: "bold",
+              color: Colors.foreground,
             }}
           >
             {props.totalSum.toFixed(2)}zł
           </Text>
           <Text
+            variant="caption"
             style={{
               color: blueText,
-              fontSize: 14,
               fontWeight: "bold",
               textAlign: "center",
               marginTop: 5,

@@ -62,7 +62,7 @@ const FlipCard: React.FC<FlipCardProps> = ({ frontContent, backContent, explanat
           style={{ position: "absolute", right: 15, bottom: 15, padding: 5 }}
           onPress={() => groupId && navigation.navigate("SwipeFlashCards", { groupId })}
         >
-          <Entypo name="resize-full-screen" size={18} color={"#fff"} />
+          <Entypo name="resize-full-screen" size={18} color={Colors.foreground} />
         </Ripple>
       )}
     </TouchableOpacity>
@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 22.5,
     textAlign: "center",
-    color: "#fff",
+    color: Colors.foreground,
   },
 });
 

@@ -7,7 +7,7 @@ import Button from "@/components/ui/Button/Button";
 import lowOpacity from "@/utils/functions/lowOpacity";
 import { gql, useQuery } from "@apollo/client";
 import moment from "moment";
-import { CategoryUtils, Icons } from "../ExpenseIcon";
+import { CategoryUtils, Icons } from "../Expense/ExpenseIcon";
 import ChartTemplate from "./ChartTemplate";
 
 const LIMITS_COMPARISON = gql`
@@ -443,7 +443,7 @@ const styles = StyleSheet.create({
     minHeight: 300,
   },
   loadingText: {
-    color: "#fff",
+    color: Colors.foreground,
     fontSize: 16,
   },
   errorContainer: {
@@ -468,7 +468,7 @@ const styles = StyleSheet.create({
     width: Layout.screen.width - 60,
   },
   noDataText: {
-    color: "#fff",
+    color: Colors.foreground,
     fontSize: 16,
   },
   chartWrapper: {
@@ -484,7 +484,7 @@ const styles = StyleSheet.create({
     paddingRight: 5,
   },
   yAxisLabel: {
-    color: "#fff",
+    color: Colors.foreground,
     fontSize: 10,
   },
   chartContent: {
@@ -512,7 +512,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   categoryLabelText: {
-    color: "#fff",
+    color: Colors.foreground,
     fontSize: 12,
     fontWeight: "bold",
     backgroundColor: Color(Colors.primary).lighten(0.3).string(),
@@ -571,7 +571,7 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   tooltipTitle: {
-    color: "#fff",
+    color: Colors.foreground,
     fontWeight: "bold",
     fontSize: 14,
   },
@@ -581,7 +581,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   tooltipCategory: {
-    color: "#fff",
+    color: Colors.foreground,
     fontSize: 12,
     opacity: 0.8,
   },
@@ -615,7 +615,7 @@ const styles = StyleSheet.create({
     marginRight: 6,
   },
   legendText: {
-    color: "#fff",
+    color: Colors.foreground,
     fontSize: 12,
   },
 });

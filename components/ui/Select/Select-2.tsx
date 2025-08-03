@@ -127,7 +127,7 @@ const styles = StyleSheet.create({
   },
 
   placeholder: {
-    color: "#fff",
+    color: Colors.foreground,
     fontSize: 16,
   },
 });

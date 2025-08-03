@@ -1,117 +1,145 @@
-import { FlatList, Text, View } from "react-native";
-import Colors from "@/constants/Colors";
-import Header from "@/components/ui/Header/Header";
-import { AntDesign } from "@expo/vector-icons";
-import { SafeAreaView } from "react-native-safe-area-context";
-import Ripple from "react-native-material-ripple";
+import Header from "@/components/ui/Header/Header"
+import Colors from "@/constants/Colors"
+import { AntDesign } from "@expo/vector-icons"
+import { RefreshControl, StyleSheet, View } from "react-native"
 
-import { Group, useFlashCards, useGroups, useGroupStats } from "../hooks";
-import moment from "moment";
-import { useNavigation } from "@react-navigation/native";
-import Animated, { FadeIn, useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated";
-import { ScreenProps } from "@/types";
-import { FlashList } from "@shopify/flash-list";
+import { Skeleton } from "@/components"
+import DeleteFlashCardGroupDialog from "@/components/ui/Dialog/Delete/DeleteGroupDialog"
+import AnimatedHeaderSearch from "@/components/ui/Header/AnimatedHeaderSearch"
+import { ScreenProps } from "@/types"
+import { FlashList } from "@shopify/flash-list"
+import { useMemo, useState } from "react"
+import Animated, { FadeOut, useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated"
+import FlashCardGroup from "../components/FlashCardGroup"
+import { Group, useGroups } from "../hooks"
 
-const AnimatedFlashList = Animated.createAnimatedComponent(FlashList);
+const AnimatedFlashList = Animated.createAnimatedComponent(FlashList)
 
-export default function NotesScreen({ navigation }: ScreenProps<any>) {
-  const { groups } = useGroups();
+const AnimatedLoader = () => {
+    return (
+        <Animated.View
+            exiting={FadeOut.duration(250)}
+            style={[
+                StyleSheet.absoluteFillObject,
+                {
+                    backgroundColor: Colors.primary,
+                    zIndex: 1000,
+                    justifyContent: "center",
+                    alignItems: "center",
+                    paddingTop: 125,
+                },
+            ]}
+        >
+            <Skeleton>
+                <View style={{ flex: 1, paddingHorizontal: 15 }}>
+                    <View style={{ alignItems: "flex-end" }}>
+                        <Skeleton.Item width={25} height={25} style={{ borderRadius: 10 }} />
+                    </View>
 
-  const scrollY = useSharedValue(0);
+                    <View style={{ paddingTop: 65, paddingBottom: 20 }}>
+                        <Skeleton.Item width={(w) => w * 0.65} height={65} style={{ marginTop: 10 }} />
+                        <Skeleton.Item width={(w) => w * 0.4} height={15} style={{ marginTop: 10 }} />
+                    </View>
 
-  const onAnimatedScrollHandler = useAnimatedScrollHandler(
-    {
-      onScroll(event) {
-        scrollY.value = event.contentOffset.y;
-      },
-    },
-    []
-  );
-
-  return (
-    <SafeAreaView style={{ padding: 0, paddingBottom: 70, flex: 1 }}>
-      <Header
-        scrollY={scrollY}
-        animated={true}
-        buttons={[
-          {
-            icon: <AntDesign name="plus" size={20} color={"#fff"} />,
-            onPress: () => navigation.navigate("CreateFlashCardGroup"),
-          },
-        ]}
-        animatedTitle="FlashCards"
-        animatedSubtitle={`${groups?.length || 0} Groups`}
-      />
-      <AnimatedFlashList
-        data={groups}
-        estimatedItemSize={150}
-        renderItem={({ item: group, index }: any) => <FlashCardGroup {...group} index={index} length={groups.length} />}
-        keyExtractor={(key: any) => key.id.toString()}
-        onScroll={onAnimatedScrollHandler}
-        contentContainerStyle={{
-          paddingHorizontal: 15,
-          paddingBottom: 100,
-        }}
-        scrollEventThrottle={16}
-        removeClippedSubviews
-      />
-    </SafeAreaView>
-  );
+                    <View>
+                        <Skeleton.Item width={(w) => w - 30} height={120} style={{ marginTop: 10 }} />
+                        <Skeleton.Item width={(w) => w - 30} height={120} style={{ marginTop: 10 }} />
+                        <Skeleton.Item width={(w) => w - 30} height={120} style={{ marginTop: 10 }} />
+                        <Skeleton.Item width={(w) => w - 30} height={120} style={{ marginTop: 10 }} />
+                    </View>
+                </View>
+            </Skeleton>
+        </Animated.View>
+    )
 }
 
-const successRate = (num: number) => {
-  if (num === 0) return "red";
+export default function NotesScreen({ navigation }: ScreenProps<any>) {
+    const { groups, loading, refetch } = useGroups()
 
-  if (num < 50) return "orange";
+    const scrollY = useSharedValue(0)
 
-  if (num < 70) return "yellow";
+    const onAnimatedScrollHandler = useAnimatedScrollHandler(
+        {
+            onScroll(event) {
+                scrollY.value = event.contentOffset.y
+            },
+        },
+        [],
+    )
 
-  if (num < 90) return "green";
+    const groupsSorted = useMemo(() => {
+        if (!groups || groups.length === 0) return []
+        return [...groups]?.sort((a, b) => b.createdAt.localeCompare(a.createdAt)) || []
+    }, [groups])
 
-  return Colors.secondary;
-};
+    const [selectedGroupForDeletion, setSelectedGroupForDeletion] = useState<Group | null>(null)
 
-const FlashCardGroup = (group: Group & { index: number; length: number }) => {
-  const navigation = useNavigation<any>();
+    const [refreshing, setRefreshing] = useState(false)
 
-  const { data } = useGroupStats(group.id);
+    const onRefresh = async () => {
+        setRefreshing(true)
 
-  const groupStats = data?.groupStats;
+        await refetch()
 
-  return (
-    <Ripple onPress={() => navigation.navigate("FlashCard", { groupId: group.id })} onLongPress={() => {}}>
-      <View
-        style={{
-          backgroundColor: Colors.primary_lighter,
-          padding: 20,
-          borderRadius: 15,
-          marginVertical: 7.5,
-          gap: 10,
-          minHeight: 150,
+        setRefreshing(false)
+    }
 
-          ...(group.index === group.length - 1 && { marginBottom: 40 }),
-        }}
-      >
-        <Text style={{ color: Colors.secondary, fontSize: 20, fontWeight: "bold" }}>{group.name}</Text>
-        <Text style={{ color: "#fff", fontSize: 15 }}>{group.description}</Text>
+    const [query, setQuery] = useState("")
 
-        {groupStats && (
-          <Animated.View entering={FadeIn} style={{ gap: 15 }}>
-            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-              <Text style={{ color: "rgba(255,255,255,0.8)", fontSize: 12 }}>{moment(group.createdAt).format("MMM Do YYYY")}</Text>
-
-              <Text style={{ color: "rgba(255,255,255,0.8)", fontSize: 12 }}>{groupStats?.masteredCards} Mastered</Text>
+    return (
+        <>
+            <View style={{ padding: 0, flex: 1 }}>
+                {loading && <AnimatedLoader />}
+                <Header
+                    scrollY={scrollY}
+                    animated={true}
+                    buttons={[
+                        {
+                            icon: <AntDesign name="plus" size={20} color={Colors.foreground} />,
+                            onPress: () => navigation.navigate("CreateFlashCardGroup"),
+                        },
+                    ]}
+                    animatedTitle="FlashCards"
+                    animatedSubtitle={`${groups?.length || 0} Groups`}
+                    renderAnimatedItem={(props) => (
+                        <AnimatedHeaderSearch
+                            buttonsCount={1}
+                            {...props}
+                            filterValue={query}
+                            setFilterValue={setQuery}
+                        />
+                    )}
+                />
+                <AnimatedFlashList
+                    data={groupsSorted}
+                    estimatedItemSize={150}
+                    renderItem={({ item: group, index }: any) => (
+                        <FlashCardGroup
+                            {...group}
+                            index={index}
+                            length={groups.length}
+                            onLongPress={() => {
+                                setSelectedGroupForDeletion(group)
+                            }}
+                        />
+                    )}
+                    keyExtractor={(key: any) => key.id.toString()}
+                    onScroll={onAnimatedScrollHandler}
+                    contentContainerStyle={{
+                        paddingHorizontal: 15,
+                        paddingBottom: 100,
+                        paddingTop: 300,
+                    }}
+                    scrollEventThrottle={16}
+                    removeClippedSubviews
+                    refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+                />
             </View>
-
-            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-              <Text style={{ color: "rgba(255,255,255,0.8)", fontSize: 12 }}>{groupStats?.totalCards} Cards</Text>
-              <Text style={{ color: successRate(groupStats?.averageSuccessRate || 0), fontSize: 12 }}>
-                {groupStats?.averageSuccessRate.toFixed(2)}% Success Rate
-              </Text>
-            </View>
-          </Animated.View>
-        )}
-      </View>
-    </Ripple>
-  );
-};
+            <DeleteFlashCardGroupDialog
+                isVisible={!!selectedGroupForDeletion}
+                item={selectedGroupForDeletion || undefined}
+                onDismiss={() => setSelectedGroupForDeletion(null)}
+            />
+        </>
+    )
+}

@@ -1,169 +1,122 @@
-import { View, Text, Pressable, StyleSheet } from "react-native";
-import { Todos } from "@/types";
-import Colors from "@/constants/Colors";
-import Color from "color";
-import Ripple from "react-native-material-ripple";
-import Button from "@/components/ui/Button/Button";
-import { useState } from "react";
-import Input from "@/components/ui/TextInput/TextInput";
-import CompleteTodoButton from "./CompleteTodoButton";
-
-import L from "@/constants/Layout";
+import { Card } from "@/components"
+import CollapsibleStack from "@/components/ui/CollapsableStack"
+import Text from "@/components/ui/Text/Text"
+import Colors from "@/constants/Colors"
+import { Todos } from "@/types"
+import { useNavigation } from "@react-navigation/native"
+import Color from "color"
+import { memo, useCallback, useMemo } from "react"
+import { StyleSheet, View } from "react-native"
+import TodoHeader from "./TodoHeader"
+import TodoItem from "./TodoItem"
 
 const styles = StyleSheet.create({
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 15,
-  },
-  title: {
-    fontSize: 20,
-    color: Colors.secondary,
-    fontWeight: "bold",
-  },
-  createTodo: {
-    backgroundColor: Colors.secondary,
-    borderRadius: 100,
-    padding: 5,
-    paddingHorizontal: 10,
-    flexDirection: "row",
-  },
-  button: {
-    backgroundColor: Color(Colors.secondary).alpha(0.15).string(),
-    paddingVertical: 15,
-  },
-  buttonText: {
-    color: Colors.secondary,
-    fontSize: 15,
-  },
-  dot: {
-    width: 10,
-    height: 10,
-    borderRadius: 100,
-  },
-  todo: {
-    backgroundColor: Colors.primary_lighter,
-    padding: 15,
-    paddingHorizontal: 20,
-    borderRadius: 15,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 10,
-    alignItems: "center",
-    flexWrap: "wrap",
-    gap: 5,
-  },
-});
+    container: {
+        marginTop: 24,
+    },
+    emptyState: {
+        alignItems: "center",
+        paddingVertical: 32,
+        paddingHorizontal: 16,
+        borderRadius: 20,
+        borderWidth: 1,
+        borderColor: Color(Colors.primary_light).lighten(0.3).hex(),
+        backgroundColor: Color(Colors.primary_lighter).lighten(0.1).hex(),
+    },
+    emptyText: {
+        opacity: 0.7,
+    },
+})
 
 export default function TimelineTodos(props: {
-  todos: Todos[];
-  timelineId: string;
-
-  expandSheet: () => void;
+    sortedTodos: Todos[]
+    timelineId: string
+    expandSheet: () => void
+    onDeleteTodo?: (todoId: string) => void
 }) {
-  const [dialog, setDialog] = useState(false);
-  const [dialogText, setDialogText] = useState("");
+    const navigation = useNavigation<any>()
+    const handleAddTodo = () => {
+        props.expandSheet()
+    }
 
-  const handleTransfer = useTransferTodos(props.todos, dialogText);
+    const handleLongPress = () => {
+        navigation.navigate("TodosTransferModal", {
+            timelineId: props.timelineId,
+        })
+    }
 
-  return (
-    <>
-      <View style={{ marginTop: 25 }}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Todos ({props.todos.length})</Text>
+    const [finishedTodos, notFinishedTodos] = useMemo(() => {
+        return props.sortedTodos.reduce(
+            ([finished, notFinished], todo) => {
+                if (todo.isCompleted) {
+                    finished.push(todo)
+                } else {
+                    notFinished.push(todo)
+                }
+                return [finished, notFinished]
+            },
+            [[] as Todos[], [] as Todos[]],
+        )
+    }, [props.sortedTodos])
 
-          <Ripple onLongPress={() => setDialog((p) => !p)} onPress={() => props.expandSheet()} style={styles.createTodo}>
-            <Text style={{ fontWeight: "bold", color: Colors.primary }}>Create todo</Text>
-          </Ripple>
-        </View>
+    return (
+        <>
+            <View style={styles.container}>
+                <TodoHeader todos={props.sortedTodos} onAddTodo={handleAddTodo} onLongPress={handleLongPress} />
 
-        {props.todos.map((todo) => (
-          <Todo timelineId={props.timelineId} key={todo.id} {...todo} />
-        ))}
-      </View>
+                {finishedTodos.length > 0 || notFinishedTodos.length > 0 ? (
+                    <>
+                        {notFinishedTodos.map((todo, index) => (
+                            <TodoItem key={todo.id} index={index} timelineId={props.timelineId} {...todo} />
+                        ))}
 
-      <Overlay opacity={0.8} onClose={() => setDialog(false)} isVisible={dialog}>
-        <View
-          style={{
-            flex: 1,
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <View
-            style={{
-              padding: 20,
-              backgroundColor: Colors.primary,
-              borderRadius: 20,
-            }}
-          >
-            <Text
-              style={{
-                color: Colors.secondary,
-                marginBottom: 10,
-                fontSize: 18,
-                fontWeight: "bold",
-              }}
-            >
-              New event ID
-            </Text>
-            <Input
-              label="Event id to be copied"
-              placeholder="xxxx-xxxxx-xxxxx"
-              placeholderTextColor="gray"
-              value={dialogText}
-              setValue={setDialogText}
-              style={{ width: L.screen.width - 50 }}
-            />
-            <Button style={{ marginTop: 10 }} type="outlined" onPress={handleTransfer}>
-              Copy
-            </Button>
-          </View>
-        </View>
-      </Overlay>
-    </>
-  );
+                        {notFinishedTodos.length === 0 && (
+                            <Card style={{ backgroundColor: Colors.primary_lighter }}>
+                                <Text variant="body" style={styles.emptyText}>
+                                    No active todos. Tap "Add Todo" to get started!
+                                </Text>
+                            </Card>
+                        )}
+
+                        {finishedTodos.length > 0 && (
+                            <FinishedTodosStack todos={finishedTodos} timelineId={props.timelineId} />
+                        )}
+                    </>
+                ) : (
+                    <Card style={styles.emptyState}>
+                        <Text variant="body" style={styles.emptyText}>
+                            No todos yet. Tap "Add Todo" to get started!
+                        </Text>
+                    </Card>
+                )}
+            </View>
+        </>
+    )
 }
 
-const Dot = (props: { color: string }) => <View style={[styles.dot, { backgroundColor: props.color }]} />;
+const getItemKey = (todo: Todos) => todo.id + (todo.isCompleted ? "1" : "0")
 
-import Animated, { FadeInDown, FadeOutUp, Layout } from "react-native-reanimated";
-import Overlay from "@/components/ui/Overlay/Overlay";
-import useTransferTodos from "../hooks/mutation/useTransferTodos";
-import useRemoveTodo from "../hooks/mutation/useRemoveTodo";
+const FinishedTodosStack = memo((props: { todos: Todos[]; timelineId: string }) => {
+    const renderItem = useCallback(
+        ({ item, index }: { item: Todos; index: number }) => (
+            <TodoItem key={item.id} index={index} {...item} timelineId={props.timelineId} />
+        ),
 
-const Todo = (todo: Todos & { timelineId: string }) => {
-  const removeTodo = useRemoveTodo(todo);
+        [props.timelineId],
+    )
 
-  return (
-    <Animated.View layout={Layout.delay(100)} entering={FadeInDown} exiting={FadeOutUp}>
-      <Pressable
-        onLongPress={() => removeTodo()}
-        style={[
-          styles.todo,
-          {
-            backgroundColor: todo.isCompleted ? Colors.primary_dark : Colors.primary_lighter,
-          },
-        ]}
-      >
-        <View style={{ flexDirection: "row", alignItems: "center" }}>
-          <Dot color={todo.isCompleted ? Colors.secondary : "red"} />
+    const onDeleteItem = useCallback(() => {}, [])
 
-          <Text
-            style={{
-              color: todo.isCompleted ? "gray" : "#fff",
-              marginLeft: 15,
-              fontSize: 16,
-              textDecorationLine: todo.isCompleted ? "line-through" : "none",
-            }}
-          >
-            {todo.title}
-          </Text>
-        </View>
-
-        {!todo.isCompleted && <CompleteTodoButton timelineId={todo.timelineId} todoId={todo.id} />}
-      </Pressable>
-    </Animated.View>
-  );
-};
+    return (
+        <CollapsibleStack
+            items={props.todos}
+            title="Completed"
+            onDeleteItem={onDeleteItem}
+            getItemKey={getItemKey}
+            renderItem={renderItem}
+            expandText="Show"
+            collapseText="Hide"
+            expandOnPress
+        />
+    )
+})

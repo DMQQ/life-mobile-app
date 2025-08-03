@@ -1,102 +1,106 @@
 {
-  "expo": {
-    "name": "Life",
-    "slug": "mylife-mobile",
-    "version": "1.1.7",
-    "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
-    "scheme": "mylife",
-    "userInterfaceStyle": "automatic",
-    "splash": {
-      "image": "./assets/images/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#151421"
-    },
-    "updates": {
-      "fallbackToCacheTimeout": 0,
-      "url": "https://u.expo.dev/5596a83c-661a-4477-806f-ee4c8a125f7e"
-    },
-    "assetBundlePatterns": ["**/*"],
-    "ios": {
-      "buildNumber": "20250626",
-      "supportsTablet": true,
-      "infoPlist": {
-        "NSFaceIDUsageDescription": "Allow $(PRODUCT_NAME) to use Face ID.",
-        "NSLocationWhenInUseUsageDescription": "This app needs access to your location to show nearby places and assign locations to your expenses.",
-        "NSLocationAlwaysAndWhenInUseUsageDescription": "This app needs access to your location to show nearby places and assign locations to your expenses.",
-        "ITSAppUsesNonExemptEncryption": false
-      },
-      "bundleIdentifier": "com.dmq.mylifemobile",
-      "associatedDomains": ["applinks:life.dmqq.dev"]
-    },
-    "android": {
-      "googleServicesFile": "./google-services.json",
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#151421"
-      },
-      "permissions": [
-        "android.permission.RECORD_AUDIO",
-        "android.permission.USE_BIOMETRIC",
-        "android.permission.USE_FINGERPRINT",
-        "android.permission.ACCESS_COARSE_LOCATION",
-        "android.permission.ACCESS_FINE_LOCATION"
-      ],
-      "package": "com.dmq.mylifemobile",
-      "intentFilters": [
-        {
-          "action": "VIEW",
-          "autoVerify": true,
-          "data": [
-            {
-              "scheme": "https",
-              "host": "*.life.dmqq.dev",
-              "pathPrefix": "/"
+    "expo": {
+        "name": "Life",
+        "slug": "mylife-mobile",
+        "version": "1.2.0",
+        "orientation": "portrait",
+        "icon": "./assets/images/icon.png",
+        "scheme": "mylife",
+        "userInterfaceStyle": "automatic",
+        "splash": {
+            "image": "./assets/images/splash.png",
+            "resizeMode": "contain",
+            "backgroundColor": "#151421"
+        },
+        "updates": {
+            "fallbackToCacheTimeout": 0,
+            "url": "https://u.expo.dev/5596a83c-661a-4477-806f-ee4c8a125f7e",
+            "checkAutomatically": "ON_LOAD",
+            "channel": "production"
+        },
+        "assetBundlePatterns": ["**/*"],
+        "ios": {
+            "buildNumber": "20250805",
+            "supportsTablet": true,
+            "infoPlist": {
+                "NSFaceIDUsageDescription": "Allow $(PRODUCT_NAME) to use Face ID.",
+                "NSLocationWhenInUseUsageDescription": "This app needs access to your location to show nearby places and assign locations to your expenses.",
+                "NSLocationAlwaysAndWhenInUseUsageDescription": "This app needs access to your location to show nearby places and assign locations to your expenses.",
+                "ITSAppUsesNonExemptEncryption": false
             },
-            {
-              "scheme": "mylife"
+            "bundleIdentifier": "com.dmq.mylifemobile",
+            "associatedDomains": ["applinks:life.dmqq.dev"]
+        },
+        "android": {
+            "googleServicesFile": "./google-services.json",
+            "adaptiveIcon": {
+                "foregroundImage": "./assets/images/adaptive-icon.png",
+                "backgroundColor": "#151421"
+            },
+            "permissions": [
+                "android.permission.RECORD_AUDIO",
+                "android.permission.USE_BIOMETRIC",
+                "android.permission.USE_FINGERPRINT",
+                "android.permission.ACCESS_COARSE_LOCATION",
+                "android.permission.ACCESS_FINE_LOCATION"
+            ],
+            "package": "com.dmq.mylifemobile",
+            "intentFilters": [
+                {
+                    "action": "VIEW",
+                    "autoVerify": true,
+                    "data": [
+                        {
+                            "scheme": "https",
+                            "host": "*.life.dmqq.dev",
+                            "pathPrefix": "/"
+                        },
+                        {
+                            "scheme": "mylife"
+                        }
+                    ],
+                    "category": ["BROWSABLE", "DEFAULT"]
+                }
+            ]
+        },
+        "web": {
+            "favicon": "./assets/images/favicon.png"
+        },
+        "plugins": [
+            "expo-notifications",
+            [
+                "expo-image-picker",
+                {
+                    "photosPermission": "The app accesses your photos to let you share them with your friends."
+                }
+            ],
+            [
+                "expo-location",
+                {
+                    "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location to show nearby places and assign locations to your expenses."
+                }
+            ],
+            "expo-asset",
+            "expo-font",
+            "expo-secure-store",
+            [
+                "expo-splash-screen",
+                {
+                    "backgroundColor": "#0d0f14",
+                    "image": "./assets/images/icon.png",
+                    "imageWidth": 200
+                }
+            ],
+            "expo-quick-actions",
+            "expo-build-properties"
+        ],
+
+        "extra": {
+            "eas": {
+                "projectId": "5596a83c-661a-4477-806f-ee4c8a125f7e"
             }
-          ],
-          "category": ["BROWSABLE", "DEFAULT"]
-        }
-      ]
-    },
-    "web": {
-      "favicon": "./assets/images/favicon.png"
-    },
-    "plugins": [
-      "expo-notifications",
-      [
-        "expo-image-picker",
-        {
-          "photosPermission": "The app accesses your photos to let you share them with your friends."
-        }
-      ],
-      [
-        "expo-location",
-        {
-          "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location to show nearby places and assign locations to your expenses."
-        }
-      ],
-      "expo-asset",
-      "expo-font",
-      "expo-secure-store",
-      [
-        "expo-splash-screen",
-        {
-          "backgroundColor": "#0d0f14",
-          "image": "./assets/images/icon.png",
-          "imageWidth": 200
-        }
-      ],
-      "expo-quick-actions"
-    ],
-    "extra": {
-      "eas": {
-        "projectId": "5596a83c-661a-4477-806f-ee4c8a125f7e"
-      }
-    },
-    "owner": "dmq",
-    "runtimeVersion": "1.0.0"
-  }
+        },
+        "owner": "dmq",
+        "runtimeVersion": "1.0.0"
+    }
 }

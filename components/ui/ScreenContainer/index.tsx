@@ -17,6 +17,7 @@ export default function ScreenContainer({ children, style, scroll = false, cente
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <Component
+        keyboardDismissMode="on-drag"
         contentContainerStyle={[
           centered &&
             scroll && {

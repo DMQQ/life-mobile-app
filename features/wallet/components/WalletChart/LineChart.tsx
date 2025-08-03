@@ -1,3 +1,4 @@
+import Colors from "@/constants/Colors";
 import Layout from "@/constants/Layout";
 import { LineChart as LineChartGifted } from "react-native-gifted-charts";
 
@@ -7,6 +8,6 @@ interface LineChartProps {
 }
 export default function LineChart(props: LineChartProps) {
   return (
-    <LineChartGifted width={Layout.screen.width} height={300} data={props.data || []} color={"#fff"} thickness={3} dataPointsColor="blue" />
+    <LineChartGifted width={Layout.screen.width} height={300} data={props.data || []} color={Colors.foreground} thickness={3} dataPointsColor="blue" />
   );
 }

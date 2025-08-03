@@ -1,6 +1,8 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
 import Animated, { interpolateColor, useAnimatedStyle, useDerivedValue, withSpring } from "react-native-reanimated";
+import Text from "@/components/ui/Text/Text";
+import Colors from "@/constants/Colors";
 
 interface SuccessBarProps {
   correctAnswers: number;
@@ -23,7 +25,7 @@ const SuccessBar: React.FC<SuccessBarProps> = ({ correctAnswers, incorrectAnswer
       <View style={styles.barBackground}>
         <Animated.View style={[styles.barForeground, barStyle]} />
       </View>
-      <Text style={styles.text}>
+      <Text variant="caption" style={styles.text}>
         {correctAnswers}/{total}
       </Text>
     </View>
@@ -48,8 +50,7 @@ const styles = StyleSheet.create({
     height: "100%",
   },
   text: {
-    color: "#fff",
-    fontSize: 12,
+    color: Colors.foreground,
   },
 });
 

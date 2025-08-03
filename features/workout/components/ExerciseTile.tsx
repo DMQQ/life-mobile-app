@@ -40,7 +40,7 @@ export default function ExerciseTile(props: Exercise & { onPress: (exerciseId: s
         }}
       />
       <View style={styles.contentContainer}>
-        <Text style={{ fontWeight: "bold", color: "#fff", fontSize: 20 }}>{props.title}</Text>
+        <Text style={{ fontWeight: "bold", color: Colors.foreground, fontSize: 20 }}>{props.title}</Text>
         <Text style={{ fontWeight: "500", color: "#ffffff8c" }} numberOfLines={3}>
           {props.description}
         </Text>
