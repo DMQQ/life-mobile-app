@@ -8,7 +8,7 @@ import { gql, useMutation } from "@apollo/client"
 import { AntDesign } from "@expo/vector-icons"
 import { Formik } from "formik"
 import { useState } from "react"
-import { SafeAreaView, StyleSheet, View } from "react-native"
+import { SafeAreaView, ScrollView, StyleSheet, View } from "react-native"
 import Feedback from "react-native-haptic-feedback"
 import * as yup from "yup"
 import CategorySelector from "../components/CreateExpense/CategorySelectorView"
@@ -94,7 +94,12 @@ export default function CreateLimits({ navigation }: WalletScreens<"CreateLimits
             >
                 {(formik) => (
                     <>
-                        <View style={styles.content}>
+                        <ScrollView
+                            style={styles.content}
+                            contentContainerStyle={{ paddingBottom: 20 }}
+                            keyboardDismissMode="on-drag"
+                            showsVerticalScrollIndicator={false}
+                        >
                             <Text style={styles.subtitle}>
                                 Set a limit to track your spending in a specific category over time. You'll get
                                 notifications when you're close to reaching your limit.
@@ -137,7 +142,9 @@ export default function CreateLimits({ navigation }: WalletScreens<"CreateLimits
                                                 setCategoryPicker(true)
                                             }}
                                             editable={false}
-                                            style={formik.values.category ? styles.selectedCategoryInput : undefined}
+                                            style={
+                                                formik.values.category ? styles.selectedCategoryInput : undefined
+                                            }
                                             left={
                                                 formik.values.category ? (
                                                     <CategoryIcon
@@ -194,7 +201,7 @@ export default function CreateLimits({ navigation }: WalletScreens<"CreateLimits
                                     </View>
                                 </>
                             )}
-                        </View>
+                        </ScrollView>
 
                         {!categoryPicker && (
                             <View style={styles.bottomButtonContainer}>
@@ -276,7 +283,7 @@ const styles = StyleSheet.create({
     },
     bottomButtonContainer: {
         padding: 15,
-        paddingBottom: 0,
+        paddingBottom: 15,
     },
     createButton: {
         width: "100%",
