@@ -182,7 +182,7 @@ const CollapsibleStack = React.memo(
         expandOnPress,
         onChange,
     }: CollapsibleStackProps<T>) => {
-        const [isExpanded, setIsExpanded] = useState<boolean>(false)
+        const [isExpanded, setIsExpanded] = useState<boolean>(items.length === 1)
         const itemHeightsRef = useRef<{ [key: string]: number }>({})
         const measuredItemsRef = useRef<Set<string>>(new Set())
         const containerHeight = useSharedValue<number>(200)

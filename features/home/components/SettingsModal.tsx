@@ -493,6 +493,8 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
                                     </BlurView>
                                 </View>
 
+                                <EnabledNotifications />
+
                                 <View style={styles.themeSection}>
                                     <BlurView intensity={20} tint="dark">
                                         <View style={styles.themeSectionContent}>
@@ -651,6 +653,7 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
 import Button2 from "@/components/ui/Button/Button2"
 import { useExpoUpdates } from "@/utils/hooks/useExpoUpdate"
 import React, { useEffect } from "react"
+import EnabledNotifications from "./EnabledNotifications"
 
 export const UpdateButton: React.FC = () => {
     const { isUpdateAvailable, isDownloading, checkForUpdate, downloadAndRestart } = useExpoUpdates()
