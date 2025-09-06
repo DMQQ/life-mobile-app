@@ -7,13 +7,24 @@ import { useEffect, useState } from "react"
 import { StyleSheet, Switch, View } from "react-native"
 import Feedback from "react-native-haptic-feedback"
 
-// GraphQL Queries and Mutations
 const GET_NOTIFICATION_SETTINGS = gql`
     query GetNotificationSettings {
         getNotificationSettings {
             id
             isEnable
             enabledNotifications
+        }
+    }
+`
+
+const GET_AVAILABLE_NOTIFICATION_TYPES = gql`
+    query GetAvailableNotificationTypes {
+        getAvailableNotificationTypes {
+            key
+            title
+            description
+            category
+            schedule
         }
     }
 `
@@ -28,7 +39,6 @@ const TOGGLE_ENABLED_NOTIFICATIONS = gql`
     }
 `
 
-// All possible notification types based on the backend implementation
 export const NOTIFICATION_TYPES = [
     {
         key: "budgetAlerts",
@@ -212,6 +222,14 @@ interface NotificationData {
     enabledNotifications: Record<string, boolean> | null
 }
 
+interface NotificationType {
+    key: string
+    title: string
+    description: string
+    category: string
+    schedule?: string
+}
+
 export default function EnabledNotifications() {
     const [settings, setSettings] = useState<NotificationSettings>({
         isEnable: true,
@@ -220,7 +238,6 @@ export default function EnabledNotifications() {
 
     const [hasChanges, setHasChanges] = useState(false)
 
-    // Query to get current settings
     const { data, loading, error } = useQuery<{ getNotificationSettings: NotificationData }>(
         GET_NOTIFICATION_SETTINGS,
         {
@@ -232,11 +249,14 @@ export default function EnabledNotifications() {
                     })
                 }
             },
-            errorPolicy: "all", // Continue rendering even with errors
+            errorPolicy: "all",
         },
     )
 
-    // Mutation to save changes
+    const { data: notificationTypesData, loading: notificationTypesLoading } = useQuery<{ 
+        getAvailableNotificationTypes: NotificationType[] 
+    }>(GET_AVAILABLE_NOTIFICATION_TYPES)
+
     const [toggleEnabledNotifications, { loading: saving }] = useMutation(TOGGLE_ENABLED_NOTIFICATIONS, {
         onCompleted: () => {
             setHasChanges(false)
@@ -248,14 +268,13 @@ export default function EnabledNotifications() {
         },
     })
 
-    // Initialize default values for missing notification types
     useEffect(() => {
-        if (data?.getNotificationSettings?.enabledNotifications) {
+        if (data?.getNotificationSettings?.enabledNotifications && notificationTypesData?.getAvailableNotificationTypes) {
             const currentSettings = data.getNotificationSettings.enabledNotifications
             const defaultSettings: Record<string, boolean> = {}
+            const availableTypes = notificationTypesData.getAvailableNotificationTypes
 
-            // Set default to true for all notification types if not explicitly set
-            NOTIFICATION_TYPES.forEach((type) => {
+            availableTypes.forEach((type) => {
                 defaultSettings[type.key] = currentSettings[type.key] !== false
             })
 
@@ -264,7 +283,7 @@ export default function EnabledNotifications() {
                 enabledNotifications: defaultSettings,
             }))
         }
-    }, [data])
+    }, [data, notificationTypesData])
 
     const handleMasterToggle = (value: boolean) => {
         Feedback.trigger("selection")
@@ -300,7 +319,7 @@ export default function EnabledNotifications() {
         }
     }
 
-    if (loading) {
+    if (loading || notificationTypesLoading) {
         return (
             <View style={styles.loadingContainer}>
                 <Text variant="body" style={styles.loadingText}>
@@ -309,6 +328,8 @@ export default function EnabledNotifications() {
             </View>
         )
     }
+
+    const notificationTypes = notificationTypesData?.getAvailableNotificationTypes || NOTIFICATION_TYPES
 
     return (
         <View style={styles.content}>
@@ -329,7 +350,6 @@ export default function EnabledNotifications() {
                 </View>
             )}
 
-            {/* Master Switch */}
             <View style={styles.section}>
                 <BlurView intensity={20} tint="dark">
                     <View style={[styles.sectionContent, styles.masterSwitchContainer]}>
@@ -358,7 +378,6 @@ export default function EnabledNotifications() {
                 </BlurView>
             </View>
 
-            {/* Individual Notification Types */}
             <View style={styles.section}>
                 <BlurView intensity={20} tint="dark">
                     <View style={styles.sectionContent}>
@@ -369,7 +388,7 @@ export default function EnabledNotifications() {
                             Control specific types of notifications
                         </Text>
 
-                        {NOTIFICATION_TYPES.map((notification, index) => {
+                        {notificationTypes.map((notification, index) => {
                             const isEnabled = settings.enabledNotifications[notification.key] !== false
                             const isDisabled = !settings.isEnable
 
@@ -378,7 +397,7 @@ export default function EnabledNotifications() {
                                     key={notification.key}
                                     style={[
                                         styles.notificationItem,
-                                        index === NOTIFICATION_TYPES.length - 1 && styles.lastItem,
+                                        index === notificationTypes.length - 1 && styles.lastItem,
                                     ]}
                                 >
                                     <View style={styles.notificationContent}>
@@ -418,7 +437,6 @@ export default function EnabledNotifications() {
                 </BlurView>
             </View>
 
-            {/* Save Button */}
             <View style={styles.saveButtonContainer}>
                 <Button
                     onPress={handleSave}
