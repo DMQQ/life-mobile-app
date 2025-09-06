@@ -428,7 +428,7 @@ export function FloatingNotifications() {
             }}
         >
             <CollapsibleStack
-                items={notifications}
+                items={notifications.slice(0, 4)}
                 renderItem={renderItem}
                 getItemKey={(item: Notification) => item.id}
                 showHeader={false}
