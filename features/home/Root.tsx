@@ -53,7 +53,7 @@ function Root({}: ScreenProps<"Root">) {
             {
                 icon: (
                     <View style={{ position: "relative" }}>
-                        <AntDesign name="bells" size={20} color={Colors.foreground} />
+                        <AntDesign name="bell" size={20} color={Colors.foreground} />
                         {(data?.notifications as any[])?.some((n) => !n.read) && <PulsingIndicator />}
                     </View>
                 ),

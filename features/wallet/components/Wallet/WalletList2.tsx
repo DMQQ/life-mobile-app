@@ -240,7 +240,6 @@ export default function WalletList2({
                             subscription={item.data}
                             index={item.index}
                             onPress={() => {
-                                console.log("Subscription pressed:", item.data.id)
                                 navigation.navigate("Subscription", {
                                     subscriptionId: item.data.id,
                                 })
@@ -295,6 +294,8 @@ export default function WalletList2({
         )
     }
 
+    console.log("Rendering WalletList2 with unifiedData length:", unifiedData.length)
+
     return (
         <>
             <AnimatedList
@@ -320,6 +321,7 @@ export default function WalletList2({
                             return `item-${index}`
                     }
                 }}
+                getItemType={(item) => item.type}
                 onScroll={onScroll}
                 contentContainerStyle={{ padding: 15, paddingTop: 300, paddingBottom: 120 }}
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}

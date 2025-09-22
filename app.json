@@ -15,8 +15,7 @@
         "updates": {
             "fallbackToCacheTimeout": 0,
             "url": "https://u.expo.dev/5596a83c-661a-4477-806f-ee4c8a125f7e",
-            "checkAutomatically": "ON_LOAD",
-            "channel": "production"
+            "checkAutomatically": "ON_LOAD"
         },
         "assetBundlePatterns": ["**/*"],
         "ios": {
@@ -92,9 +91,9 @@
                 }
             ],
             "expo-quick-actions",
-            "expo-build-properties"
+            "expo-build-properties",
+            "expo-web-browser"
         ],
-
         "extra": {
             "eas": {
                 "projectId": "5596a83c-661a-4477-806f-ee4c8a125f7e"

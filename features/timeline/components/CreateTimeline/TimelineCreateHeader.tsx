@@ -30,7 +30,7 @@ export default function TimelineCreateHeader(
     return (
         <View style={[styles.header]}>
             <Ripple style={{ padding: 10 }} onPress={props.navigation.goBack}>
-                <AntDesign name="arrowleft" color={Colors.foreground} size={23} />
+                <AntDesign name="arrow-left" color={Colors.foreground} size={23} />
             </Ripple>
 
             {props.selectedDate.split(";").length === 1 && (

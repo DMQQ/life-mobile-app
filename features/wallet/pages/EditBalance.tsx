@@ -8,12 +8,13 @@ import Color from "color"
 import dayjs from "dayjs"
 import { Formik } from "formik"
 import { useState } from "react"
-import { ActivityIndicator, SafeAreaView, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native"
+import { ActivityIndicator, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native"
 import Feedback from "react-native-haptic-feedback"
 import DateTimePicker from "react-native-modal-datetime-picker"
 import * as yup from "yup"
 import useEditWallet from "../hooks/useEditWallet"
 import { WalletScreens } from "../Main"
+import { SafeAreaView } from "react-native-safe-area-context"
 
 const validationSchema = yup.object().shape({
     balance: yup

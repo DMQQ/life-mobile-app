@@ -81,13 +81,13 @@ export default function SubscriptionItem({ subscription, index, onPress }: Subsc
     const daysUntilNext = moment(parseInt(subscription.nextBillingDate)).diff(moment(), "days")
     const isOverdue = daysUntilNext < 0
 
-    const expenses = useMemo(() => {
+    const expenses = (() => {
         const copy = [...subscription.expenses]
 
         copy.sort((a, b) => moment(b.date).diff(moment(a.date)))
 
         return copy
-    }, [subscription.expenses])
+    })()
 
     const subscriptionDuration = getSubscriptionDuration(expenses[expenses.length - 1]?.date || subscription.dateStart)
 

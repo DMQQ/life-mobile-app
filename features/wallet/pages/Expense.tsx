@@ -741,7 +741,7 @@ const FileUpload = (props: { id: string; images: any[] }) => {
 
                 <View style={{ flexDirection: "row", gap: 20 }}>
                     <Ripple onPress={handleTakePhoto}>
-                        <AntDesign name="camerao" size={24} color={Colors.foreground} />
+                        <AntDesign name="camera" size={24} color={Colors.foreground} />
                     </Ripple>
                     <Ripple onPress={handleImagesSelect}>
                         <AntDesign name="plus" size={24} color={Colors.foreground} onPress={handleImagesSelect} />

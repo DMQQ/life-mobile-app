@@ -8,7 +8,8 @@ import { gql, useMutation } from "@apollo/client"
 import { AntDesign } from "@expo/vector-icons"
 import { Formik } from "formik"
 import { useState } from "react"
-import { SafeAreaView, ScrollView, StyleSheet, View } from "react-native"
+import { ScrollView, StyleSheet, View } from "react-native"
+import { SafeAreaView } from "react-native-safe-area-context"
 import Feedback from "react-native-haptic-feedback"
 import * as yup from "yup"
 import CategorySelector from "../components/CreateExpense/CategorySelectorView"
@@ -142,9 +143,7 @@ export default function CreateLimits({ navigation }: WalletScreens<"CreateLimits
                                                 setCategoryPicker(true)
                                             }}
                                             editable={false}
-                                            style={
-                                                formik.values.category ? styles.selectedCategoryInput : undefined
-                                            }
+                                            style={formik.values.category ? styles.selectedCategoryInput : undefined}
                                             left={
                                                 formik.values.category ? (
                                                     <CategoryIcon

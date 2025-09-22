@@ -5,7 +5,7 @@ import { getItemAsync } from "expo-secure-store"
 import * as SplashScreen from "expo-splash-screen"
 import { StatusBar } from "expo-status-bar"
 import { GestureHandlerRootView } from "react-native-gesture-handler"
-import { SafeAreaView } from "react-native-safe-area-context"
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context"
 import { Provider } from "react-redux"
 import ErrorBoundary from "./components/ErrorBoundary"
 import Colors from "./constants/Colors"
@@ -14,6 +14,10 @@ import Navigation from "./navigation"
 import ThemeContextProvider from "./utils/context/ThemeContext"
 import { STORE_KEY } from "./utils/hooks/useUser"
 import { store } from "./utils/redux"
+
+import { setLogVerbosity } from "@apollo/client"
+
+setLogVerbosity("error")
 
 SplashScreen.preventAutoHideAsync()
 
@@ -69,7 +73,7 @@ const apolloClient = new ApolloClient({
 
 export default function App() {
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: Colors.primary }}>
+        <SafeAreaProvider style={{ flex: 1, backgroundColor: Colors.primary }}>
             <ErrorBoundary>
                 <GestureHandlerRootView style={{ flex: 1 }}>
                     <ThemeContextProvider>
@@ -82,6 +86,6 @@ export default function App() {
                     </ThemeContextProvider>
                 </GestureHandlerRootView>
             </ErrorBoundary>
-        </SafeAreaView>
+        </SafeAreaProvider>
     )
 }

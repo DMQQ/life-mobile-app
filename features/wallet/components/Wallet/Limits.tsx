@@ -119,7 +119,6 @@ export default function WalletLimits({ navigation }: { navigation: any }) {
         return budgetStatus
     }, [walletData, statistics, selectedRange])
 
-
     const handleRangeChange = (range: any) => {
         Feedback.trigger("impactLight")
         setSelectedRange(range)
@@ -260,9 +259,9 @@ export default function WalletLimits({ navigation }: { navigation: any }) {
                                             }}
                                         >
                                             {limit.current > prevMap[limit.category] ? (
-                                                <AntDesign name="arrowup" size={12} color={lightIcon} />
+                                                <AntDesign name="arrow-up" size={12} color={lightIcon} />
                                             ) : (
-                                                <AntDesign name="arrowdown" size={12} color={lightIcon} />
+                                                <AntDesign name="arrow-down" size={12} color={lightIcon} />
                                             )}
                                         </Animated.View>
                                         <CategoryIcon
@@ -325,9 +324,9 @@ export default function WalletLimits({ navigation }: { navigation: any }) {
                                                 numberOfLines={1}
                                             >
                                                 {/* {limit.current > prevMap[limit.category] ? (
-                          <AntDesign name="arrowup" size={12} color={isOverLimit ? "#F07070" : iconData.backgroundColor || color} />
+                          <AntDesign name="arrow-up" size={12} color={isOverLimit ? "#F07070" : iconData.backgroundColor || color} />
                         ) : (
-                          <AntDesign name="arrowdown" size={12} color={isOverLimit ? "#F07070" : iconData.backgroundColor || color} />
+                          <AntDesign name="arrow-down" size={12} color={isOverLimit ? "#F07070" : iconData.backgroundColor || color} />
                         )} */}
                                                 {((limit.current / limit.amount) * 100).toFixed(0)}%
                                             </Text>
@@ -349,7 +348,6 @@ export default function WalletLimits({ navigation }: { navigation: any }) {
                     scale={0.75}
                 />
             </View>
-
         </Animated.View>
     )
 }

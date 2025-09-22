@@ -147,7 +147,7 @@ function Header(props: HeaderProps) {
                                 Haptic.trigger("impactLight")
                                 navigation.canGoBack() && navigation.goBack()
                             }, 250)}
-                            icon={props.backIcon || <AntDesign name="arrowleft" size={24} color={Colors.foreground} />}
+                            icon={props.backIcon || <AntDesign name="arrow-left" size={24} color={Colors.foreground} />}
                         />
                     )}
 

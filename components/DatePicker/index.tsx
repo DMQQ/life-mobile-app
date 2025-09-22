@@ -175,7 +175,7 @@ export default function DatePicker({
             {typeof buttonComponent === "function" ? (
                 buttonComponent({ start: dates.start, end: dates.end })
             ) : (
-                <ChipButton icon="clockcircleo">{getDisplayText()}</ChipButton>
+                <ChipButton icon="clock-circle">{getDisplayText()}</ChipButton>
             )}
         </FloatingMenu>
     )

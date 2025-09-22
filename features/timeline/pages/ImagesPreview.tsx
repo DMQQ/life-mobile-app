@@ -51,15 +51,21 @@ export default function ImagesPreview({ route, navigation }: TimelineScreenProps
 
     return (
         <View style={styles.modalContainer}>
-            <GesturedImage uri={route.params.selectedImage} onSingleTap={() => {
-                navigation.canGoBack() && navigation.goBack()
-                console.log("Back pressed")
-            }} />
-            <TouchableOpacity style={[styles.closeButton, { top: insets.top + 10 }]} onPress={() => {
-                navigation.canGoBack() && navigation.goBack()
-                console.log("Back pressed")
-            }}>
-                <AntDesign name="arrowleft" size={24} color={Colors.foreground} />
+            <GesturedImage
+                uri={route.params.selectedImage}
+                onSingleTap={() => {
+                    navigation.canGoBack() && navigation.goBack()
+                    console.log("Back pressed")
+                }}
+            />
+            <TouchableOpacity
+                style={[styles.closeButton, { top: insets.top + 10 }]}
+                onPress={() => {
+                    navigation.canGoBack() && navigation.goBack()
+                    console.log("Back pressed")
+                }}
+            >
+                <AntDesign name="arrow-left" size={24} color={Colors.foreground} />
             </TouchableOpacity>
         </View>
     )

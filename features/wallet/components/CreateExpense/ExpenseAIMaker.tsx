@@ -587,7 +587,7 @@ export default function ExpenseAIMaker({
             <IconButton
                 onPress={handleImagePick}
                 style={{ position: "absolute", top: 15, right: 15, zIndex: 100 }}
-                icon={<AntDesign name="camerao" size={24} color="rgba(255,255,255,0.7)" />}
+                icon={<AntDesign name="camera" size={24} color="rgba(255,255,255,0.7)" />}
             />
 
             <FloatingProcessingView

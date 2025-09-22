@@ -150,7 +150,7 @@ const AnimatedSearchInput = ({
                     />
                 ) : (
                     <IconButton
-                        icon={<AntDesign name="search1" size={20} color={Colors.foreground} />}
+                        icon={<AntDesign name="search" size={20} color={Colors.foreground} />}
                         onPress={onSubmit}
                     />
                 )}

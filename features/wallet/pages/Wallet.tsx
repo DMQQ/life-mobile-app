@@ -4,7 +4,7 @@ import useTrackScroll from "@/utils/hooks/ui/useTrackScroll"
 import { AntDesign, Feather, Ionicons } from "@expo/vector-icons"
 import { useNavigation } from "@react-navigation/native"
 import { useCallback, useEffect, useMemo, useState } from "react"
-import { SafeAreaView, StyleSheet, View } from "react-native"
+import { StyleSheet, View } from "react-native"
 import Haptic from "react-native-haptic-feedback"
 import Animated, { FadeOut, SharedValue } from "react-native-reanimated"
 import AnimatedHeaderSearch from "../../../components/ui/Header/AnimatedHeaderSearch"
@@ -14,6 +14,7 @@ import WalletLoader from "../components/Wallet/WalletLoader"
 import { useWalletContext } from "../components/WalletContext"
 import useGetWallet from "../hooks/useGetWallet"
 import { WalletScreens } from "../Main"
+import { SafeAreaView } from "react-native-safe-area-context"
 
 const styles = StyleSheet.create({
     container: {
@@ -109,7 +110,7 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
         )
 
     return (
-        <View style={{ flex: 1 }}>
+        <SafeAreaView style={{ flex: 1 }}>
             {loading && (
                 <Animated.View exiting={FadeOut.duration(250)} style={[StyleSheet.absoluteFillObject, styles.overlay]}>
                     <WalletLoader />
@@ -137,7 +138,7 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
                 showSubscriptions={showSubscriptionsView}
                 showExpenses={!showSubscriptionsView}
             />
-        </View>
+        </SafeAreaView>
     )
 }
 
