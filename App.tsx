@@ -28,9 +28,12 @@ SplashScreen.setOptions({
 
 Notifications.setNotificationHandler({
     handleNotification: async () => ({
-        shouldShowAlert: true,
         shouldPlaySound: false,
         shouldSetBadge: false,
+        shouldShowAlert: true,
+        shouldShowBanner: true,
+        shouldShowList: true,
+        priority: Notifications.AndroidNotificationPriority.HIGH,
     }),
 })
 

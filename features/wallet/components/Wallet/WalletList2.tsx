@@ -9,7 +9,15 @@ import { FlashList } from "@shopify/flash-list"
 import Color from "color"
 import moment from "moment"
 import { useCallback, useEffect, useMemo, useState } from "react"
-import { NativeScrollEvent, NativeSyntheticEvent, RefreshControl, StyleSheet, Text, View } from "react-native"
+import {
+    NativeScrollEvent,
+    NativeSyntheticEvent,
+    RefreshControl,
+    StyleSheet,
+    Text,
+    View,
+    VirtualizedList,
+} from "react-native"
 import Ripple from "react-native-material-ripple"
 import Animated, { FadeInDown, FadeOutDown, LinearTransition } from "react-native-reanimated"
 import useGetSubscriptions from "../../hooks/useGetSubscriptions"
@@ -46,7 +54,7 @@ interface WalletList2Props {
     showExpenses?: boolean
 }
 
-const AnimatedList = Animated.createAnimatedComponent(FlashList)
+const AnimatedList = Animated.createAnimatedComponent(VirtualizedList)
 
 type ListItemType =
     | { type: "limits" }
@@ -301,7 +309,8 @@ export default function WalletList2({
             <AnimatedList
                 keyboardDismissMode={"on-drag"}
                 data={unifiedData}
-                estimatedItemSize={80}
+                getItem={(_, index) => _[index]}
+                getItemCount={(data) => data.length}
                 renderItem={renderItem as any}
                 keyExtractor={(item: any, index: number) => {
                     switch (item.type) {
@@ -322,6 +331,7 @@ export default function WalletList2({
                     }
                 }}
                 getItemType={(item) => item.type}
+                g
                 onScroll={onScroll}
                 contentContainerStyle={{ padding: 15, paddingTop: 300, paddingBottom: 120 }}
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}

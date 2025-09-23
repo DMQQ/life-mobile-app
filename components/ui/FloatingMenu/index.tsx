@@ -33,8 +33,8 @@ const FloatingMenu = forwardRef<FloatingMenuRef, FloatingMenuProps>(
             setIsAnimating(true)
             opacity.value = withTiming(1, { duration: 200 })
             scale.value = withSpring(1, { damping: 22, stiffness: 250, mass: 0.8 })
-            translateX.value = withSpring(0, { damping: 25, stiffness: 280 })
-            translateY.value = withSpring(0, { damping: 25, stiffness: 280 })
+            translateX.value = withTiming(0)
+            translateY.value = withTiming(0)
 
             // Use setTimeout instead of worklet callback
             setTimeout(() => {
@@ -59,8 +59,8 @@ const FloatingMenu = forwardRef<FloatingMenuRef, FloatingMenuProps>(
             // Start animations
             opacity.value = withTiming(0, { duration: 180 })
             scale.value = withSpring(0.2, { damping: 20, stiffness: 200 })
-            translateX.value = withSpring(anchorCenterX - menuCenterX, { damping: 20, stiffness: 200 })
-            translateY.value = withSpring(anchorCenterY - menuCenterY, { damping: 20, stiffness: 200 })
+            translateX.value = withTiming(anchorCenterX - menuCenterX)
+            translateY.value = withTiming(anchorCenterY - menuCenterY)
 
             // Close after animation completes (no worklet callback)
             setTimeout(() => {
@@ -70,20 +70,6 @@ const FloatingMenu = forwardRef<FloatingMenuRef, FloatingMenuProps>(
                 }
             }, 400) // Wait for spring to finish
 
-            onVisibilityChange?.(false)
-        }
-
-        const hideMenuInstant = () => {
-            if (isAnimating) return
-
-            // Cancel all animations immediately to avoid worklet issues
-            opacity.value = 0
-            scale.value = 0.3
-            translateX.value = 0
-            translateY.value = 0
-
-            setIsOpen(false)
-            setIsAnimating(false)
             onVisibilityChange?.(false)
         }
 

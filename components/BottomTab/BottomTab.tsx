@@ -4,9 +4,8 @@ import { BottomTabBarProps } from "@react-navigation/bottom-tabs"
 import Color from "color"
 import moment from "moment"
 import { useEffect } from "react"
-import { Platform, StyleSheet } from "react-native"
+import { Platform, Pressable, StyleSheet } from "react-native"
 import Feedback from "react-native-haptic-feedback"
-import Ripple from "react-native-material-ripple"
 import Animated, {
     FadeInDown,
     interpolate,
@@ -21,22 +20,24 @@ import Colors from "../../constants/Colors"
 import Layout from "../../constants/Layout"
 import { useTheme } from "../../utils/context/ThemeContext"
 import useKeyboard from "../../utils/hooks/useKeyboard"
-import BlurSurface from "../ui/BlurSurface"
+import { GlassView } from "expo-glass-effect"
 
 const blurOverlayColor = Color(Colors.primary).alpha(0.1).toString()
 
 const styles = StyleSheet.create({
     container: {
-        width: Layout.screen.width,
+        width: Layout.screen.width - 30,
         justifyContent: "space-around",
         flexDirection: "row",
         position: "absolute",
-        bottom: 0,
-        height: 90,
+        bottom: 15,
+        height: 70,
+        left: 15,
+        right: 15,
     },
     button: {
         padding: 5,
-        paddingVertical: 10,
+        paddingVertical: 5,
         justifyContent: "center",
         alignItems: "center",
         borderRadius: 15,
@@ -47,11 +48,12 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
         backgroundColor: blurOverlayColor,
         position: "relative",
+        borderRadius: 40,
     },
     activeIndicator: {
         position: "absolute",
         top: 15,
-        height: 45,
+        height: 40,
         backgroundColor: Colors.secondary,
         borderRadius: 22.5,
         opacity: 0.15,
@@ -62,27 +64,18 @@ const styles = StyleSheet.create({
         },
         shadowOpacity: 0.7,
         shadowRadius: 16.0,
-
         elevation: 24,
     },
-    activeDot: {
-        position: "absolute",
-        top: -5,
-        width: 6,
-        height: 6,
-        backgroundColor: Colors.secondary,
-        borderRadius: 3,
-    },
 })
+
+const AnimatedGlassView = Animated.createAnimatedComponent(GlassView)
 
 export default function BottomTab({ navigation, state, insets }: BottomTabBarProps) {
     const navigate = (route: string) => navigation.navigate(route)
     const activeRoute = state.routes[state.index].name
-    const { theme } = useTheme()
-
     const routes = ["NotesScreens", "GoalsScreens", "Root", "WalletScreens", "TimelineScreens"]
     const activeIndex = routes.indexOf(activeRoute)
-    const buttonWidth = Layout.screen.width / state.routes.length
+    const buttonWidth = (Layout.screen.width - 30) / state.routes.length
 
     const indicatorPosition = useSharedValue(activeIndex * buttonWidth)
     const iconScale = useSharedValue(1)
@@ -105,9 +98,10 @@ export default function BottomTab({ navigation, state, insets }: BottomTabBarPro
 
     const Btn = (props: { route: string; iconName: any; label: string; onLongPress?: any; index: number }) => {
         const isActive = activeRoute === props.route
+        const pressScale = useSharedValue(1)
 
         const buttonAnimatedStyle = useAnimatedStyle(() => {
-            const scale = isActive ? iconScale.value : 1
+            const scale = isActive ? iconScale.value : pressScale.value
             return {
                 transform: [{ scale }],
             }
@@ -120,11 +114,26 @@ export default function BottomTab({ navigation, state, insets }: BottomTabBarPro
             }
         })
 
+        const handlePressIn = () => {
+            pressScale.value = withTiming(0.85, { duration: 100 })
+            Feedback.trigger("impactLight", {
+                enableVibrateFallback: false,
+                ignoreAndroidSystemSettings: false,
+            })
+        }
+
+        const handlePressOut = () => {
+            pressScale.value = withSpring(1, {
+                damping: 15,
+                stiffness: 300,
+            })
+        }
+
         return (
-            <Ripple
+            <Pressable
+                onPressIn={handlePressIn}
+                onPressOut={handlePressOut}
                 onLongPress={props.onLongPress}
-                rippleCentered
-                rippleColor={theme.colors.secondary}
                 style={[
                     styles.button,
                     {
@@ -151,7 +160,6 @@ export default function BottomTab({ navigation, state, insets }: BottomTabBarPro
                                         },
                                         shadowOpacity: 0.7,
                                         shadowRadius: 16.0,
-
                                         elevation: 24,
                                     }),
                                 }}
@@ -161,7 +169,7 @@ export default function BottomTab({ navigation, state, insets }: BottomTabBarPro
                         )}
                     </Animated.View>
                 </Animated.View>
-            </Ripple>
+            </Pressable>
         )
     }
 
@@ -182,16 +190,23 @@ export default function BottomTab({ navigation, state, insets }: BottomTabBarPro
             entering={FadeInDown.duration(150)}
             exiting={FadeInDown.duration(150)}
         >
-            <BlurSurface
+            <GlassView
+                tintColor={Color(Colors.primary).alpha(0.2).string()}
+                isInteractive
+                glassEffectStyle="clear"
                 style={[
                     styles.innerContainer,
                     {
-                        paddingBottom: Platform.OS === "android" ? Padding.s + insets.bottom : Padding.xxl,
+                        paddingBottom: Platform.OS === "android" ? Padding.s + insets.bottom : Padding.xl,
                         paddingTop: Platform.OS === "android" ? insets.bottom + Padding.s : Padding.s,
                     },
                 ]}
             >
-                <Animated.View style={[styles.activeIndicator, indicatorStyle]} />
+                <AnimatedGlassView
+                    glassEffectStyle="regular"
+                    tintColor={Colors.secondary}
+                    style={[styles.activeIndicator, indicatorStyle]}
+                />
 
                 <Btn
                     index={0}
@@ -254,7 +269,7 @@ export default function BottomTab({ navigation, state, insets }: BottomTabBarPro
                     label="Timeline"
                     iconName={"calendar-number"}
                 />
-            </BlurSurface>
+            </GlassView>
         </Animated.View>
     )
 }
