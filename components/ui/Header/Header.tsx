@@ -97,15 +97,16 @@ function Header(props: HeaderProps) {
         <GlassContainer style={[styles.blurContainer]}>
             <LinearGradient
                 colors={[
+                    Color("#000").alpha(0.8).toString(),
                     Color(Colors.primary).alpha(0.6).toString(),
-                    Color(Colors.primary).alpha(0.3).toString(),
+                    Color(Colors.primary).alpha(0.15).toString(),
                     "transparent",
                 ]}
                 style={{
                     position: "absolute",
                     top: 0,
                     width: Layout.screen.width,
-                    height: 350,
+                    height: 300,
                 }}
                 pointerEvents="none"
             />

@@ -19,6 +19,7 @@ import PredictionView from "../components/CreateExpense/PredictionView"
 import { SpontaneousRateSelector } from "../components/CreateExpense/SpontaneousRate"
 import SubExpenseSheet from "../components/CreateExpense/SubexpenseSheet"
 import { Icons } from "../components/Wallet/WalletItem"
+import GlassView from "@/components/ui/GlassView"
 
 export default function CreateExpenseModal({ navigation, route: { params } }: any) {
     const { state, methods, animated } = useCreateExpensePage(params)
@@ -46,11 +47,12 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
                                 <PredictionView applyPrediction={methods.applyPrediction} {...state.prediction} />
                             )}
 
-                            <IconButton
-                                style={styles.cameraIcon}
-                                onPress={() => navigation.goBack()}
-                                icon={<AntDesign name="close" size={24} color="rgba(255,255,255,0.7)" />}
-                            />
+                            <GlassView style={styles.cameraIcon}>
+                                <IconButton
+                                    onPress={() => navigation.goBack()}
+                                    icon={<AntDesign name="close" size={24} color="rgba(255,255,255,0.7)" />}
+                                />
+                            </GlassView>
 
                             <ExpenseAIMaker
                                 setExpense={methods.setExpense}
@@ -174,5 +176,5 @@ const styles = StyleSheet.create({
         paddingBottom: 30,
     },
 
-    cameraIcon: { position: "absolute", top: 15, left: 15, zIndex: 100 },
+    cameraIcon: { position: "absolute", top: 15, left: 15, zIndex: 100, padding: 10, borderRadius: 100 },
 })

@@ -27,18 +27,7 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
         route,
     })
 
-    const [scrollY, scrollHandler] = useTrackScroll({ screenName: "TimelineScreens" })
-    const translateY = useSharedValue(0)
-
-    // Additional scroll handler for translateY if needed locally
-    const combinedScrollHandler = useAnimatedScrollHandler({
-        onScroll: (event) => {
-            // Call the global scroll handler
-            scrollHandler(event)
-            // Update local translateY
-            translateY.value = event.contentOffset.y
-        },
-    })
+    const [scrollY, onScroll] = useTrackScroll({ screenName: "TimelineScreens" })
 
     const selectedDateFormatted = new Intl.DateTimeFormat("en-US", {
         weekday: "long",
@@ -128,7 +117,7 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
                             selectedDate={timeline.selected}
                         />
                     }
-                    onScroll={combinedScrollHandler}
+                    onScroll={onScroll}
                     contentContainerStyle={{
                         paddingBottom: (timeline.data?.timeline?.length || 0) > 0 ? 120 : 0,
                         padding: 15,
@@ -143,7 +132,7 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
                 />
             ) : (
                 <DayTimeline
-                    onScroll={combinedScrollHandler}
+                    onScroll={onScroll}
                     selected={timeline.selected}
                     date={timeline.selected}
                     events={timeline.data?.timeline || []}
@@ -169,11 +158,7 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
                 </DayTimeline>
             )}
 
-            <FloatingSearch
-                filterValue={query}
-                setFilterValue={setQuery}
-                isVisible={true}
-            />
+            <FloatingSearch filterValue={query} setFilterValue={setQuery} isVisible={true} />
             <DeleteTimelineEvent
                 isVisible={!!selectedEventForDeletion}
                 item={

@@ -48,9 +48,8 @@ const styles = StyleSheet.create({
         position: "absolute",
         top: 15,
         height: 40,
-        backgroundColor: Colors.secondary,
         borderRadius: 100,
-        opacity: 0.4,
+        opacity: 1,
     },
 })
 
@@ -136,7 +135,7 @@ export default function BottomTab({ navigation, state, insets }: BottomTabBarPro
                             <Ionicons
                                 size={22.5}
                                 name={props.iconName as any}
-                                color={isActive ? Colors.secondary : "rgba(255,255,255,0.8)"}
+                                color={"#fff"}
                                 style={{
                                     marginBottom: 2.5,
                                     paddingVertical: 7.5,
@@ -168,16 +167,15 @@ export default function BottomTab({ navigation, state, insets }: BottomTabBarPro
         const hideOnKeyboard = isOpenSubScreen || keyboard
         const scrollValue = scrollY.value
 
-        const scale = interpolate(scrollValue, [0, 100], [1, 0.9], "clamp")
         const hideOnScroll = scrollValue > 50 // Hide when search bar should appear
 
         return {
             transform: [
                 {
-                    translateY: (hideOnKeyboard || hideOnScroll) ? withTiming(100, { duration: 200 }) : withTiming(0, { duration: 200 }),
-                },
-                {
-                    scale: hideOnKeyboard ? withTiming(1, { duration: 200 }) : withTiming(scale, { duration: 300 }),
+                    translateY:
+                        hideOnKeyboard || hideOnScroll
+                            ? withTiming(100, { duration: 200 })
+                            : withTiming(0, { duration: 200 }),
                 },
             ],
             opacity: hideOnScroll ? withTiming(0, { duration: 200 }) : withTiming(1, { duration: 200 }),
@@ -200,7 +198,7 @@ export default function BottomTab({ navigation, state, insets }: BottomTabBarPro
                 ]}
             >
                 <AnimatedGlassView
-                    glassEffectStyle="regular"
+                    glassEffectStyle="clear"
                     tintColor={Colors.secondary}
                     style={[styles.activeIndicator, indicatorStyle]}
                 />

@@ -263,7 +263,7 @@ export function FloatingProcessingView({
             case "compress":
                 return <MaterialIcons name="compress" {...iconProps} />
             case "upload":
-                return <AntDesign name="cloudupload" {...iconProps} />
+                return <AntDesign name="cloud-upload" {...iconProps} />
             case "analyze":
                 return <Ionicons name="analytics" {...iconProps} />
             default:
@@ -416,7 +416,7 @@ export function FloatingProcessingView({
                                             handleRemove?.(expense?.id || "")
                                         }}
                                     >
-                                        <AntDesign name="closecircle" size={18} color="rgba(255,255,255,0.8)" />
+                                        <AntDesign name="close-circle" size={18} color="rgba(255,255,255,0.8)" />
                                         <Text style={{ color: "rgba(255,255,255,0.8)" }}>Cancel</Text>
                                     </Ripple>
                                     <Ripple
@@ -435,7 +435,7 @@ export function FloatingProcessingView({
                                             handleSuccess?.()
                                         }}
                                     >
-                                        <AntDesign name="checkcircle" size={18} color="rgba(255,255,255,0.8)" />
+                                        <AntDesign name="check-circle" size={18} color="rgba(255,255,255,0.8)" />
                                         <Text style={{ color: "rgba(255,255,255,0.8)" }}>All good!</Text>
                                     </Ripple>
                                 </View>
@@ -463,6 +463,7 @@ import { useState } from "react"
 import Ripple from "react-native-material-ripple"
 import useDeleteActivity from "../../hooks/useDeleteActivity"
 import WalletItem from "../Wallet/WalletItem"
+import GlassView from "@/components/ui/GlassView"
 
 export default function ExpenseAIMaker({
     initialOpen,
@@ -584,11 +585,14 @@ export default function ExpenseAIMaker({
 
     return (
         <>
-            <IconButton
-                onPress={handleImagePick}
-                style={{ position: "absolute", top: 15, right: 15, zIndex: 100 }}
-                icon={<AntDesign name="camera" size={24} color="rgba(255,255,255,0.7)" />}
-            />
+            <GlassView
+                style={{ position: "absolute", top: 15, right: 15, zIndex: 100, padding: 10, borderRadius: 100 }}
+            >
+                <IconButton
+                    onPress={handleImagePick}
+                    icon={<AntDesign name="camera" size={24} color="rgba(255,255,255,0.7)" />}
+                />
+            </GlassView>
 
             <FloatingProcessingView
                 visible={processingStep >= 0}

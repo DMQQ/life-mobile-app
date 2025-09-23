@@ -1,5 +1,4 @@
 import Colors from "@/constants/Colors"
-import Layout from "@/constants/Layout"
 import { AntDesign, Ionicons } from "@expo/vector-icons"
 import { memo, useEffect, useState } from "react"
 import { Keyboard, TextInput } from "react-native"
@@ -8,12 +7,10 @@ import Animated, {
     Extrapolation,
     interpolate,
     interpolateColor,
-    SharedValue,
     useAnimatedKeyboard,
     useAnimatedStyle,
     withTiming,
 } from "react-native-reanimated"
-import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { useGlobalScrollY } from "@/utils/context/ScrollYContext"
 import GlassView from "../GlassView"
 import IconButton from "../IconButton/IconButton"
@@ -28,7 +25,6 @@ interface FloatingSearchProps {
 const FloatingSearch = ({ setFilterValue, filterValue, onFiltersPress, isVisible = true }: FloatingSearchProps) => {
     const [value, setValue] = useState("")
     const [isFocused, setIsFocused] = useState(false)
-    const insets = useSafeAreaInsets()
     const scrollY = useGlobalScrollY()
 
     useEffect(() => {
@@ -97,6 +93,14 @@ const FloatingSearch = ({ setFilterValue, filterValue, onFiltersPress, isVisible
             return
         }
         setFilterValue(value.trim())
+    }
+
+    const handleDismiss = () => {
+        Haptics.trigger("impactLight")
+        setValue("")
+        setFilterValue("")
+        setIsFocused(false)
+        Keyboard.dismiss()
     }
 
     if (!isVisible) return null
@@ -186,7 +190,10 @@ const FloatingSearch = ({ setFilterValue, filterValue, onFiltersPress, isVisible
                         height: 60,
                     }}
                 >
-                    <IconButton icon={<AntDesign name="close" size={24} color={Colors.foreground} />} />
+                    <IconButton
+                        onPress={handleDismiss}
+                        icon={<AntDesign name="close" size={24} color={Colors.foreground} />}
+                    />
                 </GlassView>
             </Animated.View>
         </Animated.View>

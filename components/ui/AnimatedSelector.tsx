@@ -1,4 +1,4 @@
-import Button from "@/components/ui/Button/Button"
+import Button2 from "@/components/ui/Button/Button2"
 import Colors from "@/constants/Colors"
 import Layout from "@/constants/Layout"
 import lowOpacity from "@/utils/functions/lowOpacity"
@@ -98,7 +98,7 @@ export default function AnimatedSelector<T>({
 
         return (
             <Animated.View style={buttonAnimatedStyle}>
-                <Button
+                <Button2
                     variant="text"
                     onPress={() => onItemSelect(item)}
                     style={[
@@ -126,7 +126,7 @@ export default function AnimatedSelector<T>({
                     >
                         {renderItem(item)}
                     </Animated.Text>
-                </Button>
+                </Button2>
             </Animated.View>
         )
     }

@@ -1,128 +1,119 @@
-import Colors from "@/constants/Colors"
-import lowOpacity from "@/utils/functions/lowOpacity"
-import { AntDesign } from "@expo/vector-icons"
+import React from "react"
+import { StyleProp, TextStyle, View, ViewStyle } from "react-native"
 import Ripple, { RippleProps } from "react-native-material-ripple"
-import Text from "../Text/Text"
 
-import FeedBack from "react-native-haptic-feedback"
+import { BUTTON_BORDER_RADIUS, BUTTON_SIZE, BUTTON_TYPES, VARIANTS, styles } from "./assets"
 
-const colors = {
-    primary: Colors.secondary,
-    secondary: Colors.ternary,
-    surface: Colors.primary,
-    success: "#4CAF50",
-    error: Colors.error,
-    warning: Colors.warning,
-}
+import Colors from "@/constants/Colors"
+import Text from "@/components/ui/Text/Text"
+import lowOpacity from "@/utils/functions/lowOpacity"
+import Color from "color"
 
-const variants = {
-    contained: (color: string) => {
-        return {
-            backgroundColor: color,
-            borderWidth: 1,
-            borderColor: color,
-            shadowColor: lowOpacity(color, 0.5),
-            shadowOffset: {
-                width: 0,
-                height: 10,
-            },
-            shadowOpacity: 0.7,
-            shadowRadius: 16.0,
-            elevation: 15,
-        }
-    },
-    outlined: (color: string) => {
-        return {
-            borderWidth: 1,
-            borderColor: color,
-            backgroundColor: "transparent",
-        }
-    },
-    text: (color: string) => {
-        return {
-            backgroundColor: "transparent",
-        }
-    },
-    tonal: (color: string) => {
-        return {
-            backgroundColor: lowOpacity(color, 0.15),
-            borderWidth: 1,
-            borderColor: color,
-        }
-    },
-}
-
-const textColors = {
-    primary: Colors.text_light,
-    secondary: Colors.text_light,
-    surface: Colors.text_light,
-    success: Colors.text_light,
-    error: Colors.text_light,
-    warning: Colors.text_light,
-} as Record<keyof typeof colors, string>
-
-interface Button2Props extends RippleProps {
+export interface ButtonProps extends RippleProps {
     children?: React.ReactNode
-    variant?: keyof typeof variants
-    color?: keyof typeof colors
-
-    icon?: React.ReactNode | string
+    /** Function called on onPress event */
+    callback?: () => void
+    icon?: React.ReactNode
+    style?: StyleProp<ViewStyle>
+    /** Styles applied to button's text */
+    fontStyle?: StyleProp<TextStyle>
+    /** Styles applied to icon's container */
+    iconStyle?: StyleProp<ViewStyle>
+    /** DEPRECATED Style variants of button component */
+    variant?: keyof typeof VARIANTS
+    /** Floating element to display number */
+    badge?: number
+    size?: keyof typeof BUTTON_SIZE
+    borderRadius?: keyof typeof BUTTON_BORDER_RADIUS
+    disabled?: boolean
+    /**  Style variants of button component */
+    type?: keyof typeof BUTTON_TYPES
+    /** Color variants of button */
+    color?: keyof typeof VARIANTS
 }
 
-export default function Button2({
+export default function Button({
     children,
-    style,
-    variant = "tonal",
-    color = "primary",
+    callback = () => {},
     icon,
+    style,
+    fontStyle,
+    iconStyle,
+    type = "contained",
+    variant = "ternary",
+    badge,
+    size = "lg",
     disabled,
+    borderRadius = "lg",
+    color,
     ...rest
-}: Button2Props) {
-    const selectedColor = colors[color]
-    const variantStyle = variants[variant](selectedColor)
+}: ButtonProps) {
+    const mainColor = VARIANTS[color || variant]
 
-    const getTextColor = () => {
-        if (variant === "tonal" || variant === "outlined") {
-            return selectedColor
-        }
-        return textColors[color]
+    const disabledColor = Color(mainColor).alpha(0.15).string()
+
+    const buttonStyle = {
+        ...BUTTON_SIZE[size],
+        ...BUTTON_TYPES[type](!disabled ? mainColor : disabledColor),
+        borderRadius: BUTTON_BORDER_RADIUS[borderRadius],
+    }
+
+    const textStyle = {
+        color: Color(type === "outlined" ? mainColor : Colors.foreground)
+            .alpha(disabled ? 0.5 : 1)
+            .string(),
     }
 
     return (
         <Ripple
-            {...rest}
+            testID={"Button"}
+            rippleCentered
+            onPress={callback}
             disabled={disabled}
             style={[
-                {
-                    padding: 15,
-                    width: "100%",
-                    borderRadius: 15,
-                    justifyContent: "center",
-                    alignItems: "center",
-                    gap: 10,
-                    flexDirection: "row",
-                },
-                variantStyle,
-                disabled && { opacity: 0.5 },
+                styles.button,
+                buttonStyle,
+                //@ts-expect-error the color prop is not typed in the original code
+                style?.backgroundColor
+                    ? {
+                          //@ts-expect-error the color prop is not typed in the original code
+
+                          shadowColor: lowOpacity(style?.backgroundColor, 0.5),
+                      }
+                    : {},
+                ,
                 style,
             ]}
-            onPress={(ev) => {
-                if (rest.onPress) {
-                    rest.onPress(ev)
-                }
-                FeedBack.trigger("impactLight")
-            }}
-            onLongPress={(ev) => {
-                if (rest.onLongPress) {
-                    rest.onLongPress(ev)
-                }
-                FeedBack.trigger("impactMedium")
-            }}
+            {...rest}
         >
-            {typeof icon === "string" ? <AntDesign name={icon as any} size={15} color={colors[color]} /> : icon}
-            <Text variant="body" style={{ fontWeight: "600", color: getTextColor(), fontSize: 15 }}>
-                {children}
-            </Text>
+            {/* {!!badge && <Badge amount={badge} left />} */}
+            {typeof children !== "undefined" && (
+                <Text variant="body" style={[styles.text, textStyle, fontStyle]}>
+                    {children}
+                </Text>
+            )}
+            <View style={iconStyle}>{icon}</View>
         </Ripple>
     )
 }
+
+export const ViewMoreButton = (props: { onPress: () => any; text: string; disabled?: boolean; bg?: string }) => (
+    <Ripple
+        onPress={props.onPress}
+        disabled={props.disabled}
+        style={{
+            borderRadius: 100,
+            padding: 5,
+            paddingHorizontal: 10,
+        }}
+    >
+        <Text
+            variant="body"
+            style={{
+                color: Colors.foreground,
+            }}
+        >
+            {props.text}
+        </Text>
+    </Ripple>
+)
