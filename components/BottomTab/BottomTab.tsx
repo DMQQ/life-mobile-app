@@ -169,16 +169,18 @@ export default function BottomTab({ navigation, state, insets }: BottomTabBarPro
         const scrollValue = scrollY.value
 
         const scale = interpolate(scrollValue, [0, 100], [1, 0.9], "clamp")
+        const hideOnScroll = scrollValue > 50 // Hide when search bar should appear
 
         return {
             transform: [
                 {
-                    translateY: hideOnKeyboard ? withTiming(100, { duration: 200 }) : withTiming(0, { duration: 200 }),
+                    translateY: (hideOnKeyboard || hideOnScroll) ? withTiming(100, { duration: 200 }) : withTiming(0, { duration: 200 }),
                 },
                 {
                     scale: hideOnKeyboard ? withTiming(1, { duration: 200 }) : withTiming(scale, { duration: 300 }),
                 },
             ],
+            opacity: hideOnScroll ? withTiming(0, { duration: 200 }) : withTiming(1, { duration: 200 }),
         }
     })
 

@@ -5,7 +5,7 @@ import { RefreshControl, StyleSheet, View } from "react-native"
 
 import { Skeleton } from "@/components"
 import DeleteFlashCardGroupDialog from "@/components/ui/Dialog/Delete/DeleteGroupDialog"
-import AnimatedHeaderSearch from "@/components/ui/Header/AnimatedHeaderSearch"
+import FloatingSearch from "@/components/ui/FloatingSearch"
 import { ScreenProps } from "@/types"
 import { FlashList } from "@shopify/flash-list"
 import { useMemo, useState } from "react"
@@ -93,14 +93,6 @@ export default function NotesScreen({ navigation }: ScreenProps<any>) {
                     ]}
                     animatedTitle="FlashCards"
                     animatedSubtitle={`${groups?.length || 0} Groups`}
-                    renderAnimatedItem={(props) => (
-                        <AnimatedHeaderSearch
-                            buttonsCount={1}
-                            {...props}
-                            filterValue={query}
-                            setFilterValue={setQuery}
-                        />
-                    )}
                 />
                 <AnimatedFlashList
                     data={groupsSorted}
@@ -127,6 +119,11 @@ export default function NotesScreen({ navigation }: ScreenProps<any>) {
                     refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
                 />
             </View>
+            <FloatingSearch
+                filterValue={query}
+                setFilterValue={setQuery}
+                isVisible={true}
+            />
             <DeleteFlashCardGroupDialog
                 isVisible={!!selectedGroupForDeletion}
                 item={selectedGroupForDeletion || undefined}

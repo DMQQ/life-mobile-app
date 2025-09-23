@@ -7,7 +7,7 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import { StyleSheet, View } from "react-native"
 import Haptic from "react-native-haptic-feedback"
 import Animated, { FadeOut, SharedValue } from "react-native-reanimated"
-import AnimatedHeaderSearch from "../../../components/ui/Header/AnimatedHeaderSearch"
+import FloatingSearch from "@/components/ui/FloatingSearch"
 import InitializeWallet from "../components/Wallet/InitializeWallet"
 import WalletList2 from "../components/Wallet/WalletList2"
 import WalletLoader from "../components/Wallet/WalletLoader"
@@ -53,6 +53,8 @@ const styles = StyleSheet.create({
 
 export default function WalletScreen({ navigation, route }: WalletScreens<"Wallet">) {
     const { data, loading, refetch, onEndReached, error } = useGetWallet()
+    const wallet = useWalletContext()
+    const navigation2 = useNavigation<any>()
 
     const [scrollY, onScroll] = useTrackScroll({ screenName: "WalletScreens" })
 
@@ -93,10 +95,6 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
         [],
     )
 
-    const renderAnimatedItem = useCallback(
-        ({ scrollY }: { scrollY: SharedValue<number> | undefined }) => <WalletSearch scrollY={scrollY} />,
-        [],
-    )
 
     if (
         (Array.isArray(error?.cause?.extensions)
@@ -127,7 +125,6 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
                 animatedValueFormat={(value) => `${value.toFixed(2)}zł`}
                 animatedSubtitle="Current Balance (zł)"
                 onAnimatedTitleLongPress={handleShowEditSheet}
-                renderAnimatedItem={renderAnimatedItem}
             />
 
             <WalletList2
@@ -138,25 +135,13 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
                 showSubscriptions={showSubscriptionsView}
                 showExpenses={!showSubscriptionsView}
             />
+            <FloatingSearch
+                filterValue={wallet.filters.query}
+                setFilterValue={(v) => wallet.dispatch({ type: "SET_QUERY", payload: v.trim() })}
+                onFiltersPress={() => navigation2.navigate("Filters")}
+                isVisible={true}
+            />
         </SafeAreaView>
     )
 }
 
-interface AnimatedHeaderSearchProps {
-    scrollY?: SharedValue<number>
-}
-
-const WalletSearch = ({ scrollY }: AnimatedHeaderSearchProps) => {
-    const wallet = useWalletContext()
-    const navigation = useNavigation<any>()
-
-    return (
-        <AnimatedHeaderSearch
-            buttonsCount={3}
-            onFiltersPress={() => navigation.navigate("Filters")}
-            scrollY={scrollY}
-            filterValue={wallet.filters.query}
-            setFilterValue={(v) => wallet.dispatch({ type: "SET_QUERY", payload: v.trim() })}
-        />
-    )
-}

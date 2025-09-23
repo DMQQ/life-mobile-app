@@ -1,6 +1,6 @@
 import DateList from "@/components/DateList/DateList"
 import DeleteTimelineEvent from "@/components/ui/Dialog/Delete/DeleteTimelineEvent"
-import AnimatedHeaderSearch from "@/components/ui/Header/AnimatedHeaderSearch"
+import FloatingSearch from "@/components/ui/FloatingSearch"
 import Header from "@/components/ui/Header/Header"
 import Colors from "@/constants/Colors"
 import NotFound from "@/features/home/components/NotFound"
@@ -115,9 +115,6 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
                 ]}
                 animatedTitle={dayjs(timeline.selected).format("DD MMMM")}
                 animatedSubtitle={`${selectedDateFormatted} • ${eventsCount} Events`}
-                renderAnimatedItem={(props) => (
-                    <AnimatedHeaderSearch buttonsCount={2} {...props} filterValue={query} setFilterValue={setQuery} />
-                )}
             />
 
             {timeline.switchView !== "timeline" ? (
@@ -172,6 +169,11 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
                 </DayTimeline>
             )}
 
+            <FloatingSearch
+                filterValue={query}
+                setFilterValue={setQuery}
+                isVisible={true}
+            />
             <DeleteTimelineEvent
                 isVisible={!!selectedEventForDeletion}
                 item={

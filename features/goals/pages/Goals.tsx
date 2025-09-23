@@ -1,5 +1,5 @@
 import DeleteGoalsGroupDialog from "@/components/ui/Dialog/Delete/DeleteGoalsDialog"
-import AnimatedHeaderSearch from "@/components/ui/Header/AnimatedHeaderSearch"
+import FloatingSearch from "@/components/ui/FloatingSearch"
 import Header from "@/components/ui/Header/Header"
 import Colors from "@/constants/Colors"
 import { AntDesign } from "@expo/vector-icons"
@@ -48,9 +48,6 @@ export default function Goals({ navigation }: any) {
                         icon: <AntDesign name="plus" size={20} color={Colors.foreground} />,
                     },
                 ]}
-                renderAnimatedItem={(props) => (
-                    <AnimatedHeaderSearch buttonsCount={1} {...props} filterValue={query} setFilterValue={setQuery} />
-                )}
             />
             <AnimatedFlashList
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
@@ -79,6 +76,11 @@ export default function Goals({ navigation }: any) {
                 }}
                 scrollEventThrottle={16}
                 removeClippedSubviews
+            />
+            <FloatingSearch
+                filterValue={query}
+                setFilterValue={setQuery}
+                isVisible={true}
             />
             <DeleteGoalsGroupDialog
                 isVisible={!!selectedGroupForDeletion}
