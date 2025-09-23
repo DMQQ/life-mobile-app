@@ -50,7 +50,7 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
                             <GlassView style={styles.cameraIcon}>
                                 <IconButton
                                     onPress={() => navigation.goBack()}
-                                    icon={<AntDesign name="close" size={24} color="rgba(255,255,255,0.7)" />}
+                                    icon={<AntDesign name="close" size={20} color="rgba(255,255,255,0.7)" />}
                                 />
                             </GlassView>
 

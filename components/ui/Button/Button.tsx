@@ -8,7 +8,6 @@ import Colors from "@/constants/Colors"
 import Text from "@/components/ui/Text/Text"
 import lowOpacity from "@/utils/functions/lowOpacity"
 import Color from "color"
-import GlassView from "../GlassView"
 
 export interface ButtonProps extends RippleProps {
     children?: React.ReactNode
@@ -66,27 +65,35 @@ export default function Button({
     }
 
     return (
-        <GlassView
-            tintColor={style?.backgroundColor || Colors.secondary}
+        <Ripple
+            testID={"Button"}
+            rippleCentered
+            onPress={callback}
+            disabled={disabled}
             style={[
                 styles.button,
                 buttonStyle,
+                //@ts-expect-error the color prop is not typed in the original code
+                style?.backgroundColor
+                    ? {
+                          //@ts-expect-error the color prop is not typed in the original code
+
+                          shadowColor: lowOpacity(style?.backgroundColor, 0.5),
+                      }
+                    : {},
+                ,
                 style,
-                {
-                    backgroundColor: undefined,
-                    borderRadius: 15,
-                },
             ]}
+            {...rest}
         >
-            <Ripple testID={"Button"} rippleCentered onPress={callback} disabled={disabled} {...rest}>
-                {typeof children !== "undefined" && (
-                    <Text variant="body" style={[styles.text, textStyle, fontStyle]}>
-                        {children}
-                    </Text>
-                )}
-                <View style={iconStyle}>{icon}</View>
-            </Ripple>
-        </GlassView>
+            {/* {!!badge && <Badge amount={badge} left />} */}
+            {typeof children !== "undefined" && (
+                <Text variant="body" style={[styles.text, textStyle, fontStyle]}>
+                    {children}
+                </Text>
+            )}
+            <View style={iconStyle}>{icon}</View>
+        </Ripple>
     )
 }
 

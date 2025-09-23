@@ -114,7 +114,9 @@ const NumpadNumber = (props: {
                 {props.num === "C" ? (
                     <Entypo name="chevron-left" size={40} color={Colors.foreground} />
                 ) : (
-                    <Text variant="title" style={{ color: Colors.foreground, fontWeight: "bold" }}>{props.num}</Text>
+                    <Text variant="title" style={{ color: Colors.foreground, fontWeight: "bold" }}>
+                        {props.num}
+                    </Text>
                 )}
             </AnimatedRipple>
         </View>

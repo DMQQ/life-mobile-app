@@ -1,4 +1,4 @@
-import Button from "@/components/ui/Button/Button"
+import Button2 from "@/components/ui/Button/Button2"
 import IconButton from "@/components/ui/IconButton/IconButton"
 import SegmentedButtons from "@/components/ui/SegmentedButtons"
 import Text from "@/components/ui/Text/Text"
@@ -221,7 +221,7 @@ const SubmitButton = (props: SubmitButtonProps) => (
             }}
             icon={<AntDesign name="calendar" color={Colors.foreground} size={20} />}
         />
-        <Button
+        <Button2
             icon={
                 props.isLoading ? (
                     <ActivityIndicator style={{ marginRight: 5 }} size={18} color={Colors.foreground} />
@@ -241,7 +241,7 @@ const SubmitButton = (props: SubmitButtonProps) => (
             fontStyle={{ fontSize: 16 }}
         >
             {props.isEditing ? "Save changes" : "Create new event"}
-        </Button>
+        </Button2>
     </View>
 )
 

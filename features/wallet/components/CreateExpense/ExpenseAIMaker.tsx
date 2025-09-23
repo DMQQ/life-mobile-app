@@ -586,11 +586,12 @@ export default function ExpenseAIMaker({
     return (
         <>
             <GlassView
+                tintColor={Colors.secondary}
                 style={{ position: "absolute", top: 15, right: 15, zIndex: 100, padding: 10, borderRadius: 100 }}
             >
                 <IconButton
                     onPress={handleImagePick}
-                    icon={<AntDesign name="camera" size={24} color="rgba(255,255,255,0.7)" />}
+                    icon={<AntDesign name="camera" size={20} color="rgba(255,255,255,0.7)" />}
                 />
             </GlassView>
 

@@ -207,13 +207,7 @@ export default function BottomTab({ navigation, state, insets }: BottomTabBarPro
                     index={0}
                     route="NotesScreens"
                     label="Notes"
-                    iconName={
-                        <MaterialCommunityIcons
-                            name="cards"
-                            size={22.5}
-                            color={activeRoute === "NotesScreens" ? Colors.secondary : "rgba(255,255,255,0.8)"}
-                        />
-                    }
+                    iconName={<MaterialCommunityIcons name="cards" size={22.5} color="#fff" />}
                 />
 
                 <Btn
@@ -224,7 +218,7 @@ export default function BottomTab({ navigation, state, insets }: BottomTabBarPro
                         <Feather
                             name="target"
                             size={22.5}
-                            color={activeRoute === "GoalsScreens" ? Colors.secondary : "rgba(255,255,255,0.8)"}
+                            color="#fff"
                             style={{ marginBottom: 2.5, paddingVertical: 7.5 }}
                         />
                     }

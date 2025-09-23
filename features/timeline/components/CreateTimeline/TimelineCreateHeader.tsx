@@ -1,4 +1,5 @@
 import DatePicker from "@/components/DatePicker"
+import GlassView from "@/components/ui/GlassView"
 import Colors from "@/constants/Colors"
 import { AntDesign, Feather } from "@expo/vector-icons"
 import { NativeStackHeaderProps } from "@react-navigation/native-stack"
@@ -11,7 +12,7 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
         flexDirection: "row",
         alignItems: "center",
-        padding: 10,
+        padding: 15,
     },
 
     eventTitle: {
@@ -29,9 +30,11 @@ export default function TimelineCreateHeader(
 ) {
     return (
         <View style={[styles.header]}>
-            <Ripple style={{ padding: 10 }} onPress={props.navigation.goBack}>
-                <AntDesign name="arrow-left" color={Colors.foreground} size={23} />
-            </Ripple>
+            <GlassView style={{ padding: 10, borderRadius: 100 }}>
+                <Ripple onPress={props.navigation.goBack}>
+                    <AntDesign name="close" color={Colors.foreground} size={20} />
+                </Ripple>
+            </GlassView>
 
             {props.selectedDate.split(";").length === 1 && (
                 <DatePicker
@@ -40,9 +43,11 @@ export default function TimelineCreateHeader(
                     dates={{ start: dayjs(props.selectedDate).toDate(), end: dayjs(props.selectedDate).toDate() }}
                 />
             )}
-            <Ripple style={{ padding: 10 }} onPress={props.onToggleOptions}>
-                <Feather name="trash" color={Colors.foreground} size={20} />
-            </Ripple>
+            <GlassView style={{ padding: 10, borderRadius: 100 }} tintColor={Colors.error}>
+                <Ripple onPress={props.onToggleOptions}>
+                    <Feather name="trash" color={Colors.foreground} size={20} />
+                </Ripple>
+            </GlassView>
         </View>
     )
 }

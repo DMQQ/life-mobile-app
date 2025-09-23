@@ -286,7 +286,7 @@ const styles = StyleSheet.create({
     },
     iconContainer: {
         flexDirection: "row",
-        gap: 10,
+        gap: 8,
         zIndex: 250,
         padding: 8,
         borderRadius: 100,

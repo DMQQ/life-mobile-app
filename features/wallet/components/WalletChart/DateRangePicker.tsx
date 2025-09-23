@@ -3,7 +3,7 @@ import { Action, Filters } from "../WalletContext"
 import { useEffect, useState } from "react"
 import { ScrollView, Text } from "react-native"
 import Layout from "@/constants/Layout"
-import Button2 from "@/components/ui/Button/Button2"
+import Button from "@/components/ui/Button/Button"
 import Colors from "@/constants/Colors"
 import lowOpacity from "@/utils/functions/lowOpacity"
 import Color from "color"
@@ -64,7 +64,7 @@ const DateRangePicker = (props: { filters: Filters; dispatch: React.Dispatch<Act
                 selected={selected}
             />
             {DateRanges.map(([label, [from, to]]) => (
-                <Button2
+                <Button
                     variant="primary"
                     key={label.toString()}
                     onPress={() => onDateChange(label, from, to)}
@@ -88,7 +88,7 @@ const DateRangePicker = (props: { filters: Filters; dispatch: React.Dispatch<Act
                     ]}
                 >
                     {label}
-                </Button2>
+                </Button>
             ))}
         </ScrollView>
     )
@@ -129,7 +129,7 @@ const CustomDatePicker = (props: {
 
     return (
         <>
-            <Button2
+            <Button
                 onPress={() => {
                     setShowDatePicker(true)
                     props.setSelected()
@@ -181,7 +181,7 @@ const CustomDatePicker = (props: {
                 ) : (
                     <Text>Custom</Text>
                 )}
-            </Button2>
+            </Button>
             <DateTimePicker
                 mode="date"
                 isVisible={showDatePicker}
