@@ -12,6 +12,7 @@ import Colors from "./constants/Colors"
 import Url from "./constants/Url"
 import Navigation from "./navigation"
 import ThemeContextProvider from "./utils/context/ThemeContext"
+import { ScrollYContextProvider } from "./utils/context/ScrollYContext"
 import { STORE_KEY } from "./utils/hooks/useUser"
 import { store } from "./utils/redux"
 
@@ -80,12 +81,14 @@ export default function App() {
             <ErrorBoundary>
                 <GestureHandlerRootView style={{ flex: 1 }}>
                     <ThemeContextProvider>
-                        <ApolloProvider client={apolloClient}>
-                            <Provider store={store}>
-                                <StatusBar backgroundColor={Colors.primary} />
-                                <Navigation />
-                            </Provider>
-                        </ApolloProvider>
+                        <ScrollYContextProvider>
+                            <ApolloProvider client={apolloClient}>
+                                <Provider store={store}>
+                                    <StatusBar backgroundColor={Colors.primary} />
+                                    <Navigation />
+                                </Provider>
+                            </ApolloProvider>
+                        </ScrollYContextProvider>
                     </ThemeContextProvider>
                 </GestureHandlerRootView>
             </ErrorBoundary>

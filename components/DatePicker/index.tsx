@@ -4,9 +4,8 @@ import { ReactElement, useEffect, useRef, useState } from "react"
 import { Calendar } from "react-native-calendars"
 import ChipButton from "../ui/Button/ChipButton"
 import FloatingMenu, { FloatingMenuRef } from "../ui/FloatingMenu"
-import { BlurView } from "expo-blur"
-import { GlassView } from "expo-glass-effect"
 import Color from "color"
+import GlassView from "../ui/GlassView"
 
 const theme = {
     backgroundColor: "transparent",
@@ -156,9 +155,6 @@ export default function DatePicker({
             menuHeight={380}
             menuContent={
                 <GlassView
-                    isInteractive
-                    glassEffectStyle="clear"
-                    tintColor={Color(Colors.primary).alpha(0.25).string()}
                     style={{
                         padding: 5,
                         borderRadius: 20,

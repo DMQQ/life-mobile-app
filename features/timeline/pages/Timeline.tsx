@@ -11,6 +11,7 @@ import { useCallback, useMemo, useState } from "react"
 import { RefreshControl, View, VirtualizedList } from "react-native"
 import Feedback from "react-native-haptic-feedback"
 import Animated, { useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated"
+import useTrackScroll from "@/utils/hooks/ui/useTrackScroll"
 import DayTimeline from "../components/DayTimeline"
 import { TimelineScreenLoader } from "../components/LoaderSkeleton"
 import TimelineItem from "../components/TimelineItem"
@@ -26,15 +27,16 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
         route,
     })
 
-    const scrollY = useSharedValue(0)
+    const [scrollY, scrollHandler] = useTrackScroll({ screenName: "TimelineScreens" })
     const translateY = useSharedValue(0)
 
-    const scrollHandler = useAnimatedScrollHandler({
+    // Additional scroll handler for translateY if needed locally
+    const combinedScrollHandler = useAnimatedScrollHandler({
         onScroll: (event) => {
-            const currentScrollY = event.contentOffset.y
-            scrollY.value = currentScrollY
-
-            translateY.value = currentScrollY
+            // Call the global scroll handler
+            scrollHandler(event)
+            // Update local translateY
+            translateY.value = event.contentOffset.y
         },
     })
 
@@ -129,7 +131,7 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
                             selectedDate={timeline.selected}
                         />
                     }
-                    onScroll={scrollHandler}
+                    onScroll={combinedScrollHandler}
                     contentContainerStyle={{
                         paddingBottom: (timeline.data?.timeline?.length || 0) > 0 ? 120 : 0,
                         padding: 15,
@@ -144,7 +146,7 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
                 />
             ) : (
                 <DayTimeline
-                    onScroll={scrollHandler}
+                    onScroll={combinedScrollHandler}
                     selected={timeline.selected}
                     date={timeline.selected}
                     events={timeline.data?.timeline || []}

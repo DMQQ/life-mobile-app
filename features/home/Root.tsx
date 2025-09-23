@@ -37,7 +37,7 @@ function Root({}: ScreenProps<"Root">) {
 
     const { refetch: refetchNotifications, data } = useGetNotifications()
     const { refreshing, refresh } = useRefresh([refetchHome, refetchNotifications], [])
-    const [scrollY, onScroll] = useTrackScroll()
+    const [scrollY, onScroll] = useTrackScroll({ screenName: "Root" })
 
     useAppBackground({ onForeground: refresh })
 

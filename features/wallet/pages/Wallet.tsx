@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
 export default function WalletScreen({ navigation, route }: WalletScreens<"Wallet">) {
     const { data, loading, refetch, onEndReached, error } = useGetWallet()
 
-    const [scrollY, onScroll] = useTrackScroll()
+    const [scrollY, onScroll] = useTrackScroll({ screenName: "WalletScreens" })
 
     useEffect(() => {
         if (route.params?.expenseId && data?.wallet) {

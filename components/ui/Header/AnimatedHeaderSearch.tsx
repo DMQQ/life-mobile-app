@@ -2,7 +2,6 @@ import { IconButton } from "@/components"
 import Colors from "@/constants/Colors"
 import Layout from "@/constants/Layout"
 import { AntDesign, Ionicons } from "@expo/vector-icons"
-import { GlassView } from "expo-glass-effect"
 import { memo, useEffect, useState } from "react"
 import { Keyboard, TextInput } from "react-native"
 import Haptics from "react-native-haptic-feedback"
@@ -13,6 +12,7 @@ import Animated, {
     SharedValue,
     useAnimatedStyle,
 } from "react-native-reanimated"
+import GlassView from "../GlassView"
 
 interface AnimatedSearchInputProps {
     scrollY?: SharedValue<number>
@@ -127,14 +127,12 @@ const AnimatedSearchInput = ({
                 ]}
             >
                 <GlassView
-                    isInteractive
                     style={{
                         flex: 1,
                         flexDirection: "row",
                         borderRadius: 100,
                         padding: 10,
                     }}
-                    glassEffectStyle="clear"
                 >
                     {onFiltersPress && (
                         <IconButton

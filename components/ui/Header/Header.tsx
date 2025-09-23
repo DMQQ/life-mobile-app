@@ -8,18 +8,13 @@ import { memo, ReactNode, useMemo } from "react"
 import { StyleProp, StyleSheet, TextStyle, View, ViewStyle } from "react-native"
 import Haptic from "react-native-haptic-feedback"
 import Ripple from "react-native-material-ripple"
-import Animated, {
-    Extrapolation,
-    interpolate,
-    interpolateColor,
-    SharedValue,
-    useAnimatedStyle,
-} from "react-native-reanimated"
+import Animated, { Extrapolation, interpolate, SharedValue, useAnimatedStyle } from "react-native-reanimated"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import AnimatedNumber from "../AnimatedNumber"
 import IconButton from "../IconButton/IconButton"
-import { GlassContainer, GlassView } from "expo-glass-effect"
+import { GlassContainer } from "expo-glass-effect"
 import { LinearGradient } from "expo-linear-gradient"
+import GlassView from "../GlassView"
 
 const AnimatedRipple = Animated.createAnimatedComponent(Ripple)
 
@@ -131,7 +126,7 @@ function Header(props: HeaderProps) {
                     ]}
                 >
                     {props.goBack && (
-                        <GlassView isInteractive glassEffectStyle="clear" style={styles.glassButton}>
+                        <GlassView style={styles.glassButton}>
                             <IconButton
                                 onPress={throttle(() => {
                                     Haptic.trigger("impactLight")
@@ -154,7 +149,7 @@ function Header(props: HeaderProps) {
 
                     {props.children}
 
-                    <GlassView isInteractive glassEffectStyle="clear" style={styles.iconContainer}>
+                    <GlassView style={styles.iconContainer}>
                         {(props.buttons || []).map((button, index) => (
                             <IconButton
                                 style={button.style}

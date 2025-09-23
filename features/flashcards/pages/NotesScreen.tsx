@@ -10,6 +10,7 @@ import { ScreenProps } from "@/types"
 import { FlashList } from "@shopify/flash-list"
 import { useMemo, useState } from "react"
 import Animated, { FadeOut, useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated"
+import useTrackScroll from "@/utils/hooks/ui/useTrackScroll"
 import FlashCardGroup from "../components/FlashCardGroup"
 import { Group, useGroups } from "../hooks"
 
@@ -56,16 +57,7 @@ const AnimatedLoader = () => {
 export default function NotesScreen({ navigation }: ScreenProps<any>) {
     const { groups, loading, refetch } = useGroups()
 
-    const scrollY = useSharedValue(0)
-
-    const onAnimatedScrollHandler = useAnimatedScrollHandler(
-        {
-            onScroll(event) {
-                scrollY.value = event.contentOffset.y
-            },
-        },
-        [],
-    )
+    const [scrollY, onAnimatedScrollHandler] = useTrackScroll({ screenName: "NotesScreens" })
 
     const groupsSorted = useMemo(() => {
         if (!groups || groups.length === 0) return []

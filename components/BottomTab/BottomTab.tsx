@@ -18,35 +18,29 @@ import Animated, {
 } from "react-native-reanimated"
 import Colors from "../../constants/Colors"
 import Layout from "../../constants/Layout"
-import { useTheme } from "../../utils/context/ThemeContext"
-import useKeyboard from "../../utils/hooks/useKeyboard"
-import { GlassView } from "expo-glass-effect"
 
-const blurOverlayColor = Color(Colors.primary).alpha(0.1).toString()
+import { useGlobalScrollY } from "../../utils/context/ScrollYContext"
+import useKeyboard from "../../utils/hooks/useKeyboard"
+import GlassView from "../ui/GlassView"
 
 const styles = StyleSheet.create({
     container: {
-        width: Layout.screen.width - 30,
+        width: Layout.screen.width - 15,
         justifyContent: "space-around",
         flexDirection: "row",
         position: "absolute",
         bottom: 15,
         height: 70,
-        left: 15,
-        right: 15,
+        alignSelf: "center",
     },
     button: {
         padding: 5,
-        paddingVertical: 5,
         justifyContent: "center",
         alignItems: "center",
-        borderRadius: 15,
-        position: "relative",
     },
     innerContainer: {
         flexDirection: "row",
         justifyContent: "space-between",
-        backgroundColor: blurOverlayColor,
         position: "relative",
         borderRadius: 40,
     },
@@ -55,16 +49,8 @@ const styles = StyleSheet.create({
         top: 15,
         height: 40,
         backgroundColor: Colors.secondary,
-        borderRadius: 22.5,
-        opacity: 0.15,
-        shadowColor: Colors.secondary,
-        shadowOffset: {
-            width: 0,
-            height: 10,
-        },
-        shadowOpacity: 0.7,
-        shadowRadius: 16.0,
-        elevation: 24,
+        borderRadius: 100,
+        opacity: 0.4,
     },
 })
 
@@ -79,6 +65,8 @@ export default function BottomTab({ navigation, state, insets }: BottomTabBarPro
 
     const indicatorPosition = useSharedValue(activeIndex * buttonWidth)
     const iconScale = useSharedValue(1)
+
+    const scrollY = useGlobalScrollY()
 
     useEffect(() => {
         indicatorPosition.value = withSpring(activeIndex * buttonWidth, {
@@ -176,13 +164,23 @@ export default function BottomTab({ navigation, state, insets }: BottomTabBarPro
     const keyboard = useKeyboard()
     const isOpenSubScreen = (state.routes[state.index].state?.index || 0) > 0
 
-    const animatedStyle = useAnimatedStyle(() => ({
-        transform: [
-            {
-                translateY: isOpenSubScreen || keyboard ? withTiming(100, { duration: 100 }) : withTiming(0),
-            },
-        ],
-    }))
+    const animatedStyle = useAnimatedStyle(() => {
+        const hideOnKeyboard = isOpenSubScreen || keyboard
+        const scrollValue = scrollY.value
+
+        const scale = interpolate(scrollValue, [0, 100], [1, 0.9], "clamp")
+
+        return {
+            transform: [
+                {
+                    translateY: hideOnKeyboard ? withTiming(100, { duration: 200 }) : withTiming(0, { duration: 200 }),
+                },
+                {
+                    scale: hideOnKeyboard ? withTiming(1, { duration: 200 }) : withTiming(scale, { duration: 300 }),
+                },
+            ],
+        }
+    })
 
     return (
         <Animated.View
@@ -191,9 +189,6 @@ export default function BottomTab({ navigation, state, insets }: BottomTabBarPro
             exiting={FadeInDown.duration(150)}
         >
             <GlassView
-                tintColor={Color(Colors.primary).alpha(0.2).string()}
-                isInteractive
-                glassEffectStyle="clear"
                 style={[
                     styles.innerContainer,
                     {
