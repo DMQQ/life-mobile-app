@@ -344,9 +344,6 @@ export default function Expense({ route: { params }, navigation }: any) {
                 animated
                 animatedTitle={capitalize(selected?.description)}
                 initialHeight={60}
-                renderAnimatedItem={({ scrollY }) => (
-                    <AnimatedExpenseHeaderItem expense={selected} scrollY={scrollY!} />
-                )}
                 titleAnimatedStyle={{ flexWrap: "nowrap" }}
                 scrollY={scrollY}
                 buttons={[
@@ -453,17 +450,31 @@ export default function Expense({ route: { params }, navigation }: any) {
                         </View>
 
                         {/* Refund section */}
-                        <View style={[{ paddingHorizontal: 15, marginTop: 15 }]}>
-                            <Button2
-                                color="error"
-                                disabled={refundLoading || selected?.type === "refunded"}
-                                onPress={handleRefund}
-                            >
+                        <Ripple
+                            style={[
+                                styles.row,
+                                {
+                                    backgroundColor: "transparent",
+                                    opacity: selected?.type === "refunded" ? 0.5 : 1,
+                                    justifyContent: "space-between"
+                                },
+                            ]}
+                            onPress={selected?.type === "refunded" ? undefined : handleRefund}
+                            disabled={refundLoading || selected?.type === "refunded"}
+                        >
+                            <Feather
+                                name="rotate-ccw"
+                                size={24}
+                                color={selected?.type === "refunded" ? Colors.secondary_light_2 : Colors.ternary}
+                                style={{ paddingHorizontal: 7.5, padding: 2.5 }}
+                            />
+                            <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>
                                 {selected?.type === "refunded"
                                     ? (selected?.note?.trim() ?? `Refunded at ${moment().format("YYYY-MM-DD")}`)
-                                    : "Refund"}
-                            </Button2>
-                        </View>
+                                    : "Refund expense"}
+                            </Text>
+                            {refundLoading && <ActivityIndicator size="small" color={Colors.ternary} />}
+                        </Ripple>
                     </View>
 
                     {/* Subscription section */}
@@ -527,19 +538,26 @@ export default function Expense({ route: { params }, navigation }: any) {
                         )}
 
                         {/* Subscription action button */}
-                        <View style={{ paddingHorizontal: 15, marginTop: 10 }}>
-                            <Button2
-                                color={hasSubscription ? (isSubscriptionActive ? "error" : "primary") : "primary"}
-                                onPress={handleSubscriptionAction}
-                                disabled={isSubscriptionLoading}
-                            >
+                        <Ripple
+                            style={[styles.row, { backgroundColor: "transparent", justifyContent: "space-between" }]}
+                            onPress={handleSubscriptionAction}
+                            disabled={isSubscriptionLoading}
+                        >
+                            <MaterialIcons
+                                name={hasSubscription ? (isSubscriptionActive ? "pause" : "play-arrow") : "refresh"}
+                                size={24}
+                                color={Colors.ternary}
+                                style={{ paddingHorizontal: 7.5, padding: 2.5 }}
+                            />
+                            <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>
                                 {hasSubscription
                                     ? isSubscriptionActive
-                                        ? "Disable Subscription"
-                                        : "Enable Subscription"
-                                    : "Create Monthly Subscription"}
-                            </Button2>
-                        </View>
+                                        ? "Disable subscription"
+                                        : "Enable subscription"
+                                    : "Create monthly subscription"}
+                            </Text>
+                            {isSubscriptionLoading && <ActivityIndicator size="small" color={Colors.ternary} />}
+                        </Ripple>
                     </View>
                 </View>
 
@@ -570,89 +588,15 @@ export default function Expense({ route: { params }, navigation }: any) {
                         </View>
                     </View>
                 )}
-                <View style={{ height: 350, width: 100 }} />
             </Animated.ScrollView>
         </View>
-    )
-}
-
-const AnimatedExpenseHeaderItem = ({
-    scrollY,
-    expense,
-}: {
-    scrollY: Animated.SharedValue<number>
-    expense: ExpenseType
-}) => {
-    return (
-        <Animated.View
-            style={[
-                useAnimatedStyle(() => {
-                    const scrollValue = scrollY?.value ?? 0
-
-                    return {
-                        opacity: interpolate(scrollValue, [0, 130, 150, 160], [0, 0, 0.75, 1], Extrapolation.CLAMP),
-                        transform: [
-                            {
-                                translateY: interpolate(scrollValue, [0, 160], [-25, 0], Extrapolation.CLAMP),
-                            },
-                            { scale: interpolate(scrollValue, [0, 160], [0.5, 1], Extrapolation.CLAMP) },
-                        ],
-                    }
-                }, [scrollY]),
-                { paddingHorizontal: 15, paddingLeft: 10 },
-            ]}
-        >
-            <View
-                style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                }}
-            >
-                <View style={{ flexDirection: "row", alignItems: "center" }}>
-                    <CategoryIcon
-                        type={expense?.type as "expense" | "income"}
-                        category={(expense?.category || "none") as any}
-                    />
-
-                    <Text style={{ color: Icons[expense?.category]?.backgroundColor, fontSize: 18, fontWeight: 600 }}>
-                        {expense?.category.split(":").map(capitalize).join(" / ")}
-                    </Text>
-                </View>
-                <Text
-                    style={{
-                        color:
-                            expense.type === "refunded"
-                                ? Colors.secondary_light_2
-                                : expense.type === "expense"
-                                  ? "#F07070"
-                                  : "#66E875",
-                        fontSize: 18,
-                        fontWeight: 600,
-                    }}
-                >
-                    {expense?.type === "refunded"
-                        ? (expense?.amount * -1).toFixed(2)
-                        : expense?.type === "expense"
-                          ? (expense?.amount * -1).toFixed(2)
-                          : expense?.amount.toFixed(2)}
-                    <Text style={{ fontSize: 16 }}>zł</Text>
-                </Text>
-            </View>
-        </Animated.View>
     )
 }
 
 import Button2 from "@/components/ui/Button/Button2"
 import Layout from "@/constants/Layout"
 import * as ImagePicker from "expo-image-picker"
-import Animated, {
-    Extrapolation,
-    interpolate,
-    useAnimatedScrollHandler,
-    useAnimatedStyle,
-    useSharedValue,
-} from "react-native-reanimated"
+import Animated, { useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import ImageViewerModal from "../components/Expense/ImageViewer"
 import MapPicker from "../components/Expense/Map"

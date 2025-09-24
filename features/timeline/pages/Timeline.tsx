@@ -104,6 +104,7 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
                 ]}
                 animatedTitle={dayjs(timeline.selected).format("DD MMMM")}
                 animatedSubtitle={`${selectedDateFormatted} • ${eventsCount} Events`}
+                initialTitleFontSize={55}
             />
 
             {timeline.switchView !== "timeline" ? (

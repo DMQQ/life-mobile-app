@@ -1,4 +1,4 @@
-import Button from "@/components/ui/Button/Button"
+import Button2 from "@/components/ui/Button/Button2"
 import Colors, { Sizing } from "@/constants/Colors"
 import Layout from "@/constants/Layout"
 import { useNavigation } from "@react-navigation/native"
@@ -60,9 +60,9 @@ export default function NotFound({ selectedDate }: { selectedDate: string }) {
             </View>
 
             <Animated.View entering={FadeIn.delay(150)} style={{ marginTop: 10 }}>
-                <Button onPress={onPress} fontStyle={{ fontSize: 16 }}>
+                <Button2 onPress={onPress} fontStyle={{ fontSize: 16 }}>
                     Create event
-                </Button>
+                </Button2>
             </Animated.View>
         </View>
     )

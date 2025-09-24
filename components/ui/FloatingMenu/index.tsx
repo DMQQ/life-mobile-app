@@ -1,3 +1,4 @@
+import { lessBouncySpring } from "@/constants/Animations"
 import { ReactElement, cloneElement, forwardRef, useEffect, useRef, useState } from "react"
 import { Dimensions, Modal, TouchableOpacity, View } from "react-native"
 import Animated, { useAnimatedStyle, useSharedValue, withSpring, withTiming } from "react-native-reanimated"
@@ -33,8 +34,8 @@ const FloatingMenu = forwardRef<FloatingMenuRef, FloatingMenuProps>(
             setIsAnimating(true)
             opacity.value = withTiming(1, { duration: 200 })
             scale.value = withSpring(1, { damping: 22, stiffness: 250, mass: 0.8 })
-            translateX.value = withTiming(0)
-            translateY.value = withTiming(0)
+            translateX.value = lessBouncySpring(0)
+            translateY.value = lessBouncySpring(0)
 
             // Use setTimeout instead of worklet callback
             setTimeout(() => {
@@ -59,8 +60,8 @@ const FloatingMenu = forwardRef<FloatingMenuRef, FloatingMenuProps>(
             // Start animations
             opacity.value = withTiming(0, { duration: 180 })
             scale.value = withSpring(0.2, { damping: 20, stiffness: 200 })
-            translateX.value = withTiming(anchorCenterX - menuCenterX)
-            translateY.value = withTiming(anchorCenterY - menuCenterY)
+            translateX.value = lessBouncySpring(anchorCenterX - menuCenterX)
+            translateY.value = lessBouncySpring(anchorCenterY - menuCenterY)
 
             // Close after animation completes (no worklet callback)
             setTimeout(() => {

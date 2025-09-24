@@ -6,6 +6,7 @@ import Layout from "@/constants/Layout"
 import { useRefresh } from "@/utils/context/RefreshContext"
 import { gql, useQuery } from "@apollo/client"
 import { FontAwesome5, Ionicons, MaterialIcons } from "@expo/vector-icons"
+import Color from "color"
 import moment from "moment"
 import React, { useMemo, useState } from "react"
 import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native"
@@ -104,7 +105,7 @@ const AnimatedItem = ({
 
     return (
         <Animated.View entering={FadeInDown.delay(index * 75)}>
-            <Ripple style={[styles.item, { width: width || (Layout.screen.width - 30 - 10) / 2, height: 90 }]}>
+            <Ripple style={[styles.item, { width: width || (Layout.screen.width - 30 - 15) / 2, height: 90 }]}>
                 <Animated.View entering={FadeIn.delay((index + 1) * 85)}>{icon}</Animated.View>
                 <View style={styles.itemContent}>
                     {typeof value === "string" && isNaN(numericValue) ? (
@@ -231,18 +232,6 @@ export default function ZeroExpenseStats() {
 
     const successRate = data ? (data.days.length / totalDays) * 100 : 0
     const lastMonthSuccessRate = lastMonthData ? (lastMonthData.days.length / lastMonthTotalDays) * 100 : 0
-
-    const handleStartDateConfirm = (date: Date) => {
-        const formattedDate = moment(date).format("YYYY-MM-DD")
-        setDateRange([formattedDate, dateRange[1]])
-        setShowStartDatePicker(false)
-    }
-
-    const handleEndDateConfirm = (date: Date) => {
-        const formattedDate = moment(date).format("YYYY-MM-DD")
-        setDateRange([dateRange[0], formattedDate])
-        setShowEndDatePicker(false)
-    }
 
     if (loading) {
         return (
@@ -455,7 +444,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "space-between",
         flexWrap: "wrap",
-        gap: 10,
+        gap: 15,
         marginBottom: 25,
     },
     item: {
@@ -466,6 +455,8 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.primary_light,
         borderRadius: 15,
         alignItems: "center",
+        borderWidth: 1,
+        borderColor: Color(Colors.primary_lighter).lighten(0.5).string(),
     },
     itemContent: {
         flex: 1,

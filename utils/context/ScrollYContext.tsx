@@ -31,8 +31,6 @@ export const ScrollYContextProvider: React.FC<ScrollYContextProviderProps> = ({ 
 
     const setActiveScreen = (screen: string) => {
         activeScreen.value = screen
-        // Reset scroll when switching screens for cleaner animations
-        resetScrollY()
     }
 
     const value: ScrollYContextType = {

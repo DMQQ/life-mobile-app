@@ -1,4 +1,5 @@
 import Colors from "@/constants/Colors"
+import Color from "color"
 import { StyleSheet, View, ViewProps } from "react-native"
 import Ripple from "react-native-material-ripple"
 import Animated, { AnimatedProps } from "react-native-reanimated"
@@ -38,5 +39,7 @@ const styles = StyleSheet.create({
         borderRadius: 20,
         width: "100%",
         backgroundColor: Colors.primary_lighter,
+        borderWidth: 1,
+        borderColor: Color(Colors.primary_lighter).lighten(0.5).hex(),
     },
 })

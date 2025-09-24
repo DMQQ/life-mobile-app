@@ -151,7 +151,7 @@ const MetricCard = ({
                     value={Number.isNaN(Number(value)) ? +value.replace(/\D/g, "") : Number(value)}
                 />
             </View>
-            <Text style={styles.metricLabel}>{label}</Text>
+            <Text style={[styles.metricLabel, { color }]}>{label}</Text>
         </View>
     )
 }

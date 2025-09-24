@@ -67,10 +67,10 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
 
     const balance = loading && data?.wallet?.balance === undefined ? " ..." : (data?.wallet?.balance || 0).toFixed(2)
 
-    const handleShowEditSheet = () => {
+    const handleShowEditSheet = useCallback(() => {
         Haptic.trigger("impactMedium")
         navigation.navigate("EditBalance")
-    }
+    }, [navigation])
 
     const [showSubscriptionsView, setShowSubscriptionsView] = useState(false)
 
@@ -95,6 +95,21 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
         [],
     )
 
+    const header = useMemo(() => {
+        return (
+            <Header
+                scrollY={scrollY}
+                animated={true}
+                buttons={buttons}
+                goBack={false}
+                animatedValue={parseFloat(balance)}
+                animatedValueLoading={loading && data?.wallet?.balance === undefined}
+                animatedValueFormat={(value) => `${value.toFixed(2)}zł`}
+                animatedSubtitle="Current Balance (zł)"
+                onAnimatedTitleLongPress={handleShowEditSheet}
+            />
+        )
+    }, [balance, loading, buttons])
 
     if (
         (Array.isArray(error?.cause?.extensions)
@@ -110,22 +125,15 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
     return (
         <SafeAreaView style={{ flex: 1 }}>
             {loading && (
-                <Animated.View exiting={FadeOut.duration(250)} style={[StyleSheet.absoluteFillObject, styles.overlay]}>
+                <Animated.View
+                    exiting={FadeOut.duration(250).delay(250)}
+                    style={[StyleSheet.absoluteFillObject, styles.overlay]}
+                >
                     <WalletLoader />
                 </Animated.View>
             )}
 
-            <Header
-                scrollY={scrollY}
-                animated={true}
-                buttons={buttons}
-                goBack={false}
-                animatedValue={parseFloat(balance)}
-                animatedValueLoading={loading && data?.wallet?.balance === undefined}
-                animatedValueFormat={(value) => `${value.toFixed(2)}zł`}
-                animatedSubtitle="Current Balance (zł)"
-                onAnimatedTitleLongPress={handleShowEditSheet}
-            />
+            {header}
 
             <WalletList2
                 refetch={refetch}
@@ -144,4 +152,3 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
         </SafeAreaView>
     )
 }
-

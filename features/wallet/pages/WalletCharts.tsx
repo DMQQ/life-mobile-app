@@ -217,7 +217,7 @@ function WalletCharts({ navigation }: any) {
                 icon: (
                     <MaterialIcons
                         name="bar-chart"
-                        size={25}
+                        size={20}
                         color={chartType === "bar" ? Colors.secondary : Colors.foreground}
                     />
                 ),
@@ -266,7 +266,7 @@ function WalletCharts({ navigation }: any) {
                 scrollY={scrollY}
                 buttons={headerButtons}
                 goBack
-                backIcon={<AntDesign name="close" size={24} color={Colors.foreground} />}
+                backIcon={<AntDesign name="close" size={20} color={Colors.foreground} />}
             />
             <AnimatedVirtualizedList
                 style={{ paddingTop: 100 }}

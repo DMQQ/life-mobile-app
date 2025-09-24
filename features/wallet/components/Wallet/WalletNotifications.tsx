@@ -12,6 +12,7 @@ import Ripple from "react-native-material-ripple"
 import Animated, { FadeInDown, FadeOutUp } from "react-native-reanimated"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { CategoryIcon } from "../Expense/ExpenseIcon"
+import GlassView from "@/components/ui/GlassView"
 
 interface Notification {
     id: string
@@ -38,8 +39,6 @@ const styles = StyleSheet.create({
         borderRadius: 16,
         marginBottom: 12,
         overflow: "hidden",
-        borderWidth: 1,
-        borderColor: "rgba(255, 255, 255, 0.1)",
         shadowColor: "#000",
         shadowOffset: {
             width: 0,
@@ -51,6 +50,7 @@ const styles = StyleSheet.create({
     },
     blurContainer: {
         flex: 1,
+        borderRadius: 20,
     },
     notificationContent: {
         padding: 20,
@@ -271,7 +271,7 @@ function NotificationCard({
 
     return (
         <Animated.View style={styles.notificationCard} entering={FadeInDown.delay((index + 1) * 75)}>
-            <BlurView intensity={20} tint="dark" style={styles.blurContainer}>
+            <GlassView style={styles.blurContainer}>
                 <Ripple
                     disabled={notification.read}
                     onPress={handlePress}
@@ -311,7 +311,7 @@ function NotificationCard({
                         </TouchableOpacity>
                     </View>
                 </Ripple>
-            </BlurView>
+            </GlassView>
         </Animated.View>
     )
 }
@@ -335,7 +335,7 @@ export function FloatingNotificationItem({
                 style={[styles.notificationCard, { zIndex: isExpanded ? 9999 : index }]}
                 entering={FadeInDown.delay((index + 1) * 75)}
             >
-                <BlurView intensity={80} tint="dark" style={styles.blurContainer}>
+                <GlassView style={styles.blurContainer}>
                     <View style={[styles.notificationContent, { paddingRight: 15 }]}>
                         <View
                             style={[
@@ -358,7 +358,7 @@ export function FloatingNotificationItem({
                             {notification.message.body}
                         </Text>
                     </View>
-                </BlurView>
+                </GlassView>
             </Animated.View>
         </Pressable>
     )
@@ -413,7 +413,7 @@ export function FloatingNotifications() {
 
     return (
         <AnimatedLinearGradient
-            colors={["rgba(0, 0, 0, 0.65)", "transparent"]}
+            colors={["rgba(0, 0, 0, 0.5)", "transparent"]}
             entering={FadeInDown}
             exiting={FadeOutUp}
             style={{

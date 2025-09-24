@@ -12,6 +12,7 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import {
     NativeScrollEvent,
     NativeSyntheticEvent,
+    Pressable,
     RefreshControl,
     StyleSheet,
     Text,
@@ -215,7 +216,7 @@ export default function WalletList2({
         }
 
         return items
-    }, [showSubscriptions, showExpenses, groupedSubscriptions, expenseData, calculateDaySum])
+    }, [showSubscriptions, showExpenses, groupedSubscriptions, expenseData])
 
     const onRefresh = useCallback(async () => {
         setRefreshing(true)
@@ -330,10 +331,8 @@ export default function WalletList2({
                             return `item-${index}`
                     }
                 }}
-                getItemType={(item) => item.type}
-                g
                 onScroll={onScroll}
-                contentContainerStyle={{ padding: 15, paddingTop: 300, paddingBottom: 120 }}
+                contentContainerStyle={{ padding: 15, paddingTop: 250, paddingBottom: 120 }}
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
                 onEndReached={onEndReached}
                 onEndReachedThreshold={0.5}
@@ -349,6 +348,7 @@ export default function WalletList2({
 }
 
 import Haptics from "react-native-haptic-feedback"
+import GlassView from "@/components/ui/GlassView"
 
 const ClearFiltersButton = () => {
     const { filters, dispatch } = useWalletContext()
@@ -410,12 +410,18 @@ const ClearFiltersButton = () => {
                 alignItems: "center",
             }}
         >
-            <ChipButton style={{ flexDirection: "row", gap: 10 }} onPress={clearFilters}>
-                <Text style={{ color: Colors.secondary_light_2 }}>
-                    {diffCount > 0 ? `Reset (${diffCount}) ${diffCount > 1 ? "filters" : "filter"}` : "Reset filters"}
-                </Text>
-                <AntDesign name="close" size={18} color={Colors.secondary_light_2} />
-            </ChipButton>
+            <Pressable onPress={clearFilters}>
+                <GlassView
+                    style={{ padding: 5, borderRadius: 50, flexDirection: "row", gap: 5, paddingHorizontal: 15 }}
+                >
+                    <Text style={{ color: Colors.secondary_light_2 }}>
+                        {diffCount > 0
+                            ? `Reset (${diffCount}) ${diffCount > 1 ? "filters" : "filter"}`
+                            : "Reset filters"}
+                    </Text>
+                    <AntDesign name="close" size={18} color={Colors.secondary_light_2} />
+                </GlassView>
+            </Pressable>
         </Animated.View>
     )
 }

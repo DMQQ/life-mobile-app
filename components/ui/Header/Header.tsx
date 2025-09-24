@@ -282,13 +282,13 @@ const AnimatedContent = memo(
 const styles = StyleSheet.create({
     glassButton: {
         borderRadius: 100,
-        padding: 8,
+        padding: 10,
     },
     iconContainer: {
         flexDirection: "row",
         gap: 8,
         zIndex: 250,
-        padding: 8,
+        padding: 10,
         borderRadius: 100,
     },
     animatedTitle: {
