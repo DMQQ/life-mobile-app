@@ -35,8 +35,8 @@ export default function Card<T extends boolean = false>({
 const styles = StyleSheet.create({
     container: {
         padding: 15,
-        paddingHorizontal: 20,
-        borderRadius: 20,
+        paddingHorizontal: 15,
+        borderRadius: 25,
         width: "100%",
         backgroundColor: Colors.primary_lighter,
         borderWidth: 1,

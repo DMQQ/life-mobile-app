@@ -1,5 +1,6 @@
-import { useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated"
+import { useAnimatedScrollHandler, useSharedValue, useDerivedValue } from "react-native-reanimated"
 import { useScrollYContext } from "@/utils/context/ScrollYContext"
+import { useFocusEffect, useIsFocused } from "@react-navigation/native"
 
 interface UseTrackScrollOptions {
     useGlobal?: boolean
@@ -18,13 +19,17 @@ export default function useTrackScroll(options: UseTrackScrollOptions = {}) {
 
     if (useGlobal) {
         try {
-            const { scrollY, onScroll, setActiveScreen } = useScrollYContext()
+            const { scrollYValues, onScroll, setActiveScreen } = useScrollYContext()
 
-            if (screenName) {
-                setActiveScreen(screenName)
-            }
+            useFocusEffect(() => {
+                if (screenName) setActiveScreen(screenName)
+            })
 
-            return [scrollY, onScroll] as const
+            const screenScrollY = useDerivedValue(() => {
+                return screenName ? scrollYValues.value[screenName] || 0 : 0
+            })
+
+            return [screenScrollY, onScroll] as const
         } catch (error) {
             console.warn("ScrollYContext not available, falling back to local scroll tracking")
             return [localScrollY, localOnScroll] as const
