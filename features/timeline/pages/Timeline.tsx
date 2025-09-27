@@ -1,6 +1,5 @@
 import DateList from "@/components/DateList/DateList"
 import DeleteTimelineEvent from "@/components/ui/Dialog/Delete/DeleteTimelineEvent"
-import FloatingSearch from "@/components/ui/FloatingSearch"
 import Header from "@/components/ui/Header/Header"
 import Colors from "@/constants/Colors"
 import NotFound from "@/features/home/components/NotFound"
@@ -9,6 +8,7 @@ import dayjs from "dayjs"
 import moment from "moment"
 import { useCallback, useMemo, useState } from "react"
 import { RefreshControl, View, VirtualizedList } from "react-native"
+import { useScreenSearch } from "@/utils/hooks/useScreenSearch"
 import Feedback from "react-native-haptic-feedback"
 import Animated, { useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated"
 import useTrackScroll from "@/utils/hooks/ui/useTrackScroll"
@@ -82,6 +82,9 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
         setRefreshing(false)
     }
     const [query, setQuery] = useState("")
+    
+    // Register search functionality
+    useScreenSearch(setQuery)
 
     return (
         <View style={{ flex: 1 }}>
@@ -159,7 +162,6 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
                 </DayTimeline>
             )}
 
-            <FloatingSearch filterValue={query} setFilterValue={setQuery} isVisible={true} />
             <DeleteTimelineEvent
                 isVisible={!!selectedEventForDeletion}
                 item={

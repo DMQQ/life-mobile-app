@@ -165,8 +165,8 @@ export default function PredictionView(item: ExpensePrediction & { applyPredicti
 
         pulseAnimation.value = withRepeat(
             withSequence(
-                withTiming(0.9, { duration: 2000, easing: Easing.bezier(0.4, 0, 0.6, 1) }),
-                withTiming(0.85, { duration: 2000, easing: Easing.bezier(0.4, 0, 0.6, 1) }),
+                withTiming(1, { duration: 2000, easing: Easing.bezier(0.4, 0, 0.6, 1) }),
+                withTiming(0.95, { duration: 2000, easing: Easing.bezier(0.4, 0, 0.6, 1) }),
             ),
             -1,
             true,
@@ -211,8 +211,6 @@ export default function PredictionView(item: ExpensePrediction & { applyPredicti
 
     const categoryIcon = Icons[item.category as keyof typeof Icons]
     const iconBackgroundColor = categoryIcon?.backgroundColor || "#00FFC8"
-
-    console.log("Rerendering PredictionView:", item.description, item.amount, item.category, item.type)
 
     return (
         <AnimatedPressable

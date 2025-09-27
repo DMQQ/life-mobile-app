@@ -1,6 +1,6 @@
 import DeleteGoalsGroupDialog from "@/components/ui/Dialog/Delete/DeleteGoalsDialog"
-import FloatingSearch from "@/components/ui/FloatingSearch"
 import Header from "@/components/ui/Header/Header"
+import { useScreenSearch } from "@/utils/hooks/useScreenSearch"
 import Colors from "@/constants/Colors"
 import { AntDesign } from "@expo/vector-icons"
 import { FlashList } from "@shopify/flash-list"
@@ -33,6 +33,9 @@ export default function Goals({ navigation }: any) {
     }
 
     const [query, setQuery] = useState("")
+    
+    // Register search functionality
+    useScreenSearch(setQuery)
 
     return (
         <View style={{ flex: 1 }}>
@@ -76,11 +79,6 @@ export default function Goals({ navigation }: any) {
                 }}
                 scrollEventThrottle={16}
                 removeClippedSubviews
-            />
-            <FloatingSearch
-                filterValue={query}
-                setFilterValue={setQuery}
-                isVisible={true}
             />
             <DeleteGoalsGroupDialog
                 isVisible={!!selectedGroupForDeletion}

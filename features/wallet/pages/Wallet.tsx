@@ -2,13 +2,12 @@ import Header from "@/components/ui/Header/Header"
 import Colors from "@/constants/Colors"
 import useTrackScroll from "@/utils/hooks/ui/useTrackScroll"
 import { AntDesign, Feather, Ionicons } from "@expo/vector-icons"
-import { useNavigation } from "@react-navigation/native"
 import { useCallback, useEffect, useMemo, useState } from "react"
-import { StyleSheet, View } from "react-native"
+import { StyleSheet } from "react-native"
 import Haptic from "react-native-haptic-feedback"
-import Animated, { FadeOut, SharedValue } from "react-native-reanimated"
-import FloatingSearch from "@/components/ui/FloatingSearch"
+import Animated, { FadeOut } from "react-native-reanimated"
 import InitializeWallet from "../components/Wallet/InitializeWallet"
+import { useScreenSearch } from "@/utils/hooks/useScreenSearch"
 import WalletList2 from "../components/Wallet/WalletList2"
 import WalletLoader from "../components/Wallet/WalletLoader"
 import { useWalletContext } from "../components/WalletContext"
@@ -54,7 +53,6 @@ const styles = StyleSheet.create({
 export default function WalletScreen({ navigation, route }: WalletScreens<"Wallet">) {
     const { data, loading, refetch, onEndReached, error } = useGetWallet()
     const wallet = useWalletContext()
-    const navigation2 = useNavigation<any>()
 
     const [scrollY, onScroll] = useTrackScroll({ screenName: "WalletScreens" })
 
@@ -73,6 +71,9 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
     }, [navigation])
 
     const [showSubscriptionsView, setShowSubscriptionsView] = useState(false)
+    
+    // Register search functionality
+    useScreenSearch((value) => wallet.dispatch({ type: "SET_QUERY", payload: value.trim() }))
 
     const buttons = useMemo(
         () => [
@@ -142,12 +143,6 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
                 onEndReached={onEndReached}
                 showSubscriptions={showSubscriptionsView}
                 showExpenses={!showSubscriptionsView}
-            />
-            <FloatingSearch
-                filterValue={wallet.filters.query}
-                setFilterValue={(v) => wallet.dispatch({ type: "SET_QUERY", payload: v.trim() })}
-                onFiltersPress={() => navigation2.navigate("Filters")}
-                isVisible={true}
             />
         </SafeAreaView>
     )

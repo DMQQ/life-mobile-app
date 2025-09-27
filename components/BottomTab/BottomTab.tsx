@@ -1,15 +1,14 @@
 import { Padding } from "@/constants/Values"
-import { Feather, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons"
+import { AntDesign, Feather, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons"
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs"
 import Color from "color"
 import moment from "moment"
-import { useEffect } from "react"
-import { Platform, Pressable, StyleSheet } from "react-native"
+import { useEffect, useState } from "react"
+import { Platform, Pressable, StyleSheet, TextInput, Keyboard, View } from "react-native"
 import Feedback from "react-native-haptic-feedback"
 import Animated, {
     FadeInDown,
     interpolate,
-    runOnJS,
     useAnimatedStyle,
     useSharedValue,
     withSequence,
@@ -18,20 +17,22 @@ import Animated, {
 } from "react-native-reanimated"
 import Colors from "../../constants/Colors"
 import Layout from "../../constants/Layout"
-
-import { useGlobalScrollY } from "../../utils/context/ScrollYContext"
 import useKeyboard from "../../utils/hooks/useKeyboard"
 import GlassView from "../ui/GlassView"
+import { useAppSelector, useAppDispatch } from "../../utils/redux"
+import { setSearchActive, setSearchValue, clearSearch } from "../../utils/redux/search/search"
+import { GlassContainer } from "expo-glass-effect"
 
 const styles = StyleSheet.create({
     container: {
-        width: Layout.screen.width - 15,
-        justifyContent: "space-around",
+        width: Layout.screen.width,
         flexDirection: "row",
         position: "absolute",
         bottom: 15,
         height: 70,
         alignSelf: "center",
+        paddingHorizontal: 15,
+        left: 0,
     },
     button: {
         padding: 5,
@@ -55,28 +56,129 @@ const styles = StyleSheet.create({
 
 const AnimatedGlassView = Animated.createAnimatedComponent(GlassView)
 
+interface SearchButtonProps {
+    toggleSearch: () => void
+
+    buttonWidth: number
+}
+
+const BackToTabsButton = ({ onPress, buttonWidth }: { onPress: () => void; buttonWidth: number }) => {
+    return (
+        <GlassView
+            style={{ borderRadius: 100, flex: 1, width: buttonWidth, justifyContent: "center", alignItems: "center" }}
+        >
+            <Pressable style={[styles.button, { justifyContent: "center", alignItems: "center" }]} onPress={onPress}>
+                <AntDesign
+                    size={20}
+                    name="arrow-left"
+                    color="#fff"
+                    style={{
+                        marginBottom: 2.5,
+                        paddingVertical: 7.5,
+                    }}
+                />
+            </Pressable>
+        </GlassView>
+    )
+}
+
+const SearchButton = ({
+    toggleSearch,
+    buttonWidth,
+    isExpanded,
+    value,
+    onChangeText,
+}: SearchButtonProps & {
+    isExpanded: boolean
+    value: string
+    onChangeText: (text: string) => void
+}) => {
+    return (
+        <Animated.View
+            style={[
+                {
+                    position: "absolute",
+                    right: 15,
+                    height: 70,
+                    justifyContent: "center",
+                    flexDirection: "row",
+                    gap: 15,
+                },
+            ]}
+        >
+            {isExpanded && (
+                <View style={{ flexDirection: "row", gap: 10, flex: 1 }}>
+                    <BackToTabsButton buttonWidth={70} onPress={toggleSearch} />
+                </View>
+            )}
+            <GlassView style={{ height: 70, borderRadius: 100 }}>
+                {isExpanded && (
+                    <TextInput
+                        value={value}
+                        onChangeText={onChangeText}
+                        style={{
+                            color: Colors.foreground,
+                            fontSize: 16,
+                            paddingHorizontal: 20,
+                            height: 70,
+                            width: Layout.screen.width - 30 - 70 - 20,
+                        }}
+                        placeholder="Search..."
+                        placeholderTextColor={Color(Colors.foreground).alpha(0.6).string()}
+                        autoFocus
+                        returnKeyType="search"
+                    />
+                )}
+                <Pressable
+                    style={{ flex: 1, justifyContent: "center", alignItems: "center", width: 70 }}
+                    onPress={toggleSearch}
+                >
+                    <AntDesign size={20} name="search" color="#fff" />
+                </Pressable>
+            </GlassView>
+        </Animated.View>
+    )
+}
+
 export default function BottomTab({ navigation, state, insets }: BottomTabBarProps) {
     const navigate = (route: string) => navigation.navigate(route)
     const activeRoute = state.routes[state.index].name
     const routes = ["NotesScreens", "GoalsScreens", "Root", "WalletScreens", "TimelineScreens"]
     const activeIndex = routes.indexOf(activeRoute)
-    const buttonWidth = (Layout.screen.width - 30) / state.routes.length
+
+    const dispatch = useAppDispatch()
+    const { isActive: isSearchActive, value: searchValue } = useAppSelector((state) => state.search)
+
+    const totalButtons = state.routes.length + 1
+    const buttonWidth = (Layout.screen.width - 30 - 15) / totalButtons
 
     const indicatorPosition = useSharedValue(activeIndex * buttonWidth)
     const iconScale = useSharedValue(1)
 
-    const scrollY = useGlobalScrollY()
+    const toggleSearch = () => {
+        if (isSearchActive) {
+            dispatch(clearSearch())
+            Keyboard.dismiss()
+        } else {
+            dispatch(setSearchActive(true))
+        }
+        Feedback.trigger("impactMedium")
+    }
+
+    const handleSearchValueChange = (value: string) => {
+        dispatch(setSearchValue(value))
+    }
 
     useEffect(() => {
-        indicatorPosition.value = withSpring(activeIndex * buttonWidth, {
-            damping: 20,
-            stiffness: 150,
-        })
+        if (!isSearchActive) {
+            indicatorPosition.value = withSpring(activeIndex * buttonWidth, {
+                damping: 20,
+                stiffness: 150,
+            })
 
-        iconScale.value = withSequence(withTiming(0.9, { duration: 100 }), withTiming(1, { duration: 150 }))
-
-        runOnJS(Feedback.trigger)("impactLight")
-    }, [activeRoute])
+            iconScale.value = withSequence(withTiming(0.9, { duration: 100 }), withTiming(1, { duration: 150 }))
+        }
+    }, [activeRoute, isSearchActive])
 
     const indicatorStyle = useAnimatedStyle(() => ({
         transform: [{ translateX: indicatorPosition.value + buttonWidth * 0.2 }],
@@ -165,26 +267,19 @@ export default function BottomTab({ navigation, state, insets }: BottomTabBarPro
 
     const animatedStyle = useAnimatedStyle(() => {
         const hideOnKeyboard = isOpenSubScreen || keyboard
-        const scrollValue = scrollY.value
-
-        const hideOnScroll = scrollValue > 50 // Hide when search bar should appear
 
         return {
             transform: [
                 {
-                    translateY:
-                        hideOnKeyboard || hideOnScroll
-                            ? withTiming(100, { duration: 200 })
-                            : withTiming(0, { duration: 200 }),
+                    translateY: hideOnKeyboard ? withTiming(100, { duration: 200 }) : withTiming(0, { duration: 200 }),
                 },
             ],
-            opacity: hideOnScroll ? withTiming(0, { duration: 200 }) : withTiming(1, { duration: 200 }),
         }
     })
 
     return (
         <Animated.View
-            style={[styles.container, animatedStyle]}
+            style={[animatedStyle, styles.container]}
             entering={FadeInDown.duration(150)}
             exiting={FadeInDown.duration(150)}
         >
@@ -197,68 +292,81 @@ export default function BottomTab({ navigation, state, insets }: BottomTabBarPro
                     },
                 ]}
             >
-                <AnimatedGlassView
-                    glassEffectStyle="clear"
-                    tintColor={Colors.secondary}
-                    style={[styles.activeIndicator, indicatorStyle]}
-                />
+                {!isSearchActive && (
+                    <AnimatedGlassView
+                        glassEffectStyle="clear"
+                        tintColor={Colors.secondary}
+                        style={[styles.activeIndicator, indicatorStyle]}
+                    />
+                )}
 
-                <Btn
-                    index={0}
-                    route="NotesScreens"
-                    label="Notes"
-                    iconName={<MaterialCommunityIcons name="cards" size={22.5} color="#fff" />}
-                />
-
-                <Btn
-                    index={1}
-                    route="GoalsScreens"
-                    label="Training"
-                    iconName={
-                        <Feather
-                            name="target"
-                            size={22.5}
-                            color="#fff"
-                            style={{ marginBottom: 2.5, paddingVertical: 7.5 }}
+                {!isSearchActive && (
+                    <>
+                        <Btn
+                            index={0}
+                            route="NotesScreens"
+                            label="Notes"
+                            iconName={<MaterialCommunityIcons name="cards" size={22.5} color="#fff" />}
                         />
-                    }
-                />
 
-                <Btn index={2} route="Root" label="Home" iconName={"home"} />
+                        <Btn
+                            index={1}
+                            route="GoalsScreens"
+                            label="Training"
+                            iconName={
+                                <Feather
+                                    name="target"
+                                    size={22.5}
+                                    color="#fff"
+                                    style={{ marginBottom: 2.5, paddingVertical: 7.5 }}
+                                />
+                            }
+                        />
 
-                <Btn
-                    index={3}
-                    onLongPress={() => {
-                        Feedback.trigger("impactMedium")
-                        navigation.navigate({
-                            name: "WalletScreens",
-                            params: {
-                                expenseId: null,
-                            },
-                        })
-                    }}
-                    route="WalletScreens"
-                    label="Wallet"
-                    iconName={"wallet"}
-                />
+                        <Btn index={2} route="Root" label="Home" iconName={"home"} />
 
-                <Btn
-                    index={4}
-                    onLongPress={() => {
-                        Feedback.trigger("impactMedium")
+                        <Btn
+                            index={3}
+                            onLongPress={() => {
+                                Feedback.trigger("impactMedium")
+                                navigation.navigate({
+                                    name: "WalletScreens",
+                                    params: {
+                                        expenseId: null,
+                                    },
+                                })
+                            }}
+                            route="WalletScreens"
+                            label="Wallet"
+                            iconName={"wallet"}
+                        />
 
-                        navigation.navigate({
-                            name: "TimelineScreens",
-                            params: {
-                                selectedDate: moment(new Date()).format("YYYY-MM-DD"),
-                            },
-                        })
-                    }}
-                    route="TimelineScreens"
-                    label="Timeline"
-                    iconName={"calendar-number"}
-                />
+                        <Btn
+                            index={4}
+                            onLongPress={() => {
+                                Feedback.trigger("impactMedium")
+
+                                navigation.navigate({
+                                    name: "TimelineScreens",
+                                    params: {
+                                        selectedDate: moment(new Date()).format("YYYY-MM-DD"),
+                                    },
+                                })
+                            }}
+                            route="TimelineScreens"
+                            label="Timeline"
+                            iconName={"calendar-number"}
+                        />
+                    </>
+                )}
             </GlassView>
+            <SearchButton
+                toggleSearch={toggleSearch}
+                buttonWidth={buttonWidth}
+                isExpanded={isSearchActive}
+                value={searchValue}
+                onChangeText={handleSearchValueChange}
+            />
         </Animated.View>
     )
 }

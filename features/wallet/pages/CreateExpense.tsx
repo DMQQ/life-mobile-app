@@ -32,7 +32,7 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
 
     const onPressCategorySelector = useCallback((item: string) => {
         methods.setIsSubscription(item === "subscription")
-
+        methods.setType("expense")
         methods.setCategory(item as keyof typeof Icons)
         methods.setChangeView(false)
     }, [])

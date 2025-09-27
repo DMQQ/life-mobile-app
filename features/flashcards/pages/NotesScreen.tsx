@@ -5,8 +5,8 @@ import { RefreshControl, StyleSheet, View } from "react-native"
 
 import { Skeleton } from "@/components"
 import DeleteFlashCardGroupDialog from "@/components/ui/Dialog/Delete/DeleteGroupDialog"
-import FloatingSearch from "@/components/ui/FloatingSearch"
 import { ScreenProps } from "@/types"
+import { useScreenSearch } from "@/utils/hooks/useScreenSearch"
 import { FlashList } from "@shopify/flash-list"
 import { useMemo, useState } from "react"
 import Animated, { FadeOut, useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated"
@@ -77,6 +77,9 @@ export default function NotesScreen({ navigation }: ScreenProps<any>) {
     }
 
     const [query, setQuery] = useState("")
+    
+    // Register search functionality
+    useScreenSearch(setQuery)
 
     return (
         <>
@@ -119,11 +122,6 @@ export default function NotesScreen({ navigation }: ScreenProps<any>) {
                     refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
                 />
             </View>
-            <FloatingSearch
-                filterValue={query}
-                setFilterValue={setQuery}
-                isVisible={true}
-            />
             <DeleteFlashCardGroupDialog
                 isVisible={!!selectedGroupForDeletion}
                 item={selectedGroupForDeletion || undefined}
