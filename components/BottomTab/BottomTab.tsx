@@ -17,6 +17,7 @@ import Animated, {
     withSequence,
     withSpring,
     withTiming,
+    useAnimatedKeyboard,
 } from "react-native-reanimated"
 import Colors from "../../constants/Colors"
 import Layout from "../../constants/Layout"
@@ -353,16 +354,21 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
         width: interpolate(tabsOpacity.value, [0, 1], [60, Layout.screen.width - 30 - 70]),
     }))
 
-    const keyboard = useKeyboard()
     const isOpenSubScreen = (state.routes[state.index].state?.index || 0) > 0
 
+    const keyboard = useAnimatedKeyboard()
+
     const animatedStyle = useAnimatedStyle(() => {
-        const hideOnKeyboard = (isOpenSubScreen || keyboard) && !isSearchActive
+        const hideOnKeyboard = (isOpenSubScreen || keyboard.height.value > 0) && !isSearchActive
 
         return {
             transform: [
                 {
-                    translateY: hideOnKeyboard ? withTiming(100, { duration: 200 }) : withTiming(0, { duration: 200 }),
+                    translateY: hideOnKeyboard
+                        ? withTiming(100, { duration: 200 })
+                        : isSearchActive
+                          ? -keyboard.height.value
+                          : withTiming(0, { duration: 200 }),
                 },
             ],
         }
