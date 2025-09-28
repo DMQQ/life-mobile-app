@@ -105,7 +105,7 @@ export default function NameInput({
                     style={{ borderRadius: 100 }}
                     tintColor={
                         !isValid && prediction
-                            ? Icons[prediction.category as keyof typeof Icons].backgroundColor
+                            ? Icons[prediction.category as keyof typeof Icons]?.backgroundColor
                             : !isValid
                               ? Colors.primary
                               : Colors.secondary

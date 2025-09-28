@@ -61,6 +61,13 @@ const theme = {
     foreground_disabled: Color(foreground).alpha(0.4).string(),
 } as const
 
+export const defaultColors = {
+    primary: "#0d0f14",
+    secondary: secondary_candidates[secondary_candidates.length - 1],
+    foreground: "#fff",
+    ternary: ternary,
+}
+
 export default theme
 
 export const Sizing = {

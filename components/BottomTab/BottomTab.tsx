@@ -4,7 +4,7 @@ import { BottomTabBarProps } from "@react-navigation/bottom-tabs"
 import Color from "color"
 import moment from "moment"
 import { cloneElement, useEffect, useMemo, useState } from "react"
-import { Platform, Pressable, StyleSheet, TextInput, Keyboard, View } from "react-native"
+import { Platform, Pressable, StyleSheet, TextInput, Keyboard, View, useAnimatedValue } from "react-native"
 import Feedback from "react-native-haptic-feedback"
 import Animated, {
     FadeInDown,
@@ -18,6 +18,7 @@ import Animated, {
     withSpring,
     withTiming,
     useAnimatedKeyboard,
+    useDerivedValue,
 } from "react-native-reanimated"
 import Colors from "../../constants/Colors"
 import Layout from "../../constants/Layout"
@@ -27,6 +28,7 @@ import { useAppSelector, useAppDispatch } from "../../utils/redux"
 import { setSearchActive, setSearchValue, clearSearch } from "../../utils/redux/search/search"
 import { useNavigation } from "@react-navigation/native"
 import { LinearGradient } from "expo-linear-gradient"
+import { useScrollYContext } from "@/utils/context/ScrollYContext"
 
 const styles = StyleSheet.create({
     container: {
@@ -113,13 +115,14 @@ const SearchButton = ({
                             }}
                             placeholder="Search..."
                             placeholderTextColor={Color(Colors.foreground).alpha(0.6).string()}
-                            autoFocus={isExpanded}
+                            autoFocus={false}
                             returnKeyType="search"
                         />
                     </Animated.View>
                 )}
 
                 <Pressable
+                    disabled={isExpanded}
                     style={{
                         width: 60,
                         height: 60,
@@ -244,6 +247,25 @@ const Btn = ({ buttonWidth, iconScale, activeRoute, ...props }: ButtonProps) => 
 export default function BottomTab({ navigation, state }: BottomTabBarProps) {
     const activeRoute = state.routes[state.index].name
     const routes = ["NotesScreens", "GoalsScreens", "Root", "WalletScreens", "TimelineScreens"]
+
+    const { scrollYValues } = useScrollYContext()
+
+    const scrollY = useDerivedValue(() => {
+        return scrollYValues.value[activeRoute] || 0
+    })
+
+    const tabScale = useAnimatedStyle(() => {
+        return {
+            transform: [
+                {
+                    scale: interpolate(scrollY.value, [0, 250], [1, 0.9], "clamp"),
+                },
+                {
+                    translateY: interpolate(scrollY.value, [0, 250], [0, 15], "clamp"),
+                },
+            ],
+        }
+    })
 
     const dispatch = useAppDispatch()
     const { isActive: isSearchActive, value: searchValue } = useAppSelector((state) => state.search)
@@ -376,7 +398,11 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
 
     return (
         <>
-            <Animated.View style={[animatedStyle, styles.container]} entering={FadeInDown} exiting={FadeInDown}>
+            <Animated.View
+                style={[animatedStyle, styles.container, tabScale]}
+                entering={FadeInDown}
+                exiting={FadeInDown}
+            >
                 <Animated.View style={[tabBarWidthStyle, { height: 60 }]}>
                     <GlassView
                         style={[

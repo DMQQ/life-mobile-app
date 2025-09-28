@@ -12,7 +12,7 @@ import Animated, {
     FadeOut,
     withSpring,
 } from "react-native-reanimated"
-import { useEffect } from "react"
+import { useEffect, useMemo } from "react"
 import { ExpensePrediction } from "../../hooks/usePredictCategory"
 import { CategoryIcon, CategoryUtils, Icons } from "../Expense/ExpenseIcon"
 import Layout from "@/constants/Layout"
@@ -145,7 +145,9 @@ const slideOutDownWithScale = () => {
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable)
 
-export default function PredictionView(item: ExpensePrediction & { applyPrediction: () => void }) {
+export default function PredictionView(
+    item: ExpensePrediction & { applyPrediction: () => void; currentEntryText: string },
+) {
     const price = item.type === "expense" ? (item.amount * -1).toFixed(2) : item.amount.toFixed(2)
     const isBalanceEdit = item.description.includes("Balance edited") || item.amount === 0
 
@@ -153,64 +155,82 @@ export default function PredictionView(item: ExpensePrediction & { applyPredicti
     const pulseAnimation = useSharedValue(1)
     const shimmerAnimation = useSharedValue(0)
 
+    const animationConfig = useMemo(
+        () => ({
+            glow: {
+                duration: 4000,
+                easing: Easing.inOut(Easing.sin),
+            },
+            pulse: {
+                duration: 3000,
+                easing: Easing.inOut(Easing.sin),
+            },
+            shimmer: {
+                duration: 6000,
+                easing: Easing.linear,
+            },
+        }),
+        [],
+    )
+
     useEffect(() => {
         glowAnimation.value = withRepeat(
-            withSequence(
-                withTiming(1, { duration: 2500, easing: Easing.bezier(0.4, 0, 0.6, 1) }),
-                withTiming(0, { duration: 2500, easing: Easing.bezier(0.4, 0, 0.6, 1) }),
-            ),
+            withSequence(withTiming(1, animationConfig.glow), withTiming(0, animationConfig.glow)),
             -1,
             true,
         )
 
         pulseAnimation.value = withRepeat(
-            withSequence(
-                withTiming(1, { duration: 2000, easing: Easing.bezier(0.4, 0, 0.6, 1) }),
-                withTiming(0.95, { duration: 2000, easing: Easing.bezier(0.4, 0, 0.6, 1) }),
-            ),
+            withSequence(withTiming(1, animationConfig.pulse), withTiming(0.98, animationConfig.pulse)),
             -1,
             true,
         )
 
-        shimmerAnimation.value = withRepeat(withTiming(1, { duration: 4000, easing: Easing.linear }), -1, false)
-    }, [])
+        shimmerAnimation.value = withRepeat(withTiming(1, animationConfig.shimmer), -1, false)
+    }, [animationConfig])
 
     const glowStyle = useAnimatedStyle(() => {
-        const glowIntensity = interpolate(glowAnimation.value, [0, 1], [0.2, 0.6])
-        const shadowRadius = interpolate(glowAnimation.value, [0, 1], [8, 20])
+        "worklet"
+        const glowIntensity = interpolate(glowAnimation.value, [0, 1], [0.1, 0.3], "clamp")
+        const shadowRadius = interpolate(glowAnimation.value, [0, 1], [4, 10], "clamp")
 
         return {
             shadowColor: "#00FFC8",
             shadowOffset: { width: 0, height: 0 },
             shadowOpacity: glowIntensity,
             shadowRadius: shadowRadius,
-            elevation: 15,
+            elevation: 8,
         }
-    })
+    }, [])
 
     const pulseStyle = useAnimatedStyle(() => {
+        "worklet"
         return {
             transform: [{ scale: pulseAnimation.value }],
         }
-    })
+    }, [])
 
     const shimmerStyle = useAnimatedStyle(() => {
-        const translateX = interpolate(shimmerAnimation.value, [0, 1], [-Layout.screen.width, Layout.screen.width])
+        "worklet"
+        const translateX = interpolate(shimmerAnimation.value, [0, 1], [-80, 80], "clamp")
 
         return {
             transform: [{ translateX }],
         }
-    })
+    }, [])
 
     const borderGlowStyle = useAnimatedStyle(() => {
-        const opacity = interpolate(glowAnimation.value, [0, 1], [0.2, 0.5])
+        "worklet"
+        const opacity = interpolate(glowAnimation.value, [0, 1], [0.1, 0.25], "clamp")
         return {
             opacity,
         }
-    })
+    }, [])
 
     const categoryIcon = Icons[item.category as keyof typeof Icons]
     const iconBackgroundColor = categoryIcon?.backgroundColor || "#00FFC8"
+
+    if (item.description.trim().toLowerCase() !== item.currentEntryText.trim().toLowerCase()) return null
 
     return (
         <AnimatedPressable

@@ -1,7 +1,7 @@
 import { AnimatedSelector, TextInput } from "@/components"
 import Button from "@/components/ui/Button/Button"
 import Text from "@/components/ui/Text/Text"
-import Colors from "@/constants/Colors"
+import Colors, { defaultColors } from "@/constants/Colors"
 import Layout from "@/constants/Layout"
 import useUser from "@/utils/hooks/useUser"
 import { AntDesign } from "@expo/vector-icons"
@@ -24,6 +24,14 @@ interface ColorPalette {
 }
 
 const colorPalettes: ColorPalette[] = [
+    {
+        name: "Default (Dark Mode)",
+        primary: defaultColors.primary,
+        secondary: defaultColors.secondary,
+        ternary: defaultColors.ternary,
+        foreground: defaultColors.foreground,
+        category: "Finance",
+    },
     {
         name: "DMQ dark",
         primary: "#111111",

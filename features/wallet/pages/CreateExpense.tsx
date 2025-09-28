@@ -44,7 +44,11 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
                     <View style={{ flex: 1 }}>
                         <View style={styles.container}>
                             {state.prediction && (
-                                <PredictionView applyPrediction={methods.applyPrediction} {...state.prediction} />
+                                <PredictionView
+                                    currentEntryText={state.name}
+                                    applyPrediction={methods.applyPrediction}
+                                    {...state.prediction}
+                                />
                             )}
 
                             <GlassView style={styles.cameraIcon}>
