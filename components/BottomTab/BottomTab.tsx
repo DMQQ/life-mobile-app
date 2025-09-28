@@ -20,9 +20,10 @@ import Animated, {
     useAnimatedKeyboard,
     useDerivedValue,
 } from "react-native-reanimated"
+import { Gesture, GestureDetector } from "react-native-gesture-handler"
+import { scheduleOnRN } from "react-native-worklets"
 import Colors from "../../constants/Colors"
 import Layout from "../../constants/Layout"
-import useKeyboard from "../../utils/hooks/useKeyboard"
 import GlassView from "../ui/GlassView"
 import { useAppSelector, useAppDispatch } from "../../utils/redux"
 import { setSearchActive, setSearchValue, clearSearch } from "../../utils/redux/search/search"
@@ -332,6 +333,8 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
     const indicatorPosition = useSharedValue(routes.indexOf(activeRoute))
     const iconScale = useSharedValue(1)
     const tabsOpacity = useSharedValue(1)
+    const isDragging = useSharedValue(false)
+    const dragScale = useSharedValue(1)
 
     const toggleSearch = () => {
         if (isSearchActive) {
@@ -349,9 +352,13 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
 
     useEffect(() => {
         if (!isSearchActive) {
+            // Reset drag scale when navigating normally
+            dragScale.value = 1
+            isDragging.value = false
+            
             indicatorPosition.value = withSpring(routes.indexOf(activeRoute), {
-                damping: 20,
-                stiffness: 150,
+                damping: 25,
+                stiffness: 200,
             })
             iconScale.value = withSequence(withTiming(0.9, { duration: 100 }), withTiming(1, { duration: 150 }))
         }
@@ -361,11 +368,51 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
         tabsOpacity.value = withTiming(isSearchActive ? 0 : 1, { duration: isSearchActive ? 200 : 300 })
     }, [isSearchActive])
 
+    const panGesture = Gesture.Pan()
+        .onBegin(() => {
+            'worklet'
+            isDragging.value = true
+            dragScale.value = withSpring(1.1, { damping: 20, stiffness: 300 })
+        })
+        .onUpdate((event) => {
+            "worklet"
+            const currentPos = routes.indexOf(activeRoute)
+            const translation = event.translationX / buttonWidth
+            const newPosition = currentPos + translation
+            const clampedPosition = Math.max(0, Math.min(routes.length - 1, newPosition))
+            indicatorPosition.value = clampedPosition
+        })
+        .onEnd((event) => {
+            'worklet'
+            const currentPos = routes.indexOf(activeRoute)
+            const translation = event.translationX / buttonWidth
+            const finalPosition = currentPos + translation
+            const targetIndex = Math.round(Math.max(0, Math.min(routes.length - 1, finalPosition)))
+
+            indicatorPosition.value = withSpring(targetIndex, {
+                damping: 20,
+                stiffness: 150,
+            })
+
+            dragScale.value = withSpring(1, { damping: 20, stiffness: 300 })
+            isDragging.value = false
+
+            if (targetIndex !== currentPos && routes[targetIndex]) {
+                scheduleOnRN(navigation.navigate, routes[targetIndex] as any)
+            }
+        })
+
     const indicatorStyle = useAnimatedStyle(() => {
+        'worklet'
+        const baseTranslateX = indicatorPosition.value * buttonWidth + buttonWidth * 0.2
+        
         return {
             transform: [
                 {
-                    translateX: indicatorPosition.value * buttonWidth + buttonWidth * 0.2,
+                    translateX: baseTranslateX,
+                },
+                {
+                    scale: dragScale.value,
                 },
             ],
             width: buttonWidth * 0.6,
@@ -398,80 +445,84 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
 
     return (
         <>
-            <Animated.View
-                style={[animatedStyle, styles.container, tabScale]}
-                entering={FadeInDown}
-                exiting={FadeInDown}
-            >
-                <Animated.View style={[tabBarWidthStyle, { height: 60 }]}>
-                    <GlassView
-                        style={[
-                            styles.innerContainer,
-                            {
-                                borderRadius: 100,
-                                flex: 1,
-                                height: 60,
-                            },
-                        ]}
-                    >
-                        {!isSearchActive && (
-                            <Animated.View
-                                style={[indicatorStyle, styles.activeIndicator, { position: "absolute", top: 10 }]}
-                                entering={FadeIn.delay((routes.indexOf(activeRoute) + 1) * 50)}
-                            >
-                                <GlassView
-                                    glassEffectStyle="clear"
-                                    tintColor={Colors.secondary}
-                                    style={[styles.activeIndicator]}
-                                />
-                            </Animated.View>
-                        )}
-
-                        {isSearchActive && (
-                            <Animated.View
-                                entering={FadeIn.delay(150)}
-                                style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 60 }}
-                            >
-                                <Pressable
-                                    style={{
-                                        flex: 1,
-                                        justifyContent: "center",
-                                        alignItems: "center",
-                                    }}
-                                    onPress={toggleSearch}
+            <GestureDetector gesture={panGesture}>
+                <Animated.View
+                    style={[animatedStyle, styles.container, tabScale]}
+                    entering={FadeInDown}
+                    exiting={FadeInDown}
+                >
+                    <Animated.View style={[tabBarWidthStyle, { height: 60 }]}>
+                        <GlassView
+                            style={[
+                                styles.innerContainer,
+                                {
+                                    borderRadius: 100,
+                                    flex: 1,
+                                    height: 60,
+                                },
+                            ]}
+                        >
+                            {!isSearchActive && (
+                                <Animated.View
+                                    style={[indicatorStyle, styles.activeIndicator, { position: "absolute", top: 10 }]}
+                                    entering={FadeIn.delay((routes.indexOf(activeRoute) + 1) * 50)}
                                 >
-                                    <AntDesign size={20} name="home" color="#fff" />
-                                </Pressable>
-                            </Animated.View>
-                        )}
+                                    <Pressable style={{ flex: 1, height: "100%" }}>
+                                        <GlassView
+                                            glassEffectStyle="clear"
+                                            tintColor={Colors.secondary}
+                                            style={[styles.activeIndicator]}
+                                        />
+                                    </Pressable>
+                                </Animated.View>
+                            )}
 
-                        {!isSearchActive && (
-                            <Animated.View style={{ flexDirection: "row", flex: 1 }}>
-                                {buttons.map((button, index) => (
-                                    <Btn
-                                        key={button.route}
-                                        index={index}
-                                        route={button.route}
-                                        label={button.label}
-                                        iconName={button.iconName}
-                                        onLongPress={button.onLongPress}
-                                        iconScale={iconScale}
-                                        buttonWidth={buttonWidth}
-                                        activeRoute={activeRoute}
-                                    />
-                                ))}
-                            </Animated.View>
-                        )}
-                    </GlassView>
+                            {isSearchActive && (
+                                <Animated.View
+                                    entering={FadeIn.delay(150)}
+                                    style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 60 }}
+                                >
+                                    <Pressable
+                                        style={{
+                                            flex: 1,
+                                            justifyContent: "center",
+                                            alignItems: "center",
+                                        }}
+                                        onPress={toggleSearch}
+                                    >
+                                        <AntDesign size={20} name="home" color="#fff" />
+                                    </Pressable>
+                                </Animated.View>
+                            )}
+
+                            {!isSearchActive && (
+                                <Animated.View style={{ flexDirection: "row", flex: 1 }}>
+                                    {buttons.map((button, index) => (
+                                        <Btn
+                                            key={button.route}
+                                            index={index}
+                                            route={button.route}
+                                            label={button.label}
+                                            iconName={button.iconName}
+                                            onLongPress={button.onLongPress}
+                                            iconScale={iconScale}
+                                            buttonWidth={buttonWidth}
+                                            activeRoute={activeRoute}
+                                        />
+                                    ))}
+                                </Animated.View>
+                            )}
+                        </GlassView>
+                    </Animated.View>
+
+                    <SearchButton
+                        toggleSearch={toggleSearch}
+                        isExpanded={isSearchActive}
+                        value={searchValue}
+                        onChangeText={handleSearchValueChange}
+                    />
                 </Animated.View>
-
-                <SearchButton
-                    toggleSearch={toggleSearch}
-                    isExpanded={isSearchActive}
-                    value={searchValue}
-                    onChangeText={handleSearchValueChange}
-                />
-            </Animated.View>
+            </GestureDetector>
             <LinearGradient
                 colors={gradient as any}
                 style={{
