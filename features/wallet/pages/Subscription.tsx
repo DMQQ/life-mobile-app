@@ -127,7 +127,7 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
     const sortedExpenses = [...(subscription?.expenses || [])].sort((a, b) => moment(b.date).diff(moment(a.date)))
 
     const sub = useSubscription()
-    const isSubscriptionLoading = sub.createSubscriptionState.loading || sub.cancelSubscriptionState.loading
+    const isSubscriptionLoading = sub.createSubscriptionState.loading || sub.cancelSubscriptionState.loading || sub.renewSubscriptionState.loading
 
     const hasSubscription = !!subscription?.id
 
@@ -137,7 +137,7 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
         const actionTitle = hasSubscription
             ? isSubscriptionActive
                 ? "Disable Subscription"
-                : "Enable Subscription"
+                : "Renew Subscription"
             : "Create Monthly Subscription"
 
         Alert.alert(actionTitle, `Are you sure you want to ${actionTitle.toLowerCase()}?`, [
@@ -150,7 +150,16 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                             })
 
                             if (result.data?.cancelSubscription) {
-                                setSubscription(result.data.cancelSubscription)
+                                setSubscription(result.data.cancelSubscription.subscription)
+                                refetch()
+                            }
+                        } else if (hasSubscription && !isSubscriptionActive) {
+                            const result = await sub.renewSubscription({
+                                variables: { subscriptionId: subscription.id },
+                            })
+
+                            if (result.data?.renewSubscription) {
+                                setSubscription(result.data.renewSubscription.subscription)
                                 refetch()
                             }
                         } else {
@@ -159,11 +168,12 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                             })
 
                             if (result.data?.createSubscription) {
-                                setSubscription(result.data.createSubscription)
+                                setSubscription(result.data.createSubscription.subscription)
                                 refetch()
                             }
                         }
                     } catch (error) {
+                        console.error("Subscription action error:", JSON.stringify(error, null, 2))
                         Alert.alert("Error", "Failed to update subscription. Please try again.")
                     }
                 },
@@ -341,7 +351,7 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                                             fontWeight: "bold",
                                         }}
                                     >
-                                        {subscription.isActive ? "Disable Subscription" : "Enable Subscription"}
+                                        {subscription.isActive ? "Disable Subscription" : "Renew Subscription"}
                                     </Text>
                                 )}
                             </Ripple>
@@ -427,8 +437,6 @@ const AnimatedSubscriptionHeader = ({
     scrollY: Animated.SharedValue<number>
     subscription: Subscription
 }) => {
-    console.log(JSON.stringify(subscription, null, 2))
-
     return (
         <Animated.View
             style={[

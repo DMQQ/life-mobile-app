@@ -1,15 +1,13 @@
-import { Padding } from "@/constants/Values"
 import { AntDesign, Feather, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons"
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs"
 import Color from "color"
 import moment from "moment"
-import { cloneElement, useEffect, useMemo, useState } from "react"
-import { Platform, Pressable, StyleSheet, TextInput, Keyboard, View, useAnimatedValue } from "react-native"
+import { cloneElement, useEffect, useMemo } from "react"
+import { Pressable, StyleSheet, TextInput, Keyboard } from "react-native"
 import Feedback from "react-native-haptic-feedback"
 import Animated, {
     FadeInDown,
     FadeIn,
-    FadeOut,
     interpolate,
     SharedValue,
     useAnimatedStyle,
@@ -261,9 +259,6 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
                 {
                     scale: interpolate(scrollY.value, [0, 250], [1, 0.9], "clamp"),
                 },
-                {
-                    translateY: interpolate(scrollY.value, [0, 250], [0, 15], "clamp"),
-                },
             ],
         }
     })
@@ -335,6 +330,7 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
     const tabsOpacity = useSharedValue(1)
     const isDragging = useSharedValue(false)
     const dragScale = useSharedValue(1)
+    const dragStartIndex = useSharedValue(0)
 
     const toggleSearch = () => {
         if (isSearchActive) {
@@ -352,10 +348,9 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
 
     useEffect(() => {
         if (!isSearchActive) {
-            // Reset drag scale when navigating normally
             dragScale.value = 1
             isDragging.value = false
-            
+
             indicatorPosition.value = withSpring(routes.indexOf(activeRoute), {
                 damping: 25,
                 stiffness: 200,
@@ -370,24 +365,35 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
 
     const panGesture = Gesture.Pan()
         .onBegin(() => {
-            'worklet'
+            "worklet"
             isDragging.value = true
             dragScale.value = withSpring(1.1, { damping: 20, stiffness: 300 })
+            dragStartIndex.value = routes.indexOf(activeRoute)
         })
         .onUpdate((event) => {
             "worklet"
-            const currentPos = routes.indexOf(activeRoute)
             const translation = event.translationX / buttonWidth
-            const newPosition = currentPos + translation
+            const newPosition = dragStartIndex.value + translation
             const clampedPosition = Math.max(0, Math.min(routes.length - 1, newPosition))
             indicatorPosition.value = clampedPosition
+
+            const targetIndex = Math.round(clampedPosition)
+            const currentActiveIndex = routes.indexOf(activeRoute)
+
+            if (
+                targetIndex !== currentActiveIndex &&
+                routes[targetIndex] &&
+                Math.abs(clampedPosition - targetIndex) <= 0.5
+            ) {
+                scheduleOnRN(navigation.navigate, routes[targetIndex] as any)
+            }
         })
         .onEnd((event) => {
-            'worklet'
-            const currentPos = routes.indexOf(activeRoute)
+            "worklet"
             const translation = event.translationX / buttonWidth
-            const finalPosition = currentPos + translation
+            const finalPosition = dragStartIndex.value + translation
             const targetIndex = Math.round(Math.max(0, Math.min(routes.length - 1, finalPosition)))
+            const currentActiveIndex = routes.indexOf(activeRoute)
 
             indicatorPosition.value = withSpring(targetIndex, {
                 damping: 20,
@@ -397,15 +403,15 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
             dragScale.value = withSpring(1, { damping: 20, stiffness: 300 })
             isDragging.value = false
 
-            if (targetIndex !== currentPos && routes[targetIndex]) {
+            if (targetIndex !== currentActiveIndex && routes[targetIndex]) {
                 scheduleOnRN(navigation.navigate, routes[targetIndex] as any)
             }
         })
 
     const indicatorStyle = useAnimatedStyle(() => {
-        'worklet'
+        "worklet"
         const baseTranslateX = indicatorPosition.value * buttonWidth + buttonWidth * 0.2
-        
+
         return {
             transform: [
                 {
@@ -445,12 +451,12 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
 
     return (
         <>
-            <GestureDetector gesture={panGesture}>
-                <Animated.View
-                    style={[animatedStyle, styles.container, tabScale]}
-                    entering={FadeInDown}
-                    exiting={FadeInDown}
-                >
+            <Animated.View
+                style={[animatedStyle, styles.container, tabScale]}
+                entering={FadeInDown}
+                exiting={FadeInDown}
+            >
+                <GestureDetector gesture={panGesture}>
                     <Animated.View style={[tabBarWidthStyle, { height: 60 }]}>
                         <GlassView
                             style={[
@@ -514,15 +520,15 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
                             )}
                         </GlassView>
                     </Animated.View>
+                </GestureDetector>
 
-                    <SearchButton
-                        toggleSearch={toggleSearch}
-                        isExpanded={isSearchActive}
-                        value={searchValue}
-                        onChangeText={handleSearchValueChange}
-                    />
-                </Animated.View>
-            </GestureDetector>
+                <SearchButton
+                    toggleSearch={toggleSearch}
+                    isExpanded={isSearchActive}
+                    value={searchValue}
+                    onChangeText={handleSearchValueChange}
+                />
+            </Animated.View>
             <LinearGradient
                 colors={gradient as any}
                 style={{

@@ -1,9 +1,9 @@
 import Button from "@/components/ui/Button/Button"
-import Header from "@/components/ui/Header/Header"
 import ValidatedInput from "@/components/ui/ValidatedInput"
-import { MaterialCommunityIcons } from "@expo/vector-icons"
+import GlassView from "@/components/ui/GlassView"
+import { MaterialCommunityIcons, AntDesign } from "@expo/vector-icons"
 import { Formik, FormikProps } from "formik"
-import { FlatList, ScrollView, Text, View, StyleSheet, TextInput } from "react-native"
+import { FlatList, ScrollView, Text, View, StyleSheet, TextInput, TouchableWithoutFeedback, Keyboard, TouchableOpacity } from "react-native"
 import Colors from "@/constants/Colors"
 import { useGoal } from "../hooks/hooks"
 import Ripple from "react-native-material-ripple"
@@ -261,7 +261,7 @@ const ALL_UNITS: string[] = createFlattenedUnits()
 export default function CreateGoal({ navigation }: CreateGoalProps): JSX.Element {
     const { createGoals } = useGoal()
     const [multiplier, setMultiplier] = useState<number>(1)
-    const [sliderRange, setSliderRange] = useState<[number, number]>([0, 100])
+    const [sliderRange, setSliderRange] = useState<[number, number]>([0, 10000])
     const [unitCategory, setUnitCategory] = useState<UnitCategoryKey | "all">("all")
     const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null)
     const [searchQuery, setSearchQuery] = useState<string>("")
@@ -359,8 +359,9 @@ export default function CreateGoal({ navigation }: CreateGoalProps): JSX.Element
         // Set suggested multiplier
         setMultiplier(preset.suggestedMultiplier)
 
-        // Update slider range based on unit type
-        setSliderRange([0, preset.max * 2])
+        // Update slider range based on unit type with a much higher maximum
+        const baseMax = Math.max(preset.max * 10, 10000)
+        setSliderRange([0, baseMax])
 
         // Update formik values
         formik.setFieldValue("min", preset.min)
@@ -368,24 +369,18 @@ export default function CreateGoal({ navigation }: CreateGoalProps): JSX.Element
     }
 
     return (
-        <View style={styles.container}>
-            <Header
-                goBack
-                title="Create New Goal"
-                containerStyle={{
-                    height: 65,
-                    paddingTop: 15,
-                }}
-            />
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View style={styles.container}>
+                <GlassView style={styles.closeButton}>
+                    <TouchableOpacity onPress={() => navigation.goBack()} style={styles.closeButtonInner}>
+                        <AntDesign name="close" size={20} color="rgba(255,255,255,0.7)" />
+                    </TouchableOpacity>
+                </GlassView>
             <Formik<FormValues> validationSchema={validationSchema} onSubmit={onSubmit} initialValues={initialValues}>
                 {(f: FormikProps<FormValues>) => (
                     <>
-                        <ScrollView
-                            style={styles.scrollView}
-                            contentContainerStyle={styles.scrollViewContent}
-                            keyboardDismissMode={"on-drag"}
-                        >
-                            {/* Icon Selector */}
+                        {/* Icon Selector - Top Area */}
+                        <View style={styles.topArea}>
                             <View style={styles.iconSelectorContainer}>
                                 <Ripple
                                     style={[styles.iconButton, f.values.icon ? styles.iconButtonSelected : {}]}
@@ -400,17 +395,25 @@ export default function CreateGoal({ navigation }: CreateGoalProps): JSX.Element
                                 >
                                     <MaterialCommunityIcons
                                         name={f.values.icon || "plus-circle-outline"}
-                                        size={90}
-                                        color={Colors.secondary}
+                                        size={50}
+                                        color={f.values.icon ? Colors.primary : Colors.secondary}
                                     />
                                 </Ripple>
                                 <Text style={styles.iconHelperText}>
                                     {f.values.icon ? "Tap to change icon" : "Tap to choose an icon for your goal"}
                                 </Text>
                             </View>
+                        </View>
 
-                            {/* Goal Details */}
-                            <View style={styles.section}>
+                        {/* Main Content Container */}
+                        <View style={styles.contentContainer}>
+                            <ScrollView
+                                style={styles.scrollView}
+                                contentContainerStyle={styles.scrollViewContent}
+                                keyboardDismissMode={"on-drag"}
+                                showsVerticalScrollIndicator={false}
+                            >
+                                {/* Goal Details */}
                                 <ValidatedInput
                                     showLabel
                                     label="Goal Name"
@@ -430,10 +433,8 @@ export default function CreateGoal({ navigation }: CreateGoalProps): JSX.Element
                                     numberOfLines={3}
                                     containerStyle={styles.inputContainer}
                                 />
-                            </View>
 
-                            {/* Goal Range */}
-                            <View style={styles.section}>
+                                {/* Goal Range */}
                                 <View style={styles.rangeHeader}>
                                     <View>
                                         <Text style={styles.rangeValueText}>
@@ -486,10 +487,8 @@ export default function CreateGoal({ navigation }: CreateGoalProps): JSX.Element
                                         </Text>
                                     </View>
                                 )}
-                            </View>
 
-                            {/* Units Selection */}
-                            <View style={styles.section}>
+                                {/* Units Selection */}
                                 {/* Search Bar */}
                                 <View style={styles.searchContainer}>
                                     <MaterialCommunityIcons
@@ -665,69 +664,102 @@ export default function CreateGoal({ navigation }: CreateGoalProps): JSX.Element
                                     />
                                     <Text style={styles.customUnitHelperText}>Press enter to use your custom unit</Text>
                                 </View>
-                            </View>
 
-                            {/* Spacer for bottom button */}
-                            <View style={styles.bottomSpacer} />
-                        </ScrollView>
-                        <View style={styles.buttonContainer}>
-                            <Button onPress={() => f.handleSubmit()} style={styles.createButton}>
-                                Create Goal
-                            </Button>
+                                {/* Spacer for bottom button */}
+                                <View style={styles.bottomSpacer} />
+                            </ScrollView>
+                            <View style={styles.buttonContainer}>
+                                <Button onPress={() => f.handleSubmit()} style={styles.createButton}>
+                                    Create Goal
+                                </Button>
+                            </View>
                         </View>
                     </>
                 )}
             </Formik>
-        </View>
+            </View>
+        </TouchableWithoutFeedback>
     )
 }
 
 const styles = StyleSheet.create({
     container: {
-        paddingVertical: 15,
-        backgroundColor: Colors.primary,
         flex: 1,
+        backgroundColor: Colors.primary,
+    },
+    closeButton: {
+        position: "absolute",
+        top: 15,
+        left: 15,
+        zIndex: 100,
+        borderRadius: 22,
+    },
+    closeButtonInner: {
+        width: 44,
+        height: 44,
+        borderRadius: 22,
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    topArea: {
+        justifyContent: "center",
+        alignItems: "center",
+        paddingTop: 80,
+        paddingBottom: 30,
+        backgroundColor: Colors.primary,
+    },
+    contentContainer: {
+        backgroundColor: Colors.primary_light,
+        borderTopLeftRadius: 30,
+        borderTopRightRadius: 30,
+        flex: 1,
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: -2,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 4,
     },
     scrollView: {
         flex: 1,
-        padding: 15,
     },
     scrollViewContent: {
         flexGrow: 1,
-        paddingBottom: 30,
+        padding: 20,
+        paddingBottom: 100,
     },
     iconSelectorContainer: {
         width: "100%",
         justifyContent: "center",
         alignItems: "center",
-        marginBottom: 25,
+        marginBottom: 10,
     },
     iconButton: {
-        width: 150,
-        height: 150,
+        width: 100,
+        height: 100,
         justifyContent: "center",
         alignItems: "center",
-        backgroundColor: Colors.primary_lighter,
-        borderRadius: 75,
+        backgroundColor: "rgba(255,255,255,0.08)",
+        borderRadius: 50,
         marginBottom: 15,
         borderWidth: 2,
         borderColor: "rgba(255,255,255,0.1)",
     },
     iconButtonSelected: {
         borderColor: Colors.secondary,
-        backgroundColor: "rgba(255,255,255,0.08)",
+        backgroundColor: Colors.secondary,
+        transform: [{ scale: 1.02 }],
     },
     iconHelperText: {
-        color: "rgba(255,255,255,0.7)",
+        color: "rgba(255,255,255,0.6)",
         marginTop: 10,
+        fontSize: 14,
+        textAlign: "center",
     },
     section: {
         marginBottom: 25,
-        backgroundColor: Colors.primary_lighter,
-        borderRadius: 15,
-        padding: 15,
-        borderWidth: 1,
-        borderColor: "rgba(255,255,255,0.1)",
     },
     sectionTitle: {
         color: Colors.foreground,
@@ -738,13 +770,13 @@ const styles = StyleSheet.create({
     categorySectionTitle: {
         color: Colors.foreground,
         fontWeight: "600",
-        fontSize: 16,
-        marginBottom: 10,
-        marginTop: 5,
+        fontSize: 15,
+        marginBottom: 8,
+        marginTop: 8,
         opacity: 0.9,
     },
     inputContainer: {
-        marginBottom: 15,
+        marginBottom: 12,
     },
     rangeHeader: {
         flexDirection: "row",
@@ -800,10 +832,10 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         marginTop: 15,
-        padding: 10,
+        padding: 15,
         backgroundColor: "rgba(255,255,255,0.07)",
-        borderRadius: 10,
-        borderLeftWidth: 3,
+        borderRadius: 15,
+        borderLeftWidth: 4,
         borderLeftColor: Colors.secondary,
     },
     rangeSuggestionText: {
@@ -814,10 +846,13 @@ const styles = StyleSheet.create({
     searchContainer: {
         flexDirection: "row",
         alignItems: "center",
-        backgroundColor: "rgba(255,255,255,0.08)",
-        borderRadius: 10,
+        backgroundColor: "rgba(255,255,255,0.05)",
+        borderRadius: 12,
         marginBottom: 15,
-        paddingHorizontal: 10,
+        paddingHorizontal: 12,
+        borderWidth: 1,
+        borderColor: "rgba(255,255,255,0.1)",
+        height: 44,
     },
     searchIcon: {
         marginRight: 10,
@@ -832,19 +867,23 @@ const styles = StyleSheet.create({
         padding: 5,
     },
     categoryScrollView: {
-        marginBottom: 15,
+        marginBottom: 12,
     },
     categoryButton: {
-        paddingVertical: 10,
-        paddingHorizontal: 15,
+        paddingVertical: 12,
+        paddingHorizontal: 18,
         marginRight: 10,
-        borderRadius: 20,
-        backgroundColor: "rgba(255,255,255,0.1)",
+        borderRadius: 25,
+        backgroundColor: "rgba(255,255,255,0.08)",
         flexDirection: "row",
         alignItems: "center",
+        borderWidth: 1,
+        borderColor: "rgba(255,255,255,0.1)",
     },
     categoryButtonActive: {
         backgroundColor: Colors.secondary,
+        borderColor: Colors.secondary,
+        transform: [{ scale: 1.02 }],
     },
     categoryIcon: {
         marginRight: 6,
@@ -857,7 +896,7 @@ const styles = StyleSheet.create({
         fontWeight: "500",
     },
     subcategoryScrollView: {
-        marginBottom: 15,
+        marginBottom: 12,
     },
     subcategoryButton: {
         paddingVertical: 8,
@@ -881,32 +920,35 @@ const styles = StyleSheet.create({
         fontWeight: "500",
     },
     unitsFlatList: {
-        maxHeight: 240,
+        maxHeight: 200,
     },
     unitsList: {
         paddingVertical: 5,
     },
     unitButton: {
-        borderRadius: 10,
+        borderRadius: 15,
         borderWidth: 1,
         borderColor: "rgba(255,255,255,0.15)",
         backgroundColor: "rgba(255,255,255,0.05)",
-        padding: 12,
-        margin: 5,
+        padding: 14,
+        margin: 6,
         flex: 1,
         alignItems: "center",
+        minHeight: 50,
+        justifyContent: "center",
     },
     unitButtonActive: {
         borderColor: Colors.secondary,
-        backgroundColor: "rgba(255,255,255,0.15)",
+        backgroundColor: Colors.secondary,
+        transform: [{ scale: 1.02 }],
     },
     unitText: {
         color: "rgba(255,255,255,0.8)",
         textAlign: "center",
     },
     unitTextActive: {
-        color: Colors.foreground,
-        fontWeight: "500",
+        color: Colors.primary,
+        fontWeight: "600",
     },
     noResultsContainer: {
         alignItems: "center",
@@ -935,30 +977,33 @@ const styles = StyleSheet.create({
         marginBottom: 10,
     },
     customUnitInput: {
-        marginBottom: 5,
+        marginBottom: 8,
         backgroundColor: "rgba(255,255,255,0.08)",
-        borderRadius: 10,
-        padding: 12,
+        borderRadius: 15,
+        padding: 15,
         color: Colors.foreground,
         fontSize: 16,
         borderWidth: 1,
         borderColor: "rgba(255,255,255,0.15)",
+        minHeight: 50,
     },
     customUnitHelperText: {
         color: "rgba(255,255,255,0.5)",
         fontSize: 12,
     },
     bottomSpacer: {
-        height: 60,
+        height: 20,
     },
     buttonContainer: {
-        padding: 15,
-        backgroundColor: Colors.primary,
+        padding: 20,
+        paddingBottom: 40,
+        backgroundColor: Colors.primary_light,
         borderTopWidth: 1,
         borderTopColor: "rgba(255,255,255,0.1)",
     },
     createButton: {
         width: "100%",
-        borderRadius: 30,
+        borderRadius: 25,
+        paddingVertical: 16,
     },
 })

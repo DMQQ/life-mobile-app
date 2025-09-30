@@ -42,6 +42,27 @@ const CREATE_SUBSCRIPTION_MUTATION = gql`
     }
 `
 
+const RENEW_SUBSCRIPTION_MUTATION = gql`
+    mutation renewSubscription($subscriptionId: ID!) {
+        renewSubscription(subscriptionId: $subscriptionId) {
+            id
+            amount
+            date
+            description
+            type
+            category
+            balanceBeforeInteraction
+            note
+            subscription {
+                id
+                isActive
+                nextBillingDate
+                dateStart
+            }
+        }
+    }
+`
+
 export default function useSubscription() {
     const [cancelSubscription, cancelSubscriptionState] = useMutation(CANCEL_SUBSCRIPTION_MUTATION, {
         refetchQueries: ["GetWallet"],
@@ -51,10 +72,16 @@ export default function useSubscription() {
         refetchQueries: ["GetWallet"],
     })
 
+    const [renewSubscription, renewSubscriptionState] = useMutation(RENEW_SUBSCRIPTION_MUTATION, {
+        refetchQueries: ["GetWallet"],
+    })
+
     return {
         cancelSubscription,
         cancelSubscriptionState,
         createSubscription,
         createSubscriptionState,
+        renewSubscription,
+        renewSubscriptionState,
     }
 }

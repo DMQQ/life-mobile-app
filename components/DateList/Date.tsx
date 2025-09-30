@@ -80,11 +80,15 @@ const DateComponent = (props: DateProps) => {
             style={[styles.container, { backgroundColor: dateItemBg }]}
         >
             <Dots tasks={tasks} />
-            <Text variant="title" style={{ color: Colors.foreground, fontWeight: "bold" }}>{date.getDate()}</Text>
+            <Text variant="title" style={{ color: Colors.foreground, fontWeight: "bold" }}>
+                {date.getDate()}
+            </Text>
             <Text variant="body" style={{ color: "#ffffffcb" }}>
                 {date.getDay() === 0 ? "Sun" : moment.weekdays()[date.getDay()].slice(0, 3)}
             </Text>
-            <Text variant="caption" style={{ color: "#ffffff8c" }}>{months[date.getMonth()].slice(0, 3)}</Text>
+            <Text variant="caption" style={{ color: "#ffffff8c" }}>
+                {months[date.getMonth()].slice(0, 3)}
+            </Text>
         </Ripple>
     )
 }

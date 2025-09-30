@@ -82,7 +82,7 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
         setRefreshing(false)
     }
     const [query, setQuery] = useState("")
-    
+
     // Register search functionality
     useScreenSearch(setQuery)
 
@@ -96,7 +96,6 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
                     {
                         onPress: () => {
                             timeline.onViewToggle()
-                            scrollY.value = 0
                         },
                         icon: <Feather name="repeat" size={20} color={Colors.foreground} />,
                     },
