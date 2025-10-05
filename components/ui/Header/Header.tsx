@@ -15,17 +15,28 @@ import IconButton from "../IconButton/IconButton"
 import { GlassContainer } from "expo-glass-effect"
 import { LinearGradient } from "expo-linear-gradient"
 import GlassView from "../GlassView"
+import { ContextMenu, Host, Button as SwiftUIButton } from "@expo/ui/swift-ui"
 
 const AnimatedRipple = Animated.createAnimatedComponent(Ripple)
 
 const THRESHOLD = 200
 
+export interface HeaderItem {
+    onPress: () => void
+    icon: React.ReactNode
+    style?: StyleProp<ViewStyle>
+    contextMenu?: {
+        items: {
+            title: string
+            systemImage?: any
+            onPress: () => void
+            destructive?: boolean
+        }[]
+    }
+}
+
 interface HeaderProps {
-    buttons?: {
-        onPress: () => void
-        icon: React.ReactNode
-        style?: StyleProp<ViewStyle>
-    }[]
+    buttons?: HeaderItem[]
     title?: string
     goBack?: boolean
     titleAnimatedStyle?: StyleProp<TextStyle>
@@ -150,19 +161,58 @@ function Header(props: HeaderProps) {
 
                     {props.children}
 
-                    <GlassView style={styles.iconContainer}>
-                        {(props.buttons || []).map((button, index) => (
-                            <IconButton
-                                style={button.style}
-                                key={index}
-                                onPress={throttle(() => {
-                                    button.onPress()
-                                    Haptic.trigger("impactLight")
-                                }, 250)}
-                                icon={button.icon}
-                            />
-                        ))}
-                    </GlassView>
+                    <View style={{ borderRadius: 100, overflow: "hidden" }}>
+                        <GlassView style={styles.iconContainer}>
+                            {(props.buttons || []).map((button, index) => {
+                                if (button.contextMenu) {
+                                    return (
+                                        <Host key={index}>
+                                            <ContextMenu activationMethod="singlePress">
+                                                <ContextMenu.Items>
+                                                    {button.contextMenu.items.map((item, itemIndex) => (
+                                                        <SwiftUIButton
+                                                            key={itemIndex}
+                                                            systemImage={item.systemImage}
+                                                            onPress={() => {
+                                                                item.onPress?.()
+                                                                Haptic.trigger("impactLight")
+                                                            }}
+                                                            role={item.destructive ? "destructive" : "default"}
+                                                            variant="glass"
+                                                        >
+                                                            {item.title}
+                                                        </SwiftUIButton>
+                                                    ))}
+                                                </ContextMenu.Items>
+                                                <ContextMenu.Trigger>
+                                                    <IconButton
+                                                        style={button.style}
+                                                        onPress={throttle(() => {
+                                                            button.onPress()
+                                                            Haptic.trigger("impactLight")
+                                                        }, 250)}
+                                                        icon={button.icon}
+                                                    />
+                                                </ContextMenu.Trigger>
+                                            </ContextMenu>
+                                        </Host>
+                                    )
+                                } else {
+                                    return (
+                                        <IconButton
+                                            style={button.style}
+                                            key={index}
+                                            onPress={throttle(() => {
+                                                button.onPress()
+                                                Haptic.trigger("impactLight")
+                                            }, 250)}
+                                            icon={button.icon}
+                                        />
+                                    )
+                                }
+                            })}
+                        </GlassView>
+                    </View>
                 </View>
 
                 {props.renderAnimatedItem && memodRenderItem}

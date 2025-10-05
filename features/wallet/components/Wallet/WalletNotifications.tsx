@@ -422,7 +422,7 @@ export function FloatingNotifications() {
                 top: 0,
                 left: 0,
                 right: 0,
-                paddingTop: insets.top - 5,
+                paddingTop: insets.top - 15,
                 paddingHorizontal: 15,
                 paddingBottom: 50,
             }}

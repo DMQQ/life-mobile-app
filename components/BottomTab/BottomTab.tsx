@@ -247,11 +247,36 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
     const activeRoute = state.routes[state.index].name
     const routes = ["NotesScreens", "GoalsScreens", "Root", "WalletScreens", "TimelineScreens"]
 
+    const handleLongPress = (route: string) => {
+        switch (route) {
+            case "WalletScreens":
+                Feedback.trigger("impactMedium")
+                navigation.navigate({
+                    name: "WalletScreens",
+                    params: {
+                        expenseId: null,
+                    },
+                })
+                break
+            case "TimelineScreens":
+                Feedback.trigger("impactMedium")
+                navigation.navigate({
+                    name: "TimelineScreens",
+                    params: {
+                        selectedDate: moment(new Date()).format("YYYY-MM-DD"),
+                    },
+                })
+                break
+            default:
+                break
+        }
+    }
+
     const { scrollYValues } = useScrollYContext()
 
     const scrollY = useDerivedValue(() => {
         return scrollYValues.value[activeRoute] || 0
-    })
+    }, [activeRoute])
 
     const tabScale = useAnimatedStyle(() => {
         return {
@@ -297,29 +322,13 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
                 route: "WalletScreens",
                 label: "Wallet",
                 iconName: "wallet",
-                onLongPress: () => {
-                    Feedback.trigger("impactMedium")
-                    navigation.navigate({
-                        name: "WalletScreens",
-                        params: {
-                            expenseId: null,
-                        },
-                    })
-                },
+                onLongPress: () => handleLongPress("WalletScreens"),
             },
             {
                 route: "TimelineScreens",
                 label: "Timeline",
                 iconName: "calendar-number",
-                onLongPress: () => {
-                    Feedback.trigger("impactMedium")
-                    navigation.navigate({
-                        name: "TimelineScreens",
-                        params: {
-                            selectedDate: moment(new Date()).format("YYYY-MM-DD"),
-                        },
-                    })
-                },
+                onLongPress: () => handleLongPress("TimelineScreens"),
             },
         ],
         [],
@@ -372,6 +381,7 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
         })
         .onUpdate((event) => {
             "worklet"
+
             const translation = event.translationX / buttonWidth
             const newPosition = dragStartIndex.value + translation
             const clampedPosition = Math.max(0, Math.min(routes.length - 1, newPosition))
@@ -386,6 +396,16 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
                 Math.abs(clampedPosition - targetIndex) <= 0.5
             ) {
                 scheduleOnRN(navigation.navigate, routes[targetIndex] as any)
+            }
+
+            if (Math.abs(event.y) > 50) {
+                scheduleOnRN(handleLongPress, activeRoute)
+                dragScale.value = withSpring(1, { damping: 20, stiffness: 300 })
+                isDragging.value = false
+                indicatorPosition.value = withSpring(routes.indexOf(activeRoute), {
+                    damping: 25,
+                    stiffness: 200,
+                })
             }
         })
         .onEnd((event) => {
@@ -423,7 +443,7 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
             ],
             width: buttonWidth * 0.6,
         }
-    })
+    }, [buttonWidth])
 
     const tabBarWidthStyle = useAnimatedStyle(() => ({
         width: interpolate(tabsOpacity.value, [0, 1], [60, Layout.screen.width - 30 - 70]),
@@ -447,7 +467,7 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
                 },
             ],
         }
-    })
+    }, [isOpenSubScreen, isSearchActive])
 
     return (
         <>

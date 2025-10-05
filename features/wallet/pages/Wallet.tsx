@@ -1,7 +1,7 @@
-import Header from "@/components/ui/Header/Header"
+import Header, { HeaderItem } from "@/components/ui/Header/Header"
 import Colors from "@/constants/Colors"
 import useTrackScroll from "@/utils/hooks/ui/useTrackScroll"
-import { AntDesign, Feather, Ionicons } from "@expo/vector-icons"
+import { AntDesign, Entypo, Feather, Ionicons } from "@expo/vector-icons"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { StyleSheet } from "react-native"
 import Haptic from "react-native-haptic-feedback"
@@ -71,29 +71,45 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
     }, [navigation])
 
     const [showSubscriptionsView, setShowSubscriptionsView] = useState(false)
-    
+
     // Register search functionality
     useScreenSearch((value) => wallet.dispatch({ type: "SET_QUERY", payload: value.trim() }))
 
     const buttons = useMemo(
-        () => [
-            {
-                onPress: () => {
-                    setShowSubscriptionsView((p) => !p)
+        () =>
+            [
+                {
+                    icon: <Entypo name="dots-three-vertical" size={20} color={Colors.foreground} />,
+                    onPress: () => {},
+                    contextMenu: {
+                        items: [
+                            {
+                                title: showSubscriptionsView ? "Show Expenses" : "Show Subscriptions",
+                                systemImage: showSubscriptionsView ? "list.bullet" : "repeat",
+                                onPress: () => {
+                                    setShowSubscriptionsView((prev) => !prev)
+                                    Haptic.trigger("impactLight")
+                                },
+                            },
+                            {
+                                title: "Edit Balance",
+                                systemImage: "pencil.and.outline",
+                                onPress: handleShowEditSheet,
+                            },
+                        ],
+                    },
                 },
-                icon: <Feather name="repeat" size={20} color={Colors.foreground} />,
-            },
 
-            {
-                onPress: () => navigation.navigate("Charts"),
-                icon: <Ionicons name="stats-chart" size={20} color={Colors.foreground} />,
-            },
-            {
-                onPress: () => navigation.navigate("CreateExpense"),
-                icon: <AntDesign name="plus" size={20} color={Colors.foreground} />,
-            },
-        ],
-        [],
+                {
+                    onPress: () => navigation.navigate("Charts"),
+                    icon: <Ionicons name="stats-chart" size={20} color={Colors.foreground} />,
+                },
+                {
+                    onPress: () => navigation.navigate("CreateExpense"),
+                    icon: <AntDesign name="plus" size={20} color={Colors.foreground} />,
+                },
+            ] as HeaderItem[],
+        [showSubscriptionsView, handleShowEditSheet],
     )
 
     const header = useMemo(() => {

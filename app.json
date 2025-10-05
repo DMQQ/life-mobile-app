@@ -2,7 +2,7 @@
     "expo": {
         "name": "Life",
         "slug": "mylife-mobile",
-        "version": "1.3.0",
+        "version": "2.0.0",
         "orientation": "portrait",
         "icon": "./assets/images/icon.png",
         "scheme": "mylife",
@@ -19,7 +19,7 @@
         },
         "assetBundlePatterns": ["**/*"],
         "ios": {
-            "buildNumber": "20250923",
+            "buildNumber": "20251001",
             "supportsTablet": true,
             "infoPlist": {
                 "NSFaceIDUsageDescription": "Allow $(PRODUCT_NAME) to use Face ID.",
@@ -28,7 +28,8 @@
                 "ITSAppUsesNonExemptEncryption": false
             },
             "bundleIdentifier": "com.dmq.mylifemobile",
-            "associatedDomains": ["applinks:life.dmqq.dev"]
+            "associatedDomains": ["applinks:life.dmqq.dev"],
+            "icon": "./assets/images/icon.icon"
         },
         "android": {
             "googleServicesFile": "./google-services.json",

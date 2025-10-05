@@ -173,7 +173,7 @@ const CompactSpendingChart = ({}: CompactSpendingChartProps) => {
             <View style={styles.header}>
                 <View style={styles.changeIndicator}>
                     <AntDesign
-                        name={percentageChange >= 0 ? "caretup" : "caret-down"}
+                        name={percentageChange >= 0 ? "caret-up" : "caret-down"}
                         size={12}
                         color={percentageChange >= 0 ? "#FF8A80" : "#4ECDC4"}
                     />
