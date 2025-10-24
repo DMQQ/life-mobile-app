@@ -644,9 +644,9 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
 
                                 <UpdateButton />
 
-                                <Button2 onPress={handleSignout} color="error" style={{ marginTop: 30 }}>
+                                <Button onPress={handleSignout} color="error" style={{ marginTop: 30 }}>
                                     Signout 👋
-                                </Button2>
+                                </Button>
 
                                 <View style={{ padding: 30 }} />
                             </View>
@@ -673,8 +673,8 @@ export const UpdateButton: React.FC = () => {
     if (!isUpdateAvailable) return null
 
     return (
-        <Button2 icon="download" onPress={downloadAndRestart} disabled={isDownloading}>
+        <Button icon="download" onPress={downloadAndRestart} disabled={isDownloading}>
             {isDownloading ? "Updating..." : "Update App"}
-        </Button2>
+        </Button>
     )
 }

@@ -1,4 +1,4 @@
-import { AnimatedSelector } from "@/components"
+import { AnimatedSelector, Button } from "@/components"
 import Button2 from "@/components/ui/Button/Button2"
 import IconButton from "@/components/ui/IconButton/IconButton"
 import Text from "@/components/ui/Text/Text"
@@ -204,13 +204,13 @@ export default function CreateLimits({ navigation }: WalletScreens<"CreateLimits
 
                         {!categoryPicker && (
                             <View style={styles.bottomButtonContainer}>
-                                <Button2
+                                <Button
                                     disabled={!(formik.isValid && formik.dirty)}
                                     onPress={() => formik.handleSubmit()}
                                     style={styles.createButton}
                                 >
                                     Create Limit
-                                </Button2>
+                                </Button>
                             </View>
                         )}
                     </>

@@ -6,6 +6,7 @@ import moment from "moment"
 import { StyleSheet, View } from "react-native"
 import Animated, { FadeIn } from "react-native-reanimated"
 import SVGImage from "./SVGImage"
+import { Button } from "@/components"
 
 const styles = StyleSheet.create({
     container: {
@@ -60,9 +61,9 @@ export default function NotFound({ selectedDate }: { selectedDate: string }) {
             </View>
 
             <Animated.View entering={FadeIn.delay(150)} style={{ marginTop: 10 }}>
-                <Button2 onPress={onPress} fontStyle={{ fontSize: 16 }}>
+                <Button onPress={onPress} fontStyle={{ fontSize: 16 }}>
                     Create event
-                </Button2>
+                </Button>
             </Animated.View>
         </View>
     )

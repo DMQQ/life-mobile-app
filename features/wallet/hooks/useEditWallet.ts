@@ -1,10 +1,12 @@
 import { gql, useMutation } from "@apollo/client";
 
 const EDIT_BALANCE = gql`
-  mutation EditBalance($balance: Int!) {
-    editWalletBalance(amount: $balance) {
+  mutation EditBalance($amount: Int, $paycheck: Float, $paycheckDate: String) {
+    editWalletBalance(amount: $amount, paycheck: $paycheck, paycheckDate: $paycheckDate) {
       id
       balance
+      income
+      paycheckDate
     }
   }
 `;

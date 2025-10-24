@@ -15,24 +15,39 @@ import * as yup from "yup"
 import useEditWallet from "../hooks/useEditWallet"
 import { WalletScreens } from "../Main"
 import { SafeAreaView } from "react-native-safe-area-context"
+import { Button } from "@/components"
+import AnimatedSelector from "@/components/ui/AnimatedSelector"
 
 const validationSchema = yup.object().shape({
     balance: yup
-        .number()
-        .typeError("Please enter a valid number")
-        .min(0, "Balance cannot be negative")
-        .max(999999999, "Maximum balance is 999,999,999 zł")
-        .required("Balance amount is required"),
+        .string()
+        .test("is-number", "Please enter a valid number", (value) => {
+            if (!value || value === "") return true
+            return !isNaN(Number(value))
+        })
+        .test("min-value", "Balance cannot be negative", (value) => {
+            if (!value || value === "") return true
+            return Number(value) >= 0
+        })
+        .test("max-value", "Maximum balance is 999,999,999 zł", (value) => {
+            if (!value || value === "") return true
+            return Number(value) <= 999999999
+        }),
     monthlySalary: yup
-        .number()
-        .typeError("Please enter a valid number")
-        .min(0, "Salary cannot be negative")
-        .max(999999999, "Maximum salary is 999,999,999 zł"),
-    paycheckDate: yup
-        .number()
-        .typeError("Please enter a valid day")
-        .min(1, "Day must be between 1 and 31")
-        .max(31, "Day must be between 1 and 31"),
+        .string()
+        .test("is-number", "Please enter a valid number", (value) => {
+            if (!value || value === "") return true
+            return !isNaN(Number(value))
+        })
+        .test("min-value", "Salary cannot be negative", (value) => {
+            if (!value || value === "") return true
+            return Number(value) >= 0
+        })
+        .test("max-value", "Maximum salary is 999,999,999 zł", (value) => {
+            if (!value || value === "") return true
+            return Number(value) <= 999999999
+        }),
+    paycheckDate: yup.string(),
 })
 
 const styles = StyleSheet.create({
@@ -109,6 +124,20 @@ export default function EditBalance({ navigation }: WalletScreens<"EditBalance">
 
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false)
     const [selectedDate, setSelectedDate] = useState<Date | null>(null)
+    const [paycheckOption, setPaycheckOption] = useState<"start" | "end" | "custom">("start")
+
+    const getPaycheckDate = () => {
+        if (paycheckOption === "start") {
+            const startOfMonth = dayjs().startOf("month").toDate()
+            return startOfMonth.toISOString()
+        } else if (paycheckOption === "end") {
+            const endOfMonth = dayjs().endOf("month").toDate()
+            return endOfMonth.toISOString()
+        } else if (paycheckOption === "custom" && selectedDate) {
+            return selectedDate.toISOString()
+        }
+        return null
+    }
 
     return (
         <SafeAreaView style={styles.container}>
@@ -130,7 +159,12 @@ export default function EditBalance({ navigation }: WalletScreens<"EditBalance">
                     Feedback.trigger("impactLight")
                     await editBalance({
                         variables: {
-                            balance: parseFloat(values.balance),
+                            amount: values.balance && values.balance.trim() !== "" ? parseInt(values.balance) : null,
+                            paycheck:
+                                values.monthlySalary && values.monthlySalary.trim() !== ""
+                                    ? parseFloat(values.monthlySalary)
+                                    : null,
+                            paycheckDate: getPaycheckDate(),
                         },
                     })
                 }}
@@ -153,7 +187,6 @@ export default function EditBalance({ navigation }: WalletScreens<"EditBalance">
                                 <Input
                                     value={formik.values.balance}
                                     onChangeText={(text: string) => {
-                                        // Only allow positive numbers and decimal points
                                         const cleanedText = text.replace(/[^0-9.]/g, "")
                                         formik.setFieldValue("balance", cleanedText)
                                     }}
@@ -223,7 +256,7 @@ export default function EditBalance({ navigation }: WalletScreens<"EditBalance">
                                     }
                                     left={
                                         <View style={styles.balanceIcon}>
-                                            <AntDesign name="creditcard" size={20} color={Colors.secondary} />
+                                            <AntDesign name="credit-card" size={20} color={Colors.secondary} />
                                         </View>
                                     }
                                 />
@@ -231,36 +264,65 @@ export default function EditBalance({ navigation }: WalletScreens<"EditBalance">
 
                             <View style={styles.section}>
                                 <Text style={styles.sectionTitle}>Paycheck date</Text>
-                                <Text style={styles.helperText}>Select the date you receive your next paycheck</Text>
-                                <TouchableOpacity
-                                    activeOpacity={0.9}
-                                    onPress={() => setDatePickerVisibility(true)}
-                                    style={{
-                                        borderWidth: 2,
-                                        borderColor: Color(Colors.primary).lighten(0.5).hex(),
-                                        borderRadius: 12,
-                                        paddingVertical: 15,
-                                        paddingHorizontal: 15,
-                                        flexDirection: "row",
-                                        alignItems: "center",
-                                        backgroundColor: Colors.primary_light,
+                                <Text style={styles.helperText}>Select when you receive your paycheck</Text>
+
+                                <AnimatedSelector
+                                    textStyle={{ fontSize: 11 }}
+                                    items={["start", "end", "custom"] as const}
+                                    selectedItem={paycheckOption}
+                                    onItemSelect={(item) => {
+                                        setPaycheckOption(item)
+                                        if (item === "custom") {
+                                            setDatePickerVisibility(true)
+                                        } else {
+                                            setSelectedDate(null)
+                                        }
                                     }}
-                                >
-                                    <View style={styles.calendarIcon}>
-                                        <AntDesign name="calendar" size={20} color={Colors.secondary} />
-                                    </View>
-                                    <Text
+                                    renderItem={(item) => {
+                                        const labels = {
+                                            start: "Start of month",
+                                            end: "End of month",
+                                            custom: "Custom date",
+                                        }
+                                        return labels[item]
+                                    }}
+                                    containerStyle={{
+                                        marginBottom: 12,
+                                    }}
+                                />
+
+                                {paycheckOption === "custom" && (
+                                    <TouchableOpacity
+                                        activeOpacity={0.9}
+                                        onPress={() => setDatePickerVisibility(true)}
                                         style={{
-                                            color: selectedDate ? Colors.foreground : Colors.foreground_secondary,
-                                            fontSize: 16,
-                                            marginLeft: 8,
+                                            borderWidth: 2,
+                                            borderColor: Color(Colors.primary).lighten(0.5).hex(),
+                                            borderRadius: 12,
+                                            paddingVertical: 15,
+                                            paddingHorizontal: 15,
+                                            flexDirection: "row",
+                                            alignItems: "center",
+                                            backgroundColor: Colors.primary_light,
+                                            marginTop: 12,
                                         }}
                                     >
-                                        {selectedDate
-                                            ? dayjs(selectedDate).format("YYYY-MM-DD")
-                                            : "Select paycheck date"}
-                                    </Text>
-                                </TouchableOpacity>
+                                        <View style={styles.calendarIcon}>
+                                            <AntDesign name="calendar" size={20} color={Colors.secondary} />
+                                        </View>
+                                        <Text
+                                            style={{
+                                                color: selectedDate ? Colors.foreground : Colors.foreground_secondary,
+                                                fontSize: 16,
+                                                marginLeft: 8,
+                                            }}
+                                        >
+                                            {selectedDate
+                                                ? dayjs(selectedDate).format("YYYY-MM-DD")
+                                                : "Select custom date"}
+                                        </Text>
+                                    </TouchableOpacity>
+                                )}
                             </View>
 
                             <DateTimePicker
@@ -280,7 +342,7 @@ export default function EditBalance({ navigation }: WalletScreens<"EditBalance">
                         </ScrollView>
 
                         <View style={styles.bottomButtonContainer}>
-                            <Button2
+                            <Button
                                 disabled={!(formik.isValid && formik.dirty) || loading}
                                 onPress={() => formik.handleSubmit()}
                                 style={styles.saveButton}
@@ -295,7 +357,7 @@ export default function EditBalance({ navigation }: WalletScreens<"EditBalance">
                                 }
                             >
                                 Save balance
-                            </Button2>
+                            </Button>
                         </View>
                     </>
                 )}

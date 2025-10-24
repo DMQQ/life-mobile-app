@@ -20,6 +20,7 @@ import TimelineCreateHeader from "../components/CreateTimeline/TimelineCreateHea
 import timelineStyles from "../components/timeline.styles"
 import useCreateTimeline from "../hooks/general/useCreateTimeline"
 import type { TimelineScreenProps } from "../types"
+import { Button } from "@/components"
 
 const styles = StyleSheet.create({
     timeContainer: {
@@ -221,7 +222,7 @@ const SubmitButton = (props: SubmitButtonProps) => (
             }}
             icon={<AntDesign name="calendar" color={Colors.foreground} size={20} />}
         />
-        <Button2
+        <Button
             icon={
                 props.isLoading ? (
                     <ActivityIndicator style={{ marginRight: 5 }} size={18} color={Colors.foreground} />
@@ -241,7 +242,7 @@ const SubmitButton = (props: SubmitButtonProps) => (
             fontStyle={{ fontSize: 16 }}
         >
             {props.isEditing ? "Save changes" : "Create new event"}
-        </Button2>
+        </Button>
     </View>
 )
 
