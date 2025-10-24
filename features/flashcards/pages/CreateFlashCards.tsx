@@ -163,7 +163,6 @@ const JSONImportForm = ({ groupId, navigation }: { groupId: string; navigation: 
             setLoading(false)
             navigation.navigate("FlashCard", { groupId })
         } catch (error) {
-            console.log(error)
             setLoading(false)
         }
     }

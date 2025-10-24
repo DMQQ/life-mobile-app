@@ -29,7 +29,6 @@ const useRemoveTodo = (todo: Todos & { timelineId: string }) => {
                     query: GET_TIMELINE,
                     variables: { id: todo.timelineId },
                     data: final,
-                    id: cache.identify(final),
                 })
             },
             onCompleted() {

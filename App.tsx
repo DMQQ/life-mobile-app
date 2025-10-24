@@ -46,7 +46,6 @@ const withToken = setContext(async () => {
 
         return { token }
     } catch (error) {
-        console.log("Error reading token:", error)
         return { token: "" }
     }
 })

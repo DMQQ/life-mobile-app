@@ -19,6 +19,8 @@ import * as ImagePicker from "expo-image-picker"
 import axios from "axios"
 import Url from "@/constants/Url"
 import Color from "color"
+import { gql, useApolloClient } from "@apollo/client"
+import { GET_TIMELINE } from "../hooks/query/useGetTimelineById"
 
 const styles = StyleSheet.create({
     todoCard: {
@@ -101,6 +103,8 @@ export default function TodoItem(todo: Todos & { timelineId: string; index: numb
     const { removeTodoFile, loading: removeFileLoading } = useRemoveTodoFile()
     const [uploadingFile, setUploadingFile] = useState(false)
 
+    const client = useApolloClient()
+
     const tapCountRef = useRef(0)
     const tapTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
     const isProcessingRef = useRef(false)
@@ -127,7 +131,7 @@ export default function TodoItem(todo: Todos & { timelineId: string; index: numb
 
             Haptic.trigger("impactLight")
 
-            completeTodo()
+            completeTodo(!todo.isCompleted)
                 .then((result) => {
                     console.log("Mutation completed:", result)
                     isProcessingRef.current = false
@@ -154,7 +158,7 @@ export default function TodoItem(todo: Todos & { timelineId: string; index: numb
     }
 
     const handleImageFromCamera = async () => {
-        const permission = await ImagePicker.requestCameraPermissionsAsync()
+        await ImagePicker.requestCameraPermissionsAsync()
 
         const result = await ImagePicker.launchCameraAsync({
             allowsEditing: true,
@@ -211,14 +215,95 @@ export default function TodoItem(todo: Todos & { timelineId: string; index: numb
                 },
             })
 
-            await addTodoFile({
-                variables: {
-                    todoId: todo.id,
-                    type: asset.mimeType || "application/octet-stream",
-                    url: response.data.url,
-                },
-                refetchQueries: ["GetTimeline"],
+            // Debug response and update cache
+            console.log("Upload response:", response.data)
+            
+            // Update cache immediately with the uploaded file
+            const uploadedFile = response.data
+            if (uploadedFile && uploadedFile.id) {
+                const timelineData = client.readQuery({
+                    query: GET_TIMELINE,
+                    variables: { id: todo.timelineId },
+                }) as any
+
+                if (timelineData) {
+                    const updatedTodos = timelineData.timelineById.todos.map((t: any) => {
+                        if (t.id === todo.id) {
+                            return {
+                                ...t,
+                                files: [...(t.files || []), uploadedFile],
+                            }
+                        }
+                        return t
+                    })
+
+                    client.writeQuery({
+                        query: GET_TIMELINE,
+                        variables: { id: todo.timelineId },
+                        data: {
+                            timelineById: {
+                                ...timelineData.timelineById,
+                                todos: updatedTodos,
+                            },
+                        },
+                    })
+                }
+                
+                Haptic.trigger("impactLight")
+                return // Skip the refetch since we updated cache directly
+            }
+            
+            // Fallback: Refetch the specific todo to get updated files
+            const { data: updatedTodo } = await client.query({
+                query: gql`
+                    query GetTodo($id: ID!) {
+                        timelineTodo(id: $id) {
+                            id
+                            title
+                            isCompleted
+                            modifiedAt
+                            files {
+                                id
+                                type
+                                url
+                            }
+                        }
+                    }
+                `,
+                variables: { id: todo.id },
+                fetchPolicy: 'network-only'
             })
+
+            // Update cache with the refetched todo data
+            if (updatedTodo?.timelineTodo) {
+                const timelineData = client.readQuery({
+                    query: GET_TIMELINE,
+                    variables: { id: todo.timelineId },
+                }) as any
+
+                if (timelineData) {
+                    const updatedTodos = timelineData.timelineById.todos.map((t: any) => {
+                        if (t.id === todo.id) {
+                            return {
+                                ...t,
+                                files: updatedTodo.timelineTodo.files,
+                            }
+                        }
+                        return t
+                    })
+
+                    client.writeQuery({
+                        query: GET_TIMELINE,
+                        variables: { id: todo.timelineId },
+                        data: {
+                            timelineById: {
+                                ...timelineData.timelineById,
+                                todos: updatedTodos,
+                            },
+                        },
+                    })
+                }
+            }
 
             Haptic.trigger("impactLight")
         } catch (error) {
@@ -252,13 +337,11 @@ export default function TodoItem(todo: Todos & { timelineId: string; index: numb
     }
 
     const handleShowPreview = (file: any) => {
-        (navigation as any).navigate("ImagesPreview", {
+        ;(navigation as any).navigate("ImagesPreview", {
             selectedImage: file.url,
             timelineId: todo.timelineId,
         })
     }
-
-    console.log(todo)
 
     const isLoading = removeLoading || completeLoading || addFileLoading || removeFileLoading || uploadingFile
 
