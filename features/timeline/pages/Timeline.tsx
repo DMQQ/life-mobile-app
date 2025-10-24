@@ -83,7 +83,6 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
     }
     const [query, setQuery] = useState("")
 
-    // Register search functionality
     useScreenSearch(setQuery)
 
     return (

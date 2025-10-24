@@ -2,10 +2,11 @@ import Colors from "@/constants/Colors"
 import { useNavigation } from "@react-navigation/native"
 import moment from "moment"
 import { useMemo } from "react"
-import { StyleProp, Text, View, ViewStyle } from "react-native"
+import { StyleProp, StyleSheet, Text, View, ViewStyle } from "react-native"
 import Ripple from "react-native-material-ripple"
 import { GetTimelineQuery } from "../hooks/query/useGetTimeLineQuery"
 import timelineStyles from "./timeline.styles"
+import TodosPreviewSection from "./TodosPreviewSection"
 
 export default function TimelineItem(
     timeline: GetTimelineQuery & {
@@ -74,47 +75,66 @@ export default function TimelineItem(
                         {start} - {end}
                     </Text>
                 </View>
-                <View
-                    style={{
-                        flexDirection: "row",
-                        flexWrap: "wrap",
-                        alignItems: "center",
-                        justifyContent: "flex-end",
-                        marginTop: 10,
-                        gap: 10,
-                    }}
-                >
-                    <Text
-                        numberOfLines={3}
-                        style={[
-                            timelineStyles.itemDescription,
-                            { flex: 1 },
-                            { ...(timeline.textColor && { color: timeline.textColor }) },
-                        ]}
-                    >
-                        {timeline.description}
-                    </Text>
-
-                    <View
-                        style={{
-                            backgroundColor: timeline.isCompleted
-                                ? "lightgreen"
-                                : isExpired
-                                  ? "#BA4343"
-                                  : Colors.secondary,
-                            padding: 2.5,
-                            paddingHorizontal: 10,
-                            borderRadius: 100,
-                            marginLeft: 2.5,
-                            alignSelf: "flex-end",
-                        }}
-                    >
-                        <Text style={[timelineStyles.status]}>
-                            {timeline.isCompleted ? "Finished" : isExpired ? "Late" : "To do"}
+                <View style={styles.contentRow}>
+                    <View style={styles.contentContainer}>
+                        <Text
+                            numberOfLines={2}
+                            style={[
+                                timelineStyles.itemDescription,
+                                timeline.textColor && { color: timeline.textColor },
+                            ]}
+                        >
+                            {timeline.description}
                         </Text>
+
+                        <TodosPreviewSection
+                            todos={timeline.todos}
+                            timelineId={timeline.id}
+                            textColor={timeline.textColor}
+                            maxItems={3}
+                        />
                     </View>
+                </View>
+                <View
+                    style={[
+                        styles.statusBadge,
+                        timeline.isCompleted && styles.statusCompleted,
+                        isExpired && styles.statusExpired,
+                    ]}
+                >
+                    <Text style={timelineStyles.status}>
+                        {timeline.isCompleted ? "Finished" : isExpired ? "Late" : "To do"}
+                    </Text>
                 </View>
             </View>
         </Ripple>
     )
 }
+
+const styles = StyleSheet.create({
+    contentRow: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        alignItems: "center",
+        justifyContent: "flex-end",
+        marginTop: 10,
+        gap: 10,
+    },
+    contentContainer: {
+        flex: 1,
+    },
+    statusBadge: {
+        backgroundColor: Colors.secondary,
+        padding: 2.5,
+        paddingHorizontal: 10,
+        borderRadius: 100,
+        marginLeft: 2.5,
+        alignSelf: "flex-end",
+    },
+    statusCompleted: {
+        backgroundColor: "lightgreen",
+    },
+    statusExpired: {
+        backgroundColor: "#BA4343",
+    },
+})

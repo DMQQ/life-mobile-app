@@ -13,6 +13,8 @@ export interface GetTimelineQuery {
 
     todos: {
         id: string
+        title: string
+        isCompleted: boolean
     }[]
 
     images: {
@@ -33,6 +35,8 @@ export const GET_TIMELINE_QUERY = gql`
 
             todos {
                 id
+                title
+                isCompleted
             }
 
             images {
