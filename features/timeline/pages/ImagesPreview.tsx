@@ -14,43 +14,17 @@ import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withSpring } from 
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import useGetTimelineById from "../hooks/query/useGetTimelineById"
 import { TimelineScreenProps } from "../types"
+import { BlurView } from "expo-blur"
 
 export default function ImagesPreview({ route, navigation }: TimelineScreenProps<"ImagesPreview">) {
     const { data } = useGetTimelineById(route.params.timelineId! as string, {
         fetchPolicy: "cache-only",
     })
 
-    const currentImageIndex = data.images.findIndex(
-        (img: { id: string; url: string }) => img.url === route.params.selectedImage,
-    )
-
-    useEffect(() => {
-        navigation.setOptions({
-            headerRight: () =>
-                currentImageIndex + 1 < data.images.length ? (
-                    <Ripple
-                        style={{ paddingRight: 10 }}
-                        onPress={() => {
-                            InteractionManager.runAfterInteractions(() => {
-                                navigation.setParams({
-                                    selectedImage: data.images[currentImageIndex + 1].url,
-                                    timelineId: route.params.timelineId,
-                                })
-                            })
-                        }}
-                    >
-                        <Text variant="body" color={Colors.foreground}>
-                            Next
-                        </Text>
-                    </Ripple>
-                ) : null,
-        })
-    }, [data.images, route.params.selectedImage])
-
     const insets = useSafeAreaInsets()
 
     return (
-        <View style={styles.modalContainer}>
+        <BlurView tint="dark" intensity={30} style={styles.modalContainer}>
             <GesturedImage
                 uri={route.params.selectedImage}
                 onSingleTap={() => {
@@ -58,16 +32,15 @@ export default function ImagesPreview({ route, navigation }: TimelineScreenProps
                     console.log("Back pressed")
                 }}
             />
-            <TouchableOpacity
+            <IconButton
+                icon={<AntDesign name="close" size={24} color={Colors.foreground} />}
                 style={[styles.closeButton, { top: insets.top + 10 }]}
                 onPress={() => {
-                    navigation.canGoBack() && navigation.goBack()
+                    navigation.pop()
                     console.log("Back pressed")
                 }}
-            >
-                <AntDesign name="arrow-left" size={24} color={Colors.foreground} />
-            </TouchableOpacity>
-        </View>
+            ></IconButton>
+        </BlurView>
     )
 }
 

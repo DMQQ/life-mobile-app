@@ -4,18 +4,26 @@ import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
 import { Todos } from "@/types"
 import dayjs from "dayjs"
-import { useRef } from "react"
-import { ActivityIndicator, StyleSheet, View } from "react-native"
+import { useRef, useState } from "react"
+import { ActivityIndicator, StyleSheet, View, TouchableOpacity, ScrollView, Alert, Image } from "react-native"
+import { useNavigation } from "@react-navigation/native"
 import Haptic from "react-native-haptic-feedback"
 import { FadeInDown, FadeOutDown } from "react-native-reanimated"
 import useCompleteTodo from "../hooks/mutation/useCompleteTodo"
 import useRemoveTodo from "../hooks/mutation/useRemoveTodo"
+import useAddTodoFile from "../hooks/mutation/useAddTodoFile"
+import useRemoveTodoFile from "../hooks/mutation/useRemoveTodoFile"
+import { Ionicons } from "@expo/vector-icons"
+import * as DocumentPicker from "expo-document-picker"
+import * as ImagePicker from "expo-image-picker"
+import axios from "axios"
+import Url from "@/constants/Url"
+import Color from "color"
 
 const styles = StyleSheet.create({
     todoCard: {
-        marginBottom: 15,
         flexDirection: "row",
-        alignItems: "center",
+        alignItems: "flex-start",
         flex: 1,
     },
     todoContent: {
@@ -35,15 +43,63 @@ const styles = StyleSheet.create({
         textDecorationLine: "line-through",
         opacity: 0.6,
     },
+    filesContainer: {
+        marginTop: 8,
+        width: "100%",
+    },
+    fileItem: {
+        alignItems: "center",
+        borderRadius: 4,
+        marginRight: 8,
+        backgroundColor: Color(Colors.primary_lighter).lighten(0.5).toString(),
+        borderWidth: 1,
+        borderColor: Color(Colors.primary_lighter).lighten(0.75).toString(),
+    },
+    fileName: {
+        fontSize: 10,
+        color: Colors.foreground_secondary,
+        marginTop: 4,
+        textAlign: "center",
+    },
+    fileImage: {
+        width: 50,
+        height: 40,
+        borderRadius: 4,
+    },
+    fileIcon: {
+        width: 60,
+        height: 60,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: Colors.secondary_light_1,
+        borderRadius: 8,
+    },
+    uploadButton: {
+        padding: 4,
+        borderRadius: 8,
+        alignSelf: "flex-start",
+    },
 })
 
+const getFileIcon = (type: string) => {
+    if (type.startsWith("image/")) return "image-outline"
+    if (type.includes("pdf")) return "document-text-outline"
+    if (type.includes("video")) return "videocam-outline"
+    if (type.includes("audio")) return "musical-notes-outline"
+    return "document-outline"
+}
+
 export default function TodoItem(todo: Todos & { timelineId: string; index: number }) {
+    const navigation = useNavigation()
     const [removeTodo, { loading: removeLoading }] = useRemoveTodo(todo)
     const [completeTodo, { loading: completeLoading }] = useCompleteTodo({
         todoId: todo.id,
         timelineId: todo.timelineId,
         currentlyCompleted: todo.isCompleted,
     })
+    const { addTodoFile, loading: addFileLoading } = useAddTodoFile()
+    const { removeTodoFile, loading: removeFileLoading } = useRemoveTodoFile()
+    const [uploadingFile, setUploadingFile] = useState(false)
 
     const tapCountRef = useRef(0)
     const tapTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -88,45 +144,204 @@ export default function TodoItem(todo: Todos & { timelineId: string; index: numb
         removeTodo()
     }
 
-    const isLoading = removeLoading || completeLoading
+    const handleUploadFile = () => {
+        Alert.alert("Add File", "Choose file type", [
+            { text: "Camera", onPress: handleImageFromCamera },
+            { text: "Photo Library", onPress: handleImageFromLibrary },
+            { text: "Document", onPress: handleDocumentPicker },
+            { text: "Cancel", style: "cancel" },
+        ])
+    }
+
+    const handleImageFromCamera = async () => {
+        const permission = await ImagePicker.requestCameraPermissionsAsync()
+
+        const result = await ImagePicker.launchCameraAsync({
+            allowsEditing: true,
+            allowsMultipleSelection: false,
+            mediaTypes: "images",
+            cameraType: ImagePicker.CameraType.back,
+            quality: 1,
+            aspect: [4, 3],
+        })
+
+        if (!result.canceled && result.assets[0]) {
+            await uploadFile(result.assets[0])
+        }
+    }
+
+    const handleImageFromLibrary = async () => {
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: "images",
+            quality: 0.8,
+        })
+
+        if (!result.canceled && result.assets[0]) {
+            await uploadFile(result.assets[0])
+        }
+    }
+
+    const handleDocumentPicker = async () => {
+        const result = await DocumentPicker.getDocumentAsync({
+            type: "*/*",
+        })
+
+        if (!result.canceled && result.assets[0]) {
+            await uploadFile(result.assets[0])
+        }
+    }
+
+    const uploadFile = async (asset: any) => {
+        try {
+            setUploadingFile(true)
+
+            const formData = new FormData()
+            formData.append("file", {
+                uri: asset.uri,
+                type: asset.mimeType || "application/octet-stream",
+                name: asset.fileName || "file",
+            } as any)
+
+            const response = await axios.post(Url.API + "/upload/todo-file", formData, {
+                params: {
+                    todoId: todo.id,
+                },
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            })
+
+            await addTodoFile({
+                variables: {
+                    todoId: todo.id,
+                    type: asset.mimeType || "application/octet-stream",
+                    url: response.data.url,
+                },
+                refetchQueries: ["GetTimeline"],
+            })
+
+            Haptic.trigger("impactLight")
+        } catch (error) {
+            console.error("Upload error:", JSON.stringify(error))
+            Alert.alert("Error", "Failed to upload file")
+        } finally {
+            setUploadingFile(false)
+        }
+    }
+
+    const handleRemoveFile = (fileId: string) => {
+        Alert.alert("Remove File", "Are you sure you want to remove this file?", [
+            { text: "Cancel", style: "cancel" },
+            {
+                text: "Remove",
+                style: "destructive",
+                onPress: async () => {
+                    try {
+                        await removeTodoFile({
+                            variables: { fileId },
+                            refetchQueries: ["GetTimeline"],
+                        })
+                        Haptic.trigger("impactLight")
+                    } catch (error) {
+                        console.error("Remove file error:", error)
+                        Alert.alert("Error", "Failed to remove file")
+                    }
+                },
+            },
+        ])
+    }
+
+    const handleShowPreview = (file: any) => {
+        (navigation as any).navigate("ImagesPreview", {
+            selectedImage: file.url,
+            timelineId: todo.timelineId,
+        })
+    }
+
+    console.log(todo)
+
+    const isLoading = removeLoading || completeLoading || addFileLoading || removeFileLoading || uploadingFile
 
     return (
-        <Card
-            ripple
-            onLongPress={handleRemoveTodo}
-            onPress={handleToggleComplete}
-            animated
-            entering={FadeInDown.delay(todo.index * 50)}
-            exiting={FadeOutDown}
-            style={[styles.todoCard]}
-        >
-            <View style={styles.checkbox}>
-                {isLoading ? (
-                    <>
-                        {completeLoading && <ActivityIndicator size="small" color={Colors.secondary} />}
-                        {removeLoading && <ActivityIndicator size="small" color={Colors.error} />}
-                    </>
-                ) : (
-                    <Checkbox checked={todo.isCompleted} onPress={handleToggleComplete} size={28} />
-                )}
+        <Card animated entering={FadeInDown.delay(todo.index * 50)} exiting={FadeOutDown} style={{ marginBottom: 15 }}>
+            <View style={styles.todoCard}>
+                <TouchableOpacity
+                    style={{ flexDirection: "row", alignItems: "center", flex: 1 }}
+                    onLongPress={handleRemoveTodo}
+                    onPress={handleToggleComplete}
+                >
+                    <View style={styles.checkbox}>
+                        {isLoading ? (
+                            <>
+                                {completeLoading && <ActivityIndicator size="small" color={Colors.secondary} />}
+                                {removeLoading && <ActivityIndicator size="small" color={Colors.error} />}
+                            </>
+                        ) : (
+                            <Checkbox checked={todo.isCompleted} onPress={handleToggleComplete} size={28} />
+                        )}
+                    </View>
+
+                    <View style={{ flex: 1, gap: 5 }}>
+                        <Text
+                            variant="subtitle"
+                            color={todo.isCompleted ? Colors.secondary_light_1 : Colors.text_light}
+                            style={[styles.todoText, todo.isCompleted && styles.completedText]}
+                        >
+                            {todo.title.trim()}
+                        </Text>
+
+                        <Text
+                            variant="caption"
+                            color={Colors.text_dark}
+                            style={{ fontSize: 12, marginLeft: styles.todoText.marginLeft }}
+                        >
+                            {dayjs(todo.modifiedAt).format("HH:mm - DD/MM")}
+                        </Text>
+                    </View>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.uploadButton} onPress={handleUploadFile} disabled={isLoading}>
+                    <Ionicons name="attach" size={24} color={"#fff"} />
+                </TouchableOpacity>
             </View>
 
-            <View style={{ flex: 1 }}>
-                <Text
-                    variant="subtitle"
-                    color={todo.isCompleted ? Colors.secondary_light_1 : Colors.text_light}
-                    style={[styles.todoText, todo.isCompleted && styles.completedText]}
-                >
-                    {todo.title.trim()}
-                </Text>
-                <Text
-                    variant="caption"
-                    color={Colors.text_dark}
-                    style={{ fontSize: 12, textAlign: "right", marginTop: 5 }}
-                >
-                    {dayjs(todo.modifiedAt).format("HH:mm - DD/MM")}
-                </Text>
-            </View>
+            {todo.files && todo.files.length > 0 && (
+                <View style={styles.filesContainer}>
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                        {todo.files.map((file) => (
+                            <TouchableOpacity
+                                key={file.id}
+                                style={styles.fileItem}
+                                onPress={() => {
+                                    if (file.type.startsWith("image/")) {
+                                        handleShowPreview(file)
+                                    } else {
+                                        // TODO: Handle other file types
+                                        console.log("File pressed:", file.url)
+                                    }
+                                }}
+                                onLongPress={() => handleRemoveFile(file.id)}
+                            >
+                                {file.type.startsWith("image/") ? (
+                                    <Image
+                                        source={{ uri: Url.API + "/upload/images/" + file.url }}
+                                        style={styles.fileImage}
+                                        resizeMode="cover"
+                                    />
+                                ) : (
+                                    <View style={styles.fileIcon}>
+                                        <Ionicons
+                                            name={getFileIcon(file.type) as any}
+                                            size={24}
+                                            color={Colors.secondary}
+                                        />
+                                    </View>
+                                )}
+                            </TouchableOpacity>
+                        ))}
+                    </ScrollView>
+                </View>
+            )}
         </Card>
     )
 }

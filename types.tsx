@@ -167,6 +167,14 @@ export interface Todos {
   createdAt: string;
 
   modifiedAt: string;
+
+  files?: TodoFile[];
+}
+
+export interface TodoFile {
+  id: string;
+  type: string;
+  url: string;
 }
 
 export interface IFile {

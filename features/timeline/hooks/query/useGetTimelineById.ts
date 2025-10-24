@@ -18,6 +18,11 @@ export const GET_TIMELINE = gql`
                 isCompleted
                 createdAt
                 modifiedAt
+                files {
+                    id
+                    type
+                    url
+                }
             }
 
             images {
