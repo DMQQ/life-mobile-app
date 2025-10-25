@@ -159,6 +159,15 @@ export interface Timeline {
   todos: Todos[];
 }
 
+export interface CopyTimelineInput {
+  newDate?: string;
+}
+
+export interface CopyTimelineVariables {
+  timelineId: string;
+  newDate?: string;
+}
+
 export interface Todos {
   id: string;
   title: string;

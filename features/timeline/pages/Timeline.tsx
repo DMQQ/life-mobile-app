@@ -43,14 +43,6 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
         ({ item }: { item: any }): any =>
             (
                 <TimelineItem
-                    styles={{
-                        backgroundColor: Colors.primary_lighter,
-                        borderRadius: 15,
-                        padding: 20,
-                        marginBottom: 10,
-                        zIndex: 1,
-                    }}
-                    key={item.id}
                     location="timeline"
                     {...item}
                     onLongPress={() => {

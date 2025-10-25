@@ -17,10 +17,7 @@ export default StyleSheet.create({
         marginLeft: 10,
     },
     itemContainer: {
-        marginVertical: 5,
-        flexDirection: "row",
-        alignItems: "center",
-        padding: 10,
+        marginBottom: 15,
     },
     itemContainerTitleRow: {
         flexDirection: "row",

@@ -19,6 +19,27 @@ export default function useNotifications(navigationRef: React.RefObject<Navigati
     const lastNotification = Notifications.useLastNotificationResponse()
     const [createNotificationToken] = useMutation(CREATE_NOTIFICATION)
 
+    const handleNotificationNavigation = (data: any) => {
+        const { eventId, type } = data || {}
+        
+        if (eventId && type === 'timeline') {
+            navigationRef.current?.navigate("TimelineScreens", {
+                screen: "TimelineDetails",
+                params: { timelineId: eventId },
+            })
+        } else if (type === 'expenseReminder') {
+            navigationRef.current?.navigate("WalletScreens" as any, {
+                screen: "CreateExpense",
+            } as any)
+        } else if (eventId) {
+            // Fallback for backwards compatibility
+            navigationRef.current?.navigate("TimelineScreens", {
+                screen: "TimelineDetails",
+                params: { timelineId: eventId },
+            })
+        }
+    }
+
     async function registerForPushNotificationsAsync() {
         let token
 
@@ -70,13 +91,8 @@ export default function useNotifications(navigationRef: React.RefObject<Navigati
         })
 
         responseListener.current = Notifications.addNotificationResponseReceivedListener((response) => {
-            const { eventId } = response.notification.request.content.data
-            if (eventId) {
-                navigationRef.current?.navigate("TimelineScreens", {
-                    screen: "TimelineDetails",
-                    params: { timelineId: eventId },
-                })
-            }
+            const data = response.notification.request.content.data
+            handleNotificationNavigation(data)
         })
 
         return () => {
@@ -87,14 +103,11 @@ export default function useNotifications(navigationRef: React.RefObject<Navigati
 
     useEffect(() => {
         if (
-            lastNotification?.notification?.request?.content?.data?.eventId &&
+            lastNotification?.notification?.request?.content?.data &&
             lastNotification?.actionIdentifier === Notifications.DEFAULT_ACTION_IDENTIFIER
         ) {
-            const { eventId } = lastNotification.notification.request.content.data
-            navigationRef.current?.navigate("TimelineScreens", {
-                screen: "TimelineDetails",
-                params: { timelineId: eventId },
-            })
+            const data = lastNotification.notification.request.content.data
+            handleNotificationNavigation(data)
         }
     }, [lastNotification, navigationRef])
 

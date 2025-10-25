@@ -622,9 +622,10 @@ const FileUpload = (props: { id: string; images: any[] }) => {
         formData.append("file", fileObject as any)
 
         try {
-            const { data } = await axios.post(Url.API + "/upload/expense-file", formData, {
+            const { data } = await axios.post(Url.API + "/upload/single", formData, {
                 params: {
-                    expenseId: props.id,
+                    type: "expense",
+                    entityId: props.id,
                     compress: "true",
                 },
                 headers: {

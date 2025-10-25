@@ -1,12 +1,14 @@
 import Colors from "@/constants/Colors"
 import { useNavigation } from "@react-navigation/native"
 import moment from "moment"
-import { useMemo } from "react"
-import { StyleProp, StyleSheet, Text, View, ViewStyle } from "react-native"
+import { useMemo, useState } from "react"
+import { StyleProp, StyleSheet, Text, View, ViewStyle, TouchableOpacity } from "react-native"
 import Ripple from "react-native-material-ripple"
 import { GetTimelineQuery } from "../hooks/query/useGetTimeLineQuery"
 import timelineStyles from "./timeline.styles"
 import TodosPreviewSection from "./TodosPreviewSection"
+import { Card } from "@/components"
+import { AntDesign } from "@expo/vector-icons"
 
 export default function TimelineItem(
     timeline: GetTimelineQuery & {
@@ -27,6 +29,15 @@ export default function TimelineItem(
             : navigation.navigate("TimelineDetails", {
                   timelineId: timeline.id,
               })
+    }
+
+    const handleCopyPress = (event: any) => {
+        event.stopPropagation()
+        navigation.navigate("CopyTimelineModal", {
+            timelineId: timeline.id,
+            timelineTitle: timeline.title,
+            originalDate: timeline.date,
+        })
     }
 
     const start = moment(timeline.beginTime, "HH:mm").format("HH:mm")
@@ -53,12 +64,8 @@ export default function TimelineItem(
     }, [timeline.date, timeline.beginTime, timeline.endTime, timeline.isCompleted])
 
     return (
-        <Ripple
-            onLongPress={timeline?.onLongPress}
-            onPress={onPress}
-            style={[timelineStyles.itemContainer, timeline.styles]}
-        >
-            <View style={{ flex: 1 }}>
+        <Card style={[timelineStyles.itemContainer, timeline.styles]}>
+            <Ripple onLongPress={timeline?.onLongPress} onPress={onPress} style={{ flex: 1 }}>
                 <View style={[timelineStyles.itemContainerTitleRow]}>
                     <Text
                         numberOfLines={1}
@@ -95,6 +102,19 @@ export default function TimelineItem(
                         />
                     </View>
                 </View>
+            </Ripple>
+
+            <View
+                style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                }}
+            >
+                <TouchableOpacity style={styles.copyButton} onPress={handleCopyPress} activeOpacity={0.7}>
+                    <AntDesign name="copy" style={[styles.copyIcon, { color: Colors.text_dark }]} />
+                    <Text style={[styles.copyText, { color: Colors.text_dark }]}>Copy</Text>
+                </TouchableOpacity>
                 <View
                     style={[
                         styles.statusBadge,
@@ -107,7 +127,7 @@ export default function TimelineItem(
                     </Text>
                 </View>
             </View>
-        </Ripple>
+        </Card>
     )
 }
 
@@ -136,5 +156,24 @@ const styles = StyleSheet.create({
     },
     statusExpired: {
         backgroundColor: "#BA4343",
+    },
+    copyButton: {
+        borderRadius: 8,
+        padding: 6,
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 4,
+    },
+    copyButtonDisabled: {
+        opacity: 0.6,
+        elevation: 0,
+        shadowOpacity: 0,
+    },
+    copyIcon: {
+        fontSize: 12,
+    },
+    copyText: {
+        fontSize: 12,
+        fontWeight: "600",
     },
 })

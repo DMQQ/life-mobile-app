@@ -15,6 +15,11 @@ export type TimelineRootStack = {
     TodosTransferModal: {
         timelineId: string
     }
+    CopyTimelineModal: {
+        timelineId: string
+        timelineTitle: string
+        originalDate: string
+    }
 }
 
 export type TimelineScreenProps<Key extends keyof TimelineRootStack> = StackScreenProps<TimelineRootStack, Key>

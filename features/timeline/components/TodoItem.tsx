@@ -206,9 +206,10 @@ export default function TodoItem(todo: Todos & { timelineId: string; index: numb
                 name: asset.fileName || "file",
             } as any)
 
-            const response = await axios.post(Url.API + "/upload/todo-file", formData, {
+            const response = await axios.post(Url.API + "/upload/single", formData, {
                 params: {
-                    todoId: todo.id,
+                    type: "todo",
+                    entityId: todo.id,
                 },
                 headers: {
                     "Content-Type": "multipart/form-data",

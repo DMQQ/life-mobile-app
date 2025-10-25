@@ -3,6 +3,7 @@ import Color from "color"
 import { StyleSheet, Text, View } from "react-native"
 import Ripple from "react-native-material-ripple"
 import useQuickCompleteTodo from "../hooks/mutation/useQuickCompleteTodo"
+import Checkbox from "@/components/ui/Checkbox"
 
 interface TodoPreviewCardProps {
     todo: {
@@ -29,9 +30,8 @@ export default function TodoPreviewCard({ todo, timelineId, textColor }: TodoPre
 
     return (
         <Ripple onPress={handleToggle} style={[styles.container, loading && styles.loading]}>
-            <View style={[styles.checkbox, todo.isCompleted && styles.checkboxCompleted]}>
-                {todo.isCompleted && <Text style={styles.checkmark}>✓</Text>}
-            </View>
+            <Checkbox checked={todo.isCompleted} onPress={() => {}} size={25} />
+
             <Text
                 numberOfLines={1}
                 style={[
@@ -53,6 +53,8 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         paddingVertical: 10,
         gap: 8,
+        borderBottomWidth: 1,
+        borderBottomColor: Color(Colors.primary_lighter).lighten(0.5).toString(),
     },
     loading: {
         opacity: 0.7,

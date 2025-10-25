@@ -34,3 +34,36 @@ export const CREATE_TIMELINE_EVENT = gql`
         }
     }
 `
+
+export const COPY_TIMELINE = gql`
+    mutation CopyTimeline(
+        $timelineId: ID!
+        $newDate: String
+    ) {
+        copyTimeline(
+            timelineId: $timelineId
+            input: { newDate: $newDate }
+        ) {
+            id
+            title
+            description
+            date
+            beginTime
+            endTime
+            tags
+            isCompleted
+            todos {
+                id
+                title
+                isCompleted
+                createdAt
+                modifiedAt
+            }
+            images {
+                id
+                url
+                type
+            }
+        }
+    }
+`
