@@ -390,14 +390,6 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
             const targetIndex = Math.round(clampedPosition)
             const currentActiveIndex = routes.indexOf(activeRoute)
 
-            if (
-                targetIndex !== currentActiveIndex &&
-                routes[targetIndex] &&
-                Math.abs(clampedPosition - targetIndex) <= 0.5
-            ) {
-                scheduleOnRN(navigation.navigate, routes[targetIndex] as any)
-            }
-
             if (Math.abs(event.y) > 50) {
                 scheduleOnRN(handleLongPress, activeRoute)
                 dragScale.value = withSpring(1, { damping: 20, stiffness: 300 })

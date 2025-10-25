@@ -93,6 +93,7 @@ export default function TimelineDetails({
                 onPress: () => {
                     setSelectedEventForDeletion(data)
                 },
+                standalone: true,
             },
             {
                 icon: <Feather name="edit-2" size={20} color={Colors.foreground} />,

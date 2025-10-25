@@ -79,6 +79,7 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
         () =>
             [
                 {
+                    standalone: true,
                     icon: <Entypo name="dots-three-vertical" size={20} color={Colors.foreground} />,
                     onPress: () => {},
                     contextMenu: {

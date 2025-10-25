@@ -50,18 +50,9 @@ const styles = StyleSheet.create({
     container: {
         flexDirection: "row",
         alignItems: "center",
-        backgroundColor: Colors.primary_lighter,
         borderRadius: 10,
-        paddingHorizontal: 12,
         paddingVertical: 10,
         gap: 8,
-        borderWidth: 1,
-        borderColor: Color(Colors.primary_lighter).lighten(0.3).toString(),
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.1,
-        shadowRadius: 2,
-        elevation: 2,
     },
     loading: {
         opacity: 0.7,

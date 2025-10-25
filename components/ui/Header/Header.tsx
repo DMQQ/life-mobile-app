@@ -25,6 +25,9 @@ export interface HeaderItem {
     onPress: () => void
     icon: React.ReactNode
     style?: StyleProp<ViewStyle>
+
+    standalone?: boolean
+
     contextMenu?: {
         items: {
             title: string
@@ -104,6 +107,18 @@ function Header(props: HeaderProps) {
         return props.renderAnimatedItem?.({ scrollY: props.scrollY })
     }, [props.renderAnimatedItem])
 
+    const standaloneButtons = useMemo(() => {
+        {
+            return (props.buttons || []).filter((button) => button.standalone)
+        }
+    }, [props.buttons])
+
+    const regularButtons = useMemo(() => {
+        {
+            return (props.buttons || []).filter((button) => !button.standalone)
+        }
+    }, [props.buttons])
+
     return (
         <GlassContainer style={[styles.blurContainer]}>
             <LinearGradient
@@ -161,55 +176,18 @@ function Header(props: HeaderProps) {
 
                     {props.children}
 
-                    <View style={{ borderRadius: 100, overflow: "hidden" }}>
+                    <View style={{ borderRadius: 100, overflow: "hidden", flexDirection: "row", gap: 10 }}>
+                        {standaloneButtons.map((button, index) => (
+                            <View style={{ overflow: "hidden" }}>
+                                <GlassView style={styles.iconContainer} key={index}>
+                                    <HeaderIconButton key={index} button={button} index={index} />
+                                </GlassView>
+                            </View>
+                        ))}
+
                         <GlassView style={styles.iconContainer}>
-                            {(props.buttons || []).map((button, index) => {
-                                if (button.contextMenu) {
-                                    return (
-                                        <Host key={index}>
-                                            <ContextMenu activationMethod="singlePress">
-                                                <ContextMenu.Items>
-                                                    {button.contextMenu.items.map((item, itemIndex) => (
-                                                        <SwiftUIButton
-                                                            key={itemIndex}
-                                                            systemImage={item.systemImage}
-                                                            onPress={() => {
-                                                                item.onPress?.()
-                                                                Haptic.trigger("impactLight")
-                                                            }}
-                                                            role={item.destructive ? "destructive" : "default"}
-                                                            variant="glass"
-                                                        >
-                                                            {item.title}
-                                                        </SwiftUIButton>
-                                                    ))}
-                                                </ContextMenu.Items>
-                                                <ContextMenu.Trigger>
-                                                    <IconButton
-                                                        style={button.style}
-                                                        onPress={throttle(() => {
-                                                            button.onPress()
-                                                            Haptic.trigger("impactLight")
-                                                        }, 250)}
-                                                        icon={button.icon}
-                                                    />
-                                                </ContextMenu.Trigger>
-                                            </ContextMenu>
-                                        </Host>
-                                    )
-                                } else {
-                                    return (
-                                        <IconButton
-                                            style={button.style}
-                                            key={index}
-                                            onPress={throttle(() => {
-                                                button.onPress()
-                                                Haptic.trigger("impactLight")
-                                            }, 250)}
-                                            icon={button.icon}
-                                        />
-                                    )
-                                }
+                            {(regularButtons || []).map((button, index) => {
+                                return <HeaderIconButton key={index} button={button} index={index} />
                             })}
                         </GlassView>
                     </View>
@@ -222,6 +200,55 @@ function Header(props: HeaderProps) {
         </GlassContainer>
     )
 }
+
+const HeaderIconButton = memo(({ button, index }: { button: HeaderItem; index: number }) => {
+    if (button.contextMenu) {
+        return (
+            <Host>
+                <ContextMenu activationMethod="singlePress">
+                    <ContextMenu.Items>
+                        {button.contextMenu.items.map((item, itemIndex) => (
+                            <SwiftUIButton
+                                key={itemIndex}
+                                systemImage={item.systemImage}
+                                onPress={() => {
+                                    item.onPress?.()
+                                    Haptic.trigger("impactLight")
+                                }}
+                                role={item.destructive ? "destructive" : "default"}
+                                variant="glass"
+                            >
+                                {item.title}
+                            </SwiftUIButton>
+                        ))}
+                    </ContextMenu.Items>
+                    <ContextMenu.Trigger>
+                        <IconButton
+                            style={button.style}
+                            onPress={throttle(() => {
+                                button.onPress()
+                                Haptic.trigger("impactLight")
+                            }, 250)}
+                            icon={button.icon}
+                        />
+                    </ContextMenu.Trigger>
+                </ContextMenu>
+            </Host>
+        )
+    } else {
+        return (
+            <IconButton
+                style={button.style}
+                key={index}
+                onPress={throttle(() => {
+                    button.onPress()
+                    Haptic.trigger("impactLight")
+                }, 250)}
+                icon={button.icon}
+            />
+        )
+    }
+})
 
 const AnimatedContent = memo(
     ({ isScreenModal = false, initialTitleFontSize = 60, initialNumberOfLines = 10, ...props }: HeaderProps) => {

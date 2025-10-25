@@ -38,6 +38,7 @@ export default function TodosPreviewSection({ todos, timelineId, textColor, maxI
 const styles = StyleSheet.create({
     container: {
         gap: 6,
+        marginVertical: 8,
     },
     moreText: {
         fontSize: 11,
