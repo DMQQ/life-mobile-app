@@ -178,7 +178,7 @@ function Header(props: HeaderProps) {
 
                     <View style={{ borderRadius: 100, overflow: "hidden", flexDirection: "row", gap: 10 }}>
                         {standaloneButtons.map((button, index) => (
-                            <View key={index} style={{ overflow: "hidden" }}>
+                            <View key={index} style={{ overflow: "hidden", borderRadius: 100 }}>
                                 <GlassView style={styles.iconContainer}>
                                     <HeaderIconButton button={button!} index={index} />
                                 </GlassView>
@@ -366,7 +366,7 @@ const styles = StyleSheet.create({
         gap: 8,
         zIndex: 250,
         padding: 10,
-        borderRadius: 100,
+        borderRadius: 1000,
     },
     animatedTitle: {
         color: Colors.foreground,

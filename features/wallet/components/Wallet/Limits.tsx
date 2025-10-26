@@ -191,7 +191,6 @@ export default function WalletLimits({ navigation }: { navigation: any }) {
                         const percentage = Math.min(100, (limit.current / limit.amount) * 100)
                         const isOverLimit = limit.current > limit.amount
 
-                        // Pick a color from secondary_candidates based on index
                         const color = secondary_candidates[index % secondary_candidates.length]
 
                         const isSelected =
@@ -221,9 +220,9 @@ export default function WalletLimits({ navigation }: { navigation: any }) {
                                     style={[
                                         styles.limitCard,
                                         {
-                                            backgroundColor: lowOpacity(iconData.backgroundColor || color, 0.15),
+                                            backgroundColor: lowOpacity(iconData.backgroundColor || color, 0.1),
                                             borderWidth: 1,
-                                            borderColor: lowOpacity(iconData.backgroundColor || color, 0.25),
+                                            borderColor: lowOpacity(iconData.backgroundColor || color, 0.15),
                                             flexDirection: compactMode ? "column" : "row",
                                             padding: compactMode ? 15 : 22.5,
                                         },

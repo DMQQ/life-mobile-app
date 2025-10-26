@@ -170,27 +170,6 @@ const CompactSpendingChart = ({}: CompactSpendingChartProps) => {
 
     return (
         <View style={styles.container}>
-            <View style={styles.header}>
-                <View style={styles.changeIndicator}>
-                    <AntDesign
-                        name={percentageChange >= 0 ? "caret-up" : "caret-down"}
-                        size={12}
-                        color={percentageChange >= 0 ? "#FF8A80" : "#4ECDC4"}
-                    />
-                    <Text
-                        style={[
-                            styles.changeText,
-                            {
-                                color: percentageChange >= 0 ? "#FF8A80" : "#4ECDC4",
-                            },
-                        ]}
-                    >
-                        {Math.abs(Math.round(percentageChange))}% {percentageChange >= 0 ? "increase" : "decrease"} in
-                        this week
-                    </Text>
-                </View>
-            </View>
-
             <View style={styles.chartWrapper}>
                 <View style={styles.yAxisLabels}>
                     {[4, 3, 2, 1, 0].map((i) => {
@@ -232,22 +211,26 @@ const CompactSpendingChart = ({}: CompactSpendingChartProps) => {
                     <Text style={styles.totalLabel}>
                         {previousDateRange.map((d) => d.split("-").slice(1).join("-")).join(" to ")}
                     </Text>
-                    <Text style={[styles.totalLabel, { fontSize: 15 }]}>Last week</Text>
                 </View>
 
                 <View style={styles.tinyLegendContainer}>
-                    <View style={styles.tinyLegendItem}>
-                        <View
-                            style={[
-                                styles.tinyLegendDot,
-                                { backgroundColor: Color(secondary_candidates[0]).alpha(0.4).string() },
-                            ]}
+                    <View style={styles.changeIndicator}>
+                        <AntDesign
+                            name={percentageChange >= 0 ? "caret-up" : "caret-down"}
+                            size={12}
+                            color={percentageChange >= 0 ? "#FF8A80" : "#4ECDC4"}
                         />
-                        <Text style={styles.tinyLegendText}>Previous</Text>
-                    </View>
-                    <View style={styles.tinyLegendItem}>
-                        <View style={[styles.tinyLegendDot, { backgroundColor: secondary_candidates[0] }]} />
-                        <Text style={styles.tinyLegendText}>Current</Text>
+                        <Text
+                            style={[
+                                styles.changeText,
+                                {
+                                    color: percentageChange >= 0 ? "#FF8A80" : "#4ECDC4",
+                                },
+                            ]}
+                        >
+                            {Math.abs(Math.round(percentageChange))}% {percentageChange >= 0 ? "increase" : "decrease"}{" "}
+                            in this week
+                        </Text>
                     </View>
                 </View>
 
@@ -256,7 +239,6 @@ const CompactSpendingChart = ({}: CompactSpendingChartProps) => {
                     <Text style={styles.totalLabel}>
                         {dateRange.map((d) => d.split("-").slice(1).join("-")).join(" to ")}
                     </Text>
-                    <Text style={[styles.totalLabel, { fontSize: 15 }]}>This week</Text>
                 </View>
             </View>
         </View>
@@ -283,9 +265,6 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         gap: 4,
-        position: "absolute",
-        right: 0,
-        top: 0,
     },
     changeText: {
         fontSize: 14,
@@ -323,7 +302,7 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         height: 0.5,
-        backgroundColor: Color(Colors.secondary).lighten(0.8).alpha(0.2).string(),
+        backgroundColor: Color(Colors.secondary).alpha(0.1).string(),
     },
     chartContainer: {
         flexDirection: "row",
@@ -391,9 +370,7 @@ const styles = StyleSheet.create({
         opacity: 0.6,
     },
     tinyLegendContainer: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 20,
+        gap: 4,
     },
     tinyLegendItem: {
         flexDirection: "row",

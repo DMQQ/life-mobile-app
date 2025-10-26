@@ -154,10 +154,8 @@ export default function WalletList2({
     const unifiedData = useMemo(() => {
         const items: ListItemType[] = []
 
-        // Always add limits at the top
         items.push({ type: "limits" })
 
-        // Add subscriptions if enabled
         if (showSubscriptions) {
             if (groupedSubscriptions.active.length > 0) {
                 items.push({
@@ -188,7 +186,6 @@ export default function WalletList2({
             }
         }
 
-        // Add expenses if enabled
         if (showExpenses) {
             expenseData.forEach((monthData, monthIndex) => {
                 items.push({ type: "month-header", data: monthData, monthIndex })

@@ -326,9 +326,6 @@ export default function ZeroExpenseStats() {
 
                 {data?.streak?.length > 0 && (
                     <Animated.View entering={FadeInDown.delay(75 * 6 + 50)} style={styles.streaksSection}>
-                        <Text variant="body" style={styles.sectionTitle}>
-                            Streak History {data?.streak?.length && `(${data.streak.length})`}
-                        </Text>
                         {data.streak.length === 0 ? (
                             <View style={styles.noStreaksContainer}>
                                 <Text variant="heading" style={styles.noStreaksIcon}>
@@ -445,7 +442,7 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
         flexWrap: "wrap",
         gap: 15,
-        marginBottom: 25,
+        marginBottom: 15,
     },
     item: {
         marginTop: 5,
@@ -509,9 +506,8 @@ const styles = StyleSheet.create({
         textAlign: "center",
     },
     streakTileHorizontal: {
-        width: 180,
-        height: 80,
-        padding: 16,
+        width: (Layout.screen.width - 30) / 2 - 7.5,
+        padding: 24,
         borderRadius: 15,
         marginRight: 12,
         position: "relative",

@@ -72,7 +72,6 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
 
     const [showSubscriptionsView, setShowSubscriptionsView] = useState(false)
 
-    // Register search functionality
     useScreenSearch((value) => wallet.dispatch({ type: "SET_QUERY", payload: value.trim() }))
 
     const buttons = useMemo(

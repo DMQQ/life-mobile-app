@@ -2,7 +2,7 @@ import { AntDesign, Feather, Ionicons, MaterialCommunityIcons } from "@expo/vect
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs"
 import Color from "color"
 import moment from "moment"
-import { cloneElement, useEffect, useMemo } from "react"
+import { cloneElement, ReactNode, useEffect, useMemo } from "react"
 import { Pressable, StyleSheet, TextInput, Keyboard } from "react-native"
 import Feedback from "react-native-haptic-feedback"
 import Animated, {
@@ -387,9 +387,6 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
             const clampedPosition = Math.max(0, Math.min(routes.length - 1, newPosition))
             indicatorPosition.value = clampedPosition
 
-            const targetIndex = Math.round(clampedPosition)
-            const currentActiveIndex = routes.indexOf(activeRoute)
-
             if (Math.abs(event.y) > 50) {
                 scheduleOnRN(handleLongPress, activeRoute)
                 dragScale.value = withSpring(1, { damping: 20, stiffness: 300 })
@@ -461,6 +458,8 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
         }
     }, [isOpenSubScreen, isSearchActive])
 
+    const dismissIcon = useMemo(() => buttons.find((btn) => btn.route === activeRoute)?.iconName, [activeRoute])
+
     return (
         <>
             <Animated.View
@@ -508,7 +507,11 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
                                         }}
                                         onPress={toggleSearch}
                                     >
-                                        <AntDesign size={20} name="home" color="#fff" />
+                                        {typeof dismissIcon === "string" ? (
+                                            <Ionicons size={20} name={dismissIcon as any} color="#fff" />
+                                        ) : (
+                                            cloneElement(dismissIcon as any, { size: 20, color: "#fff" })
+                                        )}
                                     </Pressable>
                                 </Animated.View>
                             )}

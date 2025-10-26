@@ -47,7 +47,9 @@ export default function TimelineItem(
     const isExpired = useMemo(() => {
         const now = moment()
 
-        if (moment(timeline.date).isAfter(now)) return false
+        if (!timeline?.date) return false
+
+        if (moment(timeline?.date).isAfter(now)) return false
 
         if (timeline.isCompleted) return false
 

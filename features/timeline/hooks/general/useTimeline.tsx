@@ -26,12 +26,12 @@ const groupDates = (dates: { date: string }[]) => {
 }
 
 export default function useTimeline({ route, navigation }: TimelineScreenProps<"Timeline">) {
-    const { data, selected, setSelected, loading, error } = useGetTimeLineQuery()
+    const { data, selected, setSelected, loading, error, setQuery, query } = useGetTimeLineQuery()
+
+    const [switchView, setSwitchView] = useState<"date-list" | "calendar" | "timeline">("date-list")
 
     const { data: monthData, refetch } = useQuery(GET_MONTHLY_EVENTS, {
         variables: { date: moment(selected).startOf("month").format("YYYY-MM-DD") },
-
-        onError: (err) => ToastAndroid.show("Oh! Something went wrong", ToastAndroid.SHORT),
     })
 
     const onDayPress = useCallback((day: { dateString: string }) => setSelected(day.dateString), [setSelected])
@@ -51,8 +51,6 @@ export default function useTimeline({ route, navigation }: TimelineScreenProps<"
         () => (moment().format("YYYY-MM-DD") === selected ? `Today (${selected})` : selected),
         [selected],
     )
-
-    const [switchView, setSwitchView] = useState<"date-list" | "calendar" | "timeline">("date-list")
 
     const onViewToggle = useCallback(() => {
         const views = ["date-list", "timeline"]
@@ -79,5 +77,9 @@ export default function useTimeline({ route, navigation }: TimelineScreenProps<"
         setSwitchView,
         onViewToggle,
         error,
+
+        setQuery,
+
+        query,
     }
 }

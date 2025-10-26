@@ -3,14 +3,14 @@ import DeleteTimelineEvent from "@/components/ui/Dialog/Delete/DeleteTimelineEve
 import Header from "@/components/ui/Header/Header"
 import Colors from "@/constants/Colors"
 import NotFound from "@/features/home/components/NotFound"
-import { AntDesign, Feather } from "@expo/vector-icons"
+import { AntDesign, Feather, Ionicons } from "@expo/vector-icons"
 import dayjs from "dayjs"
 import moment from "moment"
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useMemo, useRef, useState } from "react"
 import { RefreshControl, View, VirtualizedList } from "react-native"
 import { useScreenSearch } from "@/utils/hooks/useScreenSearch"
 import Feedback from "react-native-haptic-feedback"
-import Animated, { useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated"
+import Animated from "react-native-reanimated"
 import useTrackScroll from "@/utils/hooks/ui/useTrackScroll"
 import DayTimeline from "../components/DayTimeline"
 import { TimelineScreenLoader } from "../components/LoaderSkeleton"
@@ -18,6 +18,7 @@ import TimelineItem from "../components/TimelineItem"
 import useTimeline from "../hooks/general/useTimeline"
 import { GetTimelineQuery } from "../hooks/query/useGetTimeLineQuery"
 import { TimelineScreenProps } from "../types"
+import Text from "@/components/ui/Text/Text"
 
 const AnimatedVirtualizedList = Animated.createAnimatedComponent(VirtualizedList)
 
@@ -25,6 +26,16 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
     const timeline = useTimeline({
         navigation,
         route,
+    })
+
+    const timeoutId = useRef<NodeJS.Timeout | null>(null)
+    const { isSearchActive } = useScreenSearch((query) => {
+        if (timeoutId.current) {
+            clearTimeout(timeoutId.current)
+        }
+        timeoutId.current = setTimeout(() => {
+            timeline.setQuery(query)
+        }, 200)
     })
 
     const [scrollY, onScroll] = useTrackScroll({ screenName: "TimelineScreens" })
@@ -73,9 +84,6 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
 
         setRefreshing(false)
     }
-    const [query, setQuery] = useState("")
-
-    useScreenSearch(setQuery)
 
     return (
         <View style={{ flex: 1 }}>
@@ -84,32 +92,58 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
                 scrollY={scrollY}
                 animated={true}
                 buttons={[
-                    {
-                        onPress: () => {
-                            timeline.onViewToggle()
-                        },
-                        icon: <Feather name="repeat" size={20} color={Colors.foreground} />,
-                    },
+                    !isSearchActive && timeline.query === ""
+                        ? {
+                              onPress: () => {
+                                  timeline.onViewToggle()
+                              },
+                              icon: <Feather name="repeat" size={20} color={Colors.foreground} />,
+                          }
+                        : undefined,
                     {
                         icon: <AntDesign name="plus" size={20} color={Colors.foreground} />,
                         onPress: () => timeline.createTimeline(),
                     },
                 ]}
-                animatedTitle={dayjs(timeline.selected).format("DD MMMM")}
-                animatedSubtitle={`${selectedDateFormatted} • ${eventsCount} Events`}
-                initialTitleFontSize={55}
+                animatedTitle={
+                    isSearchActive && !!timeline.query
+                        ? "Search " + `"${timeline.query}"`
+                        : dayjs(timeline.selected).format("DD MMMM")
+                }
+                animatedSubtitle={`${selectedDateFormatted} - ${eventsCount} Events`}
+                initialTitleFontSize={55 - timeline.query.length}
             />
 
-            {timeline.switchView !== "timeline" ? (
+            {timeline.switchView !== "timeline" || isSearchActive ? (
                 <AnimatedVirtualizedList
                     refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-                    ListHeaderComponent={<View style={{ paddingBottom: 30 }}>{dateListMemoized}</View>}
+                    ListHeaderComponent={
+                        !isSearchActive && timeline.query === "" ? (
+                            <View style={{ paddingBottom: 30 }}>{dateListMemoized}</View>
+                        ) : (
+                            <View style={{ height: 40 }} />
+                        )
+                    }
                     ListEmptyComponent={
-                        <ListEmptyComponent
-                            isLoading={timeline.loading}
-                            length={eventsCount}
-                            selectedDate={timeline.selected}
-                        />
+                        !isSearchActive && timeline.query.trim() === "" ? (
+                            <ListEmptyComponent
+                                isLoading={timeline.loading}
+                                length={eventsCount}
+                                selectedDate={timeline.selected}
+                            />
+                        ) : (
+                            <View style={{ flex: 1, height: 400, justifyContent: "center", alignItems: "center" }}>
+                                <Ionicons
+                                    name="search"
+                                    size={50}
+                                    color={Colors.text_dark}
+                                    style={{ marginBottom: 15 }}
+                                />
+                                <Text style={{ color: Colors.text_dark }}>
+                                    No events found for "{timeline.query}", {"\n"}try changing the phrase
+                                </Text>
+                            </View>
+                        )
                     }
                     onScroll={onScroll}
                     contentContainerStyle={{
