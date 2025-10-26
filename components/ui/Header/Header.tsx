@@ -39,7 +39,7 @@ export interface HeaderItem {
 }
 
 interface HeaderProps {
-    buttons?: HeaderItem[]
+    buttons?: (HeaderItem | undefined)[]
     title?: string
     goBack?: boolean
     titleAnimatedStyle?: StyleProp<TextStyle>
@@ -109,13 +109,13 @@ function Header(props: HeaderProps) {
 
     const standaloneButtons = useMemo(() => {
         {
-            return (props.buttons || []).filter((button) => button.standalone)
+            return (props.buttons || []).filter(Boolean).filter((button) => button!.standalone)
         }
     }, [props.buttons])
 
     const regularButtons = useMemo(() => {
         {
-            return (props.buttons || []).filter((button) => !button.standalone)
+            return (props.buttons || []).filter(Boolean).filter((button) => !button!.standalone)
         }
     }, [props.buttons])
 
@@ -180,14 +180,14 @@ function Header(props: HeaderProps) {
                         {standaloneButtons.map((button, index) => (
                             <View key={index} style={{ overflow: "hidden" }}>
                                 <GlassView style={styles.iconContainer}>
-                                    <HeaderIconButton button={button} index={index} />
+                                    <HeaderIconButton button={button!} index={index} />
                                 </GlassView>
                             </View>
                         ))}
 
                         <GlassView style={styles.iconContainer}>
                             {(regularButtons || []).map((button, index) => {
-                                return <HeaderIconButton key={index} button={button} index={index} />
+                                return <HeaderIconButton key={index} button={button!} index={index} />
                             })}
                         </GlassView>
                     </View>
