@@ -1,4 +1,4 @@
-import Button from "@/components/ui/Button/Button"
+import Button2 from "@/components/ui/Button/Button2"
 import Colors, { Sizing } from "@/constants/Colors"
 import Layout from "@/constants/Layout"
 import { useNavigation } from "@react-navigation/native"
@@ -6,6 +6,7 @@ import moment from "moment"
 import { StyleSheet, View } from "react-native"
 import Animated, { FadeIn } from "react-native-reanimated"
 import SVGImage from "./SVGImage"
+import { Button } from "@/components"
 
 const styles = StyleSheet.create({
     container: {

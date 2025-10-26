@@ -1,13 +1,13 @@
 import { Button } from "@/components"
 import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
-import lowOpacity from "@/utils/functions/lowOpacity"
 import { AntDesign } from "@expo/vector-icons"
 import { BlurView } from "expo-blur"
 import { Modal, StyleSheet, TouchableOpacity, View } from "react-native"
 import Feedback from "react-native-haptic-feedback"
 import WalletNotifications, { useGetNotifications } from "../../wallet/components/Wallet/WalletNotifications"
 import useReadAllNotifications from "../../wallet/hooks/useReadAllNotifications"
+import GlassView from "@/components/ui/GlassView"
 
 const styles = StyleSheet.create({
     modalContainer: {
@@ -38,9 +38,7 @@ const styles = StyleSheet.create({
         color: Colors.text_light,
         fontWeight: "bold",
     },
-    closeButton: {
-        padding: 8,
-    },
+    closeButton: {},
     notificationsContainer: {
         flex: 1,
         backgroundColor: "rgba(0, 0, 0, 0.2)",
@@ -53,7 +51,9 @@ const styles = StyleSheet.create({
     headerActions: {
         flexDirection: "row",
         alignItems: "center",
-        gap: 15,
+        gap: 5,
+        borderRadius: 100,
+        padding: 10,
     },
 })
 
@@ -85,33 +85,27 @@ export default function NotificationsModal({ visible, onClose }: NotificationsMo
             onRequestClose={closeNotifications}
         >
             <View style={styles.modalContainer}>
-                <BlurView intensity={40} tint="dark" style={styles.blurBackground} />
+                <BlurView intensity={20} tint="dark" style={styles.blurBackground} />
                 <View style={styles.modalContent}>
                     <View style={styles.modalHeader}>
                         <Text variant="body" style={styles.modalTitle}>
                             Notifications
                         </Text>
-                        <View style={styles.headerActions}>
+                        <GlassView style={styles.headerActions}>
                             {unreadCount > 0 && (
                                 <Button
                                     type="text"
                                     onPress={handleClearAll}
-                                    fontStyle={{ fontSize: 13, color: Colors.secondary, textTransform: "none" }}
-                                    style={{
-                                        backgroundColor: lowOpacity(Colors.secondary, 0.15),
-                                        paddingHorizontal: 15,
-                                        paddingVertical: 5,
-                                        borderWidth: 1,
-                                        borderColor: lowOpacity(Colors.secondary, 0.5),
-                                    }}
+                                    fontStyle={{ fontSize: 13, color: "#fff", textTransform: "none" }}
+                                    style={{ padding: 5 }}
                                 >
                                     Clear all ({unreadCount})
                                 </Button>
                             )}
-                            <TouchableOpacity onPress={closeNotifications} style={styles.closeButton}>
-                                <AntDesign name="close" size={24} color={Colors.text_light} />
+                            <TouchableOpacity onPress={closeNotifications}>
+                                <AntDesign name="close" size={20} color={Colors.text_light} />
                             </TouchableOpacity>
-                        </View>
+                        </GlassView>
                     </View>
                     <View style={styles.notificationsContainer}>
                         <WalletNotifications {...notification} />

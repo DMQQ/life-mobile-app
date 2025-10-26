@@ -11,6 +11,12 @@ export const GET_MAIN_SCREEN = gql`
             beginTime
             endTime
             isCompleted
+
+            todos {
+                id
+                title
+                isCompleted
+            }
         }
         wallet {
             id

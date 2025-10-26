@@ -1,4 +1,4 @@
-import Button from "@/components/ui/Button/Button"
+import Button2 from "@/components/ui/Button/Button2"
 import IconButton from "@/components/ui/IconButton/IconButton"
 import SegmentedButtons from "@/components/ui/SegmentedButtons"
 import Text from "@/components/ui/Text/Text"
@@ -20,6 +20,7 @@ import TimelineCreateHeader from "../components/CreateTimeline/TimelineCreateHea
 import timelineStyles from "../components/timeline.styles"
 import useCreateTimeline from "../hooks/general/useCreateTimeline"
 import type { TimelineScreenProps } from "../types"
+import { Button } from "@/components"
 
 const styles = StyleSheet.create({
     timeContainer: {

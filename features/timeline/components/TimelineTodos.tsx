@@ -9,6 +9,7 @@ import { memo, useCallback, useMemo } from "react"
 import { StyleSheet, View } from "react-native"
 import TodoHeader from "./TodoHeader"
 import TodoItem from "./TodoItem"
+import { AntDesign } from "@expo/vector-icons"
 
 const styles = StyleSheet.create({
     container: {
@@ -24,7 +25,7 @@ const styles = StyleSheet.create({
         backgroundColor: Color(Colors.primary_lighter).lighten(0.1).hex(),
     },
     emptyText: {
-        opacity: 0.7,
+        textAlign: "center",
     },
 })
 
@@ -72,8 +73,14 @@ export default function TimelineTodos(props: {
 
                         {notFinishedTodos.length === 0 && (
                             <Card style={{ backgroundColor: Colors.primary_lighter }}>
+                                <AntDesign
+                                    name="check-circle"
+                                    size={25}
+                                    color={"#fff"}
+                                    style={{ alignSelf: "center", marginBottom: 8 }}
+                                />
                                 <Text variant="body" style={styles.emptyText}>
-                                    No active todos. Tap "Add Todo" to get started!
+                                    All todos are completed! Great job!
                                 </Text>
                             </Card>
                         )}

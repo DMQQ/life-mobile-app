@@ -1,260 +1,560 @@
-import { Padding } from "@/constants/Values"
-import { Feather, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons"
+import { AntDesign, Feather, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons"
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs"
 import Color from "color"
 import moment from "moment"
-import { useEffect } from "react"
-import { Platform, StyleSheet } from "react-native"
+import { cloneElement, ReactNode, useEffect, useMemo } from "react"
+import { Pressable, StyleSheet, TextInput, Keyboard } from "react-native"
 import Feedback from "react-native-haptic-feedback"
-import Ripple from "react-native-material-ripple"
 import Animated, {
     FadeInDown,
+    FadeIn,
     interpolate,
-    runOnJS,
+    SharedValue,
     useAnimatedStyle,
     useSharedValue,
     withSequence,
     withSpring,
     withTiming,
+    useAnimatedKeyboard,
+    useDerivedValue,
 } from "react-native-reanimated"
+import { Gesture, GestureDetector } from "react-native-gesture-handler"
+import { scheduleOnRN } from "react-native-worklets"
 import Colors from "../../constants/Colors"
 import Layout from "../../constants/Layout"
-import { useTheme } from "../../utils/context/ThemeContext"
-import useKeyboard from "../../utils/hooks/useKeyboard"
-import BlurSurface from "../ui/BlurSurface"
-
-const blurOverlayColor = Color(Colors.primary).alpha(0.1).toString()
+import GlassView from "../ui/GlassView"
+import { useAppSelector, useAppDispatch } from "../../utils/redux"
+import { setSearchActive, setSearchValue, clearSearch } from "../../utils/redux/search/search"
+import { useNavigation } from "@react-navigation/native"
+import { LinearGradient } from "expo-linear-gradient"
+import { useScrollYContext } from "@/utils/context/ScrollYContext"
 
 const styles = StyleSheet.create({
     container: {
         width: Layout.screen.width,
-        justifyContent: "space-around",
         flexDirection: "row",
         position: "absolute",
-        bottom: 0,
-        height: 90,
+        bottom: 20,
+        height: 60,
+        alignSelf: "center",
+        paddingHorizontal: 15,
+        left: 0,
     },
     button: {
-        padding: 5,
-        paddingVertical: 10,
         justifyContent: "center",
         alignItems: "center",
-        borderRadius: 15,
-        position: "relative",
     },
     innerContainer: {
         flexDirection: "row",
-        justifyContent: "space-between",
-        backgroundColor: blurOverlayColor,
+
         position: "relative",
+        borderRadius: 100,
     },
     activeIndicator: {
-        position: "absolute",
-        top: 15,
-        height: 45,
-        backgroundColor: Colors.secondary,
-        borderRadius: 22.5,
-        opacity: 0.15,
-        shadowColor: Colors.secondary,
-        shadowOffset: {
-            width: 0,
-            height: 10,
-        },
-        shadowOpacity: 0.7,
-        shadowRadius: 16.0,
-
-        elevation: 24,
-    },
-    activeDot: {
-        position: "absolute",
-        top: -5,
-        width: 6,
-        height: 6,
-        backgroundColor: Colors.secondary,
-        borderRadius: 3,
+        height: 40,
+        borderRadius: 100,
+        opacity: 1,
     },
 })
 
-export default function BottomTab({ navigation, state, insets }: BottomTabBarProps) {
-    const navigate = (route: string) => navigation.navigate(route)
-    const activeRoute = state.routes[state.index].name
-    const { theme } = useTheme()
-
-    const routes = ["NotesScreens", "GoalsScreens", "Root", "WalletScreens", "TimelineScreens"]
-    const activeIndex = routes.indexOf(activeRoute)
-    const buttonWidth = Layout.screen.width / state.routes.length
-
-    const indicatorPosition = useSharedValue(activeIndex * buttonWidth)
-    const iconScale = useSharedValue(1)
+const SearchButton = ({
+    toggleSearch,
+    isExpanded,
+    value,
+    onChangeText,
+}: {
+    toggleSearch: () => void
+    isExpanded: boolean
+    value: string
+    onChangeText: (text: string) => void
+}) => {
+    const searchProgress = useSharedValue(0)
 
     useEffect(() => {
-        indicatorPosition.value = withSpring(activeIndex * buttonWidth, {
-            damping: 20,
-            stiffness: 150,
-        })
+        searchProgress.value = withTiming(isExpanded ? 1 : 0, { duration: 300 })
+    }, [isExpanded])
 
-        iconScale.value = withSequence(withTiming(0.9, { duration: 100 }), withTiming(1, { duration: 150 }))
+    const searchContainerStyle = useAnimatedStyle(() => {
+        const width = interpolate(searchProgress.value, [0, 1], [60, Layout.screen.width - 30 - 70])
 
-        runOnJS(Feedback.trigger)("impactLight")
-    }, [activeRoute])
+        return {
+            width,
+        }
+    })
 
-    const indicatorStyle = useAnimatedStyle(() => ({
-        transform: [{ translateX: indicatorPosition.value + buttonWidth * 0.2 }],
-        width: buttonWidth * 0.6,
-    }))
-
-    const Btn = (props: { route: string; iconName: any; label: string; onLongPress?: any; index: number }) => {
-        const isActive = activeRoute === props.route
-
-        const buttonAnimatedStyle = useAnimatedStyle(() => {
-            const scale = isActive ? iconScale.value : 1
-            return {
-                transform: [{ scale }],
-            }
-        })
-
-        const iconAnimatedStyle = useAnimatedStyle(() => {
-            const translateY = isActive ? interpolate(iconScale.value, [1, 1.2, 1], [0, -2, 0]) : 0
-            return {
-                transform: [{ translateY }],
-            }
-        })
-
-        return (
-            <Ripple
-                onLongPress={props.onLongPress}
-                rippleCentered
-                rippleColor={theme.colors.secondary}
-                style={[
-                    styles.button,
-                    {
-                        width: buttonWidth,
-                    },
-                ]}
-                onPress={() => navigate(props.route)}
-            >
-                <Animated.View style={[buttonAnimatedStyle, { alignItems: "center" }]}>
-                    <Animated.View style={iconAnimatedStyle}>
-                        {typeof props.iconName === "string" ? (
-                            <Ionicons
-                                size={22.5}
-                                name={props.iconName as any}
-                                color={isActive ? Colors.secondary : "rgba(255,255,255,0.8)"}
-                                style={{
-                                    marginBottom: 2.5,
-                                    paddingVertical: 7.5,
-                                    ...(isActive && {
-                                        shadowColor: Colors.secondary,
-                                        shadowOffset: {
-                                            width: 0,
-                                            height: 10,
-                                        },
-                                        shadowOpacity: 0.7,
-                                        shadowRadius: 16.0,
-
-                                        elevation: 24,
-                                    }),
-                                }}
-                            />
-                        ) : (
-                            props.iconName
-                        )}
-                    </Animated.View>
-                </Animated.View>
-            </Ripple>
-        )
-    }
-
-    const keyboard = useKeyboard()
-    const isOpenSubScreen = (state.routes[state.index].state?.index || 0) > 0
-
-    const animatedStyle = useAnimatedStyle(() => ({
-        transform: [
-            {
-                translateY: isOpenSubScreen || keyboard ? withTiming(100, { duration: 100 }) : withTiming(0),
-            },
-        ],
+    const inputContainerStyle = useAnimatedStyle(() => ({
+        opacity: searchProgress.value,
+        width: interpolate(searchProgress.value, [0, 1], [0, Layout.screen.width - 30 - 70 - 60]),
     }))
 
     return (
         <Animated.View
-            style={[styles.container, animatedStyle]}
-            entering={FadeInDown.duration(150)}
-            exiting={FadeInDown.duration(150)}
+            style={[
+                {
+                    position: "absolute",
+                    right: 15,
+                    height: 60,
+                    justifyContent: "center",
+                },
+                searchContainerStyle,
+            ]}
         >
-            <BlurSurface
+            <GlassView style={{ height: 60, borderRadius: 100, flex: 1, flexDirection: "row", alignItems: "center" }}>
+                {isExpanded && (
+                    <Animated.View style={[{ flex: 1, paddingHorizontal: 15 }, inputContainerStyle]}>
+                        <TextInput
+                            value={value}
+                            onChangeText={onChangeText}
+                            style={{
+                                color: Colors.foreground,
+                                fontSize: 16,
+                                paddingHorizontal: 10,
+                                height: 40,
+                                flex: 1,
+                            }}
+                            placeholder="Search..."
+                            placeholderTextColor={Color(Colors.foreground).alpha(0.6).string()}
+                            autoFocus={false}
+                            returnKeyType="search"
+                        />
+                    </Animated.View>
+                )}
+
+                <Pressable
+                    disabled={isExpanded}
+                    style={{
+                        width: 60,
+                        height: 60,
+                        justifyContent: "center",
+                        alignItems: "center",
+                        position: "absolute",
+                        right: 0,
+                    }}
+                    onPress={toggleSearch}
+                >
+                    <AntDesign size={20} name="search" color="#fff" />
+                </Pressable>
+            </GlassView>
+        </Animated.View>
+    )
+}
+
+interface ButtonProps {
+    route: string
+    iconName: any
+    label: string
+    onLongPress?: any
+    index: number
+
+    iconScale: SharedValue<number>
+    buttonWidth: number
+    activeRoute: string
+}
+
+const gradient = [
+    "transparent",
+    Color(Colors.primary).alpha(0.15).toString(),
+    Color(Colors.primary).alpha(0.5).toString(),
+]
+
+const Btn = ({ buttonWidth, iconScale, activeRoute, ...props }: ButtonProps) => {
+    const isActive = activeRoute === props.route
+    const pressScale = useSharedValue(1)
+
+    const buttonAnimatedStyle = useAnimatedStyle(() => {
+        const scale = isActive ? iconScale.value : pressScale.value
+        return {
+            transform: [{ scale }],
+        }
+    })
+
+    const handlePressIn = () => {
+        pressScale.value = withTiming(0.85, { duration: 100 })
+        Feedback.trigger("impactLight", {
+            enableVibrateFallback: false,
+            ignoreAndroidSystemSettings: false,
+        })
+    }
+
+    const handlePressOut = () => {
+        pressScale.value = withSpring(1, {
+            damping: 15,
+            stiffness: 300,
+        })
+    }
+
+    const navigation = useNavigation<any>()
+
+    return (
+        <Animated.View entering={FadeIn.delay(props.index * 50)}>
+            <Pressable
+                onPressIn={handlePressIn}
+                onPressOut={handlePressOut}
+                onLongPress={props.onLongPress}
                 style={[
-                    styles.innerContainer,
                     {
-                        paddingBottom: Platform.OS === "android" ? Padding.s + insets.bottom : Padding.xxl,
-                        paddingTop: Platform.OS === "android" ? insets.bottom + Padding.s : Padding.s,
+                        width: buttonWidth,
+                        justifyContent: "center",
+                        alignItems: "center",
+                        flex: 1,
+                        height: 60,
                     },
                 ]}
+                onPress={() => navigation.navigate(props.route)}
             >
-                <Animated.View style={[styles.activeIndicator, indicatorStyle]} />
-
-                <Btn
-                    index={0}
-                    route="NotesScreens"
-                    label="Notes"
-                    iconName={
-                        <MaterialCommunityIcons
-                            name="cards"
-                            size={22.5}
-                            color={activeRoute === "NotesScreens" ? Colors.secondary : "rgba(255,255,255,0.8)"}
+                <Animated.View style={[buttonAnimatedStyle, { alignItems: "center", justifyContent: "center" }]}>
+                    {typeof props.iconName === "string" ? (
+                        <Ionicons
+                            size={20}
+                            name={props.iconName as any}
+                            color={"#fff"}
+                            style={{
+                                ...(isActive && {
+                                    shadowColor: Colors.secondary,
+                                    shadowOffset: {
+                                        width: 0,
+                                        height: 10,
+                                    },
+                                    shadowOpacity: 0.7,
+                                    shadowRadius: 16.0,
+                                    elevation: 24,
+                                }),
+                            }}
                         />
-                    }
-                />
-
-                <Btn
-                    index={1}
-                    route="GoalsScreens"
-                    label="Training"
-                    iconName={
-                        <Feather
-                            name="target"
-                            size={22.5}
-                            color={activeRoute === "GoalsScreens" ? Colors.secondary : "rgba(255,255,255,0.8)"}
-                            style={{ marginBottom: 2.5, paddingVertical: 7.5 }}
-                        />
-                    }
-                />
-
-                <Btn index={2} route="Root" label="Home" iconName={"home"} />
-
-                <Btn
-                    index={3}
-                    onLongPress={() => {
-                        Feedback.trigger("impactMedium")
-                        navigation.navigate({
-                            name: "WalletScreens",
-                            params: {
-                                expenseId: null,
+                    ) : (
+                        cloneElement(props.iconName, {
+                            style: {
+                                ...(isActive && {
+                                    shadowColor: Colors.secondary,
+                                    shadowOffset: {
+                                        width: 0,
+                                        height: 10,
+                                    },
+                                    shadowOpacity: 0.7,
+                                    shadowRadius: 16.0,
+                                    elevation: 24,
+                                }),
                             },
                         })
-                    }}
-                    route="WalletScreens"
-                    label="Wallet"
-                    iconName={"wallet"}
-                />
-
-                <Btn
-                    index={4}
-                    onLongPress={() => {
-                        Feedback.trigger("impactMedium")
-
-                        navigation.navigate({
-                            name: "TimelineScreens",
-                            params: {
-                                selectedDate: moment(new Date()).format("YYYY-MM-DD"),
-                            },
-                        })
-                    }}
-                    route="TimelineScreens"
-                    label="Timeline"
-                    iconName={"calendar-number"}
-                />
-            </BlurSurface>
+                    )}
+                </Animated.View>
+            </Pressable>
         </Animated.View>
+    )
+}
+
+export default function BottomTab({ navigation, state }: BottomTabBarProps) {
+    const activeRoute = state.routes[state.index].name
+    const routes = ["NotesScreens", "GoalsScreens", "Root", "WalletScreens", "TimelineScreens"]
+
+    const handleLongPress = (route: string) => {
+        switch (route) {
+            case "WalletScreens":
+                Feedback.trigger("impactMedium")
+                navigation.navigate({
+                    name: "WalletScreens",
+                    params: {
+                        expenseId: null,
+                    },
+                })
+                break
+            case "TimelineScreens":
+                Feedback.trigger("impactMedium")
+                navigation.navigate({
+                    name: "TimelineScreens",
+                    params: {
+                        selectedDate: moment(new Date()).format("YYYY-MM-DD"),
+                    },
+                })
+                break
+            default:
+                break
+        }
+    }
+
+    const { scrollYValues } = useScrollYContext()
+
+    const scrollY = useDerivedValue(() => {
+        return scrollYValues.value[activeRoute] || 0
+    }, [activeRoute])
+
+    const tabScale = useAnimatedStyle(() => {
+        return {
+            transform: [
+                {
+                    scale: interpolate(scrollY.value, [0, 250], [1, 0.9], "clamp"),
+                },
+            ],
+        }
+    })
+
+    const dispatch = useAppDispatch()
+    const { isActive: isSearchActive, value: searchValue } = useAppSelector((state) => state.search)
+
+    const totalButtons = state.routes.length
+    const buttonWidth = (Layout.screen.width - 30 - 70) / totalButtons
+
+    const buttons = useMemo(
+        () => [
+            {
+                route: "NotesScreens",
+                label: "Notes",
+                iconName: <MaterialCommunityIcons name="cards" size={20} color="#fff" />,
+            },
+            {
+                route: "GoalsScreens",
+                label: "Training",
+                iconName: (
+                    <Feather
+                        name="target"
+                        size={22.5}
+                        color="#fff"
+                        style={{ marginBottom: 2.5, paddingVertical: 7.5 }}
+                    />
+                ),
+            },
+            {
+                route: "Root",
+                label: "Home",
+                iconName: "home",
+            },
+            {
+                route: "WalletScreens",
+                label: "Wallet",
+                iconName: "wallet",
+                onLongPress: () => handleLongPress("WalletScreens"),
+            },
+            {
+                route: "TimelineScreens",
+                label: "Timeline",
+                iconName: "calendar-number",
+                onLongPress: () => handleLongPress("TimelineScreens"),
+            },
+        ],
+        [],
+    )
+
+    const indicatorPosition = useSharedValue(routes.indexOf(activeRoute))
+    const iconScale = useSharedValue(1)
+    const tabsOpacity = useSharedValue(1)
+    const isDragging = useSharedValue(false)
+    const dragScale = useSharedValue(1)
+    const dragStartIndex = useSharedValue(0)
+
+    const toggleSearch = () => {
+        if (isSearchActive) {
+            dispatch(clearSearch())
+            Keyboard.dismiss()
+        } else {
+            dispatch(setSearchActive(true))
+        }
+        Feedback.trigger("impactMedium")
+    }
+
+    const handleSearchValueChange = (value: string) => {
+        if (value !== searchValue) dispatch(setSearchValue(value))
+    }
+
+    useEffect(() => {
+        if (!isSearchActive) {
+            dragScale.value = 1
+            isDragging.value = false
+
+            indicatorPosition.value = withSpring(routes.indexOf(activeRoute), {
+                damping: 25,
+                stiffness: 200,
+            })
+            iconScale.value = withSequence(withTiming(0.9, { duration: 100 }), withTiming(1, { duration: 150 }))
+        }
+    }, [activeRoute, isSearchActive])
+
+    useEffect(() => {
+        tabsOpacity.value = withTiming(isSearchActive ? 0 : 1, { duration: isSearchActive ? 200 : 300 })
+    }, [isSearchActive])
+
+    const panGesture = Gesture.Pan()
+        .onBegin(() => {
+            "worklet"
+            isDragging.value = true
+            dragScale.value = withSpring(1.1, { damping: 20, stiffness: 300 })
+            dragStartIndex.value = routes.indexOf(activeRoute)
+        })
+        .onUpdate((event) => {
+            "worklet"
+
+            const translation = event.translationX / buttonWidth
+            const newPosition = dragStartIndex.value + translation
+            const clampedPosition = Math.max(0, Math.min(routes.length - 1, newPosition))
+            indicatorPosition.value = clampedPosition
+
+            if (Math.abs(event.y) > 50) {
+                scheduleOnRN(handleLongPress, activeRoute)
+                dragScale.value = withSpring(1, { damping: 20, stiffness: 300 })
+                isDragging.value = false
+                indicatorPosition.value = withSpring(routes.indexOf(activeRoute), {
+                    damping: 25,
+                    stiffness: 200,
+                })
+            }
+        })
+        .onEnd((event) => {
+            "worklet"
+            const translation = event.translationX / buttonWidth
+            const finalPosition = dragStartIndex.value + translation
+            const targetIndex = Math.round(Math.max(0, Math.min(routes.length - 1, finalPosition)))
+            const currentActiveIndex = routes.indexOf(activeRoute)
+
+            indicatorPosition.value = withSpring(targetIndex, {
+                damping: 20,
+                stiffness: 150,
+            })
+
+            dragScale.value = withSpring(1, { damping: 20, stiffness: 300 })
+            isDragging.value = false
+
+            if (targetIndex !== currentActiveIndex && routes[targetIndex]) {
+                scheduleOnRN(navigation.navigate, routes[targetIndex] as any)
+            }
+        })
+
+    const indicatorStyle = useAnimatedStyle(() => {
+        "worklet"
+        const baseTranslateX = indicatorPosition.value * buttonWidth + buttonWidth * 0.2
+
+        return {
+            transform: [
+                {
+                    translateX: baseTranslateX,
+                },
+                {
+                    scale: dragScale.value,
+                },
+            ],
+            width: buttonWidth * 0.6,
+        }
+    }, [buttonWidth])
+
+    const tabBarWidthStyle = useAnimatedStyle(() => ({
+        width: interpolate(tabsOpacity.value, [0, 1], [60, Layout.screen.width - 30 - 70]),
+    }))
+
+    const isOpenSubScreen = (state.routes[state.index].state?.index || 0) > 0
+
+    const keyboard = useAnimatedKeyboard()
+
+    const animatedStyle = useAnimatedStyle(() => {
+        const hideOnKeyboard = (isOpenSubScreen || keyboard.height.value > 0) && !isSearchActive
+
+        return {
+            transform: [
+                {
+                    translateY: hideOnKeyboard
+                        ? withTiming(100, { duration: 200 })
+                        : isSearchActive
+                          ? -keyboard.height.value
+                          : withTiming(0, { duration: 200 }),
+                },
+            ],
+        }
+    }, [isOpenSubScreen, isSearchActive])
+
+    const dismissIcon = useMemo(() => buttons.find((btn) => btn.route === activeRoute)?.iconName, [activeRoute])
+
+    return (
+        <>
+            <Animated.View
+                style={[animatedStyle, styles.container, tabScale]}
+                entering={FadeInDown}
+                exiting={FadeInDown}
+            >
+                <GestureDetector gesture={panGesture}>
+                    <Animated.View style={[tabBarWidthStyle, { height: 60 }]}>
+                        <GlassView
+                            style={[
+                                styles.innerContainer,
+                                {
+                                    borderRadius: 100,
+                                    flex: 1,
+                                    height: 60,
+                                },
+                            ]}
+                        >
+                            {!isSearchActive && (
+                                <Animated.View
+                                    style={[indicatorStyle, styles.activeIndicator, { position: "absolute", top: 10 }]}
+                                    entering={FadeIn.delay((routes.indexOf(activeRoute) + 1) * 50)}
+                                >
+                                    <Pressable style={{ flex: 1, height: "100%" }}>
+                                        <GlassView
+                                            glassEffectStyle="clear"
+                                            tintColor={Colors.secondary}
+                                            style={[styles.activeIndicator]}
+                                        />
+                                    </Pressable>
+                                </Animated.View>
+                            )}
+
+                            {isSearchActive && (
+                                <Animated.View
+                                    entering={FadeIn.delay(150)}
+                                    style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 60 }}
+                                >
+                                    <Pressable
+                                        style={{
+                                            flex: 1,
+                                            justifyContent: "center",
+                                            alignItems: "center",
+                                        }}
+                                        onPress={toggleSearch}
+                                    >
+                                        {typeof dismissIcon === "string" ? (
+                                            <Ionicons size={20} name={dismissIcon as any} color="#fff" />
+                                        ) : (
+                                            cloneElement(dismissIcon as any, { size: 20, color: "#fff" })
+                                        )}
+                                    </Pressable>
+                                </Animated.View>
+                            )}
+
+                            {!isSearchActive && (
+                                <Animated.View style={{ flexDirection: "row", flex: 1 }}>
+                                    {buttons.map((button, index) => (
+                                        <Btn
+                                            key={button.route}
+                                            index={index}
+                                            route={button.route}
+                                            label={button.label}
+                                            iconName={button.iconName}
+                                            onLongPress={button.onLongPress}
+                                            iconScale={iconScale}
+                                            buttonWidth={buttonWidth}
+                                            activeRoute={activeRoute}
+                                        />
+                                    ))}
+                                </Animated.View>
+                            )}
+                        </GlassView>
+                    </Animated.View>
+                </GestureDetector>
+
+                <SearchButton
+                    toggleSearch={toggleSearch}
+                    isExpanded={isSearchActive}
+                    value={searchValue}
+                    onChangeText={handleSearchValueChange}
+                />
+            </Animated.View>
+            <LinearGradient
+                colors={gradient as any}
+                style={{
+                    position: "absolute",
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    height: 80,
+                }}
+                pointerEvents="none"
+            />
+        </>
     )
 }

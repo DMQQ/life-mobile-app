@@ -59,46 +59,28 @@ const AvailableBalanceWidget = ({ data }: Props) => {
     const dailyBudgetLeft = daysLeft > 0 ? remainingBudget / daysLeft : 0
     const savings = wallet?.income + stats?.income - stats?.expense
 
-    const isOverBudget = spentPercentage > 100
     const isDailyBudgetNegative = dailyBudgetLeft < 0
 
     return (
         <Animated.View style={styles.container} layout={LinearTransition.delay(200)}>
             <View style={styles.metricsGrid}>
-                <MetricCard label="Days remaining" value={daysLeft.toString()} icon="calendar-clock" />
+                <MetricCard label="Days left" value={daysLeft.toString()} icon="calendar-clock" postfix="d" />
                 <MetricCard
                     label="Daily budget"
                     value={`${Math.abs(dailyBudgetLeft).toFixed(0)}zł`}
                     icon="wallet-outline"
                     status={isDailyBudgetNegative ? "error" : "neutral"}
                     prefix={isDailyBudgetNegative ? "-" : ""}
+                    postfix="zł"
                 />
-                <MetricCard label="Total saved" value={`${savings.toFixed(0)}zł`} icon="piggy-bank" prefix="" />
-            </View>
-
-            <View
-                style={[
-                    styles.targetProgress,
-                    {
-                        backgroundColor: Color(isOverBudget ? Colors.error : Colors.secondary)
-                            .alpha(0.08)
-                            .string(),
-                    },
-                ]}
-            >
-                <View style={styles.targetContent}>
-                    <MaterialCommunityIcons
-                        name="target"
-                        size={24}
-                        color={isOverBudget ? Colors.error : Colors.secondary}
-                    />
-                    <Text style={[styles.targetLabel, { color: isOverBudget ? Colors.error : Colors.secondary }]}>
-                        Monthly Target Progress {"\n"}of {targetAmount.toFixed(0)}zł target
-                    </Text>
-                    <Text style={[styles.targetPercentage, { color: isOverBudget ? Colors.error : Colors.secondary }]}>
-                        {spentPercentage.toFixed(1)}%
-                    </Text>
-                </View>
+                <MetricCard
+                    label="Total saved"
+                    value={`${savings.toFixed(0)}zł`}
+                    icon="piggy-bank"
+                    prefix=""
+                    postfix="zł"
+                />
+                <MetricCard label="Target" value={spentPercentage.toFixed(2)} icon="target" postfix="%" />
             </View>
 
             <View style={styles.chartSection}>
@@ -115,12 +97,14 @@ const MetricCard = ({
     icon,
     status = "neutral",
     prefix = "",
+    postfix = "",
 }: {
     label: string
     value: string
     icon: keyof typeof MaterialCommunityIcons.glyphMap
     status?: "success" | "error" | "neutral"
     prefix?: string
+    postfix?: string
 }) => {
     const getStatusColor = () => {
         switch (status) {
@@ -137,21 +121,20 @@ const MetricCard = ({
 
     return (
         <View style={styles.metricCard}>
-            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 5 }}>
+            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "flex-start", gap: 2.5 }}>
                 <MaterialCommunityIcons
                     name={icon}
-                    size={25}
+                    size={20}
                     color={status === "neutral" ? Colors.secondary_light_1 : color}
-                    style={{ transform: [{ translateY: -2.5 }] }}
                 />
 
                 <AnimatedNumber
                     style={[styles.metricValue, { color: color }]}
-                    formatValue={(val) => (!Number.isNaN(+value) ? val + "" : (prefix ?? "") + val + "zł")}
+                    formatValue={(val) => `${prefix}${val}${postfix}`}
                     value={Number.isNaN(Number(value)) ? +value.replace(/\D/g, "") : Number(value)}
                 />
             </View>
-            <Text style={styles.metricLabel}>{label}</Text>
+            <Text style={[styles.metricLabel, { color }]}>{label}</Text>
         </View>
     )
 }
@@ -219,9 +202,10 @@ const styles = StyleSheet.create({
     },
     metricsGrid: {
         flexDirection: "row",
-        gap: 20,
+        justifyContent: "space-between",
         marginBottom: 16,
-        marginTop: 10,
+        marginTop: 15,
+        gap: 15,
     },
     metricCard: {
         flex: 1,
@@ -238,7 +222,7 @@ const styles = StyleSheet.create({
     },
     metricValue: {
         ...Typography.title,
-        fontSize: 24,
+        fontSize: 20,
         lineHeight: 25,
         fontWeight: "700",
     },

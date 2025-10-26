@@ -1,6 +1,7 @@
 import Header from "@/components/ui/Header/Header"
 import { View } from "react-native"
 import Feedback from "react-native-haptic-feedback"
+import { SafeAreaView } from "react-native-safe-area-context"
 
 export default function SwipeFlashCardsScreen({ navigation, route }: any) {
     const { flashCards, reviewFlashCard } = useFlashCards(route.params?.groupId)
@@ -58,7 +59,7 @@ export default function SwipeFlashCardsScreen({ navigation, route }: any) {
 
 import Colors from "@/constants/Colors"
 import React, { useEffect, useState } from "react"
-import { Dimensions, SafeAreaView, StyleSheet, Text } from "react-native"
+import { Dimensions, StyleSheet, Text } from "react-native"
 import { Gesture, GestureDetector } from "react-native-gesture-handler"
 import Animated, {
     Extrapolation,

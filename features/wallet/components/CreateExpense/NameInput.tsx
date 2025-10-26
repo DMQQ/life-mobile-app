@@ -10,6 +10,7 @@ import Text from "@/components/ui/Text/Text"
 import Feedback from "react-native-haptic-feedback"
 import Ripple from "react-native-material-ripple"
 import { Icons } from "../Expense/ExpenseIcon"
+import GlassView from "@/components/ui/GlassView"
 
 interface NameInputProps {
     isInputFocused: boolean
@@ -100,55 +101,43 @@ export default function NameInput({
                 />
             }
             right={
-                <Ripple
-                    onPress={!isValid && prediction ? applyPrediction : handleSubmit}
-                    style={[
-                        styles.save,
-                        !isValid && {
-                            backgroundColor: lowOpacity(styles.save.backgroundColor, 0.2),
-                        },
-                        !isValid &&
-                            prediction && {
-                                backgroundColor: Icons[prediction.category as keyof typeof Icons].backgroundColor,
-                            },
-                    ]}
-                    disabled={!isValid && !prediction && !canPredict}
+                <GlassView
+                    style={{ borderRadius: 100 }}
+                    tintColor={
+                        !isValid && prediction
+                            ? Icons[prediction.category as keyof typeof Icons]?.backgroundColor
+                            : !isValid
+                              ? Colors.primary
+                              : Colors.secondary
+                    }
                 >
-                    {loading ? (
-                        <ActivityIndicator size={14} color={Colors.foreground} />
-                    ) : isValid ? (
-                        <AntDesign
-                            name="save"
-                            size={20}
-                            color={isValid || canPredict ? Colors.foreground : lowOpacity(Colors.secondary_light_1, 0.5)}
-                        />
-                    ) : (
-                        <Ionicons
-                            name="color-wand-sharp"
-                            size={20}
-                            color={isValid || canPredict ? Colors.foreground : lowOpacity(Colors.secondary_light_1, 0.5)}
-                        />
-                    )}
-                    <Text
-                        variant="caption"
-                        style={{
-                            color:
-                                isValid || (!isValid && prediction)
-                                    ? Colors.foreground
-                                    : lowOpacity(Colors.secondary_light_1, 0.5),
-                            fontWeight: "500",
-                            lineHeight: 20,
-                        }}
+                    <Ripple
+                        onPress={!isValid && prediction ? applyPrediction : handleSubmit}
+                        style={[styles.save]}
+                        disabled={!isValid && !prediction && !canPredict}
                     >
-                        {isSubExpenseMode
-                            ? "Add"
-                            : params?.isEditing
-                              ? "Edit"
-                              : !isValid && prediction
-                                ? "Use"
-                                : "Done"}
-                    </Text>
-                </Ripple>
+                        {loading && <ActivityIndicator size={14} color={Colors.foreground} />}
+                        <Text
+                            variant="caption"
+                            style={{
+                                color:
+                                    isValid || (!isValid && prediction)
+                                        ? Colors.foreground
+                                        : lowOpacity(Colors.secondary_light_1, 0.5),
+                                fontWeight: "500",
+                                lineHeight: 20,
+                            }}
+                        >
+                            {isSubExpenseMode
+                                ? "Add"
+                                : params?.isEditing
+                                  ? "Edit"
+                                  : !isValid && prediction
+                                    ? "Use"
+                                    : "Done"}
+                        </Text>
+                    </Ripple>
+                </GlassView>
             }
         />
     )
@@ -164,14 +153,12 @@ const styles = StyleSheet.create({
         borderRadius: 100,
     },
     save: {
-        paddingHorizontal: 12.5,
+        paddingHorizontal: 10,
         paddingVertical: 5,
-        borderRadius: 12.5,
-        backgroundColor: Colors.secondary,
+        borderRadius: 100,
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "center",
         gap: 7.5,
-        marginRight: 5,
     },
 })

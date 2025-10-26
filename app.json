@@ -2,7 +2,7 @@
     "expo": {
         "name": "Life",
         "slug": "mylife-mobile",
-        "version": "1.2.0",
+        "version": "2.0.0",
         "orientation": "portrait",
         "icon": "./assets/images/icon.png",
         "scheme": "mylife",
@@ -15,12 +15,11 @@
         "updates": {
             "fallbackToCacheTimeout": 0,
             "url": "https://u.expo.dev/5596a83c-661a-4477-806f-ee4c8a125f7e",
-            "checkAutomatically": "ON_LOAD",
-            "channel": "production"
+            "checkAutomatically": "ON_LOAD"
         },
         "assetBundlePatterns": ["**/*"],
         "ios": {
-            "buildNumber": "20250805",
+            "buildNumber": "20251001",
             "supportsTablet": true,
             "infoPlist": {
                 "NSFaceIDUsageDescription": "Allow $(PRODUCT_NAME) to use Face ID.",
@@ -29,7 +28,8 @@
                 "ITSAppUsesNonExemptEncryption": false
             },
             "bundleIdentifier": "com.dmq.mylifemobile",
-            "associatedDomains": ["applinks:life.dmqq.dev"]
+            "associatedDomains": ["applinks:life.dmqq.dev"],
+            "icon": "./assets/images/icon.icon"
         },
         "android": {
             "googleServicesFile": "./google-services.json",
@@ -92,15 +92,15 @@
                 }
             ],
             "expo-quick-actions",
-            "expo-build-properties"
+            "expo-build-properties",
+            "expo-web-browser"
         ],
-
         "extra": {
             "eas": {
                 "projectId": "5596a83c-661a-4477-806f-ee4c8a125f7e"
             }
         },
         "owner": "dmq",
-        "runtimeVersion": "1.0.0"
+        "runtimeVersion": "2.0.0"
     }
 }

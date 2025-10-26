@@ -1,7 +1,7 @@
 import { AnimatedSelector, TextInput } from "@/components"
 import Button from "@/components/ui/Button/Button"
 import Text from "@/components/ui/Text/Text"
-import Colors from "@/constants/Colors"
+import Colors, { defaultColors } from "@/constants/Colors"
 import Layout from "@/constants/Layout"
 import useUser from "@/utils/hooks/useUser"
 import { AntDesign } from "@expo/vector-icons"
@@ -24,6 +24,14 @@ interface ColorPalette {
 }
 
 const colorPalettes: ColorPalette[] = [
+    {
+        name: "Default (Dark Mode)",
+        primary: defaultColors.primary,
+        secondary: defaultColors.secondary,
+        ternary: defaultColors.ternary,
+        foreground: defaultColors.foreground,
+        category: "Finance",
+    },
     {
         name: "DMQ dark",
         primary: "#111111",
@@ -636,9 +644,9 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
 
                                 <UpdateButton />
 
-                                <Button2 onPress={handleSignout} color="error" style={{ marginTop: 30 }}>
+                                <Button onPress={handleSignout} color="error" style={{ marginTop: 30 }}>
                                     Signout 👋
-                                </Button2>
+                                </Button>
 
                                 <View style={{ padding: 30 }} />
                             </View>
@@ -665,8 +673,8 @@ export const UpdateButton: React.FC = () => {
     if (!isUpdateAvailable) return null
 
     return (
-        <Button2 icon="download" onPress={downloadAndRestart} disabled={isDownloading}>
+        <Button icon="download" onPress={downloadAndRestart} disabled={isDownloading}>
             {isDownloading ? "Updating..." : "Update App"}
-        </Button2>
+        </Button>
     )
 }

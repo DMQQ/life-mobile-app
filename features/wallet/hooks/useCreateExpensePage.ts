@@ -7,7 +7,7 @@ import { Expense } from "@/types"
 import { useApolloClient } from "@apollo/client"
 import { useNavigation } from "@react-navigation/native"
 import moment from "moment/moment"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useState, useTransition } from "react"
 import { cancelAnimation, useSharedValue, withSpring } from "react-native-reanimated"
 
 interface SubExpense {
@@ -49,48 +49,94 @@ export default function useCreateExpensePage(
 
     const [uploadSubexpenses, state] = useUploadSubExpense(() => {})
 
+    const [isPending, startTransition] = useTransition()
+
     const handleSubmit = async () => {
-        if (isSubExpenseMode) {
-            handleAddSubexpense()
+        if (isPending) return
 
-            return
-        }
+        startTransition(async () => {
+            if (isSubExpenseMode) {
+                handleAddSubexpense()
 
-        const parseAmount = (amount: string) => {
-            if (amount.endsWith(".")) return +amount.slice(0, -1)
-
-            if (amount.includes(".")) {
-                const [int, dec] = amount.split(".")
-                if (dec.length > 2) {
-                    return +int + +`0.${dec.slice(0, 2)}`
-                }
+                return
             }
 
-            return +amount
-        }
+            const parseAmount = (amount: string) => {
+                if (amount.endsWith(".")) return +amount.slice(0, -1)
 
-        if (!isValid) {
-            shake()
-            return
-        }
+                if (amount.includes(".")) {
+                    const [int, dec] = amount.split(".")
+                    if (dec.length > 2) {
+                        return +int + +`0.${dec.slice(0, 2)}`
+                    }
+                }
 
-        if (params?.isEditing) {
-            await editExpense({
+                return +amount
+            }
+
+            if (!isValid) {
+                shake()
+                return
+            }
+
+            if (params?.isEditing) {
+                await editExpense({
+                    variables: {
+                        amount: parseAmount(amount),
+                        description: name,
+                        type: type,
+                        category: category,
+                        expenseId: params.id,
+                        date: date,
+                        spontaneousRate,
+                    },
+                }).catch((e) => console.log(e))
+
+                if (SubExpenses.length > 0) {
+                    await uploadSubexpenses({
+                        variables: {
+                            expenseId: params.id,
+                            input: SubExpenses.map((item) => ({
+                                description: item.description,
+                                amount: item.amount,
+                                category: item.category,
+                            })),
+                        },
+                    })
+                }
+
+                try {
+                    await client?.refetchQueries({
+                        include: ["GetWallet", "Limits", "StatisticsDayOfWeek", "GetZeroSpendings"],
+                    })
+                } catch (error) {
+                    console.log("Error refetching queries:", error)
+                }
+
+                navigation.goBack()
+
+                return
+            }
+
+            const { data, errors } = await createExpense({
                 variables: {
                     amount: parseAmount(amount),
                     description: name,
                     type: type,
                     category: category,
-                    expenseId: params.id,
-                    date: date,
-                    spontaneousRate,
+                    date: date ?? moment().format("YYYY-MM-DD"),
+                    schedule: moment(date).isAfter(moment()),
+                    isSubscription: isSubscription,
+                    spontaneousRate: spontaneousRate,
                 },
-            }).catch((e) => console.log(e))
+            })
+
+            const id = data.createExpense.id
 
             if (SubExpenses.length > 0) {
                 await uploadSubexpenses({
                     variables: {
-                        expenseId: params.id,
+                        expenseId: id,
                         input: SubExpenses.map((item) => ({
                             description: item.description,
                             amount: item.amount,
@@ -100,52 +146,12 @@ export default function useCreateExpensePage(
                 })
             }
 
-            try {
-                await client?.refetchQueries({
-                    include: ["GetWallet", "Limits", "StatisticsDayOfWeek", "GetZeroSpendings"],
-                })
-            } catch (error) {
-                console.log("Error refetching queries:", error)
-            }
+            await client?.refetchQueries({
+                include: ["GetWallet", "Limits", "StatisticsDayOfWeek", "GetZeroSpendings"],
+            })
 
             navigation.goBack()
-
-            return
-        }
-
-        const { data, errors } = await createExpense({
-            variables: {
-                amount: parseAmount(amount),
-                description: name,
-                type: type,
-                category: category,
-                date: date ?? moment().format("YYYY-MM-DD"),
-                schedule: moment(date).isAfter(moment()),
-                isSubscription: isSubscription,
-                spontaneousRate: spontaneousRate,
-            },
         })
-
-        const id = data.createExpense.id
-
-        if (SubExpenses.length > 0) {
-            await uploadSubexpenses({
-                variables: {
-                    expenseId: id,
-                    input: SubExpenses.map((item) => ({
-                        description: item.description,
-                        amount: item.amount,
-                        category: item.category,
-                    })),
-                },
-            })
-        }
-
-        await client?.refetchQueries({
-            include: ["GetWallet", "Limits", "StatisticsDayOfWeek", "GetZeroSpendings"],
-        })
-
-        navigation.goBack()
     }
 
     useEffect(() => {

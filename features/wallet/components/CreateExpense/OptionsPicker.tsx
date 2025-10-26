@@ -196,9 +196,9 @@ const TypeIcon = ({ type }: { type: "expense" | "income" | null }) =>
             />
         </View>
     ) : type === "expense" ? (
-        <AntDesign name="arrowdown" size={15} color={Color(Colors.error).lighten(0.2).string()} />
+        <AntDesign name="arrow-down" size={15} color={Color(Colors.error).lighten(0.2).string()} />
     ) : type === "income" ? (
-        <AntDesign name="arrowup" size={15} color={Color(Colors.secondary_light_1).lighten(0.2).string()} />
+        <AntDesign name="arrow-up" size={15} color={Color(Colors.secondary_light_1).lighten(0.2).string()} />
     ) : (
         <Entypo name="back-in-time" size={15} color="rgba(255,255,255,0.7)" />
     )

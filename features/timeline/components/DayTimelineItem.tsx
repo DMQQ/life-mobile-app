@@ -63,12 +63,12 @@ export default function DayTimelineItem(
         >
             <View style={{ flex: 1 }}>
                 <View style={[timelineStyles.itemContainerTitleRow]}>
-                    <View style={{ flexDirection: "row", gap: 5 }}>
+                    <View style={{ flexDirection: "row", gap: 5, alignItems: "center" }}>
                         <View>
                             {timeline.isCompleted ? (
                                 <AntDesign name="check" color={Colors.foreground} size={18} />
                             ) : isExpired ? (
-                                <AntDesign name="clockcircle" size={18} color={Colors.foreground} />
+                                <AntDesign name="clock-circle" size={18} color={Colors.foreground} />
                             ) : (
                                 <MaterialIcons name="pending" color={Colors.foreground} size={18} />
                             )}

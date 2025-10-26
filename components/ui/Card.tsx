@@ -1,4 +1,5 @@
 import Colors from "@/constants/Colors"
+import Color from "color"
 import { StyleSheet, View, ViewProps } from "react-native"
 import Ripple from "react-native-material-ripple"
 import Animated, { AnimatedProps } from "react-native-reanimated"
@@ -34,9 +35,11 @@ export default function Card<T extends boolean = false>({
 const styles = StyleSheet.create({
     container: {
         padding: 15,
-        paddingHorizontal: 20,
-        borderRadius: 20,
+        paddingHorizontal: 15,
+        borderRadius: 25,
         width: "100%",
         backgroundColor: Colors.primary_lighter,
+        borderWidth: 1,
+        borderColor: Color(Colors.primary_lighter).lighten(0.5).hex(),
     },
 })

@@ -159,6 +159,15 @@ export interface Timeline {
   todos: Todos[];
 }
 
+export interface CopyTimelineInput {
+  newDate?: string;
+}
+
+export interface CopyTimelineVariables {
+  timelineId: string;
+  newDate?: string;
+}
+
 export interface Todos {
   id: string;
   title: string;
@@ -167,6 +176,14 @@ export interface Todos {
   createdAt: string;
 
   modifiedAt: string;
+
+  files?: TodoFile[];
+}
+
+export interface TodoFile {
+  id: string;
+  type: string;
+  url: string;
 }
 
 export interface IFile {

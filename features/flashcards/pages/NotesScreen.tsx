@@ -5,11 +5,12 @@ import { RefreshControl, StyleSheet, View } from "react-native"
 
 import { Skeleton } from "@/components"
 import DeleteFlashCardGroupDialog from "@/components/ui/Dialog/Delete/DeleteGroupDialog"
-import AnimatedHeaderSearch from "@/components/ui/Header/AnimatedHeaderSearch"
 import { ScreenProps } from "@/types"
+import { useScreenSearch } from "@/utils/hooks/useScreenSearch"
 import { FlashList } from "@shopify/flash-list"
 import { useMemo, useState } from "react"
 import Animated, { FadeOut, useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated"
+import useTrackScroll from "@/utils/hooks/ui/useTrackScroll"
 import FlashCardGroup from "../components/FlashCardGroup"
 import { Group, useGroups } from "../hooks"
 
@@ -56,16 +57,7 @@ const AnimatedLoader = () => {
 export default function NotesScreen({ navigation }: ScreenProps<any>) {
     const { groups, loading, refetch } = useGroups()
 
-    const scrollY = useSharedValue(0)
-
-    const onAnimatedScrollHandler = useAnimatedScrollHandler(
-        {
-            onScroll(event) {
-                scrollY.value = event.contentOffset.y
-            },
-        },
-        [],
-    )
+    const [scrollY, onAnimatedScrollHandler] = useTrackScroll({ screenName: "NotesScreens" })
 
     const groupsSorted = useMemo(() => {
         if (!groups || groups.length === 0) return []
@@ -85,6 +77,9 @@ export default function NotesScreen({ navigation }: ScreenProps<any>) {
     }
 
     const [query, setQuery] = useState("")
+    
+    // Register search functionality
+    useScreenSearch(setQuery)
 
     return (
         <>
@@ -101,14 +96,6 @@ export default function NotesScreen({ navigation }: ScreenProps<any>) {
                     ]}
                     animatedTitle="FlashCards"
                     animatedSubtitle={`${groups?.length || 0} Groups`}
-                    renderAnimatedItem={(props) => (
-                        <AnimatedHeaderSearch
-                            buttonsCount={1}
-                            {...props}
-                            filterValue={query}
-                            setFilterValue={setQuery}
-                        />
-                    )}
                 />
                 <AnimatedFlashList
                     data={groupsSorted}

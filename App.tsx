@@ -5,15 +5,20 @@ import { getItemAsync } from "expo-secure-store"
 import * as SplashScreen from "expo-splash-screen"
 import { StatusBar } from "expo-status-bar"
 import { GestureHandlerRootView } from "react-native-gesture-handler"
-import { SafeAreaView } from "react-native-safe-area-context"
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context"
 import { Provider } from "react-redux"
 import ErrorBoundary from "./components/ErrorBoundary"
 import Colors from "./constants/Colors"
 import Url from "./constants/Url"
 import Navigation from "./navigation"
 import ThemeContextProvider from "./utils/context/ThemeContext"
+import { ScrollYContextProvider } from "./utils/context/ScrollYContext"
 import { STORE_KEY } from "./utils/hooks/useUser"
 import { store } from "./utils/redux"
+
+import { setLogVerbosity } from "@apollo/client"
+
+setLogVerbosity("error")
 
 SplashScreen.preventAutoHideAsync()
 
@@ -24,9 +29,12 @@ SplashScreen.setOptions({
 
 Notifications.setNotificationHandler({
     handleNotification: async () => ({
-        shouldShowAlert: true,
         shouldPlaySound: false,
         shouldSetBadge: false,
+        shouldShowAlert: true,
+        shouldShowBanner: true,
+        shouldShowList: true,
+        priority: Notifications.AndroidNotificationPriority.HIGH,
     }),
 })
 
@@ -38,7 +46,6 @@ const withToken = setContext(async () => {
 
         return { token }
     } catch (error) {
-        console.log("Error reading token:", error)
         return { token: "" }
     }
 })
@@ -69,19 +76,21 @@ const apolloClient = new ApolloClient({
 
 export default function App() {
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: Colors.primary }}>
+        <SafeAreaProvider style={{ flex: 1, backgroundColor: Colors.primary }}>
             <ErrorBoundary>
                 <GestureHandlerRootView style={{ flex: 1 }}>
                     <ThemeContextProvider>
-                        <ApolloProvider client={apolloClient}>
-                            <Provider store={store}>
-                                <StatusBar backgroundColor={Colors.primary} />
-                                <Navigation />
-                            </Provider>
-                        </ApolloProvider>
+                        <ScrollYContextProvider>
+                            <ApolloProvider client={apolloClient}>
+                                <Provider store={store}>
+                                    <StatusBar backgroundColor={Colors.primary} />
+                                    <Navigation />
+                                </Provider>
+                            </ApolloProvider>
+                        </ScrollYContextProvider>
                     </ThemeContextProvider>
                 </GestureHandlerRootView>
             </ErrorBoundary>
-        </SafeAreaView>
+        </SafeAreaProvider>
     )
 }

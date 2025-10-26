@@ -4,40 +4,47 @@ import throttle from "@/utils/functions/throttle"
 import { AntDesign } from "@expo/vector-icons"
 import { useNavigation } from "@react-navigation/native"
 import Color from "color"
-import { BlurView } from "expo-blur"
 import { memo, ReactNode, useMemo } from "react"
 import { StyleProp, StyleSheet, TextStyle, View, ViewStyle } from "react-native"
 import Haptic from "react-native-haptic-feedback"
 import Ripple from "react-native-material-ripple"
-import Animated, {
-    Extrapolation,
-    interpolate,
-    interpolateColor,
-    SharedValue,
-    useAnimatedProps,
-    useAnimatedStyle,
-} from "react-native-reanimated"
+import Animated, { Extrapolation, interpolate, SharedValue, useAnimatedStyle } from "react-native-reanimated"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import AnimatedNumber from "../AnimatedNumber"
 import IconButton from "../IconButton/IconButton"
+import { GlassContainer } from "expo-glass-effect"
+import { LinearGradient } from "expo-linear-gradient"
+import GlassView from "../GlassView"
+import { ContextMenu, Host, Button as SwiftUIButton } from "@expo/ui/swift-ui"
 
 const AnimatedRipple = Animated.createAnimatedComponent(Ripple)
 
-const AnimatedBlur = Animated.createAnimatedComponent(BlurView)
-
 const THRESHOLD = 200
 
+export interface HeaderItem {
+    onPress: () => void
+    icon: React.ReactNode
+    style?: StyleProp<ViewStyle>
+
+    standalone?: boolean
+
+    contextMenu?: {
+        items: {
+            title: string
+            systemImage?: any
+            onPress: () => void
+            destructive?: boolean
+        }[]
+    }
+}
+
 interface HeaderProps {
-    buttons?: {
-        onPress: () => void
-        icon: JSX.Element | React.ReactNode
-        style?: StyleProp<ViewStyle>
-    }[]
+    buttons?: (HeaderItem | undefined)[]
     title?: string
     goBack?: boolean
     titleAnimatedStyle?: StyleProp<TextStyle>
-    backIcon?: JSX.Element
-    children?: JSX.Element
+    backIcon?: React.ReactNode
+    children?: React.ReactNode
     containerStyle?: StyleProp<ViewStyle>
     scrollY?: SharedValue<number>
     animated?: boolean
@@ -74,7 +81,7 @@ interface HeaderProps {
     /**
      * This is used to render an animated item below the header.
      */
-    renderAnimatedItem?: (props: { scrollY: SharedValue<number> | undefined }) => JSX.Element | ReactNode | null
+    renderAnimatedItem?: (props: { scrollY: SharedValue<number> | undefined }) => ReactNode | null
     /**
      * For screen modals, this will adjust the header
      */
@@ -92,46 +99,50 @@ interface HeaderProps {
     initialTitleFontSize?: number
 }
 
-const blurOverlayColor = Color(Colors.primary).alpha(0.1).toString()
-
 function Header(props: HeaderProps) {
     const insets = useSafeAreaInsets()
     const navigation = useNavigation()
-
-    const animatedBlurProps = useAnimatedProps(() => {
-        "worklet"
-        const scrollValue = Math.max(0, Math.min(props.scrollY?.value || 0, THRESHOLD))
-        return {
-            intensity: interpolate(scrollValue, [0, THRESHOLD], [0, 80], Extrapolation.CLAMP),
-        }
-    }, [props.scrollY])
-
-    const animatedBlurStyle = useAnimatedStyle(() => {
-        "worklet"
-        const scrollValue = Math.max(0, Math.min(props.scrollY?.value || 0, THRESHOLD))
-        return {
-            backgroundColor: interpolateColor(
-                scrollValue,
-                [0, THRESHOLD],
-                ["rgba(0,0,0,0.0)", blurOverlayColor],
-                "RGB",
-            ),
-        }
-    }, [props.scrollY])
 
     const memodRenderItem = useMemo(() => {
         return props.renderAnimatedItem?.({ scrollY: props.scrollY })
     }, [props.renderAnimatedItem])
 
+    const standaloneButtons = useMemo(() => {
+        {
+            return (props.buttons || []).filter(Boolean).filter((button) => button!.standalone)
+        }
+    }, [props.buttons])
+
+    const regularButtons = useMemo(() => {
+        {
+            return (props.buttons || []).filter(Boolean).filter((button) => !button!.standalone)
+        }
+    }, [props.buttons])
+
     return (
-        <AnimatedBlur tint="dark" animatedProps={animatedBlurProps} style={[styles.blurContainer]}>
-            <Animated.View style={[animatedBlurStyle, { position: "relative" }]}>
+        <GlassContainer style={[styles.blurContainer]}>
+            <LinearGradient
+                colors={[
+                    Color("#000").alpha(0.8).toString(),
+                    Color(Colors.primary).alpha(0.6).toString(),
+                    Color(Colors.primary).alpha(0.15).toString(),
+                    "transparent",
+                ]}
+                style={{
+                    position: "absolute",
+                    top: 0,
+                    width: Layout.screen.width,
+                    height: 300,
+                }}
+                pointerEvents="none"
+            />
+            <Animated.View style={{ position: "relative" }}>
                 <View
                     style={[
                         {
                             flexDirection: "row",
                             paddingHorizontal: 15,
-                            justifyContent: "space-between",
+                            justifyContent: props.goBack || props.title ? "space-between" : "flex-end",
                             alignItems: "center",
                         },
                         {
@@ -142,13 +153,19 @@ function Header(props: HeaderProps) {
                     ]}
                 >
                     {props.goBack && (
-                        <IconButton
-                            onPress={throttle(() => {
-                                Haptic.trigger("impactLight")
-                                navigation.canGoBack() && navigation.goBack()
-                            }, 250)}
-                            icon={props.backIcon || <AntDesign name="arrowleft" size={24} color={Colors.foreground} />}
-                        />
+                        <GlassView style={styles.iconContainer}>
+                            <IconButton
+                                onPress={throttle(() => {
+                                    Haptic.trigger("impactLight")
+                                    navigation.canGoBack() && navigation.goBack()
+                                }, 250)}
+                                icon={
+                                    props.backIcon || (
+                                        <AntDesign name="arrow-left" size={20} color={Colors.foreground} />
+                                    )
+                                }
+                            />
+                        </GlassView>
                     )}
 
                     {props.titleAnimatedStyle && props.title && (
@@ -159,28 +176,79 @@ function Header(props: HeaderProps) {
 
                     {props.children}
 
-                    <Animated.View style={styles.iconContainer}>
-                        {(props.buttons || []).map((button, index) => (
-                            <IconButton
-                                style={button.style}
-                                key={index}
-                                onPress={throttle(() => {
-                                    button.onPress()
-                                    Haptic.trigger("impactLight")
-                                }, 250)}
-                                icon={button.icon}
-                            />
+                    <View style={{ borderRadius: 100, overflow: "hidden", flexDirection: "row", gap: 10 }}>
+                        {standaloneButtons.map((button, index) => (
+                            <View key={index} style={{ overflow: "hidden", borderRadius: 100 }}>
+                                <GlassView style={styles.iconContainer}>
+                                    <HeaderIconButton button={button!} index={index} />
+                                </GlassView>
+                            </View>
                         ))}
-                    </Animated.View>
+
+                        <GlassView style={styles.iconContainer}>
+                            {(regularButtons || []).map((button, index) => {
+                                return <HeaderIconButton key={index} button={button!} index={index} />
+                            })}
+                        </GlassView>
+                    </View>
                 </View>
 
                 {props.renderAnimatedItem && memodRenderItem}
 
                 {(props.animatedTitle || props.animatedValue !== undefined) && <AnimatedContent {...props} />}
             </Animated.View>
-        </AnimatedBlur>
+        </GlassContainer>
     )
 }
+
+const HeaderIconButton = memo(({ button, index }: { button: HeaderItem; index: number }) => {
+    if (button.contextMenu) {
+        return (
+            <Host>
+                <ContextMenu activationMethod="singlePress">
+                    <ContextMenu.Items>
+                        {button.contextMenu.items.map((item, itemIndex) => (
+                            <SwiftUIButton
+                                key={itemIndex}
+                                systemImage={item.systemImage}
+                                onPress={() => {
+                                    item.onPress?.()
+                                    Haptic.trigger("impactLight")
+                                }}
+                                role={item.destructive ? "destructive" : "default"}
+                                variant="glass"
+                            >
+                                {item.title}
+                            </SwiftUIButton>
+                        ))}
+                    </ContextMenu.Items>
+                    <ContextMenu.Trigger>
+                        <IconButton
+                            style={button.style}
+                            onPress={throttle(() => {
+                                button.onPress()
+                                Haptic.trigger("impactLight")
+                            }, 250)}
+                            icon={button.icon}
+                        />
+                    </ContextMenu.Trigger>
+                </ContextMenu>
+            </Host>
+        )
+    } else {
+        return (
+            <IconButton
+                style={button.style}
+                key={index}
+                onPress={throttle(() => {
+                    button.onPress()
+                    Haptic.trigger("impactLight")
+                }, 250)}
+                icon={button.icon}
+            />
+        )
+    }
+})
 
 const AnimatedContent = memo(
     ({ isScreenModal = false, initialTitleFontSize = 60, initialNumberOfLines = 10, ...props }: HeaderProps) => {
@@ -289,12 +357,16 @@ const AnimatedContent = memo(
 )
 
 const styles = StyleSheet.create({
+    glassButton: {
+        borderRadius: 100,
+        padding: 10,
+    },
     iconContainer: {
-        flex: 1,
-        justifyContent: "flex-end",
         flexDirection: "row",
-        gap: 10,
+        gap: 8,
         zIndex: 250,
+        padding: 10,
+        borderRadius: 1000,
     },
     animatedTitle: {
         color: Colors.foreground,

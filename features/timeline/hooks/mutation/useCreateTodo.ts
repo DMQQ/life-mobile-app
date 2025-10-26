@@ -15,6 +15,11 @@ const useCreateTodo = (timelineId: string) => {
                     isCompleted
                     createdAt
                     modifiedAt
+                    files {
+                        id
+                        type
+                        url
+                    }
                 }
             }
         `,

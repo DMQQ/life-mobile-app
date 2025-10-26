@@ -6,7 +6,14 @@ import { AntDesign, Feather } from "@expo/vector-icons"
 import Color from "color"
 import { useCallback, useMemo, useState } from "react"
 import { StyleSheet, View } from "react-native"
-import Animated, { Extrapolation, interpolate, SharedValue, useAnimatedStyle } from "react-native-reanimated"
+import Animated, {
+    Extrapolation,
+    interpolate,
+    SharedValue,
+    useAnimatedScrollHandler,
+    useAnimatedStyle,
+    useSharedValue,
+} from "react-native-reanimated"
 import FileList from "../components/FileList"
 import LoaderSkeleton from "../components/LoaderSkeleton"
 import TimelineTodos from "../components/TimelineTodos"
@@ -63,7 +70,13 @@ export default function TimelineDetails({
     const { data, loading } = useGetTimelineById(route.params.timelineId)
     const [completeTimeline] = useCompleteTimeline(route.params.timelineId)
 
-    const [scrollY, onScroll] = useTrackScroll()
+    const scrollY = useSharedValue(0)
+
+    const onScroll = useAnimatedScrollHandler({
+        onScroll: (ev) => {
+            scrollY.value = ev.contentOffset.y
+        },
+    })
 
     const onFabPress = () => {
         ;(navigation as any).navigate("TimelineCreate", {
@@ -80,6 +93,7 @@ export default function TimelineDetails({
                 onPress: () => {
                     setSelectedEventForDeletion(data)
                 },
+                standalone: true,
             },
             {
                 icon: <Feather name="edit-2" size={20} color={Colors.foreground} />,
@@ -88,7 +102,7 @@ export default function TimelineDetails({
             {
                 icon: (
                     <AntDesign
-                        name={data?.isCompleted ? "check" : "loading1"}
+                        name={data?.isCompleted ? "check" : "check-circle"}
                         color={data?.isCompleted ? Colors.secondary : Colors.foreground}
                         size={20}
                     />
@@ -127,13 +141,13 @@ export default function TimelineDetails({
                 animated={true}
                 animatedTitle={capitalize(data?.title)}
                 buttons={buttons}
-                renderAnimatedItem={renderAnimatedItem}
+                // renderAnimatedItem={renderAnimatedItem}
                 initialTitleFontSize={data?.title?.length > 25 ? 40 : 50}
             />
             <Animated.ScrollView
                 keyboardDismissMode={"on-drag"}
                 style={{ padding: 15 }}
-                contentContainerStyle={{ paddingBottom: 50, paddingTop: 225 }}
+                contentContainerStyle={{ paddingBottom: 50, paddingTop: 225 + data?.title?.length * 3 }}
                 onScroll={onScroll}
                 showsVerticalScrollIndicator={false}
             >

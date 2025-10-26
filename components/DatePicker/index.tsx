@@ -1,23 +1,28 @@
 import Colors from "@/constants/Colors"
 import moment from "moment"
 import { ReactElement, useEffect, useRef, useState } from "react"
-import { View } from "react-native"
 import { Calendar } from "react-native-calendars"
 import ChipButton from "../ui/Button/ChipButton"
 import FloatingMenu, { FloatingMenuRef } from "../ui/FloatingMenu"
+import Color from "color"
+import GlassView from "../ui/GlassView"
 
 const theme = {
-    backgroundColor: Colors.primary_lighter,
-    calendarBackground: Colors.primary_lighter,
-    dayTextColor: Colors.foreground,
-    textDisabledColor: "#5e5e5e",
-    monthTextColor: Colors.secondary,
+    backgroundColor: "transparent",
+    calendarBackground: "transparent",
+    dayTextColor: "#FFFFFF",
+    textDisabledColor: "#666666",
+    monthTextColor: "#FFFFFF",
     textMonthFontSize: 16,
-    textMonthFontWeight: "600",
-    selectedDayBackgroundColor: Colors.ternary,
-    arrowColor: Colors.secondary,
+    textMonthFontWeight: "600" as const,
+    selectedDayBackgroundColor: Colors.secondary,
+    selectedDayTextColor: "#FFFFFF",
+    todayTextColor: Colors.secondary,
+    arrowColor: "#FFFFFF",
     textDayFontSize: 14,
     textDayHeaderFontSize: 12,
+    textDayHeaderFontWeight: "500" as const,
+    textSectionTitleColor: "#999999",
 }
 
 interface DatePickerProps {
@@ -51,7 +56,7 @@ export default function DatePicker({
         } else {
             updateSelectedRange(dates.start, dates.end)
         }
-        // Reset selection state when dates change externally
+
         setSelecting(null)
         setTempStartDate(null)
     }, [dates, mode])
@@ -69,12 +74,10 @@ export default function DatePicker({
         }
 
         if (!selecting || selecting === "start") {
-            // First date selection - store temporarily
             setTempStartDate(selectedDate)
             updateSelectedRange(selectedDate, selectedDate)
             setSelecting("end")
         } else {
-            // Second date selection - now call setDates with both dates
             const startDate = moment(tempStartDate!)
             const endDate = moment(selectedDate)
 
@@ -108,7 +111,7 @@ export default function DatePicker({
                 selected: true,
                 startingDay: true,
                 endingDay: true,
-                color: Colors.ternary,
+                color: Colors.secondary,
             }
         } else {
             let current = startMoment.clone()
@@ -118,7 +121,7 @@ export default function DatePicker({
                     selected: true,
                     startingDay: current.isSame(startMoment),
                     endingDay: current.isSame(endMoment),
-                    color: Colors.ternary,
+                    color: Colors.secondary,
                 }
                 current.add(1, "day")
             }
@@ -134,7 +137,6 @@ export default function DatePicker({
             return moment(dates.start).format("DD.MM.YYYY")
         }
 
-        // If we're in the middle of selecting a period, show temp start date
         if (selecting === "end" && tempStartDate) {
             return `${moment(tempStartDate).format("DD.MM")} - ...`
         }
@@ -152,10 +154,9 @@ export default function DatePicker({
             menuWidth={320}
             menuHeight={380}
             menuContent={
-                <View
+                <GlassView
                     style={{
-                        backgroundColor: Colors.primary_lighter,
-                        padding: 8,
+                        padding: 5,
                         borderRadius: 20,
                         overflow: "hidden",
                     }}
@@ -166,16 +167,16 @@ export default function DatePicker({
                         markingType={mode === "single" ? "simple" : "period"}
                         theme={theme}
                         style={{
-                            borderRadius: 12,
+                            borderRadius: 15,
                         }}
                     />
-                </View>
+                </GlassView>
             }
         >
             {typeof buttonComponent === "function" ? (
                 buttonComponent({ start: dates.start, end: dates.end })
             ) : (
-                <ChipButton icon="clockcircleo">{getDisplayText()}</ChipButton>
+                <ChipButton icon="clock-circle">{getDisplayText()}</ChipButton>
             )}
         </FloatingMenu>
     )

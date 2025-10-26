@@ -1,6 +1,6 @@
 import DeleteGoalsGroupDialog from "@/components/ui/Dialog/Delete/DeleteGoalsDialog"
-import AnimatedHeaderSearch from "@/components/ui/Header/AnimatedHeaderSearch"
 import Header from "@/components/ui/Header/Header"
+import { useScreenSearch } from "@/utils/hooks/useScreenSearch"
 import Colors from "@/constants/Colors"
 import { AntDesign } from "@expo/vector-icons"
 import { FlashList } from "@shopify/flash-list"
@@ -8,6 +8,7 @@ import { useState } from "react"
 import { RefreshControl, View } from "react-native"
 import Feedback from "react-native-haptic-feedback"
 import Animated, { useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated"
+import useTrackScroll from "@/utils/hooks/ui/useTrackScroll"
 import { GoalCategory } from "../components/GoalCategory"
 import AnimatedLoader from "../components/GoalsLoader"
 import { useGoal } from "../hooks/hooks"
@@ -17,16 +18,7 @@ const AnimatedFlashList = Animated.createAnimatedComponent(FlashList)
 export default function Goals({ navigation }: any) {
     const { goals, loading, refetchGoals } = useGoal()
 
-    const scrollY = useSharedValue(0)
-
-    const onAnimatedScrollHandler = useAnimatedScrollHandler(
-        {
-            onScroll(event) {
-                scrollY.value = event.contentOffset.y
-            },
-        },
-        [],
-    )
+    const [scrollY, onAnimatedScrollHandler] = useTrackScroll({ screenName: "GoalsScreens" })
 
     const [selectedGroupForDeletion, setSelectedGroupForDeletion] = useState<{ id: string; name: string } | null>(null)
 
@@ -41,6 +33,9 @@ export default function Goals({ navigation }: any) {
     }
 
     const [query, setQuery] = useState("")
+    
+    // Register search functionality
+    useScreenSearch(setQuery)
 
     return (
         <View style={{ flex: 1 }}>
@@ -56,9 +51,6 @@ export default function Goals({ navigation }: any) {
                         icon: <AntDesign name="plus" size={20} color={Colors.foreground} />,
                     },
                 ]}
-                renderAnimatedItem={(props) => (
-                    <AnimatedHeaderSearch buttonsCount={1} {...props} filterValue={query} setFilterValue={setQuery} />
-                )}
             />
             <AnimatedFlashList
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}

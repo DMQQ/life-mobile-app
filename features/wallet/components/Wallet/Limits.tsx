@@ -119,7 +119,6 @@ export default function WalletLimits({ navigation }: { navigation: any }) {
         return budgetStatus
     }, [walletData, statistics, selectedRange])
 
-
     const handleRangeChange = (range: any) => {
         Feedback.trigger("impactLight")
         setSelectedRange(range)
@@ -192,7 +191,6 @@ export default function WalletLimits({ navigation }: { navigation: any }) {
                         const percentage = Math.min(100, (limit.current / limit.amount) * 100)
                         const isOverLimit = limit.current > limit.amount
 
-                        // Pick a color from secondary_candidates based on index
                         const color = secondary_candidates[index % secondary_candidates.length]
 
                         const isSelected =
@@ -222,9 +220,9 @@ export default function WalletLimits({ navigation }: { navigation: any }) {
                                     style={[
                                         styles.limitCard,
                                         {
-                                            backgroundColor: lowOpacity(iconData.backgroundColor || color, 0.15),
+                                            backgroundColor: lowOpacity(iconData.backgroundColor || color, 0.1),
                                             borderWidth: 1,
-                                            borderColor: lowOpacity(iconData.backgroundColor || color, 0.25),
+                                            borderColor: lowOpacity(iconData.backgroundColor || color, 0.15),
                                             flexDirection: compactMode ? "column" : "row",
                                             padding: compactMode ? 15 : 22.5,
                                         },
@@ -260,9 +258,9 @@ export default function WalletLimits({ navigation }: { navigation: any }) {
                                             }}
                                         >
                                             {limit.current > prevMap[limit.category] ? (
-                                                <AntDesign name="arrowup" size={12} color={lightIcon} />
+                                                <AntDesign name="arrow-up" size={12} color={lightIcon} />
                                             ) : (
-                                                <AntDesign name="arrowdown" size={12} color={lightIcon} />
+                                                <AntDesign name="arrow-down" size={12} color={lightIcon} />
                                             )}
                                         </Animated.View>
                                         <CategoryIcon
@@ -325,9 +323,9 @@ export default function WalletLimits({ navigation }: { navigation: any }) {
                                                 numberOfLines={1}
                                             >
                                                 {/* {limit.current > prevMap[limit.category] ? (
-                          <AntDesign name="arrowup" size={12} color={isOverLimit ? "#F07070" : iconData.backgroundColor || color} />
+                          <AntDesign name="arrow-up" size={12} color={isOverLimit ? "#F07070" : iconData.backgroundColor || color} />
                         ) : (
-                          <AntDesign name="arrowdown" size={12} color={isOverLimit ? "#F07070" : iconData.backgroundColor || color} />
+                          <AntDesign name="arrow-down" size={12} color={isOverLimit ? "#F07070" : iconData.backgroundColor || color} />
                         )} */}
                                                 {((limit.current / limit.amount) * 100).toFixed(0)}%
                                             </Text>
@@ -349,7 +347,6 @@ export default function WalletLimits({ navigation }: { navigation: any }) {
                     scale={0.75}
                 />
             </View>
-
         </Animated.View>
     )
 }

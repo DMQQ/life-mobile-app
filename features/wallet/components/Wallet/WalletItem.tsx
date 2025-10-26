@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
 
     date: {
         color: "rgba(255,255,255,0.65)",
-        fontSize: 11,
+        fontSize: 10,
         marginLeft: 10,
         lineHeight: 16,
         fontWeight: "500",
@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
         padding: 0,
         borderRadius: 20,
         marginTop: 15,
-        paddingHorizontal: 19,
+        paddingHorizontal: 15,
     },
 })
 
@@ -149,7 +149,7 @@ export default function WalletItem(
             disabled={isBalanceEdit}
             onPress={() => item.handlePress()}
         >
-            <View style={{ flexDirection: "row", height: 50 }}>
+            <View style={{ flexDirection: "row", height: 40 }}>
                 <CategoryIcon
                     style={{ padding: 0 }}
                     type={item.type as "income" | "expense" | "refunded"}

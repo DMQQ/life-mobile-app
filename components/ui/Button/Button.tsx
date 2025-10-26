@@ -87,7 +87,11 @@ export default function Button({
             {...rest}
         >
             {/* {!!badge && <Badge amount={badge} left />} */}
-            {typeof children !== "undefined" && <Text variant="body" style={[styles.text, textStyle, fontStyle]}>{children}</Text>}
+            {typeof children !== "undefined" && (
+                <Text variant="body" style={[styles.text, textStyle, fontStyle]}>
+                    {children}
+                </Text>
+            )}
             <View style={iconStyle}>{icon}</View>
         </Ripple>
     )

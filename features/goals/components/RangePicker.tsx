@@ -17,9 +17,7 @@ const ValuePicker = ({ label, value, min, max, step, onChange }: ValuePickerProp
   const [inputValue, setInputValue] = useState(value.toString());
 
   const increment = () => {
-    if (value + step <= max) {
-      onChange(value + step);
-    }
+    onChange(value + step);
   };
 
   const decrement = () => {
@@ -32,7 +30,7 @@ const ValuePicker = ({ label, value, min, max, step, onChange }: ValuePickerProp
   const bigStep = Math.max(step * 5, Math.floor((max - min) / 20));
 
   const incrementBig = () => {
-    const newValue = Math.min(max, value + bigStep);
+    const newValue = value + bigStep;
     onChange(newValue);
   };
 
@@ -55,8 +53,8 @@ const ValuePicker = ({ label, value, min, max, step, onChange }: ValuePickerProp
       return;
     }
 
-    // Clamp value between min and max
-    newValue = Math.max(min, Math.min(max, newValue));
+    // Ensure value is at least min, but allow exceeding max for flexibility
+    newValue = Math.max(min, newValue);
 
     // Update the value
     onChange(newValue);
@@ -94,22 +92,22 @@ const ValuePicker = ({ label, value, min, max, step, onChange }: ValuePickerProp
               keyboardType="numeric"
               selectTextOnFocus
               autoFocus
-              maxLength={String(max).length}
+              maxLength={8}
             />
           ) : (
             <Text style={styles.valueText}>{value}</Text>
           )}
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.pickerButton} onPress={increment} disabled={value >= max}>
-          <MaterialCommunityIcons name="chevron-right" size={24} color={value >= max ? "rgba(255,255,255,0.3)" : "rgba(255,255,255,0.9)"} />
+        <TouchableOpacity style={styles.pickerButton} onPress={increment}>
+          <MaterialCommunityIcons name="chevron-right" size={24} color="rgba(255,255,255,0.9)" />
         </TouchableOpacity>
 
-        <TouchableOpacity style={[styles.pickerButton, styles.pickerButtonBig]} onPress={incrementBig} disabled={value >= max}>
+        <TouchableOpacity style={[styles.pickerButton, styles.pickerButtonBig]} onPress={incrementBig}>
           <MaterialCommunityIcons
             name="chevron-double-right"
             size={24}
-            color={value >= max ? "rgba(255,255,255,0.3)" : "rgba(255,255,255,0.9)"}
+            color="rgba(255,255,255,0.9)"
           />
         </TouchableOpacity>
       </View>
@@ -121,7 +119,7 @@ const RangePickers = ({
   minValue,
   targetValue,
   onTargetChange,
-  max = 100,
+  max = 10000,
   step = 1,
   unit = "",
 }: {

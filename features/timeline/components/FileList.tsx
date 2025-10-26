@@ -60,10 +60,10 @@ const useUploadFiles = (timelineId: string, refetch: () => Promise<any>) => {
         try {
             setLoading(true)
 
-            const { data } = await axios.post(Url.API + "/upload", formData, {
+            const { data } = await axios.post(Url.API + "/upload/multiple", formData, {
                 params: {
                     type: "timeline",
-                    timelineId: timelineId,
+                    entityId: timelineId,
                 },
                 headers: {
                     "Content-Type": "multipart/form-data",
@@ -108,7 +108,7 @@ export default function FileList({ timelineId }: FileListProps) {
     const { data, refetch } = useGetTimelineById(timelineId)
 
     async function removePhoto(photoId: string) {
-        await axios.delete(Url.API + "/upload/" + photoId)
+        await axios.delete(Url.API + "/upload/timeline/" + photoId)
         await refetch()
     }
 

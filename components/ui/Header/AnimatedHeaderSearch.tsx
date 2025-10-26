@@ -12,6 +12,7 @@ import Animated, {
     SharedValue,
     useAnimatedStyle,
 } from "react-native-reanimated"
+import GlassView from "../GlassView"
 
 interface AnimatedSearchInputProps {
     scrollY?: SharedValue<number>
@@ -56,7 +57,7 @@ const AnimatedSearchInput = ({
         const scrollValue = scrollY?.value ?? 0
 
         return {
-            opacity: interpolate(scrollValue, [0, 40, 120, 160], [1, 0, 0, 1], Extrapolation.CLAMP),
+            opacity: interpolate(scrollValue, [0, 160], [0, 1], Extrapolation.CLAMP),
             transform: [
                 {
                     translateY: interpolate(scrollValue, [0, 160], [-55, 0], Extrapolation.CLAMP),
@@ -84,6 +85,7 @@ const AnimatedSearchInput = ({
                       ["rgba(255,255,255,0.0)", "rgba(255,255,255,0.15)"],
                       "RGB",
                   ),
+            borderRadius: 100,
         }
     })
 
@@ -107,6 +109,7 @@ const AnimatedSearchInput = ({
                     paddingBottom: 10,
                     flexDirection: "row",
                     gap: 10,
+                    borderRadius: 100,
                 },
                 animatedStyle,
             ]}
@@ -117,43 +120,51 @@ const AnimatedSearchInput = ({
                         flex: 1,
                         position: "relative",
                         flexDirection: "row",
-                        padding: 5,
-                        borderRadius: 15,
-                        borderWidth: 1,
+                        borderRadius: 100,
+                        overflow: "hidden",
                     },
                     AnimatedBackgroundStyle,
                 ]}
             >
-                {onFiltersPress && (
-                    <IconButton
-                        icon={<Ionicons name="options" size={24} color={Colors.foreground} />}
-                        onPress={onFiltersPress}
+                <GlassView
+                    style={{
+                        flex: 1,
+                        flexDirection: "row",
+                        borderRadius: 100,
+                        padding: 10,
+                    }}
+                >
+                    {onFiltersPress && (
+                        <IconButton
+                            icon={<Ionicons name="options" size={24} color={Colors.foreground} />}
+                            onPress={onFiltersPress}
+                        />
+                    )}
+                    <TextInput
+                        value={value}
+                        onChangeText={setValue}
+                        style={{ fontSize: 15, flex: 1, color: Colors.foreground, paddingHorizontal: 10 }}
+                        onEndEditing={onSubmit}
+                        onSubmitEditing={onSubmit}
+                        onFocus={() => setIsFocused(true)}
+                        onBlur={() => setIsFocused(false)}
                     />
-                )}
-                <TextInput
-                    value={value}
-                    onChangeText={setValue}
-                    style={{ fontSize: 15, flex: 1, color: Colors.foreground, paddingHorizontal: 10 }}
-                    onEndEditing={onSubmit}
-                    onSubmitEditing={onSubmit}
-                    onFocus={() => setIsFocused(true)}
-                    onBlur={() => setIsFocused(false)}
-                />
-                {filterValue === value && (filterValue.trim() !== "" || value !== "") ? (
-                    <IconButton
-                        icon={<AntDesign name="close" size={20} color={Colors.foreground} />}
-                        onPress={() => {
-                            Haptics.trigger("impactLight")
-                            setValue("")
-                            setFilterValue("")
-                        }}
-                    />
-                ) : (
-                    <IconButton
-                        icon={<AntDesign name="search1" size={20} color={Colors.foreground} />}
-                        onPress={onSubmit}
-                    />
-                )}
+                    {filterValue === value && (filterValue.trim() !== "" || value !== "") ? (
+                        <IconButton
+                            icon={<AntDesign name="close" size={20} color={Colors.foreground} />}
+                            onPress={() => {
+                                Haptics.trigger("impactLight")
+                                setValue("")
+                                setFilterValue("")
+                            }}
+                        />
+                    ) : (
+                        <IconButton
+                            icon={<AntDesign name="search" size={20} color={Colors.foreground} />}
+                            onPress={onSubmit}
+                        />
+                    )}
+                </GlassView>
             </Animated.View>
         </Animated.View>
     )

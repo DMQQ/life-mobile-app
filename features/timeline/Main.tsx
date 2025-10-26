@@ -9,6 +9,7 @@ import Timeline from "./pages/Timeline"
 import CreateTimeLineEventModal from "./pages/TimelineCreate"
 import TimelineDetails from "./pages/TimelineDetails"
 import TodosTransferModal from "./pages/TodosTransferModal"
+import CopyTimelineModal from "./pages/CopyTimelineModal"
 import type { TimelineRootStack as RootStackParamList } from "./types"
 
 const Stack = createNativeStackNavigator<RootStackParamList>()
@@ -61,6 +62,7 @@ export default function TimelineScreens({ route, navigation }: RootStackScreenPr
                     headerTitle: "",
                     headerTransparent: true,
                     presentation: "transparentModal",
+                    animation: "fade",
                 }}
                 name="ImagesPreview"
                 component={ImagesPreview}
@@ -84,6 +86,14 @@ export default function TimelineScreens({ route, navigation }: RootStackScreenPr
             <Stack.Screen
                 name="TodosTransferModal"
                 component={TodosTransferModal}
+                options={{
+                    headerShown: false,
+                    presentation: "modal",
+                }}
+            />
+            <Stack.Screen
+                name="CopyTimelineModal"
+                component={CopyTimelineModal}
                 options={{
                     headerShown: false,
                     presentation: "modal",

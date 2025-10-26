@@ -670,10 +670,11 @@ export const CategoryIcon = (props: {
                     },
                 ]}
             >
-                {React.cloneElement(Icons[category]?.icon, {
-                    size: props.size || 20,
-                    style: [styles.clonedIcon, { shadowColor: backgroundColor ?? "#000" }],
-                })}
+                {Icons[category]?.icon &&
+                    React.cloneElement(Icons[category]?.icon, {
+                        size: props.size || 20,
+                        style: [styles.clonedIcon, { shadowColor: backgroundColor ?? "#000" }],
+                    })}
             </View>
         </View>
     )
