@@ -84,15 +84,17 @@ export default function TimelineItem(
                 </View>
                 <View style={styles.contentRow}>
                     <View style={styles.contentContainer}>
-                        <Text
-                            numberOfLines={2}
-                            style={[
-                                timelineStyles.itemDescription,
-                                timeline.textColor && { color: timeline.textColor },
-                            ]}
-                        >
-                            {timeline.description}
-                        </Text>
+                        {!!timeline.description && (
+                            <Text
+                                numberOfLines={2}
+                                style={[
+                                    timelineStyles.itemDescription,
+                                    timeline.textColor && { color: timeline.textColor },
+                                ]}
+                            >
+                                {timeline.description}
+                            </Text>
+                        )}
 
                         <TodosPreviewSection
                             todos={timeline.todos}

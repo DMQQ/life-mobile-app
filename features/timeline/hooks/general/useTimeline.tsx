@@ -52,7 +52,7 @@ export default function useTimeline({ route, navigation }: TimelineScreenProps<"
         [selected],
     )
 
-    const [switchView, setSwitchView] = useState<"date-list" | "calendar" | "timeline">("timeline")
+    const [switchView, setSwitchView] = useState<"date-list" | "calendar" | "timeline">("date-list")
 
     const onViewToggle = useCallback(() => {
         const views = ["date-list", "timeline"]

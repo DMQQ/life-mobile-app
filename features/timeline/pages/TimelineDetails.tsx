@@ -147,7 +147,7 @@ export default function TimelineDetails({
             <Animated.ScrollView
                 keyboardDismissMode={"on-drag"}
                 style={{ padding: 15 }}
-                contentContainerStyle={{ paddingBottom: 50, paddingTop: 225 }}
+                contentContainerStyle={{ paddingBottom: 50, paddingTop: 225 + data?.title?.length * 3 }}
                 onScroll={onScroll}
                 showsVerticalScrollIndicator={false}
             >

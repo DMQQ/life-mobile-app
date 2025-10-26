@@ -153,7 +153,7 @@ function Header(props: HeaderProps) {
                     ]}
                 >
                     {props.goBack && (
-                        <GlassView style={styles.glassButton}>
+                        <GlassView style={styles.iconContainer}>
                             <IconButton
                                 onPress={throttle(() => {
                                     Haptic.trigger("impactLight")
@@ -161,7 +161,7 @@ function Header(props: HeaderProps) {
                                 }, 250)}
                                 icon={
                                     props.backIcon || (
-                                        <AntDesign name="arrow-left" size={24} color={Colors.foreground} />
+                                        <AntDesign name="arrow-left" size={20} color={Colors.foreground} />
                                     )
                                 }
                             />

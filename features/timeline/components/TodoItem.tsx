@@ -2,7 +2,7 @@ import { Card } from "@/components"
 import Checkbox from "@/components/ui/Checkbox"
 import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
-import { Todos } from "@/types"
+import { TodoFile, Todos } from "@/types"
 import dayjs from "dayjs"
 import { useRef, useState } from "react"
 import { ActivityIndicator, StyleSheet, View, TouchableOpacity, ScrollView, Alert, Image } from "react-native"
@@ -46,8 +46,9 @@ const styles = StyleSheet.create({
         opacity: 0.6,
     },
     filesContainer: {
-        marginTop: 8,
+        marginTop: 2.5,
         width: "100%",
+        marginLeft: 16,
     },
     fileItem: {
         alignItems: "center",
@@ -216,10 +217,6 @@ export default function TodoItem(todo: Todos & { timelineId: string; index: numb
                 },
             })
 
-            // Debug response and update cache
-            console.log("Upload response:", response.data)
-            
-            // Update cache immediately with the uploaded file
             const uploadedFile = response.data
             if (uploadedFile && uploadedFile.id) {
                 const timelineData = client.readQuery({
@@ -249,12 +246,11 @@ export default function TodoItem(todo: Todos & { timelineId: string; index: numb
                         },
                     })
                 }
-                
+
                 Haptic.trigger("impactLight")
                 return // Skip the refetch since we updated cache directly
             }
-            
-            // Fallback: Refetch the specific todo to get updated files
+
             const { data: updatedTodo } = await client.query({
                 query: gql`
                     query GetTodo($id: ID!) {
@@ -272,10 +268,9 @@ export default function TodoItem(todo: Todos & { timelineId: string; index: numb
                     }
                 `,
                 variables: { id: todo.id },
-                fetchPolicy: 'network-only'
+                fetchPolicy: "network-only",
             })
 
-            // Update cache with the refetched todo data
             if (updatedTodo?.timelineTodo) {
                 const timelineData = client.readQuery({
                     query: GET_TIMELINE,
@@ -350,6 +345,7 @@ export default function TodoItem(todo: Todos & { timelineId: string; index: numb
         <Card animated entering={FadeInDown.delay(todo.index * 50)} exiting={FadeOutDown} style={{ marginBottom: 15 }}>
             <View style={styles.todoCard}>
                 <TouchableOpacity
+                    activeOpacity={0.9}
                     style={{ flexDirection: "row", alignItems: "center", flex: 1 }}
                     onLongPress={handleRemoveTodo}
                     onPress={handleToggleComplete}
@@ -374,6 +370,12 @@ export default function TodoItem(todo: Todos & { timelineId: string; index: numb
                             {todo.title.trim()}
                         </Text>
 
+                        <FilesList
+                            files={todo.files || []}
+                            handleShowPreview={handleShowPreview}
+                            handleRemoveFile={handleRemoveFile}
+                        />
+
                         <Text
                             variant="caption"
                             color={Colors.text_dark}
@@ -388,44 +390,50 @@ export default function TodoItem(todo: Todos & { timelineId: string; index: numb
                     <Ionicons name="attach" size={24} color={"#fff"} />
                 </TouchableOpacity>
             </View>
-
-            {todo.files && todo.files.length > 0 && (
-                <View style={styles.filesContainer}>
-                    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                        {todo.files.map((file) => (
-                            <TouchableOpacity
-                                key={file.id}
-                                style={styles.fileItem}
-                                onPress={() => {
-                                    if (file.type.startsWith("image/")) {
-                                        handleShowPreview(file)
-                                    } else {
-                                        // TODO: Handle other file types
-                                        console.log("File pressed:", file.url)
-                                    }
-                                }}
-                                onLongPress={() => handleRemoveFile(file.id)}
-                            >
-                                {file.type.startsWith("image/") ? (
-                                    <Image
-                                        source={{ uri: Url.API + "/upload/images/" + file.url }}
-                                        style={styles.fileImage}
-                                        resizeMode="cover"
-                                    />
-                                ) : (
-                                    <View style={styles.fileIcon}>
-                                        <Ionicons
-                                            name={getFileIcon(file.type) as any}
-                                            size={24}
-                                            color={Colors.secondary}
-                                        />
-                                    </View>
-                                )}
-                            </TouchableOpacity>
-                        ))}
-                    </ScrollView>
-                </View>
-            )}
         </Card>
+    )
+}
+
+interface FilesListProps {
+    files: TodoFile[]
+
+    handleShowPreview: (file: any) => void
+
+    handleRemoveFile: (fileId: string) => void
+}
+
+const FilesList = ({ files, handleShowPreview, handleRemoveFile }: FilesListProps) => {
+    return (
+        files &&
+        files.length > 0 && (
+            <View style={styles.filesContainer}>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                    {files.map((file) => (
+                        <TouchableOpacity
+                            key={file.id}
+                            style={styles.fileItem}
+                            onPress={() => {
+                                if (file.type.startsWith("image/")) {
+                                    handleShowPreview(file)
+                                }
+                            }}
+                            onLongPress={() => handleRemoveFile(file.id)}
+                        >
+                            {file.type.startsWith("image/") ? (
+                                <Image
+                                    source={{ uri: Url.API + "/upload/images/" + file.url }}
+                                    style={styles.fileImage}
+                                    resizeMode="cover"
+                                />
+                            ) : (
+                                <View style={styles.fileIcon}>
+                                    <Ionicons name={getFileIcon(file.type) as any} size={24} color={Colors.secondary} />
+                                </View>
+                            )}
+                        </TouchableOpacity>
+                    ))}
+                </ScrollView>
+            </View>
+        )
     )
 }
