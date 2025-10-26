@@ -1,12 +1,9 @@
 import { Card } from "@/components"
-import Checkbox from "@/components/ui/Checkbox"
 import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
 import { TodoFile, Todos } from "@/types"
 import dayjs from "dayjs"
-import { useRef, useState } from "react"
-import { ActivityIndicator, StyleSheet, View, TouchableOpacity, ScrollView, Alert, Image } from "react-native"
-import { useNavigation } from "@react-navigation/native"
+import { StyleSheet, View, TouchableOpacity, ScrollView, Image } from "react-native"
 import Haptic from "react-native-haptic-feedback"
 import { FadeInDown, FadeOutDown } from "react-native-reanimated"
 import useCompleteTodo from "../hooks/mutation/useCompleteTodo"
@@ -14,13 +11,13 @@ import useRemoveTodo from "../hooks/mutation/useRemoveTodo"
 import useAddTodoFile from "../hooks/mutation/useAddTodoFile"
 import useRemoveTodoFile from "../hooks/mutation/useRemoveTodoFile"
 import { Ionicons } from "@expo/vector-icons"
-import * as DocumentPicker from "expo-document-picker"
-import * as ImagePicker from "expo-image-picker"
-import axios from "axios"
 import Url from "@/constants/Url"
 import Color from "color"
-import { gql, useApolloClient } from "@apollo/client"
-import { GET_TIMELINE } from "../hooks/query/useGetTimelineById"
+import { useDoubleTapComplete } from "../hooks/useDoubleTapComplete"
+import { useFileUpload } from "../hooks/useFileUpload"
+import { useFileManagement } from "../hooks/useFileManagement"
+import { TodoCheckbox } from "./TodoCheckbox"
+import { UploadButton } from "./UploadButton"
 
 const styles = StyleSheet.create({
     todoCard: {
@@ -40,7 +37,6 @@ const styles = StyleSheet.create({
         lineHeight: 24,
         flex: 1,
     },
-    checkbox: {},
     completedText: {
         textDecorationLine: "line-through",
         opacity: 0.6,
@@ -77,11 +73,6 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.secondary_light_1,
         borderRadius: 8,
     },
-    uploadButton: {
-        padding: 4,
-        borderRadius: 8,
-        alignSelf: "flex-start",
-    },
 })
 
 const getFileIcon = (type: string) => {
@@ -93,250 +84,32 @@ const getFileIcon = (type: string) => {
 }
 
 export default function TodoItem(todo: Todos & { timelineId: string; index: number }) {
-    const navigation = useNavigation()
     const [removeTodo, { loading: removeLoading }] = useRemoveTodo(todo)
     const [completeTodo, { loading: completeLoading }] = useCompleteTodo({
         todoId: todo.id,
         timelineId: todo.timelineId,
         currentlyCompleted: todo.isCompleted,
     })
-    const { addTodoFile, loading: addFileLoading } = useAddTodoFile()
-    const { removeTodoFile, loading: removeFileLoading } = useRemoveTodoFile()
-    const [uploadingFile, setUploadingFile] = useState(false)
+    const { loading: addFileLoading } = useAddTodoFile()
+    const { loading: removeFileLoading } = useRemoveTodoFile()
 
-    const client = useApolloClient()
+    const { handleToggleComplete } = useDoubleTapComplete({
+        onComplete: completeTodo,
+        currentlyCompleted: todo.isCompleted,
+    })
 
-    const tapCountRef = useRef(0)
-    const tapTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-    const isProcessingRef = useRef(false)
+    const { handleUploadFile, uploadingFile } = useFileUpload({
+        todoId: todo.id,
+        timelineId: todo.timelineId,
+    })
 
-    const handleToggleComplete = () => {
-        if (isProcessingRef.current) return
-
-        tapCountRef.current += 1
-
-        if (tapTimeoutRef.current) {
-            clearTimeout(tapTimeoutRef.current)
-        }
-
-        if (tapCountRef.current === 1) {
-            tapTimeoutRef.current = setTimeout(() => {
-                tapCountRef.current = 0
-            }, 300)
-        } else if (tapCountRef.current === 2) {
-            if (tapTimeoutRef.current) {
-                clearTimeout(tapTimeoutRef.current)
-            }
-            tapCountRef.current = 0
-            isProcessingRef.current = true
-
-            Haptic.trigger("impactLight")
-
-            completeTodo(!todo.isCompleted)
-                .then((result) => {
-                    console.log("Mutation completed:", result)
-                    isProcessingRef.current = false
-                })
-                .catch((error) => {
-                    console.error("Mutation error:", error)
-                    isProcessingRef.current = false
-                })
-        }
-    }
+    const { handleRemoveFile, handleShowPreview } = useFileManagement({
+        timelineId: todo.timelineId,
+    })
 
     const handleRemoveTodo = () => {
         Haptic.trigger("impactLight")
         removeTodo()
-    }
-
-    const handleUploadFile = () => {
-        Alert.alert("Add File", "Choose file type", [
-            { text: "Camera", onPress: handleImageFromCamera },
-            { text: "Photo Library", onPress: handleImageFromLibrary },
-            { text: "Document", onPress: handleDocumentPicker },
-            { text: "Cancel", style: "cancel" },
-        ])
-    }
-
-    const handleImageFromCamera = async () => {
-        await ImagePicker.requestCameraPermissionsAsync()
-
-        const result = await ImagePicker.launchCameraAsync({
-            allowsEditing: true,
-            allowsMultipleSelection: false,
-            mediaTypes: "images",
-            cameraType: ImagePicker.CameraType.back,
-            quality: 1,
-            aspect: [4, 3],
-        })
-
-        if (!result.canceled && result.assets[0]) {
-            await uploadFile(result.assets[0])
-        }
-    }
-
-    const handleImageFromLibrary = async () => {
-        const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: "images",
-            quality: 0.8,
-        })
-
-        if (!result.canceled && result.assets[0]) {
-            await uploadFile(result.assets[0])
-        }
-    }
-
-    const handleDocumentPicker = async () => {
-        const result = await DocumentPicker.getDocumentAsync({
-            type: "*/*",
-        })
-
-        if (!result.canceled && result.assets[0]) {
-            await uploadFile(result.assets[0])
-        }
-    }
-
-    const uploadFile = async (asset: any) => {
-        try {
-            setUploadingFile(true)
-
-            const formData = new FormData()
-            formData.append("file", {
-                uri: asset.uri,
-                type: asset.mimeType || "application/octet-stream",
-                name: asset.fileName || "file",
-            } as any)
-
-            const response = await axios.post(Url.API + "/upload/single", formData, {
-                params: {
-                    type: "todo",
-                    entityId: todo.id,
-                },
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                },
-            })
-
-            const uploadedFile = response.data
-            if (uploadedFile && uploadedFile.id) {
-                const timelineData = client.readQuery({
-                    query: GET_TIMELINE,
-                    variables: { id: todo.timelineId },
-                }) as any
-
-                if (timelineData) {
-                    const updatedTodos = timelineData.timelineById.todos.map((t: any) => {
-                        if (t.id === todo.id) {
-                            return {
-                                ...t,
-                                files: [...(t.files || []), uploadedFile],
-                            }
-                        }
-                        return t
-                    })
-
-                    client.writeQuery({
-                        query: GET_TIMELINE,
-                        variables: { id: todo.timelineId },
-                        data: {
-                            timelineById: {
-                                ...timelineData.timelineById,
-                                todos: updatedTodos,
-                            },
-                        },
-                    })
-                }
-
-                Haptic.trigger("impactLight")
-                return // Skip the refetch since we updated cache directly
-            }
-
-            const { data: updatedTodo } = await client.query({
-                query: gql`
-                    query GetTodo($id: ID!) {
-                        timelineTodo(id: $id) {
-                            id
-                            title
-                            isCompleted
-                            modifiedAt
-                            files {
-                                id
-                                type
-                                url
-                            }
-                        }
-                    }
-                `,
-                variables: { id: todo.id },
-                fetchPolicy: "network-only",
-            })
-
-            if (updatedTodo?.timelineTodo) {
-                const timelineData = client.readQuery({
-                    query: GET_TIMELINE,
-                    variables: { id: todo.timelineId },
-                }) as any
-
-                if (timelineData) {
-                    const updatedTodos = timelineData.timelineById.todos.map((t: any) => {
-                        if (t.id === todo.id) {
-                            return {
-                                ...t,
-                                files: updatedTodo.timelineTodo.files,
-                            }
-                        }
-                        return t
-                    })
-
-                    client.writeQuery({
-                        query: GET_TIMELINE,
-                        variables: { id: todo.timelineId },
-                        data: {
-                            timelineById: {
-                                ...timelineData.timelineById,
-                                todos: updatedTodos,
-                            },
-                        },
-                    })
-                }
-            }
-
-            Haptic.trigger("impactLight")
-        } catch (error) {
-            console.error("Upload error:", JSON.stringify(error))
-            Alert.alert("Error", "Failed to upload file")
-        } finally {
-            setUploadingFile(false)
-        }
-    }
-
-    const handleRemoveFile = (fileId: string) => {
-        Alert.alert("Remove File", "Are you sure you want to remove this file?", [
-            { text: "Cancel", style: "cancel" },
-            {
-                text: "Remove",
-                style: "destructive",
-                onPress: async () => {
-                    try {
-                        await removeTodoFile({
-                            variables: { fileId },
-                            refetchQueries: ["GetTimeline"],
-                        })
-                        Haptic.trigger("impactLight")
-                    } catch (error) {
-                        console.error("Remove file error:", error)
-                        Alert.alert("Error", "Failed to remove file")
-                    }
-                },
-            },
-        ])
-    }
-
-    const handleShowPreview = (file: any) => {
-        ;(navigation as any).navigate("ImagesPreview", {
-            selectedImage: file.url,
-            timelineId: todo.timelineId,
-        })
     }
 
     const isLoading = removeLoading || completeLoading || addFileLoading || removeFileLoading || uploadingFile
@@ -350,16 +123,13 @@ export default function TodoItem(todo: Todos & { timelineId: string; index: numb
                     onLongPress={handleRemoveTodo}
                     onPress={handleToggleComplete}
                 >
-                    <View style={styles.checkbox}>
-                        {isLoading ? (
-                            <>
-                                {completeLoading && <ActivityIndicator size="small" color={Colors.secondary} />}
-                                {removeLoading && <ActivityIndicator size="small" color={Colors.error} />}
-                            </>
-                        ) : (
-                            <Checkbox checked={todo.isCompleted} onPress={handleToggleComplete} size={28} />
-                        )}
-                    </View>
+                    <TodoCheckbox
+                        isCompleted={todo.isCompleted}
+                        isLoading={isLoading}
+                        completeLoading={completeLoading}
+                        removeLoading={removeLoading}
+                        onToggleComplete={handleToggleComplete}
+                    />
 
                     <View style={{ flex: 1, gap: 5 }}>
                         <Text
@@ -386,9 +156,7 @@ export default function TodoItem(todo: Todos & { timelineId: string; index: numb
                     </View>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.uploadButton} onPress={handleUploadFile} disabled={isLoading}>
-                    <Ionicons name="attach" size={24} color={"#fff"} />
-                </TouchableOpacity>
+                <UploadButton onPress={handleUploadFile} disabled={isLoading} />
             </View>
         </Card>
     )
