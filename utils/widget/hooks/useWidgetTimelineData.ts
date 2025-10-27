@@ -16,6 +16,7 @@ const transformEventForWidget = (event: GetTimelineQuery): WidgetTimelineEvent =
     id: event.id,
     title: event.title,
     description: event.description,
+    date: event.date,
     beginTime: event.beginTime,
     endTime: event.endTime,
     isCompleted: event.isCompleted,
@@ -23,32 +24,27 @@ const transformEventForWidget = (event: GetTimelineQuery): WidgetTimelineEvent =
 })
 
 export const useWidgetTimelineData = () => {
-    // Query for today's events
     const todayQuery = useQuery<{ timeline: GetTimelineQuery[] }>(GET_TIMELINE_QUERY, {
-        variables: { date: moment().format("YYYY-MM-DD") }
+        variables: { date: moment().format("YYYY-MM-DD") },
     })
-    
-    // Query for tomorrow's events
+
     const tomorrowQuery = useQuery<{ timeline: GetTimelineQuery[] }>(GET_TIMELINE_QUERY, {
-        variables: { date: moment().add(1, 'day').format("YYYY-MM-DD") }
+        variables: { date: moment().add(1, "day").format("YYYY-MM-DD") },
     })
-    
-    // Query for day after tomorrow's events
+
     const dayAfterQuery = useQuery<{ timeline: GetTimelineQuery[] }>(GET_TIMELINE_QUERY, {
-        variables: { date: moment().add(2, 'days').format("YYYY-MM-DD") }
+        variables: { date: moment().add(2, "days").format("YYYY-MM-DD") },
     })
 
     useEffect(() => {
-        // Combine events from all queries
         const allEvents: GetTimelineQuery[] = [
             ...(todayQuery.data?.timeline || []),
             ...(tomorrowQuery.data?.timeline || []),
-            ...(dayAfterQuery.data?.timeline || [])
+            ...(dayAfterQuery.data?.timeline || []),
         ]
 
         if (allEvents.length === 0) return
 
-        // Sort events by date and time
         const sortedEvents = allEvents.sort((a, b) => {
             const dateA = moment(`${a.date} ${a.beginTime}`)
             const dateB = moment(`${b.date} ${b.beginTime}`)
@@ -65,8 +61,6 @@ export const useWidgetTimelineData = () => {
             completedEvents,
             lastUpdated: new Date().toISOString(),
         }
-
-        console.log("Widget timeline data:", JSON.stringify(widgetData, null, 2))
 
         store.set("timeline_data", JSON.stringify(widgetData))
         ExtensionStorage.reloadWidget()

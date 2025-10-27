@@ -38,6 +38,7 @@ export interface WidgetTimelineEvent {
   id: string
   title: string
   description: string
+  date: string
   beginTime: string
   endTime: string
   isCompleted: boolean

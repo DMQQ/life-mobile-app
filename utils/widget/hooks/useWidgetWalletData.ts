@@ -19,7 +19,6 @@ const transformExpenseForWidget = (expense: Expense): WidgetExpense => ({
 export const useWidgetWalletData = (wallet: any) => {
     const { data: subscriptionsData } = useGetSubscriptions()
 
-    // Get current month statistics for accurate spending data
     const { data: statistics } = useGetStatistics([
         moment().startOf("month").toDate(),
         moment().endOf("month").toDate(),
@@ -30,16 +29,13 @@ export const useWidgetWalletData = (wallet: any) => {
 
         const recentExpenses = wallet.expenses.slice(0, 5).map(transformExpenseForWidget)
 
-        // Use the expense amount from statistics query (this is the correct monthly spending)
         const monthlySpent = statistics?.statistics?.expense || 0
 
-        // Calculate monthly limit from income and percentage target
         const monthlyLimit =
             wallet.income && wallet.monthlyPercentageTarget
                 ? (wallet.income * wallet.monthlyPercentageTarget) / 100
                 : 2000
 
-        // Filter upcoming subscriptions (within 3 days)
         const now = new Date()
         const threeDaysFromNow = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000)
 

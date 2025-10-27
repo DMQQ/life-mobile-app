@@ -78,6 +78,7 @@ struct TimelineEvent: Codable {
     let id: String
     let title: String
     let description: String
+    let date: String
     let beginTime: String
     let endTime: String
     let isCompleted: Bool
@@ -99,7 +100,6 @@ struct WalletWidgetView: View {
             if let walletDataString = UserDefaults.shared?.string(forKey: "wallet_data"),
                let walletData = try? JSONDecoder().decode(WalletData.self, from: walletDataString.data(using: .utf8) ?? Data()) {
                 
-                // Wallet Header
                 HStack {
                     Text("💰 Wallet")
                         .font(.headline)
@@ -110,7 +110,6 @@ struct WalletWidgetView: View {
                         .fontWeight(.black)
                 }
                 
-                // Monthly Spending Chart (Large Widget Only)
                 if family == .systemLarge, 
                    let monthlySpent = walletData.monthlySpent,
                    let monthlyLimit = walletData.monthlyLimit {
@@ -125,7 +124,6 @@ struct WalletWidgetView: View {
                                 .fontWeight(.medium)
                         }
                         
-                        // Progress Bar
                         ZStack(alignment: .leading) {
                             RoundedRectangle(cornerRadius: 4)
                                 .fill(Color.gray.opacity(0.3))
@@ -159,46 +157,48 @@ struct WalletWidgetView: View {
                     .padding(.bottom, 4)
                 }
                 
-                ForEach(walletData.recentExpenses.prefix(family == .systemLarge ? 5 : 2), id: \.id) { expense in
-                    HStack(spacing: 8) {
-                        // Category Icon
-                        Image(systemName: getCategoryIcon(expense.category))
-                            .font(.caption)
-                            .foregroundColor(getCategoryColor(expense.category))
-                            .frame(width: 16, height: 16)
-                        
-                        VStack(alignment: .leading, spacing: 1) {
-                            Text(expense.description)
-                                .font(.caption2)
-                                .lineLimit(1)
-                            HStack(spacing: 4) {
-                                Text(expense.category)
+                let expenseCount = family == .systemLarge ? 5 : 2
+                let expensesToShow: [WalletExpense] = Array(walletData.recentExpenses.prefix(expenseCount))
+                ForEach(expensesToShow, id: \.id) { (expense: WalletExpense) in
+                    Link(destination: URL(string: "mylife://wallet/expense/id/\(expense.id)")!) {
+                        HStack(spacing: 8) {
+                                Image(systemName: getCategoryIcon(expense.category))
+                                .font(.caption)
+                                .foregroundColor(getCategoryColor(expense.category))
+                                .frame(width: 16, height: 16)
+                            
+                            VStack(alignment: .leading, spacing: 1) {
+                                Text(expense.description)
                                     .font(.caption2)
-                                    .foregroundColor(.secondary)
-                                Text("•")
-                                    .font(.caption2)
-                                    .foregroundColor(.secondary)
-                                Text(formatDate(expense.date))
-                                    .font(.caption2)
-                                    .foregroundColor(.secondary)
+                                    .lineLimit(1)
+                                HStack(spacing: 4) {
+                                    Text(expense.category)
+                                        .font(.caption2)
+                                        .foregroundColor(.secondary)
+                                    Text("•")
+                                        .font(.caption2)
+                                        .foregroundColor(.secondary)
+                                    Text(formatDate(expense.date))
+                                        .font(.caption2)
+                                        .foregroundColor(.secondary)
+                                }
                             }
+                            Spacer()
+                            Text("\(expense.type == "income" ? "+" : "-")\(expense.amount, specifier: "%.2f")zł")
+                                .font(.caption2)
+                                .fontWeight(.medium)
+                                .foregroundColor(expense.type == "income" ? .green : .red)
+                                .strikethrough(expense.type == "refunded", color: .gray)
                         }
-                        Spacer()
-                        Text("\(expense.type == "income" ? "+" : "-")\(expense.amount, specifier: "%.2f")zł")
-                            .font(.caption2)
-                            .fontWeight(.medium)
-                            .foregroundColor(expense.type == "income" ? .green : .red)
-                            .strikethrough(expense.type == "refunded", color: .gray)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(
+                            RoundedRectangle(cornerRadius: 10)
+                                .fill(Color.primary.opacity(0.05))
+                        )
                     }
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 6)
-                    .background(
-                        RoundedRectangle(cornerRadius: 10)
-                            .fill(Color.primary.opacity(0.05))
-                    )
                 }
                 
-                // Upcoming Subscriptions (Large Widget Only)
                 if family == .systemLarge,
                    let subscriptions = walletData.upcomingSubscriptions,
                    !subscriptions.isEmpty {
@@ -208,7 +208,8 @@ struct WalletWidgetView: View {
                         .foregroundColor(.secondary)
                         .padding(.top, 8)
                     
-                    ForEach(subscriptions.prefix(2), id: \.id) { subscription in
+                    let subscriptionsToShow: [WalletSubscription] = Array(subscriptions.prefix(2))
+                    ForEach(subscriptionsToShow, id: \.id) { (subscription: WalletSubscription) in
                         HStack {
                             VStack(alignment: .leading, spacing: 1) {
                                 Text(subscription.description)
@@ -320,7 +321,6 @@ struct TimelineWidgetView: View {
             if let timelineDataString = UserDefaults.shared?.string(forKey: "timeline_data"),
                let timelineData = try? JSONDecoder().decode(TimelineData.self, from: timelineDataString.data(using: .utf8) ?? Data()) {
                 
-                // Timeline Header
                 HStack {
                     Text("📅 Timeline")
                         .font(.headline)
@@ -343,62 +343,73 @@ struct TimelineWidgetView: View {
                 }
                 .padding(.bottom, 8)
                 
-                // Today's Events
-                ForEach(timelineData.events.prefix(family == .systemLarge ? 5 : 2), id: \.id) { event in
-                    VStack(alignment: .leading, spacing: 4) {
-                        HStack(spacing: 8) {
-                            Image(systemName: event.isCompleted ? "checkmark.circle.fill" : "circle")
-                                .foregroundColor(event.isCompleted ? .green : .blue)
-                                .font(.caption)
-                                .frame(width: 16, height: 16)
-                            
-                            VStack(alignment: .leading, spacing: 1) {
-                                Text(event.title)
+                let eventCount = family == .systemLarge ? 4 : 2
+                let eventsToShow: [TimelineEvent] = Array(timelineData.events.prefix(eventCount))
+                ForEach(eventsToShow, id: \.id) { (event: TimelineEvent) in
+                    Link(destination: URL(string: "mylife://timeline/id/\(event.id)")!) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            HStack(spacing: 8) {
+                                let isCompleted = event.isCompleted
+                                Image(systemName: isCompleted ? "checkmark.circle.fill" : "circle")
+                                    .foregroundColor(isCompleted ? .green : .blue)
                                     .font(.caption)
-                                    .fontWeight(.medium)
-                                    .lineLimit(1)
+                                    .frame(width: 16, height: 16)
                                 
-                                if !event.description.isEmpty {
-                                    Text(event.description)
+                                VStack(alignment: .leading, spacing: 1) {
+                                    Text(event.title)
+                                        .font(.caption)
+                                        .fontWeight(.medium)
+                                        .lineLimit(1)
+                                    
+                                    if !event.description.isEmpty && event.todos.isEmpty {
+                                        Text(event.description)
+                                            .font(.caption2)
+                                            .foregroundColor(.secondary)
+                                            .lineLimit(1)
+                                    }
+                                }
+                                
+                                Spacer()
+                                
+                                VStack(alignment: .trailing, spacing: 1) {
+                                    Text(formatEventDate(event.date))
                                         .font(.caption2)
                                         .foregroundColor(.secondary)
-                                        .lineLimit(1)
+                                    Text("\(formatTime(event.beginTime)) - \(formatTime(event.endTime))")
+                                        .font(.caption2)
+                                        .foregroundColor(.secondary)
                                 }
                             }
                             
-                            Spacer()
-                            
-                            Text("\(formatTime(event.beginTime)) - \(formatTime(event.endTime))")
-                                .font(.caption2)
-                                .foregroundColor(.secondary)
-                        }
-                        
-                        if !event.todos.isEmpty {
-                            VStack(alignment: .leading, spacing: 2) {
-                                ForEach(event.todos.prefix(family == .systemLarge ? 3 : 1), id: \.id) { todo in
-                                    HStack(spacing: 6) {
-                                        Image(systemName: todo.isCompleted ? "checkmark.square.fill" : "square")
-                                            .foregroundColor(todo.isCompleted ? .green : .gray)
-                                            .font(.caption2)
-                                            .frame(width: 12, height: 12)
-                                        Text(todo.title)
-                                            .font(.caption2)
-                                            .lineLimit(1)
-                                            .strikethrough(todo.isCompleted)
-                                            .foregroundColor(todo.isCompleted ? .secondary : .primary)
-                                        Spacer()
+                            if !event.todos.isEmpty {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    let todoCount = family == .systemLarge ? 2 : 1
+                                let todosToShow: [TimelineTodo] = Array(event.todos.prefix(todoCount))
+                                ForEach(todosToShow, id: \.id) { (todo: TimelineTodo) in
+                                        HStack(spacing: 6) {
+                                            Image(systemName: todo.isCompleted ? "checkmark.square.fill" : "square")
+                                                .foregroundColor(todo.isCompleted ? .green : .gray)
+                                                .font(.caption2)
+                                                .frame(width: 12, height: 12)
+                                            Text(todo.title)
+                                                .font(.caption2)
+                                                .lineLimit(1)
+                                                .strikethrough(todo.isCompleted)
+                                                .foregroundColor(todo.isCompleted ? .secondary : .primary)
+                                            Spacer()
+                                        }
+                                        .padding(.leading, 20)
                                     }
-                                    .padding(.leading, 20)
                                 }
                             }
                         }
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(
+                            RoundedRectangle(cornerRadius: 10)
+                                .fill(Color.primary.opacity(0.05))
+                        )
                     }
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 6)
-                    .background(
-                        RoundedRectangle(cornerRadius: 10)
-                            .fill(Color.primary.opacity(0.05))
-                    )
                 }
                 
             } else {
@@ -412,7 +423,6 @@ struct TimelineWidgetView: View {
     }
     
     private func formatTime(_ timeString: String) -> String {
-        // Handle both HH:mm:ss and HH:mm formats
         if timeString.contains(":") {
             let components = timeString.split(separator: ":")
             if components.count >= 2 {
@@ -420,6 +430,27 @@ struct TimelineWidgetView: View {
             }
         }
         return timeString
+    }
+    
+    private func formatEventDate(_ dateString: String) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        guard let date = formatter.date(from: dateString) else { return dateString }
+        
+        let today = Calendar.current.startOfDay(for: Date())
+        let eventDate = Calendar.current.startOfDay(for: date)
+        
+        let daysDiff = Calendar.current.dateComponents([.day], from: today, to: eventDate).day ?? 0
+        
+        switch daysDiff {
+        case 0: return "Today"
+        case 1: return "Tomorrow"
+        case 2: return "Day After"
+        default:
+            let displayFormatter = DateFormatter()
+            displayFormatter.dateFormat = "MMM dd"
+            return displayFormatter.string(from: date)
+        }
     }
 }
 
