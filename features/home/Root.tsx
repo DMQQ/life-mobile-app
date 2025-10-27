@@ -9,7 +9,7 @@ import { GET_MAIN_SCREEN, getMainScreenBaseVariables } from "@/utils/schemas/GET
 import { useQuery } from "@apollo/client"
 import { AntDesign } from "@expo/vector-icons"
 import * as SplashScreen from "expo-splash-screen"
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { View } from "react-native"
 import Animated, { LinearTransition } from "react-native-reanimated"
 import { FloatingNotifications, useGetNotifications } from "../wallet/components/Wallet/WalletNotifications"
@@ -17,11 +17,16 @@ import LoadingSkeleton from "./components/LoadingSkeleton"
 import MainContent from "./components/MainContent"
 import NotificationsModal from "./components/NotificationsModal"
 import SettingsModal from "./components/SettingsModal"
+import store from "@/utils/widget/store"
+import { ExtensionStorage } from "@bacons/apple-targets"
+import useWidgets from "@/utils/widget/hooks/useWidgets"
 
 function Root({}: ScreenProps<"Root">) {
     const [loading, setLoading] = useState(true)
     const [showNotifications, setShowNotifications] = useState(false)
     const [showSettings, setShowSettings] = useState(false)
+
+    useWidgets()
 
     const { data: home, refetch: refetchHome } = useQuery(GET_MAIN_SCREEN, {
         variables: getMainScreenBaseVariables(),
@@ -66,6 +71,11 @@ function Root({}: ScreenProps<"Root">) {
         ],
         [data?.notifications],
     )
+
+    useEffect(() => {
+        store.set("test_key", "")
+        ExtensionStorage.reloadWidget()
+    }, [])
 
     return (
         <Animated.View style={{ flex: 1 }} layout={LinearTransition.delay(100)}>

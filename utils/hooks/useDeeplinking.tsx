@@ -1,14 +1,22 @@
 import { RootStackParamList } from "@/types"
 import { NavigationContainerRef } from "@react-navigation/native"
 import * as Linking from "expo-linking"
-import { useEffect } from "react"
+import { useEffect, useRef } from "react"
+import { AppState } from "react-native"
 
 export default function useDeeplinking(navigationRef: React.RefObject<NavigationContainerRef<RootStackParamList>>) {
+    const appState = useRef(AppState.currentState)
+    const pendingUrl = useRef<string | null>(null)
+
     useEffect(() => {
         const handleDeepLink = async ({ url }: { url: string }) => {
             if (!url) return
 
-            setTimeout(() => {
+            console.log('Deep link received:', url)
+
+            pendingUrl.current = url
+
+            const navigate = () => {
                 if (url.includes("wallet/create-expense")) {
                     navigationRef.current?.navigate<any>({
                         name: "WalletScreens",
@@ -34,10 +42,36 @@ export default function useDeeplinking(navigationRef: React.RefObject<Navigation
                         screen: "",
                     })
                 }
-            }, 300)
+                
+                pendingUrl.current = null
+            }
+
+            if (AppState.currentState === 'active' && navigationRef.current?.isReady()) {
+                navigate()
+            } else {
+                console.log('App not active, storing URL for later:', url)
+            }
+        }
+
+        const handleAppStateChange = async (nextAppState: string) => {
+            if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
+                console.log('App came to foreground')
+                
+                if (pendingUrl.current) {
+                    console.log('Processing pending URL:', pendingUrl.current)
+                    
+                    setTimeout(() => {
+                        if (pendingUrl.current) {
+                            handleDeepLink({ url: pendingUrl.current })
+                        }
+                    }, 500)
+                }
+            }
+            appState.current = nextAppState
         }
 
         const subscription = Linking.addEventListener("url", handleDeepLink)
+        const appStateSubscription = AppState.addEventListener('change', handleAppStateChange)
 
         Linking.getInitialURL().then((url) => {
             if (url) {
@@ -47,6 +81,7 @@ export default function useDeeplinking(navigationRef: React.RefObject<Navigation
 
         return () => {
             subscription.remove()
+            appStateSubscription.remove()
         }
     }, [])
 

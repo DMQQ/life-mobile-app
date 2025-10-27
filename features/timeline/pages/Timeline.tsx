@@ -17,6 +17,7 @@ import { TimelineScreenLoader } from "../components/LoaderSkeleton"
 import TimelineItem from "../components/TimelineItem"
 import useTimeline from "../hooks/general/useTimeline"
 import { GetTimelineQuery } from "../hooks/query/useGetTimeLineQuery"
+import useWidgetTimelineData from "@/utils/widget/hooks/useWidgetTimelineData"
 import { TimelineScreenProps } from "../types"
 import Text from "@/components/ui/Text/Text"
 

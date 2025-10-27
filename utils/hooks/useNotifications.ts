@@ -22,21 +22,30 @@ export default function useNotifications(navigationRef: React.RefObject<Navigati
     const handleNotificationNavigation = (data: any) => {
         const { eventId, type } = data || {}
         
-        if (eventId && type === 'timeline') {
-            navigationRef.current?.navigate("TimelineScreens", {
-                screen: "TimelineDetails",
-                params: { timelineId: eventId },
-            })
-        } else if (type === 'expenseReminder') {
-            navigationRef.current?.navigate("WalletScreens" as any, {
-                screen: "CreateExpense",
-            } as any)
-        } else if (eventId) {
-            // Fallback for backwards compatibility
-            navigationRef.current?.navigate("TimelineScreens", {
-                screen: "TimelineDetails",
-                params: { timelineId: eventId },
-            })
+        console.log('Notification navigation:', { eventId, type })
+        
+        const navigate = () => {
+            if (eventId && type === 'timeline') {
+                navigationRef.current?.navigate("TimelineScreens", {
+                    screen: "TimelineDetails",
+                    params: { timelineId: eventId },
+                })
+            } else if (type === 'expenseReminder') {
+                navigationRef.current?.navigate("WalletScreens" as any, {
+                    screen: "CreateExpense",
+                } as any)
+            } else if (eventId) {
+                navigationRef.current?.navigate("TimelineScreens", {
+                    screen: "TimelineDetails",
+                    params: { timelineId: eventId },
+                })
+            }
+        }
+        
+        if (navigationRef.current?.isReady()) {
+            navigate()
+        } else {
+            setTimeout(navigate, 500)
         }
     }
 
@@ -91,7 +100,9 @@ export default function useNotifications(navigationRef: React.RefObject<Navigati
         })
 
         responseListener.current = Notifications.addNotificationResponseReceivedListener((response) => {
+            console.log('Notification response received:', response)
             const data = response.notification.request.content.data
+            console.log('Notification data:', data)
             handleNotificationNavigation(data)
         })
 
@@ -106,7 +117,9 @@ export default function useNotifications(navigationRef: React.RefObject<Navigati
             lastNotification?.notification?.request?.content?.data &&
             lastNotification?.actionIdentifier === Notifications.DEFAULT_ACTION_IDENTIFIER
         ) {
+            console.log('Last notification handling:', lastNotification)
             const data = lastNotification.notification.request.content.data
+            console.log('Last notification data:', data)
             handleNotificationNavigation(data)
         }
     }, [lastNotification, navigationRef])
