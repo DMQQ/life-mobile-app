@@ -21,6 +21,7 @@
         "ios": {
             "buildNumber": "20251001",
             "supportsTablet": true,
+            "appleTeamId": "55RA6Q9VSR",
             "infoPlist": {
                 "NSFaceIDUsageDescription": "Allow $(PRODUCT_NAME) to use Face ID.",
                 "NSLocationWhenInUseUsageDescription": "This app needs access to your location to show nearby places and assign locations to your expenses.",
@@ -29,7 +30,10 @@
             },
             "bundleIdentifier": "com.dmq.mylifemobile",
             "associatedDomains": ["applinks:life.dmqq.dev"],
-            "icon": "./assets/images/icon.icon"
+            "icon": "./assets/images/icon.icon",
+            "entitlements": {
+                "com.apple.security.application-groups": ["group.com.dmq.mylifemobile"]
+            }
         },
         "android": {
             "googleServicesFile": "./google-services.json",
@@ -93,7 +97,8 @@
             ],
             "expo-quick-actions",
             "expo-build-properties",
-            "expo-web-browser"
+            "expo-web-browser",
+            "@bacons/apple-targets"
         ],
         "extra": {
             "eas": {
