@@ -19,11 +19,14 @@ import NotificationsModal from "./components/NotificationsModal"
 import SettingsModal from "./components/SettingsModal"
 import store from "@/utils/widget/store"
 import { ExtensionStorage } from "@bacons/apple-targets"
+import useWidgets from "@/utils/widget/hooks/useWidgets"
 
 function Root({}: ScreenProps<"Root">) {
     const [loading, setLoading] = useState(true)
     const [showNotifications, setShowNotifications] = useState(false)
     const [showSettings, setShowSettings] = useState(false)
+
+    useWidgets()
 
     const { data: home, refetch: refetchHome } = useQuery(GET_MAIN_SCREEN, {
         variables: getMainScreenBaseVariables(),

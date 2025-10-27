@@ -1,11 +1,12 @@
 import { useEffect } from "react"
-import { Expense } from "@/types"
+import { Expense, Wallet } from "@/types"
 import store from "../store"
 import { WidgetWalletData, WidgetExpense, WidgetSubscription } from "../types"
 import { ExtensionStorage } from "@bacons/apple-targets"
 import useGetSubscriptions from "@/features/wallet/hooks/useGetSubscriptions"
 import useGetStatistics from "@/features/wallet/hooks/useGetStatistics"
 import moment from "moment"
+import useGetWallet from "@/features/wallet/hooks/useGetWallet"
 
 const transformExpenseForWidget = (expense: Expense): WidgetExpense => ({
     id: expense.id,
@@ -16,7 +17,14 @@ const transformExpenseForWidget = (expense: Expense): WidgetExpense => ({
     category: expense.category.includes(":") ? expense.category.split(":")[1].trim() : expense.category,
 })
 
-export const useWidgetWalletData = (wallet: any) => {
+export const useWidgetWalletData = () => {
+    const { data } = useGetWallet()
+
+    const wallet = data?.wallet as Wallet & {
+        monthlyPercentageTarget?: number
+        income: number
+    }
+
     const { data: subscriptionsData } = useGetSubscriptions()
 
     const { data: statistics } = useGetStatistics([

@@ -13,6 +13,7 @@ import WalletLoader from "../components/Wallet/WalletLoader"
 import { useWalletContext } from "../components/WalletContext"
 import useGetWallet from "../hooks/useGetWallet"
 import useWidgetWalletData from "@/utils/widget/hooks/useWidgetWalletData"
+import useWidgetAnalyticsData from "@/utils/widget/hooks/useWidgetAnalyticsData"
 import { WalletScreens } from "../Main"
 import { SafeAreaView } from "react-native-safe-area-context"
 
@@ -54,9 +55,6 @@ const styles = StyleSheet.create({
 export default function WalletScreen({ navigation, route }: WalletScreens<"Wallet">) {
     const { data, loading, refetch, onEndReached, error } = useGetWallet()
     const wallet = useWalletContext()
-    
-    // Sync wallet data to widgets
-    useWidgetWalletData(data?.wallet)
 
     const [scrollY, onScroll] = useTrackScroll({ screenName: "WalletScreens" })
 

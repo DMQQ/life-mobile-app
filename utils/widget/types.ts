@@ -53,7 +53,33 @@ export interface WidgetTimelineData {
   lastUpdated: string
 }
 
+export interface WidgetAnalyticsLimit {
+  category: string
+  amount: number
+  current: number
+}
+
+export interface WidgetAnalyticsCategory {
+  name: string
+  amount: number
+}
+
+export interface WidgetAnalyticsSavings {
+  savedAmount: number
+  targetAmount: number
+  savedPercentage: number
+}
+
+export interface WidgetAnalyticsData {
+  limits: WidgetAnalyticsLimit[]
+  weeklySpending: number[]
+  topCategories: WidgetAnalyticsCategory[]
+  savings: WidgetAnalyticsSavings
+  lastUpdated: string
+}
+
 export interface WidgetStore {
   wallet: WidgetWalletData | null
   timeline: WidgetTimelineData | null
+  analytics: WidgetAnalyticsData | null
 }

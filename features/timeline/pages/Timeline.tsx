@@ -28,9 +28,6 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
         navigation,
         route,
     })
-    
-    // Sync timeline data to widgets (now fetches future events independently)
-    useWidgetTimelineData()
 
     const timeoutId = useRef<NodeJS.Timeout | null>(null)
     const { isSearchActive } = useScreenSearch((query) => {

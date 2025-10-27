@@ -17,10 +17,10 @@ struct Provider: AppIntentTimelineProvider {
     func timeline(for configuration: ConfigurationAppIntent, in context: Context) async -> Timeline<SimpleEntry> {
         var entries: [SimpleEntry] = []
 
-        // Generate a timeline consisting of five entries an hour apart, starting from the current date.
+        // Generate entries every minute for analytics rotation
         let currentDate = Date()
-        for hourOffset in 0 ..< 5 {
-            let entryDate = Calendar.current.date(byAdding: .hour, value: hourOffset, to: currentDate)!
+        for minuteOffset in 0 ..< 5 {
+            let entryDate = Calendar.current.date(byAdding: .minute, value: minuteOffset, to: currentDate)!
             let entry = SimpleEntry(date: entryDate, configuration: configuration)
             entries.append(entry)
         }
@@ -55,6 +55,31 @@ struct WalletData: Codable {
     let monthlySpent: Double?
     let monthlyLimit: Double?
     let upcomingSubscriptions: [WalletSubscription]?
+}
+
+struct AnalyticsData: Codable {
+    let limits: [AnalyticsLimit]
+    let weeklySpending: [Double]
+    let topCategories: [AnalyticsCategory]
+    let savings: AnalyticsSavings
+    let lastUpdated: String
+}
+
+struct AnalyticsLimit: Codable {
+    let category: String
+    let amount: Double
+    let current: Double
+}
+
+struct AnalyticsCategory: Codable {
+    let name: String
+    let amount: Double
+}
+
+struct AnalyticsSavings: Codable {
+    let savedAmount: Double
+    let targetAmount: Double
+    let savedPercentage: Double
 }
 
 struct WalletExpense: Codable {
@@ -454,6 +479,243 @@ struct TimelineWidgetView: View {
     }
 }
 
+struct AnalyticsWidgetView: View {
+    var entry: Provider.Entry
+    
+    private var currentView: Int {
+        let minutes = Int(entry.date.timeIntervalSince1970) / 60
+        return minutes % 4
+    }
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            if let analyticsDataString = UserDefaults.shared?.string(forKey: "analytics_data"),
+               let analyticsData = try? JSONDecoder().decode(AnalyticsData.self, from: analyticsDataString.data(using: .utf8) ?? Data()) {
+                
+                HStack {
+                    Text("📊 Analytics")
+                        .font(.headline)
+                        .fontWeight(.bold)
+                    Spacer()
+                    Text(getViewTitle(currentView))
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                
+                switch currentView {
+                case 0:
+                    LimitsChartView(limits: analyticsData.limits)
+                case 1:
+                    WeeklySpendingView(weeklySpending: analyticsData.weeklySpending)
+                case 2:
+                    CategoryChartView(categories: analyticsData.topCategories)
+                default:
+                    SavingsView(savings: analyticsData.savings)
+                }
+                
+            } else {
+                VStack {
+                    Text("📊 Analytics")
+                        .font(.headline)
+                        .fontWeight(.bold)
+                    Text("No analytics data")
+                        .foregroundColor(.secondary)
+                }
+            }
+        }
+        .padding(.horizontal, 8)
+        .padding(.top, 4)
+        .padding(.bottom, 8)
+    }
+    
+    private func getViewTitle(_ index: Int) -> String {
+        switch index {
+        case 0: return "Limits"
+        case 1: return "Weekly"
+        case 2: return "Categories"
+        default: return "Savings"
+        }
+    }
+}
+
+struct LimitsChartView: View {
+    let limits: [AnalyticsLimit]
+    
+    var body: some View {
+        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
+            ForEach(limits.prefix(4), id: \.category) { limit in
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack {
+                        Text(limit.category.capitalized)
+                            .font(.caption2)
+                            .fontWeight(.medium)
+                            .lineLimit(1)
+                        Spacer()
+                        Text("\(Int(limit.current))/\(Int(limit.amount))")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                    }
+                    
+                    ZStack(alignment: .leading) {
+                        RoundedRectangle(cornerRadius: 3)
+                            .fill(Color.gray.opacity(0.3))
+                            .frame(height: 6)
+                        
+                        RoundedRectangle(cornerRadius: 3)
+                            .fill(limit.current > limit.amount ? .red : .blue)
+                            .frame(height: 6)
+                            .frame(maxWidth: .infinity)
+                            .scaleEffect(x: min(1.0, limit.current / limit.amount), anchor: .leading)
+                            .clipped()
+                    }
+                }
+                .padding(.horizontal, 8)
+                .padding(.vertical, 6)
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color.primary.opacity(0.05))
+                )
+            }
+        }
+    }
+}
+
+struct WeeklySpendingView: View {
+    let weeklySpending: [Double]
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                Text("Last 7 days")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                Spacer()
+                Text("Total: \(weeklySpending.reduce(0, +), specifier: "%.0f")zł")
+                    .font(.caption2)
+                    .fontWeight(.medium)
+            }
+            
+            HStack(alignment: .bottom, spacing: 0) {
+                ForEach(0..<min(7, weeklySpending.count), id: \.self) { index in
+                    let maxHeight: CGFloat = 50
+                    let maxValue = weeklySpending.max() ?? 1
+                    let height = CGFloat(weeklySpending[index] / maxValue) * maxHeight
+                    
+                    VStack(spacing: 2) {
+                        Text("\(Int(weeklySpending[index]))")
+                            .font(.caption2)
+                            .foregroundColor(.primary)
+                            .opacity(0.8)
+                        RoundedRectangle(cornerRadius: 2)
+                            .fill(.blue)
+                            .frame(height: max(4, height))
+                        Text(getDayLabel(index))
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+            }
+        }
+    }
+    
+    private func getDayLabel(_ index: Int) -> String {
+        let calendar = Calendar.current
+        let today = Date()
+        let targetDate = calendar.date(byAdding: .day, value: index - 6, to: today) ?? today
+        let dayOfWeek = calendar.component(.weekday, from: targetDate)
+        let days = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]
+        return days[(dayOfWeek - 1) % 7]
+    }
+}
+
+struct CategoryChartView: View {
+    let categories: [AnalyticsCategory]
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("Top spending")
+                .font(.caption)
+                .foregroundColor(.secondary)
+            
+            ForEach(categories.prefix(4), id: \.name) { category in
+                HStack {
+                    Circle()
+                        .fill(getCategoryChartColor(category.name))
+                        .frame(width: 8, height: 8)
+                    Text(category.name)
+                        .font(.caption2)
+                        .lineLimit(1)
+                    Spacer()
+                    Text("\(category.amount, specifier: "%.0f")zł")
+                        .font(.caption2)
+                        .fontWeight(.medium)
+                }
+            }
+        }
+    }
+    
+    private func getCategoryChartColor(_ category: String) -> Color {
+        switch category.lowercased() {
+        case "food": return .orange
+        case "transportation": return .red
+        case "shopping": return .purple
+        case "entertainment": return .pink
+        default: return .blue
+        }
+    }
+}
+
+struct SavingsView: View {
+    let savings: AnalyticsSavings
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text("Monthly Progress")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                Spacer()
+                Text("\(savings.savedPercentage, specifier: "%.0f")%")
+                    .font(.caption)
+                    .fontWeight(.bold)
+                    .foregroundColor(savings.savedPercentage > 0 ? .green : .red)
+            }
+            
+            ZStack(alignment: .leading) {
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(Color.gray.opacity(0.3))
+                    .frame(height: 8)
+                
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(savings.savedPercentage > 0 ? .green : .red)
+                    .frame(width: abs(savings.savedPercentage) * 2, height: 8)
+            }
+            
+            HStack {
+                VStack(alignment: .leading) {
+                    Text("Saved")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                    Text("\(savings.savedAmount, specifier: "%.0f")zł")
+                        .font(.caption)
+                        .fontWeight(.medium)
+                        .foregroundColor(.green)
+                }
+                Spacer()
+                VStack(alignment: .trailing) {
+                    Text("Target")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                    Text("\(savings.targetAmount, specifier: "%.0f")zł")
+                        .font(.caption)
+                        .fontWeight(.medium)
+                }
+            }
+        }
+    }
+}
+
 struct WalletWidget: Widget {
     let kind: String = "WalletWidget"
 
@@ -464,6 +726,20 @@ struct WalletWidget: Widget {
         }
         .configurationDisplayName("Wallet")
         .description("View your balance and recent expenses")
+    }
+}
+
+struct AnalyticsWidget: Widget {
+    let kind: String = "AnalyticsWidget"
+
+    var body: some WidgetConfiguration {
+        AppIntentConfiguration(kind: kind, intent: ConfigurationAppIntent.self, provider: Provider()) { entry in
+            AnalyticsWidgetView(entry: entry)
+                .containerBackground(.fill.tertiary, for: .widget)
+        }
+        .configurationDisplayName("Analytics")
+        .description("View spending analytics and charts")
+        .supportedFamilies([.systemMedium])
     }
 }
 
