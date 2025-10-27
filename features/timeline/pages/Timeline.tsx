@@ -17,6 +17,7 @@ import { TimelineScreenLoader } from "../components/LoaderSkeleton"
 import TimelineItem from "../components/TimelineItem"
 import useTimeline from "../hooks/general/useTimeline"
 import { GetTimelineQuery } from "../hooks/query/useGetTimeLineQuery"
+import useWidgetTimelineData from "@/utils/widget/hooks/useWidgetTimelineData"
 import { TimelineScreenProps } from "../types"
 import Text from "@/components/ui/Text/Text"
 
@@ -27,6 +28,9 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
         navigation,
         route,
     })
+    
+    // Sync timeline data to widgets (now fetches future events independently)
+    useWidgetTimelineData()
 
     const timeoutId = useRef<NodeJS.Timeout | null>(null)
     const { isSearchActive } = useScreenSearch((query) => {
