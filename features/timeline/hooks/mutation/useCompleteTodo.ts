@@ -15,45 +15,7 @@ export default function useCompleteTodo(props: { todoId: string; timelineId: str
             }
         `,
         {
-            update(cache, { data: mutationResult }) {
-                const data = cache.readQuery({
-                    query: GET_TIMELINE,
-                    variables: { id: props.timelineId },
-                }) as any
-
-                if (!data?.timelineById?.todos) {
-                    return
-                }
-
-                const updatedTodo = mutationResult?.completeTimelineTodo
-                if (!updatedTodo) {
-                    return
-                }
-
-                const todos = data.timelineById.todos
-                    .map((todo: any) => {
-                        if (todo.id === props.todoId) {
-                            return {
-                                ...todo,
-                                isCompleted: updatedTodo.isCompleted,
-                                modifiedAt: updatedTodo.modifiedAt,
-                            }
-                        }
-                        return todo
-                    })
-                    .sort((a: any, b: any) => a.isCompleted - b.isCompleted)
-
-                cache.writeQuery({
-                    query: GET_TIMELINE,
-                    variables: { id: props.timelineId },
-                    data: {
-                        timelineById: {
-                            ...data.timelineById,
-                            todos,
-                        },
-                    },
-                })
-            },
+            refetchQueries: [{ query: GET_TIMELINE, variables: { id: props.timelineId } }],
         },
     )
 

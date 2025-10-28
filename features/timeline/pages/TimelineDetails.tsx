@@ -113,25 +113,6 @@ export default function TimelineDetails({
         [data?.isCompleted, data],
     )
 
-    const taskCompletionProgressBar = useMemo(() => {
-        let count = 0
-
-        if (data?.todos === undefined || data?.todos?.length === 0) return 0
-
-        for (let todo of data?.todos || []) {
-            if (todo.isCompleted) count += 1
-        }
-
-        return Math.trunc((count / data?.todos?.length) * 100)
-    }, [data?.todos])
-
-    const renderAnimatedItem = useCallback(
-        ({ scrollY }: { scrollY: SharedValue<number> | undefined }) => (
-            <AnimatedProgressBar percentage={taskCompletionProgressBar} scrollY={scrollY!} />
-        ),
-        [taskCompletionProgressBar, data?.todos],
-    )
-
     const [selectedEventForDeletion, setSelectedEventForDeletion] = useState<GetTimelineQuery | null>(null)
 
     return (
@@ -141,7 +122,6 @@ export default function TimelineDetails({
                 animated={true}
                 animatedTitle={capitalize(data?.title)}
                 buttons={buttons}
-                // renderAnimatedItem={renderAnimatedItem}
                 initialTitleFontSize={data?.title?.length > 25 ? 40 : 50}
             />
             <Animated.ScrollView
