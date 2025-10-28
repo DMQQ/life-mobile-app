@@ -3,8 +3,8 @@ import useDeeplinking from "@/utils/hooks/useDeeplinking"
 import useQuickActions from "@/utils/hooks/useQuickActions"
 import { useApolloClient } from "@apollo/client"
 import { BottomTabBarProps, createBottomTabNavigator } from "@react-navigation/bottom-tabs"
-import { DarkTheme, NavigationContainer, NavigationContainerRef } from "@react-navigation/native"
-import React, { useCallback, useEffect } from "react"
+import { DarkTheme, LinkingOptions, NavigationContainer, NavigationContainerRef } from "@react-navigation/native"
+import React, { useCallback, useEffect, useMemo } from "react"
 import BottomTab from "../components/BottomTab/BottomTab"
 import Colors from "../constants/Colors"
 import Authentication from "../features/authentication/Main"
@@ -15,6 +15,7 @@ import WalletScreens from "../features/wallet/Main"
 import { RootStackParamList } from "../types"
 import useNotifications from "../utils/hooks/useNotifications"
 import useUser from "../utils/hooks/useUser"
+import * as Notifications from "expo-notifications"
 
 export const navigationRef = React.createRef<NavigationContainerRef<RootStackParamList>>()
 
@@ -48,7 +49,7 @@ export default function Navigation() {
         [isAuthenticated],
     )
 
-    const linking = useDeeplinking(navigationRef)
+    const linking = useDeeplinking(navigationRef as any)
 
     if (isLoading) return null
 

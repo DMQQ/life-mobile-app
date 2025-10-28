@@ -17,7 +17,6 @@ export type Action =
 
 const reducer = (state: typeof init, action: Action) => {
     if (action.type === "SET_QUERY") {
-        console.log("SET_QUERY", action.payload)
         return { ...state, query: action.payload }
     }
     if (action.type === "SET_AMOUNT_MIN") {

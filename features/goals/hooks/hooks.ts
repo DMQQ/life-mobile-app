@@ -117,9 +117,6 @@ export const useGoal = (dateRange?: { start: Date; end: Date }) => {
         onError: (error) => {
             console.error(JSON.stringify(error, null, 2))
         },
-        onCompleted: (data) => {
-            console.log("Goal created:", data)
-        },
     })
 
     const [updateGoals] = useMutation(UPDATE_GOALS, {

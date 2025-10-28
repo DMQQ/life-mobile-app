@@ -291,9 +291,7 @@ function NotificationCard({
                             </View>
                         </View>
 
-                        <Text style={styles.body} numberOfLines={3}>
-                            {notification.message.body}
-                        </Text>
+                        <Text style={styles.body}>{notification.message.body}</Text>
 
                         <View style={[styles.footerRow]}>
                             <Text style={styles.timestamp}>

@@ -32,7 +32,9 @@
             "associatedDomains": ["applinks:life.dmqq.dev"],
             "icon": "./assets/images/icon.icon",
             "entitlements": {
-                "com.apple.security.application-groups": ["group.com.dmq.mylifemobile"]
+                "com.apple.security.application-groups": ["group.com.dmq.mylifemobile"],
+
+                "com.apple.developer.associated-domains": ["applinks:life.dmqq.dev"]
             }
         },
         "android": {

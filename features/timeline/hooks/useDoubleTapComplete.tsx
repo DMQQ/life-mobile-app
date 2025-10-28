@@ -35,11 +35,9 @@ export const useDoubleTapComplete = ({ onComplete, currentlyCompleted }: UseDoub
 
             onComplete(!currentlyCompleted)
                 .then((result) => {
-                    console.log("Mutation completed:", result)
                     isProcessingRef.current = false
                 })
                 .catch((error) => {
-                    console.error("Mutation error:", error)
                     isProcessingRef.current = false
                 })
         }

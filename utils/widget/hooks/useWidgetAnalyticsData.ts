@@ -154,8 +154,6 @@ export const useWidgetAnalyticsData = () => {
             lastUpdated: new Date().toISOString(),
         }
 
-        console.log("Analytics widget data:", JSON.stringify(analyticsData, null, 2))
-
         store.set("analytics_data", JSON.stringify(analyticsData))
         ExtensionStorage.reloadWidget()
     }, [limitsData, dailyStats, monthlyStats, categoryStats, walletData])

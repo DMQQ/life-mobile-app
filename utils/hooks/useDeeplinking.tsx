@@ -1,103 +1,96 @@
 import { RootStackParamList } from "@/types"
-import { NavigationContainerRef } from "@react-navigation/native"
-import * as Linking from "expo-linking"
-import { useEffect, useRef } from "react"
+import { LinkingOptions, NavigationContainerRef } from "@react-navigation/native"
+import * as Notifications from "expo-notifications"
+import { useEffect, useMemo, useRef } from "react"
 import { AppState } from "react-native"
 
+import * as Linking from "expo-linking"
+
+const prefix = Linking.createURL("/")
+
 export default function useDeeplinking(navigationRef: React.RefObject<NavigationContainerRef<RootStackParamList>>) {
-    const appState = useRef(AppState.currentState)
-    const pendingUrl = useRef<string | null>(null)
+    const navigate = (url: string) => {
+        if (url.includes("wallet/create-expense")) {
+            navigationRef.current?.navigate<any>({
+                name: "WalletScreens",
+                params: {
+                    expenseId: null,
+                },
+            })
+        } else if (url.includes("wallet/expense/id/")) {
+            const expenseId = url.split("/").pop()
 
-    useEffect(() => {
-        const handleDeepLink = async ({ url }: { url: string }) => {
-            if (!url) return
+            navigationRef.current?.navigate<any>("WalletScreens", {
+                screen: "Wallet",
+                params: { expenseId },
+            })
+        } else if (url.includes("timeline/id/")) {
+            const timelineId = url.split("/").pop()
 
-            console.log('Deep link received:', url)
+            navigationRef.current?.navigate("TimelineScreens", {
+                timelineId,
+            })
+        } else if (url.includes("timeline")) {
+            navigationRef.current?.navigate("TimelineScreens", {
+                screen: "",
+            })
+        }
+    }
 
-            pendingUrl.current = url
+    const linking = useMemo(() => {
+        return {
+            prefixes: [prefix],
 
-            const navigate = () => {
-                if (url.includes("wallet/create-expense")) {
-                    navigationRef.current?.navigate<any>({
-                        name: "WalletScreens",
-                        params: {
-                            expenseId: null,
-                        },
-                    })
-                } else if (url.includes("wallet/expense/id/")) {
-                    const expenseId = url.split("/").pop()
+            getInitialURL: async () => {
+                const url = await Linking.getInitialURL()
 
-                    navigationRef.current?.navigate<any>("WalletScreens", {
-                        screen: "Wallet",
-                        params: { expenseId },
-                    })
-                } else if (url.includes("timeline/id/")) {
-                    const timelineId = url.split("/").pop()
-
-                    navigationRef.current?.navigate("TimelineScreens", {
-                        timelineId,
-                    })
-                } else if (url.includes("timeline")) {
-                    navigationRef.current?.navigate("TimelineScreens", {
-                        screen: "",
-                    })
+                if (url != null) {
+                    return url
                 }
-                
-                pendingUrl.current = null
-            }
 
-            if (AppState.currentState === 'active' && navigationRef.current?.isReady()) {
-                navigate()
-            } else {
-                console.log('App not active, storing URL for later:', url)
-            }
-        }
+                const response = Notifications.getLastNotificationResponse()
 
-        const handleAppStateChange = async (nextAppState: string) => {
-            if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
-                console.log('App came to foreground')
-                
-                if (pendingUrl.current) {
-                    console.log('Processing pending URL:', pendingUrl.current)
-                    
-                    setTimeout(() => {
-                        if (pendingUrl.current) {
-                            handleDeepLink({ url: pendingUrl.current })
-                        }
-                    }, 500)
+                return response?.notification.request.content.data.eventId
+            },
+
+            subscribe(listener) {
+                const linkingSubscription = Linking.addEventListener("url", ({ url }) => {
+                    navigate(url)
+
+                    listener(url)
+                })
+
+                const pushNotificationSubscription = Notifications.addNotificationResponseReceivedListener(
+                    (response) => {
+                        const url = response.notification.request.content.data.eventId
+
+                        listener(url as string)
+                    },
+                )
+
+                return () => {
+                    linkingSubscription.remove()
+                    pushNotificationSubscription.remove()
                 }
-            }
-            appState.current = nextAppState
-        }
-
-        const subscription = Linking.addEventListener("url", handleDeepLink)
-        const appStateSubscription = AppState.addEventListener('change', handleAppStateChange)
-
-        Linking.getInitialURL().then((url) => {
-            if (url) {
-                handleDeepLink({ url })
-            }
-        })
-
-        return () => {
-            subscription.remove()
-            appStateSubscription.remove()
-        }
+            },
+        } as LinkingOptions<RootStackParamList>
     }, [])
 
-    const linking = {
-        prefixes: ["mylife://", "https://life.dmqq.dev"],
-        config: {
-            screens: {
-                WalletScreens: "wallet",
-                TimelineScreens: "timeline",
-                Root: "home",
-                GoalsScreens: "goals",
-                NotesScreens: "notes",
-                Settings: "settings",
-            },
-        },
-    }
+    useEffect(() => {
+        const initialListener = async () => {
+            const initialUrl = await Linking.getInitialURL()
+
+            if (initialUrl == null) return
+
+            const timeout = setTimeout(() => {
+                navigate(initialUrl)
+            }, 100)
+
+            return () => clearTimeout(timeout)
+        }
+
+        initialListener()
+    }, [])
 
     return linking
 }
