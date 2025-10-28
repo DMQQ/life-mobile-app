@@ -17,7 +17,7 @@ struct Provider: AppIntentTimelineProvider {
     func timeline(for configuration: ConfigurationAppIntent, in context: Context) async -> Timeline<SimpleEntry> {
         var entries: [SimpleEntry] = []
 
-        // Generate entries every minute for analytics rotation
+
         let currentDate = Date()
         for minuteOffset in 0 ..< 5 {
             let entryDate = Calendar.current.date(byAdding: .minute, value: minuteOffset, to: currentDate)!
@@ -27,10 +27,6 @@ struct Provider: AppIntentTimelineProvider {
 
         return Timeline(entries: entries, policy: .atEnd)
     }
-
-//    func relevances() async -> WidgetRelevances<ConfigurationAppIntent> {
-//        // Generate a list containing the contexts this widget is relevant in.
-//    }
 }
 
 struct SimpleEntry: TimelineEntry {
@@ -135,9 +131,10 @@ struct WalletWidgetView: View {
                         .fontWeight(.black)
                 }
                 
-                if family == .systemLarge, 
+                if family == .systemLarge,
                    let monthlySpent = walletData.monthlySpent,
-                   let monthlyLimit = walletData.monthlyLimit {
+                   let monthlyLimit = walletData.monthlyLimit,
+                   monthlyLimit > 0 {
                     VStack(alignment: .leading, spacing: 4) {
                         HStack {
                             Text("Monthly Spending")
@@ -409,8 +406,8 @@ struct TimelineWidgetView: View {
                             if !event.todos.isEmpty {
                                 VStack(alignment: .leading, spacing: 2) {
                                     let todoCount = family == .systemLarge ? 2 : 1
-                                let todosToShow: [TimelineTodo] = Array(event.todos.prefix(todoCount))
-                                ForEach(todosToShow, id: \.id) { (todo: TimelineTodo) in
+                                    let todosToShow: [TimelineTodo] = Array(event.todos.prefix(todoCount))
+                                    ForEach(todosToShow, id: \.id) { (todo: TimelineTodo) in
                                         HStack(spacing: 6) {
                                             Image(systemName: todo.isCompleted ? "checkmark.square.fill" : "square")
                                                 .foregroundColor(todo.isCompleted ? .green : .gray)
@@ -494,8 +491,6 @@ struct AnalyticsWidgetView: View {
               let decoded = try? JSONDecoder().decode(AnalyticsData.self, from: data) else {
             return nil
         }
-        
-        
         return decoded
     }
     
@@ -517,7 +512,7 @@ struct AnalyticsWidgetView: View {
                 case 0:
                     LimitsChartView(limits: data.limits, family: family)
                 case 1:
-                    WeeklySpendingView(weeklySpending: data.weeklySpending, family: family)
+                    WeeklySpendingView(analyticsData: data, family: family)
                 default:
                     CategoryChartView(categories: data.topCategories, family: family)
                 }
@@ -527,6 +522,7 @@ struct AnalyticsWidgetView: View {
                     Text("📊 Analytics")
                         .font(.headline)
                         .fontWeight(.bold)
+                        .padding(.bottom, 6)
                     
                     if let analyticsDataString = UserDefaults.shared?.string(forKey: "analytics_data") {
                         Text("Data found but decode failed")
@@ -614,12 +610,12 @@ struct LimitsChartView: View {
                                 ))
                                 .frame(height: family == .systemLarge ? 8 : 6)
                                 .frame(maxWidth: .infinity)
-                                .scaleEffect(x: min(1.0, limit.current / limit.amount), anchor: .leading)
+                                .scaleEffect(x: min(1.0, limit.amount > 0 ? limit.current / limit.amount : 0), anchor: .leading)
                                 .clipped()
                         }
                         
-                        if family == .systemLarge {
-                            let percentage = limit.amount > 0 ? (limit.current / limit.amount) * 100 : 0
+                        if family == .systemLarge && limit.amount > 0 {
+                            let percentage = (limit.current / limit.amount) * 100
                             let remaining = max(0, limit.amount - limit.current)
                             
                             HStack {
@@ -692,144 +688,104 @@ struct LimitsChartView: View {
     
     private func getCategoryLimitColor(_ category: String) -> Color {
         switch category.lowercased() {
-        case "housing": return Color(red: 0.02, green: 0.68, blue: 0.13) // #05ad21
-        case "transportation": return Color(red: 0.67, green: 0.02, blue: 0.02) // #ab0505
-        case "food": return Color(red: 0.34, green: 0.2, blue: 1.0) // #5733FF
-        case "drinks": return Color(red: 1.0, green: 0.47, blue: 0.31) // #ff774f
-        case "shopping": return Color(red: 1.0, green: 0.34, blue: 0.2) // #ff5733
-        case "addictions": return Color(red: 1.0, green: 0.34, blue: 0.2) // #ff5733
-        case "work": return Color(red: 0.34, green: 0.2, blue: 1.0) // #5733ff
-        case "clothes": return Color(red: 1.0, green: 0.34, blue: 0.2) // #ff5733
-        case "health": return Color(red: 0.03, green: 0.73, blue: 0.71) // #07bab4
-        case "entertainment": return Color(red: 0.6, green: 0.02, blue: 0.51) // #990583
-        case "utilities": return Color(red: 0.34, green: 0.2, blue: 1.0) // #5733ff
-        case "debt": return Color(red: 1.0, green: 0.34, blue: 0.2) // #ff5733
-        case "education": return Color(red: 0.8, green: 0.6, blue: 0.11) // #cc9a1b
-        case "savings": return Color(red: 0.81, green: 0.04, blue: 0.5) // #cf0a80
-        case "travel": return Color(red: 0.2, green: 1.0, blue: 0.34) // #33FF57
-        case "animals", "pets": return Color(red: 0.51, green: 0.46, blue: 0.09) // #827717
-        case "gifts": return Color(red: 0.2, green: 1.0, blue: 0.34) // #33FF57
-        case "sports": return Color(red: 0.3, green: 0.69, blue: 0.31) // #4CAF50
-        case "tech": return Color(red: 0.01, green: 0.53, blue: 0.82) // #0288D1
-        case "goingout": return Color(red: 0.61, green: 0.15, blue: 0.69) // #9C27B0
-        case "subscriptions": return Color(red: 0.5, green: 0.2, blue: 1.0) // #8033ff
-        case "investments": return Color(red: 0.2, green: 1.0, blue: 0.54) // #33ff89
-        case "maintenance": return Color(red: 1.0, green: 0.55, blue: 0.2) // #ff8c33
-        case "insurance": return Color(red: 0.2, green: 0.34, blue: 1.0) // #3357ff
-        case "taxes": return Color(red: 1.0, green: 0.2, blue: 0.2) // #ff3333
-        case "children": return Color(red: 1.0, green: 0.2, blue: 0.82) // #ff33d1
-        case "donations": return Color(red: 0.2, green: 1.0, blue: 0.83) // #33ffd4
-        case "beauty": return Color(red: 1.0, green: 0.2, blue: 0.63) // #ff33a1
+        case "housing": return Color(red: 0.02, green: 0.68, blue: 0.13)
+        case "transportation": return Color(red: 0.67, green: 0.02, blue: 0.02)
+        case "food": return Color(red: 0.34, green: 0.2, blue: 1.0)
+        case "drinks": return Color(red: 1.0, green: 0.47, blue: 0.31)
+        case "shopping": return Color(red: 1.0, green: 0.34, blue: 0.2)
+        case "addictions": return Color(red: 1.0, green: 0.34, blue: 0.2)
+        case "work": return Color(red: 0.34, green: 0.2, blue: 1.0)
+        case "clothes": return Color(red: 1.0, green: 0.34, blue: 0.2)
+        case "health": return Color(red: 0.03, green: 0.73, blue: 0.71)
+        case "entertainment": return Color(red: 0.6, green: 0.02, blue: 0.51)
+        case "utilities": return Color(red: 0.34, green: 0.2, blue: 1.0)
+        case "debt": return Color(red: 1.0, green: 0.34, blue: 0.2)
+        case "education": return Color(red: 0.8, green: 0.6, blue: 0.11)
+        case "savings": return Color(red: 0.81, green: 0.04, blue: 0.5)
+        case "travel": return Color(red: 0.2, green: 1.0, blue: 0.34)
+        case "animals", "pets": return Color(red: 0.51, green: 0.46, blue: 0.09)
+        case "gifts": return Color(red: 0.2, green: 1.0, blue: 0.34)
+        case "sports": return Color(red: 0.3, green: 0.69, blue: 0.31)
+        case "tech": return Color(red: 0.01, green: 0.53, blue: 0.82)
+        case "goingout": return Color(red: 0.61, green: 0.15, blue: 0.69)
+        case "subscriptions": return Color(red: 0.5, green: 0.2, blue: 1.0)
+        case "investments": return Color(red: 0.2, green: 1.0, blue: 0.54)
+        case "maintenance": return Color(red: 1.0, green: 0.55, blue: 0.2)
+        case "insurance": return Color(red: 0.2, green: 0.34, blue: 1.0)
+        case "taxes": return Color(red: 1.0, green: 0.2, blue: 0.2)
+        case "children": return Color(red: 1.0, green: 0.2, blue: 0.82)
+        case "donations": return Color(red: 0.2, green: 1.0, blue: 0.83)
+        case "beauty": return Color(red: 1.0, green: 0.2, blue: 0.63)
         default: return .blue
         }
     }
 }
 
 struct WeeklySpendingView: View {
-    let weeklySpending: [Double]
+    let analyticsData: AnalyticsData
     let family: WidgetFamily
+    
+    private var weeklySpending: [Double] {
+        analyticsData.weeklySpending
+    }
     
     var body: some View {
         if family == .systemLarge {
-            // Compact layout for large widgets - better space utilization
-            VStack(alignment: .leading, spacing: 6) {
-                // Header with stats in single row
-                HStack {
-                    Text("Last 7 days")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    
-                    Spacer()
-                    
-                    HStack(spacing: 12) {
-                        HStack(spacing: 2) {
-                            Text("Total:")
-                                .font(.caption2)
-                                .foregroundColor(.secondary)
-                            Text("\(weeklySpending.reduce(0, +), specifier: "%.0f")zł")
-                                .font(.caption2)
-                                .fontWeight(.medium)
-                        }
-                        
-                        HStack(spacing: 2) {
-                            Text("Avg:")
-                                .font(.caption2)
-                                .foregroundColor(.secondary)
-                            Text("\(weeklySpending.reduce(0, +) / 7, specifier: "%.0f")zł")
-                                .font(.caption2)
-                                .fontWeight(.medium)
+            VStack(alignment: .leading, spacing: 4) {                
+                GeometryReader { geometry in
+                    HStack(alignment: .bottom, spacing: geometry.size.width / 24) {
+                        ForEach(0..<min(7, weeklySpending.count), id: \.self) { index in
+                            let maxValue = weeklySpending.max() ?? 1
+                            let barHeight = (geometry.size.height * 0.8) * (maxValue > 0 ? (weeklySpending[index] / maxValue) : 0)
+                            
+                            VStack(spacing: 6) {
+                                Text(String(format: "%.0f", weeklySpending[index]))
+                                    .font(.caption)
+                                    .fontWeight(.semibold)
+                                
+                                RoundedRectangle(cornerRadius: 5)
+                                    .fill(LinearGradient(
+                                        gradient: Gradient(colors: [.cyan, .blue]),
+                                        startPoint: .top,
+                                        endPoint: .bottom
+                                    ))
+                                    .frame(height: max(12, barHeight))
+                                
+                                Text(getDayLabel(index))
+                                    .font(.caption)
+                                    .fontWeight(.medium)
+                                    .foregroundColor(.secondary)
+                            }
+                            .frame(maxWidth: .infinity)
                         }
                     }
                 }
                 
-                // Compact bar chart
-                HStack(alignment: .bottom, spacing: 6) {
-                    ForEach(0..<min(7, weeklySpending.count), id: \.self) { index in
-                        let maxHeight: CGFloat = 60
-                        let maxValue = weeklySpending.max() ?? 1
-                        let height = CGFloat(weeklySpending[index] / maxValue) * maxHeight
-                        
-                        VStack(spacing: 2) {
-                            Text("\(Int(weeklySpending[index]))")
-                                .font(.caption2)
-                                .foregroundColor(.primary)
-                                .fontWeight(.medium)
-                                .frame(height: 12)
-                            
-                            RoundedRectangle(cornerRadius: 3)
-                                .fill(LinearGradient(
-                                    gradient: Gradient(colors: [.blue.opacity(0.8), .blue]),
-                                    startPoint: .top,
-                                    endPoint: .bottom
-                                ))
-                                .frame(width: 20, height: max(6, height))
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 3)
-                                        .stroke(.blue.opacity(0.3), lineWidth: 0.5)
-                                )
-                            
-                            Text(getDayLabel(index))
-                                .font(.caption2)
-                                .fontWeight(.medium)
-                                .foregroundColor(.secondary)
-                                .frame(height: 10)
-                        }
-                        .frame(maxWidth: .infinity)
-                    }
-                }
-                
-                // Compact min/max in single row
                 HStack {
-                    HStack(spacing: 3) {
-                        Circle()
-                            .fill(.green)
-                            .frame(width: 4, height: 4)
-                        Text("Min: \(weeklySpending.min() ?? 0, specifier: "%.0f")zł")
-                            .font(.caption2)
-                            .foregroundColor(.secondary)
-                    }
+                    let total = weeklySpending.reduce(0, +)
+                    let average = weeklySpending.isEmpty ? 0 : total / Double(weeklySpending.count)
                     
+                    Text("Total: **\(String(format: "%.0f", total))zł**")
                     Spacer()
-                    
-                    HStack(spacing: 3) {
-                        Circle()
-                            .fill(.orange)
-                            .frame(width: 4, height: 4)
-                        Text("Max: \(weeklySpending.max() ?? 0, specifier: "%.0f")zł")
-                            .font(.caption2)
-                            .foregroundColor(.secondary)
-                    }
+                    Text("Avg: **\(String(format: "%.0f", average))zł**")
+                    Spacer()
+                    Text("Max: **\(String(format: "%.0f", weeklySpending.max() ?? 0))zł**")
                 }
+                .font(.caption)
+                .foregroundColor(.secondary)
+                .padding(.top, 4)
             }
+            .padding(.vertical)
+            .padding(.horizontal, 12)
+            
         } else {
-            // Original layout for medium widgets
             VStack(alignment: .leading, spacing: 4) {
                 HStack {
                     Text("Last 7 days")
                         .font(.caption)
                         .foregroundColor(.secondary)
                     Spacer()
-                    Text("Total: \(weeklySpending.reduce(0, +), specifier: "%.0f")zł")
+                    Text("Total: \(String(format: "%.0f", weeklySpending.reduce(0, +)))zł")
                         .font(.caption2)
                         .fontWeight(.medium)
                 }
@@ -872,7 +828,7 @@ struct WeeklySpendingView: View {
     private func getDayLabel(_ index: Int) -> String {
         let calendar = Calendar.current
         let today = Date()
-        let targetDate = calendar.date(byAdding: .day, value: index - 6, to: today) ?? today
+        guard let targetDate = calendar.date(byAdding: .day, value: index - 6, to: today) else { return "" }
         let dayOfWeek = calendar.component(.weekday, from: targetDate)
         let days = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]
         return days[(dayOfWeek - 1) % 7]
@@ -891,6 +847,7 @@ struct CategoryChartView: View {
             Text("Top spending categories")
                 .font(.caption)
                 .foregroundColor(.secondary)
+                .padding(.bottom, 8)
             
             LazyVGrid(columns: columns, spacing: family == .systemLarge ? 8 : 6) {
                 ForEach(categories.prefix(itemCount), id: \.name) { category in
@@ -908,8 +865,8 @@ struct CategoryChartView: View {
                                     .lineLimit(1)
                                 
                                 if family == .systemLarge {
-                                    let percentage = categories.reduce(0) { $0 + $1.amount } > 0 ? 
-                                        (category.amount / categories.reduce(0) { $0 + $1.amount }) * 100 : 0
+                                    let totalSpending = categories.reduce(0) { $0 + $1.amount }
+                                    let percentage = totalSpending > 0 ? (category.amount / totalSpending) * 100 : 0
                                     Text("\(percentage, specifier: "%.0f")% of total")
                                         .font(.caption2)
                                         .foregroundColor(.secondary)
@@ -926,9 +883,8 @@ struct CategoryChartView: View {
                         }
                         
                         if family == .systemLarge {
-                            // Add a small progress bar to show relative spending
                             let maxAmount = categories.max(by: { $0.amount < $1.amount })?.amount ?? 1
-                            let percentage = category.amount / maxAmount
+                            let percentage = maxAmount > 0 ? category.amount / maxAmount : 0
                             
                             ZStack(alignment: .leading) {
                                 RoundedRectangle(cornerRadius: 2)
@@ -995,39 +951,38 @@ struct CategoryChartView: View {
     
     private func getCategoryChartColor(_ category: String) -> Color {
         switch category.lowercased() {
-        case "housing": return Color(red: 0.02, green: 0.68, blue: 0.13) // #05ad21
-        case "transportation": return Color(red: 0.67, green: 0.02, blue: 0.02) // #ab0505
-        case "food": return Color(red: 0.34, green: 0.2, blue: 1.0) // #5733FF
-        case "drinks": return Color(red: 1.0, green: 0.47, blue: 0.31) // #ff774f
-        case "shopping": return Color(red: 1.0, green: 0.34, blue: 0.2) // #ff5733
-        case "addictions": return Color(red: 1.0, green: 0.34, blue: 0.2) // #ff5733
-        case "work": return Color(red: 0.34, green: 0.2, blue: 1.0) // #5733ff
-        case "clothes": return Color(red: 1.0, green: 0.34, blue: 0.2) // #ff5733
-        case "health": return Color(red: 0.03, green: 0.73, blue: 0.71) // #07bab4
-        case "entertainment": return Color(red: 0.6, green: 0.02, blue: 0.51) // #990583
-        case "utilities": return Color(red: 0.34, green: 0.2, blue: 1.0) // #5733ff
-        case "debt": return Color(red: 1.0, green: 0.34, blue: 0.2) // #ff5733
-        case "education": return Color(red: 0.8, green: 0.6, blue: 0.11) // #cc9a1b
-        case "savings": return Color(red: 0.81, green: 0.04, blue: 0.5) // #cf0a80
-        case "travel": return Color(red: 0.2, green: 1.0, blue: 0.34) // #33FF57
-        case "animals", "pets": return Color(red: 0.51, green: 0.46, blue: 0.09) // #827717
-        case "gifts": return Color(red: 0.2, green: 1.0, blue: 0.34) // #33FF57
-        case "sports": return Color(red: 0.3, green: 0.69, blue: 0.31) // #4CAF50
-        case "tech": return Color(red: 0.01, green: 0.53, blue: 0.82) // #0288D1
-        case "goingout": return Color(red: 0.61, green: 0.15, blue: 0.69) // #9C27B0
-        case "subscriptions": return Color(red: 0.5, green: 0.2, blue: 1.0) // #8033ff
-        case "investments": return Color(red: 0.2, green: 1.0, blue: 0.54) // #33ff89
-        case "maintenance": return Color(red: 1.0, green: 0.55, blue: 0.2) // #ff8c33
-        case "insurance": return Color(red: 0.2, green: 0.34, blue: 1.0) // #3357ff
-        case "taxes": return Color(red: 1.0, green: 0.2, blue: 0.2) // #ff3333
-        case "children": return Color(red: 1.0, green: 0.2, blue: 0.82) // #ff33d1
-        case "donations": return Color(red: 0.2, green: 1.0, blue: 0.83) // #33ffd4
-        case "beauty": return Color(red: 1.0, green: 0.2, blue: 0.63) // #ff33a1
+        case "housing": return Color(red: 0.02, green: 0.68, blue: 0.13)
+        case "transportation": return Color(red: 0.67, green: 0.02, blue: 0.02)
+        case "food": return Color(red: 0.34, green: 0.2, blue: 1.0)
+        case "drinks": return Color(red: 1.0, green: 0.47, blue: 0.31)
+        case "shopping": return Color(red: 1.0, green: 0.34, blue: 0.2)
+        case "addictions": return Color(red: 1.0, green: 0.34, blue: 0.2)
+        case "work": return Color(red: 0.34, green: 0.2, blue: 1.0)
+        case "clothes": return Color(red: 1.0, green: 0.34, blue: 0.2)
+        case "health": return Color(red: 0.03, green: 0.73, blue: 0.71)
+        case "entertainment": return Color(red: 0.6, green: 0.02, blue: 0.51)
+        case "utilities": return Color(red: 0.34, green: 0.2, blue: 1.0)
+        case "debt": return Color(red: 1.0, green: 0.34, blue: 0.2)
+        case "education": return Color(red: 0.8, green: 0.6, blue: 0.11)
+        case "savings": return Color(red: 0.81, green: 0.04, blue: 0.5)
+        case "travel": return Color(red: 0.2, green: 1.0, blue: 0.34)
+        case "animals", "pets": return Color(red: 0.51, green: 0.46, blue: 0.09)
+        case "gifts": return Color(red: 0.2, green: 1.0, blue: 0.34)
+        case "sports": return Color(red: 0.3, green: 0.69, blue: 0.31)
+        case "tech": return Color(red: 0.01, green: 0.53, blue: 0.82)
+        case "goingout": return Color(red: 0.61, green: 0.15, blue: 0.69)
+        case "subscriptions": return Color(red: 0.5, green: 0.2, blue: 1.0)
+        case "investments": return Color(red: 0.2, green: 1.0, blue: 0.54)
+        case "maintenance": return Color(red: 1.0, green: 0.55, blue: 0.2)
+        case "insurance": return Color(red: 0.2, green: 0.34, blue: 1.0)
+        case "taxes": return Color(red: 1.0, green: 0.2, blue: 0.2)
+        case "children": return Color(red: 1.0, green: 0.2, blue: 0.82)
+        case "donations": return Color(red: 0.2, green: 1.0, blue: 0.83)
+        case "beauty": return Color(red: 1.0, green: 0.2, blue: 0.63)
         default: return .blue
         }
     }
 }
-
 
 struct WalletWidget: Widget {
     let kind: String = "WalletWidget"
@@ -1052,7 +1007,7 @@ struct AnalyticsWidget: Widget {
         }
         .configurationDisplayName("Analytics")
         .description("View spending analytics and charts")
-.supportedFamilies([.systemMedium, .systemLarge])
+        .supportedFamilies([.systemMedium, .systemLarge])
     }
 }
 
