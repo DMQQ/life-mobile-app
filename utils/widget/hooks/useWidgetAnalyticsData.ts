@@ -111,18 +111,13 @@ export const useWidgetAnalyticsData = () => {
                 current: limit.current,
             }))
 
-        // Real daily spending data for last 7 days
         const dailySpendingData = dailyStats?.statisticsDayOfWeek || []
         const weeklySpending = Array.from({ length: 7 }, (_, index) => {
-            const targetDay = moment()
-                .subtract(6 - index, "days")
-                .format("dddd")
-                .toLowerCase()
-            const dayData = dailySpendingData.find((day: any) => day?.day?.toLowerCase?.() === targetDay)
+            const dayNumber = index + 1
+            const dayData = dailySpendingData.find((day: any) => day.day === dayNumber)
             return dayData?.total || 0
         })
 
-        // Real category data from database
         const topCategories = [...(categoryStats?.statisticsLegend || [])]
             .sort((a: any, b: any) => b.total - a.total)
             .slice(0, 4)
@@ -131,7 +126,6 @@ export const useWidgetAnalyticsData = () => {
                 amount: category.total,
             }))
 
-        // Real savings calculation using database target
         const wallet = walletData?.wallet
         const monthlyIncome = monthlyStats?.statistics?.income || wallet?.income || 0
         const monthlyExpense = monthlyStats?.statistics?.expense || 0

@@ -481,16 +481,27 @@ struct TimelineWidgetView: View {
 
 struct AnalyticsWidgetView: View {
     var entry: Provider.Entry
+    @Environment(\.widgetFamily) var family
     
     private var currentView: Int {
         let minutes = Int(entry.date.timeIntervalSince1970) / 60
-        return minutes % 4
+        return minutes % 3
+    }
+    
+    private var analyticsData: AnalyticsData? {
+        guard let analyticsDataString = UserDefaults.shared?.string(forKey: "analytics_data"),
+              let data = analyticsDataString.data(using: .utf8),
+              let decoded = try? JSONDecoder().decode(AnalyticsData.self, from: data) else {
+            return nil
+        }
+        
+        
+        return decoded
     }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            if let analyticsDataString = UserDefaults.shared?.string(forKey: "analytics_data"),
-               let analyticsData = try? JSONDecoder().decode(AnalyticsData.self, from: analyticsDataString.data(using: .utf8) ?? Data()) {
+            if let data = analyticsData {
                 
                 HStack {
                     Text("📊 Analytics")
@@ -500,17 +511,15 @@ struct AnalyticsWidgetView: View {
                     Text(getViewTitle(currentView))
                         .font(.caption)
                         .foregroundColor(.secondary)
-                }
+                }.padding(.bottom, 6)
                 
                 switch currentView {
                 case 0:
-                    LimitsChartView(limits: analyticsData.limits)
+                    LimitsChartView(limits: data.limits, family: family)
                 case 1:
-                    WeeklySpendingView(weeklySpending: analyticsData.weeklySpending)
-                case 2:
-                    CategoryChartView(categories: analyticsData.topCategories)
+                    WeeklySpendingView(weeklySpending: data.weeklySpending, family: family)
                 default:
-                    SavingsView(savings: analyticsData.savings)
+                    CategoryChartView(categories: data.topCategories, family: family)
                 }
                 
             } else {
@@ -518,8 +527,19 @@ struct AnalyticsWidgetView: View {
                     Text("📊 Analytics")
                         .font(.headline)
                         .fontWeight(.bold)
-                    Text("No analytics data")
-                        .foregroundColor(.secondary)
+                    
+                    if let analyticsDataString = UserDefaults.shared?.string(forKey: "analytics_data") {
+                        Text("Data found but decode failed")
+                            .foregroundColor(.orange)
+                            .font(.caption)
+                        Text("Length: \(analyticsDataString.count)")
+                            .foregroundColor(.secondary)
+                            .font(.caption2)
+                    } else {
+                        Text("No analytics data in UserDefaults")
+                            .foregroundColor(.secondary)
+                            .font(.caption)
+                    }
                 }
             }
         }
@@ -532,88 +552,318 @@ struct AnalyticsWidgetView: View {
         switch index {
         case 0: return "Limits"
         case 1: return "Weekly"
-        case 2: return "Categories"
-        default: return "Savings"
+        default: return "Categories"
         }
     }
 }
 
 struct LimitsChartView: View {
     let limits: [AnalyticsLimit]
+    let family: WidgetFamily
     
     var body: some View {
-        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
-            ForEach(limits.prefix(4), id: \.category) { limit in
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack {
-                        Text(limit.category.capitalized)
-                            .font(.caption2)
-                            .fontWeight(.medium)
-                            .lineLimit(1)
+        let itemCount = family == .systemLarge ? 6 : 3
+        let columns = [GridItem(.flexible())]
+        
+        LazyVGrid(columns: columns, spacing: family == .systemLarge ? 12 : 6) {
+            ForEach(limits.prefix(itemCount), id: \.category) { limit in
+                VStack(alignment: .leading, spacing: family == .systemLarge ? 16 : 6) {
+                    HStack(spacing: 6) {
+                        Image(systemName: getCategorySystemIcon(limit.category))
+                            .font(.caption)
+                            .foregroundColor(getCategoryLimitColor(limit.category))
+                            .frame(width: 16, height: 16)
+                        
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text(limit.category.capitalized)
+                                .font(family == .systemLarge ? .caption2 : .caption2)
+                                .fontWeight(.medium)
+                                .lineLimit(1)
+                            
+                            if family == .systemLarge {
+                                Text("\(Int(limit.current))zł / \(Int(limit.amount))zł")
+                                    .font(.caption2)
+                                    .foregroundColor(.secondary)
+                                    .lineLimit(1)
+                            }
+                        }
+                        
                         Spacer()
-                        Text("\(Int(limit.current))/\(Int(limit.amount))")
-                            .font(.caption2)
-                            .foregroundColor(.secondary)
+                        
+                        if family != .systemLarge {
+                            Text("\(Int(limit.current))/\(Int(limit.amount))")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                        }
                     }
                     
-                    ZStack(alignment: .leading) {
-                        RoundedRectangle(cornerRadius: 3)
-                            .fill(Color.gray.opacity(0.3))
-                            .frame(height: 6)
+                    VStack(alignment: .leading, spacing: 2) {
+                        ZStack(alignment: .leading) {
+                            RoundedRectangle(cornerRadius: family == .systemLarge ? 4 : 3)
+                                .fill(Color.gray.opacity(0.2))
+                                .frame(height: family == .systemLarge ? 8 : 6)
+                            
+                            RoundedRectangle(cornerRadius: family == .systemLarge ? 4 : 3)
+                                .fill(LinearGradient(
+                                    gradient: Gradient(colors: [
+                                        limit.current > limit.amount ? .red.opacity(0.8) : getCategoryLimitColor(limit.category).opacity(0.8),
+                                        limit.current > limit.amount ? .red : getCategoryLimitColor(limit.category)
+                                    ]),
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                ))
+                                .frame(height: family == .systemLarge ? 8 : 6)
+                                .frame(maxWidth: .infinity)
+                                .scaleEffect(x: min(1.0, limit.current / limit.amount), anchor: .leading)
+                                .clipped()
+                        }
                         
-                        RoundedRectangle(cornerRadius: 3)
-                            .fill(limit.current > limit.amount ? .red : .blue)
-                            .frame(height: 6)
-                            .frame(maxWidth: .infinity)
-                            .scaleEffect(x: min(1.0, limit.current / limit.amount), anchor: .leading)
-                            .clipped()
+                        if family == .systemLarge {
+                            let percentage = limit.amount > 0 ? (limit.current / limit.amount) * 100 : 0
+                            let remaining = max(0, limit.amount - limit.current)
+                            
+                            HStack {
+                                Text("\(Int(percentage))% used")
+                                    .font(.caption2)
+                                    .foregroundColor(limit.current > limit.amount ? .red : .secondary)
+                                
+                                Spacer()
+                                
+                                if remaining > 0 {
+                                    Text("\(Int(remaining))zł left")
+                                        .font(.caption2)
+                                        .foregroundColor(.green)
+                                } else {
+                                    Text("\(Int(limit.current - limit.amount))zł over")
+                                        .font(.caption2)
+                                        .foregroundColor(.red)
+                                }
+                            }
+                        }
                     }
                 }
-                .padding(.horizontal, 8)
-                .padding(.vertical, 6)
+                .padding(.horizontal, family == .systemLarge ? 10 : 8)
+                .padding(.vertical, family == .systemLarge ? 8 : 6)
                 .background(
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(Color.primary.opacity(0.05))
+                    RoundedRectangle(cornerRadius: family == .systemLarge ? 10 : 8)
+                        .fill(getCategoryLimitColor(limit.category).opacity(0.05))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: family == .systemLarge ? 10 : 8)
+                                .stroke(getCategoryLimitColor(limit.category).opacity(0.2), lineWidth: 1)
+                        )
                 )
             }
+        }
+    }
+    
+    private func getCategorySystemIcon(_ category: String) -> String {
+        switch category.lowercased() {
+        case "housing": return "house.fill"
+        case "transportation": return "car.fill"
+        case "food": return "fork.knife"
+        case "drinks": return "wineglass.fill"
+        case "shopping": return "bag.fill"
+        case "addictions": return "smoke.fill"
+        case "work": return "briefcase.fill"
+        case "clothes": return "tshirt.fill"
+        case "health": return "pills.fill"
+        case "entertainment": return "tv.fill"
+        case "utilities": return "bolt.fill"
+        case "debt": return "creditcard.fill"
+        case "education": return "book.fill"
+        case "savings": return "banknote.fill"
+        case "travel": return "airplane"
+        case "animals", "pets": return "pawprint.fill"
+        case "gifts": return "gift.fill"
+        case "sports": return "figure.strengthtraining.traditional"
+        case "tech": return "laptopcomputer"
+        case "goingout": return "party.popper.fill"
+        case "subscriptions": return "arrow.clockwise"
+        case "investments": return "chart.line.uptrend.xyaxis"
+        case "maintenance": return "wrench.fill"
+        case "insurance": return "shield.checkered"
+        case "taxes": return "doc.text.fill"
+        case "children": return "figure.2.and.child.holdinghands"
+        case "donations": return "heart.fill"
+        case "beauty": return "face.smiling"
+        default: return "circle.fill"
+        }
+    }
+    
+    private func getCategoryLimitColor(_ category: String) -> Color {
+        switch category.lowercased() {
+        case "housing": return Color(red: 0.02, green: 0.68, blue: 0.13) // #05ad21
+        case "transportation": return Color(red: 0.67, green: 0.02, blue: 0.02) // #ab0505
+        case "food": return Color(red: 0.34, green: 0.2, blue: 1.0) // #5733FF
+        case "drinks": return Color(red: 1.0, green: 0.47, blue: 0.31) // #ff774f
+        case "shopping": return Color(red: 1.0, green: 0.34, blue: 0.2) // #ff5733
+        case "addictions": return Color(red: 1.0, green: 0.34, blue: 0.2) // #ff5733
+        case "work": return Color(red: 0.34, green: 0.2, blue: 1.0) // #5733ff
+        case "clothes": return Color(red: 1.0, green: 0.34, blue: 0.2) // #ff5733
+        case "health": return Color(red: 0.03, green: 0.73, blue: 0.71) // #07bab4
+        case "entertainment": return Color(red: 0.6, green: 0.02, blue: 0.51) // #990583
+        case "utilities": return Color(red: 0.34, green: 0.2, blue: 1.0) // #5733ff
+        case "debt": return Color(red: 1.0, green: 0.34, blue: 0.2) // #ff5733
+        case "education": return Color(red: 0.8, green: 0.6, blue: 0.11) // #cc9a1b
+        case "savings": return Color(red: 0.81, green: 0.04, blue: 0.5) // #cf0a80
+        case "travel": return Color(red: 0.2, green: 1.0, blue: 0.34) // #33FF57
+        case "animals", "pets": return Color(red: 0.51, green: 0.46, blue: 0.09) // #827717
+        case "gifts": return Color(red: 0.2, green: 1.0, blue: 0.34) // #33FF57
+        case "sports": return Color(red: 0.3, green: 0.69, blue: 0.31) // #4CAF50
+        case "tech": return Color(red: 0.01, green: 0.53, blue: 0.82) // #0288D1
+        case "goingout": return Color(red: 0.61, green: 0.15, blue: 0.69) // #9C27B0
+        case "subscriptions": return Color(red: 0.5, green: 0.2, blue: 1.0) // #8033ff
+        case "investments": return Color(red: 0.2, green: 1.0, blue: 0.54) // #33ff89
+        case "maintenance": return Color(red: 1.0, green: 0.55, blue: 0.2) // #ff8c33
+        case "insurance": return Color(red: 0.2, green: 0.34, blue: 1.0) // #3357ff
+        case "taxes": return Color(red: 1.0, green: 0.2, blue: 0.2) // #ff3333
+        case "children": return Color(red: 1.0, green: 0.2, blue: 0.82) // #ff33d1
+        case "donations": return Color(red: 0.2, green: 1.0, blue: 0.83) // #33ffd4
+        case "beauty": return Color(red: 1.0, green: 0.2, blue: 0.63) // #ff33a1
+        default: return .blue
         }
     }
 }
 
 struct WeeklySpendingView: View {
     let weeklySpending: [Double]
+    let family: WidgetFamily
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack {
-                Text("Last 7 days")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                Spacer()
-                Text("Total: \(weeklySpending.reduce(0, +), specifier: "%.0f")zł")
-                    .font(.caption2)
-                    .fontWeight(.medium)
-            }
-            
-            HStack(alignment: .bottom, spacing: 0) {
-                ForEach(0..<min(7, weeklySpending.count), id: \.self) { index in
-                    let maxHeight: CGFloat = 50
-                    let maxValue = weeklySpending.max() ?? 1
-                    let height = CGFloat(weeklySpending[index] / maxValue) * maxHeight
+        if family == .systemLarge {
+            // Compact layout for large widgets - better space utilization
+            VStack(alignment: .leading, spacing: 6) {
+                // Header with stats in single row
+                HStack {
+                    Text("Last 7 days")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
                     
-                    VStack(spacing: 2) {
-                        Text("\(Int(weeklySpending[index]))")
-                            .font(.caption2)
-                            .foregroundColor(.primary)
-                            .opacity(0.8)
-                        RoundedRectangle(cornerRadius: 2)
-                            .fill(.blue)
-                            .frame(height: max(4, height))
-                        Text(getDayLabel(index))
+                    Spacer()
+                    
+                    HStack(spacing: 12) {
+                        HStack(spacing: 2) {
+                            Text("Total:")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                            Text("\(weeklySpending.reduce(0, +), specifier: "%.0f")zł")
+                                .font(.caption2)
+                                .fontWeight(.medium)
+                        }
+                        
+                        HStack(spacing: 2) {
+                            Text("Avg:")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                            Text("\(weeklySpending.reduce(0, +) / 7, specifier: "%.0f")zł")
+                                .font(.caption2)
+                                .fontWeight(.medium)
+                        }
+                    }
+                }
+                
+                // Compact bar chart
+                HStack(alignment: .bottom, spacing: 6) {
+                    ForEach(0..<min(7, weeklySpending.count), id: \.self) { index in
+                        let maxHeight: CGFloat = 60
+                        let maxValue = weeklySpending.max() ?? 1
+                        let height = CGFloat(weeklySpending[index] / maxValue) * maxHeight
+                        
+                        VStack(spacing: 2) {
+                            Text("\(Int(weeklySpending[index]))")
+                                .font(.caption2)
+                                .foregroundColor(.primary)
+                                .fontWeight(.medium)
+                                .frame(height: 12)
+                            
+                            RoundedRectangle(cornerRadius: 3)
+                                .fill(LinearGradient(
+                                    gradient: Gradient(colors: [.blue.opacity(0.8), .blue]),
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                ))
+                                .frame(width: 20, height: max(6, height))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 3)
+                                        .stroke(.blue.opacity(0.3), lineWidth: 0.5)
+                                )
+                            
+                            Text(getDayLabel(index))
+                                .font(.caption2)
+                                .fontWeight(.medium)
+                                .foregroundColor(.secondary)
+                                .frame(height: 10)
+                        }
+                        .frame(maxWidth: .infinity)
+                    }
+                }
+                
+                // Compact min/max in single row
+                HStack {
+                    HStack(spacing: 3) {
+                        Circle()
+                            .fill(.green)
+                            .frame(width: 4, height: 4)
+                        Text("Min: \(weeklySpending.min() ?? 0, specifier: "%.0f")zł")
                             .font(.caption2)
                             .foregroundColor(.secondary)
                     }
-                    .frame(maxWidth: .infinity)
+                    
+                    Spacer()
+                    
+                    HStack(spacing: 3) {
+                        Circle()
+                            .fill(.orange)
+                            .frame(width: 4, height: 4)
+                        Text("Max: \(weeklySpending.max() ?? 0, specifier: "%.0f")zł")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                    }
+                }
+            }
+        } else {
+            // Original layout for medium widgets
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Text("Last 7 days")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    Spacer()
+                    Text("Total: \(weeklySpending.reduce(0, +), specifier: "%.0f")zł")
+                        .font(.caption2)
+                        .fontWeight(.medium)
+                }
+                
+                HStack(alignment: .bottom, spacing: 0) {
+                    ForEach(0..<min(7, weeklySpending.count), id: \.self) { index in
+                        let maxHeight: CGFloat = 50
+                        let maxValue = weeklySpending.max() ?? 1
+                        let height = CGFloat(weeklySpending[index] / maxValue) * maxHeight
+                        
+                        VStack(spacing: 2) {
+                            Text("\(Int(weeklySpending[index]))")
+                                .font(.caption2)
+                                .foregroundColor(.primary)
+                                .opacity(0.8)
+                            
+                            RoundedRectangle(cornerRadius: 2)
+                                .fill(LinearGradient(
+                                    gradient: Gradient(colors: [.blue.opacity(0.8), .blue]),
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                ))
+                                .frame(height: max(4, height))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 2)
+                                        .stroke(.blue.opacity(0.3), lineWidth: 0.5)
+                                )
+                            
+                            Text(getDayLabel(index))
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                        }
+                        .frame(maxWidth: .infinity)
+                    }
                 }
             }
         }
@@ -631,90 +881,153 @@ struct WeeklySpendingView: View {
 
 struct CategoryChartView: View {
     let categories: [AnalyticsCategory]
+    let family: WidgetFamily
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text("Top spending")
+        let itemCount = family == .systemLarge ? 6 : 3
+        let columns = [GridItem(.flexible())]
+        
+        VStack(alignment: .leading, spacing: 4) {
+            Text("Top spending categories")
                 .font(.caption)
                 .foregroundColor(.secondary)
             
-            ForEach(categories.prefix(4), id: \.name) { category in
-                HStack {
-                    Circle()
-                        .fill(getCategoryChartColor(category.name))
-                        .frame(width: 8, height: 8)
-                    Text(category.name)
-                        .font(.caption2)
-                        .lineLimit(1)
-                    Spacer()
-                    Text("\(category.amount, specifier: "%.0f")zł")
-                        .font(.caption2)
-                        .fontWeight(.medium)
+            LazyVGrid(columns: columns, spacing: family == .systemLarge ? 8 : 6) {
+                ForEach(categories.prefix(itemCount), id: \.name) { category in
+                    VStack(alignment: .leading, spacing: family == .systemLarge ? 6 : 4) {
+                        HStack(spacing: 6) {
+                            Image(systemName: getCategorySystemIcon(category.name))
+                                .font(.caption)
+                                .foregroundColor(getCategoryChartColor(category.name))
+                                .frame(width: 16, height: 16)
+                            
+                            VStack(alignment: .leading, spacing: 1) {
+                                Text(category.name.capitalized)
+                                    .font(family == .systemLarge ? .caption2 : .caption2)
+                                    .fontWeight(.medium)
+                                    .lineLimit(1)
+                                
+                                if family == .systemLarge {
+                                    let percentage = categories.reduce(0) { $0 + $1.amount } > 0 ? 
+                                        (category.amount / categories.reduce(0) { $0 + $1.amount }) * 100 : 0
+                                    Text("\(percentage, specifier: "%.0f")% of total")
+                                        .font(.caption2)
+                                        .foregroundColor(.secondary)
+                                        .lineLimit(1)
+                                }
+                            }
+                            
+                            Spacer()
+                            
+                            Text("\(category.amount, specifier: "%.0f")zł")
+                                .font(family == .systemLarge ? .caption : .caption2)
+                                .fontWeight(.medium)
+                                .foregroundColor(getCategoryChartColor(category.name))
+                        }
+                        
+                        if family == .systemLarge {
+                            // Add a small progress bar to show relative spending
+                            let maxAmount = categories.max(by: { $0.amount < $1.amount })?.amount ?? 1
+                            let percentage = category.amount / maxAmount
+                            
+                            ZStack(alignment: .leading) {
+                                RoundedRectangle(cornerRadius: 2)
+                                    .fill(Color.gray.opacity(0.2))
+                                    .frame(height: 4)
+                                
+                                RoundedRectangle(cornerRadius: 2)
+                                    .fill(getCategoryChartColor(category.name))
+                                    .frame(height: 4)
+                                    .frame(maxWidth: .infinity)
+                                    .scaleEffect(x: percentage, anchor: .leading)
+                                    .clipped()
+                            }
+                        }
+                    }
+                    .padding(.horizontal, family == .systemLarge ? 10 : 8)
+                    .padding(.vertical, family == .systemLarge ? 8 : 6)
+                    .background(
+                        RoundedRectangle(cornerRadius: family == .systemLarge ? 10 : 8)
+                            .fill(getCategoryChartColor(category.name).opacity(0.05))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: family == .systemLarge ? 10 : 8)
+                                    .stroke(getCategoryChartColor(category.name).opacity(0.2), lineWidth: 1)
+                            )
+                    )
                 }
             }
+        }
+    }
+    
+    private func getCategorySystemIcon(_ category: String) -> String {
+        switch category.lowercased() {
+        case "housing": return "house.fill"
+        case "transportation": return "car.fill"
+        case "food": return "fork.knife"
+        case "drinks": return "wineglass.fill"
+        case "shopping": return "bag.fill"
+        case "addictions": return "smoke.fill"
+        case "work": return "briefcase.fill"
+        case "clothes": return "tshirt.fill"
+        case "health": return "pills.fill"
+        case "entertainment": return "tv.fill"
+        case "utilities": return "bolt.fill"
+        case "debt": return "creditcard.fill"
+        case "education": return "book.fill"
+        case "savings": return "banknote.fill"
+        case "travel": return "airplane"
+        case "animals", "pets": return "pawprint.fill"
+        case "gifts": return "gift.fill"
+        case "sports": return "figure.strengthtraining.traditional"
+        case "tech": return "laptopcomputer"
+        case "goingout": return "party.popper.fill"
+        case "subscriptions": return "arrow.clockwise"
+        case "investments": return "chart.line.uptrend.xyaxis"
+        case "maintenance": return "wrench.fill"
+        case "insurance": return "shield.checkered"
+        case "taxes": return "doc.text.fill"
+        case "children": return "figure.2.and.child.holdinghands"
+        case "donations": return "heart.fill"
+        case "beauty": return "face.smiling"
+        default: return "circle.fill"
         }
     }
     
     private func getCategoryChartColor(_ category: String) -> Color {
         switch category.lowercased() {
-        case "food": return .orange
-        case "transportation": return .red
-        case "shopping": return .purple
-        case "entertainment": return .pink
+        case "housing": return Color(red: 0.02, green: 0.68, blue: 0.13) // #05ad21
+        case "transportation": return Color(red: 0.67, green: 0.02, blue: 0.02) // #ab0505
+        case "food": return Color(red: 0.34, green: 0.2, blue: 1.0) // #5733FF
+        case "drinks": return Color(red: 1.0, green: 0.47, blue: 0.31) // #ff774f
+        case "shopping": return Color(red: 1.0, green: 0.34, blue: 0.2) // #ff5733
+        case "addictions": return Color(red: 1.0, green: 0.34, blue: 0.2) // #ff5733
+        case "work": return Color(red: 0.34, green: 0.2, blue: 1.0) // #5733ff
+        case "clothes": return Color(red: 1.0, green: 0.34, blue: 0.2) // #ff5733
+        case "health": return Color(red: 0.03, green: 0.73, blue: 0.71) // #07bab4
+        case "entertainment": return Color(red: 0.6, green: 0.02, blue: 0.51) // #990583
+        case "utilities": return Color(red: 0.34, green: 0.2, blue: 1.0) // #5733ff
+        case "debt": return Color(red: 1.0, green: 0.34, blue: 0.2) // #ff5733
+        case "education": return Color(red: 0.8, green: 0.6, blue: 0.11) // #cc9a1b
+        case "savings": return Color(red: 0.81, green: 0.04, blue: 0.5) // #cf0a80
+        case "travel": return Color(red: 0.2, green: 1.0, blue: 0.34) // #33FF57
+        case "animals", "pets": return Color(red: 0.51, green: 0.46, blue: 0.09) // #827717
+        case "gifts": return Color(red: 0.2, green: 1.0, blue: 0.34) // #33FF57
+        case "sports": return Color(red: 0.3, green: 0.69, blue: 0.31) // #4CAF50
+        case "tech": return Color(red: 0.01, green: 0.53, blue: 0.82) // #0288D1
+        case "goingout": return Color(red: 0.61, green: 0.15, blue: 0.69) // #9C27B0
+        case "subscriptions": return Color(red: 0.5, green: 0.2, blue: 1.0) // #8033ff
+        case "investments": return Color(red: 0.2, green: 1.0, blue: 0.54) // #33ff89
+        case "maintenance": return Color(red: 1.0, green: 0.55, blue: 0.2) // #ff8c33
+        case "insurance": return Color(red: 0.2, green: 0.34, blue: 1.0) // #3357ff
+        case "taxes": return Color(red: 1.0, green: 0.2, blue: 0.2) // #ff3333
+        case "children": return Color(red: 1.0, green: 0.2, blue: 0.82) // #ff33d1
+        case "donations": return Color(red: 0.2, green: 1.0, blue: 0.83) // #33ffd4
+        case "beauty": return Color(red: 1.0, green: 0.2, blue: 0.63) // #ff33a1
         default: return .blue
         }
     }
 }
 
-struct SavingsView: View {
-    let savings: AnalyticsSavings
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Text("Monthly Progress")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                Spacer()
-                Text("\(savings.savedPercentage, specifier: "%.0f")%")
-                    .font(.caption)
-                    .fontWeight(.bold)
-                    .foregroundColor(savings.savedPercentage > 0 ? .green : .red)
-            }
-            
-            ZStack(alignment: .leading) {
-                RoundedRectangle(cornerRadius: 4)
-                    .fill(Color.gray.opacity(0.3))
-                    .frame(height: 8)
-                
-                RoundedRectangle(cornerRadius: 4)
-                    .fill(savings.savedPercentage > 0 ? .green : .red)
-                    .frame(width: abs(savings.savedPercentage) * 2, height: 8)
-            }
-            
-            HStack {
-                VStack(alignment: .leading) {
-                    Text("Saved")
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
-                    Text("\(savings.savedAmount, specifier: "%.0f")zł")
-                        .font(.caption)
-                        .fontWeight(.medium)
-                        .foregroundColor(.green)
-                }
-                Spacer()
-                VStack(alignment: .trailing) {
-                    Text("Target")
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
-                    Text("\(savings.targetAmount, specifier: "%.0f")zł")
-                        .font(.caption)
-                        .fontWeight(.medium)
-                }
-            }
-        }
-    }
-}
 
 struct WalletWidget: Widget {
     let kind: String = "WalletWidget"
@@ -739,7 +1052,7 @@ struct AnalyticsWidget: Widget {
         }
         .configurationDisplayName("Analytics")
         .description("View spending analytics and charts")
-        .supportedFamilies([.systemMedium])
+.supportedFamilies([.systemMedium, .systemLarge])
     }
 }
 

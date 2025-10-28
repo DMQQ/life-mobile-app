@@ -10,6 +10,9 @@ const prefix = Linking.createURL("/")
 
 export default function useDeeplinking(navigationRef: React.RefObject<NavigationContainerRef<RootStackParamList>>) {
     const navigate = (url: string) => {
+        console.log("Deeplink URL:", url)
+        if (!url.startsWith("mylife")) return
+
         if (url.includes("wallet/create-expense")) {
             navigationRef.current?.navigate<any>({
                 name: "WalletScreens",
