@@ -142,42 +142,24 @@ public class ExpoLiveActivityModule: Module {
   }
   
   private func resolveImagesForState(_ state: LiveActivityState) async -> (imageName: String?, dynamicIslandImageName: String?) {
-    logger.info("🔍 Starting image resolution for state")
-    logger.info("🔍 Original imageName: \(state.imageName ?? "nil")")
-    logger.info("🔍 Original dynamicIslandImageName: \(state.dynamicIslandImageName ?? "nil")")
-    
     var resolvedImageName: String?
     var resolvedDynamicIslandImageName: String?
     
-    // Special handling for AppIcon, SplashScreenLogo, and icon - copy to shared container
+    // Special handling for app icons - copy to shared container
     if state.imageName == "AppIcon" || state.imageName == "SplashScreenLogo" || state.imageName == "icon" {
-      if let copiedIconName = copyAppIconToSharedContainer() {
-        logger.info("✅ Icon copied to shared container: \(copiedIconName)")
-        resolvedImageName = copiedIconName
-      } else {
-        logger.error("❌ Failed to copy icon to shared container")
-      }
+      resolvedImageName = copyAppIconToSharedContainer()
     }
     
     if state.dynamicIslandImageName == "AppIcon" || state.dynamicIslandImageName == "SplashScreenLogo" || state.dynamicIslandImageName == "icon" {
-      if let copiedIconName = copyAppIconToSharedContainer() {
-        logger.info("✅ Icon copied to shared container for dynamic island: \(copiedIconName)")
-        resolvedDynamicIslandImageName = copiedIconName
-      } else {
-        logger.error("❌ Failed to copy icon to shared container for dynamic island")
-      }
+      resolvedDynamicIslandImageName = copyAppIconToSharedContainer()
     }
     
-    // Resolve images concurrently for non-icon cases
+    // Resolve remote images concurrently
     async let imageNameTask: String? = {
       if let name = state.imageName, name != "AppIcon" && name != "SplashScreenLogo" && name != "icon" {
-        logger.info("🔍 Resolving imageName: \(name)")
         do {
-          let resolved = try await resolveImage(from: name)
-          logger.info("✅ Resolved imageName: \(name) -> \(resolved)")
-          return resolved
+          return try await resolveImage(from: name)
         } catch {
-          logger.error("❌ Failed to resolve imageName: \(name), error: \(error.localizedDescription)")
           return nil
         }
       }
@@ -186,29 +168,22 @@ public class ExpoLiveActivityModule: Module {
     
     async let dynamicIslandImageNameTask: String? = {
       if let name = state.dynamicIslandImageName, name != "AppIcon" && name != "SplashScreenLogo" && name != "icon" {
-        logger.info("🔍 Resolving dynamicIslandImageName: \(name)")
         do {
-          let resolved = try await resolveImage(from: name)
-          logger.info("✅ Resolved dynamicIslandImageName: \(name) -> \(resolved)")
-          return resolved
+          return try await resolveImage(from: name)
         } catch {
-          logger.error("❌ Failed to resolve dynamicIslandImageName: \(name), error: \(error.localizedDescription)")
           return nil
         }
       }
       return nil
     }()
     
-    // Use resolved values from async tasks if AppIcon wasn't handled above
+    // Use resolved values from async tasks if app icon wasn't handled above
     if resolvedImageName == nil {
       resolvedImageName = await imageNameTask
     }
     if resolvedDynamicIslandImageName == nil {
       resolvedDynamicIslandImageName = await dynamicIslandImageNameTask
     }
-    
-    logger.info("🔍 Final resolved imageName: \(resolvedImageName ?? "nil")")
-    logger.info("🔍 Final resolved dynamicIslandImageName: \(resolvedDynamicIslandImageName ?? "nil")")
     
     return (resolvedImageName, resolvedDynamicIslandImageName)
   }
@@ -329,9 +304,6 @@ public class ExpoLiveActivityModule: Module {
         let finalImageName = resolvedImages.imageName ?? state.imageName
         let finalDynamicIslandImageName = resolvedImages.dynamicIslandImageName ?? state.dynamicIslandImageName
         
-        logger.info("🚀 Creating initial state with:")
-        logger.info("🚀 finalImageName: \(finalImageName ?? "nil")")
-        logger.info("🚀 finalDynamicIslandImageName: \(finalDynamicIslandImageName ?? "nil")")
         
         let initialState = LiveActivityAttributes.ContentState(
           title: state.title,

@@ -72,33 +72,22 @@ func resolveImage(from string: String, maxRetries: Int = 3) async throws -> Stri
 }
 
 func copyAppIconToSharedContainer() -> String? {
-  logger.info("🔍 Attempting to copy app icon to shared container")
-  
   guard let container = FileManager.default.containerURL(
     forSecurityApplicationGroupIdentifier: "group.com.dmq.mylifemobile"
   ) else {
-    logger.error("❌ Could not access shared container")
     return nil
   }
   
-  // Try to load the icon from ios/Life/icon.icon/Assets/icon.png
+  // Load original icon and resize at runtime (works reliably)
   let iconPath = Bundle.main.path(forResource: "icon", ofType: "png", inDirectory: "icon.icon/Assets")
   let rawImage: UIImage? = {
     if let iconPath = iconPath {
-      logger.info("✅ Found icon at: \(iconPath)")
       return UIImage(contentsOfFile: iconPath)
     }
-    logger.warning("⚠️ Icon not found in ios bundle, trying named assets")
-    return UIImage(named: "SplashScreenLogo") ?? 
-           UIImage(named: "AppIcon") ?? 
-           UIImage(named: "Icon-60") ??
-           UIImage(named: "Icon")
+    return UIImage(named: "SplashScreenLogo")
   }()
   
-  guard let rawImage = rawImage else {
-    logger.error("❌ Could not find app icon in main bundle")
-    return nil
-  }
+  guard let rawImage = rawImage else { return nil }
   
   // Resize to 36x36 for Dynamic Island
   let targetSize = CGSize(width: 36, height: 36)
@@ -107,26 +96,16 @@ func copyAppIconToSharedContainer() -> String? {
   let appIconImage = UIGraphicsGetImageFromCurrentImageContext()
   UIGraphicsEndImageContext()
   
-  guard let appIconImage = appIconImage else {
-    logger.error("❌ Could not resize app icon")
-    return nil
-  }
-  
-  // Convert to PNG data
-  guard let imageData = appIconImage.pngData() else {
-    logger.error("❌ Could not convert app icon to PNG data")
-    return nil
-  }
+  guard let appIconImage = appIconImage,
+        let imageData = appIconImage.pngData() else { return nil }
   
   let filename = "app-icon.png"
   let fileURL = container.appendingPathComponent(filename)
   
   do {
     try imageData.write(to: fileURL)
-    logger.info("✅ Successfully copied app icon to shared container: \(filename)")
     return filename
   } catch {
-    logger.error("❌ Failed to write app icon to shared container: \(error.localizedDescription)")
     return nil
   }
 }
