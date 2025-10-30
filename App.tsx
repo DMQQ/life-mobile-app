@@ -15,7 +15,6 @@ import ThemeContextProvider from "./utils/context/ThemeContext"
 import { ScrollYContextProvider } from "./utils/context/ScrollYContext"
 import { STORE_KEY } from "./utils/hooks/useUser"
 import { store } from "./utils/redux"
-import WidgetDataProvider from "./utils/widget/WidgetDataProvider"
 
 import { setLogVerbosity } from "@apollo/client"
 

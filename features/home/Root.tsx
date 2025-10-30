@@ -20,6 +20,11 @@ import SettingsModal from "./components/SettingsModal"
 import store from "@/utils/widget/store"
 import { ExtensionStorage } from "@bacons/apple-targets"
 import useWidgets from "@/utils/widget/hooks/useWidgets"
+import LiveAcitivty from "@/modules/expo-live-activity"
+
+import { Button } from "@/components"
+
+import { manageWorkoutActivity } from "@/utils/widget/live-activity"
 
 function Root({}: ScreenProps<"Root">) {
     const [loading, setLoading] = useState(true)
@@ -83,7 +88,21 @@ function Root({}: ScreenProps<"Root">) {
 
             <FloatingNotifications />
 
-            <Header
+            <View
+                style={{
+                    padding: 50,
+                }}
+            >
+                <Button
+                    onPress={() => {
+                        manageWorkoutActivity()
+                    }}
+                >
+                    Start
+                </Button>
+            </View>
+
+            {/* <Header
                 goBack={false}
                 animatedValue={parseFloat(home?.monthlySpendings?.expense || 0)}
                 animatedValueLoading={loading && home?.wallet?.balance === undefined}
@@ -92,7 +111,7 @@ function Root({}: ScreenProps<"Root">) {
                 scrollY={scrollY}
                 animated={true}
                 buttons={headerButtons}
-            />
+            /> */}
 
             <MainContent
                 data={home}

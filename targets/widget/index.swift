@@ -9,6 +9,6 @@ struct exportWidgets: WidgetBundle {
         TimelineWidget()
         AnalyticsWidget()
 //        widgetControl()
-//        WidgetLiveActivity()
+        WidgetLiveActivity()
     }
 }

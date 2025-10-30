@@ -26,7 +26,8 @@
                 "NSFaceIDUsageDescription": "Allow $(PRODUCT_NAME) to use Face ID.",
                 "NSLocationWhenInUseUsageDescription": "This app needs access to your location to show nearby places and assign locations to your expenses.",
                 "NSLocationAlwaysAndWhenInUseUsageDescription": "This app needs access to your location to show nearby places and assign locations to your expenses.",
-                "ITSAppUsesNonExemptEncryption": false
+                "ITSAppUsesNonExemptEncryption": false,
+                "NSSupportsLiveActivities": true
             },
             "bundleIdentifier": "com.dmq.mylifemobile",
             "associatedDomains": ["applinks:life.dmqq.dev"],
