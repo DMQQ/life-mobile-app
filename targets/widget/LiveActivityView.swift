@@ -189,9 +189,14 @@ import WidgetKit
         let effectiveStretch = isStretch && hasImage
 
         HStack(alignment: .center) {
-          if hasImage, isLeftImage {
+          if isLeftImage {
             if let imageName = contentState.imageName {
               alignedImage(imageName: imageName)
+            } else {
+              // Default app icon when no image is provided
+              Image(systemName: "app.badge")
+                .frame(width: 40, height: 40)
+                .foregroundColor(.primary)
             }
           }
 
@@ -220,10 +225,15 @@ import WidgetKit
             }
           }.layoutPriority(1)
 
-          if hasImage, !isLeftImage { // right side (default)
+          if !isLeftImage { // right side (default)
             Spacer()
             if let imageName = contentState.imageName {
               alignedImage(imageName: imageName)
+            } else {
+              // Default app icon when no image is provided
+              Image(systemName: "app.badge")
+                .frame(width: 40, height: 40)
+                .foregroundColor(.primary)
             }
           }
         }

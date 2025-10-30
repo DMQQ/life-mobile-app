@@ -1,8 +1,10 @@
 
 import ActivityKit
 import ExpoModulesCore
+import os.log
 
 public class ExpoLiveActivityModule: Module {
+  private let logger = Logger(subsystem: "com.expoLiveActivity", category: "Module")
   struct LiveActivityState: Record {
     @Field
     var title: String
@@ -138,11 +140,83 @@ public class ExpoLiveActivityModule: Module {
       newState.dynamicIslandImageName = try await resolveImage(from: name)
     }
   }
+  
+  private func resolveImagesForState(_ state: LiveActivityState) async -> (imageName: String?, dynamicIslandImageName: String?) {
+    logger.info("🔍 Starting image resolution for state")
+    logger.info("🔍 Original imageName: \(state.imageName ?? "nil")")
+    logger.info("🔍 Original dynamicIslandImageName: \(state.dynamicIslandImageName ?? "nil")")
+    
+    var resolvedImageName: String?
+    var resolvedDynamicIslandImageName: String?
+    
+    // Special handling for AppIcon, SplashScreenLogo, and icon - copy to shared container
+    if state.imageName == "AppIcon" || state.imageName == "SplashScreenLogo" || state.imageName == "icon" {
+      if let copiedIconName = copyAppIconToSharedContainer() {
+        logger.info("✅ Icon copied to shared container: \(copiedIconName)")
+        resolvedImageName = copiedIconName
+      } else {
+        logger.error("❌ Failed to copy icon to shared container")
+      }
+    }
+    
+    if state.dynamicIslandImageName == "AppIcon" || state.dynamicIslandImageName == "SplashScreenLogo" || state.dynamicIslandImageName == "icon" {
+      if let copiedIconName = copyAppIconToSharedContainer() {
+        logger.info("✅ Icon copied to shared container for dynamic island: \(copiedIconName)")
+        resolvedDynamicIslandImageName = copiedIconName
+      } else {
+        logger.error("❌ Failed to copy icon to shared container for dynamic island")
+      }
+    }
+    
+    // Resolve images concurrently for non-icon cases
+    async let imageNameTask: String? = {
+      if let name = state.imageName, name != "AppIcon" && name != "SplashScreenLogo" && name != "icon" {
+        logger.info("🔍 Resolving imageName: \(name)")
+        do {
+          let resolved = try await resolveImage(from: name)
+          logger.info("✅ Resolved imageName: \(name) -> \(resolved)")
+          return resolved
+        } catch {
+          logger.error("❌ Failed to resolve imageName: \(name), error: \(error.localizedDescription)")
+          return nil
+        }
+      }
+      return nil
+    }()
+    
+    async let dynamicIslandImageNameTask: String? = {
+      if let name = state.dynamicIslandImageName, name != "AppIcon" && name != "SplashScreenLogo" && name != "icon" {
+        logger.info("🔍 Resolving dynamicIslandImageName: \(name)")
+        do {
+          let resolved = try await resolveImage(from: name)
+          logger.info("✅ Resolved dynamicIslandImageName: \(name) -> \(resolved)")
+          return resolved
+        } catch {
+          logger.error("❌ Failed to resolve dynamicIslandImageName: \(name), error: \(error.localizedDescription)")
+          return nil
+        }
+      }
+      return nil
+    }()
+    
+    // Use resolved values from async tasks if AppIcon wasn't handled above
+    if resolvedImageName == nil {
+      resolvedImageName = await imageNameTask
+    }
+    if resolvedDynamicIslandImageName == nil {
+      resolvedDynamicIslandImageName = await dynamicIslandImageNameTask
+    }
+    
+    logger.info("🔍 Final resolved imageName: \(resolvedImageName ?? "nil")")
+    logger.info("🔍 Final resolved dynamicIslandImageName: \(resolvedDynamicIslandImageName ?? "nil")")
+    
+    return (resolvedImageName, resolvedDynamicIslandImageName)
+  }
 
   private func observePushToStartToken() {
     guard #available(iOS 17.2, *), ActivityAuthorizationInfo().areActivitiesEnabled else { return }
 
-    print("Observing push to start token updates...")
+    logger.info("Observing push to start token updates...")
     Task {
       for await data in Activity<LiveActivityAttributes>.pushToStartTokenUpdates {
         let token = data.reduce("") { $0 + String(format: "%02x", $1) }
@@ -159,13 +233,16 @@ public class ExpoLiveActivityModule: Module {
         let activityId = activityUpdate.id
         let activityState = activityUpdate.activityState
 
-        print("Received activity update: \(activityId), \(activityState)")
+        logger.info("Received activity update: \(activityId), \(String(describing: activityState))")
 
         guard
           let activity = Activity<LiveActivityAttributes>.activities.first(where: {
             $0.id == activityId
           })
-        else { return print("Didn't find activity with ID \(activityId)") }
+        else { 
+          logger.warning("Didn't find activity with ID \(activityId)")
+          return 
+        }
 
         if case .active = activityState {
           Task {
@@ -175,7 +252,7 @@ public class ExpoLiveActivityModule: Module {
           }
 
           if pushNotificationsEnabled {
-            print("Adding push token observer for activity \(activity.id)")
+            logger.info("Adding push token observer for activity \(activity.id)")
             Task {
               for await pushToken in activity.pushTokenUpdates {
                 let pushTokenString = pushToken.reduce("") { $0 + String(format: "%02x", $1) }
@@ -206,7 +283,7 @@ public class ExpoLiveActivityModule: Module {
 
     Events("onTokenReceived", "onPushToStartTokenReceived", "onStateChange")
 
-    Function("startActivity") {
+    AsyncFunction("startActivity") {
       (state: LiveActivityState, maybeConfig: LiveActivityConfig?) -> String in
       guard #available(iOS 16.2, *) else { throw UnsupportedOSException("16.2") }
 
@@ -246,11 +323,23 @@ public class ExpoLiveActivityModule: Module {
           contentFit: config.contentFit
         )
 
+        // Resolve images before starting activity
+        let resolvedImages = await resolveImagesForState(state)
+        
+        let finalImageName = resolvedImages.imageName ?? state.imageName
+        let finalDynamicIslandImageName = resolvedImages.dynamicIslandImageName ?? state.dynamicIslandImageName
+        
+        logger.info("🚀 Creating initial state with:")
+        logger.info("🚀 finalImageName: \(finalImageName ?? "nil")")
+        logger.info("🚀 finalDynamicIslandImageName: \(finalDynamicIslandImageName ?? "nil")")
+        
         let initialState = LiveActivityAttributes.ContentState(
           title: state.title,
           subtitle: state.subtitle,
           timerEndDateInMilliseconds: state.progressBar?.date,
-          progress: state.progressBar?.progress
+          progress: state.progressBar?.progress,
+          imageName: finalImageName,
+          dynamicIslandImageName: finalDynamicIslandImageName
         )
 
         let activity = try Activity.request(
@@ -259,10 +348,14 @@ public class ExpoLiveActivityModule: Module {
           pushType: pushNotificationsEnabled ? .token : nil
         )
 
-        Task {
-          var newState = activity.content.state
-          try await updateImages(state: state, newState: &newState)
-          await activity.update(ActivityContent(state: newState, staleDate: nil))
+        // Only update for remote images that might have failed initial resolution
+        if (state.imageName?.hasPrefix("http") == true && resolvedImages.imageName == nil) ||
+           (state.dynamicIslandImageName?.hasPrefix("http") == true && resolvedImages.dynamicIslandImageName == nil) {
+          Task {
+            var newState = activity.content.state
+            try await updateImages(state: state, newState: &newState)
+            await activity.update(ActivityContent(state: newState, staleDate: nil))
+          }
         }
 
         return activity.id
@@ -281,7 +374,7 @@ public class ExpoLiveActivityModule: Module {
       else { throw ActivityNotFoundException(activityId) }
 
       Task {
-        print("Stopping activity with id: \(activityId)")
+        logger.info("Stopping activity with id: \(activityId)")
         var newState = LiveActivityAttributes.ContentState(
           title: state.title,
           subtitle: state.subtitle,
@@ -308,7 +401,7 @@ public class ExpoLiveActivityModule: Module {
       else { throw ActivityNotFoundException(activityId) }
 
       Task {
-        print("Updating activity with id: \(activityId)")
+        logger.info("Updating activity with id: \(activityId)")
         var newState = LiveActivityAttributes.ContentState(
           title: state.title,
           subtitle: state.subtitle,

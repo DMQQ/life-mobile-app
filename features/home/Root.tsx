@@ -88,7 +88,6 @@ function Root({}: ScreenProps<"Root">) {
                     progress: 0.5,
                     date: new Date(Date.now() + 60 * 1000 * 5).getTime(),
                 },
-                imageName: "icon",
                 dynamicIslandImageName: "icon",
             },
             {
