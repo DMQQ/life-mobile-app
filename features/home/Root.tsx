@@ -20,6 +20,7 @@ import SettingsModal from "./components/SettingsModal"
 import store from "@/utils/widget/store"
 import { ExtensionStorage } from "@bacons/apple-targets"
 import useWidgets from "@/utils/widget/hooks/useWidgets"
+import { startActivity } from "@/modules/expo-live-activity"
 
 function Root({}: ScreenProps<"Root">) {
     const [loading, setLoading] = useState(true)
@@ -75,6 +76,35 @@ function Root({}: ScreenProps<"Root">) {
     useEffect(() => {
         store.set("test_key", "")
         ExtensionStorage.reloadWidget()
+    }, [])
+
+    useEffect(() => {
+        startActivity?.(
+            {
+                title: "Life App",
+                subtitle: "Your personal finance companion",
+
+                progressBar: {
+                    progress: 0.5,
+                    date: new Date(Date.now() + 60 * 1000 * 5).getTime(),
+                },
+                imageName: "icon",
+                dynamicIslandImageName: "icon",
+            },
+            {
+                backgroundColor: Colors.primary,
+                titleColor: Colors.secondary,
+                padding: 15,
+                deepLinkUrl: "life://timeline",
+                contentFit: "contain",
+                timerType: "circular",
+                progressViewTint: Colors.secondary,
+                imageSize: {
+                    width: 40,
+                    height: 40,
+                },
+            },
+        )
     }, [])
 
     return (
