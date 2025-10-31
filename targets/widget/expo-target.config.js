@@ -4,6 +4,8 @@ module.exports = (config) => ({
     bundleIdentifier: ".lifewidget",
     entitlements: {
         "com.apple.security.application-groups": ["group.com.dmq.mylifemobile"],
+        "aps-enviroment": "production",
+        NSSupportsLiveActivities: true,
     },
     deploymentTarget: "18.0",
 })
