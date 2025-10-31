@@ -11,7 +11,7 @@ const prefix = Linking.createURL("/")
 export default function useDeeplinking(navigationRef: React.RefObject<NavigationContainerRef<RootStackParamList>>) {
     const navigate = (url: string) => {
         console.log("Deeplink URL:", url)
-        if (!url.startsWith("mylife")) return
+        if (!url.startsWith("mylife") && !url.startsWith("lifeapp")) return
 
         if (url.includes("wallet/create-expense")) {
             navigationRef.current?.navigate<any>({
@@ -34,6 +34,16 @@ export default function useDeeplinking(navigationRef: React.RefObject<Navigation
                 timelineId,
             })
         } else if (url.includes("timeline")) {
+            navigationRef.current?.navigate("TimelineScreens", {
+                screen: "",
+            })
+        } else if (url.includes("activity/")) {
+            // Handle Live Activity deep links
+            const eventId = url.split("/").pop()
+            console.log("Live Activity deep link for eventId:", eventId)
+            
+            // You can navigate to a specific screen or show a completion modal
+            // For now, let's navigate to timeline
             navigationRef.current?.navigate("TimelineScreens", {
                 screen: "",
             })

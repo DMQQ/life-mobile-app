@@ -2,36 +2,42 @@ import ExpoModulesCore
 import ActivityKit
 import OSLog
 
-private let logger = os.Logger(subsystem: "com.dmq.mylifemobile", category: "ExpoLiveActivity")
-
-// --- DATA MODEL ---
-// This MUST be identical to the struct in WidgetLiveActivity.swift
+// MUST exactly match the WidgetAttributes struct in WidgetLiveActivity.
 struct WidgetAttributes: ActivityAttributes {
     public struct ContentState: Codable, Hashable {
-        // Dynamic properties that change
         var title: String
         var description: String
         var startTime: Date
         var endTime: Date
+        var isCompleted: Bool
+        var progress: Double
     }
-
-    // Fixed properties that don't change
-    var name: String
-    var deepLinkUrl: String // For deep linking
+    
+    var eventId: String
+    var deepLinkURL: String
 }
-// --- END DATA MODEL ---
-
 
 public class ExpoLiveActivityModule: Module {
+    private let logger = Logger(subsystem: "com.dmq.mylifemobile", category: "LiveActivity")
+    
+    // Each module class must implement the definition function. The definition consists of components
+    // that describes the module's functionality and behavior.
+    // See https://docs.expo.dev/modules/module-api for more details about available components.
     public func definition() -> ModuleDefinition {
+        // Sets the name of the module that JavaScript code will use to refer to the module. Takes a string as an argument.
+        // Can be inferred from module's class name, but it's recommended to set it explicitly for clarity.
+        // The module will be accessible from `requireNativeModule('ExpoLiveActivity')` in JavaScript.
         Name("ExpoLiveActivity")
         
         Events("onLiveActivityCancel")
         
         Function("areActivitiesEnabled") { () -> Bool in
             if #available(iOS 16.2, *) {
-                return ActivityAuthorizationInfo().areActivitiesEnabled
+                let enabled = ActivityAuthorizationInfo().areActivitiesEnabled
+                self.logger.info("Activities enabled check: \(enabled)")
+                return enabled
             } else {
+                self.logger.warning("iOS version below 16.2, activities not supported")
                 return false
             }
         }
@@ -44,97 +50,134 @@ public class ExpoLiveActivityModule: Module {
             }
         }
         
-        Function("startActivity") { (name: String, jsonString: String, deepLinkUrl: String) -> Bool in
-            guard #available(iOS 16.2, *) else {
-                logger.error("❌ Live Activity not supported on this iOS version")
-                return false
-            }
-
-            do {
-                guard let data = jsonString.data(using: .utf8) else {
-                    logger.error("❌ Invalid UTF-8 JSON string for start")
-                    return false
+        AsyncFunction("startCountdownActivity") { (eventId: String, deepLinkURL: String, title: String, description: String, endTime: String) -> String? in
+            if #available(iOS 16.2, *) {
+                self.logger.info("Starting Live Activity for eventId: \(eventId)")
+                self.logger.info("EndTime string: \(endTime)")
+                self.logger.info("DeepLink URL: \(deepLinkURL)")
+                self.logger.info("Title: \(title)")
+                self.logger.info("Description: \(description)")
+                
+                let dateFormatter = ISO8601DateFormatter()
+                dateFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+                guard let endDate = dateFormatter.date(from: endTime) else {
+                    self.logger.error("Failed to parse end date: \(endTime)")
+                    return nil
                 }
                 
-                let decoder = JSONDecoder()
-                // Assumes you send timestamps in SECONDS from JavaScript (e.g., Date.now() / 1000)
-                decoder.dateDecodingStrategy = .secondsSince1970 
-
-                let state = try decoder.decode(WidgetAttributes.ContentState.self, from: data)
-                let attributes = WidgetAttributes(name: name, deepLinkUrl: deepLinkUrl)
-                let content = ActivityContent(state: state, staleDate: nil)
-
-                let activity = try Activity.request(attributes: attributes, content: content)
-                logger.log("✅ Live Activity started: \(activity.id, privacy: .public)")
-
-                NotificationCenter.default.addObserver(self, selector: #selector(self.onLiveActivityCancel), name: Notification.Name("onLiveActivityCancel"), object: nil)
-                return true
-            } catch {
-                logger.error("❌ Failed to start Live Activity: \(error.localizedDescription, privacy: .public)")
-                return false
+                self.logger.info("Parsed end date: \(endDate)")
+                
+                let startDate = Date()
+                let totalDuration = endDate.timeIntervalSince(startDate)
+                let progress = totalDuration > 0 ? 1.0 : 0.0
+                
+                self.logger.info("Start date: \(startDate)")
+                self.logger.info("Total duration: \(totalDuration) seconds")
+                self.logger.info("Initial progress: \(progress)")
+                
+                let attributes = WidgetAttributes(eventId: eventId, deepLinkURL: deepLinkURL)
+                self.logger.info("Created attributes with eventId: \(eventId)")
+                
+                let contentState = WidgetAttributes.ContentState(
+                    title: title,
+                    description: description,
+                    startTime: startDate,
+                    endTime: endDate,
+                    isCompleted: false,
+                    progress: progress
+                )
+                
+                self.logger.info("Created content state successfully")
+                
+                // Set stale date after end time - iOS will clean up stale activities
+                let staleDate = endDate.addingTimeInterval(10.0) // 5 minutes after end
+                let activityContent = ActivityContent(state: contentState, staleDate: staleDate)
+                self.logger.info("Created activity content with stale date: \(staleDate)")
+                
+                do {
+                    self.logger.info("About to request activity with attributes")
+                    
+                    // Check authorization status
+                    let authInfo = ActivityAuthorizationInfo()
+                    self.logger.info("Activity authorization status: \(authInfo.areActivitiesEnabled)")
+                    
+                    let activity = try Activity.request(attributes: attributes, content: activityContent)
+                    self.logger.info("Activity created successfully with ID: \(activity.id)")
+                    self.logger.info("Activity state: \(String(describing: activity.activityState))")
+                    
+                    // Activity will automatically become stale and be cleaned up by iOS
+                    
+                    NotificationCenter.default.addObserver(self, selector: #selector(self.onLiveActivityCancel), name: Notification.Name("onLiveActivityCancel"), object: nil)
+                    return activity.id
+                } catch {
+                    self.logger.error("Failed to create activity with error: \(error.localizedDescription)")
+                    self.logger.error("Error details: \(String(describing: error))")
+                    self.logger.error("Error type: \(type(of: error))")
+                    
+                    return nil
+                }
+            } else {
+                self.logger.error("iOS version is below 16.2, Live Activities not supported")
+                return nil
             }
         }
         
-        Function("updateActivity") { (jsonString: String) -> Void in
-            guard #available(iOS 16.2, *) else { return }
-            
-            do {
-                guard let data = jsonString.data(using: .utf8) else {
-                    logger.error("❌ Invalid UTF-8 JSON string for update")
-                    return
-                }
-
-                let decoder = JSONDecoder()
-                decoder.dateDecodingStrategy = .secondsSince1970 
-
-                let contentState = try decoder.decode(WidgetAttributes.ContentState.self, from: data)
-                
+        Function("updateActivity") { (progress: Double, isCompleted: Bool) -> Void in
+            if #available(iOS 16.2, *) {
                 Task {
                     for activity in Activity<WidgetAttributes>.activities {
-                        await activity.update(using: contentState)
-                        logger.log("✅ Live Activity updated")
+                        let currentState = activity.content.state
+                        let newContentState = WidgetAttributes.ContentState(
+                            title: currentState.title,
+                            description: currentState.description,
+                            startTime: currentState.startTime,
+                            endTime: currentState.endTime,
+                            isCompleted: isCompleted,
+                            progress: progress
+                        )
+                        await activity.update(using: newContentState)
                     }
                 }
-            } catch {
-                logger.error("❌ Failed to update Live Activity: \(error.localizedDescription, privacy: .public)")
             }
         }
         
-        Function("endActivity") { (finalStateJSON: String, dismissalTime: Double) -> Void in
-            guard #available(iOS 16.2, *) else { return }
-            
-            // dismissalTime is expected to be in SECONDS since epoch
-            let dismissalDate = Date(timeIntervalSince1970: dismissalTime)
-
-            guard let data = finalStateJSON.data(using: .utf8) else {
-                logger.error("❌ Invalid final state JSON for endActivity")
-                return
-            }
-
-            do {
-                let decoder = JSONDecoder()
-                decoder.dateDecodingStrategy = .secondsSince1970
-                let finalContentState = try decoder.decode(WidgetAttributes.ContentState.self, from: data)
-                let finalContent = ActivityContent(state: finalContentState, staleDate: nil)
-
+        Function("endActivity") { () -> Void in
+            if #available(iOS 16.2, *) {
                 Task {
                     for activity in Activity<WidgetAttributes>.activities {
-                        // End the activity with the final content and schedule its removal
-                        await activity.end(finalContent, dismissalPolicy: .after(dismissalDate))
-                        logger.log("✅ Activity scheduled to end and dismiss at \(dismissalDate.description, privacy: .public)")
+                        await activity.end(nil, dismissalPolicy: .default)
                     }
                 }
+                
                 NotificationCenter.default.removeObserver(self, name: Notification.Name("onLiveActivityCancel"), object: nil)
-
-            } catch {
-                logger.error("❌ Failed to decode final state for endActivity: \(error.localizedDescription, privacy: .public)")
             }
         }
-    } // End of definition()
-
+        
+        Function("getActivityToken") { () -> String? in
+            if #available(iOS 16.2, *) {
+                return Activity<WidgetAttributes>.activities.first?.id
+            } else {
+                return nil
+            }
+        }
+        
+        Function("cancelActivityById") { (activityId: String) -> Void in
+            if #available(iOS 16.2, *) {
+                Task {
+                    for activity in Activity<WidgetAttributes>.activities {
+                        if activity.id == activityId {
+                            await activity.end(nil, dismissalPolicy: .immediate)
+                            break
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
     @objc
     func onLiveActivityCancel() {
         sendEvent("onLiveActivityCancel", [:])
     }
     
-} // End of class
+}

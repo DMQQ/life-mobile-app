@@ -20,11 +20,10 @@ import SettingsModal from "./components/SettingsModal"
 import store from "@/utils/widget/store"
 import { ExtensionStorage } from "@bacons/apple-targets"
 import useWidgets from "@/utils/widget/hooks/useWidgets"
-import LiveAcitivty from "@/modules/expo-live-activity"
 
 import { Button } from "@/components"
-
-import { manageWorkoutActivity } from "@/utils/widget/live-activity"
+import expoLiveActivity from "@/modules/expo-live-activity"
+import { useActivityManager } from "@/utils/hooks/useActivityManager"
 
 function Root({}: ScreenProps<"Root">) {
     const [loading, setLoading] = useState(true)
@@ -58,6 +57,8 @@ function Root({}: ScreenProps<"Root">) {
         : 0
     const isIncreasing = trendPercentage > 0
 
+    const { startActivity } = useActivityManager()
+
     const headerButtons = useMemo(
         () => [
             {
@@ -72,6 +73,17 @@ function Root({}: ScreenProps<"Root">) {
             {
                 icon: <AntDesign name="setting" size={20} color={Colors.foreground} />,
                 onPress: () => setShowSettings(true),
+            },
+            {
+                icon: <AntDesign name="clock-circle" size={20} color={Colors.foreground} />,
+                onPress: () =>
+                    startActivity({
+                        eventId: `test-activity-${Date.now()}`,
+                        description: "Test Activity",
+                        title: "Countdown",
+                        endTime: new Date(Date.now() + 0.5 * 60 * 1000),
+                        deepLinkURL: "lifeapp://activity/test",
+                    }),
             },
         ],
         [data?.notifications],
@@ -88,21 +100,7 @@ function Root({}: ScreenProps<"Root">) {
 
             <FloatingNotifications />
 
-            <View
-                style={{
-                    padding: 50,
-                }}
-            >
-                <Button
-                    onPress={() => {
-                        manageWorkoutActivity()
-                    }}
-                >
-                    Start
-                </Button>
-            </View>
-
-            {/* <Header
+            <Header
                 goBack={false}
                 animatedValue={parseFloat(home?.monthlySpendings?.expense || 0)}
                 animatedValueLoading={loading && home?.wallet?.balance === undefined}
@@ -111,7 +109,7 @@ function Root({}: ScreenProps<"Root">) {
                 scrollY={scrollY}
                 animated={true}
                 buttons={headerButtons}
-            /> */}
+            />
 
             <MainContent
                 data={home}

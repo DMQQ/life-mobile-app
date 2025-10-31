@@ -154,7 +154,7 @@ export default function OptionsPicker({
                         },
                     ]}
                 >
-                    {Icons[category].icon}
+                    {Icons[category]?.icon ?? null}
                     <Text
                         style={{
                             color:
