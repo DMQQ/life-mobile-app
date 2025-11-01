@@ -31,7 +31,7 @@ export const useActivityManager = (): UseActivityManagerReturn => {
             }
         })
 
-        console.log("is pending ", ExpoLiveActivityModule.isActivityInProgress())
+        ExpoLiveActivityModule.saveAppIconToSharedStorage()
     }, [])
 
     useEffect(() => {

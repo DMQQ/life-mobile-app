@@ -347,6 +347,14 @@ public class ExpoLiveActivityModule: Module {
                 self.logger.warning("iOS version below 17.2, push-to-start not supported")
             }
         }
+        
+        Function("saveAppIconToSharedStorage") { () -> Bool in
+            return self.saveAppIconToSharedStorage()
+        }
+        
+        Function("saveImageToSharedStorage") { (imageUri: String) -> Bool in
+            return self.saveImageToSharedStorage(imageUri: imageUri)
+        }
     }
     
     private func observePushToStartToken() {
@@ -494,6 +502,134 @@ public class ExpoLiveActivityModule: Module {
                     self.logger.info("🟡 Activity Content Update - Title: \(newContent.state.title)")
                 }
             }
+        }
+    }
+    
+    private func saveAppIconToSharedStorage() -> Bool {
+        guard let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.dmq.mylifemobile") else {
+            self.logger.error("Failed to get shared container URL")
+            return false
+        }
+        
+        // Get the app icon from the bundle
+        guard let appIcon = getAppIconFromBundle() else {
+            self.logger.error("Failed to get app icon from bundle")
+            return false
+        }
+        
+        // Save to shared container as PNG to preserve transparency
+        let iconURL = containerURL.appendingPathComponent("AppIcon.png")
+        
+        // Ensure the image preserves alpha channel
+        let renderer = UIGraphicsImageRenderer(size: appIcon.size)
+        let transparentImage = renderer.image { context in
+            appIcon.draw(at: .zero)
+        }
+        
+        guard let pngData = transparentImage.pngData() else {
+            self.logger.error("Failed to convert app icon to PNG data")
+            return false
+        }
+        
+        do {
+            try pngData.write(to: iconURL)
+            self.logger.info("Successfully saved app icon to shared storage")
+            return true
+        } catch {
+            self.logger.error("Failed to write app icon to shared storage: \(error.localizedDescription)")
+            return false
+        }
+    }
+    
+    private func getAppIconFromBundle() -> UIImage? {
+        // First try to get from the main bundle
+        if let appIcon = UIImage(named: "AppIcon") {
+            return appIcon
+        }
+        
+        // Fallback: try to get from info.plist
+        guard let iconsDictionary = Bundle.main.infoDictionary?["CFBundleIcons"] as? [String: Any],
+              let primaryIconsDictionary = iconsDictionary["CFBundlePrimaryIcon"] as? [String: Any],
+              let iconFiles = primaryIconsDictionary["CFBundleIconFiles"] as? [String] else {
+            return nil
+        }
+        
+        // Try each icon file until we find one that works
+        for iconName in iconFiles.reversed() { // Start with the largest icon
+            if let icon = UIImage(named: iconName) {
+                return icon
+            }
+        }
+        
+        return nil
+    }
+    
+    private func saveImageToSharedStorage(imageUri: String) -> Bool {
+        guard let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.dmq.mylifemobile") else {
+            self.logger.error("Failed to get shared container URL")
+            return false
+        }
+        
+        // Handle different URI formats (file://, http://, data:, or local path)
+        var image: UIImage?
+        
+        if imageUri.hasPrefix("data:image") {
+            // Handle base64 data URI
+            if let dataString = imageUri.components(separatedBy: ",").last,
+               let imageData = Data(base64Encoded: dataString) {
+                image = UIImage(data: imageData)
+            }
+        } else if imageUri.hasPrefix("file://") {
+            // Handle file:// URI
+            let filePath = String(imageUri.dropFirst(7)) // Remove "file://"
+            let fileURL = URL(fileURLWithPath: filePath)
+            if let imageData = try? Data(contentsOf: fileURL) {
+                image = UIImage(data: imageData)
+            }
+        } else if imageUri.hasPrefix("http://") || imageUri.hasPrefix("https://") {
+            // Handle remote URL (synchronous for simplicity, could be async)
+            if let url = URL(string: imageUri),
+               let imageData = try? Data(contentsOf: url) {
+                image = UIImage(data: imageData)
+            }
+        } else {
+            // Handle local file path or asset name
+            if FileManager.default.fileExists(atPath: imageUri) {
+                if let imageData = try? Data(contentsOf: URL(fileURLWithPath: imageUri)) {
+                    image = UIImage(data: imageData)
+                }
+            } else {
+                // Try as asset name
+                image = UIImage(named: imageUri)
+            }
+        }
+        
+        guard let finalImage = image else {
+            self.logger.error("Failed to load image from URI: \(imageUri)")
+            return false
+        }
+        
+        // Save to shared container as PNG to preserve transparency
+        let iconURL = containerURL.appendingPathComponent("AppIcon.png")
+        
+        // Ensure the image preserves alpha channel
+        let renderer = UIGraphicsImageRenderer(size: finalImage.size)
+        let transparentImage = renderer.image { context in
+            finalImage.draw(at: .zero)
+        }
+        
+        guard let pngData = transparentImage.pngData() else {
+            self.logger.error("Failed to convert image to PNG data")
+            return false
+        }
+        
+        do {
+            try pngData.write(to: iconURL)
+            self.logger.info("Successfully saved image to shared storage from URI: \(imageUri)")
+            return true
+        } catch {
+            self.logger.error("Failed to write image to shared storage: \(error.localizedDescription)")
+            return false
         }
     }
 }

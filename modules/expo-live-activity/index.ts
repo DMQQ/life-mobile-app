@@ -52,6 +52,8 @@ declare class ExpoLiveActivityModule extends NativeModule<ExpoLiveActivityModule
     endActivity(): void
 
     getPushToStartToken(): Promise<string | null>
+
+    saveAppIconToSharedStorage(): void
 }
 
 export default requireNativeModule<ExpoLiveActivityModule>("ExpoLiveActivity")

@@ -2,6 +2,27 @@ import ActivityKit
 import WidgetKit
 import SwiftUI
 
+func loadAppIconFromSharedStorage() -> UIImage? {
+    guard let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.dmq.mylifemobile") else {
+        print("❌ Widget: Failed to get shared container")
+        return nil
+    }
+    
+    let iconURL = containerURL.appendingPathComponent("AppIcon.png")
+    guard let imageData = try? Data(contentsOf: iconURL) else {
+        print("❌ Widget: Failed to load image data from \(iconURL)")
+        return nil
+    }
+    
+    guard let image = UIImage(data: imageData) else {
+        print("❌ Widget: Failed to create UIImage from data")
+        return nil
+    }
+    
+    print("✅ Widget: Loaded image with alpha info: \(image.cgImage?.alphaInfo.rawValue ?? 0)")
+    return image
+}
+
 struct WidgetAttributes: ActivityAttributes {
     public struct ContentState: Codable, Hashable {
         var title: String
@@ -117,31 +138,42 @@ struct WidgetLiveActivity: Widget {
 
                         CircularProgressView(
                             isCompleted: context.state.isCompleted,
-                            size: 40,
+                            size: 45,
                             endTime: context.state.endTime,
-                            startTime: context.state.startTime
+                            startTime: context.state.startTime,
+                            showTimer: true
                         )
                     }
                     .padding(.horizontal, 8)
                     .padding(.vertical, 8)
                 }
             } compactLeading: {
-                Image(systemName: "app.fill")
-                    .foregroundColor(.blue)
-                    .font(.system(size: 16))
+                if let appIconImage = loadAppIconFromSharedStorage() {
+                    Image(uiImage: appIconImage)
+                        .renderingMode(.original)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 16, height: 16)
+                } else {
+                    Image(systemName: "app.fill")
+                        .foregroundColor(.blue)
+                        .font(.system(size: 16))
+                }
             } compactTrailing: {
                 CircularProgressView(
                     isCompleted: context.state.isCompleted,
                     size: 24,
                     endTime: context.state.endTime,
-                    startTime: context.state.startTime
+                    startTime: context.state.startTime,
+                    showTimer: false
                 )
             } minimal: {
                 CircularProgressView(
                     isCompleted: context.state.isCompleted,
                     size: 24,
                     endTime: context.state.endTime,
-                    startTime: context.state.startTime
+                    startTime: context.state.startTime,
+                    showTimer: false
                 )
             }
             .widgetURL(URL(string: context.attributes.deepLinkURL))
@@ -176,9 +208,17 @@ struct LockScreenActivityView: View {
         return VStack(spacing: 0) {
             HStack {
                 HStack(spacing: 8) {
-                    Image(systemName: "app.fill")
-                        .font(.system(size: 16))
-                        .foregroundColor(.blue)
+                    if let appIconImage = loadAppIconFromSharedStorage() {
+                        Image(uiImage: appIconImage)
+                            .renderingMode(.original)
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 16, height: 16)
+                    } else {
+                        Image(systemName: "app.fill")
+                            .foregroundColor(.blue)
+                            .font(.system(size: 16))
+                    }
                     
                     Text("MyLife")
                         .font(.subheadline)
@@ -253,6 +293,7 @@ struct CircularProgressView: View {
     let size: CGFloat
     let endTime: Date
     let startTime: Date
+    let showTimer: Bool
 
     var body: some View {
         ZStack {
@@ -277,11 +318,13 @@ struct CircularProgressView: View {
                     .tint(.blue)
 
                     // doesnt fit too well
-                    // Text(timerInterval: Date.now...endTime, countsDown: true)
-                    //     .font(.system(size: size * 0.26, weight: .semibold, design: .rounded))
-                    //     .monospacedDigit()
-                    //     .multilineTextAlignment(.center)
-                    //     .foregroundColor(.primary)
+                    if showTimer {
+                        Text(timerInterval: Date.now...endTime, countsDown: true)
+                            .font(.system(size: size * 0.26, weight: .semibold, design: .rounded))
+                            .monospacedDigit()
+                            .multilineTextAlignment(.center)
+                            .foregroundColor(.primary)
+                    }
                 }
                 .frame(width: size, height: size)
             }
@@ -323,4 +366,5 @@ extension WidgetAttributes.ContentState {
    WidgetLiveActivity()
 } contentStates: {
     WidgetAttributes.ContentState.running
+    WidgetAttributes.ContentState.completed
 }
