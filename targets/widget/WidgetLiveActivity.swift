@@ -2,7 +2,6 @@ import ActivityKit
 import WidgetKit
 import SwiftUI
 
-// No changes needed here. This defines the static and dynamic data for the activity.
 struct WidgetAttributes: ActivityAttributes {
     public struct ContentState: Codable, Hashable {
         var title: String
@@ -93,18 +92,15 @@ struct WidgetAttributes: ActivityAttributes {
     }
 }
 
-// The main widget configuration.
 struct WidgetLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: WidgetAttributes.self) { context in
-            // This view appears on the Lock Screen.
             LockScreenActivityView(context: context)
         } dynamicIsland: { context in
             DynamicIsland {
-                // Only use bottom region to avoid doubled content
+
                 DynamicIslandExpandedRegion(.bottom) {
                     HStack(spacing: 12) {
-                        // Circle timer on the left
                         CircularProgressView(
                             isCompleted: context.state.isCompleted,
                             size: 40,
@@ -112,7 +108,6 @@ struct WidgetLiveActivity: Widget {
                             startTime: context.state.startTime
                         )
                         
-                        // Title and description in the center
                         VStack(alignment: .leading, spacing: 3) {
                             Text(context.state.title)
                                 .font(.subheadline)
@@ -127,7 +122,7 @@ struct WidgetLiveActivity: Widget {
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal, 6)
                         
-                        // Button on the right
+
                         if !context.state.isCompleted {
                             Button(intent: CompleteActivityIntent(eventId: context.attributes.eventId)) {
                                 ZStack {
@@ -152,7 +147,6 @@ struct WidgetLiveActivity: Widget {
                     .foregroundColor(.blue)
                     .font(.system(size: 16))
             } compactTrailing: {
-                // The compact trailing view in the Dynamic Island.
                 CircularProgressView(
                     isCompleted: context.state.isCompleted,
                     size: 24,
@@ -160,7 +154,6 @@ struct WidgetLiveActivity: Widget {
                     startTime: context.state.startTime
                 )
             } minimal: {
-                // The minimal view when multiple activities are present.
                 CircularProgressView(
                     isCompleted: context.state.isCompleted,
                     size: 20,
@@ -174,7 +167,7 @@ struct WidgetLiveActivity: Widget {
     }
 }
 
-// The view for the Lock Screen presentation.
+
 struct LockScreenActivityView: View {
     let context: ActivityViewContext<WidgetAttributes>
     
@@ -225,45 +218,58 @@ struct LockScreenActivityView: View {
     }
 }
 
-// ✅ CircularProgressView using ProgressView for countdown
 struct CircularProgressView: View {
     let isCompleted: Bool
     let size: CGFloat
     let endTime: Date
     let startTime: Date
     
-    private func circularTimer(endDate: Date) -> some View {
-        let currentTime = Date()
-        let timeRemaining = endDate.timeIntervalSince(currentTime)
+    private func formatTimeRemaining(_ timeRemaining: TimeInterval) -> String {
+        let hours = Int(timeRemaining) / 3600
+        let minutes = Int(timeRemaining) / 60
+        let seconds = Int(timeRemaining) % 60
         
-        return ZStack {
-            if timeRemaining > 0 {
-                ProgressView(
-                    timerInterval: currentTime...endDate,
-                    countsDown: true,
-                    label: { EmptyView() },
-                    currentValueLabel: { EmptyView() }
-                )
-                .progressViewStyle(.circular)
-                .scaleEffect(size / 30) // Scale based on size
-                .tint(.blue)
-                
-                // Timer text overlay
-                Text(endDate, style: .timer)
-                    .font(.system(size: size * 0.26, weight: .semibold, design: .rounded))
-                    .monospacedDigit()
-                    .multilineTextAlignment(.center)
-                    .foregroundColor(.primary)
-            } else {
-                // Show completed state when time is up
-                Circle()
-                    .stroke(Color.gray.opacity(0.3), lineWidth: size * 0.08)
-                    .frame(width: size, height: size)
-                
-                Text("00:00")
-                    .font(.system(size: size * 0.26, weight: .semibold, design: .rounded))
-                    .monospacedDigit()
-                    .foregroundColor(.secondary)
+        if hours >= 1 {
+            return "\(hours)h"
+        } else if minutes >= 1 {
+            return "\(minutes)m"
+        } else {
+            return "\(seconds)s"
+        }
+    }
+    
+    private func circularTimer(endDate: Date) -> some View {
+        TimelineView(.periodic(from: .now, by: 1.0)) { context in
+            let currentTime = context.date
+            let timeRemaining = max(0, endDate.timeIntervalSince(currentTime))
+            
+            ZStack {
+                if timeRemaining > 0 {
+                    ProgressView(
+                        timerInterval: currentTime...endDate,
+                        countsDown: true,
+                        label: { EmptyView() },
+                        currentValueLabel: { EmptyView() }
+                    )
+                    .progressViewStyle(.circular)
+                    .scaleEffect(size / 30)
+                    .tint(.blue)
+                    
+                    Text(formatTimeRemaining(timeRemaining))
+                        .font(.system(size: size * 0.26, weight: .semibold, design: .rounded))
+                        .monospacedDigit()
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(.primary)
+                } else {
+                    Circle()
+                        .stroke(Color.gray.opacity(0.3), lineWidth: size * 0.08)
+                        .frame(width: size, height: size)
+                    
+                    Text("0")
+                        .font(.system(size: size * 0.26, weight: .semibold, design: .rounded))
+                        .monospacedDigit()
+                        .foregroundColor(.secondary)
+                }
             }
         }
     }
@@ -271,7 +277,6 @@ struct CircularProgressView: View {
     var body: some View {
         ZStack {
             if isCompleted {
-                // Show completed state
                 Circle()
                     .stroke(Color.green, lineWidth: size * 0.12)
                     .frame(width: size, height: size)
@@ -280,7 +285,6 @@ struct CircularProgressView: View {
                     .font(.system(size: size * 0.4, weight: .bold))
                     .foregroundColor(.green)
             } else {
-                // Use ProgressView for automatic countdown with timer text
                 circularTimer(endDate: endTime)
                     .frame(width: size, height: size)
             }
@@ -289,11 +293,10 @@ struct CircularProgressView: View {
 }
 
 
-// --- PREVIEW PROVIDERS ---
 
 extension WidgetAttributes {
     fileprivate static var preview: WidgetAttributes {
-        WidgetAttributes(eventId: "preview-event", deepLinkURL: "lifeapp://timeline/preview-event")
+        WidgetAttributes(eventId: "preview-event", deepLinkURL: "mylife://timeline/")
     }
 }
 
@@ -303,7 +306,7 @@ extension WidgetAttributes.ContentState {
             title: "Morning Workout",
             description: "Complete your 30-minute exercise routine",
             startTime: Date(),
-            endTime: Date().addingTimeInterval(1800), // 30 minutes from now
+            endTime: Date().addingTimeInterval(1800), 
             isCompleted: false,
             progress: 0.3
         )
@@ -313,7 +316,7 @@ extension WidgetAttributes.ContentState {
          WidgetAttributes.ContentState(
             title: "Study Session",
             description: "Review chapter 5 for upcoming exam",
-            startTime: Date().addingTimeInterval(-3600), // Started an hour ago
+            startTime: Date().addingTimeInterval(-3600), 
             endTime: Date(), // Ended now
             isCompleted: true,
             progress: 1.0
@@ -321,7 +324,6 @@ extension WidgetAttributes.ContentState {
      }
 }
 
-// The preview block for Xcode.
 #Preview("Notification", as: .content, using: WidgetAttributes.preview) {
    WidgetLiveActivity()
 } contentStates: {
