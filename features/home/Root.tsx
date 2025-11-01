@@ -9,7 +9,7 @@ import { GET_MAIN_SCREEN, getMainScreenBaseVariables } from "@/utils/schemas/GET
 import { useQuery } from "@apollo/client"
 import { AntDesign } from "@expo/vector-icons"
 import * as SplashScreen from "expo-splash-screen"
-import { useEffect, useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 import { View } from "react-native"
 import Animated, { LinearTransition } from "react-native-reanimated"
 import { FloatingNotifications, useGetNotifications } from "../wallet/components/Wallet/WalletNotifications"
@@ -17,12 +17,7 @@ import LoadingSkeleton from "./components/LoadingSkeleton"
 import MainContent from "./components/MainContent"
 import NotificationsModal from "./components/NotificationsModal"
 import SettingsModal from "./components/SettingsModal"
-import store from "@/utils/widget/store"
-import { ExtensionStorage } from "@bacons/apple-targets"
 import useWidgets from "@/utils/widget/hooks/useWidgets"
-
-import { Button } from "@/components"
-import expoLiveActivity from "@/modules/expo-live-activity"
 import { useActivityManager } from "@/utils/hooks/useActivityManager"
 
 function Root({}: ScreenProps<"Root">) {
@@ -57,7 +52,7 @@ function Root({}: ScreenProps<"Root">) {
         : 0
     const isIncreasing = trendPercentage > 0
 
-    const { startActivity } = useActivityManager()
+    useActivityManager()
 
     const headerButtons = useMemo(
         () => [
@@ -74,25 +69,9 @@ function Root({}: ScreenProps<"Root">) {
                 icon: <AntDesign name="setting" size={20} color={Colors.foreground} />,
                 onPress: () => setShowSettings(true),
             },
-            {
-                icon: <AntDesign name="clock-circle" size={20} color={Colors.foreground} />,
-                onPress: () =>
-                    startActivity({
-                        eventId: `test-activity-${Date.now()}`,
-                        description: "Test Activity",
-                        title: "Countdown",
-                        endTime: new Date(Date.now() + 0.5 * 60 * 1000),
-                        deepLinkURL: "lifeapp://activity/test",
-                    }),
-            },
         ],
         [data?.notifications],
     )
-
-    useEffect(() => {
-        store.set("test_key", "")
-        ExtensionStorage.reloadWidget()
-    }, [])
 
     return (
         <Animated.View style={{ flex: 1 }} layout={LinearTransition.delay(100)}>

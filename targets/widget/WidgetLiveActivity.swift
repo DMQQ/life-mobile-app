@@ -11,10 +11,31 @@ struct WidgetAttributes: ActivityAttributes {
         var endTime: Date
         var isCompleted: Bool
         var progress: Double // Note: This 'progress' property from your state is not used in the circular view. The view calculates its own progress.
+        
+        // Custom initializer for push-to-start with defaults
+        init(title: String = "Default Title", 
+             description: String = "Default Description",
+             startTime: Date = Date(),
+             endTime: Date = Date().addingTimeInterval(3600),
+             isCompleted: Bool = false,
+             progress: Double = 1.0) {
+            self.title = title
+            self.description = description
+            self.startTime = startTime
+            self.endTime = endTime
+            self.isCompleted = isCompleted
+            self.progress = progress
+        }
     }
 
     var eventId: String
     var deepLinkURL: String
+    
+    // Custom initializer for push-to-start with defaults
+    init(eventId: String = "default-event-id", deepLinkURL: String = "mylife://default") {
+        self.eventId = eventId
+        self.deepLinkURL = deepLinkURL
+    }
 }
 
 // The main widget configuration.

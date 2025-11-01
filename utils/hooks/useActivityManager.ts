@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react"
 import { activityManager, ActivityConfig } from "../services/ActivityManager"
 import { useActivityServer } from "./useActivityServer"
 import ExpoLiveActivityModule, { ActivityPushTokenEvent, PushToStartTokenEvent } from "../../modules/expo-live-activity"
-import * as Notification from "expo-notifications"
+import * as Notifications from "expo-notifications"
 
 export interface UseActivityManagerReturn {
     isSupported: boolean
@@ -23,47 +23,15 @@ export const useActivityManager = (): UseActivityManagerReturn => {
     const serverHook = useActivityServer()
 
     useEffect(() => {
-        Notification.getDevicePushTokenAsync().then((token) => {
-            console.log("Device push token for Live Activities:", token.data)
+        ExpoLiveActivityModule.getPushToStartToken().then((token) => {
+            if (token && serverHook?.registerPushToStartToken) {
+                console.log("ExpoLiveActivityModule.getPushToStartToken", { token })
+
+                serverHook.registerPushToStartToken(token)
+            }
         })
-    }, [])
 
-    useEffect(() => {
-        activityManager.setServerHook(serverHook)
-    }, [serverHook])
-
-    // Listen for Live Activity token updates
-    useEffect(() => {
-        const handleActivityPushToken = (event: ActivityPushTokenEvent) => {
-            console.log('🔴 ACTIVITY PUSH TOKEN:', {
-                activityId: event.activityId,
-                tokenLength: event.pushToken.length,
-                tokenSample: event.pushToken.substring(0, 20) + '...',
-                fullToken: event.pushToken,
-                isValidHex: /^[0-9a-fA-F]+$/.test(event.pushToken)
-            })
-            // The ActivityManager automatically sends this to server via serverHook
-        }
-
-        const handlePushToStartToken = (event: PushToStartTokenEvent) => {
-            console.log('🟡 PUSH-TO-START TOKEN:', {
-                tokenLength: event.pushToStartToken.length,
-                tokenSample: event.pushToStartToken.substring(0, 20) + '...',
-                fullToken: event.pushToStartToken,
-                isValidHex: /^[0-9a-fA-F]+$/.test(event.pushToStartToken)
-            })
-            // The ActivityManager automatically sends this to server via serverHook
-        }
-
-        // Add listeners for token updates
-        activityManager.onActivityPushToken(handleActivityPushToken)
-        activityManager.onPushToStartToken(handlePushToStartToken)
-
-        // Cleanup listeners
-        return () => {
-            activityManager.removeActivityPushTokenListener(handleActivityPushToken)
-            activityManager.removePushToStartTokenListener(handlePushToStartToken)
-        }
+        console.log("is pending ", ExpoLiveActivityModule.isActivityInProgress())
     }, [])
 
     useEffect(() => {

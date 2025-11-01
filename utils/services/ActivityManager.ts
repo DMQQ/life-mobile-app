@@ -1,4 +1,8 @@
-import ExpoLiveActivityModule, { ActivityPushTokenEvent, PushNotificationEvent, PushToStartTokenEvent } from "../../modules/expo-live-activity"
+import ExpoLiveActivityModule, {
+    ActivityPushTokenEvent,
+    PushNotificationEvent,
+    PushToStartTokenEvent,
+} from "../../modules/expo-live-activity"
 import { Platform } from "react-native"
 
 export interface ActivityConfig {
@@ -21,8 +25,7 @@ export class ActivityManager {
 
     private constructor() {
         this.setupPushNotificationHandling()
-        this.enablePushToStart()
-        this.handleAppLaunchFromPushToStart()
+        // Push-to-start monitoring is now handled automatically in Swift OnCreate
     }
 
     static getInstance(): ActivityManager {
@@ -32,24 +35,20 @@ export class ActivityManager {
         return ActivityManager.instance
     }
 
-    setServerHook(serverHook: any): void {
-        this.serverHook = serverHook
-    }
-
     async startCountdownActivity(config: ActivityConfig): Promise<string | null> {
-        console.log('Starting Live Activity with config:', config)
-        
-        if (Platform.OS !== 'ios') {
-            console.warn('Live Activities are only supported on iOS')
+        console.log("Starting Live Activity with config:", config)
+
+        if (Platform.OS !== "ios") {
+            console.warn("Live Activities are only supported on iOS")
             return null
         }
 
         if (!ExpoLiveActivityModule.areActivitiesEnabled()) {
-            console.warn('Live Activities are not enabled')
+            console.warn("Live Activities are not enabled")
             return null
         }
 
-        console.log('Live Activities are enabled, starting activity...')
+        console.log("Live Activities are enabled, starting activity...")
 
         try {
             const activityToken = await ExpoLiveActivityModule.startCountdownActivity(
@@ -57,60 +56,60 @@ export class ActivityManager {
                 config.deepLinkURL || `lifeapp://activity/${config.eventId}`,
                 config.title,
                 config.description,
-                config.endTime.toISOString()
+                config.endTime.toISOString(),
             )
-            
-            console.log('Received activity token:', activityToken)
-            
+
+            console.log("Received activity token:", activityToken)
+
             if (activityToken) {
                 this.activeActivities.set(config.eventId, activityToken)
-                
+
                 if (this.serverHook) {
                     await this.serverHook.registerActivity({
                         eventId: config.eventId,
                         activityToken,
-                        endTime: config.endTime.toISOString()
+                        endTime: config.endTime.toISOString(),
                     })
                 }
-                
+
                 return activityToken
             }
-            
+
             return null
         } catch (error) {
-            console.error('Failed to start Live Activity:', error)
+            console.error("Failed to start Live Activity:", error)
             return null
         }
     }
 
     updateActivityProgress(eventId: string, progress: number, isCompleted: boolean = false): void {
-        if (Platform.OS !== 'ios') return
+        if (Platform.OS !== "ios") return
 
         if (this.activeActivities.has(eventId)) {
             try {
                 ExpoLiveActivityModule.updateActivity(progress, isCompleted)
             } catch (error) {
-                console.error('Failed to update Live Activity:', error)
+                console.error("Failed to update Live Activity:", error)
             }
         }
     }
 
     async completeActivity(eventId: string): Promise<void> {
-        if (Platform.OS !== 'ios') return
+        if (Platform.OS !== "ios") return
 
         this.updateActivityProgress(eventId, 1.0, true)
-        
+
         if (this.serverHook) {
             await this.serverHook.completeServerActivity(eventId)
         }
-        
+
         setTimeout(() => {
             this.cancelActivity(eventId)
         }, 3000)
     }
 
     async cancelActivity(eventId: string): Promise<void> {
-        if (Platform.OS !== 'ios') return
+        if (Platform.OS !== "ios") return
 
         const activityToken = this.activeActivities.get(eventId)
         if (activityToken) {
@@ -118,28 +117,28 @@ export class ActivityManager {
                 if (this.serverHook) {
                     await this.serverHook.cancelServerActivity(eventId)
                 }
-                
-                ExpoLiveActivityModule.cancelActivityById(activityToken)
+
+                ExpoLiveActivityModule.endActivity()
                 this.activeActivities.delete(eventId)
             } catch (error) {
-                console.error('Failed to cancel Live Activity:', error)
+                console.error("Failed to cancel Live Activity:", error)
             }
         }
     }
 
     cancelAllActivities(): void {
-        if (Platform.OS !== 'ios') return
+        if (Platform.OS !== "ios") return
 
         try {
             ExpoLiveActivityModule.endActivity()
             this.activeActivities.clear()
         } catch (error) {
-            console.error('Failed to cancel all Live Activities:', error)
+            console.error("Failed to cancel all Live Activities:", error)
         }
     }
 
     isActivityInProgress(): boolean {
-        if (Platform.OS !== 'ios') return false
+        if (Platform.OS !== "ios") return false
         return ExpoLiveActivityModule.isActivityInProgress()
     }
 
@@ -149,90 +148,44 @@ export class ActivityManager {
 
     // Push notification methods
     private setupPushNotificationHandling(): void {
-        if (Platform.OS !== 'ios') return
+        if (Platform.OS !== "ios") return
 
         try {
-            ExpoLiveActivityModule.setupPushNotificationHandling()
-
             // Listen for push tokens
-            ExpoLiveActivityModule.addListener('onActivityPushToken', (event: ActivityPushTokenEvent) => {
-                console.log('Activity push token received:', event)
+            ExpoLiveActivityModule.addListener("onActivityPushToken", (event: ActivityPushTokenEvent) => {
+                console.log("Activity push token received:", event)
                 this.activityPushTokens.set(event.activityId, event.pushToken)
-                
+
                 // Send token to server
                 if (this.serverHook) {
                     this.serverHook.registerActivityPushToken(event)
                 }
 
                 // Notify callbacks
-                this.pushTokenCallbacks.forEach(callback => callback(event))
-            })
-
-            // Listen for push notifications
-            ExpoLiveActivityModule.addListener('onPushNotificationReceived', (event: PushNotificationEvent) => {
-                console.log('Push notification received for Live Activity:', event)
-                this.pushNotificationCallbacks.forEach(callback => callback(event))
+                this.pushTokenCallbacks.forEach((callback) => callback(event))
             })
 
             // Listen for push-to-start tokens
-            ExpoLiveActivityModule.addListener('onPushToStartToken', (event: PushToStartTokenEvent) => {
-                console.log('Push-to-start token received:', event)
+            ExpoLiveActivityModule.addListener("onPushToStartToken", (event: PushToStartTokenEvent) => {
+                console.log("Push-to-start token received:", event)
                 this.pushToStartToken = event.pushToStartToken
-                
+
                 // Send token to server
                 if (this.serverHook) {
                     this.serverHook.registerPushToStartToken(event.pushToStartToken)
                 }
 
                 // Notify callbacks
-                this.pushToStartTokenCallbacks.forEach(callback => callback(event))
+                this.pushToStartTokenCallbacks.forEach((callback) => callback(event))
             })
         } catch (error) {
-            console.error('Failed to setup push notification handling:', error)
-        }
-    }
-
-    private enablePushToStart(): void {
-        if (Platform.OS !== 'ios') return
-
-        try {
-            ExpoLiveActivityModule.enablePushToStart()
-            console.log('Push-to-start enabled')
-        } catch (error) {
-            console.error('Failed to enable push-to-start:', error)
-        }
-    }
-
-    private async handleAppLaunchFromPushToStart(): Promise<void> {
-        if (Platform.OS !== 'ios') return
-
-        try {
-            const activityId = await ExpoLiveActivityModule.handleAppLaunchFromPushToStart()
-            if (activityId) {
-                console.log('App launched from push-to-start notification with activity:', activityId)
-                // Activity is already being monitored by the native module
-            }
-        } catch (error) {
-            console.error('Failed to handle app launch from push-to-start:', error)
-        }
-    }
-
-    async startActivityFromPushNotification(userInfo: Record<string, any>): Promise<string | null> {
-        if (Platform.OS !== 'ios') return null
-
-        try {
-            const activityId = await ExpoLiveActivityModule.startActivityFromPushNotification(userInfo)
-            console.log('Activity started from push notification:', activityId)
-            return activityId
-        } catch (error) {
-            console.error('Failed to start activity from push notification:', error)
-            return null
+            console.error("Failed to setup push notification handling:", error)
         }
     }
 
     getActivityPushToken(activityId: string): string | null {
-        if (Platform.OS !== 'ios') return null
-        return this.activityPushTokens.get(activityId) || ExpoLiveActivityModule.getActivityPushToken(activityId)
+        if (Platform.OS !== "ios") return null
+        return this.activityPushTokens.get(activityId) || null
     }
 
     onActivityPushToken(callback: (event: ActivityPushTokenEvent) => void): void {
@@ -249,31 +202,6 @@ export class ActivityManager {
             this.pushTokenCallbacks.splice(index, 1)
         }
     }
-
-    removePushNotificationListener(callback: (event: PushNotificationEvent) => void): void {
-        const index = this.pushNotificationCallbacks.indexOf(callback)
-        if (index > -1) {
-            this.pushNotificationCallbacks.splice(index, 1)
-        }
-    }
-
-    // Push-to-start methods
-    getPushToStartToken(): string | null {
-        if (Platform.OS !== 'ios') return null
-        return this.pushToStartToken || ExpoLiveActivityModule.getPushToStartToken()
-    }
-
-    onPushToStartToken(callback: (event: PushToStartTokenEvent) => void): void {
-        this.pushToStartTokenCallbacks.push(callback)
-    }
-
-    removePushToStartTokenListener(callback: (event: PushToStartTokenEvent) => void): void {
-        const index = this.pushToStartTokenCallbacks.indexOf(callback)
-        if (index > -1) {
-            this.pushToStartTokenCallbacks.splice(index, 1)
-        }
-    }
-
 }
 
 export const activityManager = ActivityManager.getInstance()

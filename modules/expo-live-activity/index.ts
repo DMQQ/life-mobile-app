@@ -35,24 +35,23 @@ export interface PushToStartTokenEvent {
 export type ExpoLiveActivityModuleEvents = {
     onLiveActivityCancel: () => void
     onActivityPushToken: (event: ActivityPushTokenEvent) => void
-    onPushNotificationReceived: (event: PushNotificationEvent) => void
     onPushToStartToken: (event: PushToStartTokenEvent) => void
 }
 
 declare class ExpoLiveActivityModule extends NativeModule<ExpoLiveActivityModuleEvents> {
     areActivitiesEnabled(): boolean
     isActivityInProgress(): boolean
-    startCountdownActivity(eventId: string, deepLinkURL: string, title: string, description: string, endTime: string): Promise<string | null>
+    startCountdownActivity(
+        eventId: string,
+        deepLinkURL: string,
+        title: string,
+        description: string,
+        endTime: string,
+    ): Promise<string | null>
     updateActivity(progress: number, isCompleted: boolean): void
     endActivity(): void
-    getActivityToken(): string | null
-    getActivityPushToken(activityId: string): string | null
-    startActivityFromPushNotification(userInfo: Record<string, any>): Promise<string | null>
-    setupPushNotificationHandling(): void
-    enablePushToStart(): void
-    getPushToStartToken(): string | null
-    handleAppLaunchFromPushToStart(): Promise<string | null>
-    cancelActivityById(token: string): void
+
+    getPushToStartToken(): Promise<string | null>
 }
 
 export default requireNativeModule<ExpoLiveActivityModule>("ExpoLiveActivity")

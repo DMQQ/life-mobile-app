@@ -27,7 +27,8 @@
                 "NSLocationWhenInUseUsageDescription": "This app needs access to your location to show nearby places and assign locations to your expenses.",
                 "NSLocationAlwaysAndWhenInUseUsageDescription": "This app needs access to your location to show nearby places and assign locations to your expenses.",
                 "ITSAppUsesNonExemptEncryption": false,
-                "NSSupportsLiveActivities": true
+                "NSSupportsLiveActivities": true,
+                "UIBackgroundModes": ["remote-notification"]
             },
             "bundleIdentifier": "com.dmq.mylifemobile",
             "associatedDomains": ["applinks:life.dmqq.dev"],
@@ -35,7 +36,9 @@
             "entitlements": {
                 "com.apple.security.application-groups": ["group.com.dmq.mylifemobile"],
 
-                "com.apple.developer.associated-domains": ["applinks:life.dmqq.dev"]
+                "com.apple.developer.associated-domains": ["applinks:life.dmqq.dev"],
+
+                "aps-environment": "development"
             }
         },
         "android": {
