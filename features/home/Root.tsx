@@ -75,8 +75,7 @@ function Root({}: ScreenProps<"Root">) {
                     activity.startActivity({
                         title: "New Activity",
                         description: "Creating a new activity from header",
-                        endTime: "20:00:00",
-                        startTime: "19:00:00",
+                        endTime: "23:15:00",
                         eventId: `activity-${Date.now()}`,
                         deepLinkURL: `lifeapp://new-activity`,
                     })

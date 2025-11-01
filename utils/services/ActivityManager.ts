@@ -9,7 +9,7 @@ export interface ActivityConfig {
     eventId: string
     title: string
     description: string
-    endTime: Date
+    endTime: `${number}:${number}:${number}`
     deepLinkURL?: string
 }
 

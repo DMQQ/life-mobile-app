@@ -98,16 +98,8 @@ struct WidgetLiveActivity: Widget {
             LockScreenActivityView(context: context)
         } dynamicIsland: { context in
             DynamicIsland {
-
                 DynamicIslandExpandedRegion(.bottom) {
                     HStack(spacing: 12) {
-                        CircularProgressView(
-                            isCompleted: context.state.isCompleted,
-                            size: 40,
-                            endTime: context.state.endTime,
-                            startTime: context.state.startTime
-                        )
-                        
                         VStack(alignment: .leading, spacing: 3) {
                             Text(context.state.title)
                                 .font(.subheadline)
@@ -121,23 +113,14 @@ struct WidgetLiveActivity: Widget {
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal, 6)
-                        
 
-                        if !context.state.isCompleted {
-                            Button(intent: CompleteActivityIntent(eventId: context.attributes.eventId)) {
-                                ZStack {
-                                    Circle()
-                                        .fill(Color.blue)
-                                        .frame(width: 40, height: 40)
-                                    
-                                    Image(systemName: "checkmark")
-                                        .font(.system(size: 20, weight: .bold))
-                                        .foregroundColor(.white)
-                                }
-                            }
-                            .buttonStyle(.plain)
-                            .background(Color.clear)
-                        }
+
+                        CircularProgressView(
+                            isCompleted: context.state.isCompleted,
+                            size: 40,
+                            endTime: context.state.endTime,
+                            startTime: context.state.startTime
+                        )
                     }
                     .padding(.horizontal, 8)
                     .padding(.vertical, 8)
@@ -156,7 +139,7 @@ struct WidgetLiveActivity: Widget {
             } minimal: {
                 CircularProgressView(
                     isCompleted: context.state.isCompleted,
-                    size: 20,
+                    size: 24,
                     endTime: context.state.endTime,
                     startTime: context.state.startTime
                 )
@@ -172,49 +155,96 @@ struct LockScreenActivityView: View {
     let context: ActivityViewContext<WidgetAttributes>
     
     var body: some View {
-        HStack(spacing: 12) {
-            CircularProgressView(
-                isCompleted: context.state.isCompleted,
-                size: 35,
-                endTime: context.state.endTime,
-                startTime: context.state.startTime
-            )
-            .frame(width: 35, height: 35)
+        let totalDuration = context.state.endTime.timeIntervalSince(context.state.startTime)
+        let now = Date()
+        let remaining = context.state.endTime.timeIntervalSince(now)
+        let remainingPercentage = totalDuration > 0 ? remaining / totalDuration : 0
+        
+        let progressColor: Color = {
+            if context.state.isCompleted {
+                return .green
+            }
+            if remainingPercentage <= 0.2 {
+                return .red
+            } else if remainingPercentage <= 0.4 {
+                return .yellow
+            } else {
+                return .blue
+            }
+        }()
+        
+        return VStack(spacing: 0) {
+            HStack {
+                HStack(spacing: 8) {
+                    Image(systemName: "app.fill")
+                        .font(.system(size: 16))
+                        .foregroundColor(.blue)
+                    
+                    Text("MyLife")
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .foregroundColor(.secondary)
+                }
+                
+                Spacer()
+
+                Text(context.state.isCompleted ? "Completed" : "In Progress")
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                    .foregroundColor(context.state.isCompleted ? .green : .blue)
+            }
+            .padding(.bottom, 12)
             
-            VStack(alignment: .leading, spacing: 6) {
+            VStack(alignment: .leading, spacing: 4) {
                 Text(context.state.title)
                     .font(.headline)
-                    .fontWeight(.semibold)
+                    .fontWeight(.bold)
                     .foregroundColor(.primary)
-                    .lineLimit(2)
+                    .lineLimit(1)
                 
                 Text(context.state.description)
                     .font(.subheadline)
                     .foregroundColor(.secondary)
-                    .lineLimit(4)
+                    .lineLimit(2)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.bottom, 12)
             
-            if !context.state.isCompleted {
-                Button(intent: CompleteActivityIntent(eventId: context.attributes.eventId)) {
-                    ZStack {
-                        Circle()
-                            .fill(Color.blue)
-                            .frame(width: 40, height: 40)
-                        
-                        Image(systemName: "checkmark")
-                            .font(.system(size: 18, weight: .bold))
-                            .foregroundColor(.white)
-                    }
+            HStack(spacing: 8) {
+                if context.state.isCompleted {
+                    ProgressView(value: 1.0)
+                        .progressViewStyle(LinearProgressViewStyle(tint: progressColor))
+                        .frame(height: 8)
+                        .layoutPriority(1)
+
+                } else {
+                    ProgressView(
+                        timerInterval: Date.now...context.state.endTime,
+                        countsDown: true,
+                        label: { EmptyView() },
+                        currentValueLabel: { EmptyView() }
+                    )
+                    .progressViewStyle(LinearProgressViewStyle(tint: progressColor))
+                    .frame(height: 8)
+                    .layoutPriority(1)
                 }
-                .buttonStyle(.plain)
-                .background(Color.clear)
-                .frame(width: 40, height: 40)
+
+                if context.state.isCompleted {
+                    Text("00:00:00")
+                        .font(.system(size: 14, weight: .medium, design: .rounded))
+                        .monospacedDigit()
+                        .foregroundColor(.green)
+                } else {
+                    Text(timerInterval: Date.now...context.state.endTime, countsDown: true)
+                        .font(.system(size: 14, weight: .medium, design: .rounded))
+                        .monospacedDigit()
+                        .multilineTextAlignment(.trailing)
+                        .foregroundColor(.secondary)
+                        .frame(minWidth: 60)
+                }
             }
         }
         .padding(16)
-        .activityBackgroundTint(Color.black.opacity(0.5))
-        .activitySystemActionForegroundColor(Color.blue)
     }
 }
 
@@ -223,30 +253,21 @@ struct CircularProgressView: View {
     let size: CGFloat
     let endTime: Date
     let startTime: Date
-    
-    private func formatTimeRemaining(_ timeRemaining: TimeInterval) -> String {
-        let hours = Int(timeRemaining) / 3600
-        let minutes = Int(timeRemaining) / 60
-        let seconds = Int(timeRemaining) % 60
-        
-        if hours >= 1 {
-            return "\(hours)h"
-        } else if minutes >= 1 {
-            return "\(minutes)m"
-        } else {
-            return "\(seconds)s"
-        }
-    }
-    
-    private func circularTimer(endDate: Date) -> some View {
-        TimelineView(.periodic(from: .now, by: 1.0)) { context in
-            let currentTime = context.date
-            let timeRemaining = max(0, endDate.timeIntervalSince(currentTime))
-            
-            ZStack {
-                if timeRemaining > 0 {
+
+    var body: some View {
+        ZStack {
+            if isCompleted {
+                Circle()
+                    .stroke(Color.green, lineWidth: size * 0.12)
+                    .frame(width: size, height: size)
+
+                Image(systemName: "checkmark")
+                    .font(.system(size: size * 0.4, weight: .bold))
+                    .foregroundColor(.green)
+            } else {
+                ZStack {
                     ProgressView(
-                        timerInterval: currentTime...endDate,
+                        timerInterval: Date.now...endTime,
                         countsDown: true,
                         label: { EmptyView() },
                         currentValueLabel: { EmptyView() }
@@ -254,45 +275,19 @@ struct CircularProgressView: View {
                     .progressViewStyle(.circular)
                     .scaleEffect(size / 30)
                     .tint(.blue)
-                    
-                    Text(formatTimeRemaining(timeRemaining))
-                        .font(.system(size: size * 0.26, weight: .semibold, design: .rounded))
-                        .monospacedDigit()
-                        .multilineTextAlignment(.center)
-                        .foregroundColor(.primary)
-                } else {
-                    Circle()
-                        .stroke(Color.gray.opacity(0.3), lineWidth: size * 0.08)
-                        .frame(width: size, height: size)
-                    
-                    Text("0")
-                        .font(.system(size: size * 0.26, weight: .semibold, design: .rounded))
-                        .monospacedDigit()
-                        .foregroundColor(.secondary)
+
+                    // doesnt fit too well
+                    // Text(timerInterval: Date.now...endTime, countsDown: true)
+                    //     .font(.system(size: size * 0.26, weight: .semibold, design: .rounded))
+                    //     .monospacedDigit()
+                    //     .multilineTextAlignment(.center)
+                    //     .foregroundColor(.primary)
                 }
-            }
-        }
-    }
-    
-    var body: some View {
-        ZStack {
-            if isCompleted {
-                Circle()
-                    .stroke(Color.green, lineWidth: size * 0.12)
-                    .frame(width: size, height: size)
-                
-                Image(systemName: "checkmark")
-                    .font(.system(size: size * 0.4, weight: .bold))
-                    .foregroundColor(.green)
-            } else {
-                circularTimer(endDate: endTime)
-                    .frame(width: size, height: size)
+                .frame(width: size, height: size)
             }
         }
     }
 }
-
-
 
 extension WidgetAttributes {
     fileprivate static var preview: WidgetAttributes {
