@@ -28,7 +28,10 @@ struct WidgetAttributes: ActivityAttributes {
         var isCompleted: Bool
         var progress: Double
         
-        // Custom initializer for push-to-start with defaults
+        enum CodingKeys: String, CodingKey {
+            case title, description, startTime, endTime, isCompleted, progress
+        }
+        
         init(title: String = "Default Title", 
              description: String = "Default Description",
              startTime: Date = Date(),
@@ -42,12 +45,64 @@ struct WidgetAttributes: ActivityAttributes {
             self.isCompleted = isCompleted
             self.progress = progress
         }
+        
+        init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            title = try container.decode(String.self, forKey: .title)
+            description = try container.decode(String.self, forKey: .description)
+            isCompleted = try container.decode(Bool.self, forKey: .isCompleted)
+            progress = try container.decode(Double.self, forKey: .progress)
+            
+            if let startTimeString = try? container.decode(String.self, forKey: .startTime) {
+                startTime = Self.parseTime(startTimeString)
+            } else {
+                startTime = try container.decode(Date.self, forKey: .startTime)
+            }
+            
+            if let endTimeString = try? container.decode(String.self, forKey: .endTime) {
+                endTime = Self.parseTime(endTimeString)
+            } else {
+                endTime = try container.decode(Date.self, forKey: .endTime)
+            }
+        }
+        
+        func encode(to encoder: Encoder) throws {
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(title, forKey: .title)
+            try container.encode(description, forKey: .description)
+            try container.encode(startTime, forKey: .startTime)
+            try container.encode(endTime, forKey: .endTime)
+            try container.encode(isCompleted, forKey: .isCompleted)
+            try container.encode(progress, forKey: .progress)
+        }
+        
+        private static func parseTime(_ timeString: String) -> Date {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "HH:mm:ss"
+            formatter.timeZone = TimeZone.current
+            
+            let calendar = Calendar.current
+            let now = Date()
+            
+            if let time = formatter.date(from: timeString) {
+                let timeComponents = calendar.dateComponents([.hour, .minute, .second], from: time)
+                if let dateWithTime = calendar.date(bySettingHour: timeComponents.hour ?? 0,
+                                                     minute: timeComponents.minute ?? 0,
+                                                     second: timeComponents.second ?? 0,
+                                                     of: now) {
+                    if dateWithTime < now {
+                        return calendar.date(byAdding: .day, value: 1, to: dateWithTime) ?? dateWithTime
+                    }
+                    return dateWithTime
+                }
+            }
+            return now
+        }
     }
     
     var eventId: String
     var deepLinkURL: String
     
-    // Custom initializer for push-to-start with defaults
     init(eventId: String = "default-event-id", deepLinkURL: String = "mylife://default") {
         self.eventId = eventId
         self.deepLinkURL = deepLinkURL
@@ -167,13 +222,28 @@ public class ExpoLiveActivityModule: Module {
             if #available(iOS 16.2, *) {
                 self.logger.info("Starting Live Activity for eventId: \(eventId)")
                 
-                let dateFormatter = ISO8601DateFormatter()
-                dateFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-                guard let endDate = dateFormatter.date(from: endTime) else {
-                    self.logger.error("Failed to parse end date: \(endTime)")
+                let dateFormatter = DateFormatter()
+                dateFormatter.dateFormat = "HH:mm:ss"
+                dateFormatter.timeZone = TimeZone.current
+                
+                let calendar = Calendar.current
+                let now = Date()
+                
+                guard let time = dateFormatter.date(from: endTime) else {
+                    self.logger.error("Failed to parse end time: \(endTime)")
                     return nil
                 }
                 
+                let timeComponents = calendar.dateComponents([.hour, .minute, .second], from: time)
+                guard let dateWithTime = calendar.date(bySettingHour: timeComponents.hour ?? 0,
+                                                    minute: timeComponents.minute ?? 0,
+                                                    second: timeComponents.second ?? 0,
+                                                    of: now) else {
+                    self.logger.error("Failed to create date with time")
+                    return nil
+                }
+                
+                let endDate = dateWithTime < now ? calendar.date(byAdding: .day, value: 1, to: dateWithTime)! : dateWithTime
                 let startDate = Date()
                 let totalDuration = endDate.timeIntervalSince(startDate)
                 let progress = totalDuration > 0 ? 1.0 : 0.0
@@ -198,7 +268,6 @@ public class ExpoLiveActivityModule: Module {
                     )
                     self.logger.info("Activity created successfully with ID: \(activity.id)")
                     
-                    // Monitor for push tokens if enabled
                     if pushNotificationsEnabled {
                         self.monitorActivityPushToken(activity: activity)
                     }

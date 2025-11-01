@@ -52,7 +52,7 @@ function Root({}: ScreenProps<"Root">) {
         : 0
     const isIncreasing = trendPercentage > 0
 
-    useActivityManager()
+    const activity = useActivityManager()
 
     const headerButtons = useMemo(
         () => [
@@ -68,6 +68,19 @@ function Root({}: ScreenProps<"Root">) {
             {
                 icon: <AntDesign name="setting" size={20} color={Colors.foreground} />,
                 onPress: () => setShowSettings(true),
+            },
+            {
+                icon: <AntDesign name="plus" size={20} color={Colors.foreground} />,
+                onPress: () => {
+                    activity.startActivity({
+                        title: "New Activity",
+                        description: "Creating a new activity from header",
+                        endTime: "20:00:00",
+                        startTime: "19:00:00",
+                        eventId: `activity-${Date.now()}`,
+                        deepLinkURL: `lifeapp://new-activity`,
+                    })
+                },
             },
         ],
         [data?.notifications],

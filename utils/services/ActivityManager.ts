@@ -56,7 +56,7 @@ export class ActivityManager {
                 config.deepLinkURL || `lifeapp://activity/${config.eventId}`,
                 config.title,
                 config.description,
-                config.endTime.toISOString(),
+                config.endTime,
             )
 
             console.log("Received activity token:", activityToken)

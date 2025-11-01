@@ -10,9 +10,12 @@ struct WidgetAttributes: ActivityAttributes {
         var startTime: Date
         var endTime: Date
         var isCompleted: Bool
-        var progress: Double // Note: This 'progress' property from your state is not used in the circular view. The view calculates its own progress.
+        var progress: Double
         
-        // Custom initializer for push-to-start with defaults
+        enum CodingKeys: String, CodingKey {
+            case title, description, startTime, endTime, isCompleted, progress
+        }
+        
         init(title: String = "Default Title", 
              description: String = "Default Description",
              startTime: Date = Date(),
@@ -26,12 +29,64 @@ struct WidgetAttributes: ActivityAttributes {
             self.isCompleted = isCompleted
             self.progress = progress
         }
+        
+        init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            title = try container.decode(String.self, forKey: .title)
+            description = try container.decode(String.self, forKey: .description)
+            isCompleted = try container.decode(Bool.self, forKey: .isCompleted)
+            progress = try container.decode(Double.self, forKey: .progress)
+            
+            if let startTimeString = try? container.decode(String.self, forKey: .startTime) {
+                startTime = Self.parseTime(startTimeString)
+            } else {
+                startTime = try container.decode(Date.self, forKey: .startTime)
+            }
+            
+            if let endTimeString = try? container.decode(String.self, forKey: .endTime) {
+                endTime = Self.parseTime(endTimeString)
+            } else {
+                endTime = try container.decode(Date.self, forKey: .endTime)
+            }
+        }
+        
+        func encode(to encoder: Encoder) throws {
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(title, forKey: .title)
+            try container.encode(description, forKey: .description)
+            try container.encode(startTime, forKey: .startTime)
+            try container.encode(endTime, forKey: .endTime)
+            try container.encode(isCompleted, forKey: .isCompleted)
+            try container.encode(progress, forKey: .progress)
+        }
+        
+        private static func parseTime(_ timeString: String) -> Date {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "HH:mm:ss"
+            formatter.timeZone = TimeZone.current
+            
+            let calendar = Calendar.current
+            let now = Date()
+            
+            if let time = formatter.date(from: timeString) {
+                let timeComponents = calendar.dateComponents([.hour, .minute, .second], from: time)
+                if let dateWithTime = calendar.date(bySettingHour: timeComponents.hour ?? 0,
+                                                     minute: timeComponents.minute ?? 0,
+                                                     second: timeComponents.second ?? 0,
+                                                     of: now) {
+                    if dateWithTime < now {
+                        return calendar.date(byAdding: .day, value: 1, to: dateWithTime) ?? dateWithTime
+                    }
+                    return dateWithTime
+                }
+            }
+            return now
+        }
     }
 
     var eventId: String
     var deepLinkURL: String
     
-    // Custom initializer for push-to-start with defaults
     init(eventId: String = "default-event-id", deepLinkURL: String = "mylife://default") {
         self.eventId = eventId
         self.deepLinkURL = deepLinkURL
