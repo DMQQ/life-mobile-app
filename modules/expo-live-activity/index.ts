@@ -17,8 +17,26 @@ export interface ActivityContentState {
     progress: number
 }
 
+export interface ActivityPushTokenEvent {
+    activityId: string
+    pushToken: string
+    eventId: string
+}
+
+export interface PushNotificationEvent {
+    userInfo: Record<string, any>
+    activityId: string
+}
+
+export interface PushToStartTokenEvent {
+    pushToStartToken: string
+}
+
 export type ExpoLiveActivityModuleEvents = {
     onLiveActivityCancel: () => void
+    onActivityPushToken: (event: ActivityPushTokenEvent) => void
+    onPushNotificationReceived: (event: PushNotificationEvent) => void
+    onPushToStartToken: (event: PushToStartTokenEvent) => void
 }
 
 declare class ExpoLiveActivityModule extends NativeModule<ExpoLiveActivityModuleEvents> {
@@ -28,6 +46,12 @@ declare class ExpoLiveActivityModule extends NativeModule<ExpoLiveActivityModule
     updateActivity(progress: number, isCompleted: boolean): void
     endActivity(): void
     getActivityToken(): string | null
+    getActivityPushToken(activityId: string): string | null
+    startActivityFromPushNotification(userInfo: Record<string, any>): Promise<string | null>
+    setupPushNotificationHandling(): void
+    enablePushToStart(): void
+    getPushToStartToken(): string | null
+    handleAppLaunchFromPushToStart(): Promise<string | null>
     cancelActivityById(token: string): void
 }
 

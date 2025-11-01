@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react"
 import { activityManager, ActivityConfig } from "../services/ActivityManager"
 import { useActivityServer } from "./useActivityServer"
-import ExpoLiveActivityModule from "../../modules/expo-live-activity"
+import ExpoLiveActivityModule, { ActivityPushTokenEvent, PushToStartTokenEvent } from "../../modules/expo-live-activity"
 import * as Notification from "expo-notifications"
 
 export interface UseActivityManagerReturn {
@@ -31,6 +31,40 @@ export const useActivityManager = (): UseActivityManagerReturn => {
     useEffect(() => {
         activityManager.setServerHook(serverHook)
     }, [serverHook])
+
+    // Listen for Live Activity token updates
+    useEffect(() => {
+        const handleActivityPushToken = (event: ActivityPushTokenEvent) => {
+            console.log('🔴 ACTIVITY PUSH TOKEN:', {
+                activityId: event.activityId,
+                tokenLength: event.pushToken.length,
+                tokenSample: event.pushToken.substring(0, 20) + '...',
+                fullToken: event.pushToken,
+                isValidHex: /^[0-9a-fA-F]+$/.test(event.pushToken)
+            })
+            // The ActivityManager automatically sends this to server via serverHook
+        }
+
+        const handlePushToStartToken = (event: PushToStartTokenEvent) => {
+            console.log('🟡 PUSH-TO-START TOKEN:', {
+                tokenLength: event.pushToStartToken.length,
+                tokenSample: event.pushToStartToken.substring(0, 20) + '...',
+                fullToken: event.pushToStartToken,
+                isValidHex: /^[0-9a-fA-F]+$/.test(event.pushToStartToken)
+            })
+            // The ActivityManager automatically sends this to server via serverHook
+        }
+
+        // Add listeners for token updates
+        activityManager.onActivityPushToken(handleActivityPushToken)
+        activityManager.onPushToStartToken(handlePushToStartToken)
+
+        // Cleanup listeners
+        return () => {
+            activityManager.removeActivityPushTokenListener(handleActivityPushToken)
+            activityManager.removePushToStartTokenListener(handlePushToStartToken)
+        }
+    }, [])
 
     useEffect(() => {
         try {

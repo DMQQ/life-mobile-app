@@ -157,23 +157,38 @@ struct CircularProgressView: View {
     let startTime: Date
     
     private func circularTimer(endDate: Date) -> some View {
-        ZStack {
-            ProgressView(
-                timerInterval: Date()...endDate,
-                countsDown: true,
-                label: { EmptyView() },
-                currentValueLabel: { EmptyView() }
-            )
-            .progressViewStyle(.circular)
-            .scaleEffect(size / 30) // Scale based on size
-            .tint(.blue)
-            
-            // Timer text overlay
-            Text(endDate, style: .timer)
-                .font(.system(size: size * 0.26, weight: .semibold, design: .rounded))
-                .monospacedDigit()
-                .multilineTextAlignment(.center)
-                .foregroundColor(.primary)
+        let currentTime = Date()
+        let timeRemaining = endDate.timeIntervalSince(currentTime)
+        
+        return ZStack {
+            if timeRemaining > 0 {
+                ProgressView(
+                    timerInterval: currentTime...endDate,
+                    countsDown: true,
+                    label: { EmptyView() },
+                    currentValueLabel: { EmptyView() }
+                )
+                .progressViewStyle(.circular)
+                .scaleEffect(size / 30) // Scale based on size
+                .tint(.blue)
+                
+                // Timer text overlay
+                Text(endDate, style: .timer)
+                    .font(.system(size: size * 0.26, weight: .semibold, design: .rounded))
+                    .monospacedDigit()
+                    .multilineTextAlignment(.center)
+                    .foregroundColor(.primary)
+            } else {
+                // Show completed state when time is up
+                Circle()
+                    .stroke(Color.gray.opacity(0.3), lineWidth: size * 0.08)
+                    .frame(width: size, height: size)
+                
+                Text("00:00")
+                    .font(.system(size: size * 0.26, weight: .semibold, design: .rounded))
+                    .monospacedDigit()
+                    .foregroundColor(.secondary)
+            }
         }
     }
     
