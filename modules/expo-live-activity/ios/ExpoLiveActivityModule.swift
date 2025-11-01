@@ -355,6 +355,10 @@ public class ExpoLiveActivityModule: Module {
         Function("saveImageToSharedStorage") { (imageUri: String) -> Bool in
             return self.saveImageToSharedStorage(imageUri: imageUri)
         }
+        
+        AsyncFunction("resolveAndSaveImage") { (imageString: String) -> String? in
+            return await self.resolveAndSaveImage(from: imageString)
+        }
     }
     
     private func observePushToStartToken() {
@@ -520,14 +524,48 @@ public class ExpoLiveActivityModule: Module {
         // Save to shared container as PNG to preserve transparency
         let iconURL = containerURL.appendingPathComponent("AppIcon.png")
         
-        // Ensure the image preserves alpha channel
-        let renderer = UIGraphicsImageRenderer(size: appIcon.size)
-        let transparentImage = renderer.image { context in
-            appIcon.draw(at: .zero)
+        // Force create a new image with transparency preserved
+        let size = appIcon.size
+        let rect = CGRect(origin: .zero, size: size)
+        
+        // Create a graphics context with explicit alpha channel
+        guard let colorSpace = CGColorSpace(name: CGColorSpace.sRGB) else {
+            self.logger.error("Failed to create color space")
+            return false
         }
         
+        guard let context = CGContext(
+            data: nil,
+            width: Int(size.width),
+            height: Int(size.height),
+            bitsPerComponent: 8,
+            bytesPerRow: 0,
+            space: colorSpace,
+            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+        ) else {
+            self.logger.error("Failed to create graphics context")
+            return false
+        }
+        
+        // Clear the context (transparent background)
+        context.clear(rect)
+        
+        // Draw the original image
+        if let cgImage = appIcon.cgImage {
+            context.draw(cgImage, in: rect)
+        }
+        
+        // Create new image from context
+        guard let newCGImage = context.makeImage() else {
+            self.logger.error("Failed to create CGImage from context")
+            return false
+        }
+        
+        let transparentImage = UIImage(cgImage: newCGImage)
+        self.logger.info("Created transparent app icon with alpha info: \(transparentImage.cgImage?.alphaInfo.rawValue ?? 0)")
+        
         guard let pngData = transparentImage.pngData() else {
-            self.logger.error("Failed to convert app icon to PNG data")
+            self.logger.error("Failed to convert transparent app icon to PNG data")
             return false
         }
         
@@ -612,14 +650,48 @@ public class ExpoLiveActivityModule: Module {
         // Save to shared container as PNG to preserve transparency
         let iconURL = containerURL.appendingPathComponent("AppIcon.png")
         
-        // Ensure the image preserves alpha channel
-        let renderer = UIGraphicsImageRenderer(size: finalImage.size)
-        let transparentImage = renderer.image { context in
-            finalImage.draw(at: .zero)
+        // Force create a new image with transparency preserved
+        let size = finalImage.size
+        let rect = CGRect(origin: .zero, size: size)
+        
+        // Create a graphics context with explicit alpha channel
+        guard let colorSpace = CGColorSpace(name: CGColorSpace.sRGB) else {
+            self.logger.error("Failed to create color space")
+            return false
         }
         
+        guard let context = CGContext(
+            data: nil,
+            width: Int(size.width),
+            height: Int(size.height),
+            bitsPerComponent: 8,
+            bytesPerRow: 0,
+            space: colorSpace,
+            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+        ) else {
+            self.logger.error("Failed to create graphics context")
+            return false
+        }
+        
+        // Clear the context (transparent background)
+        context.clear(rect)
+        
+        // Draw the original image
+        if let cgImage = finalImage.cgImage {
+            context.draw(cgImage, in: rect)
+        }
+        
+        // Create new image from context
+        guard let newCGImage = context.makeImage() else {
+            self.logger.error("Failed to create CGImage from context")
+            return false
+        }
+        
+        let transparentImage = UIImage(cgImage: newCGImage)
+        self.logger.info("Created transparent image with alpha info: \(transparentImage.cgImage?.alphaInfo.rawValue ?? 0)")
+        
         guard let pngData = transparentImage.pngData() else {
-            self.logger.error("Failed to convert image to PNG data")
+            self.logger.error("Failed to convert transparent image to PNG data")
             return false
         }
         
@@ -630,6 +702,114 @@ public class ExpoLiveActivityModule: Module {
         } catch {
             self.logger.error("Failed to write image to shared storage: \(error.localizedDescription)")
             return false
+        }
+    }
+    
+    private func resolveAndSaveImage(from imageString: String) async -> String? {
+        guard let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.dmq.mylifemobile") else {
+            self.logger.error("Failed to get shared container URL")
+            return nil
+        }
+        
+        var imageData: Data?
+        
+        // Handle remote URLs
+        if let url = URL(string: imageString), url.scheme?.hasPrefix("http") == true {
+            do {
+                self.logger.info("Downloading image from URL: \(imageString)")
+                let (data, _) = try await URLSession.shared.data(from: url)
+                imageData = data
+                self.logger.info("Successfully downloaded image data, size: \(data.count) bytes")
+            } catch {
+                self.logger.error("Failed to download image from URL: \(error.localizedDescription)")
+                return nil
+            }
+        }
+        // Handle data URIs
+        else if imageString.hasPrefix("data:image") {
+            if let dataString = imageString.components(separatedBy: ",").last,
+               let data = Data(base64Encoded: dataString) {
+                imageData = data
+                self.logger.info("Decoded base64 image data, size: \(data.count) bytes")
+            }
+        }
+        // Handle file paths
+        else if imageString.hasPrefix("file://") {
+            let filePath = String(imageString.dropFirst(7))
+            let fileURL = URL(fileURLWithPath: filePath)
+            imageData = try? Data(contentsOf: fileURL)
+        }
+        // Handle local paths
+        else if FileManager.default.fileExists(atPath: imageString) {
+            imageData = try? Data(contentsOf: URL(fileURLWithPath: imageString))
+        }
+        
+        guard let data = imageData else {
+            self.logger.error("Failed to get image data from: \(imageString)")
+            return nil
+        }
+        
+        guard let originalImage = UIImage(data: data) else {
+            self.logger.error("Failed to create UIImage from data")
+            return nil
+        }
+        
+        // Force create a new image with transparency preserved
+        let size = originalImage.size
+        let rect = CGRect(origin: .zero, size: size)
+        
+        // Create a graphics context with explicit alpha channel
+        guard let colorSpace = CGColorSpace(name: CGColorSpace.sRGB) else {
+            self.logger.error("Failed to create color space")
+            return nil
+        }
+        
+        guard let context = CGContext(
+            data: nil,
+            width: Int(size.width),
+            height: Int(size.height),
+            bitsPerComponent: 8,
+            bytesPerRow: 0,
+            space: colorSpace,
+            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+        ) else {
+            self.logger.error("Failed to create graphics context")
+            return nil
+        }
+        
+        // Clear the context (transparent background)
+        context.clear(rect)
+        
+        // Draw the original image
+        if let cgImage = originalImage.cgImage {
+            context.draw(cgImage, in: rect)
+        }
+        
+        // Create new image from context
+        guard let newCGImage = context.makeImage() else {
+            self.logger.error("Failed to create CGImage from context")
+            return nil
+        }
+        
+        let transparentImage = UIImage(cgImage: newCGImage)
+        self.logger.info("Created transparent image with alpha info: \(transparentImage.cgImage?.alphaInfo.rawValue ?? 0)")
+        
+        // Save with unique filename
+        let filename = "AppIcon.png"
+        let fileURL = containerURL.appendingPathComponent(filename)
+        
+        guard let pngData = transparentImage.pngData() else {
+            self.logger.error("Failed to convert transparent image to PNG data")
+            return nil
+        }
+        
+        do {
+            try pngData.write(to: fileURL)
+            self.logger.info("Successfully saved image to shared storage: \(filename)")
+            return filename
+        } catch {
+            self.logger.error("Failed to write image to shared storage: \(error.localizedDescription)")
+            return nil
         }
     }
 }

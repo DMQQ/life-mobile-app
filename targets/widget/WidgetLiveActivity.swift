@@ -119,18 +119,31 @@ struct WidgetLiveActivity: Widget {
             LockScreenActivityView(context: context)
         } dynamicIsland: { context in
             DynamicIsland {
+                DynamicIslandExpandedRegion(.leading) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "leaf.fill")
+                            .foregroundColor(.blue)
+                            .font(.system(size: 16))
+                        
+                        Text("MyLife")
+                            .font(.caption)
+                            .fontWeight(.medium)
+                            .foregroundColor(.secondary)
+                    }.padding(.horizontal, 12)
+                }
+                
                 DynamicIslandExpandedRegion(.bottom) {
                     HStack(spacing: 12) {
                         VStack(alignment: .leading, spacing: 3) {
                             Text(context.state.title)
                                 .font(.subheadline)
-                                .fontWeight(.semibold)
+                                .fontWeight(.bold)
                                 .foregroundColor(.primary)
                                 .lineLimit(1)
                             Text(context.state.description)
                                 .font(.caption)
                                 .foregroundColor(.secondary)
-                                .lineLimit(2)
+                                .lineLimit(3)
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal, 6)
@@ -148,17 +161,9 @@ struct WidgetLiveActivity: Widget {
                     .padding(.vertical, 8)
                 }
             } compactLeading: {
-                if let appIconImage = loadAppIconFromSharedStorage() {
-                    Image(uiImage: appIconImage)
-                        .renderingMode(.original)
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 16, height: 16)
-                } else {
-                    Image(systemName: "app.fill")
-                        .foregroundColor(.blue)
-                        .font(.system(size: 16))
-                }
+                Image(systemName: "leaf.fill")
+                    .foregroundColor(.blue)
+                    .font(.system(size: 16))
             } compactTrailing: {
                 CircularProgressView(
                     isCompleted: context.state.isCompleted,
@@ -208,17 +213,9 @@ struct LockScreenActivityView: View {
         return VStack(spacing: 0) {
             HStack {
                 HStack(spacing: 8) {
-                    if let appIconImage = loadAppIconFromSharedStorage() {
-                        Image(uiImage: appIconImage)
-                            .renderingMode(.original)
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: 16, height: 16)
-                    } else {
-                        Image(systemName: "app.fill")
-                            .foregroundColor(.blue)
-                            .font(.system(size: 16))
-                    }
+                    Image(systemName: "leaf.fill")
+                        .foregroundColor(.blue)
+                        .font(.system(size: 16))
                     
                     Text("MyLife")
                         .font(.subheadline)

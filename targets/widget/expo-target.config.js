@@ -5,4 +5,5 @@ module.exports = (config) => ({
     entitlements: {
         "com.apple.security.application-groups": ["group.com.dmq.mylifemobile"],
     },
+    frameworks: ["SwiftUI"],
 })
