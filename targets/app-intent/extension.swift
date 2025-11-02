@@ -30,12 +30,6 @@ struct LogExpense: AppIntent {
     struct GraphQLVariables: Codable {
         let amount: Double
         let description: String
-        let type: String
-        let category: String
-        let date: String
-        let schedule: Bool
-        let isSubscription: Bool
-        let spontaneousRate: Float
     }
     
     struct GraphQLErrorDetail: Codable {
@@ -54,7 +48,7 @@ struct LogExpense: AppIntent {
     }
     
     struct GraphQLDataResponse: Codable {
-        let createExpense: GraphQLExpenseResponse
+        let createShortcutExpense: GraphQLExpenseResponse
     }
     
     struct GraphQLRootResponse: Codable {
@@ -187,30 +181,16 @@ struct LogExpense: AppIntent {
         guard let token = sharedDefaults.string(forKey: "auth_token") else {
             throw ExpenseError.missingAuthToken
         }
-        
-        let isoFormatter = ISO8601DateFormatter()
-        let dateString = isoFormatter.string(from: Date())
+
 
         let mutation = """
         mutation CreateExpense(
             $amount: Float!,
             $description: String!,
-            $type: String!,
-            $category: String!,
-            $date: String!,
-            $schedule: Boolean!,
-            $isSubscription: Boolean!,
-            $spontaneousRate: Float!
         ) {
-            createExpense(
+            createShortcutExpense(
                 amount: $amount,
                 description: $description,
-                type: $type,
-                category: $category,
-                date: $date,
-                schedule: $schedule,
-                isSubscription: $isSubscription,
-                spontaneousRate: $spontaneousRate
             ) {
                 id
                 amount
@@ -226,13 +206,7 @@ struct LogExpense: AppIntent {
         
         let variables = GraphQLVariables(
             amount: self.amount,
-            description: self.name,
-            type: "expense",
-            category: self.category,
-            date: dateString,
-            schedule: false,
-            isSubscription: false,
-            spontaneousRate: 0.0
+            description: self.name
         )
         
         let graphQLRequest = GraphQLRequest(query: mutation, variables: variables)
@@ -261,7 +235,7 @@ struct LogExpense: AppIntent {
                 throw ExpenseError.apiError(errorMessage)
             }
             
-            guard let expense = rootResponse.data?.createExpense else {
+            guard let expense = rootResponse.data?.createShortcutExpense else {
                 throw ExpenseError.apiError("Successfully called API but no expense data was returned.")
             }
 
