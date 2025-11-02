@@ -128,7 +128,7 @@ public class ExpoLiveActivityModule: Module {
     public func definition() -> ModuleDefinition {
         Name("ExpoLiveActivity")
         
-        Events("onStateChange", "onActivityPushToken", "onPushToStartToken")
+        Events("onStateChange", "onActivityPushToken", "onPushToStartToken", "onTokenReceived", "onActivityStartedRemotely")
         
         OnCreate {
             if pushNotificationsEnabled {
@@ -440,7 +440,12 @@ public class ExpoLiveActivityModule: Module {
                 }
 
                 if case .active = activityState {
-                    self.logger.info("✅ Activity is active: \(activity.id)")
+                    self.logger.info("✅ Activity is active: \(activity.id) (eventId: \(activity.attributes.eventId))")
+                    
+                    // Log if this might be a remote activity (useful for debugging)
+                    let currentAppActivities = Activity<WidgetAttributes>.activities.count
+                    self.logger.info("📊 Current active activities count: \(currentAppActivities)")
+                    
                     Task {
                         for await state in activity.activityStateUpdates {
                             self.logger.info("🔵 Activity state change: \(activity.id) -> \(String(describing: state))")
@@ -459,10 +464,18 @@ public class ExpoLiveActivityModule: Module {
                                 let pushTokenString = pushToken.reduce("") { $0 + String(format: "%02x", $1) }
                                 self.logger.info("🟡 Activity push token: \(pushTokenString)")
                                 
+                                // Send both events for compatibility
                                 sendEvent("onActivityPushToken", [
                                     "activityID": activity.id,
                                     "activityPushToken": pushTokenString,
                                     "eventId": activity.attributes.eventId
+                                ])
+                                
+                                // 🎯 NEW: Send onTokenReceived event (this will trigger server call)
+                                sendEvent("onTokenReceived", [
+                                    "activityID": activity.id,
+                                    "activityName": activity.attributes.eventId,
+                                    "activityPushToken": pushTokenString
                                 ])
                             }
                         }
@@ -489,11 +502,18 @@ public class ExpoLiveActivityModule: Module {
                 let pushTokenString = pushToken.reduce("") { $0 + String(format: "%02x", $1) }
                 self.logger.info("Activity push token received: \(pushTokenString)")
                 
-                // Send token to JavaScript
+                // Send token to JavaScript (legacy event)
                 self.sendEvent("onActivityPushToken", [
                     "activityID": activity.id,
                     "activityPushToken": pushTokenString,
                     "eventId": activity.attributes.eventId
+                ])
+                
+                // 🎯 NEW: Send onTokenReceived event (this will trigger server call)
+                self.sendEvent("onTokenReceived", [
+                    "activityID": activity.id,
+                    "activityName": activity.attributes.eventId,
+                    "activityPushToken": pushTokenString
                 ])
             }
         }

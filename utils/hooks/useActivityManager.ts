@@ -1,8 +1,7 @@
 import { useState, useEffect, useCallback } from "react"
-import { activityManager, ActivityConfig } from "../services/ActivityManager"
+import { useActivityCore, ActivityConfig } from "./useActivityCore"
 import { useActivityServer } from "./useActivityServer"
-import ExpoLiveActivityModule, { ActivityPushTokenEvent, PushToStartTokenEvent } from "../../modules/expo-live-activity"
-import * as Notifications from "expo-notifications"
+import ExpoLiveActivityModule from "../../modules/expo-live-activity"
 
 export interface UseActivityManagerReturn {
     isSupported: boolean
@@ -19,8 +18,10 @@ export const useActivityManager = (): UseActivityManagerReturn => {
     const [isSupported, setIsSupported] = useState(false)
     const [isInProgress, setIsInProgress] = useState(false)
     const [activeActivities, setActiveActivities] = useState<string[]>([])
+    const [processedTokens, setProcessedTokens] = useState<Set<string>>(new Set())
 
     const serverHook = useActivityServer()
+    const activityCore = useActivityCore()
 
     useEffect(() => {
         ExpoLiveActivityModule.getPushToStartToken().then((token) => {
@@ -31,27 +32,36 @@ export const useActivityManager = (): UseActivityManagerReturn => {
             }
         })
 
-        ExpoLiveActivityModule.saveAppIconToSharedStorage()
-    }, [])
+        const tokenReceivedListener = ExpoLiveActivityModule.addListener("onTokenReceived", (event: any) => {
+            const tokenKey = `${event.activityID}-${event.activityPushToken}`
 
-    useEffect(() => {
-        try {
-            const supported = ExpoLiveActivityModule.areActivitiesEnabled()
-            setIsSupported(supported)
-        } catch (error) {
-            console.warn("Error checking Live Activities support:", error)
-            setIsSupported(false)
+            console.log("Token received for activity:", event)
+
+            if (processedTokens.has(tokenKey)) return
+
+            setProcessedTokens((prev) => new Set(prev).add(tokenKey))
+
+            if (serverHook?.setLiveActivityUpdateToken && event.activityPushToken) {
+                // Use activityName as timelineId - this is the eventId from Live Activity attributes
+                const timelineId = event.activityName || event.eventId
+                serverHook.setLiveActivityUpdateToken(event.activityID, event.activityPushToken, timelineId)
+            }
+        })
+
+        ExpoLiveActivityModule.saveAppIconToSharedStorage()
+
+        return () => {
+            tokenReceivedListener.remove()
         }
     }, [])
 
     useEffect(() => {
+        setIsSupported(activityCore.areActivitiesEnabled())
+    }, [])
+
+    useEffect(() => {
         const updateStatus = () => {
-            try {
-                setIsInProgress(activityManager.isActivityInProgress())
-                setActiveActivities(activityManager.getActiveActivities())
-            } catch (error) {
-                console.warn("Error updating activity status:", error)
-            }
+            setIsInProgress(activityCore.isActivityInProgress())
         }
 
         updateStatus()
@@ -60,57 +70,72 @@ export const useActivityManager = (): UseActivityManagerReturn => {
         return () => clearInterval(interval)
     }, [])
 
-    const startActivity = useCallback(async (config: ActivityConfig): Promise<string | null> => {
-        try {
-            const result = await activityManager.startCountdownActivity(config)
-            setActiveActivities(activityManager.getActiveActivities())
-            setIsInProgress(activityManager.isActivityInProgress())
-            return result
-        } catch (error) {
-            console.error("Error starting activity:", error)
-            return null
-        }
-    }, [])
+    const startActivity = useCallback(
+        async (config: ActivityConfig): Promise<string | null> => {
+            try {
+                const result = await activityCore.startCountdownActivity(config)
+                if (result) {
+                    setActiveActivities((prev) => [...prev, config.eventId])
+                    setIsInProgress(true)
+                }
+                return result
+            } catch (error) {
+                console.error("Error starting activity:", error)
+                return null
+            }
+        },
+        [activityCore],
+    )
 
-    const updateActivity = useCallback((eventId: string, progress: number, isCompleted: boolean = false) => {
-        try {
-            activityManager.updateActivityProgress(eventId, progress, isCompleted)
-        } catch (error) {
-            console.error("Error updating activity:", error)
-        }
-    }, [])
+    const updateActivity = useCallback(
+        (_eventId: string, progress: number, isCompleted: boolean = false) => {
+            try {
+                activityCore.updateActivityProgress(progress, isCompleted)
+            } catch (error) {
+                console.error("Error updating activity:", error)
+            }
+        },
+        [activityCore],
+    )
 
-    const completeActivity = useCallback(async (eventId: string) => {
-        try {
-            await activityManager.completeActivity(eventId)
-            setTimeout(() => {
-                setActiveActivities(activityManager.getActiveActivities())
-                setIsInProgress(activityManager.isActivityInProgress())
-            }, 100)
-        } catch (error) {
-            console.error("Error completing activity:", error)
-        }
-    }, [])
+    const completeActivity = useCallback(
+        async (eventId: string) => {
+            try {
+                activityCore.updateActivityProgress(1.0, true)
+                setTimeout(() => {
+                    activityCore.endActivity()
+                    setActiveActivities((prev) => prev.filter((id) => id !== eventId))
+                    setIsInProgress(activityCore.isActivityInProgress())
+                }, 3000)
+            } catch (error) {
+                console.error("Error completing activity:", error)
+            }
+        },
+        [activityCore],
+    )
 
-    const cancelActivity = useCallback(async (eventId: string) => {
-        try {
-            await activityManager.cancelActivity(eventId)
-            setActiveActivities(activityManager.getActiveActivities())
-            setIsInProgress(activityManager.isActivityInProgress())
-        } catch (error) {
-            console.error("Error cancelling activity:", error)
-        }
-    }, [])
+    const cancelActivity = useCallback(
+        async (eventId: string) => {
+            try {
+                activityCore.endActivity()
+                setActiveActivities((prev) => prev.filter((id) => id !== eventId))
+                setIsInProgress(false)
+            } catch (error) {
+                console.error("Error cancelling activity:", error)
+            }
+        },
+        [activityCore],
+    )
 
     const cancelAllActivities = useCallback(() => {
         try {
-            activityManager.cancelAllActivities()
+            activityCore.endActivity()
             setActiveActivities([])
             setIsInProgress(false)
         } catch (error) {
             console.error("Error cancelling all activities:", error)
         }
-    }, [])
+    }, [activityCore])
 
     return {
         isSupported,

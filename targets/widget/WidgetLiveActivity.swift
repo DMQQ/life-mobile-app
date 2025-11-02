@@ -178,7 +178,7 @@ struct WidgetLiveActivity: Widget {
             } compactTrailing: {
                 CircularProgressView(
                     isCompleted: context.state.isCompleted,
-                    size: 24,
+                    size: 23,
                     endTime: context.state.endTime,
                     startTime: context.state.startTime,
                     showTimer: false
@@ -186,7 +186,7 @@ struct WidgetLiveActivity: Widget {
             } minimal: {
                 CircularProgressView(
                     isCompleted: context.state.isCompleted,
-                    size: 24,
+                    size: 23,
                     endTime: context.state.endTime,
                     startTime: context.state.startTime,
                     showTimer: false
@@ -231,11 +231,13 @@ struct LockScreenActivityView: View {
                     .fontWeight(.bold)
                     .foregroundColor(.primary)
                     .lineLimit(1)
-                
-                Text(context.state.description)
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                    .lineLimit(2)
+
+                if !context.state.description.isEmpty {
+                    Text(context.state.description)
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .lineLimit(2)
+                }
                 
                 if !context.state.todos.isEmpty {
                     TodosRowView(todos: context.state.todos)

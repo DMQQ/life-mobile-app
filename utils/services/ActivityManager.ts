@@ -1,5 +1,6 @@
 import ExpoLiveActivityModule, {
     ActivityPushTokenEvent,
+    ActivityStartedEvent,
     PushNotificationEvent,
     PushToStartTokenEvent,
 } from "../../modules/expo-live-activity"
@@ -28,6 +29,7 @@ export class ActivityManager {
     private pushTokenCallbacks: Array<(event: ActivityPushTokenEvent) => void> = []
     private pushNotificationCallbacks: Array<(event: PushNotificationEvent) => void> = []
     private pushToStartTokenCallbacks: Array<(event: PushToStartTokenEvent) => void> = []
+    private activityStartedCallbacks: Array<(event: ActivityStartedEvent) => void> = []
 
     private constructor() {
         this.setupPushNotificationHandling()
@@ -185,6 +187,31 @@ export class ActivityManager {
                 // Notify callbacks
                 this.pushToStartTokenCallbacks.forEach((callback) => callback(event))
             })
+
+            // Listen for remotely started activities
+            ExpoLiveActivityModule.addListener("onActivityStartedRemotely", (event: ActivityStartedEvent) => {
+                console.log("🚨 Activity started remotely via push notification:", event)
+                
+                // Register the activity as active
+                this.activeActivities.set(event.eventId, event.activityId)
+                this.activityPushTokens.set(event.activityId, event.pushToken)
+
+                // Send push token to server immediately
+                if (this.serverHook && this.serverHook.setLiveActivityUpdateToken) {
+                    this.serverHook.setLiveActivityUpdateToken(event.activityId, event.pushToken)
+                }
+
+                // Notify callbacks
+                this.activityStartedCallbacks.forEach((callback) => callback(event))
+            })
+
+            // Listen for push notifications that update activities
+            ExpoLiveActivityModule.addListener("onPushNotificationReceived", (event: PushNotificationEvent) => {
+                console.log("Push notification received for Live Activity:", event)
+                
+                // Notify callbacks
+                this.pushNotificationCallbacks.forEach((callback) => callback(event))
+            })
         } catch (error) {
             console.error("Failed to setup push notification handling:", error)
         }
@@ -201,6 +228,10 @@ export class ActivityManager {
 
     onPushNotificationReceived(callback: (event: PushNotificationEvent) => void): void {
         this.pushNotificationCallbacks.push(callback)
+    }
+
+    onActivityStartedRemotely(callback: (event: ActivityStartedEvent) => void): void {
+        this.activityStartedCallbacks.push(callback)
     }
 
     removeActivityPushTokenListener(callback: (event: ActivityPushTokenEvent) => void): void {

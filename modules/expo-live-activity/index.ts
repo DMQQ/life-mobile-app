@@ -28,6 +28,12 @@ export interface PushNotificationEvent {
     activityId: string
 }
 
+export interface ActivityStartedEvent {
+    activityId: string
+    eventId: string
+    pushToken: string
+}
+
 export interface PushToStartTokenEvent {
     pushToStartToken: string
 }
@@ -36,6 +42,10 @@ export type ExpoLiveActivityModuleEvents = {
     onLiveActivityCancel: () => void
     onActivityPushToken: (event: ActivityPushTokenEvent) => void
     onPushToStartToken: (event: PushToStartTokenEvent) => void
+    onActivityStartedRemotely: (event: ActivityStartedEvent) => void
+    onPushNotificationReceived: (event: PushNotificationEvent) => void
+    onTokenReceived: (event: ActivityPushTokenEvent) => void
+    onStateChange: (event: { activityID: string; activityName: string; activityState: string }) => void
 }
 
 declare class ExpoLiveActivityModule extends NativeModule<ExpoLiveActivityModuleEvents> {

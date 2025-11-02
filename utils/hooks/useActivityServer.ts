@@ -33,6 +33,12 @@ const SET_PUSH_TO_START_TOKEN = gql`
     }
 `
 
+const SET_LIVE_ACTIVITY_UPDATE_TOKEN = gql`
+    mutation setLiveActivityUpdateToken($input: SetUpdateTokenInput!) {
+        setLiveActivityUpdateToken(input: $input)
+    }
+`
+
 export interface ActivityServerConfig {
     eventId: string
     activityToken: string
@@ -44,6 +50,7 @@ export const useActivityServer = () => {
     const [cancelActivityMutation] = useMutation(CANCEL_ACTIVITY)
     const [completeActivityMutation] = useMutation(COMPLETE_ACTIVITY)
     const [setPushToStartTokenMutation] = useMutation(SET_PUSH_TO_START_TOKEN)
+    const [setLiveActivityUpdateTokenMutation] = useMutation(SET_LIVE_ACTIVITY_UPDATE_TOKEN)
 
     const registerActivity = async (config: ActivityServerConfig): Promise<boolean> => {
         try {
@@ -94,10 +101,28 @@ export const useActivityServer = () => {
                 variables: { pushToStartToken },
             })
 
-            console.log("Push-to-start token registered via GraphQL:", data)
             return data?.setPushToStartToken || false
         } catch (error) {
-            console.error("Failed to register push-to-start token via GraphQL:", error)
+            console.error("Failed to register push-to-start token:", error)
+            return false
+        }
+    }
+
+    const setLiveActivityUpdateToken = async (activityId: string, updateToken: string, timelineId?: string): Promise<boolean> => {
+        try {
+            const { data } = await setLiveActivityUpdateTokenMutation({
+                variables: {
+                    input: {
+                        activityId,
+                        updateToken,
+                        timelineId, // Send the timeline ID if available
+                    },
+                },
+            })
+
+            return data?.setLiveActivityUpdateToken === true
+        } catch (error: any) {
+            console.error("Failed to set Live Activity update token:", error.message)
             return false
         }
     }
@@ -107,5 +132,6 @@ export const useActivityServer = () => {
         cancelServerActivity,
         completeServerActivity,
         registerPushToStartToken,
+        setLiveActivityUpdateToken,
     }
 }
