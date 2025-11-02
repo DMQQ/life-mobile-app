@@ -203,11 +203,6 @@ struct LockScreenActivityView: View {
     let context: ActivityViewContext<WidgetAttributes>
     
     var body: some View {
-        let totalDuration = context.state.endTime.timeIntervalSince(context.state.startTime)
-        let now = Date()
-        let remaining = context.state.endTime.timeIntervalSince(now)
-        
-        
         return VStack(spacing: 0) {
             HStack {
                 HStack(spacing: 8) {
@@ -285,6 +280,7 @@ struct LockScreenActivityView: View {
             }
         }
         .padding(16)
+        .widgetURL(URL(string: context.attributes.deepLinkURL))
     }
 }
 

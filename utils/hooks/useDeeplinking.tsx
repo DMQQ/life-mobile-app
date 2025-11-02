@@ -37,16 +37,6 @@ export default function useDeeplinking(navigationRef: React.RefObject<Navigation
             navigationRef.current?.navigate("TimelineScreens", {
                 screen: "",
             })
-        } else if (url.includes("activity/")) {
-            // Handle Live Activity deep links
-            const eventId = url.split("/").pop()
-            console.log("Live Activity deep link for eventId:", eventId)
-            
-            // You can navigate to a specific screen or show a completion modal
-            // For now, let's navigate to timeline
-            navigationRef.current?.navigate("TimelineScreens", {
-                screen: "",
-            })
         }
     }
 
