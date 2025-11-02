@@ -195,7 +195,6 @@ struct LockScreenActivityView: View {
         let totalDuration = context.state.endTime.timeIntervalSince(context.state.startTime)
         let now = Date()
         let remaining = context.state.endTime.timeIntervalSince(now)
-        let remainingPercentage = totalDuration > 0 ? remaining / totalDuration : 0
         
         
         return VStack(spacing: 0) {

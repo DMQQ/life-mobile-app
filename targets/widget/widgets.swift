@@ -745,7 +745,7 @@ struct WeeklySpendingView: View {
                                 
                                 RoundedRectangle(cornerRadius: 5)
                                     .fill(LinearGradient(
-                                        gradient: Gradient(colors: [.cyan, .blue]),
+                                        gradient: Gradient(colors: isCurrentDay(index) ? [.orange, .red] : [.cyan, .blue]),
                                         startPoint: .top,
                                         endPoint: .bottom
                                     ))
@@ -753,8 +753,8 @@ struct WeeklySpendingView: View {
                                 
                                 Text(getDayLabel(index))
                                     .font(.caption)
-                                    .fontWeight(.medium)
-                                    .foregroundColor(.secondary)
+                                    .fontWeight(isCurrentDay(index) ? .bold : .medium)
+                                    .foregroundColor(isCurrentDay(index) ? .primary : .secondary)
                             }
                             .frame(maxWidth: .infinity)
                         }
@@ -804,19 +804,20 @@ struct WeeklySpendingView: View {
                             
                             RoundedRectangle(cornerRadius: 2)
                                 .fill(LinearGradient(
-                                    gradient: Gradient(colors: [.blue.opacity(0.8), .blue]),
+                                    gradient: Gradient(colors: isCurrentDay(index) ? [.orange.opacity(0.8), .orange] : [.blue.opacity(0.8), .blue]),
                                     startPoint: .top,
                                     endPoint: .bottom
                                 ))
                                 .frame(height: max(4, height))
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 2)
-                                        .stroke(.blue.opacity(0.3), lineWidth: 0.5)
+                                        .stroke(isCurrentDay(index) ? .orange.opacity(0.3) : .blue.opacity(0.3), lineWidth: 0.5)
                                 )
                             
                             Text(getDayLabel(index))
                                 .font(.caption2)
-                                .foregroundColor(.secondary)
+                                .fontWeight(isCurrentDay(index) ? .bold : .regular)
+                                .foregroundColor(isCurrentDay(index) ? .primary : .secondary)
                         }
                         .frame(maxWidth: .infinity)
                     }
@@ -826,12 +827,16 @@ struct WeeklySpendingView: View {
     }
     
     private func getDayLabel(_ index: Int) -> String {
+        let days = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
+        return days[index % 7]
+    }
+    
+    private func isCurrentDay(_ index: Int) -> Bool {
         let calendar = Calendar.current
         let today = Date()
-        guard let targetDate = calendar.date(byAdding: .day, value: index - 6, to: today) else { return "" }
-        let dayOfWeek = calendar.component(.weekday, from: targetDate)
-        let days = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]
-        return days[(dayOfWeek - 1) % 7]
+        let currentWeekday = calendar.component(.weekday, from: today)
+        let mondayBasedWeekday = (currentWeekday == 1) ? 6 : currentWeekday - 2
+        return index == mondayBasedWeekday
     }
 }
 
