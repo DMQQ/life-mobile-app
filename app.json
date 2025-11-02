@@ -19,7 +19,7 @@
         },
         "assetBundlePatterns": ["**/*"],
         "ios": {
-            "buildNumber": "20251027",
+            "buildNumber": "20251102",
             "supportsTablet": true,
             "appleTeamId": "55RA6Q9VSR",
             "infoPlist": {
@@ -38,7 +38,7 @@
 
                 "com.apple.developer.associated-domains": ["applinks:life.dmqq.dev"],
 
-                "aps-environment": "development"
+                "aps-environment": "production"
             }
         },
         "android": {

@@ -69,18 +69,6 @@ function Root({}: ScreenProps<"Root">) {
                 icon: <AntDesign name="setting" size={20} color={Colors.foreground} />,
                 onPress: () => setShowSettings(true),
             },
-            {
-                icon: <AntDesign name="plus" size={20} color={Colors.foreground} />,
-                onPress: () => {
-                    activity.startActivity({
-                        title: "New Activity",
-                        description: "Creating a new activity from header",
-                        endTime: "23:25:00",
-                        eventId: `activity-${Date.now()}`,
-                        deepLinkURL: `mylife://timeline`,
-                    })
-                },
-            },
         ],
         [data?.notifications],
     )

@@ -55,7 +55,6 @@ export default function CreateTimeLineEventModal({ route, navigation }: Timeline
     })
 
     const [timePicker, setTimePicker] = useState<"begin" | "end" | "">("")
-    const [datePicker, setDatePicker] = useState<boolean>(false)
 
     const numberOfLines = f.values.desc.split("\n").length
 
@@ -163,6 +162,7 @@ export default function CreateTimeLineEventModal({ route, navigation }: Timeline
 
                     <TimePickerModal
                         isVisible={!!timePicker}
+                        currentTime={timePicker === "begin" ? f.values.begin : f.values.end}
                         onConfirm={(currentlySelectedTime) => {
                             let finalDate = moment(currentlySelectedTime)
 
@@ -246,8 +246,23 @@ const SubmitButton = (props: SubmitButtonProps) => (
     </View>
 )
 
-const TimePickerModal = (props: { isVisible: boolean; onConfirm: (date: Date) => void; onCancel: () => void }) => {
+const TimePickerModal = (props: {
+    isVisible: boolean
+    onConfirm: (date: Date) => void
+    onCancel: () => void
+    currentTime: string
+}) => {
+    const currentDate = moment(props.currentTime, "HH:mm").toDate()
+    
     return (
-        <DateTimePicker mode="time" isVisible={props.isVisible} onConfirm={props.onConfirm} onCancel={props.onCancel} />
+        <DateTimePicker
+            date={currentDate}
+            mode="time"
+            isDarkModeEnabled
+            is24Hour
+            isVisible={props.isVisible}
+            onConfirm={props.onConfirm}
+            onCancel={props.onCancel}
+        />
     )
 }
