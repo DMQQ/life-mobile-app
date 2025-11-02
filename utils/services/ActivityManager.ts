@@ -11,6 +11,12 @@ export interface ActivityConfig {
     description: string
     endTime: `${number}:${number}:${number}`
     deepLinkURL?: string
+
+    todos?: Array<{
+        id: string
+        title: string
+        isCompleted: boolean
+    }>
 }
 
 export class ActivityManager {
@@ -57,6 +63,7 @@ export class ActivityManager {
                 config.title,
                 config.description,
                 config.endTime,
+                config.todos || [],
             )
 
             console.log("Received activity token:", activityToken)
@@ -68,7 +75,7 @@ export class ActivityManager {
                     await this.serverHook.registerActivity({
                         eventId: config.eventId,
                         activityToken,
-                        endTime: config.endTime.toISOString(),
+                        endTime: config.endTime,
                     })
                 }
 

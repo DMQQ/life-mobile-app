@@ -2,7 +2,7 @@
     "expo": {
         "name": "Life",
         "slug": "mylife-mobile",
-        "version": "2.0.0",
+        "version": "2.0.1",
         "orientation": "portrait",
         "icon": "./assets/images/icon.png",
         "scheme": "mylife",
@@ -19,7 +19,7 @@
         },
         "assetBundlePatterns": ["**/*"],
         "ios": {
-            "buildNumber": "20251102",
+            "buildNumber": "20251104",
             "supportsTablet": true,
             "appleTeamId": "55RA6Q9VSR",
             "infoPlist": {

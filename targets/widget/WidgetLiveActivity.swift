@@ -23,6 +23,12 @@ func loadAppIconFromSharedStorage() -> UIImage? {
     return image
 }
 
+struct WidgetTodo: Codable, Hashable {
+    var id: String
+    var title: String
+    var isCompleted: Bool
+}
+
 struct WidgetAttributes: ActivityAttributes {
     public struct ContentState: Codable, Hashable {
         var title: String
@@ -31,9 +37,10 @@ struct WidgetAttributes: ActivityAttributes {
         var endTime: Date
         var isCompleted: Bool
         var progress: Double
+        var todos: [WidgetTodo]
         
         enum CodingKeys: String, CodingKey {
-            case title, description, startTime, endTime, isCompleted, progress
+            case title, description, startTime, endTime, isCompleted, progress, todos
         }
         
         init(title: String = "Default Title", 
@@ -41,13 +48,15 @@ struct WidgetAttributes: ActivityAttributes {
              startTime: Date = Date(),
              endTime: Date = Date().addingTimeInterval(3600),
              isCompleted: Bool = false,
-             progress: Double = 1.0) {
+             progress: Double = 1.0,
+             todos: [WidgetTodo] = []) {
             self.title = title
             self.description = description
             self.startTime = startTime
             self.endTime = endTime
             self.isCompleted = isCompleted
             self.progress = progress
+            self.todos = todos
         }
         
         init(from decoder: Decoder) throws {
@@ -56,6 +65,7 @@ struct WidgetAttributes: ActivityAttributes {
             description = try container.decode(String.self, forKey: .description)
             isCompleted = try container.decode(Bool.self, forKey: .isCompleted)
             progress = try container.decode(Double.self, forKey: .progress)
+            todos = try container.decodeIfPresent([WidgetTodo].self, forKey: .todos) ?? []
             
             if let startTimeString = try? container.decode(String.self, forKey: .startTime) {
                 startTime = Self.parseTime(startTimeString)
@@ -78,6 +88,7 @@ struct WidgetAttributes: ActivityAttributes {
             try container.encode(endTime, forKey: .endTime)
             try container.encode(isCompleted, forKey: .isCompleted)
             try container.encode(progress, forKey: .progress)
+            try container.encode(todos, forKey: .todos)
         }
         
         private static func parseTime(_ timeString: String) -> Date {
@@ -230,9 +241,14 @@ struct LockScreenActivityView: View {
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                     .lineLimit(2)
+                
+                if !context.state.todos.isEmpty {
+                    TodosRowView(todos: context.state.todos)
+                        .padding(.top, 6)
+                }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.bottom, 12)
+            .padding(.bottom, 8)
             
             HStack(spacing: 8) {
                 if context.state.isCompleted {
@@ -316,6 +332,62 @@ struct CircularProgressView: View {
     }
 }
 
+struct TodosRowView: View {
+    let todos: [WidgetTodo]
+    
+    var body: some View {
+        GeometryReader { geometry in
+            HStack(spacing: 4) {
+                ForEach(visibleTodos, id: \.id) { todo in
+                    TodoTile(todo: todo)
+                }
+                
+                if remainingCount > 0 {
+                    Text("+\(remainingCount) more")
+                        .font(.caption2)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 6)
+                        .background(Color.gray.opacity(0.2))
+                        .cornerRadius(6)
+                        .foregroundColor(.secondary)
+                }
+            }
+        }
+        .frame(height: 20)
+    }
+    
+    private var visibleTodos: [WidgetTodo] {
+        let maxItems = 3
+        return Array(todos.prefix(maxItems))
+    }
+    
+    private var remainingCount: Int {
+        max(0, todos.count - visibleTodos.count)
+    }
+}
+
+struct TodoTile: View {
+    let todo: WidgetTodo
+    
+    var body: some View {
+        HStack(spacing: 2) {
+            Image(systemName: todo.isCompleted ? "checkmark.circle.fill" : "circle")
+                .font(.caption2)
+                .foregroundColor(todo.isCompleted ? .green : .gray)
+            
+            Text(todo.title)
+                .font(.caption2)
+                .strikethrough(todo.isCompleted)
+                .foregroundColor(todo.isCompleted ? .secondary : .primary)
+                .lineLimit(1)
+        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 6)
+        .background(Color.primary.opacity(0.1))
+        .cornerRadius(6)
+    }
+}
+
 extension WidgetAttributes {
     fileprivate static var preview: WidgetAttributes {
         WidgetAttributes(eventId: "preview-event", deepLinkURL: "mylife://timeline/")
@@ -330,7 +402,12 @@ extension WidgetAttributes.ContentState {
             startTime: Date(),
             endTime: Date().addingTimeInterval(1800), 
             isCompleted: false,
-            progress: 0.3
+            progress: 0.3,
+            todos: [
+                WidgetTodo(id: "1", title: "Warm up for 5 minutes", isCompleted: true),
+                WidgetTodo(id: "2", title: "30 push-ups", isCompleted: false),
+                WidgetTodo(id: "3", title: "Cool down stretches", isCompleted: false)
+            ]
         )
      }
      
@@ -341,7 +418,12 @@ extension WidgetAttributes.ContentState {
             startTime: Date().addingTimeInterval(-3600), 
             endTime: Date(), // Ended now
             isCompleted: true,
-            progress: 1.0
+            progress: 1.0,
+            todos: [
+                WidgetTodo(id: "1", title: "Read chapter 5", isCompleted: true),
+                WidgetTodo(id: "2", title: "Take notes", isCompleted: true),
+                WidgetTodo(id: "3", title: "Review flashcards", isCompleted: true)
+            ]
          )
      }
 }

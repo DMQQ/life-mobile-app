@@ -19,6 +19,12 @@ class NotificationHandler: NSObject, UNUserNotificationCenterDelegate {
 }
 
 // MUST exactly match the WidgetAttributes struct in WidgetLiveActivity.
+struct WidgetTodo: Codable, Hashable {
+    var id: String
+    var title: String
+    var isCompleted: Bool
+}
+
 struct WidgetAttributes: ActivityAttributes {
     public struct ContentState: Codable, Hashable {
         var title: String
@@ -27,9 +33,10 @@ struct WidgetAttributes: ActivityAttributes {
         var endTime: Date
         var isCompleted: Bool
         var progress: Double
+        var todos: [WidgetTodo]
         
         enum CodingKeys: String, CodingKey {
-            case title, description, startTime, endTime, isCompleted, progress
+            case title, description, startTime, endTime, isCompleted, progress, todos
         }
         
         init(title: String = "Default Title", 
@@ -37,13 +44,15 @@ struct WidgetAttributes: ActivityAttributes {
              startTime: Date = Date(),
              endTime: Date = Date().addingTimeInterval(3600),
              isCompleted: Bool = false,
-             progress: Double = 1.0) {
+             progress: Double = 1.0,
+             todos: [WidgetTodo] = []) {
             self.title = title
             self.description = description
             self.startTime = startTime
             self.endTime = endTime
             self.isCompleted = isCompleted
             self.progress = progress
+            self.todos = todos
         }
         
         init(from decoder: Decoder) throws {
@@ -52,6 +61,7 @@ struct WidgetAttributes: ActivityAttributes {
             description = try container.decode(String.self, forKey: .description)
             isCompleted = try container.decode(Bool.self, forKey: .isCompleted)
             progress = try container.decode(Double.self, forKey: .progress)
+            todos = try container.decodeIfPresent([WidgetTodo].self, forKey: .todos) ?? []
             
             if let startTimeString = try? container.decode(String.self, forKey: .startTime) {
                 startTime = Self.parseTime(startTimeString)
@@ -74,6 +84,7 @@ struct WidgetAttributes: ActivityAttributes {
             try container.encode(endTime, forKey: .endTime)
             try container.encode(isCompleted, forKey: .isCompleted)
             try container.encode(progress, forKey: .progress)
+            try container.encode(todos, forKey: .todos)
         }
         
         private static func parseTime(_ timeString: String) -> Date {
@@ -218,7 +229,7 @@ public class ExpoLiveActivityModule: Module {
             }
         }
         
-        AsyncFunction("startCountdownActivity") { (eventId: String, deepLinkURL: String, title: String, description: String, endTime: String) -> String? in
+        AsyncFunction("startCountdownActivity") { (eventId: String, deepLinkURL: String, title: String, description: String, endTime: String, todos: [[String: Any]]) -> String? in
             if #available(iOS 16.2, *) {
                 self.logger.info("Starting Live Activity for eventId: \(eventId)")
                 
@@ -249,13 +260,24 @@ public class ExpoLiveActivityModule: Module {
                 let progress = totalDuration > 0 ? 1.0 : 0.0
                 
                 let attributes = WidgetAttributes(eventId: eventId, deepLinkURL: deepLinkURL)
+                // Convert todos from dictionary array to WidgetTodo objects
+                let todoObjects = todos.compactMap { todoDict -> WidgetTodo? in
+                    guard let id = todoDict["id"] as? String,
+                          let title = todoDict["title"] as? String,
+                          let isCompleted = todoDict["isCompleted"] as? Bool else {
+                        return nil
+                    }
+                    return WidgetTodo(id: id, title: title, isCompleted: isCompleted)
+                }
+                
                 let contentState = WidgetAttributes.ContentState(
                     title: title,
                     description: description,
                     startTime: startDate,
                     endTime: endDate,
                     isCompleted: false,
-                    progress: progress
+                    progress: progress,
+                    todos: todoObjects
                 )
                 
                 let activityContent = ActivityContent(state: contentState, staleDate: endDate)
