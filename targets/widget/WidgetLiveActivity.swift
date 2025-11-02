@@ -197,18 +197,6 @@ struct LockScreenActivityView: View {
         let remaining = context.state.endTime.timeIntervalSince(now)
         let remainingPercentage = totalDuration > 0 ? remaining / totalDuration : 0
         
-        let progressColor: Color = {
-            if context.state.isCompleted {
-                return .green
-            }
-            if remainingPercentage <= 0.2 {
-                return .red
-            } else if remainingPercentage <= 0.4 {
-                return .yellow
-            } else {
-                return .blue
-            }
-        }()
         
         return VStack(spacing: 0) {
             HStack {
@@ -250,7 +238,7 @@ struct LockScreenActivityView: View {
             HStack(spacing: 8) {
                 if context.state.isCompleted {
                     ProgressView(value: 1.0)
-                        .progressViewStyle(LinearProgressViewStyle(tint: progressColor))
+                        .progressViewStyle(LinearProgressViewStyle(tint: .green))
                         .frame(height: 8)
                         .layoutPriority(1)
 
@@ -261,7 +249,7 @@ struct LockScreenActivityView: View {
                         label: { EmptyView() },
                         currentValueLabel: { EmptyView() }
                     )
-                    .progressViewStyle(LinearProgressViewStyle(tint: progressColor))
+                    .progressViewStyle(LinearProgressViewStyle(tint: .blue))
                     .frame(height: 8)
                     .layoutPriority(1)
                 }
