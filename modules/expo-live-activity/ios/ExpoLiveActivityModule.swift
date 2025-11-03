@@ -101,9 +101,6 @@ struct WidgetAttributes: ActivityAttributes {
                                                      minute: timeComponents.minute ?? 0,
                                                      second: timeComponents.second ?? 0,
                                                      of: now) {
-                    if dateWithTime < now {
-                        return calendar.date(byAdding: .day, value: 1, to: dateWithTime) ?? dateWithTime
-                    }
                     return dateWithTime
                 }
             }
