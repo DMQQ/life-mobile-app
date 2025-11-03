@@ -3,7 +3,7 @@ import Button from "@/components/ui/Button/Button"
 import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
 import { AntDesign } from "@expo/vector-icons"
-import { useNavigation } from "@react-navigation/native"
+import { CommonActions, StackActions, useNavigation } from "@react-navigation/native"
 import Color from "color"
 import { BlurView } from "expo-blur"
 import { useEffect, useRef, useState } from "react"
@@ -93,14 +93,24 @@ const styles = StyleSheet.create({
 
 import Feedback from "react-native-haptic-feedback"
 
-export default function CreateTimelineTodos({ route }: TimelineScreenProps<"CreateTimelineTodos">) {
-    const { dispatch, loading, onSaveTodos, state } = useTodos(route.params.timelineId, () => {
+export default function CreateTimelineTodos({ route, navigation }: TimelineScreenProps<"CreateTimelineTodos">) {
+    const mode = route.params?.mode || "create"
+
+    const { dispatch, loading, onSaveTodos, state } = useTodos(route.params?.timelineId || "", () => {
         Keyboard.dismiss()
         navigation.goBack()
     })
     const todoCount = state.todos.filter((todo) => todo.value.trim().length > 0).length
 
-    const navigation = useNavigation()
+    const onSubmit = () => {
+        if (mode === "push-back") {
+            const todos = state.todos.map((t) => t.value)
+
+            return
+        }
+
+        onSaveTodos()
+    }
 
     return (
         <View style={{ flex: 1, backgroundColor: "transparent" }}>
@@ -129,7 +139,7 @@ export default function CreateTimelineTodos({ route }: TimelineScreenProps<"Crea
             <Animated.View style={styles.stickyFooter}>
                 <TodoInput
                     saveTodos={() => {
-                        onSaveTodos()
+                        onSubmit()
                         Feedback.trigger("impactLight")
                     }}
                     loading={loading}
@@ -158,22 +168,27 @@ const TodosList = ({ todos, dispatch }: { todos: ITodoInput[]; dispatch: React.D
     )
 }
 
-const Todo = (
-    todo: ITodoInput & {
-        onRemove: () => any
-    },
-) => {
+export const Todo = ({
+    showRemove = true,
+    ...todo
+}: ITodoInput & {
+    onRemove?: () => any
+
+    showRemove?: boolean
+}) => {
     return (
         <Card style={styles.todoCard}>
             <Text variant="body" style={{ maxWidth: "95%" }}>
                 {todo.value}
             </Text>
 
-            <IconButton
-                icon={<AntDesign name="close" size={18} color={Colors.error} />}
-                onPress={todo.onRemove}
-                style={{ margin: 0, marginLeft: 8 }}
-            />
+            {showRemove && (
+                <IconButton
+                    icon={<AntDesign name="close" size={18} color={Colors.error} />}
+                    onPress={todo.onRemove}
+                    style={{ margin: 0, marginLeft: 8 }}
+                />
+            )}
         </Card>
     )
 }

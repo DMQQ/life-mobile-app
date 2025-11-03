@@ -17,9 +17,6 @@ import LoadingSkeleton from "./components/LoadingSkeleton"
 import MainContent from "./components/MainContent"
 import NotificationsModal from "./components/NotificationsModal"
 import SettingsModal from "./components/SettingsModal"
-import useWidgets from "@/utils/widget/hooks/useWidgets"
-import { useActivityManager } from "@/utils/hooks/useActivityManager"
-import dayjs from "dayjs"
 
 function Root({}: ScreenProps<"Root">) {
     const [loading, setLoading] = useState(true)

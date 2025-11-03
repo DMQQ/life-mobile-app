@@ -9,7 +9,7 @@ import Ripple from "react-native-material-ripple"
 
 const styles = StyleSheet.create({
     header: {
-        justifyContent: "space-between",
+        justifyContent: "center",
         flexDirection: "row",
         alignItems: "center",
         padding: 15,
@@ -24,18 +24,11 @@ const styles = StyleSheet.create({
 export default function TimelineCreateHeader(
     props: NativeStackHeaderProps & {
         selectedDate: string
-        onToggleOptions: () => void
         handleChangeDate: (...rest: any) => void
     },
 ) {
     return (
         <View style={[styles.header]}>
-            <GlassView style={{ padding: 10, borderRadius: 100 }}>
-                <Ripple onPress={props.navigation.goBack}>
-                    <AntDesign name="close" color={Colors.foreground} size={20} />
-                </Ripple>
-            </GlassView>
-
             {props.selectedDate.split(";").length === 1 && (
                 <DatePicker
                     mode="single"
@@ -43,11 +36,6 @@ export default function TimelineCreateHeader(
                     dates={{ start: dayjs(props.selectedDate).toDate(), end: dayjs(props.selectedDate).toDate() }}
                 />
             )}
-            <GlassView style={{ padding: 10, borderRadius: 100 }} tintColor={Colors.error}>
-                <Ripple onPress={props.onToggleOptions}>
-                    <Feather name="trash" color={Colors.foreground} size={20} />
-                </Ripple>
-            </GlassView>
         </View>
     )
 }

@@ -171,28 +171,3 @@ export default function TimelineDetails({
         </View>
     )
 }
-
-const AnimatedProgressBar = ({ percentage, scrollY }: { percentage: number; scrollY: SharedValue<number> }) => {
-    return (
-        <Animated.View
-            style={[
-                useAnimatedStyle(() => {
-                    const scrollValue = scrollY?.value ?? 0
-
-                    return {
-                        opacity: interpolate(scrollValue, [0, 130, 150, 160], [0, 0, 0.75, 1], Extrapolation.CLAMP),
-                        transform: [
-                            {
-                                translateY: interpolate(scrollValue, [0, 160], [-25, 0], Extrapolation.CLAMP),
-                            },
-                            { scale: interpolate(scrollValue, [0, 160], [0.5, 1], Extrapolation.CLAMP) },
-                        ],
-                    }
-                }, [scrollY]),
-                { paddingHorizontal: 15, paddingBottom: 15 },
-            ]}
-        >
-            <CompletionBar percentage={percentage} />
-        </Animated.View>
-    )
-}

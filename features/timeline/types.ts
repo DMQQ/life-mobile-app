@@ -7,11 +7,13 @@ export type TimelineRootStack = {
         selectedDate: string
         mode: "create" | "edit" | "shopping-list"
         timelineId?: string
+
+        todos?: string[]
     }
     ImagesPreview: { selectedImage: string; timelineId: string }
     Schedule: { selected: string; selectedDate: string }
     Search: undefined
-    CreateTimelineTodos: { timelineId: string }
+    CreateTimelineTodos: { timelineId?: string; mode?: "create" | "push-back" }
     TodosTransferModal: {
         timelineId: string
     }

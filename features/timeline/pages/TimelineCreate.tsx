@@ -21,6 +21,9 @@ import timelineStyles from "../components/timeline.styles"
 import useCreateTimeline from "../hooks/general/useCreateTimeline"
 import type { TimelineScreenProps } from "../types"
 import { Button } from "@/components"
+import { useIsFocused } from "@react-navigation/native"
+import TodoItem from "../components/TodoItem"
+import { Todo } from "./CreateTimelineTodos"
 
 const styles = StyleSheet.create({
     timeContainer: {
@@ -73,6 +76,8 @@ export default function CreateTimeLineEventModal({ route, navigation }: Timeline
         }
     }, [route.params.mode])
 
+    console.log("Rerendering CreateTimeLineEventModal", route.params)
+
     return (
         <View style={{ flex: 1, paddingBottom: insets.bottom }}>
             <TimelineCreateHeader
@@ -84,9 +89,6 @@ export default function CreateTimeLineEventModal({ route, navigation }: Timeline
                     })
                 }}
                 selectedDate={route.params.selectedDate}
-                onToggleOptions={() => {
-                    f.resetForm()
-                }}
             />
 
             <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 15 }} keyboardDismissMode={"on-drag"}>
@@ -139,7 +141,23 @@ export default function CreateTimeLineEventModal({ route, navigation }: Timeline
                         </Ripple>
                     </View>
 
-                    <View style={{ marginTop: 10 }}>
+                    <View>
+                        {route.params.todos?.map((todo, index) => (
+                            <Todo index={index} value={todo} key={index} showRemove={false} />
+                        ))}
+
+                        <Button
+                            onPress={() => {
+                                ;(navigation as any).navigate("CreateTimelineTodos", {
+                                    mode: "push-back",
+                                })
+                            }}
+                        >
+                            open todos
+                        </Button>
+                    </View>
+
+                    {/* <View style={{ marginTop: 10 }}>
                         <ValidatedInput.Label error={false} text="How to send you notifications?" />
                         <SegmentedButtons
                             containerStyle={{
@@ -158,7 +176,7 @@ export default function CreateTimeLineEventModal({ route, navigation }: Timeline
                             value={f.values.notification}
                             onChange={(val) => f.setFieldValue("notification", val)}
                         />
-                    </View>
+                    </View> */}
 
                     <TimePickerModal
                         isVisible={!!timePicker}

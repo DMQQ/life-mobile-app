@@ -5,20 +5,22 @@ import { WidgetAnalyticsData } from "../types"
 import { ExtensionStorage } from "@bacons/apple-targets"
 import moment from "moment"
 
-const GET_LIMITS = gql`
-    query Limits($range: String!, $date: String) {
+const GET_WIDGET_ANALYTICS = gql`
+    query WidgetAnalytics(
+        $range: String!
+        $date: String
+        $statsRange: [String!]!
+        $startDate: String!
+        $endDate: String!
+        $detailed: String!
+    ) {
         limits(range: $range, date: $date) {
             id
             category
             amount
             current
         }
-    }
-`
-
-const GET_STATISTICS = gql`
-    query WalletStatistics($range: [String!]!) {
-        statistics: getStatistics(range: $range) {
+        statistics: getStatistics(range: $statsRange) {
             total
             average
             max
@@ -30,11 +32,6 @@ const GET_STATISTICS = gql`
             income
             expense
         }
-    }
-`
-
-const GET_DAILY_STATS = gql`
-    query StatisticsDayOfWeek($startDate: String!, $endDate: String!) {
         statisticsDayOfWeek(startDate: $startDate, endDate: $endDate) {
             day
             total
@@ -42,22 +39,12 @@ const GET_DAILY_STATS = gql`
             median
             count
         }
-    }
-`
-
-const GET_CATEGORY_STATS = gql`
-    query StatisticsLegend($startDate: String!, $endDate: String!, $detailed: String!) {
         statisticsLegend(startDate: $startDate, endDate: $endDate, displayMode: $detailed) {
             category
             count
             total
             percentage
         }
-    }
-`
-
-const GET_WALLET = gql`
-    query GetWallet {
         wallet {
             id
             balance
@@ -68,67 +55,49 @@ const GET_WALLET = gql`
 `
 
 export const useWidgetAnalyticsData = () => {
-    const { data: limitsData } = useQuery(GET_LIMITS, {
+    const now = moment()
+    const { data } = useQuery(GET_WIDGET_ANALYTICS, {
         variables: {
             range: "monthly",
-            date: moment().format("YYYY-MM-DD"),
-        },
-    })
-
-    const { data: dailyStats } = useQuery(GET_DAILY_STATS, {
-        variables: {
-            startDate: moment().subtract(6, "days").format("YYYY-MM-DD"),
+            date: now.format("YYYY-MM-DD"),
+            statsRange: [now.startOf("month").format("YYYY-MM-DD"), now.endOf("month").format("YYYY-MM-DD")],
+            startDate: now.subtract(6, "days").format("YYYY-MM-DD"),
             endDate: moment().format("YYYY-MM-DD"),
-        },
-    })
-
-    const { data: categoryStats } = useQuery(GET_CATEGORY_STATS, {
-        variables: {
-            startDate: moment().startOf("month").format("YYYY-MM-DD"),
-            endDate: moment().endOf("month").format("YYYY-MM-DD"),
             detailed: "monthly",
         },
     })
 
-    const { data: walletData } = useQuery(GET_WALLET)
-
-    const { data: monthlyStats } = useQuery(GET_STATISTICS, {
-        variables: {
-            range: [moment().startOf("month").format("YYYY-MM-DD"), moment().endOf("month").format("YYYY-MM-DD")],
-        },
-    })
-
     useEffect(() => {
-        if (!limitsData && !dailyStats && !monthlyStats && !categoryStats && !walletData) return
+        if (!data) return
 
-        const limits = (limitsData?.limits || [])
-            .filter((limit: any) => limit.current > 0)
+        const limits = (data.limits || [])
+            .filter((l: any) => l.current > 0)
             .sort((a: any, b: any) => b.current - a.current)
             .slice(0, 4)
-            .map((limit: any) => ({
-                category: limit.category,
-                amount: limit.amount,
-                current: limit.current,
+            .map((l: any) => ({
+                category: l.category,
+                amount: l.amount,
+                current: l.current,
             }))
 
-        const dailySpendingData = dailyStats?.statisticsDayOfWeek || []
-        const weeklySpending = Array.from({ length: 7 }, (_, index) => {
-            const dayNumber = index + 1
-            const dayData = dailySpendingData.find((day: any) => day.day === dayNumber)
-            return dayData?.total || 0
+        const dailySpendingData = data.statisticsDayOfWeek || []
+        console.log("dailySpendingData", JSON.stringify(dailySpendingData, null, 2))
+        const weeklySpending = Array.from({ length: 7 }, (_, i) => {
+            const day = i + 1
+            return dailySpendingData.find((d: any) => d.day === day)?.total || 0
         })
 
-        const topCategories = [...(categoryStats?.statisticsLegend || [])]
+        const topCategories = [...(data.statisticsLegend || [])]
             .sort((a: any, b: any) => b.total - a.total)
             .slice(0, 4)
-            .map((category: any) => ({
-                name: category.category,
-                amount: category.total,
+            .map((c: any) => ({
+                name: c.category,
+                amount: c.total,
             }))
 
-        const wallet = walletData?.wallet
-        const monthlyIncome = monthlyStats?.statistics?.income || wallet?.income || 0
-        const monthlyExpense = monthlyStats?.statistics?.expense || 0
+        const wallet = data.wallet
+        const monthlyIncome = data.statistics?.income || wallet?.income || 0
+        const monthlyExpense = data.statistics?.expense || 0
         const savedAmount = monthlyIncome - monthlyExpense
         const targetPercentage = wallet?.monthlyPercentageTarget || 20
         const targetAmount = monthlyIncome * (targetPercentage / 100)
@@ -150,7 +119,7 @@ export const useWidgetAnalyticsData = () => {
 
         store.set("analytics_data", JSON.stringify(analyticsData))
         ExtensionStorage.reloadWidget()
-    }, [limitsData, dailyStats, monthlyStats, categoryStats, walletData])
+    }, [data])
 }
 
 export default useWidgetAnalyticsData
