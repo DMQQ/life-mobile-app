@@ -22,6 +22,8 @@ const initialValues = {
     repeatUntil: "unspecified",
     repeatOn: "",
     repeatEveryNth: "",
+
+    todos: [] as string[],
 }
 
 export type InitialValuesType = typeof initialValues
@@ -41,7 +43,7 @@ export default function useCreateTimeline(props: { selectedDate: string }) {
     const [createTimelineEvent, state] = useMutation(CREATE_TIMELINE_EVENT, {})
 
     const handleSubmit = async (input: typeof initialValues) => {
-        const { data } = await createTimelineEvent({
+        await createTimelineEvent({
             variables: {
                 title: input.title,
                 desc: input.desc,
@@ -49,6 +51,8 @@ export default function useCreateTimeline(props: { selectedDate: string }) {
                 end: input.end,
                 tags: input.tags,
                 date: props.selectedDate,
+
+                todos: input.todos ?? [],
 
                 ...(input.repeatCount &&
                     input.repeatOn !== "" && {
@@ -87,6 +91,7 @@ export default function useCreateTimeline(props: { selectedDate: string }) {
             },
 
             onError: (err) => {
+                console.error("Error creating timeline:", JSON.stringify(err, null, 2))
                 Platform.OS === "android" && ToastAndroid.show("Could not create timeline", ToastAndroid.LONG)
             },
         })

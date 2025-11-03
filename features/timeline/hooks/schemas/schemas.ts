@@ -12,9 +12,18 @@ export const CREATE_TIMELINE_EVENT = gql`
         $repeatUntil: String
         $repeatOn: String
         $repeatEveryNth: Int
+        $todos: [String!]
     ) {
         createTimeline(
-            input: { title: $title, description: $desc, date: $date, beginTime: $begin, endTime: $end, tags: $tags }
+            input: {
+                title: $title
+                description: $desc
+                date: $date
+                beginTime: $begin
+                endTime: $end
+                tags: $tags
+                todos: $todos
+            }
             options: {
                 reapeatCount: $repeatCount
                 startDate: $date
@@ -31,19 +40,26 @@ export const CREATE_TIMELINE_EVENT = gql`
             endTime
             tags
             isCompleted
+
+            todos {
+                id
+                title
+                isCompleted
+                createdAt
+                modifiedAt
+                files {
+                    id
+                    type
+                    url
+                }
+            }
         }
     }
 `
 
 export const COPY_TIMELINE = gql`
-    mutation CopyTimeline(
-        $timelineId: ID!
-        $newDate: String
-    ) {
-        copyTimeline(
-            timelineId: $timelineId
-            input: { newDate: $newDate }
-        ) {
+    mutation CopyTimeline($timelineId: ID!, $newDate: String) {
+        copyTimeline(timelineId: $timelineId, input: { newDate: $newDate }) {
             id
             title
             description

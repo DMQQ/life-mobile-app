@@ -3,7 +3,6 @@ import Button from "@/components/ui/Button/Button"
 import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
 import { AntDesign } from "@expo/vector-icons"
-import { CommonActions, StackActions, useNavigation } from "@react-navigation/native"
 import Color from "color"
 import { BlurView } from "expo-blur"
 import { useEffect, useRef, useState } from "react"
@@ -54,7 +53,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
-        borderRadius: 20,
+        borderRadius: 15,
         marginBottom: 12,
         backgroundColor: Colors.primary_lighter,
     },
@@ -100,11 +99,27 @@ export default function CreateTimelineTodos({ route, navigation }: TimelineScree
         Keyboard.dismiss()
         navigation.goBack()
     })
+
+    useEffect(() => {
+        if (route.params?.todos?.length > 0) {
+            console.log("Setting todos from route params", route.params.todos)
+            dispatch({ type: "set", payload: route.params.todos })
+        }
+    }, [route.params?.todos])
+
     const todoCount = state.todos.filter((todo) => todo.value.trim().length > 0).length
 
     const onSubmit = () => {
         if (mode === "push-back") {
             const todos = state.todos.map((t) => t.value)
+
+            navigation.popTo(
+                "TimelineCreate",
+                {
+                    todos,
+                },
+                { merge: true },
+            )
 
             return
         }

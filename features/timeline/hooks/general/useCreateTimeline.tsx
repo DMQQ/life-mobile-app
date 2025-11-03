@@ -22,7 +22,7 @@ export default function useCreateTimeline({ route, navigation }: TimelineScreenP
         selectedDate: route.params.selectedDate,
     })
 
-    const sheetRef = useRef<BottomSheetType>()
+    const sheetRef = useRef<BottomSheetType>(null)
 
     const client = useApolloClient()
 
@@ -52,10 +52,10 @@ export default function useCreateTimeline({ route, navigation }: TimelineScreenP
         if (isEditing) {
             await editTimeline(input, route.params.selectedDate)
         } else {
-            await handleSubmit(input)
+            await handleSubmit({ ...input, todos: route.params?.todos || [] })
         }
 
-        await Promise.any([
+        await Promise.allSettled([
             client.refetchQueries({
                 include: [GET_MONTHLY_EVENTS],
             }),

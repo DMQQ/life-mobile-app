@@ -21,12 +21,10 @@ const styles = StyleSheet.create({
     },
 })
 
-export default function TimelineCreateHeader(
-    props: NativeStackHeaderProps & {
-        selectedDate: string
-        handleChangeDate: (...rest: any) => void
-    },
-) {
+export default function TimelineCreateHeader(props: {
+    selectedDate: string
+    handleChangeDate: (...rest: any) => void
+}) {
     return (
         <View style={[styles.header]}>
             {props.selectedDate.split(";").length === 1 && (

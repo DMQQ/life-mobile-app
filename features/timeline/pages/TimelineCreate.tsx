@@ -9,7 +9,7 @@ import { AntDesign } from "@expo/vector-icons"
 import Color from "color"
 import moment from "moment"
 import { useState } from "react"
-import { ActivityIndicator, Platform, ScrollView, StyleSheet, View } from "react-native"
+import { ActivityIndicator, Platform, Pressable, ScrollView, StyleSheet, View } from "react-native"
 import Ripple from "react-native-material-ripple"
 import DateTimePicker from "react-native-modal-datetime-picker"
 import Animated, { useAnimatedKeyboard, useAnimatedStyle } from "react-native-reanimated"
@@ -76,12 +76,9 @@ export default function CreateTimeLineEventModal({ route, navigation }: Timeline
         }
     }, [route.params.mode])
 
-    console.log("Rerendering CreateTimeLineEventModal", route.params)
-
     return (
         <View style={{ flex: 1, paddingBottom: insets.bottom }}>
             <TimelineCreateHeader
-                navigation={navigation}
                 handleChangeDate={(date) => {
                     handleChangeDate(date)
                     navigation.setParams({
@@ -141,21 +138,58 @@ export default function CreateTimeLineEventModal({ route, navigation }: Timeline
                         </Ripple>
                     </View>
 
-                    <View>
-                        {route.params.todos?.map((todo, index) => (
-                            <Todo index={index} value={todo} key={index} showRemove={false} />
-                        ))}
+                    {!isEditing && (
+                        <View style={{ marginTop: 15 }}>
+                            <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                                <ValidatedInput.Label error={false} text={"Todos "} />
 
-                        <Button
-                            onPress={() => {
-                                ;(navigation as any).navigate("CreateTimelineTodos", {
-                                    mode: "push-back",
-                                })
-                            }}
-                        >
-                            open todos
-                        </Button>
-                    </View>
+                                <Pressable
+                                    onPress={() => {
+                                        ;(navigation as any).navigate("CreateTimelineTodos", {
+                                            mode: "push-back",
+
+                                            todos: route.params.todos || [],
+                                        })
+                                    }}
+                                >
+                                    <Text
+                                        style={{
+                                            fontSize: 16,
+                                            fontWeight: "bold",
+                                            color: Colors.secondary,
+                                            padding: 5,
+                                        }}
+                                    >
+                                        Create new todos
+                                    </Text>
+                                </Pressable>
+                            </View>
+                            <View style={{ marginTop: 2.5 }}>
+                                {(route.params.todos?.length || 0) > 0 ? (
+                                    route.params.todos?.map((todo, index) => (
+                                        <Todo
+                                            index={index}
+                                            value={todo}
+                                            key={index}
+                                            showRemove
+                                            onRemove={() => {
+                                                navigation.setParams({
+                                                    ...route.params,
+                                                    todos: route.params?.todos?.filter((_, i) => i !== index),
+                                                })
+                                            }}
+                                        />
+                                    ))
+                                ) : (
+                                    <View style={{ padding: 10 }}>
+                                        <Text style={{ color: "gray", fontStyle: "italic", fontSize: 15 }}>
+                                            No todos added yet.
+                                        </Text>
+                                    </View>
+                                )}
+                            </View>
+                        </View>
+                    )}
 
                     {/* <View style={{ marginTop: 10 }}>
                         <ValidatedInput.Label error={false} text="How to send you notifications?" />
