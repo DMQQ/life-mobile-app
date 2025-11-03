@@ -6,6 +6,7 @@ export interface ActivityConfig {
     title: string
     description: string
     endTime: `${number}:${number}:${number}`
+    startTime: `${number}:${number}:${number}`
     deepLinkURL?: string
     todos?: Array<{
         id: string
@@ -51,6 +52,7 @@ export const useActivityCore = () => {
                 config.title,
                 config.description,
                 config.endTime,
+                config.startTime,
                 config.todos || [],
             )
 

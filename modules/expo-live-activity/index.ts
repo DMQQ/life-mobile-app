@@ -6,6 +6,7 @@ export interface ActivityData {
     title: string
     description: string
     endTime: string
+    startTime: string
 }
 
 export interface ActivityContentState {
@@ -57,6 +58,8 @@ declare class ExpoLiveActivityModule extends NativeModule<ExpoLiveActivityModule
         title: string,
         description: string,
         endTime: string,
+        startTime: string,
+        todos: Array<{id: string, title: string, isCompleted: boolean}>
     ): Promise<string | null>
     updateActivity(progress: number, isCompleted: boolean): void
     endActivity(): void

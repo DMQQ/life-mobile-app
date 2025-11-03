@@ -18,7 +18,6 @@ class NotificationHandler: NSObject, UNUserNotificationCenterDelegate {
     }
 }
 
-// MUST exactly match the WidgetAttributes struct in WidgetLiveActivity.
 struct WidgetTodo: Codable, Hashable {
     var id: String
     var title: String
@@ -101,13 +100,14 @@ struct WidgetAttributes: ActivityAttributes {
                                                      minute: timeComponents.minute ?? 0,
                                                      second: timeComponents.second ?? 0,
                                                      of: now) {
+
                     return dateWithTime
                 }
             }
             return now
         }
     }
-    
+
     var eventId: String
     var deepLinkURL: String
     
@@ -133,7 +133,6 @@ public class ExpoLiveActivityModule: Module {
             }
             observeLiveActivityUpdates()
             
-            // Debug: Log when any push notification is received
             UNUserNotificationCenter.current().delegate = NotificationHandler.shared
         }
         
@@ -155,7 +154,7 @@ public class ExpoLiveActivityModule: Module {
                 
                 for activity in activities {
                     self.logger.info("🔍 Activity \(activity.id) - eventId: \(activity.attributes.eventId)")
-                    // Note: pushToken is only available after the activity requests it
+
                     result[activity.id] = [
                         "eventId": activity.attributes.eventId,
                         "state": String(describing: activity.activityState)
@@ -196,7 +195,6 @@ public class ExpoLiveActivityModule: Module {
                     )
                     self.logger.info("✅ Test activity created: \(activity.id)")
                     
-                    // Monitor this activity
                     if pushNotificationsEnabled {
                         monitorActivityPushToken(activity: activity)
                     }
@@ -226,10 +224,8 @@ public class ExpoLiveActivityModule: Module {
             }
         }
         
-        AsyncFunction("startCountdownActivity") { (eventId: String, deepLinkURL: String, title: String, description: String, endTime: String, todos: [[String: Any]]) -> String? in
-            if #available(iOS 16.2, *) {
-                self.logger.info("Starting Live Activity for eventId: \(eventId)")
-                
+        AsyncFunction("startCountdownActivity") { (eventId: String, deepLinkURL: String, title: String, description: String, endTime: String, startTime: String, todos: [[String: Any]]) -> String? in
+            if #available(iOS 16.2, *) {                
                 let dateFormatter = DateFormatter()
                 dateFormatter.dateFormat = "HH:mm:ss"
                 dateFormatter.timeZone = TimeZone.current
@@ -251,13 +247,47 @@ public class ExpoLiveActivityModule: Module {
                     return nil
                 }
                 
-                let endDate = dateWithTime < now ? calendar.date(byAdding: .day, value: 1, to: dateWithTime)! : dateWithTime
-                let startDate = Date()
+                guard let startTimeDate = dateFormatter.date(from: startTime) else {
+                    self.logger.error("Failed to parse start time: \(startTime)")
+                    return nil
+                }
+                
+                let startTimeComponents = calendar.dateComponents([.hour, .minute, .second], from: startTimeDate)
+                guard let dateWithStartTime = calendar.date(bySettingHour: startTimeComponents.hour ?? 0,
+                                                           minute: startTimeComponents.minute ?? 0,
+                                                           second: startTimeComponents.second ?? 0,
+                                                           of: now) else {
+                    self.logger.error("Failed to create date with start time")
+                    return nil
+                }
+                
+                let baseDate: Date
+                if dateWithTime < now {
+                    baseDate = calendar.date(byAdding: .day, value: 1, to: now)!
+                } else {
+                    baseDate = now
+                }
+                
+
+                guard let startDate = calendar.date(bySettingHour: startTimeComponents.hour ?? 0,
+                                                   minute: startTimeComponents.minute ?? 0,
+                                                   second: startTimeComponents.second ?? 0,
+                                                   of: baseDate) else {
+                    self.logger.error("Failed to create start date")
+                    return nil
+                }
+                
+                guard let endDate = calendar.date(bySettingHour: timeComponents.hour ?? 0,
+                                                 minute: timeComponents.minute ?? 0,
+                                                 second: timeComponents.second ?? 0,
+                                                 of: baseDate) else {
+                    self.logger.error("Failed to create end date")
+                    return nil
+                }
                 let totalDuration = endDate.timeIntervalSince(startDate)
                 let progress = totalDuration > 0 ? 1.0 : 0.0
                 
                 let attributes = WidgetAttributes(eventId: eventId, deepLinkURL: deepLinkURL)
-                // Convert todos from dictionary array to WidgetTodo objects
                 let todoObjects = todos.compactMap { todoDict -> WidgetTodo? in
                     guard let id = todoDict["id"] as? String,
                           let title = todoDict["title"] as? String,
@@ -409,7 +439,6 @@ public class ExpoLiveActivityModule: Module {
 
         self.logger.info("🔄 Starting Live Activity updates monitoring...")
         
-        // Debug: Log all current activities at startup
         let currentActivities = Activity<WidgetAttributes>.activities
         self.logger.info("🔍 Activities at startup: \(currentActivities.count)")
         for activity in currentActivities {

@@ -19,6 +19,7 @@ import NotificationsModal from "./components/NotificationsModal"
 import SettingsModal from "./components/SettingsModal"
 import useWidgets from "@/utils/widget/hooks/useWidgets"
 import { useActivityManager } from "@/utils/hooks/useActivityManager"
+import dayjs from "dayjs"
 
 function Root({}: ScreenProps<"Root">) {
     const [loading, setLoading] = useState(true)
@@ -75,7 +76,10 @@ function Root({}: ScreenProps<"Root">) {
                     activity.startActivity({
                         title: "New Activity",
                         description: "Creating a new activity from header",
-                        endTime: "23:25:00",
+                        endTime: dayjs(dayjs()).add(15, "minute").format("HH:mm:ss") as `${number}:${number}:${number}`,
+                        startTime: dayjs(dayjs())
+                            .subtract(15, "minute")
+                            .format("HH:mm:ss") as `${number}:${number}:${number}`,
                         eventId: `activity-${Date.now()}`,
                         deepLinkURL: `mylife://timeline`,
                         todos: [
