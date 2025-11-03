@@ -28,6 +28,9 @@ export interface HeaderItem {
 
     standalone?: boolean
 
+    position?: "left" | "right"
+
+    tintColor?: string
     contextMenu?: {
         items: {
             title: string
@@ -108,9 +111,28 @@ function Header(props: HeaderProps) {
     }, [props.renderAnimatedItem])
 
     const standaloneButtons = useMemo(() => {
-        {
-            return (props.buttons || []).filter(Boolean).filter((button) => button!.standalone)
-        }
+        return (props.buttons || []).filter(Boolean).reduce(
+            (acc, button) => {
+                if (button!.standalone) {
+                    if (button!.position === "left") {
+                        acc.left.push(button!)
+                    } else if (button!.position === "right") {
+                        acc.right.push(button!)
+                    } else {
+                        acc.left.push(button!)
+                    }
+                }
+
+                return acc
+            },
+            {
+                left: [] as HeaderItem[],
+                right: [] as HeaderItem[],
+            },
+        )
+        // {
+        //     return (props.buttons || []).filter(Boolean).filter((button) => button!.standalone)
+        // }
     }, [props.buttons])
 
     const regularButtons = useMemo(() => {
@@ -177,7 +199,7 @@ function Header(props: HeaderProps) {
                     {props.children}
 
                     <View style={{ borderRadius: 100, overflow: "hidden", flexDirection: "row", gap: 10 }}>
-                        {standaloneButtons.map((button, index) => (
+                        {standaloneButtons.left.map((button, index) => (
                             <View key={index} style={{ overflow: "hidden", borderRadius: 100 }}>
                                 <GlassView style={styles.iconContainer}>
                                     <HeaderIconButton button={button!} index={index} />
@@ -190,6 +212,17 @@ function Header(props: HeaderProps) {
                                 return <HeaderIconButton key={index} button={button!} index={index} />
                             })}
                         </GlassView>
+
+                        {standaloneButtons.right.map((button, index) => (
+                            <View key={index} style={{ overflow: "hidden", borderRadius: 100 }}>
+                                <GlassView
+                                    style={styles.iconContainer}
+                                    {...(button.tintColor && { tintColor: button.tintColor })}
+                                >
+                                    <HeaderIconButton button={button!} index={index} />
+                                </GlassView>
+                            </View>
+                        ))}
                     </View>
                 </View>
 
