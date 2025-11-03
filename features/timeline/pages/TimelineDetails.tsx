@@ -22,9 +22,8 @@ import useGetTimelineById from "../hooks/query/useGetTimelineById"
 
 import { Header } from "@/components"
 import DeleteTimelineEvent from "@/components/ui/Dialog/Delete/DeleteTimelineEvent"
-import useTrackScroll from "@/utils/hooks/ui/useTrackScroll"
-import CompletionBar from "../components/CompletionBar"
 import { GetTimelineQuery } from "../hooks/query/useGetTimeLineQuery"
+import { HeaderItem } from "@/components/ui/Header/Header"
 
 const styles = StyleSheet.create({
     title: {
@@ -87,29 +86,27 @@ export default function TimelineDetails({
     }
 
     const buttons = useMemo(
-        () => [
-            {
-                icon: <Feather name="trash" size={20} color={Colors.error} />,
-                onPress: () => {
-                    setSelectedEventForDeletion(data)
+        () =>
+            [
+                {
+                    icon: <Feather name="trash" size={20} color="#fff" />,
+                    onPress: () => {
+                        setSelectedEventForDeletion(data)
+                    },
                 },
-                standalone: true,
-            },
-            {
-                icon: <Feather name="edit-2" size={20} color={Colors.foreground} />,
-                onPress: onFabPress,
-            },
-            {
-                icon: (
-                    <AntDesign
-                        name={data?.isCompleted ? "check" : "check-circle"}
-                        color={data?.isCompleted ? Colors.secondary : Colors.foreground}
-                        size={20}
-                    />
-                ),
-                onPress: completeTimeline,
-            },
-        ],
+                {
+                    icon: <Feather name="edit-2" size={20} color={Colors.foreground} />,
+                    onPress: onFabPress,
+                },
+                {
+                    icon: <AntDesign name={data?.isCompleted ? "check" : "check"} color={"#fff"} size={20} />,
+                    standalone: true,
+                    position: "right",
+                    onPress: completeTimeline,
+
+                    tintColor: !data?.isCompleted ? Colors.secondary : "green",
+                },
+            ] as HeaderItem[],
         [data?.isCompleted, data],
     )
 

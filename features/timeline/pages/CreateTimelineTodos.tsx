@@ -91,6 +91,7 @@ const styles = StyleSheet.create({
 })
 
 import Feedback from "react-native-haptic-feedback"
+import { CommonActions } from "@react-navigation/native"
 
 export default function CreateTimelineTodos({ route, navigation }: TimelineScreenProps<"CreateTimelineTodos">) {
     const mode = route.params?.mode || "create"
@@ -102,29 +103,26 @@ export default function CreateTimelineTodos({ route, navigation }: TimelineScree
 
     useEffect(() => {
         if (route.params?.todos?.length > 0) {
-            console.log("Setting todos from route params", route.params.todos)
             dispatch({ type: "set", payload: route.params.todos })
         }
     }, [route.params?.todos])
 
     const todoCount = state.todos.filter((todo) => todo.value.trim().length > 0).length
 
-    const onSubmit = () => {
+    const onSubmit = (text: string) => {
+        Feedback.trigger("impactLight")
+
         if (mode === "push-back") {
             const todos = state.todos.map((t) => t.value)
 
-            navigation.popTo(
-                "TimelineCreate",
-                {
-                    todos,
-                },
-                { merge: true },
-            )
-
+            navigation.navigate("TimelineCreate", {
+                ...route.params,
+                todos,
+            })
             return
         }
 
-        onSaveTodos()
+        onSaveTodos(text)
     }
 
     return (
@@ -153,10 +151,7 @@ export default function CreateTimelineTodos({ route, navigation }: TimelineScree
 
             <Animated.View style={styles.stickyFooter}>
                 <TodoInput
-                    saveTodos={() => {
-                        onSubmit()
-                        Feedback.trigger("impactLight")
-                    }}
+                    saveTodos={onSubmit}
                     loading={loading}
                     isOpen={true}
                     onAddTodo={(v) => dispatch({ type: "add", payload: v.trim() })}
@@ -217,7 +212,7 @@ const TodoInput = ({
     isOpen,
 }: {
     onAddTodo: (value: string) => any
-    saveTodos: () => any
+    saveTodos: (text: string) => any
     loading: boolean
     isOpen?: boolean
 }) => {
@@ -234,6 +229,10 @@ const TodoInput = ({
             textRef.current = ""
             setHasText(false)
         }
+    }
+
+    const onSaveTodosPress = async () => {
+        saveTodos(textRef.current.trim())
     }
 
     const onTextChange = (text: string) => {
@@ -315,9 +314,9 @@ const TodoInput = ({
                     >
                         <IconButton
                             icon={<AntDesign name="check" size={20} color={Colors.text_light} />}
-                            onPress={saveTodos}
+                            onPress={onSaveTodosPress}
                             disabled={loading}
-                            style={[{ backgroundColor: Colors.secondary, padding: 13.5, borderRadius: 20 }]}
+                            style={[{ backgroundColor: Colors.secondary, padding: 13.5, borderRadius: 100 }]}
                         />
                     </Animated.View>
                 </AnimatedBlurView>

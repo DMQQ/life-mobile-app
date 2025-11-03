@@ -62,10 +62,14 @@ export default function useTodos(timelineId: string, onSuccessfulSave?: () => vo
         state: { loading },
     } = useCreateTodo(timelineId)
 
-    const onSaveTodos = async () => {
-        if (loading || !timelineId || state.todos.length === 0) return
+    const onSaveTodos = async (extraText: string) => {
+        if ((loading || !timelineId || state.todos.length === 0) && extraText.trim() === "") return
 
         const filteredTodos = state.todos.filter((todo) => todo.value.trim().length > 0)
+
+        if (extraText.trim().length > 0) {
+            filteredTodos.push({ index: -1, value: extraText })
+        }
 
         try {
             const promises = filteredTodos.map((todo) => createTodo({ variables: { title: todo.value, timelineId } }))

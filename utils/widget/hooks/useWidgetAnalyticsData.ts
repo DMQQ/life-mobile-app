@@ -81,7 +81,7 @@ export const useWidgetAnalyticsData = () => {
             }))
 
         const dailySpendingData = data.statisticsDayOfWeek || []
-        console.log("dailySpendingData", JSON.stringify(dailySpendingData, null, 2))
+
         const weeklySpending = Array.from({ length: 7 }, (_, i) => {
             const day = i + 1
             return dailySpendingData.find((d: any) => d.day === day)?.total || 0

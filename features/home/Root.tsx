@@ -17,6 +17,9 @@ import LoadingSkeleton from "./components/LoadingSkeleton"
 import MainContent from "./components/MainContent"
 import NotificationsModal from "./components/NotificationsModal"
 import SettingsModal from "./components/SettingsModal"
+import { useActivityManager } from "@/utils/hooks/useActivityManager"
+
+import dayjs from "dayjs"
 
 function Root({}: ScreenProps<"Root">) {
     const [loading, setLoading] = useState(true)
@@ -41,12 +44,13 @@ function Root({}: ScreenProps<"Root">) {
 
     useAppBackground({ onForeground: refresh })
 
-    // Calculate spending trend
     const trendPercentage = home?.lastMonthSpendings?.expense
         ? ((home?.monthlySpendings?.expense - home?.lastMonthSpendings?.expense) / home?.lastMonthSpendings?.expense) *
           100
         : 0
     const isIncreasing = trendPercentage > 0
+
+    const activity = useActivityManager()
 
     const headerButtons = useMemo(
         () => [
@@ -63,48 +67,48 @@ function Root({}: ScreenProps<"Root">) {
                 icon: <AntDesign name="setting" size={20} color={Colors.foreground} />,
                 onPress: () => setShowSettings(true),
             },
-            // {
-            //     icon: <AntDesign name="plus" size={20} color={Colors.foreground} />,
-            //     onPress: () => {
-            //         activity.startActivity({
-            //             title: "New Activity",
-            //             description: "Creating a new activity from header",
-            //             endTime: dayjs(dayjs()).add(15, "minute").format("HH:mm:ss") as `${number}:${number}:${number}`,
-            //             startTime: dayjs(dayjs())
-            //                 .subtract(15, "minute")
-            //                 .format("HH:mm:ss") as `${number}:${number}:${number}`,
-            //             eventId: `activity-${Date.now()}`,
-            //             deepLinkURL: `mylife://timeline`,
-            //             todos: [
-            //                 {
-            //                     id: "todo-1",
-            //                     title: "First Todo",
-            //                     isCompleted: false,
-            //                 },
-            //                 {
-            //                     id: "todo-2",
-            //                     title: "Second Todo",
-            //                     isCompleted: true,
-            //                 },
-            //                 {
-            //                     id: "todo-3",
-            //                     title: "Third Todo",
-            //                     isCompleted: false,
-            //                 },
-            //                 {
-            //                     id: "todo-4",
-            //                     title: "4 Todo",
-            //                     isCompleted: true,
-            //                 },
-            //                 {
-            //                     id: "todo-5",
-            //                     title: "5 Todo",
-            //                     isCompleted: false,
-            //                 },
-            //             ],
-            //         })
-            //     },
-            // },
+            {
+                icon: <AntDesign name="plus" size={20} color={Colors.foreground} />,
+                onPress: () => {
+                    activity.startActivity({
+                        title: "New Activity",
+                        description: "Creating a new activity from header",
+                        endTime: dayjs(dayjs()).add(15, "minute").format("HH:mm:ss") as `${number}:${number}:${number}`,
+                        startTime: dayjs(dayjs())
+                            .subtract(15, "minute")
+                            .format("HH:mm:ss") as `${number}:${number}:${number}`,
+                        eventId: `activity-${Date.now()}`,
+                        deepLinkURL: `mylife://timeline/id/1234`,
+                        todos: [
+                            {
+                                id: "todo-1",
+                                title: "First Todo",
+                                isCompleted: false,
+                            },
+                            {
+                                id: "todo-2",
+                                title: "Second Todo",
+                                isCompleted: true,
+                            },
+                            {
+                                id: "todo-3",
+                                title: "Third Todo",
+                                isCompleted: false,
+                            },
+                            {
+                                id: "todo-4",
+                                title: "4 Todo",
+                                isCompleted: true,
+                            },
+                            {
+                                id: "todo-5",
+                                title: "5 Todo",
+                                isCompleted: false,
+                            },
+                        ],
+                    })
+                },
+            },
         ],
         [data?.notifications],
     )

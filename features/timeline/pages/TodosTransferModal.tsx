@@ -42,8 +42,6 @@ export default function TodosTransferModal({ route, navigation }: any) {
     const [targetTimelineId, setTargetTimelineId] = useState<string>("")
     const [transferTodos, transferState] = useTransferTodos(sourceTimelineId, targetTimelineId)
 
-    console.log("Available Timelines:", JSON.stringify(transferState.error, null, 2))
-
     const handleTransfer = async () => {
         setTransferring(true)
         try {

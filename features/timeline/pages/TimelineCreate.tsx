@@ -63,19 +63,6 @@ export default function CreateTimeLineEventModal({ route, navigation }: Timeline
 
     const insets = useSafeAreaInsets()
 
-    const keyboard = useAnimatedKeyboard()
-
-    const animatedKeyboardStyle = useAnimatedStyle(() => {
-        if (route.params.mode === "edit") return {}
-        return {
-            transform: [
-                {
-                    translateY: -keyboard.height.value / 2,
-                },
-            ],
-        }
-    }, [route.params.mode])
-
     return (
         <View style={{ flex: 1, paddingBottom: insets.bottom }}>
             <TimelineCreateHeader
@@ -89,7 +76,7 @@ export default function CreateTimeLineEventModal({ route, navigation }: Timeline
             />
 
             <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 15 }} keyboardDismissMode={"on-drag"}>
-                <Animated.View style={animatedKeyboardStyle}>
+                <Animated.View>
                     {/* {!isEditing && <SuggestedEvents date={route.params.selectedDate} />} */}
 
                     <ValidatedInput
