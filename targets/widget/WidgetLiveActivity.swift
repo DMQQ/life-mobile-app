@@ -254,7 +254,7 @@ struct LockScreenActivityView: View {
 
                 } else {
                     ProgressView(
-                        timerInterval: Date.now...context.state.endTime,
+                        timerInterval: context.state.startTime...context.state.endTime,
                         countsDown: true,
                         label: { EmptyView() },
                         currentValueLabel: { EmptyView() }
@@ -304,7 +304,7 @@ struct CircularProgressView: View {
             } else {
                 ZStack {
                     ProgressView(
-                        timerInterval: Date.now...endTime,
+                        timerInterval: startTime...endTime,
                         countsDown: true,
                         label: { EmptyView() },
                         currentValueLabel: { EmptyView() }
