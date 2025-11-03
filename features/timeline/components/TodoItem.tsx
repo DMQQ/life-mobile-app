@@ -3,7 +3,7 @@ import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
 import { TodoFile, Todos } from "@/types"
 import dayjs from "dayjs"
-import { StyleSheet, View, TouchableOpacity, ScrollView, Image } from "react-native"
+import { StyleSheet, View, TouchableOpacity, ScrollView, Image, Pressable } from "react-native"
 import Haptic from "react-native-haptic-feedback"
 import { FadeInDown, FadeOutDown } from "react-native-reanimated"
 import useCompleteTodo from "../hooks/mutation/useCompleteTodo"
@@ -18,6 +18,7 @@ import { useFileUpload } from "../hooks/useFileUpload"
 import { useFileManagement } from "../hooks/useFileManagement"
 import { TodoCheckbox } from "./TodoCheckbox"
 import { UploadButton } from "./UploadButton"
+import Checkbox from "@/components/ui/Checkbox"
 
 const styles = StyleSheet.create({
     todoCard: {
@@ -93,10 +94,10 @@ export default function TodoItem(todo: Todos & { timelineId: string; index: numb
     const { loading: addFileLoading } = useAddTodoFile()
     const { loading: removeFileLoading } = useRemoveTodoFile()
 
-    const { handleToggleComplete } = useDoubleTapComplete({
-        onComplete: completeTodo,
-        currentlyCompleted: todo.isCompleted,
-    })
+    // const { handleToggleComplete } = useDoubleTapComplete({
+    //     onComplete: completeTodo,
+    //     currentlyCompleted: todo.isCompleted,
+    // })
 
     const { handleUploadFile, uploadingFile } = useFileUpload({
         todoId: todo.id,
@@ -117,18 +118,16 @@ export default function TodoItem(todo: Todos & { timelineId: string; index: numb
     return (
         <Card animated entering={FadeInDown.delay(todo.index * 50)} exiting={FadeOutDown} style={{ marginBottom: 15 }}>
             <View style={styles.todoCard}>
-                <TouchableOpacity
-                    activeOpacity={0.9}
+                <Pressable
                     style={{ flexDirection: "row", alignItems: "center", flex: 1 }}
                     onLongPress={handleRemoveTodo}
-                    onPress={handleToggleComplete}
                 >
-                    <TodoCheckbox
-                        isCompleted={todo.isCompleted}
-                        isLoading={isLoading}
-                        completeLoading={completeLoading}
-                        removeLoading={removeLoading}
-                        onToggleComplete={handleToggleComplete}
+                    <Checkbox
+                        checked={todo.isCompleted}
+                        onPress={completeTodo}
+                        size={28}
+                        loading={completeLoading}
+                        disabled={isLoading}
                     />
 
                     <View style={{ flex: 1, gap: 5 }}>
@@ -154,7 +153,7 @@ export default function TodoItem(todo: Todos & { timelineId: string; index: numb
                             {dayjs(todo.modifiedAt).format("HH:mm - DD/MM")}
                         </Text>
                     </View>
-                </TouchableOpacity>
+                </Pressable>
 
                 <UploadButton onPress={handleUploadFile} disabled={isLoading} />
             </View>

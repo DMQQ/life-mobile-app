@@ -41,11 +41,15 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
 
     const [scrollY, onScroll] = useTrackScroll({ screenName: "TimelineScreens" })
 
-    const selectedDateFormatted = new Intl.DateTimeFormat("en-US", {
-        weekday: "long",
-        month: "short",
-        day: "numeric",
-    }).format(moment(timeline.selected).toDate())
+    const selectedDateFormatted = useMemo(
+        () =>
+            new Intl.DateTimeFormat("en-US", {
+                weekday: "long",
+                month: "short",
+                day: "numeric",
+            }).format(moment(timeline.selected).toDate()),
+        [timeline.selected],
+    )
 
     const eventsCount = timeline.data?.timeline?.length || 0
 
@@ -55,8 +59,8 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
         ({ item }: { item: any }): any =>
             (
                 <TimelineItem
-                    location="timeline"
                     {...item}
+                    location="timeline"
                     onLongPress={() => {
                         Feedback.trigger("impactMedium")
                         setSelectedEventForDeletion(item)
@@ -188,6 +192,7 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
             )}
 
             <DeleteTimelineEvent
+                shouldNavigateBack={false}
                 isVisible={!!selectedEventForDeletion}
                 item={
                     selectedEventForDeletion

@@ -15,17 +15,23 @@ import WalletScreens from "../features/wallet/Main"
 import { RootStackParamList } from "../types"
 import useNotifications from "../utils/hooks/useNotifications"
 import useUser from "../utils/hooks/useUser"
-import * as Notifications from "expo-notifications"
+import useWidgets from "@/utils/widget/hooks/useWidgets"
+import { useActivityManager } from "@/utils/hooks/useActivityManager"
 
 export const navigationRef = React.createRef<NavigationContainerRef<RootStackParamList>>()
 
 const Tab = createBottomTabNavigator<RootStackParamList>()
 
 export default function Navigation() {
-    useQuickActions(navigationRef)
     const { isAuthenticated, loadUser, isLoading, removeUser } = useUser()
     const client = useApolloClient()
-    const { sendTokenToServer } = useNotifications(navigationRef)
+    const { sendTokenToServer } = useNotifications(navigationRef as any)
+
+    useQuickActions(navigationRef as any)
+
+    useActivityManager()
+
+    useWidgets()
 
     useEffect(() => {
         loadUser()

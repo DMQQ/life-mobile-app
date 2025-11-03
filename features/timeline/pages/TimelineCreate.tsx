@@ -91,7 +91,7 @@ export default function CreateTimeLineEventModal({ route, navigation }: Timeline
 
             <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 15 }} keyboardDismissMode={"on-drag"}>
                 <Animated.View style={animatedKeyboardStyle}>
-                    {!isEditing && <SuggestedEvents date={route.params.selectedDate} />}
+                    {/* {!isEditing && <SuggestedEvents date={route.params.selectedDate} />} */}
 
                     <ValidatedInput
                         placeholder="Like  'take out the trash' etc.."
@@ -253,7 +253,7 @@ const TimePickerModal = (props: {
     currentTime: string
 }) => {
     const currentDate = moment(props.currentTime, "HH:mm").toDate()
-    
+
     return (
         <DateTimePicker
             date={currentDate}

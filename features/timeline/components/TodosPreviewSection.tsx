@@ -22,7 +22,7 @@ export default function TodosPreviewSection({ todos, timelineId, textColor, maxI
     const remainingCount = todos.length - maxItems
 
     return (
-        <Pressable style={styles.container} onPress={(e) => e.stopPropagation()}>
+        <View style={styles.container}>
             {visibleTodos.map((todo) => (
                 <TodoPreviewCard key={todo.id} todo={todo} timelineId={timelineId} textColor={textColor} />
             ))}
@@ -31,7 +31,7 @@ export default function TodosPreviewSection({ todos, timelineId, textColor, maxI
                     +{remainingCount} more todo{remainingCount > 1 ? "s" : ""}
                 </Text>
             )}
-        </Pressable>
+        </View>
     )
 }
 

@@ -29,8 +29,8 @@ export default function TodoPreviewCard({ todo, timelineId, textColor }: TodoPre
     }
 
     return (
-        <Ripple onPress={handleToggle} style={[styles.container, loading && styles.loading]}>
-            <Checkbox checked={todo.isCompleted} onPress={() => {}} size={25} />
+        <View style={[styles.container, loading && styles.loading]}>
+            <Checkbox checked={todo.isCompleted} onPress={handleToggle} size={25} loading={loading} />
 
             <Text
                 numberOfLines={1}
@@ -42,7 +42,7 @@ export default function TodoPreviewCard({ todo, timelineId, textColor }: TodoPre
             >
                 {todo.title}
             </Text>
-        </Ripple>
+        </View>
     )
 }
 

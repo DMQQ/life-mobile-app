@@ -2,7 +2,7 @@ import Colors from "@/constants/Colors"
 import lowOpacity from "@/utils/functions/lowOpacity"
 import { MaterialIcons } from "@expo/vector-icons"
 import Color from "color"
-import { StyleSheet, ViewStyle } from "react-native"
+import { ActivityIndicator, StyleSheet, ViewStyle } from "react-native"
 import HapticFeedback, { HapticFeedbackTypes } from "react-native-haptic-feedback"
 import Ripple from "react-native-material-ripple"
 
@@ -12,9 +12,11 @@ interface CheckboxProps {
     size?: number
     disabled?: boolean
     style?: ViewStyle
+
+    loading?: boolean
 }
 
-export default function Checkbox({ checked, onPress, size = 24, disabled = false, style }: CheckboxProps) {
+export default function Checkbox({ checked, onPress, size = 24, disabled = false, style, loading }: CheckboxProps) {
     const handlePress = () => {
         if (!disabled) {
             HapticFeedback.trigger(HapticFeedbackTypes.selection)
@@ -41,7 +43,8 @@ export default function Checkbox({ checked, onPress, size = 24, disabled = false
             rippleOpacity={0.3}
             rippleDuration={200}
         >
-            {checked && <MaterialIcons name="check" size={size * 0.7} color={Colors.foreground} />}
+            {checked && loading === false && <MaterialIcons name="check" size={size * 0.7} color={Colors.foreground} />}
+            {loading && <ActivityIndicator size={size * 0.6} color={Colors.foreground} />}
         </Ripple>
     )
 }
