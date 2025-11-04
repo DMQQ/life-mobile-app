@@ -32,7 +32,7 @@ export const useActivityManager = (): UseActivityManagerReturn => {
             }
         })
 
-        const tokenReceivedListener = ExpoLiveActivityModule.addListener("onTokenReceived", (event: any) => {
+        const tokenReceivedListener = ExpoLiveActivityModule.addListener("onTokenReceived", (event) => {
             const tokenKey = `${event.activityID}-${event.activityPushToken}`
 
             console.log("Token received for activity:", event)
@@ -42,18 +42,67 @@ export const useActivityManager = (): UseActivityManagerReturn => {
             setProcessedTokens((prev) => new Set(prev).add(tokenKey))
 
             if (serverHook?.setLiveActivityUpdateToken && event.activityPushToken) {
-                // Use activityName as timelineId - this is the eventId from Live Activity attributes
-                const timelineId = event.activityName || event.eventId
+                const timelineId = event.activityName
                 serverHook.setLiveActivityUpdateToken(event.activityID, event.activityPushToken, timelineId)
             }
+        })
+
+        const stateChangeListener = ExpoLiveActivityModule.addListener("onStateChange", (event) => {
+            console.log("Activity state changed:", event)
+
+            if (event.activityState === "ended" || event.activityState === "dismissed") {
+                setActiveActivities((prev) => prev.filter((id) => id !== event.eventId))
+                setIsInProgress(activityCore.isActivityInProgress())
+            }
+
+            console.log(
+                "Activity state update - ID:",
+                event.activityID,
+                "EventID:",
+                event.eventId,
+                "State:",
+                event.activityState,
+            )
         })
 
         ExpoLiveActivityModule.saveAppIconToSharedStorage()
 
         return () => {
             tokenReceivedListener.remove()
+            stateChangeListener.remove()
         }
     }, [])
+
+    useEffect(() => {
+        const syncActivitiesWithBackend = async () => {
+            try {
+                const activities = await ExpoLiveActivityModule.getActivityTokens()
+                console.log("Syncing activities with backend:", activities)
+
+                if (serverHook && Object.keys(activities).length > 0) {
+                    for (const [activityID, activityData] of Object.entries(activities)) {
+                        if (activityData.pushToken && serverHook.setLiveActivityUpdateToken) {
+                            serverHook.setLiveActivityUpdateToken(
+                                activityID,
+                                activityData.pushToken,
+                                activityData.eventId,
+                            )
+                        }
+
+                        console.log(`Activity ${activityID} (${activityData.eventId}): ${activityData.state}`)
+                    }
+                }
+            } catch (error) {
+                console.error("Error syncing activities with backend:", error)
+            }
+        }
+
+        syncActivitiesWithBackend()
+
+        const syncInterval = setInterval(syncActivitiesWithBackend, 30000)
+
+        return () => clearInterval(syncInterval)
+    }, [activeActivities])
 
     useEffect(() => {
         setIsSupported(activityCore.areActivitiesEnabled())

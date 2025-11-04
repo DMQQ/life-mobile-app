@@ -147,7 +147,7 @@ public class ExpoLiveActivityModule: Module {
             }
         }
         
-        Function("getActivityTokens") { () -> [String: Any] in
+        AsyncFunction("getActivityTokens") { () async -> [String: Any] in
             if #available(iOS 16.2, *) {
                 var result: [String: Any] = [:]
                 let activities = Activity<WidgetAttributes>.activities
@@ -155,10 +155,19 @@ public class ExpoLiveActivityModule: Module {
                 for activity in activities {
                     self.logger.info("🔍 Activity \(activity.id) - eventId: \(activity.attributes.eventId)")
 
-                    result[activity.id] = [
+                    var activityInfo: [String: Any] = [
                         "eventId": activity.attributes.eventId,
-                        "state": String(describing: activity.activityState)
+                        "state": String(describing: activity.activityState),
+                        "other": activity
                     ]
+                    
+                    if let pushToken = activity.pushToken {
+                        let pushTokenString = pushToken.reduce("") { $0 + String(format: "%02x", $1) }
+                        activityInfo["pushToken"] = pushTokenString
+
+                    } 
+                    
+                    result[activity.id] = activityInfo
                 }
                 return result
             }

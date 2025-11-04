@@ -19,9 +19,15 @@ export interface ActivityContentState {
 }
 
 export interface ActivityPushTokenEvent {
-    activityId: string
-    pushToken: string
+    activityID: string
+    activityPushToken: string
     eventId: string
+}
+
+export interface TokenReceivedEvent {
+    activityID: string
+    activityPushToken: string
+    activityName: string
 }
 
 export interface PushNotificationEvent {
@@ -36,7 +42,13 @@ export interface ActivityStartedEvent {
 }
 
 export interface PushToStartTokenEvent {
-    pushToStartToken: string
+    activityPushToStartToken: string
+}
+
+export interface StateChangeEvent {
+    activityID: string
+    activityState: string
+    eventId: string
 }
 
 export type ExpoLiveActivityModuleEvents = {
@@ -45,8 +57,18 @@ export type ExpoLiveActivityModuleEvents = {
     onPushToStartToken: (event: PushToStartTokenEvent) => void
     onActivityStartedRemotely: (event: ActivityStartedEvent) => void
     onPushNotificationReceived: (event: PushNotificationEvent) => void
-    onTokenReceived: (event: ActivityPushTokenEvent) => void
-    onStateChange: (event: { activityID: string; activityName: string; activityState: string }) => void
+    onTokenReceived: (event: TokenReceivedEvent) => void
+    onStateChange: (event: StateChangeEvent) => void
+}
+
+export interface LiveActivityEvent {
+    activityID: string
+    activityPushToken: string
+    activityName: string
+    eventId: string
+    state: string
+    pushToken?: string
+    other: Record<string, any> | null | undefined
 }
 
 declare class ExpoLiveActivityModule extends NativeModule<ExpoLiveActivityModuleEvents> {
@@ -59,7 +81,7 @@ declare class ExpoLiveActivityModule extends NativeModule<ExpoLiveActivityModule
         description: string,
         endTime: string,
         startTime: string,
-        todos: Array<{id: string, title: string, isCompleted: boolean}>
+        todos: Array<{ id: string; title: string; isCompleted: boolean }>,
     ): Promise<string | null>
     updateActivity(progress: number, isCompleted: boolean): void
     endActivity(): void
@@ -67,6 +89,8 @@ declare class ExpoLiveActivityModule extends NativeModule<ExpoLiveActivityModule
     getPushToStartToken(): Promise<string | null>
 
     saveAppIconToSharedStorage(): void
+
+    getActivityTokens(): Promise<Record<string, LiveActivityEvent>>
 }
 
 export default requireNativeModule<ExpoLiveActivityModule>("ExpoLiveActivity")
