@@ -2,7 +2,7 @@ import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
 import Layout from "@/constants/Layout"
 import { StackScreenProps } from "@/types"
-import { AntDesign, Feather } from "@expo/vector-icons"
+import { AntDesign, Feather, FontAwesome, FontAwesome5, Ionicons } from "@expo/vector-icons"
 import Color from "color"
 import { useCallback, useMemo, useState } from "react"
 import { StyleSheet, View } from "react-native"
@@ -24,6 +24,7 @@ import { Header } from "@/components"
 import DeleteTimelineEvent from "@/components/ui/Dialog/Delete/DeleteTimelineEvent"
 import { GetTimelineQuery } from "../hooks/query/useGetTimeLineQuery"
 import { HeaderItem } from "@/components/ui/Header/Header"
+import { useActivityUtils } from "@/utils/hooks/useActivityManager"
 
 const styles = StyleSheet.create({
     title: {
@@ -85,6 +86,23 @@ export default function TimelineDetails({
         })
     }
 
+    const { isPending, startActivity } = useActivityUtils(data?.id)
+
+    const startLiveActivityLocally = useCallback(() => {
+        if (!data || isPending) return
+
+        startActivity({
+            description: data.description || "",
+            title: data.title || "No Title",
+            endTime: data.endTime,
+            startTime: data.beginTime,
+            eventId: data.id,
+            deepLinkURL: `mylife://timeline/id/${data.id}`,
+            todos: data.todos || [],
+            isCompleted: data.isCompleted,
+        })
+    }, [isPending, data])
+
     const buttons = useMemo(
         () =>
             [
@@ -98,8 +116,16 @@ export default function TimelineDetails({
                     icon: <Feather name="edit-2" size={20} color={Colors.foreground} />,
                     onPress: onFabPress,
                 },
+                !isPending && {
+                    icon: <Ionicons name="play-outline" size={22.5} color="#fff" />,
+                    onPress: startLiveActivityLocally,
+                },
                 {
-                    icon: <AntDesign name={data?.isCompleted ? "check" : "check"} color={"#fff"} size={20} />,
+                    icon: data?.isCompleted ? (
+                        <FontAwesome name="check-circle" size={20} color="#fff" />
+                    ) : (
+                        <AntDesign name={"check"} color={"#fff"} size={20} />
+                    ),
                     standalone: true,
                     position: "right",
                     onPress: completeTimeline,
@@ -107,8 +133,10 @@ export default function TimelineDetails({
                     tintColor: !data?.isCompleted ? Colors.secondary : "green",
                 },
             ] as HeaderItem[],
-        [data?.isCompleted, data],
+        [data?.isCompleted, data, isPending],
     )
+
+    console.log("Timeline Details Rendered", { isPending })
 
     const [selectedEventForDeletion, setSelectedEventForDeletion] = useState<GetTimelineQuery | null>(null)
 

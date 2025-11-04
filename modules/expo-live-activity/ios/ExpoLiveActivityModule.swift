@@ -233,7 +233,7 @@ public class ExpoLiveActivityModule: Module {
             }
         }
         
-        AsyncFunction("startCountdownActivity") { (eventId: String, deepLinkURL: String, title: String, description: String, endTime: String, startTime: String, todos: [[String: Any]]) -> String? in
+        AsyncFunction("startCountdownActivity") { (eventId: String, deepLinkURL: String, title: String, description: String, endTime: String, startTime: String, todos: [[String: Any]], isCompleted: Bool) -> String? in
             if #available(iOS 16.2, *) {                
                 let dateFormatter = DateFormatter()
                 dateFormatter.dateFormat = "HH:mm:ss"
@@ -311,7 +311,7 @@ public class ExpoLiveActivityModule: Module {
                     description: description,
                     startTime: startDate,
                     endTime: endDate,
-                    isCompleted: false,
+                    isCompleted: isCompleted,
                     progress: progress,
                     todos: todoObjects
                 )

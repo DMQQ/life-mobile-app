@@ -197,3 +197,89 @@ export const useActivityManager = (): UseActivityManagerReturn => {
         cancelAllActivities,
     }
 }
+
+export interface UseActivityUtilsReturn {
+    getActivities: () => Promise<Record<string, any>>
+    isActivityPending: (eventId: string) => Promise<boolean>
+    startActivity: (config: ActivityConfig) => Promise<string | null>
+    isSupported: boolean
+
+    isPending: boolean
+}
+
+export const useActivityUtils = (eventId: string): UseActivityUtilsReturn => {
+    const activityCore = useActivityCore()
+
+    const [isPending, setIsPending] = useState(false)
+
+    const getActivities = useCallback(async () => {
+        try {
+            return await ExpoLiveActivityModule.getActivityTokens()
+        } catch (error) {
+            console.error("Error getting activities:", error)
+            return {}
+        }
+    }, [])
+
+    const isActivityPending = useCallback(async (eventId: string) => {
+        try {
+            const activities = await ExpoLiveActivityModule.getActivityTokens()
+
+            for (const [_, activityData] of Object.entries(activities)) {
+                if (
+                    activityData.eventId === eventId &&
+                    (activityData.state === "active" || activityData.state === "pending")
+                ) {
+                    return true
+                }
+            }
+            return false
+        } catch (error) {
+            console.error("Error checking activity status:", error)
+            return false
+        }
+    }, [])
+
+    useEffect(() => {
+        isActivityPending(eventId).then(setIsPending)
+    }, [eventId])
+
+    useEffect(() => {
+        const stateChangeListener = ExpoLiveActivityModule.addListener("onStateChange", (event) => {
+            // Update isPending state if this event matches our eventId
+            if (event.eventId === eventId) {
+                const isActive = event.activityState === "active" || event.activityState === "pending"
+                setIsPending(isActive)
+            }
+        })
+
+        return () => {
+            stateChangeListener.remove()
+        }
+    }, [eventId])
+
+    const startActivity = useCallback(
+        async (config: ActivityConfig): Promise<string | null> => {
+            try {
+                const id = await activityCore.startCountdownActivity(config)
+
+                setIsPending(typeof id === "string")
+
+                return id
+            } catch (error) {
+                console.error("Error starting activity:", error)
+                return null
+            }
+        },
+        [activityCore],
+    )
+
+    return {
+        getActivities,
+        isActivityPending,
+        startActivity,
+        isSupported: activityCore.areActivitiesEnabled(),
+
+        isPending,
+    }
+}

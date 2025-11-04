@@ -13,6 +13,8 @@ export interface ActivityConfig {
         title: string
         isCompleted: boolean
     }>
+
+    isCompleted?: boolean
 }
 
 export const useActivityCore = () => {
@@ -54,6 +56,7 @@ export const useActivityCore = () => {
                 config.endTime,
                 config.startTime,
                 config.todos || [],
+                config.isCompleted || false,
             )
 
             return activityToken

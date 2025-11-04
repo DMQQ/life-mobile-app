@@ -82,6 +82,7 @@ declare class ExpoLiveActivityModule extends NativeModule<ExpoLiveActivityModule
         endTime: string,
         startTime: string,
         todos: Array<{ id: string; title: string; isCompleted: boolean }>,
+        isCompleted: boolean,
     ): Promise<string | null>
     updateActivity(progress: number, isCompleted: boolean): void
     endActivity(): void
