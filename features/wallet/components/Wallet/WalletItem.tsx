@@ -2,11 +2,26 @@ import { Card } from "@/components"
 import Colors from "@/constants/Colors"
 import { Expense } from "@/types"
 import moment from "moment"
-import { useState } from "react"
-import { StyleProp, StyleSheet, Text, View, ViewStyle } from "react-native"
+import { useCallback, useRef, useState } from "react"
+import {
+    LayoutChangeEvent,
+    MeasureOnSuccessCallback,
+    Modal,
+    Pressable,
+    StyleProp,
+    StyleSheet,
+    Text,
+    View,
+    ViewStyle,
+} from "react-native"
 import Feedback from "react-native-haptic-feedback"
 import Animated, { AnimatedStyle, FadeIn, FadeOut, LinearTransition } from "react-native-reanimated"
 import { CategoryIcon, Icons } from "../Expense/ExpenseIcon"
+import { BlurView } from "expo-blur"
+import ContextMenu from "@/components/ui/ContextMenu"
+import { AntDesign } from "@expo/vector-icons"
+import { useNavigation } from "@react-navigation/native"
+import useDeleteActivity from "../../hooks/useDeleteActivity"
 
 interface WalletElement extends Expense {
     description: string
@@ -111,8 +126,13 @@ export default function WalletItem(
         containerStyle?: StyleProp<ViewStyle>
         subExpenseStyle?: StyleProp<ViewStyle> & Record<string, any>
         onLongPress?: () => void
+
+        isModal?: boolean
     },
 ) {
+    const { deleteActivity } = useDeleteActivity()
+
+    const navigation = useNavigation<any>()
     const price =
         item?.type === "expense"
             ? (item.amount * -1).toFixed(2)
@@ -120,132 +140,119 @@ export default function WalletItem(
 
     const isBalanceEdit = item?.description?.includes("Balance edited") || item?.amount === 0
 
-    const [isExpanded, setIsExpanded] = useState(false)
-
     if (!item) {
         return null
     }
 
     return (
-        <Card
-            animated
-            style={[
+        <ContextMenu
+            anchor="right"
+            items={[
                 {
-                    marginBottom: 15,
-                    position: "relative",
+                    leading: "pencil",
+                    text: "Edit",
+                    onPress: () => {
+                        navigation.navigate("CreateExpense", {
+                            ...(item as any),
+                            isEditing: true,
+                        })
+                    },
                 },
-                item.animatedStyle as any,
-                item.containerStyle,
+                {
+                    leading: "arrow.trianglehead.clockwise.rotate.90",
+                    text: "Refund",
+                    onPress: () => {},
+                },
+                {
+                    leading: "clipboard",
+                    text: "Duplicate",
+                    onPress: () => {
+                        navigation.navigate("CreateExpense", {
+                            ...(item as any),
+                            isDuplicating: true,
+                        })
+                    },
+                },
+                {
+                    leading: "trash",
+                    text: "Delete",
+                    destructive: true,
+                    onPress: () => deleteActivity({ variables: { id: item.id } }),
+                },
             ]}
-            layout={LinearTransition}
-            ripple
-            onLongPress={async () => {
-                Feedback.trigger("impactLight")
-                if (item.onLongPress) {
-                    item.onLongPress()
-                }
-                setIsExpanded(!isExpanded)
-            }}
-            disabled={isBalanceEdit}
-            onPress={() => item.handlePress()}
         >
-            <View style={{ flexDirection: "row", height: 40 }}>
-                <CategoryIcon
-                    style={{ padding: 0 }}
-                    type={item.type as "income" | "expense" | "refunded"}
-                    category={isBalanceEdit ? "edit" : item.category}
-                />
+            <Card
+                style={[
+                    {
+                        marginBottom: 15,
+                        position: "relative",
+                    },
+                    item.animatedStyle as any,
+                    item.containerStyle,
+                ]}
+                ripple
+                disabled={isBalanceEdit}
+                onPress={() => item.handlePress()}
+            >
+                <View style={{ flexDirection: "row", height: 40 }}>
+                    <CategoryIcon
+                        style={{ padding: 0 }}
+                        type={item.type as "income" | "expense" | "refunded"}
+                        category={isBalanceEdit ? "edit" : item.category}
+                    />
 
-                <View style={{ height: "100%", justifyContent: "center", flex: 3 }}>
-                    <Text style={styles.title} numberOfLines={1}>
-                        {item.description}
-                    </Text>
+                    <View style={{ height: "100%", justifyContent: "center", flex: 3 }}>
+                        <Text style={styles.title} numberOfLines={1}>
+                            {item.description}
+                        </Text>
 
-                    <Text style={styles.date}>
-                        {dateFormatter(item.date)}
-                        {item.category && item.subscription?.isActive && " • "}
-                        {item.subscription?.isActive ? <Text>Subscription</Text> : ""}
-                        {item.files && item.files.length > 0 && (
-                            <>
-                                {" • "}
+                        <Text style={styles.date}>
+                            {dateFormatter(item.date)}
+                            {item.category && item.subscription?.isActive && " • "}
+                            {item.subscription?.isActive ? <Text>Subscription</Text> : ""}
+                            {item.files && item.files.length > 0 && (
+                                <>
+                                    {" • "}
 
-                                <Text>
-                                    {item.files.length} {item.files.length > 1 ? "files" : "file"}
-                                </Text>
-                            </>
-                        )}
-                        {item.subexpenses && item.subexpenses?.length > 0 && (
-                            <>
-                                {" • "}
-                                <Text>{item.subexpenses?.length} items</Text>
-                            </>
-                        )}
-                    </Text>
-                </View>
-                {!isBalanceEdit && (
-                    <View style={[styles.price_container, { flexDirection: "row" }]}>
-                        <Text
-                            style={[
-                                styles.price,
-                                {
-                                    marginRight: 10,
-                                    width: "100%",
-                                    textAlign: "right",
-                                    color:
-                                        item.type === "refunded"
-                                            ? Colors.secondary_light_2
-                                            : item.type === "expense"
-                                              ? "#F07070"
-                                              : "#66E875",
-                                    ...(item.type === "refunded" ? { textDecorationLine: "line-through" } : {}),
-                                },
-                            ]}
-                        >
-                            {price}
-                            <Text style={{ fontSize: 12 }}>zł</Text>
+                                    <Text>
+                                        {item.files.length} {item.files.length > 1 ? "files" : "file"}
+                                    </Text>
+                                </>
+                            )}
+                            {item.subexpenses && item.subexpenses?.length > 0 && (
+                                <>
+                                    {" • "}
+                                    <Text>{item.subexpenses?.length} items</Text>
+                                </>
+                            )}
                         </Text>
                     </View>
-                )}
-            </View>
-
-            {isExpanded && item.subexpenses?.length > 0 && (
-                <Animated.View
-                    layout={LinearTransition}
-                    style={[
-                        styles.expanded,
-                        {
-                            backgroundColor: Colors.primary_light,
-                        },
-                    ]}
-                >
-                    {item.subexpenses.map((subexpense, index) => (
-                        <Animated.View
-                            key={subexpense.id}
-                            entering={FadeIn.delay(index * 50)}
-                            exiting={FadeOut.delay(Math.min((item.subexpenses.length - index) * 50, 200))}
-                        >
-                            <WalletItem
-                                key={index}
-                                {...item}
-                                {...(subexpense as any)}
-                                files={[]}
-                                subscription={undefined}
-                                subexpenses={[]}
-                                type="expense"
-                                handlePress={() => {}}
-                                animatedStyle={{ marginBottom: 5 }}
-                                index={index}
-                                containerStyle={{
-                                    marginBottom: 0,
-                                    paddingHorizontal: 0,
-                                    backgroundColor: undefined,
-                                    ...((item.subExpenseStyle as any) || {}),
-                                }}
-                            />
-                        </Animated.View>
-                    ))}
-                </Animated.View>
-            )}
-        </Card>
+                    {!isBalanceEdit && (
+                        <View style={[styles.price_container, { flexDirection: "row" }]}>
+                            <Text
+                                style={[
+                                    styles.price,
+                                    {
+                                        marginRight: 10,
+                                        width: "100%",
+                                        textAlign: "right",
+                                        color:
+                                            item.type === "refunded"
+                                                ? Colors.secondary_light_2
+                                                : item.type === "expense"
+                                                  ? "#F07070"
+                                                  : "#66E875",
+                                        ...(item.type === "refunded" ? { textDecorationLine: "line-through" } : {}),
+                                    },
+                                ]}
+                            >
+                                {price}
+                                <Text style={{ fontSize: 12 }}>zł</Text>
+                            </Text>
+                        </View>
+                    )}
+                </View>
+            </Card>
+        </ContextMenu>
     )
 }

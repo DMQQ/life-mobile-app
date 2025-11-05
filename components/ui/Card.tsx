@@ -1,10 +1,10 @@
 import Colors from "@/constants/Colors"
 import Color from "color"
-import { StyleSheet, View, ViewProps } from "react-native"
+import { Pressable, StyleSheet, View, ViewProps } from "react-native"
 import Ripple from "react-native-material-ripple"
 import Animated, { AnimatedProps } from "react-native-reanimated"
 
-const AnimatedRipple = Animated.createAnimatedComponent(Ripple)
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable)
 
 type CardProps<T extends boolean = false> = {
     animated?: T
@@ -13,20 +13,24 @@ type CardProps<T extends boolean = false> = {
     onPress?: () => void
     onLongPress?: () => void
     disabled?: boolean
+
+    ref?: React.RefObject<View | null>
 } & (T extends true ? AnimatedProps<ViewProps> : ViewProps)
 
 export default function Card<T extends boolean = false>({
+    ref,
+
     animated = false as T,
     ripple = false,
     children,
     ...rest
 }: CardProps<T>) {
     const Component = (
-        animated ? (ripple ? AnimatedRipple : Animated.View) : ripple ? Ripple : View
+        animated ? (ripple ? AnimatedPressable : Animated.View) : ripple ? Ripple : View
     ) as React.ComponentType<CardProps<T>>
 
     return (
-        <Component {...(rest as any)} style={[styles.container, rest.style as any]}>
+        <Component {...(rest as any)} style={[styles.container, rest.style as any]} ref={ref}>
             {children}
         </Component>
     )

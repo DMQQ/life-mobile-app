@@ -31,8 +31,8 @@ const styles = StyleSheet.create({
         width: "100%",
         backgroundColor: Colors.primary_light,
         borderWidth: 2,
-        borderColor: Colors.primary_light,
-        borderRadius: 10,
+        borderColor: Colors.primary_lighter,
+        borderRadius: 15,
         padding: 7.5,
         alignItems: "center",
         justifyContent: "space-between",
@@ -112,16 +112,18 @@ export default function CreateTimeLineEventModal({ route, navigation }: Timeline
                             <Text variant="title" style={styles.timeText}>
                                 {f.values.begin.split(":").slice(0, 2).join(":")}
                             </Text>
+                            <Text style={{ fontSize: 13, color: "gray", textAlign: "center" }}>From</Text>
                         </Ripple>
 
                         <Text variant="body" style={{ color: "gray", padding: 5 }}>
-                            to
+                            -
                         </Text>
 
                         <Ripple style={{ flex: 1, padding: 5 }} onPress={() => setTimePicker("end")}>
                             <Text variant="title" style={styles.timeText}>
                                 {f.values.end.split(":").slice(0, 2).join(":")}
                             </Text>
+                            <Text style={{ fontSize: 13, color: "gray", textAlign: "center" }}>To</Text>
                         </Ripple>
                     </View>
 
@@ -178,27 +180,6 @@ export default function CreateTimeLineEventModal({ route, navigation }: Timeline
                         </View>
                     )}
 
-                    {/* <View style={{ marginTop: 10 }}>
-                        <ValidatedInput.Label error={false} text="How to send you notifications?" />
-                        <SegmentedButtons
-                            containerStyle={{
-                                borderRadius: 15,
-                                backgroundColor: Colors.primary_light,
-                            }}
-                            buttonTextStyle={{ fontWeight: "400" }}
-                            buttonStyle={{
-                                margin: 10,
-                                height: 40,
-                            }}
-                            buttons={radioOptions.map((prev) => ({
-                                text: prev.label,
-                                value: prev.value,
-                            }))}
-                            value={f.values.notification}
-                            onChange={(val) => f.setFieldValue("notification", val)}
-                        />
-                    </View> */}
-
                     <TimePickerModal
                         isVisible={!!timePicker}
                         currentTime={timePicker === "begin" ? f.values.begin : f.values.end}
@@ -225,10 +206,11 @@ export default function CreateTimeLineEventModal({ route, navigation }: Timeline
                         }}
                         onCancel={() => setTimePicker("")}
                     />
-
-                    <CreateRepeatableTimeline formik={f} ref={sheetRef as any} />
                 </Animated.View>
             </ScrollView>
+
+            <CreateRepeatableTimeline formik={f} ref={sheetRef as any} />
+
             <SubmitButton
                 f={f}
                 openSheet={() => sheetRef.current?.expand()}

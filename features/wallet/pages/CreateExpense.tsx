@@ -91,6 +91,7 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
                                                     setIsInputFocused={setIsInputFocused}
                                                     subexpenseSheetRef={subexpenseSheetRef}
                                                     params={params}
+                                                    loading={state.loading}
                                                 />
                                             </View>
                                             <OptionsPicker
