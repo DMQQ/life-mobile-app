@@ -10,10 +10,11 @@ import Animated, {
     Easing,
     useAnimatedProps,
 } from "react-native-reanimated"
-import GlassView from "../GlassView"
+import { GlassView } from "expo-glass-effect"
 import { SFSymbol, SymbolView } from "expo-symbols"
 import Colors from "@/constants/Colors"
 import Color from "color"
+import Feedback from "react-native-haptic-feedback"
 
 interface ContextMenuItemProps {
     text: string
@@ -88,7 +89,7 @@ export default function ContextMenu({ children, items, anchor = "middle" }: Cont
         return cloneElement(children as React.ReactElement, {
             //@ts-ignore
             onLongPress() {
-                console.log("ContextMenu: onLongPress")
+                Feedback.trigger("impactLight")
                 viewRef.current?.measureInWindow((x, y, w, h) => {
                     setAbsolutePosition({ x, y, w, h })
                     setIsExpanded(true)
@@ -284,7 +285,10 @@ export default function ContextMenu({ children, items, anchor = "middle" }: Cont
 
                         {absolutePosition.w > 0 && (
                             <Animated.View
-                                style={[animatedMenuWrapperStyles, { overflow: "hidden", borderRadius: 20 }]}
+                                style={[
+                                    animatedMenuWrapperStyles,
+                                    { overflow: "hidden", borderRadius: 20, borderWidth: 1, borderColor: "#222222ff" },
+                                ]}
                             >
                                 <GlassView
                                     isInteractive
