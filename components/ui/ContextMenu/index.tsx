@@ -7,6 +7,8 @@ import Animated, {
     withSpring,
     withTiming,
     interpolate,
+    Easing,
+    useAnimatedProps,
 } from "react-native-reanimated"
 import GlassView from "../GlassView"
 import { SFSymbol, SymbolView } from "expo-symbols"
@@ -63,6 +65,10 @@ const ContextMenuItem = ({ text, onPress, destructive, disabled, leading, traili
 const MENU_WIDTH = 220
 const SCREEN_PADDING = 16
 
+const tintColor = Color(Colors.primary_light).alpha(0.75).string()
+
+const AnimatedBlurView = Animated.createAnimatedComponent(BlurView)
+
 export default function ContextMenu({ children, items, anchor = "middle" }: ContextMenuProps) {
     const viewRef = useRef<View | null>(null)
     const [absolutePosition, setAbsolutePosition] = useState({ x: 0, y: 0, w: 0, h: 0 })
@@ -70,12 +76,6 @@ export default function ContextMenu({ children, items, anchor = "middle" }: Cont
 
     const scale = useSharedValue(1)
     const progress = useSharedValue(0)
-
-    const animatedChildStyle = useAnimatedStyle(() => {
-        return {
-            transform: [{ scale: scale.value }],
-        }
-    })
 
     const clonedChildren = useMemo(() => {
         const childElement = children as React.ReactElement
@@ -93,7 +93,7 @@ export default function ContextMenu({ children, items, anchor = "middle" }: Cont
                     setAbsolutePosition({ x, y, w, h })
                     setIsExpanded(true)
                     scale.value = withSpring(1, { damping: 20, stiffness: 300 })
-                    progress.value = withSpring(1, { damping: 12, stiffness: 200, mass: 0.7 })
+                    progress.value = withSpring(1, { damping: 18, stiffness: 200, mass: 0.9 })
                 })
 
                 originalOnLongPress?.()
@@ -114,7 +114,7 @@ export default function ContextMenu({ children, items, anchor = "middle" }: Cont
             left: absolutePosition.x,
             width: absolutePosition.w,
             height: absolutePosition.h,
-            zIndex: 1001,
+            zIndex: 1000,
         } as StyleProp<ViewStyle>
     }, [absolutePosition])
 
@@ -166,7 +166,7 @@ export default function ContextMenu({ children, items, anchor = "middle" }: Cont
 
     const handleClose = () => {
         scale.value = withTiming(1, { duration: 150 })
-        progress.value = withTiming(0, { duration: 200 })
+        progress.value = withTiming(0, { duration: 200, easing: Easing.in(Easing.cubic) })
         setTimeout(() => {
             setIsExpanded(false)
         }, 200)
@@ -181,22 +181,73 @@ export default function ContextMenu({ children, items, anchor = "middle" }: Cont
         onPress()
     }
 
-    const animatedMenuWrapperStyles = useAnimatedStyle(() => {
-        const startX = absolutePosition.x + absolutePosition.w / 2
-        const startY = absolutePosition.y + absolutePosition.h / 2
+    const showAbove = useMemo(() => {
+        const screenHeight = Dimensions.get("window").height
+        const spaceBelow = screenHeight - (absolutePosition.y + absolutePosition.h)
+        return spaceBelow < finalMenuGeometry.height && absolutePosition.y > finalMenuGeometry.height
+    }, [absolutePosition, finalMenuGeometry])
 
+    const animatedMenuWrapperStyles = useAnimatedStyle(() => {
         const finalX = finalMenuGeometry.left
         const finalY = finalMenuGeometry.top
         const finalW = finalMenuGeometry.width
         const finalH = finalMenuGeometry.height
 
-        const initialScale = 0.01
-        const currentScale = interpolate(progress.value, [0, 1], [initialScale, 1])
+        let anchorX: number
+        switch (anchor) {
+            case "left":
+                anchorX = absolutePosition.x
+                break
+            case "right":
+                anchorX = absolutePosition.x + absolutePosition.w
+                break
+            case "middle":
+            default:
+                anchorX = absolutePosition.x + absolutePosition.w / 2
+                break
+        }
 
-        const interpolatedX = interpolate(progress.value, [0, 1], [startX - (finalW * initialScale) / 2, finalX])
-        const interpolatedY = interpolate(progress.value, [0, 1], [startY - (finalH * initialScale) / 2, finalY])
+        const anchorY = showAbove ? absolutePosition.y : absolutePosition.y + absolutePosition.h
 
-        const opacity = interpolate(progress.value, [0, 0.3, 1], [0, 0.8, 1])
+        const currentScale = interpolate(progress.value, [0, 1], [0, 1])
+
+        let startX: number
+        switch (anchor) {
+            case "left":
+                startX = anchorX
+                break
+            case "right":
+                startX = anchorX - finalW
+                break
+            case "middle":
+            default:
+                startX = anchorX - finalW / 2
+                break
+        }
+
+        const startY = showAbove ? anchorY - finalH : anchorY
+
+        const positionProgress = interpolate(progress.value, [0, 0.8, 1], [0, 0.95, 1])
+        const interpolatedX = interpolate(positionProgress, [0, 1], [startX, finalX])
+        const interpolatedY = interpolate(positionProgress, [0, 1], [startY, finalY])
+
+        let transformOriginX: number
+        switch (anchor) {
+            case "left":
+                transformOriginX = 0
+                break
+            case "right":
+                transformOriginX = 1
+                break
+            case "middle":
+            default:
+                transformOriginX = 0.5
+                break
+        }
+
+        const transformOriginY = showAbove ? 1 : 0
+
+        const opacity = interpolate(progress.value, [0, 0.1, 1], [0, 0.8, 1])
 
         return {
             position: "absolute",
@@ -205,10 +256,15 @@ export default function ContextMenu({ children, items, anchor = "middle" }: Cont
             width: finalW,
             height: finalH,
             opacity,
-            zIndex: 1000,
+            zIndex: 998,
             transform: [{ scale: currentScale }],
+            transformOrigin: `${transformOriginX * 100}% ${transformOriginY * 100}%`,
         }
     })
+
+    const animatedBlur = useAnimatedProps(() => ({
+        intensity: interpolate(progress.value, [0, 1], [0, 20]),
+    }))
 
     return (
         <View ref={viewRef}>
@@ -216,18 +272,25 @@ export default function ContextMenu({ children, items, anchor = "middle" }: Cont
 
             {isExpanded && (
                 <Modal visible={isExpanded} transparent statusBarTranslucent>
-                    <BlurView style={[StyleSheet.absoluteFillObject]} intensity={20} tint="dark" />
+                    <AnimatedBlurView
+                        animatedProps={animatedBlur}
+                        style={[StyleSheet.absoluteFillObject]}
+                        intensity={20}
+                        tint="dark"
+                    />
 
                     <Pressable style={{ flex: 1 }} onPress={handleClose}>
-                        <Animated.View style={[innerContainer, animatedChildStyle]}>{clonedChildren}</Animated.View>
+                        <Animated.View style={[innerContainer]}>{clonedChildren}</Animated.View>
 
                         {absolutePosition.w > 0 && (
                             <Animated.View
                                 style={[animatedMenuWrapperStyles, { overflow: "hidden", borderRadius: 20 }]}
                             >
                                 <GlassView
+                                    isInteractive
+                                    glassEffectStyle="regular"
                                     style={[styles.menu]}
-                                    tintColor={Color(Colors.primary_lighter).alpha(0.5).string()}
+                                    tintColor={tintColor}
                                 >
                                     {items.map((item, index) => (
                                         <View key={index}>

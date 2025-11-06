@@ -88,43 +88,45 @@ export default function TimelineItem(
     }, [isPending, timeline])
 
     const items = useMemo(
-        () => [
-            {
-                leading: "bell",
-                text: "Start live activity",
-                onPress: startLiveActivityLocally,
-            },
-            {
-                leading: "checkmark",
-                text: "Complete",
-                onPress: completeTimeline,
-            },
-            {
-                leading: "clipboard",
-                text: "Copy",
-                onPress: handleCopyPress,
-            },
+        () =>
+            [
+                {
+                    leading: "bell",
+                    text: isPending ? "Activity pending" : "Start live activity",
+                    onPress: startLiveActivityLocally,
+                    disabled: isPending,
+                },
+                !timeline.isCompleted && {
+                    leading: "checkmark",
+                    text: "Complete",
+                    onPress: completeTimeline,
+                },
+                {
+                    leading: "clipboard",
+                    text: "Copy",
+                    onPress: handleCopyPress,
+                },
 
-            {
-                leading: "pencil",
-                text: "Edit",
-                onPress: () => {
-                    ;(navigation as any).navigate("TimelineCreate", {
-                        mode: "edit",
-                        selectedDate: timeline?.date,
-                        timelineId: timeline?.id,
-                    })
+                {
+                    leading: "pencil",
+                    text: "Edit",
+                    onPress: () => {
+                        ;(navigation as any).navigate("TimelineCreate", {
+                            mode: "edit",
+                            selectedDate: timeline?.date,
+                            timelineId: timeline?.id,
+                        })
+                    },
                 },
-            },
-            {
-                leading: "trash",
-                text: "Delete",
-                onPress: () => {
-                    remove()
+                {
+                    leading: "trash",
+                    text: "Delete",
+                    onPress: () => {
+                        remove()
+                    },
+                    destructive: true,
                 },
-                destructive: true,
-            },
-        ],
+            ].filter(Boolean),
         [completeTimeline, handleCopyPress, navigation, remove, startLiveActivityLocally, timeline],
     )
 

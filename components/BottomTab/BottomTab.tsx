@@ -168,12 +168,14 @@ const Btn = ({ buttonWidth, iconScale, activeRoute, ...props }: ButtonProps) => 
         }
     })
 
-    const handlePressIn = () => {
+    const handlePressIn = (route: string) => {
         pressScale.value = withTiming(0.85, { duration: 100 })
         Feedback.trigger("impactLight", {
             enableVibrateFallback: false,
             ignoreAndroidSystemSettings: false,
         })
+
+        navigation.navigate(route)
     }
 
     const handlePressOut = () => {
@@ -188,7 +190,7 @@ const Btn = ({ buttonWidth, iconScale, activeRoute, ...props }: ButtonProps) => 
     return (
         <Animated.View entering={FadeIn.delay(props.index * 50)}>
             <Pressable
-                onPressIn={handlePressIn}
+                onPress={() => handlePressIn(props.route)}
                 onPressOut={handlePressOut}
                 onLongPress={props.onLongPress}
                 style={[
@@ -200,7 +202,6 @@ const Btn = ({ buttonWidth, iconScale, activeRoute, ...props }: ButtonProps) => 
                         height: 60,
                     },
                 ]}
-                onPress={() => navigation.navigate(props.route)}
             >
                 <Animated.View style={[buttonAnimatedStyle, { alignItems: "center", justifyContent: "center" }]}>
                     {typeof props.iconName === "string" ? (
@@ -277,16 +278,6 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
     const scrollY = useDerivedValue(() => {
         return scrollYValues.value[activeRoute] || 0
     }, [activeRoute])
-
-    const tabScale = useAnimatedStyle(() => {
-        return {
-            transform: [
-                {
-                    scale: interpolate(scrollY.value, [0, 250], [1, 0.9], "clamp"),
-                },
-            ],
-        }
-    })
 
     const dispatch = useAppDispatch()
     const { isActive: isSearchActive, value: searchValue } = useAppSelector((state) => state.search)
@@ -462,11 +453,7 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
 
     return (
         <>
-            <Animated.View
-                style={[animatedStyle, styles.container, tabScale]}
-                entering={FadeInDown}
-                exiting={FadeInDown}
-            >
+            <Animated.View style={[animatedStyle, styles.container]} entering={FadeInDown} exiting={FadeInDown}>
                 <GestureDetector gesture={panGesture}>
                     <Animated.View style={[tabBarWidthStyle, { height: 60 }]}>
                         <GlassView
