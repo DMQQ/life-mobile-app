@@ -10,6 +10,8 @@ import Animated, {
 } from "react-native-reanimated"
 import GlassView from "../GlassView"
 import { SFSymbol, SymbolView } from "expo-symbols"
+import Colors from "@/constants/Colors"
+import Color from "color"
 
 interface ContextMenuItemProps {
     text: string
@@ -117,7 +119,7 @@ export default function ContextMenu({ children, items, anchor = "middle" }: Cont
     }, [absolutePosition])
 
     const finalMenuGeometry = useMemo(() => {
-        const screenHeight = Dimensions.get("window").height - 80
+        const screenHeight = Dimensions.get("window").height
         const screenWidth = Dimensions.get("window").width
         const ITEM_HEIGHT = 50
         const SEPARATOR_HEIGHT = StyleSheet.hairlineWidth
@@ -203,7 +205,7 @@ export default function ContextMenu({ children, items, anchor = "middle" }: Cont
             width: finalW,
             height: finalH,
             opacity,
-            zIndex: 1002,
+            zIndex: 1000,
             transform: [{ scale: currentScale }],
         }
     })
@@ -213,8 +215,8 @@ export default function ContextMenu({ children, items, anchor = "middle" }: Cont
             {clonedChildren}
 
             {isExpanded && (
-                <Modal visible transparent statusBarTranslucent>
-                    <BlurView style={[StyleSheet.absoluteFillObject]} intensity={25} tint="dark" />
+                <Modal visible={isExpanded} transparent statusBarTranslucent>
+                    <BlurView style={[StyleSheet.absoluteFillObject]} intensity={20} tint="dark" />
 
                     <Pressable style={{ flex: 1 }} onPress={handleClose}>
                         <Animated.View style={[innerContainer, animatedChildStyle]}>{clonedChildren}</Animated.View>
@@ -223,7 +225,10 @@ export default function ContextMenu({ children, items, anchor = "middle" }: Cont
                             <Animated.View
                                 style={[animatedMenuWrapperStyles, { overflow: "hidden", borderRadius: 20 }]}
                             >
-                                <GlassView style={[styles.menu]}>
+                                <GlassView
+                                    style={[styles.menu]}
+                                    tintColor={Color(Colors.primary_lighter).alpha(0.5).string()}
+                                >
                                     {items.map((item, index) => (
                                         <View key={index}>
                                             {index > 0 && <View style={styles.separator} />}
@@ -246,6 +251,7 @@ const styles = StyleSheet.create({
         overflow: "hidden",
         paddingVertical: 5,
         paddingHorizontal: 5,
+        zIndex: 1000,
     },
     separator: {
         height: StyleSheet.hairlineWidth,

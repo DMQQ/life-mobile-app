@@ -1,14 +1,16 @@
 import Colors from "@/constants/Colors"
 import { useNavigation } from "@react-navigation/native"
 import moment from "moment"
-import { useMemo, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { StyleProp, StyleSheet, Text, View, ViewStyle, TouchableOpacity, Pressable } from "react-native"
-import Ripple from "react-native-material-ripple"
 import { GetTimelineQuery } from "../hooks/query/useGetTimeLineQuery"
 import timelineStyles from "./timeline.styles"
 import TodosPreviewSection from "./TodosPreviewSection"
 import { Card } from "@/components"
-import { AntDesign } from "@expo/vector-icons"
+import ContextMenu from "@/components/ui/ContextMenu"
+import useRemoveTimelineMutation from "../hooks/mutation/useRemoveTimelineMutation"
+import { useActivityUtils } from "@/utils/hooks/useActivityManager"
+import useCompleteTimeline from "../hooks/mutation/useCompleteTimeline"
 
 export default function TimelineItem(
     timeline: GetTimelineQuery & {
@@ -31,8 +33,7 @@ export default function TimelineItem(
               })
     }
 
-    const handleCopyPress = (event: any) => {
-        event.stopPropagation()
+    const handleCopyPress = () => {
         navigation.navigate("CopyTimelineModal", {
             timelineId: timeline.id,
             timelineTitle: timeline.title,
@@ -65,73 +66,136 @@ export default function TimelineItem(
         }
     }, [timeline.date, timeline.beginTime, timeline.endTime, timeline.isCompleted])
 
+    const { remove } = useRemoveTimelineMutation(timeline || { id: "", date: "", name: "" })
+
+    const { isPending, startActivity } = useActivityUtils(timeline?.id)
+
+    const [completeTimeline] = useCompleteTimeline(timeline.id)
+
+    const startLiveActivityLocally = useCallback(() => {
+        if (!timeline || isPending) return
+
+        startActivity({
+            description: timeline.description || "",
+            title: timeline.title || "No Title",
+            endTime: timeline.endTime as any,
+            startTime: timeline.beginTime as any,
+            eventId: timeline.id,
+            deepLinkURL: `mylife://timeline/id/${timeline.id}`,
+            todos: timeline.todos || [],
+            isCompleted: timeline.isCompleted,
+        })
+    }, [isPending, timeline])
+
+    const items = useMemo(
+        () => [
+            {
+                leading: "bell",
+                text: "Start live activity",
+                onPress: startLiveActivityLocally,
+            },
+            {
+                leading: "checkmark",
+                text: "Complete",
+                onPress: completeTimeline,
+            },
+            {
+                leading: "clipboard",
+                text: "Copy",
+                onPress: handleCopyPress,
+            },
+
+            {
+                leading: "pencil",
+                text: "Edit",
+                onPress: () => {
+                    ;(navigation as any).navigate("TimelineCreate", {
+                        mode: "edit",
+                        selectedDate: timeline?.date,
+                        timelineId: timeline?.id,
+                    })
+                },
+            },
+            {
+                leading: "trash",
+                text: "Delete",
+                onPress: () => {
+                    remove()
+                },
+                destructive: true,
+            },
+        ],
+        [completeTimeline, handleCopyPress, navigation, remove, startLiveActivityLocally, timeline],
+    )
+
     return (
-        <Pressable onLongPress={timeline?.onLongPress} onPress={onPress} style={{ flex: 1 }}>
-            <Card style={[timelineStyles.itemContainer, timeline.styles]}>
-                <View style={[timelineStyles.itemContainerTitleRow]}>
-                    <Text
-                        numberOfLines={1}
-                        style={[timelineStyles.itemTitle, { ...(timeline.textColor && { color: timeline.textColor }) }]}
-                    >
-                        {timeline.title}
-                    </Text>
-                    <Text
-                        style={[
-                            timelineStyles.itemTimeLeft,
-                            { ...(timeline.textColor && { color: timeline.textColor }) },
-                        ]}
-                    >
-                        {start} - {end}
-                    </Text>
-                </View>
-                <View style={styles.contentRow}>
-                    <View style={styles.contentContainer}>
-                        {!!timeline.description && (
-                            <Text
-                                numberOfLines={2}
-                                style={[
-                                    timelineStyles.itemDescription,
-                                    timeline.textColor && { color: timeline.textColor },
-                                ]}
-                            >
-                                {timeline.description}
-                            </Text>
-                        )}
-
-                        <TodosPreviewSection
-                            todos={timeline.todos}
-                            timelineId={timeline.id}
-                            textColor={timeline.textColor}
-                            maxItems={3}
-                        />
-                    </View>
-                </View>
-
-                <View
-                    style={{
-                        flexDirection: "row",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                    }}
-                >
-                    <TouchableOpacity style={styles.copyButton} onPress={handleCopyPress} activeOpacity={0.7}>
-                        <AntDesign name="copy" style={[styles.copyIcon, { color: Colors.text_dark }]} />
-                        <Text style={[styles.copyText, { color: Colors.text_dark }]}>Copy</Text>
-                    </TouchableOpacity>
-                    <View
-                        style={[
-                            styles.statusBadge,
-                            timeline.isCompleted && styles.statusCompleted,
-                            isExpired && styles.statusExpired,
-                        ]}
-                    >
-                        <Text style={timelineStyles.status}>
-                            {timeline.isCompleted ? "Finished" : isExpired ? "Late" : "To do"}
+        <ContextMenu anchor="right" items={items as any}>
+            <Pressable onLongPress={timeline?.onLongPress} onPress={onPress} style={{ flex: 1 }}>
+                <Card style={[timelineStyles.itemContainer, timeline.styles]}>
+                    <View style={[timelineStyles.itemContainerTitleRow]}>
+                        <Text
+                            numberOfLines={1}
+                            style={[
+                                timelineStyles.itemTitle,
+                                { ...(timeline.textColor && { color: timeline.textColor }) },
+                            ]}
+                        >
+                            {timeline.title}
+                        </Text>
+                        <Text
+                            style={[
+                                timelineStyles.itemTimeLeft,
+                                { ...(timeline.textColor && { color: timeline.textColor }) },
+                            ]}
+                        >
+                            {start} - {end}
                         </Text>
                     </View>
-                </View>
-            </Card>
-        </Pressable>
+                    <View style={styles.contentRow}>
+                        <View style={styles.contentContainer}>
+                            {!!timeline.description && (
+                                <Text
+                                    numberOfLines={2}
+                                    style={[
+                                        timelineStyles.itemDescription,
+                                        timeline.textColor && { color: timeline.textColor },
+                                    ]}
+                                >
+                                    {timeline.description}
+                                </Text>
+                            )}
+
+                            <TodosPreviewSection
+                                todos={timeline.todos}
+                                timelineId={timeline.id}
+                                textColor={timeline.textColor}
+                                maxItems={3}
+                            />
+                        </View>
+                    </View>
+
+                    <View
+                        style={{
+                            flexDirection: "row",
+                            justifyContent: "flex-end",
+                            alignItems: "center",
+                        }}
+                    >
+                        <View
+                            style={[
+                                styles.statusBadge,
+                                timeline.isCompleted && styles.statusCompleted,
+                                isExpired && styles.statusExpired,
+                            ]}
+                        >
+                            <Text style={timelineStyles.status}>
+                                {timeline.isCompleted ? "Finished" : isExpired ? "Late" : "To do"}
+                            </Text>
+                        </View>
+                    </View>
+                </Card>
+            </Pressable>
+        </ContextMenu>
     )
 }
 

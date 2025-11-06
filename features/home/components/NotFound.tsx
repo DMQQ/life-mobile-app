@@ -35,7 +35,7 @@ export default function NotFound({ selectedDate }: { selectedDate: string }) {
 
     const onPress = () => {
         navigation.navigate("TimelineScreens", {
-            screen: "Timeline",
+            screen: "TimelineCreate",
             params: {
                 selectedDate: selectedDate || moment().format("YYYY-MM-DD"),
             },

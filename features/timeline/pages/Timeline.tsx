@@ -191,7 +191,7 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
                 </DayTimeline>
             )}
 
-            <DeleteTimelineEvent
+            {/* <DeleteTimelineEvent
                 shouldNavigateBack={false}
                 isVisible={!!selectedEventForDeletion}
                 item={
@@ -204,7 +204,7 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
                         : undefined
                 }
                 onDismiss={() => setSelectedEventForDeletion(null)}
-            />
+            /> */}
         </View>
     )
 }
