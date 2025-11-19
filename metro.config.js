@@ -1,17 +1,17 @@
-const { getDefaultConfig } = require("expo/metro-config");
+const { getSentryExpoConfig } = require("@sentry/react-native/metro")
 
-const config = getDefaultConfig(__dirname);
+const config = getSentryExpoConfig(__dirname)
 
-const { transformer, resolver } = config;
+const { transformer, resolver } = config
 
 config.transformer = {
-  ...transformer,
-};
+    ...transformer,
+}
 
 config.resolver = {
-  ...resolver,
-  assetExts: resolver.assetExts.filter((ext) => ext !== "svg"),
-  sourceExts: [...resolver.sourceExts, "svg"],
-};
+    ...resolver,
+    assetExts: resolver.assetExts.filter((ext) => ext !== "svg"),
+    sourceExts: [...resolver.sourceExts, "svg"],
+}
 
-module.exports = config;
+module.exports = config

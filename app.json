@@ -35,9 +35,7 @@
             "icon": "./assets/images/icon.icon",
             "entitlements": {
                 "com.apple.security.application-groups": ["group.com.dmq.mylifemobile"],
-
                 "com.apple.developer.associated-domains": ["applinks:life.dmqq.dev"],
-
                 "aps-environment": "production"
             }
         },
@@ -104,7 +102,15 @@
             "expo-quick-actions",
             "expo-build-properties",
             "expo-web-browser",
-            "@bacons/apple-targets"
+            "@bacons/apple-targets",
+            [
+                "@sentry/react-native/expo",
+                {
+                    "url": "https://sentry.io/",
+                    "project": "flickmate",
+                    "organization": "dmq"
+                }
+            ]
         ],
         "extra": {
             "eas": {

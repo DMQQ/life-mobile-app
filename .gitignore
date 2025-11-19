@@ -84,3 +84,6 @@ google-services.json
 
 .vscode
 .claude
+.env.local
+
+eas.json
