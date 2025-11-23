@@ -15,9 +15,9 @@ const styles = StyleSheet.create({
     container: {
         alignItems: "center",
         borderRadius: Rounded.m,
-        width: 75,
+        width: 60,
         justifyContent: "center",
-        height: 100,
+        height: 75,
         margin: Padding.xs,
     },
     indicator: {
@@ -41,8 +41,6 @@ interface DateProps extends TDate {
 }
 
 const bg = Colors.primary_lighter
-
-const months = moment.months()
 
 const Dots = memo((props: { tasks: number[] }) =>
     props.tasks.length > 0 ? (
@@ -80,14 +78,11 @@ const DateComponent = (props: DateProps) => {
             style={[styles.container, { backgroundColor: dateItemBg }]}
         >
             <Dots tasks={tasks} />
-            <Text variant="title" style={{ color: Colors.foreground, fontWeight: "bold" }}>
+            <Text variant="title" style={{ color: Colors.foreground, fontWeight: "bold", fontSize: 23 }}>
                 {date.getDate()}
             </Text>
-            <Text variant="body" style={{ color: "#ffffffcb" }}>
+            <Text variant="body" style={{ color: "#ffffffcb", fontSize: 15 }}>
                 {date.getDay() === 0 ? "Sun" : moment.weekdays()[date.getDay()].slice(0, 3)}
-            </Text>
-            <Text variant="caption" style={{ color: "#ffffff8c" }}>
-                {months[date.getMonth()].slice(0, 3)}
             </Text>
         </Ripple>
     )

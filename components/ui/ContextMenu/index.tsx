@@ -31,6 +31,8 @@ interface ContextMenuProps {
     children: React.ReactNode
     items: ContextMenuItemProps[]
     anchor?: "left" | "right" | "middle"
+
+    style?: StyleProp<ViewStyle>
 }
 
 const ContextMenuItem = ({ text, onPress, destructive, disabled, leading, trailing, style }: ContextMenuItemProps) => {
@@ -70,7 +72,7 @@ const tintColor = Color(Colors.primary_light).alpha(0.75).string()
 
 const AnimatedBlurView = Animated.createAnimatedComponent(BlurView)
 
-export default function ContextMenu({ children, items, anchor = "middle" }: ContextMenuProps) {
+export default function ContextMenu({ children, items, anchor = "middle", style }: ContextMenuProps) {
     const viewRef = useRef<View | null>(null)
     const [absolutePosition, setAbsolutePosition] = useState({ x: 0, y: 0, w: 0, h: 0 })
     const [isExpanded, setIsExpanded] = useState(false)
@@ -268,7 +270,7 @@ export default function ContextMenu({ children, items, anchor = "middle" }: Cont
     }))
 
     return (
-        <View ref={viewRef}>
+        <View ref={viewRef} style={[{ flex: 1 }, style]}>
             {clonedChildren}
 
             {isExpanded && (
@@ -319,6 +321,7 @@ const styles = StyleSheet.create({
         paddingVertical: 5,
         paddingHorizontal: 5,
         zIndex: 1000,
+        backgroundColor: Colors.primary_lighter,
     },
     separator: {
         height: StyleSheet.hairlineWidth,

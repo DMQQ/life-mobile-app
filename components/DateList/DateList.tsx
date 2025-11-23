@@ -25,8 +25,8 @@ const date = (today: Moment, month: string) => {
 
 const getItemLayout = (_: any, index: number) => ({
     index,
-    length: 75,
-    offset: (75 + 5 * 2) * index,
+    length: 60,
+    offset: (60 + 5 * 2) * index,
 })
 
 const getItem = (arr: any, i: number) => arr[i] as any
@@ -69,7 +69,7 @@ const DateList = memo(({ selectedDate, setSelected, dayEvents }: DateListProps) 
         })
     }, [month])
 
-    const snapInterval = 75 + Padding.xs * 2 // 85 total
+    const snapInterval = 60 + Padding.xs * 2
 
     const navigation = useNavigation<any>()
 

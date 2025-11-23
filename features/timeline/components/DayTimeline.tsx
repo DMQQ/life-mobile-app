@@ -4,7 +4,9 @@ import { memo, useCallback, useMemo } from "react"
 import { ScrollViewProps, View } from "react-native"
 import TimeTable from "react-native-calendar-timetable"
 import Animated from "react-native-reanimated"
-import DayTimelineItem from "./DayTimelineItem"
+import DayTimelineItemWrapper from "./DayTimelineItemWrapper"
+import Text from "@/components/ui/Text/Text"
+import Color from "color"
 
 interface TimelineEvent {
     id: string
@@ -66,43 +68,19 @@ const CalendarTimetable = ({
 
     const maxHour = Math.max(...(events.map((v) => +trimTime(v.endTime, 1)) || []))
 
-    const renderItem = useCallback((props: any) => {
-        const backgroundColor = secondary_candidates[props.item.id % secondary_candidates.length]
-
-        const textColor = Colors.foreground
-
-        return (
-            <View
-                key={props.item.id}
-                style={[
-                    props.style,
-                    {
-                        backgroundColor: backgroundColor,
-                        borderRadius: 5,
-                        overflow: "hidden",
-                        width: props.style.width - 25,
-                    },
-                    props.item.timeline.isCompleted && {
-                        opacity: 0.5,
-                    },
-                ]}
-            >
-                <DayTimelineItem
-                    {...props.item.timeline}
-                    location="timeline"
-                    textColor={textColor}
-                    styles={{
-                        padding: 5,
-                        paddingHorizontal: 10,
-                        flex: 1,
-                        alignItems: "flex-start",
-                    }}
-                    isSmall={props.style.height < 100}
-                    onLongPress={() => onLongPress?.(props.item.timeline)}
+    const renderItem = useCallback(
+        (props: any) => {
+            return (
+                <DayTimelineItemWrapper
+                    key={props.item.id}
+                    item={props.item}
+                    style={props.style}
+                    onLongPress={onLongPress}
                 />
-            </View>
-        )
-    }, [])
+            )
+        },
+        [onLongPress],
+    )
 
     const style = useMemo(
         () => ({
@@ -111,25 +89,24 @@ const CalendarTimetable = ({
                 flex: 1,
             },
             time: {
-                color: Colors.foreground,
-                fontSize: 15,
+                color: Color(Colors.primary_lighter).lighten(5).toString(),
+                fontSize: 16,
             },
             timeContainer: {
-                backgroundColor: Colors.ternary,
-                borderRadius: 5,
-                padding: 5,
+                backgroundColor: Colors.primary_dark,
                 zIndex: 100,
             },
             lines: {
-                borderColor: Colors.primary_lighter,
+                borderColor: Color(Colors.primary).lighten(2).toString(),
             },
 
             nowLine: {
                 line: {
-                    backgroundColor: "red",
+                    backgroundColor: Colors.secondary,
+                    height: 2,
                 },
                 dot: {
-                    backgroundColor: "red",
+                    backgroundColor: Colors.secondary,
                 },
             },
         }),
@@ -148,7 +125,7 @@ const CalendarTimetable = ({
             {children}
             <TimeTable
                 fromHour={Math.max(minHour, 0)}
-                toHour={Math.min(maxHour + 2, 24)}
+                toHour={Math.min(maxHour + 1, 24)}
                 date={moment(selected).toDate()}
                 stickyHours
                 style={style}

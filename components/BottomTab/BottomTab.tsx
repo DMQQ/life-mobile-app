@@ -1,8 +1,8 @@
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs"
 import Color from "color"
 import moment from "moment"
-import { useEffect, useMemo } from "react"
-import { Pressable, StyleSheet, TextInput, Keyboard, Text } from "react-native"
+import { useEffect, useMemo, useState } from "react"
+import { Pressable, StyleSheet, TextInput, Keyboard, Text, View } from "react-native"
 import Feedback from "react-native-haptic-feedback"
 import { SymbolView } from "expo-symbols"
 import Animated, {
@@ -50,9 +50,8 @@ const styles = StyleSheet.create({
         borderRadius: 100,
     },
     activeIndicator: {
-        height: 50,
-        borderRadius: 25,
-        opacity: 1,
+        height: 70,
+        borderRadius: 100,
     },
 })
 
@@ -169,7 +168,13 @@ const SearchButton = ({
                         justifyContent: "center",
                     }}
                 >
-                    <Pressable disabled={isExpanded} onPress={toggleSearch}>
+                    <Pressable
+                        onPress={() => {
+                            Keyboard.dismiss()
+                            onChangeText("")
+                            toggleSearch()
+                        }}
+                    >
                         <SymbolView name="xmark" size={26} tintColor={"#fff"} weight="semibold" />
                     </Pressable>
                 </GlassView>
@@ -246,12 +251,12 @@ const Btn = ({ buttonWidth, iconScale, activeRoute, ...props }: ButtonProps) => 
                 <Animated.View style={[buttonAnimatedStyle, { alignItems: "center", justifyContent: "center" }]}>
                     <SymbolView
                         name={props.iconName as any}
-                        size={26}
+                        size={27.5}
                         tintColor={"#fff"}
                         weight="semibold"
                         style={{
-                            width: 26,
-                            height: 26,
+                            width: 27.5,
+                            height: 27.5,
                             ...(isActive && {
                                 shadowColor: Colors.secondary,
                                 shadowOffset: {
@@ -268,7 +273,7 @@ const Btn = ({ buttonWidth, iconScale, activeRoute, ...props }: ButtonProps) => 
                 <Text
                     style={{
                         color: "#fff",
-                        fontSize: 10,
+                        fontSize: 11,
                         fontWeight: isActive ? "600" : "400",
                         opacity: isActive ? 1 : 0.7,
                     }}
@@ -313,7 +318,7 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
     const { isActive: isSearchActive, value: searchValue } = useAppSelector((state) => state.search)
 
     const totalButtons = state.routes.length
-    const buttonWidth = (Layout.screen.width - 30 - 70 - 15) / totalButtons
+    const buttonWidth = (Layout.screen.width - 30 - 70 - 15 - 10) / totalButtons
 
     const buttons = useMemo(
         () => [
@@ -433,18 +438,24 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
 
     const indicatorStyle = useAnimatedStyle(() => {
         "worklet"
-        const baseTranslateX = indicatorPosition.value * buttonWidth + buttonWidth * 0.2
+        const indicatorWidth = Math.min(buttonWidth * 1.175, 85)
+        const paddingOffset = 5
+        const baseTranslateX =
+            indicatorPosition.value * buttonWidth + (buttonWidth - indicatorWidth) / 2 + paddingOffset
 
         return {
             transform: [
                 {
-                    translateX: baseTranslateX,
+                    translateX: Math.max(
+                        paddingOffset,
+                        Math.min(baseTranslateX, Layout.screen.width - 30 - 70 - 15 - indicatorWidth - paddingOffset),
+                    ),
                 },
                 {
-                    scale: dragScale.value,
+                    scale: withSpring(Math.min(dragScale.value, 1.05), { damping: 20, stiffness: 200 }),
                 },
             ],
-            width: buttonWidth * 0.6,
+            width: indicatorWidth,
         }
     }, [buttonWidth])
 
@@ -472,6 +483,24 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
         }
     }, [isOpenSubScreen, isSearchActive])
 
+    const [showIndicator, setShowIndicator] = useState(false)
+
+    useEffect(() => {
+        let timeout: NodeJS.Timeout
+
+        if (!isSearchActive) {
+            timeout = setTimeout(() => {
+                setShowIndicator(true)
+            }, 300)
+        } else {
+            setShowIndicator(false)
+        }
+
+        return () => {
+            if (timeout) clearTimeout(timeout)
+        }
+    }, [isSearchActive])
+
     const dismissIcon = useMemo(() => buttons.find((btn) => btn.route === activeRoute)?.iconName, [activeRoute])
 
     return (
@@ -489,22 +518,21 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
                                 },
                             ]}
                         >
-                            {!isSearchActive && (
+                            {!isSearchActive && showIndicator && (
                                 <Animated.View
-                                    style={[indicatorStyle, styles.activeIndicator, { position: "absolute", top: 10 }]}
+                                    style={[
+                                        indicatorStyle,
+                                        {
+                                            position: "absolute",
+                                            top: 0,
+                                            height: 70,
+                                            borderRadius: 100,
+                                            overflow: "hidden",
+                                        },
+                                    ]}
                                     entering={FadeIn.delay((routes.indexOf(activeRoute) + 1) * 50)}
                                 >
-                                    <Pressable style={{ flex: 1, height: "100%" }}>
-                                        <GlassView
-                                            tintColor={Color(Colors.foreground).alpha(0.15).toString()}
-                                            style={[
-                                                styles.activeIndicator,
-                                                {
-                                                    backgroundColor: Color(Colors.foreground).alpha(0.12).toString(),
-                                                },
-                                            ]}
-                                        />
-                                    </Pressable>
+                                    <View style={[styles.activeIndicator, { backgroundColor: Colors.secondary }]} />
                                 </Animated.View>
                             )}
 
@@ -532,7 +560,7 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
                             )}
 
                             {!isSearchActive && (
-                                <Animated.View style={{ flexDirection: "row", flex: 1 }}>
+                                <Animated.View style={{ flexDirection: "row", flex: 1, paddingHorizontal: 5 }}>
                                     {buttons.map((button, index) => (
                                         <Btn
                                             key={button.route}
