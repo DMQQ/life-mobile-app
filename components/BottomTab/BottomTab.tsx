@@ -1,10 +1,10 @@
-import { AntDesign, Feather, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons"
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs"
 import Color from "color"
 import moment from "moment"
-import { cloneElement, ReactNode, useEffect, useMemo } from "react"
-import { Pressable, StyleSheet, TextInput, Keyboard } from "react-native"
+import { useEffect, useMemo } from "react"
+import { Pressable, StyleSheet, TextInput, Keyboard, Text } from "react-native"
 import Feedback from "react-native-haptic-feedback"
+import { SymbolView } from "expo-symbols"
 import Animated, {
     FadeInDown,
     FadeIn,
@@ -16,7 +16,6 @@ import Animated, {
     withSpring,
     withTiming,
     useAnimatedKeyboard,
-    useDerivedValue,
 } from "react-native-reanimated"
 import { Gesture, GestureDetector } from "react-native-gesture-handler"
 import { scheduleOnRN } from "react-native-worklets"
@@ -27,7 +26,6 @@ import { useAppSelector, useAppDispatch } from "../../utils/redux"
 import { setSearchActive, setSearchValue, clearSearch } from "../../utils/redux/search/search"
 import { useNavigation } from "@react-navigation/native"
 import { LinearGradient } from "expo-linear-gradient"
-import { useScrollYContext } from "@/utils/context/ScrollYContext"
 import useKeyboard from "@/utils/hooks/useKeyboard"
 
 const styles = StyleSheet.create({
@@ -36,7 +34,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         position: "absolute",
         bottom: 20,
-        height: 60,
+        height: 70,
         alignSelf: "center",
         paddingHorizontal: 15,
         left: 0,
@@ -52,8 +50,8 @@ const styles = StyleSheet.create({
         borderRadius: 100,
     },
     activeIndicator: {
-        height: 40,
-        borderRadius: 100,
+        height: 50,
+        borderRadius: 25,
         opacity: 1,
     },
 })
@@ -77,7 +75,7 @@ const SearchButton = ({
     }, [isExpanded])
 
     const searchContainerStyle = useAnimatedStyle(() => {
-        const width = interpolate(searchProgress.value, [0, 1], [60, Layout.screen.width - 30 - 60])
+        const width = interpolate(searchProgress.value, [0, 1], [70, Layout.screen.width - 30 - 70])
 
         return {
             width,
@@ -86,7 +84,7 @@ const SearchButton = ({
 
     const inputContainerStyle = useAnimatedStyle(() => ({
         opacity: searchProgress.value,
-        width: interpolate(searchProgress.value, [0, 1], [0, Layout.screen.width - 30 - 70 - 60]),
+        width: interpolate(searchProgress.value, [0, 1], [0, Layout.screen.width - 30 - 80 - 70]),
     }))
 
     const glassWrapper = useAnimatedStyle(
@@ -94,7 +92,7 @@ const SearchButton = ({
             width: interpolate(
                 searchProgress.value,
                 [0, 1],
-                [60, Layout.screen.width - 30 - 60 - 15 - (isExpanded && keyboard ? 60 : 0)],
+                [70, Layout.screen.width - 30 - 70 - 15 - (isExpanded && keyboard ? 70 : 0)],
             ),
             paddingLeft: isExpanded ? 15 : 0,
         }),
@@ -107,7 +105,7 @@ const SearchButton = ({
                 {
                     position: "absolute",
                     right: 15,
-                    height: 60,
+                    height: 70,
                     justifyContent: "center",
                 },
                 searchContainerStyle,
@@ -116,7 +114,7 @@ const SearchButton = ({
             <Animated.View style={glassWrapper}>
                 <GlassView
                     style={{
-                        height: 60,
+                        height: 70,
                         borderRadius: 100,
                         flexDirection: "row",
                         alignItems: "center",
@@ -145,8 +143,8 @@ const SearchButton = ({
                     <Pressable
                         disabled={isExpanded}
                         style={{
-                            width: 60,
-                            height: 60,
+                            width: 70,
+                            height: 70,
                             justifyContent: "center",
                             alignItems: "center",
                             position: "absolute",
@@ -154,7 +152,7 @@ const SearchButton = ({
                         }}
                         onPress={toggleSearch}
                     >
-                        <AntDesign size={20} name="search" color="#fff" />
+                        <SymbolView name="magnifyingglass" size={26} tintColor={"#fff"} weight="semibold" />
                     </Pressable>
                 </GlassView>
             </Animated.View>
@@ -166,13 +164,13 @@ const SearchButton = ({
                         position: "absolute",
                         right: 0,
                         borderRadius: 100,
-                        width: 60,
-                        height: 60,
+                        width: 70,
+                        height: 70,
                         justifyContent: "center",
                     }}
                 >
                     <Pressable disabled={isExpanded} onPress={toggleSearch}>
-                        <AntDesign size={20} name="close" color="#fff" />
+                        <SymbolView name="xmark" size={26} tintColor={"#fff"} weight="semibold" />
                     </Pressable>
                 </GlassView>
             )}
@@ -182,7 +180,7 @@ const SearchButton = ({
 
 interface ButtonProps {
     route: string
-    iconName: any
+    iconName: string
     label: string
     onLongPress?: any
     index: number
@@ -240,46 +238,43 @@ const Btn = ({ buttonWidth, iconScale, activeRoute, ...props }: ButtonProps) => 
                         justifyContent: "center",
                         alignItems: "center",
                         flex: 1,
-                        height: 60,
+                        height: 70,
+                        gap: 4,
                     },
                 ]}
             >
                 <Animated.View style={[buttonAnimatedStyle, { alignItems: "center", justifyContent: "center" }]}>
-                    {typeof props.iconName === "string" ? (
-                        <Ionicons
-                            size={20}
-                            name={props.iconName as any}
-                            color={"#fff"}
-                            style={{
-                                ...(isActive && {
-                                    shadowColor: Colors.secondary,
-                                    shadowOffset: {
-                                        width: 0,
-                                        height: 10,
-                                    },
-                                    shadowOpacity: 0.7,
-                                    shadowRadius: 16.0,
-                                    elevation: 24,
-                                }),
-                            }}
-                        />
-                    ) : (
-                        cloneElement(props.iconName, {
-                            style: {
-                                ...(isActive && {
-                                    shadowColor: Colors.secondary,
-                                    shadowOffset: {
-                                        width: 0,
-                                        height: 10,
-                                    },
-                                    shadowOpacity: 0.7,
-                                    shadowRadius: 16.0,
-                                    elevation: 24,
-                                }),
-                            },
-                        })
-                    )}
+                    <SymbolView
+                        name={props.iconName as any}
+                        size={26}
+                        tintColor={"#fff"}
+                        weight="semibold"
+                        style={{
+                            width: 26,
+                            height: 26,
+                            ...(isActive && {
+                                shadowColor: Colors.secondary,
+                                shadowOffset: {
+                                    width: 0,
+                                    height: 10,
+                                },
+                                shadowOpacity: 0.7,
+                                shadowRadius: 16.0,
+                                elevation: 24,
+                            }),
+                        }}
+                    />
                 </Animated.View>
+                <Text
+                    style={{
+                        color: "#fff",
+                        fontSize: 10,
+                        fontWeight: isActive ? "600" : "400",
+                        opacity: isActive ? 1 : 0.7,
+                    }}
+                >
+                    {props.label}
+                </Text>
             </Pressable>
         </Animated.View>
     )
@@ -314,52 +309,39 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
         }
     }
 
-    const { scrollYValues } = useScrollYContext()
-
-    const scrollY = useDerivedValue(() => {
-        return scrollYValues.value[activeRoute] || 0
-    }, [activeRoute])
-
     const dispatch = useAppDispatch()
     const { isActive: isSearchActive, value: searchValue } = useAppSelector((state) => state.search)
 
     const totalButtons = state.routes.length
-    const buttonWidth = (Layout.screen.width - 30 - 70) / totalButtons
+    const buttonWidth = (Layout.screen.width - 30 - 70 - 15) / totalButtons
 
     const buttons = useMemo(
         () => [
             {
                 route: "NotesScreens",
                 label: "Notes",
-                iconName: <MaterialCommunityIcons name="cards" size={20} color="#fff" />,
+                iconName: "rectangle.stack",
             },
             {
                 route: "GoalsScreens",
                 label: "Training",
-                iconName: (
-                    <Feather
-                        name="target"
-                        size={22.5}
-                        color="#fff"
-                        style={{ marginBottom: 2.5, paddingVertical: 7.5 }}
-                    />
-                ),
+                iconName: "scope",
             },
             {
                 route: "Root",
                 label: "Home",
-                iconName: "home",
+                iconName: "house.fill",
             },
             {
                 route: "WalletScreens",
                 label: "Wallet",
-                iconName: "wallet",
+                iconName: "creditcard.fill",
                 onLongPress: () => handleLongPress("WalletScreens"),
             },
             {
                 route: "TimelineScreens",
                 label: "Timeline",
-                iconName: "calendar-number",
+                iconName: "calendar",
                 onLongPress: () => handleLongPress("TimelineScreens"),
             },
         ],
@@ -467,7 +449,7 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
     }, [buttonWidth])
 
     const tabBarWidthStyle = useAnimatedStyle(() => ({
-        width: interpolate(tabsOpacity.value, [0, 1], [60, Layout.screen.width - 30 - 70]),
+        width: interpolate(tabsOpacity.value, [0, 1], [70, Layout.screen.width - 30 - 70 - 15]),
     }))
 
     const isOpenSubScreen = (state.routes[state.index].state?.index || 0) > 0
@@ -496,14 +478,14 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
         <>
             <Animated.View style={[animatedStyle, styles.container]} entering={FadeInDown} exiting={FadeInDown}>
                 <GestureDetector gesture={panGesture}>
-                    <Animated.View style={[tabBarWidthStyle, { height: 60 }]}>
+                    <Animated.View style={[tabBarWidthStyle, { height: 70 }]}>
                         <GlassView
                             style={[
                                 styles.innerContainer,
                                 {
                                     borderRadius: 100,
                                     flex: 1,
-                                    height: 60,
+                                    height: 70,
                                 },
                             ]}
                         >
@@ -514,9 +496,13 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
                                 >
                                     <Pressable style={{ flex: 1, height: "100%" }}>
                                         <GlassView
-                                            glassEffectStyle="clear"
-                                            tintColor={Colors.secondary}
-                                            style={[styles.activeIndicator]}
+                                            tintColor={Color(Colors.foreground).alpha(0.15).toString()}
+                                            style={[
+                                                styles.activeIndicator,
+                                                {
+                                                    backgroundColor: Color(Colors.foreground).alpha(0.12).toString(),
+                                                },
+                                            ]}
                                         />
                                     </Pressable>
                                 </Animated.View>
@@ -525,7 +511,7 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
                             {isSearchActive && (
                                 <Animated.View
                                     entering={FadeIn.delay(150)}
-                                    style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 60 }}
+                                    style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 70 }}
                                 >
                                     <Pressable
                                         style={{
@@ -535,11 +521,12 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
                                         }}
                                         onPress={toggleSearch}
                                     >
-                                        {typeof dismissIcon === "string" ? (
-                                            <Ionicons size={20} name={dismissIcon as any} color="#fff" />
-                                        ) : (
-                                            cloneElement(dismissIcon as any, { size: 20, color: "#fff" })
-                                        )}
+                                        <SymbolView
+                                            name={(dismissIcon || "house.fill") as any}
+                                            size={26}
+                                            tintColor={"#fff"}
+                                            weight="semibold"
+                                        />
                                     </Pressable>
                                 </Animated.View>
                             )}
