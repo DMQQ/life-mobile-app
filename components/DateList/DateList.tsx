@@ -3,6 +3,7 @@ import { useNavigation } from "@react-navigation/native"
 import moment, { Moment } from "moment"
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { View, VirtualizedList } from "react-native"
+import Animated, { SharedValue, useAnimatedStyle, interpolate } from "react-native-reanimated"
 import Date from "./Date"
 import MonthSelectList from "./MonthSelectList"
 import { createDates } from "./fns"
@@ -15,6 +16,7 @@ interface DateListProps {
     dayEvents: {
         [key: string]: number
     }
+    scrollY?: SharedValue<number>
 }
 
 const date = (today: Moment, month: string) => {
@@ -35,12 +37,20 @@ const keyExtractor = (item: string) => item
 
 const getItemCount = (arr: any) => arr.length
 
-const DateList = memo(({ selectedDate, setSelected, dayEvents }: DateListProps) => {
+const DateList = memo(({ selectedDate, setSelected, dayEvents, scrollY }: DateListProps) => {
     const [month, setMonth] = useState(() => moment.months()[moment(selectedDate).month()])
 
     const [dates, setDates] = useState<string[]>(() => createDates(moment()))
 
     const listRef = useRef<VirtualizedList<string>>(null)
+
+    const monthAnimatedStyle = useAnimatedStyle(() => {
+        if (!scrollY) return { opacity: 1, height: 40 }
+        return {
+            opacity: interpolate(scrollY.value, [0, 50], [1, 0], "clamp"),
+            height: interpolate(scrollY.value, [0, 50], [60, 0], "clamp"),
+        }
+    })
 
     const onMonthChange = useCallback(
         (newMonth: string) => {
@@ -95,28 +105,30 @@ const DateList = memo(({ selectedDate, setSelected, dayEvents }: DateListProps) 
 
     return (
         <View style={{ backgroundColor: Colors.primary }}>
-            <MonthSelectList selected={month} onPress={onMonthChange} />
-            <VirtualizedList
-                initialNumToRender={initialNumToRender}
-                snapToInterval={snapInterval}
-                snapToAlignment="start"
-                decelerationRate="fast"
-                removeClippedSubviews
-                showsHorizontalScrollIndicator={false}
-                getItemLayout={getItemLayout}
-                ref={listRef}
-                horizontal
-                getItem={getItem}
-                getItemCount={getItemCount}
-                data={dates}
-                keyExtractor={keyExtractor}
-                renderItem={renderItem}
-                style={{ backgroundColor: Colors.primary }}
-            />
+            <Animated.View style={monthAnimatedStyle}>
+                <MonthSelectList selected={month} onPress={onMonthChange} />
+            </Animated.View>
+            <Animated.View>
+                <VirtualizedList
+                    initialNumToRender={initialNumToRender}
+                    snapToInterval={snapInterval}
+                    snapToAlignment="start"
+                    decelerationRate="fast"
+                    removeClippedSubviews
+                    showsHorizontalScrollIndicator={false}
+                    getItemLayout={getItemLayout}
+                    ref={listRef}
+                    horizontal
+                    getItem={getItem}
+                    getItemCount={getItemCount}
+                    data={dates}
+                    keyExtractor={keyExtractor}
+                    renderItem={renderItem}
+                    style={{ backgroundColor: Colors.primary }}
+                />
+            </Animated.View>
         </View>
     )
 })
 
-export default memo(DateList, (prev, next) => {
-    return prev.selectedDate === next.selectedDate && JSON.stringify(prev.dayEvents) === JSON.stringify(next.dayEvents)
-})
+export default memo(DateList)

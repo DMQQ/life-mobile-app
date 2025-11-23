@@ -159,6 +159,7 @@ export default function DatePicker({
                         padding: 5,
                         borderRadius: 20,
                         overflow: "hidden",
+                        backgroundColor: Colors.primary_lighter,
                     }}
                 >
                     <Calendar

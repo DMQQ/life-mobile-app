@@ -15,11 +15,11 @@
         "updates": {
             "fallbackToCacheTimeout": 0,
             "url": "https://u.expo.dev/5596a83c-661a-4477-806f-ee4c8a125f7e",
-            "checkAutomatically": "ON_LOAD"
+            "checkAutomatically": "NEVER"
         },
         "assetBundlePatterns": ["**/*"],
         "ios": {
-            "buildNumber": "202511061",
+            "buildNumber": "202511231",
             "supportsTablet": true,
             "appleTeamId": "55RA6Q9VSR",
             "infoPlist": {

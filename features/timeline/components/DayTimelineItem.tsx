@@ -19,8 +19,6 @@ export default function DayTimelineItem(
         onLongPress?: () => void
     },
 ) {
-    const navigation = useNavigation<any>()
-
     const start = moment(timeline.beginTime, "HH:mm").format("HH:mm")
 
     const end = moment(timeline.endTime, "HH:mm").format("HH:mm")
@@ -47,7 +45,7 @@ export default function DayTimelineItem(
     }, [timeline.date, timeline.beginTime, timeline.endTime, timeline.isCompleted])
 
     return (
-        <View style={[timelineStyles.itemContainer, timeline.styles]}>
+        <View style={[timelineStyles.itemContainer, timeline.styles, { padding: 10 }]}>
             <View style={[timelineStyles.itemContainerTitleRow]}>
                 <Text
                     variant="subtitle"

@@ -94,7 +94,7 @@ export default StyleSheet.create({
         // backgroundColor: Color(Colors.primary).lighten(0.35).string(),
     },
     status: {
-        color: Colors.primary,
+        color: "#fff",
         fontWeight: "600",
     },
 

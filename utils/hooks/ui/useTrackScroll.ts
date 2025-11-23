@@ -1,6 +1,7 @@
-import { useAnimatedScrollHandler, useSharedValue, useDerivedValue } from "react-native-reanimated"
+import { useAnimatedScrollHandler, useSharedValue, useDerivedValue, runOnJS } from "react-native-reanimated"
 import { useScrollYContext } from "@/utils/context/ScrollYContext"
 import { useFocusEffect, useIsFocused } from "@react-navigation/native"
+import { useCallback, useEffect } from "react"
 
 interface UseTrackScrollOptions {
     useGlobal?: boolean
@@ -19,15 +20,31 @@ export default function useTrackScroll(options: UseTrackScrollOptions = {}) {
 
     if (useGlobal) {
         try {
-            const { scrollYValues, onScroll, setActiveScreen } = useScrollYContext()
+            const { scrollYValues, onScroll, setActiveScreen, resetScrollY } = useScrollYContext()
 
-            useFocusEffect(() => {
-                if (screenName) setActiveScreen(screenName)
-            })
+            // Initialize scroll position when screen first mounts
+            useEffect(() => {
+                if (screenName) {
+                    // Always initialize to 0 if not already set
+                    if (scrollYValues.value[screenName] === undefined) {
+                        resetScrollY(screenName)
+                    }
+                }
+            }, [screenName])
+
+            // Set active screen when focused
+            useFocusEffect(
+                useCallback(() => {
+                    if (screenName) {
+                        setActiveScreen(screenName)
+                    }
+                }, [screenName]),
+            )
 
             const screenScrollY = useDerivedValue(() => {
-                return screenName ? scrollYValues.value[screenName] || 0 : 0
-            })
+                const currentValue = screenName ? scrollYValues.value[screenName] : undefined
+                return currentValue !== undefined ? currentValue : 0
+            }, [screenName])
 
             return [screenScrollY, onScroll] as const
         } catch (error) {

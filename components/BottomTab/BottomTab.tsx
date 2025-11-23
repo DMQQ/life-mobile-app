@@ -50,7 +50,7 @@ const styles = StyleSheet.create({
         borderRadius: 100,
     },
     activeIndicator: {
-        height: 70,
+        height: 50,
         borderRadius: 100,
     },
 })
@@ -524,15 +524,20 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
                                         indicatorStyle,
                                         {
                                             position: "absolute",
-                                            top: 0,
-                                            height: 70,
+                                            top: 10,
+                                            height: 50,
                                             borderRadius: 100,
                                             overflow: "hidden",
                                         },
                                     ]}
                                     entering={FadeIn.delay((routes.indexOf(activeRoute) + 1) * 50)}
                                 >
-                                    <View style={[styles.activeIndicator, { backgroundColor: Colors.secondary }]} />
+                                    <View
+                                        style={[
+                                            styles.activeIndicator,
+                                            { backgroundColor: Color(Colors.primary_lighter).lighten(1.5).hex() },
+                                        ]}
+                                    />
                                 </Animated.View>
                             )}
 

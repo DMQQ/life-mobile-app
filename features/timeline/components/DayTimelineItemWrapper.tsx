@@ -117,17 +117,20 @@ export default function DayTimelineItemWrapper({ item, style, onLongPress }: Day
                     timeline.isCompleted && {
                         opacity: 0.5,
                     },
+                    style,
                 ]}
             >
-                <DayTimelineItem
-                    {...timeline}
-                    location="timeline"
-                    textColor={textColor}
-                    styles={{
-                        flex: 1,
-                    }}
-                    isSmall={style.height < 100}
-                />
+                <View style={{ flex: 1 }}>
+                    <DayTimelineItem
+                        {...timeline}
+                        location="timeline"
+                        textColor={textColor}
+                        styles={{
+                            flex: 1,
+                        }}
+                        isSmall={style.height < 100}
+                    />
+                </View>
             </Pressable>
         </ContextMenu>
     )

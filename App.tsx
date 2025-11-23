@@ -74,10 +74,11 @@ const apolloClient = new ApolloClient({
     link,
 })
 
-Sentry.init({
-    dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
-    sendDefaultPii: true,
-})
+if (!__DEV__)
+    Sentry.init({
+        dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
+        sendDefaultPii: true,
+    })
 
 export default Sentry.wrap(function App() {
     return (
