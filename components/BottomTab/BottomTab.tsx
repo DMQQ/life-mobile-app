@@ -28,6 +28,7 @@ import { setSearchActive, setSearchValue, clearSearch } from "../../utils/redux/
 import { useNavigation } from "@react-navigation/native"
 import { LinearGradient } from "expo-linear-gradient"
 import { useScrollYContext } from "@/utils/context/ScrollYContext"
+import useKeyboard from "@/utils/hooks/useKeyboard"
 
 const styles = StyleSheet.create({
     container: {
@@ -69,13 +70,14 @@ const SearchButton = ({
     onChangeText: (text: string) => void
 }) => {
     const searchProgress = useSharedValue(0)
+    const keyboard = useKeyboard()
 
     useEffect(() => {
         searchProgress.value = withTiming(isExpanded ? 1 : 0, { duration: 300 })
     }, [isExpanded])
 
     const searchContainerStyle = useAnimatedStyle(() => {
-        const width = interpolate(searchProgress.value, [0, 1], [60, Layout.screen.width - 30 - 70])
+        const width = interpolate(searchProgress.value, [0, 1], [60, Layout.screen.width - 30 - 60])
 
         return {
             width,
@@ -86,6 +88,18 @@ const SearchButton = ({
         opacity: searchProgress.value,
         width: interpolate(searchProgress.value, [0, 1], [0, Layout.screen.width - 30 - 70 - 60]),
     }))
+
+    const glassWrapper = useAnimatedStyle(
+        () => ({
+            width: interpolate(
+                searchProgress.value,
+                [0, 1],
+                [60, Layout.screen.width - 30 - 60 - 15 - (isExpanded && keyboard ? 60 : 0)],
+            ),
+            paddingLeft: isExpanded ? 15 : 0,
+        }),
+        [isExpanded, keyboard],
+    )
 
     return (
         <Animated.View
@@ -99,42 +113,69 @@ const SearchButton = ({
                 searchContainerStyle,
             ]}
         >
-            <GlassView style={{ height: 60, borderRadius: 100, flex: 1, flexDirection: "row", alignItems: "center" }}>
-                {isExpanded && (
-                    <Animated.View style={[{ flex: 1, paddingHorizontal: 15 }, inputContainerStyle]}>
-                        <TextInput
-                            value={value}
-                            onChangeText={onChangeText}
-                            style={{
-                                color: Colors.foreground,
-                                fontSize: 16,
-                                paddingHorizontal: 10,
-                                height: 40,
-                                flex: 1,
-                            }}
-                            placeholder="Search..."
-                            placeholderTextColor={Color(Colors.foreground).alpha(0.6).string()}
-                            autoFocus={false}
-                            returnKeyType="search"
-                        />
-                    </Animated.View>
-                )}
-
-                <Pressable
-                    disabled={isExpanded}
+            <Animated.View style={glassWrapper}>
+                <GlassView
                     style={{
-                        width: 60,
                         height: 60,
-                        justifyContent: "center",
+                        borderRadius: 100,
+                        flexDirection: "row",
+                        alignItems: "center",
+                    }}
+                >
+                    {isExpanded && (
+                        <Animated.View style={[{ flex: 1, paddingHorizontal: 15 }, inputContainerStyle]}>
+                            <TextInput
+                                value={value}
+                                onChangeText={onChangeText}
+                                style={{
+                                    color: Colors.foreground,
+                                    fontSize: 16,
+                                    paddingHorizontal: 10,
+                                    height: 40,
+                                    flex: 1,
+                                }}
+                                placeholder="Search..."
+                                placeholderTextColor={Color(Colors.foreground).alpha(0.6).string()}
+                                autoFocus={false}
+                                returnKeyType="search"
+                            />
+                        </Animated.View>
+                    )}
+
+                    <Pressable
+                        disabled={isExpanded}
+                        style={{
+                            width: 60,
+                            height: 60,
+                            justifyContent: "center",
+                            alignItems: "center",
+                            position: "absolute",
+                            right: 0,
+                        }}
+                        onPress={toggleSearch}
+                    >
+                        <AntDesign size={20} name="search" color="#fff" />
+                    </Pressable>
+                </GlassView>
+            </Animated.View>
+
+            {isExpanded && keyboard && (
+                <GlassView
+                    style={{
                         alignItems: "center",
                         position: "absolute",
                         right: 0,
+                        borderRadius: 100,
+                        width: 60,
+                        height: 60,
+                        justifyContent: "center",
                     }}
-                    onPress={toggleSearch}
                 >
-                    <AntDesign size={20} name="search" color="#fff" />
-                </Pressable>
-            </GlassView>
+                    <Pressable disabled={isExpanded} onPress={toggleSearch}>
+                        <AntDesign size={20} name="close" color="#fff" />
+                    </Pressable>
+                </GlassView>
+            )}
         </Animated.View>
     )
 }
