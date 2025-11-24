@@ -59,6 +59,7 @@ const BottomSheet = forwardRef<
             snapPoints={props.snapPoints}
             ref={ref}
             onChange={(index) => {
+                console.log("BottomSheet index changed to:", index)
                 props.onChange?.(index)
             }}
             handleIndicatorStyle={{
@@ -70,6 +71,9 @@ const BottomSheet = forwardRef<
             }}
             enablePanDownToClose
             containerStyle={{
+                zIndex: 1000,
+            }}
+            style={{
                 zIndex: 1000,
             }}
         >

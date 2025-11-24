@@ -7,6 +7,7 @@ import Animated from "react-native-reanimated"
 import DayTimelineItemWrapper from "./DayTimelineItemWrapper"
 import Text from "@/components/ui/Text/Text"
 import Color from "color"
+import Layout from "@/constants/Layout"
 
 interface TimelineEvent {
     id: string

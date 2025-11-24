@@ -1,11 +1,12 @@
 import Colors from "@/constants/Colors"
 import moment from "moment"
-import { ReactElement, useEffect, useRef, useState } from "react"
+import { ReactElement, useCallback, useEffect, useRef, useState } from "react"
 import { Calendar } from "react-native-calendars"
 import ChipButton from "../ui/Button/ChipButton"
 import FloatingMenu, { FloatingMenuRef } from "../ui/FloatingMenu"
 import Color from "color"
 import GlassView from "../ui/GlassView"
+import { View } from "react-native"
 
 const theme = {
     backgroundColor: "transparent",
@@ -148,13 +149,10 @@ export default function DatePicker({
         return `${moment(dates.start).format("DD.MM")} - ${moment(dates.end).format("DD.MM")}`
     }
 
-    return (
-        <FloatingMenu
-            ref={pickerRef}
-            menuWidth={320}
-            menuHeight={380}
-            menuContent={
-                <GlassView
+    const menuContent = useCallback(
+        ({ isFinished }: { isFinished: boolean }) => {
+            return (
+                <View
                     style={{
                         padding: 5,
                         borderRadius: 20,
@@ -171,9 +169,14 @@ export default function DatePicker({
                             borderRadius: 15,
                         }}
                     />
-                </GlassView>
-            }
-        >
+                </View>
+            )
+        },
+        [selectedRange, mode],
+    )
+
+    return (
+        <FloatingMenu ref={pickerRef} menuWidth={320} menuHeight={380} menuContent={menuContent}>
             {typeof buttonComponent === "function" ? (
                 buttonComponent({ start: dates.start, end: dates.end })
             ) : (

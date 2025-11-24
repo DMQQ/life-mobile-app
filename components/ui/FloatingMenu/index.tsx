@@ -1,11 +1,11 @@
 import { lessBouncySpring } from "@/constants/Animations"
-import { ReactElement, cloneElement, forwardRef, useEffect, useRef, useState } from "react"
+import { ReactElement, cloneElement, forwardRef, useEffect, useMemo, useRef, useState } from "react"
 import { Dimensions, Modal, TouchableOpacity, View } from "react-native"
-import Animated, { useAnimatedStyle, useSharedValue, withSpring, withTiming } from "react-native-reanimated"
+import Animated, { useAnimatedStyle, useSharedValue, withSpring, withTiming, runOnJS } from "react-native-reanimated"
 
 interface FloatingMenuProps {
     children: ReactElement
-    menuContent: ReactElement
+    menuContent: ReactElement | ((props: { isFinished: boolean }) => ReactElement)
     onVisibilityChange?: (visible: boolean) => void
     menuWidth?: number
     menuHeight?: number
@@ -19,30 +19,41 @@ const FloatingMenu = forwardRef<FloatingMenuRef, FloatingMenuProps>(
     ({ children, menuContent, onVisibilityChange, menuWidth = 300, menuHeight = 400 }, ref) => {
         const [isOpen, setIsOpen] = useState(false)
         const [isAnimating, setIsAnimating] = useState(false)
+        const [isFinished, setIsFinished] = useState(false)
         const [anchorLayout, setAnchorLayout] = useState({ x: 0, y: 0, width: 0, height: 0 })
         const [menuPosition, setMenuPosition] = useState({ left: 0, top: 0 })
         const isMounted = useRef(true)
         const anchorRef = useRef<View>(null)
 
         const opacity = useSharedValue(0)
-        const scale = useSharedValue(0.3)
+        const scale = useSharedValue(0)
         const translateX = useSharedValue(0)
         const translateY = useSharedValue(0)
 
         const showMenu = () => {
             setIsOpen(true)
             setIsAnimating(true)
-            opacity.value = withTiming(1, { duration: 200 })
-            scale.value = withSpring(1, { damping: 22, stiffness: 250, mass: 0.8 })
-            translateX.value = lessBouncySpring(0)
-            translateY.value = lessBouncySpring(0)
+            setIsFinished(false)
+
+            opacity.value = withTiming(1, { duration: 300 })
+            scale.value = withSpring(
+                1,
+                { damping: 20, stiffness: 180, mass: 1 },
+                (finished) => {
+                    if (finished) {
+                        runOnJS(setIsFinished)(true)
+                    }
+                }
+            )
+            translateX.value = withSpring(0, { damping: 30, stiffness: 180, mass: 1 })
+            translateY.value = withSpring(0, { damping: 30, stiffness: 180, mass: 1 })
 
             // Use setTimeout instead of worklet callback
             setTimeout(() => {
                 if (isMounted.current) {
                     setIsAnimating(false)
                 }
-            }, 400) // Wait for spring animation to settle
+            }, 500) // Wait for spring animation to settle
 
             onVisibilityChange?.(true)
         }
@@ -51,6 +62,7 @@ const FloatingMenu = forwardRef<FloatingMenuRef, FloatingMenuProps>(
             if (isAnimating) return
 
             setIsAnimating(true)
+            setIsFinished(false)
 
             const anchorCenterX = anchorLayout.x + anchorLayout.width / 2
             const anchorCenterY = anchorLayout.y + anchorLayout.height / 2
@@ -58,10 +70,18 @@ const FloatingMenu = forwardRef<FloatingMenuRef, FloatingMenuProps>(
             const menuCenterY = menuPosition.top + menuHeight / 2
 
             // Start animations
-            opacity.value = withTiming(0, { duration: 180 })
-            scale.value = withSpring(0.2, { damping: 20, stiffness: 200 })
-            translateX.value = lessBouncySpring(anchorCenterX - menuCenterX)
-            translateY.value = lessBouncySpring(anchorCenterY - menuCenterY)
+            opacity.value = withTiming(0, { duration: 250 })
+            scale.value = withSpring(
+                0,
+                { damping: 28, stiffness: 170, mass: 1 },
+                (finished) => {
+                    if (finished) {
+                        runOnJS(setIsFinished)(true)
+                    }
+                }
+            )
+            translateX.value = withSpring(anchorCenterX - menuCenterX, { damping: 28, stiffness: 170, mass: 1 })
+            translateY.value = withSpring(anchorCenterY - menuCenterY, { damping: 28, stiffness: 170, mass: 1 })
 
             // Close after animation completes (no worklet callback)
             setTimeout(() => {
@@ -69,7 +89,7 @@ const FloatingMenu = forwardRef<FloatingMenuRef, FloatingMenuProps>(
                     setIsOpen(false)
                     setIsAnimating(false)
                 }
-            }, 400) // Wait for spring to finish
+            }, 450) // Wait for spring to finish
 
             onVisibilityChange?.(false)
         }
@@ -82,9 +102,10 @@ const FloatingMenu = forwardRef<FloatingMenuRef, FloatingMenuProps>(
         useEffect(() => {
             return () => {
                 isMounted.current = false
+                setIsFinished(false)
                 // Cancel any running animations on unmount
                 opacity.value = 0
-                scale.value = 0.3
+                scale.value = 0
                 translateX.value = 0
                 translateY.value = 0
             }
@@ -149,13 +170,23 @@ const FloatingMenu = forwardRef<FloatingMenuRef, FloatingMenuProps>(
             pointerEvents: isAnimating ? "none" : "auto",
         })
 
-        const enhancedMenuContent = cloneElement(menuContent, {
-            onPress: () => {
-                if (isAnimating) return
-                menuContent.props.onPress?.()
-                hideMenu() // Use animated close
-            },
-        })
+        const enhancedMenuContent = useMemo(() => {
+            return cloneElement(
+                typeof menuContent === "function"
+                    ? menuContent({
+                          isFinished: isFinished,
+                      })
+                    : menuContent,
+                {
+                    onPress: () => {
+                        if (isAnimating) return
+                        //@ts-ignore
+                        menuContent.props.onPress?.()
+                        hideMenu() // Use animated close
+                    },
+                },
+            )
+        }, [isAnimating, isFinished, menuContent])
 
         const animatedStyle = useAnimatedStyle(() => ({
             opacity: opacity.value,

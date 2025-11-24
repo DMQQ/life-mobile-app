@@ -17,6 +17,7 @@ import { STORE_KEY } from "./utils/hooks/useUser"
 import { store } from "./utils/redux"
 import * as Sentry from "@sentry/react-native"
 import { setLogVerbosity } from "@apollo/client"
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet"
 
 setLogVerbosity("error")
 
@@ -85,16 +86,18 @@ export default Sentry.wrap(function App() {
         <SafeAreaProvider style={{ flex: 1, backgroundColor: Colors.primary }}>
             <ErrorBoundary>
                 <GestureHandlerRootView style={{ flex: 1 }}>
-                    <ThemeContextProvider>
-                        <ScrollYContextProvider>
-                            <ApolloProvider client={apolloClient}>
-                                <Provider store={store}>
-                                    <StatusBar backgroundColor={Colors.primary} />
-                                    <Navigation />
-                                </Provider>
-                            </ApolloProvider>
-                        </ScrollYContextProvider>
-                    </ThemeContextProvider>
+                    <BottomSheetModalProvider>
+                        <ThemeContextProvider>
+                            <ScrollYContextProvider>
+                                <ApolloProvider client={apolloClient}>
+                                    <Provider store={store}>
+                                        <StatusBar backgroundColor={Colors.primary} />
+                                        <Navigation />
+                                    </Provider>
+                                </ApolloProvider>
+                            </ScrollYContextProvider>
+                        </ThemeContextProvider>
+                    </BottomSheetModalProvider>
                 </GestureHandlerRootView>
             </ErrorBoundary>
         </SafeAreaProvider>

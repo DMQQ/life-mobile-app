@@ -44,7 +44,7 @@ const bg = Colors.primary_lighter
 
 const Dots = memo((props: { tasks: number[] }) =>
     props.tasks.length > 0 ? (
-        <View style={{ flexDirection: "row", position: "absolute", top: -3 }}>
+        <View style={{ flexDirection: "row", position: "absolute", top: -3, overflow: "hidden" }}>
             {props.tasks.map((_, i) => (
                 <Animated.View
                     entering={FadeIn}

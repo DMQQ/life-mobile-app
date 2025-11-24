@@ -64,18 +64,19 @@ export default function CreateTimeLineEventModal({ route, navigation }: Timeline
     const insets = useSafeAreaInsets()
 
     return (
-        <View style={{ flex: 1, paddingBottom: insets.bottom }}>
-            <TimelineCreateHeader
-                handleChangeDate={(date) => {
-                    handleChangeDate(date)
-                    navigation.setParams({
-                        selectedDate: moment(date).format("YYYY-MM-DD"),
-                    })
-                }}
-                selectedDate={route.params.selectedDate}
-            />
+        <>
+            <View style={{ flex: 1, paddingBottom: insets.bottom }}>
+                <TimelineCreateHeader
+                    handleChangeDate={(date) => {
+                        handleChangeDate(date)
+                        navigation.setParams({
+                            selectedDate: moment(date).format("YYYY-MM-DD"),
+                        })
+                    }}
+                    selectedDate={route.params.selectedDate}
+                />
 
-            <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 15 }} keyboardDismissMode={"on-drag"}>
+                <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 15 }} keyboardDismissMode={"on-drag"}>
                 <Animated.View>
                     {/* {!isEditing && <SuggestedEvents date={route.params.selectedDate} />} */}
 
@@ -209,16 +210,20 @@ export default function CreateTimeLineEventModal({ route, navigation }: Timeline
                 </Animated.View>
             </ScrollView>
 
-            <CreateRepeatableTimeline formik={f} ref={sheetRef as any} />
-
             <SubmitButton
                 f={f}
-                openSheet={() => sheetRef.current?.expand()}
+                openSheet={() => {
+                    console.log("Opening sheet, ref:", sheetRef.current)
+                    sheetRef.current?.expand()
+                }}
                 isEditing={isEditing}
                 isKeyboardOpen={isKeyboardOpen || false}
                 isLoading={isLoading}
             />
-        </View>
+            </View>
+
+            <CreateRepeatableTimeline formik={f} ref={sheetRef as any} />
+        </>
     )
 }
 

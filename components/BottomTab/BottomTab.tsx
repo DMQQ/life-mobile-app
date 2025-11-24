@@ -50,7 +50,7 @@ const styles = StyleSheet.create({
         borderRadius: 100,
     },
     activeIndicator: {
-        height: 50,
+        height: 60,
         borderRadius: 100,
     },
 })
@@ -358,6 +358,7 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
     const tabsOpacity = useSharedValue(1)
     const isDragging = useSharedValue(false)
     const dragScale = useSharedValue(1)
+    const dragScaleY = useSharedValue(1)
     const dragStartIndex = useSharedValue(0)
 
     const toggleSearch = () => {
@@ -376,14 +377,19 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
 
     useEffect(() => {
         if (!isSearchActive) {
-            dragScale.value = 1
+            dragScale.value = withSpring(1, { damping: 14, stiffness: 280 })
+            dragScaleY.value = withSpring(1, { damping: 12, stiffness: 320 })
             isDragging.value = false
 
             indicatorPosition.value = withSpring(routes.indexOf(activeRoute), {
-                damping: 25,
-                stiffness: 200,
+                damping: 24,
+                stiffness: 240,
             })
-            iconScale.value = withSequence(withTiming(0.9, { duration: 100 }), withTiming(1, { duration: 150 }))
+            iconScale.value = withSequence(
+                withSpring(0.85, { damping: 18, stiffness: 320 }),
+                withSpring(1.05, { damping: 10, stiffness: 280 }),
+                withSpring(1, { damping: 14, stiffness: 240 }),
+            )
         }
     }, [activeRoute, isSearchActive])
 
@@ -395,7 +401,8 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
         .onBegin(() => {
             "worklet"
             isDragging.value = true
-            dragScale.value = withSpring(1.1, { damping: 20, stiffness: 300 })
+            dragScale.value = withSpring(1.15, { damping: 14, stiffness: 320 })
+            dragScaleY.value = withSpring(1.2, { damping: 12, stiffness: 360 })
             dragStartIndex.value = routes.indexOf(activeRoute)
         })
         .onUpdate((event) => {
@@ -408,11 +415,12 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
 
             if (Math.abs(event.y) > 50) {
                 scheduleOnRN(handleLongPress, activeRoute)
-                dragScale.value = withSpring(1, { damping: 20, stiffness: 300 })
+                dragScale.value = withSpring(1, { damping: 14, stiffness: 280 })
+                dragScaleY.value = withSpring(1, { damping: 12, stiffness: 320 })
                 isDragging.value = false
                 indicatorPosition.value = withSpring(routes.indexOf(activeRoute), {
-                    damping: 25,
-                    stiffness: 200,
+                    damping: 18,
+                    stiffness: 240,
                 })
             }
         })
@@ -424,11 +432,12 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
             const currentActiveIndex = routes.indexOf(activeRoute)
 
             indicatorPosition.value = withSpring(targetIndex, {
-                damping: 20,
-                stiffness: 150,
+                damping: 14,
+                stiffness: 200,
             })
 
-            dragScale.value = withSpring(1, { damping: 20, stiffness: 300 })
+            dragScale.value = withSpring(1, { damping: 14, stiffness: 280 })
+            dragScaleY.value = withSpring(1, { damping: 12, stiffness: 320 })
             isDragging.value = false
 
             if (targetIndex !== currentActiveIndex && routes[targetIndex]) {
@@ -439,20 +448,30 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
     const indicatorStyle = useAnimatedStyle(() => {
         "worklet"
         const indicatorWidth = Math.min(buttonWidth * 1.175, 85)
-        const paddingOffset = 5
+        const containerPadding = 5
         const baseTranslateX =
-            indicatorPosition.value * buttonWidth + (buttonWidth - indicatorWidth) / 2 + paddingOffset
+            indicatorPosition.value * buttonWidth + (buttonWidth - indicatorWidth) / 2 + containerPadding
+
+        const containerWidth = Layout.screen.width - 30 - 70 - 15
+        const maxTranslateX = containerWidth - indicatorWidth
+
+        // For edge tabs, allow indicator to fill to the edges
+        const isFirstTab = indicatorPosition.value < 0.5
+        const isLastTab = indicatorPosition.value > routes.length - 1.5
+
+        const minTranslateX = isFirstTab ? 0 : containerPadding
+        const adjustedMaxTranslateX = isLastTab ? containerWidth - indicatorWidth : maxTranslateX - containerPadding
 
         return {
             transform: [
                 {
-                    translateX: Math.max(
-                        paddingOffset,
-                        Math.min(baseTranslateX, Layout.screen.width - 30 - 70 - 15 - indicatorWidth - paddingOffset),
-                    ),
+                    translateX: Math.max(minTranslateX, Math.min(baseTranslateX, adjustedMaxTranslateX)),
                 },
                 {
-                    scale: withSpring(Math.min(dragScale.value, 1.05), { damping: 20, stiffness: 200 }),
+                    scaleX: dragScale.value,
+                },
+                {
+                    scaleY: dragScaleY.value,
                 },
             ],
             width: indicatorWidth,
@@ -524,8 +543,8 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
                                         indicatorStyle,
                                         {
                                             position: "absolute",
-                                            top: 10,
-                                            height: 50,
+                                            top: 5,
+                                            height: 60,
                                             borderRadius: 100,
                                             overflow: "hidden",
                                         },
@@ -535,7 +554,7 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
                                     <View
                                         style={[
                                             styles.activeIndicator,
-                                            { backgroundColor: Color(Colors.primary_lighter).lighten(1.5).hex() },
+                                            { backgroundColor: Color(Colors.secondary).alpha(0.15).hex() },
                                         ]}
                                     />
                                 </Animated.View>

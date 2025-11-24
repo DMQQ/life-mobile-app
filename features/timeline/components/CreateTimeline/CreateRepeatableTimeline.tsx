@@ -1,4 +1,4 @@
-import BottomSheet from "@/components/ui/BottomSheet/BottomSheet"
+import BottomSheet, { BottomSheetGorhom } from "@/components/ui/BottomSheet/BottomSheet"
 import Button from "@/components/ui/Button/Button"
 import SegmentedButtons from "@/components/ui/SegmentedButtons"
 import Input from "@/components/ui/TextInput/TextInput"
@@ -6,10 +6,11 @@ import ThemedCalendar from "@/components/ui/ThemedCalendar/ThemedCalendar"
 import Colors from "@/constants/Colors"
 import Layout from "@/constants/Layout"
 import { AntDesign } from "@expo/vector-icons"
-import BottomSheetType from "@gorhom/bottom-sheet"
-import { forwardRef, memo, useMemo, useState } from "react"
-import { KeyboardAvoidingView, StyleSheet, Text, View } from "react-native"
+import BottomSheetType, { BottomSheetView } from "@gorhom/bottom-sheet"
+import { forwardRef, memo, useMemo, useState, useCallback } from "react"
+import { KeyboardAvoidingView, StyleSheet, Text, View, useWindowDimensions } from "react-native"
 import Ripple from "react-native-material-ripple"
+import { BottomSheetScrollView, BottomSheetBackdrop } from "@gorhom/bottom-sheet"
 
 const styles = StyleSheet.create({
     arrow_button: {
@@ -100,6 +101,8 @@ const Txt = (props: { text: string }) => (
 )
 
 const CreateRepeatableTimeline = forwardRef<BottomSheetType, CreateRepeatableTimelineProps>(({ formik: f }, ref) => {
+    const { height } = useWindowDimensions()
+
     const onClearFields = () => {
         f.setFieldValue("repeatCount", "")
         f.setFieldValue("repeatOn", "")
@@ -122,6 +125,11 @@ const CreateRepeatableTimeline = forwardRef<BottomSheetType, CreateRepeatableTim
 
     const [view, setView] = useState<"form" | "calendar">("form")
 
+    const snapPoints = useMemo(() => {
+        const points = [height * 0.5]
+        return points
+    }, [height])
+
     const markedDates = useMemo(() => {
         const dates = {} as Record<string, { selected: boolean; selectedColor: string }>
         const repeatCount = Number(f.values.repeatCount)
@@ -140,9 +148,35 @@ const CreateRepeatableTimeline = forwardRef<BottomSheetType, CreateRepeatableTim
         return dates
     }, [f.values.repeatCount, f.values.repeatOn, f.values.repeatEveryNth])
 
+    const renderBackdrop = useCallback(
+        (props: any) => <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} />,
+        [],
+    )
+
+    console.log("CreateRepeatableTimeline rendering, snapPoints:", snapPoints)
+
     return (
-        <BottomSheet snapPoints={["70%"]} ref={ref}>
-            <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
+        <BottomSheetGorhom
+            ref={ref}
+            index={-1}
+            snapPoints={snapPoints}
+            enablePanDownToClose={true}
+            backdropComponent={renderBackdrop}
+            onChange={(index) => {
+                console.log("Sheet index changed:", index)
+            }}
+            handleIndicatorStyle={{ backgroundColor: "#fff" }}
+            handleStyle={{
+                backgroundColor: Colors.primary,
+            }}
+            style={{
+                backgroundColor: Colors.primary,
+            }}
+            backgroundStyle={{
+                backgroundColor: Colors.primary,
+            }}
+        >
+            <BottomSheetView style={{ flex: 1, backgroundColor: Colors.primary }}>
                 <View style={styles.modal_container}>
                     {view === "form" && (
                         <View style={{ flex: 1, gap: 10 }}>
@@ -208,12 +242,13 @@ const CreateRepeatableTimeline = forwardRef<BottomSheetType, CreateRepeatableTim
                         onPress={() => {
                             setView((prev) => (prev === "form" ? "calendar" : "form"))
                         }}
+                        style={{ marginTop: 25 }}
                     >
                         {view === "form" ? "View dates in calendar" : "Go back to form"}
                     </Button>
                 </View>
-            </KeyboardAvoidingView>
-        </BottomSheet>
+            </BottomSheetView>
+        </BottomSheetGorhom>
     )
 })
 

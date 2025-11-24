@@ -94,13 +94,13 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
     const eventsCount = timeline.data?.timeline?.length || 0
 
     const dateListAnimatedStyle = useAnimatedStyle(() => {
-        if (!scrollY) return { marginTop: 175 }
+        if (!scrollY) return { transform: [{ translateY: 0 }] }
 
         const scrollValue = scrollY.value
         const clampedValue = Math.max(0, Math.min(scrollValue, 200))
 
         return {
-            marginTop: interpolate(clampedValue, [0, 200], [175, 0], Extrapolation.CLAMP),
+            transform: [{ translateY: interpolate(clampedValue, [0, 200], [0, -175], Extrapolation.CLAMP) }],
         }
     })
 
@@ -147,7 +147,7 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
                 renderAnimatedItem={
                     !isSearchActive
                         ? () => (
-                              <Animated.View style={dateListAnimatedStyle}>
+                              <Animated.View style={[{ marginTop: 175 }, dateListAnimatedStyle]}>
                                   <DateList
                                       dayEvents={timeline.dayEventsSorted}
                                       selectedDate={timeline.selected}
