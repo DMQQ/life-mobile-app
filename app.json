@@ -118,6 +118,10 @@
             }
         },
         "owner": "dmq",
-        "runtimeVersion": "2.0.0"
+        "runtimeVersion": "2.0.0",
+
+        "experiments": {
+            "reactCompiler": true
+        }
     }
 }
