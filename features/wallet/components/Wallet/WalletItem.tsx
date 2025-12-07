@@ -2,24 +2,11 @@ import { Card } from "@/components"
 import Colors from "@/constants/Colors"
 import { Expense } from "@/types"
 import moment from "moment"
-import { useCallback, useRef, useState } from "react"
-import {
-    LayoutChangeEvent,
-    MeasureOnSuccessCallback,
-    Modal,
-    Pressable,
-    StyleProp,
-    StyleSheet,
-    Text,
-    View,
-    ViewStyle,
-} from "react-native"
-import Feedback from "react-native-haptic-feedback"
-import Animated, { AnimatedStyle, FadeIn, FadeOut, LinearTransition } from "react-native-reanimated"
+import { memo, useMemo } from "react"
+import { StyleProp, StyleSheet, Text, View, ViewStyle } from "react-native"
+import { AnimatedStyle } from "react-native-reanimated"
 import { CategoryIcon, Icons } from "../Expense/ExpenseIcon"
-import { BlurView } from "expo-blur"
 import ContextMenu from "@/components/ui/ContextMenu"
-import { AntDesign } from "@expo/vector-icons"
 import { useNavigation } from "@react-navigation/native"
 import useDeleteActivity from "../../hooks/useDeleteActivity"
 
@@ -90,44 +77,38 @@ const styles = StyleSheet.create({
     },
 })
 
+const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+
 export function parseDateToText(date: string) {
-    const providedDate = moment(date)
-    const today = moment()
+    const dateStr = date.slice(0, 10)
+    const today = new Date().toISOString().slice(0, 10)
 
-    if (providedDate.isSame(today, "day")) {
-        return "Today"
-    }
-    if (providedDate.isSame(today.clone().subtract(1, "days"), "day")) {
-        return "Yesterday"
-    }
+    if (dateStr === today) return "Today"
 
-    return moment(date).format("DD MMM YYYY")
+    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10)
+    if (dateStr === yesterday) return "Yesterday"
+
+    const [year, month, day] = dateStr.split("-")
+    return `${day} ${months[parseInt(month) - 1]} ${year}`
 }
 
 function dateFormatter(date: string) {
-    const providedDate = moment(date)
-    const today = moment()
+    const dateStr = date.slice(0, 10)
+    const today = new Date().toISOString().slice(0, 10)
 
-    if (providedDate.isSame(today, "day")) {
-        return "Today"
-    }
-    if (providedDate.isSame(today.clone().subtract(1, "days"), "day")) {
-        return "Yesterday"
-    }
+    if (dateStr === today) return "Today"
+
+    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10)
+    if (dateStr === yesterday) return "Yesterday"
 
     return moment(date).fromNow()
 }
 
-export default function WalletItem(
+function WalletItem(
     item: WalletItemProps & {
         handlePress: Function
         animatedStyle: AnimatedStyle
-        index: number
         containerStyle?: StyleProp<ViewStyle>
-        subExpenseStyle?: StyleProp<ViewStyle> & Record<string, any>
-        onLongPress?: () => void
-
-        isModal?: boolean
     },
 ) {
     const { deleteActivity } = useDeleteActivity()
@@ -140,47 +121,49 @@ export default function WalletItem(
 
     const isBalanceEdit = item?.description?.includes("Balance edited") || item?.amount === 0
 
+    const items = useMemo(
+        () => [
+            {
+                leading: "pencil",
+                text: "Edit",
+                onPress: () => {
+                    navigation.navigate("CreateExpense", {
+                        ...(item as any),
+                        isEditing: true,
+                    })
+                },
+            },
+            // {
+            //     leading: "arrow.trianglehead.clockwise.rotate.90",
+            //     text: "Refund",
+            //     onPress: () => {},
+            // },
+            {
+                leading: "clipboard",
+                text: "Duplicate",
+                onPress: () => {
+                    navigation.navigate("CreateExpense", {
+                        ...(item as any),
+                        isDuplicating: true,
+                    })
+                },
+            },
+            {
+                leading: "trash",
+                text: "Delete",
+                destructive: true,
+                onPress: () => deleteActivity({ variables: { id: item.id } }),
+            },
+        ],
+        [item],
+    )
+
     if (!item) {
         return null
     }
 
     return (
-        <ContextMenu
-            anchor="right"
-            items={[
-                {
-                    leading: "pencil",
-                    text: "Edit",
-                    onPress: () => {
-                        navigation.navigate("CreateExpense", {
-                            ...(item as any),
-                            isEditing: true,
-                        })
-                    },
-                },
-                {
-                    leading: "arrow.trianglehead.clockwise.rotate.90",
-                    text: "Refund",
-                    onPress: () => {},
-                },
-                {
-                    leading: "clipboard",
-                    text: "Duplicate",
-                    onPress: () => {
-                        navigation.navigate("CreateExpense", {
-                            ...(item as any),
-                            isDuplicating: true,
-                        })
-                    },
-                },
-                {
-                    leading: "trash",
-                    text: "Delete",
-                    destructive: true,
-                    onPress: () => deleteActivity({ variables: { id: item.id } }),
-                },
-            ]}
-        >
+        <ContextMenu anchor="middle" items={items}>
             <Card
                 style={[
                     {
@@ -256,3 +239,5 @@ export default function WalletItem(
         </ContextMenu>
     )
 }
+
+export default memo(WalletItem)

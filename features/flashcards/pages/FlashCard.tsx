@@ -15,13 +15,12 @@ import SnapCarousel from "../components/FlashCards/CardSwiper"
 import FlipCard from "../components/FlashCards/FlashCard"
 import SuccessBar from "../components/SuccessBar"
 import { FlashCard, useFlashCards } from "../hooks"
+import { FlashList } from "@shopify/flash-list"
 
 export default function FlashCardScreen({ navigation, route }: any) {
     const groupId = route.params?.groupId
 
     const { flashCards, groupStats } = useFlashCards(groupId)
-
-    const [scrollY, onScroll] = useTrackScroll()
 
     const [selectedGroupForDeletion, setSelectedGroupForDeletion] = useState<FlashCard | null>(null)
 
@@ -49,8 +48,6 @@ export default function FlashCardScreen({ navigation, route }: any) {
         ({ item, index }: { item: FlashCard; index: number }) => (
             <Card
                 ripple
-                animated
-                entering={FadeIn.delay(50 * (index + 1))}
                 onLongPress={() => {
                     Feedback.trigger("impactMedium")
                     setSelectedGroupForDeletion(item)
@@ -87,7 +84,6 @@ export default function FlashCardScreen({ navigation, route }: any) {
     return (
         <SafeAreaView style={{ flex: 1 }}>
             <Header
-                scrollY={scrollY}
                 title="Flashcards"
                 buttons={[
                     {
@@ -99,9 +95,8 @@ export default function FlashCardScreen({ navigation, route }: any) {
                 initialHeight={60}
             />
 
-            <Animated.FlatList
+            <FlashList
                 style={{ paddingTop: 60 }}
-                onScroll={onScroll}
                 ListHeaderComponent={ListHeaderComponent}
                 data={flashCards}
                 contentContainerStyle={{ paddingHorizontal: 15 }}

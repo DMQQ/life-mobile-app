@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react"
 import { useActivityCore, ActivityConfig } from "./useActivityCore"
 import { useActivityServer } from "./useActivityServer"
 import ExpoLiveActivityModule from "../../modules/expo-live-activity"
+import useUser from "./useUser"
 
 export interface UseActivityManagerReturn {
     isSupported: boolean
@@ -19,11 +20,13 @@ export const useActivityManager = (): UseActivityManagerReturn => {
     const [isInProgress, setIsInProgress] = useState(false)
     const [activeActivities, setActiveActivities] = useState<string[]>([])
     const [processedTokens, setProcessedTokens] = useState<Set<string>>(new Set())
-
+    const user = useUser()
     const serverHook = useActivityServer()
     const activityCore = useActivityCore()
 
     useEffect(() => {
+        if (!user.isAuthenticated) return
+
         ExpoLiveActivityModule.getPushToStartToken().then((token) => {
             if (token && serverHook?.registerPushToStartToken) {
                 console.log("ExpoLiveActivityModule.getPushToStartToken", { token })
@@ -71,7 +74,7 @@ export const useActivityManager = (): UseActivityManagerReturn => {
             tokenReceivedListener.remove()
             stateChangeListener.remove()
         }
-    }, [])
+    }, [user.isAuthenticated])
 
     useEffect(() => {
         const syncActivitiesWithBackend = async () => {

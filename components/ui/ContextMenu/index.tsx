@@ -66,8 +66,6 @@ const ContextMenuItem = ({ text, onPress, destructive, disabled, leading, traili
 const MENU_WIDTH = 220
 const SCREEN_PADDING = 16
 
-const tintColor = Color(Colors.primary_light).alpha(0.75).string()
-
 const AnimatedBlurView = Animated.createAnimatedComponent(BlurView)
 
 export default function ContextMenu({ children, items, anchor = "middle" }: ContextMenuProps) {

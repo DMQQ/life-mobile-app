@@ -1,11 +1,9 @@
-import ChipButton from "@/components/ui/Button/ChipButton"
 import Colors, { Sizing } from "@/constants/Colors"
 import Layout from "@/constants/Layout"
 import { Expense, Wallet } from "@/types"
 import { gql, useQuery } from "@apollo/client"
 import { AntDesign } from "@expo/vector-icons"
 import { useNavigation, useRoute } from "@react-navigation/native"
-import { FlashList } from "@shopify/flash-list"
 import Color from "color"
 import moment from "moment"
 import { useCallback, useEffect, useMemo, useState } from "react"
@@ -75,11 +73,7 @@ export default function WalletList2({
 }: WalletList2Props) {
     const route = useRoute<any>()
     const navigation = useNavigation<any>()
-    const {
-        data: subscriptionsData,
-        loading: subscriptionsLoading,
-        refetch: refetchSubscriptions,
-    } = useGetSubscriptions()
+    const { data: subscriptionsData, refetch: refetchSubscriptions } = useGetSubscriptions()
 
     const [refreshing, setRefreshing] = useState(false)
 
@@ -111,7 +105,7 @@ export default function WalletList2({
         }
     }, [subscriptionsData?.subscriptions])
 
-    const expenseData = useMemo(() => {
+    const getExpenseData = useCallback(() => {
         const sorted = [] as {
             month: string
             expenses: Expense[]
@@ -121,8 +115,7 @@ export default function WalletList2({
 
         for (const expense of wallet.expenses) {
             const previous = sorted[sorted.length - 1]
-
-            if (previous && moment(previous?.expenses[0]?.date).isSame(expense.date, "month")) {
+            if (previous && previous?.expenses[0]?.date.slice(0, 7) === expense.date.slice(0, 7)) {
                 previous.expenses.push(expense)
             } else {
                 sorted.push({
@@ -152,6 +145,8 @@ export default function WalletList2({
     }, [])
 
     const unifiedData = useMemo(() => {
+        const expenseData = getExpenseData()
+
         const items: ListItemType[] = []
 
         items.push({ type: "limits" })
@@ -190,30 +185,35 @@ export default function WalletList2({
             expenseData.forEach((monthData, monthIndex) => {
                 items.push({ type: "month-header", data: monthData, monthIndex })
 
-                let currentDate = ""
-                monthData.expenses.forEach((expense, expenseIndex) => {
-                    const expenseDate = moment(expense.date).format("YYYY-MM-DD")
+                const groupedByDay = new Map<string, typeof monthData.expenses>()
 
-                    if (expenseDate !== currentDate) {
-                        currentDate = expenseDate
-                        const dayExpenses = monthData.expenses.filter((e) => moment(e.date).isSame(expense.date, "day"))
-                        const sum = calculateDaySum(dayExpenses)
-                        items.push({ type: "date-header", date: expense.date, sum })
+                monthData.expenses.forEach((expense) => {
+                    const day = expense.date.slice(0, 10)
+                    if (!groupedByDay.has(day)) {
+                        groupedByDay.set(day, [])
                     }
+                    groupedByDay.get(day).push(expense)
+                })
 
-                    items.push({
-                        type: "expense",
-                        data: expense,
-                        expenses: monthData.expenses,
-                        index: expenseIndex,
-                        monthIndex,
+                let expenseIndex = 0
+                groupedByDay.forEach((dayExpenses, date) => {
+                    const sum = calculateDaySum(dayExpenses)
+                    items.push({ type: "date-header", date: dayExpenses[0].date, sum })
+
+                    dayExpenses.forEach((expense) => {
+                        items.push({
+                            type: "expense",
+                            data: expense,
+                            expenses: monthData.expenses,
+                            index: expenseIndex++,
+                            monthIndex,
+                        })
                     })
                 })
             })
         }
-
         return items
-    }, [showSubscriptions, showExpenses, groupedSubscriptions, expenseData])
+    }, [showSubscriptions, showExpenses, groupedSubscriptions, getExpenseData])
 
     const onRefresh = useCallback(async () => {
         setRefreshing(true)
@@ -222,70 +222,59 @@ export default function WalletList2({
         setRefreshing(false)
     }, [refetch, refetchSubscriptions])
 
-    const renderItem = useCallback(
-        ({ item }: { item: ListItemType }) => {
-            switch (item.type) {
-                case "limits":
-                    return <WalletLimits navigation={navigation} />
+    const renderItem = useCallback(({ item }: { item: ListItemType }) => {
+        switch (item.type) {
+            case "limits":
+                return <WalletLimits navigation={navigation} />
 
-                case "subscription-header":
-                    return (
-                        <Animated.View style={{ marginBottom: 30, marginTop: 30 }} layout={LinearTransition.delay(100)}>
-                            <View style={styles.monthRow}>
-                                <Text style={styles.monthText}>{item.title}</Text>
-                                <View style={[styles.countBadge, { backgroundColor: item.color }]}>
-                                    <Text style={styles.countText}>{item.count}</Text>
-                                </View>
+            case "subscription-header":
+                return (
+                    <Animated.View style={{ marginBottom: 30, marginTop: 30 }} layout={LinearTransition.delay(100)}>
+                        <View style={styles.monthRow}>
+                            <Text style={styles.monthText}>{item.title}</Text>
+                            <View style={[styles.countBadge, { backgroundColor: item.color }]}>
+                                <Text style={styles.countText}>{item.count}</Text>
                             </View>
-                        </Animated.View>
-                    )
+                        </View>
+                    </Animated.View>
+                )
 
-                case "subscription":
-                    return (
-                        <SubscriptionItem
-                            subscription={item.data}
-                            index={item.index}
-                            onPress={() => {
-                                navigation.navigate("Subscription", {
-                                    subscriptionId: item.data.id,
-                                })
-                            }}
-                        />
-                    )
+            case "subscription":
+                return (
+                    <SubscriptionItem
+                        subscription={item.data}
+                        index={item.index}
+                        onPress={() => {
+                            navigation.navigate("Subscription", {
+                                subscriptionId: item.data.id,
+                            })
+                        }}
+                    />
+                )
 
-                case "month-header":
-                    return <MonthExpenseHeader monthData={item.data} monthIndex={item.monthIndex} />
+            case "month-header":
+                return <MonthExpenseHeader monthData={item.data} monthIndex={item.monthIndex} />
 
-                case "date-header":
-                    return <DateHeader date={item.date} sum={item.sum} />
+            case "date-header":
+                return <DateHeader date={item.date} sum={item.sum} />
 
-                case "expense":
-                    return (
-                        <WalletItem
-                            index={item.index}
-                            handlePress={() => {
-                                navigation.navigate("Expense", {
-                                    expense: item.data,
-                                })
-                            }}
-                            {...(item.data as any)}
-                        />
-                    )
+            case "expense":
+                return (
+                    <WalletItem
+                        index={item.index}
+                        handlePress={() => {
+                            navigation.navigate("Expense", {
+                                expense: item.data,
+                            })
+                        }}
+                        {...(item.data as any)}
+                    />
+                )
 
-                default:
-                    return null
-            }
-        },
-        [navigation],
-    )
-
-    if (subscriptionsLoading && showSubscriptions && !showExpenses) {
-        return (
-            <View style={styles.loadingContainer}>
-                <Text style={styles.loadingText}>Loading subscriptions...</Text>
-            </View>
-        )
-    }
+            default:
+                return null
+        }
+    }, [])
 
     if (
         showSubscriptions &&
@@ -299,8 +288,6 @@ export default function WalletList2({
             </View>
         )
     }
-
-    console.log("Rendering WalletList2 with unifiedData length:", unifiedData.length)
 
     return (
         <>
@@ -332,12 +319,9 @@ export default function WalletList2({
                 contentContainerStyle={{ padding: 15, paddingTop: 250, paddingBottom: 120 }}
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
                 onEndReached={onEndReached}
-                onEndReachedThreshold={0.5}
-                scrollEventThrottle={8}
-                maintainVisibleContentPosition={{
-                    minIndexForVisible: 0,
-                    autoscrollToTopThreshold: 10,
-                }}
+                onEndReachedThreshold={0.75}
+                removeClippedSubviews
+                windowSize={5}
             />
             {showExpenses && <ClearFiltersButton />}
         </>

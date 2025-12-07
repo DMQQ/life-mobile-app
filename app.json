@@ -19,7 +19,7 @@
         },
         "assetBundlePatterns": ["**/*"],
         "ios": {
-            "buildNumber": "202511231",
+            "buildNumber": "202512013",
             "supportsTablet": true,
             "appleTeamId": "55RA6Q9VSR",
             "infoPlist": {
