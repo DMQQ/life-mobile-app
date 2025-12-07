@@ -15,16 +15,18 @@ import {
     StyleSheet,
     Text,
     View,
-    VirtualizedList,
 } from "react-native"
 import Ripple from "react-native-material-ripple"
-import Animated, { FadeInDown, FadeOutDown, LinearTransition } from "react-native-reanimated"
+import Animated from "react-native-reanimated"
+import { FlashList, ListRenderItem } from "@shopify/flash-list"
 import useGetSubscriptions from "../../hooks/useGetSubscriptions"
 import { getInvalidExpenses } from "../../pages/WalletCharts"
 import SubscriptionItem from "../Subscription/SubscriptionItem"
 import { init, useWalletContext } from "../WalletContext"
 import WalletLimits from "./Limits"
 import WalletItem, { parseDateToText } from "./WalletItem"
+
+const AnimatedFlashList = Animated.createAnimatedComponent(FlashList)
 
 interface Subscription {
     id: string
@@ -52,8 +54,6 @@ interface WalletList2Props {
     showSubscriptions?: boolean
     showExpenses?: boolean
 }
-
-const AnimatedList = Animated.createAnimatedComponent(VirtualizedList)
 
 type ListItemType =
     | { type: "limits" }
@@ -192,6 +192,7 @@ export default function WalletList2({
                     if (!groupedByDay.has(day)) {
                         groupedByDay.set(day, [])
                     }
+                    //@ts-ignore
                     groupedByDay.get(day).push(expense)
                 })
 
@@ -222,58 +223,65 @@ export default function WalletList2({
         setRefreshing(false)
     }, [refetch, refetchSubscriptions])
 
-    const renderItem = useCallback(({ item }: { item: ListItemType }) => {
-        switch (item.type) {
-            case "limits":
-                return <WalletLimits navigation={navigation} />
+    const renderItem: ListRenderItem<ListItemType> = useCallback(
+        ({ item }) => {
+            switch (item.type) {
+                case "limits":
+                    return <WalletLimits navigation={navigation} />
 
-            case "subscription-header":
-                return (
-                    <Animated.View style={{ marginBottom: 30, marginTop: 30 }} layout={LinearTransition.delay(100)}>
-                        <View style={styles.monthRow}>
-                            <Text style={styles.monthText}>{item.title}</Text>
-                            <View style={[styles.countBadge, { backgroundColor: item.color }]}>
-                                <Text style={styles.countText}>{item.count}</Text>
+                case "subscription-header":
+                    return (
+                        <View style={styles.subscriptionHeaderContainer}>
+                            <View style={styles.monthRow}>
+                                <Text style={styles.monthText}>{item.title}</Text>
+                                <View style={[styles.countBadge, { backgroundColor: item.color }]}>
+                                    <Text style={styles.countText}>{item.count}</Text>
+                                </View>
                             </View>
                         </View>
-                    </Animated.View>
-                )
+                    )
 
-            case "subscription":
-                return (
-                    <SubscriptionItem
-                        subscription={item.data}
-                        index={item.index}
-                        onPress={() => {
-                            navigation.navigate("Subscription", {
-                                subscriptionId: item.data.id,
-                            })
-                        }}
-                    />
-                )
+                case "subscription":
+                    return (
+                        <SubscriptionItem
+                            subscription={item.data}
+                            index={item.index}
+                            onPress={() => {
+                                navigation.navigate("Subscription", {
+                                    subscriptionId: item.data.id,
+                                })
+                            }}
+                        />
+                    )
 
-            case "month-header":
-                return <MonthExpenseHeader monthData={item.data} monthIndex={item.monthIndex} />
+                case "month-header":
+                    return <MonthExpenseHeader monthData={item.data} monthIndex={item.monthIndex} />
 
-            case "date-header":
-                return <DateHeader date={item.date} sum={item.sum} />
+                case "date-header":
+                    return <DateHeader date={item.date} sum={item.sum} />
 
-            case "expense":
-                return (
-                    <WalletItem
-                        index={item.index}
-                        handlePress={() => {
-                            navigation.navigate("Expense", {
-                                expense: item.data,
-                            })
-                        }}
-                        {...(item.data as any)}
-                    />
-                )
+                case "expense":
+                    return (
+                        <WalletItem
+                            index={item.index}
+                            handlePress={() => {
+                                navigation.navigate("Expense", {
+                                    expense: item.data,
+                                })
+                            }}
+                            {...(item.data as any)}
+                        />
+                    )
 
-            default:
-                return null
-        }
+                default:
+                    return null
+            }
+        },
+        [navigation],
+    )
+
+    const getItemType = useCallback((item: ListItemType) => {
+        return item.type
     }, [])
 
     if (
@@ -289,14 +297,15 @@ export default function WalletList2({
         )
     }
 
+    console.log("RERENDERING WALLET LIST 2", { onScroll })
+
     return (
         <>
-            <AnimatedList
+            <AnimatedFlashList
                 keyboardDismissMode={"on-drag"}
                 data={unifiedData}
-                getItem={(_, index) => _[index]}
-                getItemCount={(data) => data.length}
                 renderItem={renderItem as any}
+                getItemType={getItemType as any}
                 keyExtractor={(item: any, index: number) => {
                     switch (item.type) {
                         case "limits":
@@ -316,12 +325,10 @@ export default function WalletList2({
                     }
                 }}
                 onScroll={onScroll}
-                contentContainerStyle={{ padding: 15, paddingTop: 250, paddingBottom: 120 }}
+                contentContainerStyle={styles.contentContainer}
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
                 onEndReached={onEndReached}
                 onEndReachedThreshold={0.75}
-                removeClippedSubviews
-                windowSize={5}
             />
             {showExpenses && <ClearFiltersButton />}
         </>
@@ -380,22 +387,10 @@ const ClearFiltersButton = () => {
     if (!hasFilters) return null
 
     return (
-        <Animated.View
-            entering={FadeInDown.delay(100)}
-            exiting={FadeOutDown}
-            style={{
-                position: "absolute",
-                bottom: 100,
-                width: Layout.screen.width,
-                justifyContent: "center",
-                alignItems: "center",
-            }}
-        >
+        <Animated.View style={styles.clearFiltersContainer}>
             <Pressable onPress={clearFilters}>
-                <GlassView
-                    style={{ padding: 5, borderRadius: 50, flexDirection: "row", gap: 5, paddingHorizontal: 15 }}
-                >
-                    <Text style={{ color: Colors.secondary_light_2 }}>
+                <GlassView style={styles.clearFiltersButton}>
+                    <Text style={styles.clearFiltersText}>
                         {diffCount > 0
                             ? `Reset (${diffCount}) ${diffCount > 1 ? "filters" : "filter"}`
                             : "Reset filters"}
@@ -414,29 +409,37 @@ const MonthExpenseHeader = ({
     monthData: { month: string; expenses: Expense[] }
     monthIndex: number
 }) => {
-    const diff = useQuery(
+    const { data, previousData } = useQuery(
         gql`
             query getMonthTotal($date: String!) {
                 getMonthTotal(date: $date)
             }
         `,
-        { variables: { date: monthData.month } },
+        {
+            variables: { date: monthData.month },
+            fetchPolicy: "cache-and-network",
+            notifyOnNetworkStatusChange: true,
+        },
     )
 
-    const amount = diff.data?.getMonthTotal || 0
+    const amount = data?.getMonthTotal ?? previousData?.getMonthTotal ?? 0
 
     return (
-        <Animated.View
-            style={{ marginBottom: 30, marginTop: monthIndex === 0 ? 30 : 0 }}
-            layout={LinearTransition.delay(100)}
-        >
+        <Animated.View style={monthIndex === 0 ? styles.monthHeaderContainerFirst : styles.monthHeaderContainer}>
             <View style={styles.monthRow}>
                 <Text style={styles.monthText}>{moment(monthData.month).format("MMMM YYYY")}</Text>
 
-                <View style={{ flexDirection: "row", alignItems: "center" }}>
-                    <Text style={{ color: amount > 0 ? "#66E875" : "#F07070", fontSize: 17, fontWeight: "600" }}>
+                <View style={styles.monthAmountRow}>
+                    <Text style={amount > 0 ? styles.monthAmountPositive : styles.monthAmountNegative}>
                         {amount > 0 ? `+${amount.toFixed(2)}` : amount.toFixed(2)}
-                        <Text style={{ color: amount > 0 ? "#66E875" : "#F07070", fontSize: 13 }}>zł</Text>
+                        <Text
+                            style={[
+                                amount > 0 ? styles.monthAmountPositive : styles.monthAmountNegative,
+                                styles.monthAmountCurrency,
+                            ]}
+                        >
+                            zł
+                        </Text>
                     </Text>
                 </View>
             </View>
@@ -462,27 +465,15 @@ const DateHeader = ({ date, sum }: { date: string; sum: [number, number] }) => {
         <Ripple onPress={onPress} style={styles.dateTextContainer}>
             <Text style={styles.dateText}>{parseDateToText(date)}</Text>
 
-            <View style={{ gap: 5, flexDirection: "row" }}>
+            <View style={styles.dateSumContainer}>
                 {sum[0] > 0 && (
-                    <Text
-                        style={{
-                            color: sum[0] > 0 ? "#F07070" : "#66E875",
-                            fontSize: 15,
-                            fontWeight: "600",
-                        }}
-                    >
+                    <Text style={[styles.expenseAmount, styles.expenseAmountNegative]}>
                         {sum[0] > 0 ? `-${sum[0].toFixed(2)}` : sum[0].toFixed(2)}zł
                     </Text>
                 )}
                 {sum[0] > 0 && sum[1] > 0 && <Text style={styles.dateText}>/</Text>}
                 {sum[1] > 0 && (
-                    <Text
-                        style={{
-                            color: sum[1] > 0 ? "#66E875" : "#F07070",
-                            fontSize: 15,
-                            fontWeight: "600",
-                        }}
-                    >
+                    <Text style={[styles.expenseAmount, styles.incomeAmountPositive]}>
                         {sum[1] > 0 ? `+${sum[1].toFixed(2)}` : sum[1].toFixed(2)}zł
                     </Text>
                 )}
@@ -582,5 +573,69 @@ const styles = StyleSheet.create({
         gap: 5,
         paddingRight: 15,
         width: 160,
+    },
+    subscriptionHeaderContainer: {
+        marginBottom: 30,
+        marginTop: 30,
+    },
+    contentContainer: {
+        padding: 15,
+        paddingTop: 250,
+        paddingBottom: 120,
+    },
+    clearFiltersContainer: {
+        position: "absolute",
+        bottom: 100,
+        width: Layout.screen.width,
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    clearFiltersButton: {
+        padding: 5,
+        borderRadius: 50,
+        flexDirection: "row",
+        gap: 5,
+        paddingHorizontal: 15,
+    },
+    clearFiltersText: {
+        color: Colors.secondary_light_2,
+    },
+    monthHeaderContainer: {
+        marginBottom: 30,
+    },
+    monthHeaderContainerFirst: {
+        marginBottom: 30,
+        marginTop: 30,
+    },
+    monthAmountRow: {
+        flexDirection: "row",
+        alignItems: "center",
+    },
+    monthAmountPositive: {
+        color: "#66E875",
+        fontSize: 17,
+        fontWeight: "600",
+    },
+    monthAmountNegative: {
+        color: "#F07070",
+        fontSize: 17,
+        fontWeight: "600",
+    },
+    monthAmountCurrency: {
+        fontSize: 13,
+    },
+    dateSumContainer: {
+        gap: 5,
+        flexDirection: "row",
+    },
+    expenseAmount: {
+        fontSize: 15,
+        fontWeight: "600",
+    },
+    expenseAmountNegative: {
+        color: "#F07070",
+    },
+    incomeAmountPositive: {
+        color: "#66E875",
     },
 })

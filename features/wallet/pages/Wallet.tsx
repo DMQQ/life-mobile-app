@@ -68,7 +68,7 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
     const handleShowEditSheet = useCallback(() => {
         Haptic.trigger("impactMedium")
         navigation.navigate("EditBalance")
-    }, [navigation])
+    }, [])
 
     const [showSubscriptionsView, setShowSubscriptionsView] = useState(false)
 
