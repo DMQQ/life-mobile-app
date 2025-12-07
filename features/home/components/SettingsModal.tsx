@@ -10,9 +10,10 @@ import { reloadAppAsync } from "expo"
 import { BlurView } from "expo-blur"
 import * as SecureStore from "expo-secure-store"
 import { useState } from "react"
-import { FlatList, Modal, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native"
+import { FlatList, Modal, ScrollView, StyleSheet, TouchableOpacity, View, Alert } from "react-native"
 import Feedback from "react-native-haptic-feedback"
 import Ripple from "react-native-material-ripple"
+import * as ExpoAppleWatch from "@/modules/expo-apple-watch"
 
 interface ColorPalette {
     name: string
@@ -503,6 +504,8 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
 
                                 <EnabledNotifications />
 
+                                <WatchConnectionSection />
+
                                 <View style={styles.themeSection}>
                                     <BlurView intensity={20} tint="dark">
                                         <View style={styles.themeSectionContent}>
@@ -676,5 +679,79 @@ export const UpdateButton: React.FC = () => {
         <Button icon="download" onPress={downloadAndRestart} disabled={isDownloading}>
             {isDownloading ? "Updating..." : "Update App"}
         </Button>
+    )
+}
+
+const WatchConnectionSection: React.FC = () => {
+    const { user, token } = useUser()
+    const [isSyncing, setIsSyncing] = useState(false)
+    const [watchStatus, setWatchStatus] = useState<string>("")
+
+    const handleSyncToWatch = async () => {
+        try {
+            setIsSyncing(true)
+            Feedback.trigger("impactLight")
+
+            // Validate token
+            if (!token || token.trim() === "") {
+                Alert.alert("No Auth Token", "You need to be logged in to sync to Apple Watch.")
+                setWatchStatus("No auth token available")
+                return
+            }
+
+            const isAvailable = ExpoAppleWatch.isWatchAvailable()
+            if (!isAvailable) {
+                Alert.alert("Apple Watch Not Available", "Please make sure your Apple Watch is paired and the watch app is installed.")
+                setWatchStatus("Watch not available")
+                return
+            }
+
+            const isReachable = ExpoAppleWatch.isWatchReachable()
+            setWatchStatus(isReachable ? "Watch is reachable" : "Watch is not reachable (will sync when available)")
+
+            await ExpoAppleWatch.sendAuthToken(token)
+
+            Feedback.trigger("notificationSuccess")
+            Alert.alert("Success", "Authentication synced to Apple Watch!")
+            setWatchStatus("Synced successfully")
+        } catch (error: any) {
+            Feedback.trigger("notificationError")
+            console.error("Failed to sync to watch:", error)
+            Alert.alert("Sync Failed", error?.message || "Failed to sync authentication to Apple Watch")
+            setWatchStatus("Sync failed")
+        } finally {
+            setIsSyncing(false)
+        }
+    }
+
+    return (
+        <View style={[styles.themeSection, { marginBottom: 20 }]}>
+            <BlurView intensity={20} tint="dark">
+                <View style={styles.themeSectionContent}>
+                    <Text variant="body" style={styles.themeSectionTitle}>
+                        Apple Watch Connection
+                    </Text>
+                    <Text variant="caption" style={{ color: "rgba(255, 255, 255, 0.6)", marginBottom: 15 }}>
+                        Sync your authentication to Apple Watch to use the watch app.
+                    </Text>
+
+                    {watchStatus ? (
+                        <Text
+                            variant="caption"
+                            style={{
+                                color: watchStatus.includes("success") ? "#50FA7B" : "rgba(255, 255, 255, 0.5)",
+                                marginBottom: 10,
+                            }}
+                        >
+                            {watchStatus}
+                        </Text>
+                    ) : null}
+
+                    <Button onPress={handleSyncToWatch} disabled={isSyncing}>
+                        {isSyncing ? "Syncing..." : "Sync to Apple Watch"}
+                    </Button>
+                </View>
+            </BlurView>
+        </View>
     )
 }

@@ -27,7 +27,6 @@
     "@react-navigation/native": "^6.1.17",
     "@react-navigation/native-stack": "^6.9.26",
     "@reduxjs/toolkit": "^2.9.0",
-    "@sentry/react-native": "^7.6.0",
     "@shopify/flash-list": "2.0.2",
     "@types/moment": "^2.13.0",
     "axios": "^1.7.2",

@@ -15,7 +15,6 @@ import ThemeContextProvider from "./utils/context/ThemeContext"
 import { ScrollYContextProvider } from "./utils/context/ScrollYContext"
 import { STORE_KEY } from "./utils/hooks/useUser"
 import { store } from "./utils/redux"
-import * as Sentry from "@sentry/react-native"
 import { setLogVerbosity } from "@apollo/client"
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet"
 
@@ -75,13 +74,7 @@ const apolloClient = new ApolloClient({
     link,
 })
 
-if (!__DEV__)
-    Sentry.init({
-        dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
-        sendDefaultPii: true,
-    })
-
-export default Sentry.wrap(function App() {
+export default function App() {
     return (
         <SafeAreaProvider style={{ flex: 1, backgroundColor: Colors.primary }}>
             <ErrorBoundary>
@@ -102,4 +95,4 @@ export default Sentry.wrap(function App() {
             </ErrorBoundary>
         </SafeAreaProvider>
     )
-})
+}

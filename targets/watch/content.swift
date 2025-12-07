@@ -88,9 +88,20 @@ class ExpenseService: ObservableObject {
     @Published var categories: [ExpenseCategory] = []
     @Published var isLoading = false
     @Published var errorMessage: String?
+    @Published var isAuthenticated = false
 
     var totalSpent: Double {
         categories.reduce(0) { $0 + $1.total }
+    }
+
+    func checkAuthentication() {
+        guard let sharedDefaults = UserDefaults(suiteName: "group.com.dmq.mylifemobile"),
+              let authToken = sharedDefaults.string(forKey: "auth_token"),
+              !authToken.isEmpty else {
+            isAuthenticated = false
+            return
+        }
+        isAuthenticated = true
     }
 
     func fetchExpenses() async {
@@ -105,6 +116,20 @@ class ExpenseService: ObservableObject {
                 isLoading = false
             }
             return
+        }
+
+        // Check authentication
+        guard let authToken = sharedDefaults.string(forKey: "auth_token"), !authToken.isEmpty else {
+            await MainActor.run {
+                errorMessage = "Not authenticated.\nPlease login on your iPhone."
+                isLoading = false
+                isAuthenticated = false
+            }
+            return
+        }
+
+        await MainActor.run {
+            isAuthenticated = true
         }
 
         // Try to read expenses data from shared storage
@@ -129,6 +154,7 @@ class ExpenseService: ObservableObject {
 // MARK: - Main View
 struct ContentView: View {
     @StateObject private var service = ExpenseService()
+    @EnvironmentObject var sessionManager: WatchSessionManager
 
     var body: some View {
         NavigationStack {
@@ -149,6 +175,13 @@ struct ContentView: View {
                             }
                         }
                         .buttonStyle(.bordered)
+
+                        if !sessionManager.isConnected {
+                            Text("Watch not connected to iPhone")
+                                .font(.caption2)
+                                .foregroundColor(.gray)
+                                .padding(.top, 4)
+                        }
                     }
                     .padding()
                 } else if !service.categories.isEmpty {
@@ -168,6 +201,14 @@ struct ContentView: View {
         }
         .task {
             await service.fetchExpenses()
+        }
+        .onChange(of: sessionManager.authToken) { oldValue, newValue in
+            // Reload data when auth token changes
+            if !newValue.isEmpty && newValue != oldValue {
+                Task {
+                    await service.fetchExpenses()
+                }
+            }
         }
     }
 }

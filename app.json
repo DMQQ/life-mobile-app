@@ -2,7 +2,7 @@
     "expo": {
         "name": "Life",
         "slug": "mylife-mobile",
-        "version": "2.0.2",
+        "version": "2.0.3",
         "orientation": "portrait",
         "icon": "./assets/images/icon.png",
         "scheme": "mylife",
@@ -19,7 +19,7 @@
         },
         "assetBundlePatterns": ["**/*"],
         "ios": {
-            "buildNumber": "202512013",
+            "buildNumber": "202512074",
             "supportsTablet": true,
             "appleTeamId": "55RA6Q9VSR",
             "infoPlist": {
@@ -102,15 +102,7 @@
             "expo-quick-actions",
             "expo-build-properties",
             "expo-web-browser",
-            "@bacons/apple-targets",
-            [
-                "@sentry/react-native/expo",
-                {
-                    "url": "https://sentry.io/",
-                    "project": "flickmate",
-                    "organization": "dmq"
-                }
-            ]
+            "@bacons/apple-targets"
         ],
         "extra": {
             "eas": {
@@ -118,7 +110,7 @@
             }
         },
         "owner": "dmq",
-        "runtimeVersion": "2.0.0",
+        "runtimeVersion": "3.0.0",
 
         "experiments": {
             "reactCompiler": true

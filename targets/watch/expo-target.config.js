@@ -8,4 +8,5 @@ module.exports = (config) => ({
         "com.apple.security.application-groups": ["group.com.dmq.mylifemobile"],
     },
     bundleIdentifier: ".watch",
+    displayName: "Life Watch",
 })
