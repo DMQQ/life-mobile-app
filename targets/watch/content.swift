@@ -42,6 +42,14 @@ struct DailyBreakdown: Codable, Identifiable {
     var id: String { date }
 }
 
+struct RecentExpense: Codable, Identifiable {
+    let id: String
+    let amount: Double
+    let category: String
+    let description: String
+    let date: String
+}
+
 
 // Category color mapping based on mobile app Icons
 struct CategoryColorMap {
@@ -68,12 +76,48 @@ struct CategoryColorMap {
         if categoryLower.starts(with: "sports") { return Color(hex: "#4CAF50") }
         if categoryLower.starts(with: "tech") { return Color(hex: "#0288D1") }
         if categoryLower.starts(with: "goingout") { return Color(hex: "#9C27B0") }
+        if categoryLower.starts(with: "subscriptions") { return Color(hex: "#8020FF") }
         if categoryLower.starts(with: "income") { return .green }
 
         // Default colors for unknown categories
         let defaultColors = ["#00C896", "#F6B161", "#8685EF", "#FF6F61"]
         let index = abs(category.hashValue) % defaultColors.count
         return Color(hex: defaultColors[index])
+    }
+
+    static func getIcon(for category: String) -> String {
+        let categoryLower = category.lowercased()
+
+        if categoryLower.starts(with: "housing") { return "house.fill" }
+        if categoryLower.starts(with: "transportation") { return "car.fill" }
+        if categoryLower.starts(with: "food") { return "fork.knife" }
+        if categoryLower.starts(with: "drinks") { return "wineglass.fill" }
+        if categoryLower.starts(with: "shopping") { return "bag.fill" }
+        if categoryLower.starts(with: "addictions") { return "smoke.fill" }
+        if categoryLower.starts(with: "work") { return "briefcase.fill" }
+        if categoryLower.starts(with: "clothes") { return "tshirt.fill" }
+        if categoryLower.starts(with: "health") { return "pills.fill" }
+        if categoryLower.starts(with: "entertainment") { return "tv.fill" }
+        if categoryLower.starts(with: "utilities") { return "bolt.fill" }
+        if categoryLower.starts(with: "debt") { return "creditcard.fill" }
+        if categoryLower.starts(with: "education") { return "book.fill" }
+        if categoryLower.starts(with: "savings") { return "banknote.fill" }
+        if categoryLower.starts(with: "travel") { return "airplane" }
+        if categoryLower.starts(with: "animals") || categoryLower.starts(with: "pets") { return "pawprint.fill" }
+        if categoryLower.starts(with: "gifts") { return "gift.fill" }
+        if categoryLower.starts(with: "sports") { return "figure.run" }
+        if categoryLower.starts(with: "tech") { return "laptopcomputer" }
+        if categoryLower.starts(with: "goingout") { return "party.popper.fill" }
+        if categoryLower.starts(with: "subscriptions") { return "arrow.clockwise" }
+        if categoryLower.starts(with: "investments") { return "chart.line.uptrend.xyaxis" }
+        if categoryLower.starts(with: "maintenance") { return "wrench.fill" }
+        if categoryLower.starts(with: "insurance") { return "shield.checkered" }
+        if categoryLower.starts(with: "taxes") { return "doc.text.fill" }
+        if categoryLower.starts(with: "children") { return "figure.2.and.child.holdinghands" }
+        if categoryLower.starts(with: "donations") { return "heart.fill" }
+        if categoryLower.starts(with: "beauty") { return "face.smiling" }
+
+        return "circle.fill"
     }
 }
 
@@ -115,12 +159,13 @@ class FinanceService: ObservableObject {
     @Published var categories: [ExpenseCategory] = []
     @Published var walletData: WalletData?
     @Published var dailyBreakdown: [DailyBreakdown] = []
+    @Published var recentExpenses: [RecentExpense] = []
     @Published var isLoading = false
     @Published var errorMessage: String?
     @Published var isAuthenticated = false
 
     // Default token for development/testing
-    private let defaultToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2NvdW50SWQiOiI0ZWVlZjY5Ny1kMjJlLTQyM2MtYThlNS1mZDhkYzRjYzc0OTQiLCJpYXQiOjE3NjUyMTE1NzksImV4cCI6MTc2ODgxMTU3OX0.ush-Y1U5p2xQn9_0_u_zCwXZzRi1i9UzpOXp81MmkF8"
+    let defaultToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2NvdW50SWQiOiI0ZWVlZjY5Ny1kMjJlLTQyM2MtYThlNS1mZDhkYzRjYzc0OTQiLCJpYXQiOjE3NjUyMTE1NzksImV4cCI6MTc2ODgxMTU3OX0.ush-Y1U5p2xQn9_0_u_zCwXZzRi1i9UzpOXp81MmkF8"
 
     // TOGGLE THIS FOR PRODUCTION: Set to false to show current week, true for previous week (demo data)
     private let usePreviousWeekForDemo = true
@@ -169,10 +214,14 @@ class FinanceService: ObservableObject {
             // Fetch daily breakdown for last 7 days
             let daily = try await fetchDailyBreakdownFromAPI(authToken: authToken)
 
+            // Fetch recent expenses
+            let recent = try await fetchRecentExpensesFromAPI(authToken: authToken)
+
             await MainActor.run {
                 self.categories = expenses.statisticsLegend
                 self.walletData = walletInfo
                 self.dailyBreakdown = daily
+                self.recentExpenses = recent
                 isLoading = false
             }
         } catch {
@@ -393,12 +442,51 @@ class FinanceService: ObservableObject {
             ])
         }
     }
+
+    private func fetchRecentExpensesFromAPI(authToken: String) async throws -> [RecentExpense] {
+        var components = URLComponents(string: "https://life.dmqq.dev/statistics/recent-expenses")!
+        components.queryItems = [
+            URLQueryItem(name: "limit", value: "4")
+        ]
+
+        guard let url = components.url else {
+            throw NSError(domain: "URLError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue(authToken, forHTTPHeaderField: "authentication")
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw NSError(domain: "APIError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid response"])
+        }
+
+        guard httpResponse.statusCode == 200 else {
+            let responseBody = String(data: data, encoding: .utf8) ?? "No response body"
+            throw NSError(domain: "APIError", code: httpResponse.statusCode, userInfo: [
+                NSLocalizedDescriptionKey: "HTTP \(httpResponse.statusCode): \(responseBody)"
+            ])
+        }
+
+        let decoder = JSONDecoder()
+        do {
+            return try decoder.decode([RecentExpense].self, from: data)
+        } catch {
+            let responseString = String(data: data, encoding: .utf8) ?? "Unable to decode"
+            throw NSError(domain: "DecodingError", code: 1, userInfo: [
+                NSLocalizedDescriptionKey: "Recent expenses decode error: \(error.localizedDescription). Response: \(responseString.prefix(300))"
+            ])
+        }
+    }
 }
 
 // MARK: - Main View
 struct ContentView: View {
     @StateObject private var service = FinanceService()
     @EnvironmentObject var sessionManager: WatchSessionManager
+    @State private var showingAddExpense = false
 
     var body: some View {
         ZStack {
@@ -425,21 +513,23 @@ struct ContentView: View {
                 }
             }
 
-            // Glass UI + Button overlay
+            // Glass UI + Button overlay (global)
             GeometryReader { geometry in
                 VStack(spacing: 0) {
                     HStack(spacing: 0) {
-                        AddExpenseButton()
-                            .padding(.leading, 4)
+                        AddExpenseButton(action: { showingAddExpense = true })
                         Spacer(minLength: 0)
                     }
-                    .padding(.top, 20)
-                    .padding(.leading, 4)
+                    .padding(.top, 16)
+                    .padding(.leading, 16)
                     Spacer(minLength: 0)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             }
             .edgesIgnoringSafeArea(.top)
+        }
+        .sheet(isPresented: $showingAddExpense) {
+            AddExpenseView(service: service)
         }
         .task {
             await service.fetchData()
@@ -454,12 +544,45 @@ struct ContentView: View {
     }
 }
 
+// MARK: - Page Title Overlay
+struct PageTitleOverlay: View {
+    let currentPage: Int
+
+    var pageTitle: String {
+        switch currentPage {
+        case 0: return "Overview"
+        case 1: return "Weekly"
+        case 2: return "Recent"
+        case 3: return "Categories"
+        default: return ""
+        }
+    }
+
+    var body: some View {
+        GeometryReader { geometry in
+            VStack(spacing: 0) {
+                HStack(spacing: 0) {
+                    Spacer(minLength: 0)
+                    Text(pageTitle)
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(.white.opacity(0.9))
+                    Spacer(minLength: 0)
+                }
+                .padding(.top, 16)
+                Spacer(minLength: 0)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        }
+        .edgesIgnoringSafeArea(.top)
+    }
+}
+
 // MARK: - Glass UI Add Button
 struct AddExpenseButton: View {
+    let action: () -> Void
+
     var body: some View {
-        Button(action: {
-            // TODO: Add expense action
-        }) {
+        Button(action: action) {
             Image(systemName: "plus")
                 .font(.system(size: 12, weight: .semibold))
                 .foregroundColor(.white)
@@ -544,11 +667,12 @@ struct EmptyStateView: View {
 struct FinanceScrollView: View {
     let service: FinanceService
     let wallet: WalletData
+    @State private var currentPage = 0
 
     var body: some View {
-        TabView {
-            // Page 1 - Rings
-            VStack(spacing: 12) {
+        TabView(selection: $currentPage) {
+            // Page 0 - Rings
+            VStack(spacing: 0) {
                 Spacer()
                 FitnessRingsView(
                     spent: wallet.monthlySpent,
@@ -556,19 +680,17 @@ struct FinanceScrollView: View {
                     income: wallet.income,
                     balance: wallet.balance
                 )
-                .padding(.top, 16)
+                .padding(.top, 20)
                 Spacer()
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .tag(0)
 
-            // Page 2 - Weekly Spending
+            // Page 1 - Weekly Spending
             VStack(spacing: 8) {
-                Text("Weekly Spending")
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(.white)
-                    .padding(.top, 4)
-
                 if !service.dailyBreakdown.isEmpty {
                     WeeklySpendingChart(dailyData: service.dailyBreakdown)
+                        .padding(.top, 24)
                 } else {
                     Spacer()
                     Text("No data")
@@ -577,37 +699,43 @@ struct FinanceScrollView: View {
                     Spacer()
                 }
             }
+            .tag(1)
 
-            // Page 3 - Stats Cards
-            VStack(spacing: 12) {
-                Spacer()
-                HStack(spacing: 8) {
-                    StatCard(
-                        title: "Income",
-                        value: wallet.income,
-                        icon: "arrow.down.circle.fill",
-                        color: .green
-                    )
-                    StatCard(
-                        title: "Spent",
-                        value: wallet.monthlySpent,
-                        icon: "arrow.up.circle.fill",
-                        color: .red
-                    )
+            // Page 2 - Recent Expenses
+            VStack(spacing: 4) {
+                if !service.recentExpenses.isEmpty {
+                    ScrollView {
+                        VStack(spacing: 6) {
+                            ForEach(service.recentExpenses) { expense in
+                                RecentExpenseRow(expense: expense)
+                            }
+                        }
+                        .padding(.horizontal, 4)
+                        .padding(.top, 28)
+                    }
+                } else {
+                    Spacer()
+                    Text("No expenses")
+                        .font(.caption)
+                        .foregroundColor(.gray)
+                    Spacer()
                 }
-                .padding(.horizontal, 4)
-                Spacer()
             }
+            .tag(2)
 
-            // Page 4 - Bar Chart
+            // Page 3 - Bar Chart
             if !service.categories.isEmpty {
                 ScrollView {
                     CategoryBarChart(categories: service.categories)
-                        .padding(.top, 8)
+                        .padding(.top, 28)
                 }
+                .tag(3)
             }
         }
         .tabViewStyle(.verticalPage)
+        .overlay(
+            PageTitleOverlay(currentPage: currentPage)
+        )
     }
 }
 
@@ -641,11 +769,11 @@ struct FitnessRingsView: View {
     var body: some View {
         VStack(spacing: 16) {
             ZStack {
-                // Outer ring - Savings (160 diameter, 16 stroke)
+                // Outer ring - Savings (152 diameter, 15 stroke)
                 // Background ring
                 Circle()
-                    .stroke(Color.purple.opacity(0.1), lineWidth: 16)
-                    .frame(width: 160, height: 160)
+                    .stroke(Color.purple.opacity(0.1), lineWidth: 15)
+                    .frame(width: 152, height: 152)
 
                 Circle()
                     .trim(from: 0, to: savingsProgress)
@@ -655,17 +783,17 @@ struct FitnessRingsView: View {
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         ),
-                        style: StrokeStyle(lineWidth: 16, lineCap: .round)
+                        style: StrokeStyle(lineWidth: 15, lineCap: .round)
                     )
-                    .frame(width: 160, height: 160)
+                    .frame(width: 152, height: 152)
                     .rotationEffect(.degrees(-90))
                     .animation(.spring(response: 0.6, dampingFraction: 0.8), value: savingsProgress)
 
-                // Middle ring - Budget Remaining (120 diameter, 14 stroke, 4px gap)
+                // Middle ring - Budget Remaining (114 diameter, 13 stroke, 4px gap)
                 // Background ring
                 Circle()
-                    .stroke(Color.green.opacity(0.05), lineWidth: 14)
-                    .frame(width: 120, height: 120)
+                    .stroke(Color.green.opacity(0.05), lineWidth: 13)
+                    .frame(width: 114, height: 114)
 
                 Circle()
                     .trim(from: 0, to: budgetRemainingProgress)
@@ -676,17 +804,17 @@ struct FitnessRingsView: View {
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         ),
-                        style: StrokeStyle(lineWidth: 14, lineCap: .round)
+                        style: StrokeStyle(lineWidth: 13, lineCap: .round)
                     )
-                    .frame(width: 120, height: 120)
+                    .frame(width: 114, height: 114)
                     .rotationEffect(.degrees(-90))
                     .animation(.spring(response: 0.6, dampingFraction: 0.8), value: budgetRemainingProgress)
 
-                // Inner ring - Spent (84 diameter, 12 stroke, 4px gap)
+                // Inner ring - Spent (80 diameter, 11 stroke, 4px gap)
                 // Background ring
                 Circle()
-                    .stroke(Color.blue.opacity(0.05), lineWidth: 12)
-                    .frame(width: 84, height: 84)
+                    .stroke(Color.blue.opacity(0.05), lineWidth: 11)
+                    .frame(width: 80, height: 80)
 
                 Circle()
                     .trim(from: 0, to: spentProgress)
@@ -696,18 +824,18 @@ struct FitnessRingsView: View {
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         ),
-                        style: StrokeStyle(lineWidth: 12, lineCap: .round)
+                        style: StrokeStyle(lineWidth: 11, lineCap: .round)
                     )
-                    .frame(width: 84, height: 84)
+                    .frame(width: 80, height: 80)
                     .rotationEffect(.degrees(-90))
                     .animation(.spring(response: 0.6, dampingFraction: 0.8), value: spentProgress)
 
                 // Center value
                 VStack(spacing: 2) {
                     Text(String(format: "%.0f%%", spentProgress * 100))
-                        .font(.system(size: 22, weight: .bold, design: .rounded))
+                        .font(.system(size: 20, weight: .bold, design: .rounded))
                     Text("Spent")
-                        .font(.system(size: 9))
+                        .font(.system(size: 8))
                         .foregroundColor(.gray)
                 }
             }
@@ -854,19 +982,30 @@ struct WeeklySpendingChart: View {
         for day in allDays {
             var cumulativeHeight: Double = 0
 
-            for cat in day.categories {
-                let segmentStart = cumulativeHeight
-                let segmentEnd = cumulativeHeight + cat.amount
-
+            // If no categories, add a placeholder to ensure the day appears
+            if day.categories.isEmpty {
                 segments.append(SegmentData(
                     day: day.dayOfWeek,
-                    category: cat.category,
-                    yStart: segmentStart,
-                    yEnd: segmentEnd - gapSize,  // Subtract gap
-                    color: CategoryColorMap.getColor(for: cat.category)
+                    category: "",
+                    yStart: 0,
+                    yEnd: 0.01,  // Tiny invisible bar to force day to appear
+                    color: .clear
                 ))
+            } else {
+                for cat in day.categories {
+                    let segmentStart = cumulativeHeight
+                    let segmentEnd = cumulativeHeight + cat.amount
 
-                cumulativeHeight = segmentEnd
+                    segments.append(SegmentData(
+                        day: day.dayOfWeek,
+                        category: cat.category,
+                        yStart: segmentStart,
+                        yEnd: segmentEnd - gapSize,  // Subtract gap
+                        color: CategoryColorMap.getColor(for: cat.category)
+                    ))
+
+                    cumulativeHeight = segmentEnd
+                }
             }
         }
 
@@ -977,6 +1116,252 @@ struct CategoryBarChart: View {
                 .stroke(Color.white.opacity(0.1), lineWidth: 1)
         )
         .padding(.horizontal, 4)
+    }
+}
+
+// MARK: - Recent Expense Row
+struct RecentExpenseRow: View {
+    let expense: RecentExpense
+
+    var body: some View {
+        HStack(spacing: 8) {
+            // Category icon
+            Image(systemName: CategoryColorMap.getIcon(for: expense.category))
+                .font(.system(size: 12))
+                .foregroundColor(CategoryColorMap.getColor(for: expense.category))
+                .frame(width: 20, height: 20)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(expense.category.capitalized)
+                    .font(.system(size: 10, weight: .medium))
+                    .foregroundColor(.white)
+
+                if !expense.description.isEmpty {
+                    Text(expense.description)
+                        .font(.system(size: 8))
+                        .foregroundColor(.gray)
+                        .lineLimit(1)
+                }
+            }
+
+            Spacer()
+
+            VStack(alignment: .trailing, spacing: 2) {
+                Text(String(format: "%.0f zł", expense.amount))
+                    .font(.system(size: 10, weight: .semibold))
+                    .foregroundColor(.white)
+
+                Text(expense.date)
+                    .font(.system(size: 8))
+                    .foregroundColor(.gray)
+            }
+        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 6)
+        .background(Color.gray.opacity(0.1))
+        .cornerRadius(12)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.white.opacity(0.1), lineWidth: 0.5)
+        )
+    }
+}
+
+// MARK: - Add Expense View
+struct AddExpenseView: View {
+    @Environment(\.dismiss) var dismiss
+    let service: FinanceService
+
+    @State private var amount: Double = 0
+    @State private var description: String = ""
+    @State private var isIncome: Bool = false
+    @State private var isSubmitting: Bool = false
+    @State private var errorMessage: String?
+
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 12) {
+                Spacer()
+                    .frame(height: 4)
+
+                // Income/Expense Toggle
+                HStack(spacing: 8) {
+                    Button(action: { isIncome = false }) {
+                        Text("Expense")
+                            .font(.system(size: 11, weight: isIncome ? .regular : .bold))
+                            .foregroundColor(isIncome ? .gray : .white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 6)
+                            .background(isIncome ? Color.clear : Color.blue)
+                            .cornerRadius(8)
+                    }
+                    .buttonStyle(.plain)
+
+                    Button(action: { isIncome = true }) {
+                        Text("Income")
+                            .font(.system(size: 11, weight: isIncome ? .bold : .regular))
+                            .foregroundColor(isIncome ? .white : .gray)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 6)
+                            .background(isIncome ? Color.green : Color.clear)
+                            .cornerRadius(8)
+                    }
+                    .buttonStyle(.plain)
+                }
+                .padding(4)
+                .background(Color.gray.opacity(0.2))
+                .cornerRadius(10)
+
+                // Amount Input
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Amount")
+                        .font(.system(size: 10))
+                        .foregroundColor(.gray)
+
+                    TextField("0", value: $amount, format: .number)
+                }
+
+                // Description Input (supports voice dictation automatically on watchOS)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Description")
+                        .font(.system(size: 10))
+                        .foregroundColor(.gray)
+
+                    TextField("Tap to speak", text: $description)
+                }
+
+                // Error Message
+                if let errorMessage = errorMessage {
+                    Text(errorMessage)
+                        .font(.system(size: 10))
+                        .foregroundColor(.red)
+                        .padding(8)
+                }
+
+                // Submit Button
+                Button(action: submitExpense) {
+                    ZStack {
+                        // Glass background
+                        Capsule()
+                            .fill(.ultraThinMaterial)
+
+                        // Color overlay
+                        Capsule()
+                            .fill(
+                                LinearGradient(
+                                    colors: [
+                                        (isIncome ? Color.green : Color.blue).opacity(0.8),
+                                        (isIncome ? Color.green : Color.blue).opacity(0.4)
+                                    ],
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                )
+                            )
+
+                        // Highlight shine
+                        Capsule()
+                            .fill(
+                                LinearGradient(
+                                    colors: [
+                                        Color.white.opacity(0.3),
+                                        Color.clear
+                                    ],
+                                    startPoint: .top,
+                                    endPoint: .center
+                                )
+                            )
+
+                        // Border
+                        Capsule()
+                            .strokeBorder(Color.white.opacity(0.4), lineWidth: 1)
+
+                        // Content
+                        HStack {
+                            Spacer()
+                            if isSubmitting {
+                                ProgressView()
+                                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                            } else {
+                                Text("Save")
+                                    .font(.system(size: 13, weight: .semibold))
+                                    .foregroundColor(.white)
+                            }
+                            Spacer()
+                        }
+                    }
+                    .frame(height: 44)
+                }
+                .buttonStyle(.plain)
+                .disabled(isSubmitting || amount <= 0)
+                .opacity((isSubmitting || amount <= 0) ? 0.5 : 1.0)
+            }
+            .padding(.horizontal, 8)
+        }
+    }
+
+    func submitExpense() {
+        guard amount > 0 else {
+            errorMessage = "Invalid amount"
+            return
+        }
+
+        isSubmitting = true
+        errorMessage = nil
+
+        Task {
+            do {
+                try await createExpenseAPI(
+                    amount: amount,
+                    description: description.isEmpty ? (isIncome ? "Income" : "Expense") : description,
+                    type: isIncome ? "income" : "expense"
+                )
+
+                await MainActor.run {
+                    dismiss()
+                    // Refresh data
+                    Task {
+                        await service.fetchData()
+                    }
+                }
+            } catch let error as NSError {
+                await MainActor.run {
+                    errorMessage = error.localizedDescription
+                    isSubmitting = false
+                }
+            }
+        }
+    }
+
+    func createExpenseAPI(amount: Double, description: String, type: String) async throws {
+        let sharedDefaults = UserDefaults(suiteName: "group.com.dmq.mylifemobile")
+        let authToken = sharedDefaults?.string(forKey: "auth_token") ?? service.defaultToken
+
+        let url = URL(string: "https://life.dmqq.dev/statistics/create-expense")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(authToken, forHTTPHeaderField: "authentication")
+
+        let body: [String: Any] = [
+            "amount": amount,
+            "description": description,
+            "type": type
+        ]
+
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw NSError(domain: "APIError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid response"])
+        }
+
+        guard httpResponse.statusCode == 201 || httpResponse.statusCode == 200 else {
+            let responseBody = String(data: data, encoding: .utf8) ?? "No response"
+            throw NSError(domain: "APIError", code: httpResponse.statusCode, userInfo: [
+                NSLocalizedDescriptionKey: "HTTP \(httpResponse.statusCode): \(responseBody.prefix(100))"
+            ])
+        }
     }
 }
 
