@@ -28,6 +28,20 @@ struct WalletStatistics: Codable {
     let income: Double
 }
 
+struct DailyCategory: Codable {
+    let category: String
+    let amount: Double
+}
+
+struct DailyBreakdown: Codable, Identifiable {
+    let date: String
+    let dayOfWeek: String
+    let categories: [DailyCategory]
+    let total: Double
+
+    var id: String { date }
+}
+
 
 // Category color mapping based on mobile app Icons
 struct CategoryColorMap {
@@ -100,12 +114,16 @@ struct ExpensesData: Codable {
 class FinanceService: ObservableObject {
     @Published var categories: [ExpenseCategory] = []
     @Published var walletData: WalletData?
+    @Published var dailyBreakdown: [DailyBreakdown] = []
     @Published var isLoading = false
     @Published var errorMessage: String?
     @Published var isAuthenticated = false
 
     // Default token for development/testing
     private let defaultToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2NvdW50SWQiOiI0ZWVlZjY5Ny1kMjJlLTQyM2MtYThlNS1mZDhkYzRjYzc0OTQiLCJpYXQiOjE3NjUyMTE1NzksImV4cCI6MTc2ODgxMTU3OX0.ush-Y1U5p2xQn9_0_u_zCwXZzRi1i9UzpOXp81MmkF8"
+
+    // TOGGLE THIS FOR PRODUCTION: Set to false to show current week, true for previous week (demo data)
+    private let usePreviousWeekForDemo = true
 
     var totalSpent: Double {
         categories.reduce(0) { $0 + $1.total }
@@ -148,9 +166,13 @@ class FinanceService: ObservableObject {
             // Then fetch wallet
             let walletInfo = try await fetchWalletDataFromAPI(authToken: authToken)
 
+            // Fetch daily breakdown for last 7 days
+            let daily = try await fetchDailyBreakdownFromAPI(authToken: authToken)
+
             await MainActor.run {
                 self.categories = expenses.statisticsLegend
                 self.walletData = walletInfo
+                self.dailyBreakdown = daily
                 isLoading = false
             }
         } catch {
@@ -305,6 +327,71 @@ class FinanceService: ObservableObject {
             monthlyPercentageTarget: restResponse.wallet.monthlyPercentageTarget,
             monthlySpent: restResponse.monthlySpendings.expense
         )
+    }
+
+    private func fetchDailyBreakdownFromAPI(authToken: String) async throws -> [DailyBreakdown] {
+        let calendar = Calendar.current
+        let now = Date()
+
+        // Get reference date (current week or previous week based on flag)
+        let referenceDate = usePreviousWeekForDemo ?
+            calendar.date(byAdding: .day, value: -7, to: now)! : now
+
+        // Get the start of the week (Monday)
+        var weekStart = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: referenceDate))!
+        // Adjust to Monday if needed (some locales start week on Sunday)
+        let weekday = calendar.component(.weekday, from: weekStart)
+        if weekday == 1 { // Sunday
+            weekStart = calendar.date(byAdding: .day, value: 1, to: weekStart)!
+        }
+
+        // Get end of week (Sunday)
+        guard let weekEnd = calendar.date(byAdding: .day, value: 6, to: weekStart) else {
+            throw NSError(domain: "DateError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Failed to calculate dates"])
+        }
+
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        let startDate = dateFormatter.string(from: weekStart)
+        let endDate = dateFormatter.string(from: weekEnd)
+
+        // Build REST URL
+        var components = URLComponents(string: "https://life.dmqq.dev/statistics/daily-breakdown")!
+        components.queryItems = [
+            URLQueryItem(name: "startDate", value: startDate),
+            URLQueryItem(name: "endDate", value: endDate)
+        ]
+
+        guard let url = components.url else {
+            throw NSError(domain: "URLError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue(authToken, forHTTPHeaderField: "authentication")
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw NSError(domain: "APIError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid response"])
+        }
+
+        guard httpResponse.statusCode == 200 else {
+            let responseBody = String(data: data, encoding: .utf8) ?? "No response body"
+            throw NSError(domain: "APIError", code: httpResponse.statusCode, userInfo: [
+                NSLocalizedDescriptionKey: "HTTP \(httpResponse.statusCode): \(responseBody)"
+            ])
+        }
+
+        let decoder = JSONDecoder()
+        do {
+            return try decoder.decode([DailyBreakdown].self, from: data)
+        } catch {
+            let responseString = String(data: data, encoding: .utf8) ?? "Unable to decode"
+            throw NSError(domain: "DecodingError", code: 1, userInfo: [
+                NSLocalizedDescriptionKey: "Daily breakdown decode error: \(error.localizedDescription). Response: \(responseString.prefix(300))"
+            ])
+        }
     }
 }
 
@@ -473,11 +560,22 @@ struct FinanceScrollView: View {
                 Spacer()
             }
 
-            // Page 2 - Balance
-            VStack(spacing: 12) {
-                Spacer()
-                ModernBalanceCard(balance: wallet.balance)
-                Spacer()
+            // Page 2 - Weekly Spending
+            VStack(spacing: 8) {
+                Text("Weekly Spending")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(.white)
+                    .padding(.top, 4)
+
+                if !service.dailyBreakdown.isEmpty {
+                    WeeklySpendingChart(dailyData: service.dailyBreakdown)
+                } else {
+                    Spacer()
+                    Text("No data")
+                        .font(.caption)
+                        .foregroundColor(.gray)
+                    Spacer()
+                }
             }
 
             // Page 3 - Stats Cards
@@ -520,74 +618,34 @@ struct FitnessRingsView: View {
     let income: Double
     let balance: Double
 
-    // Outer ring - Monthly Budget Progress (spent vs limit)
-    var budgetProgress: Double {
-        guard limit > 0 else { return 0 }
-        return min(spent / limit, 1.0)
-    }
-
-    // Middle ring - Income Usage (spent vs income)
-    var incomeUsageProgress: Double {
-        guard income > 0 else { return 0 }
-        return min(spent / income, 1.0)
-    }
-
-    // Inner ring - Savings Rate (money saved vs income)
+    // Outer ring - Savings Rate (money saved vs income)
     var savingsProgress: Double {
         guard income > 0 else { return 0 }
         let saved = income - spent
         return max(0, min(saved / income, 1.0))
     }
 
+    // Middle ring - Budget Remaining (how much budget is left)
+    var budgetRemainingProgress: Double {
+        guard limit > 0 else { return 0 }
+        let remaining = max(0, limit - spent)
+        return min(remaining / limit, 1.0)
+    }
+
+    // Inner ring - Spending Rate (spent vs income)
+    var spentProgress: Double {
+        guard income > 0 else { return 0 }
+        return min(spent / income, 1.0)
+    }
+
     var body: some View {
         VStack(spacing: 16) {
             ZStack {
-                // Outer ring - Monthly Budget (160 diameter, 16 stroke)
+                // Outer ring - Savings (160 diameter, 16 stroke)
                 // Background ring
                 Circle()
-                    .stroke(Color.blue.opacity(0.1), lineWidth: 16)
+                    .stroke(Color.purple.opacity(0.1), lineWidth: 16)
                     .frame(width: 160, height: 160)
-
-                Circle()
-                    .trim(from: 0, to: budgetProgress)
-                    .stroke(
-                        LinearGradient(
-                            colors: budgetProgress < 0.7 ? [.green, .mint] :
-                                   budgetProgress < 0.9 ? [.orange, .yellow] : [.red, .pink],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ),
-                        style: StrokeStyle(lineWidth: 16, lineCap: .round)
-                    )
-                    .frame(width: 160, height: 160)
-                    .rotationEffect(.degrees(-90))
-                    .animation(.spring(response: 0.6, dampingFraction: 0.8), value: budgetProgress)
-
-                // Middle ring - Income Usage (120 diameter, 14 stroke, 4px gap)
-                // Background ring
-                Circle()
-                    .stroke(Color.cyan.opacity(0.05), lineWidth: 14)
-                    .frame(width: 120, height: 120)
-
-                Circle()
-                    .trim(from: 0, to: incomeUsageProgress)
-                    .stroke(
-                        LinearGradient(
-                            colors: [.blue, .cyan],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ),
-                        style: StrokeStyle(lineWidth: 14, lineCap: .round)
-                    )
-                    .frame(width: 120, height: 120)
-                    .rotationEffect(.degrees(-90))
-                    .animation(.spring(response: 0.6, dampingFraction: 0.8), value: incomeUsageProgress)
-
-                // Inner ring - Savings Rate (84 diameter, 12 stroke, 4px gap)
-                // Background ring
-                Circle()
-                    .stroke(Color.purple.opacity(0.05), lineWidth: 12)
-                    .frame(width: 84, height: 84)
 
                 Circle()
                     .trim(from: 0, to: savingsProgress)
@@ -597,17 +655,58 @@ struct FitnessRingsView: View {
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         ),
+                        style: StrokeStyle(lineWidth: 16, lineCap: .round)
+                    )
+                    .frame(width: 160, height: 160)
+                    .rotationEffect(.degrees(-90))
+                    .animation(.spring(response: 0.6, dampingFraction: 0.8), value: savingsProgress)
+
+                // Middle ring - Budget Remaining (120 diameter, 14 stroke, 4px gap)
+                // Background ring
+                Circle()
+                    .stroke(Color.green.opacity(0.05), lineWidth: 14)
+                    .frame(width: 120, height: 120)
+
+                Circle()
+                    .trim(from: 0, to: budgetRemainingProgress)
+                    .stroke(
+                        LinearGradient(
+                            colors: budgetRemainingProgress > 0.3 ? [.green, .mint] :
+                                   budgetRemainingProgress > 0.1 ? [.orange, .yellow] : [.red, .pink],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        style: StrokeStyle(lineWidth: 14, lineCap: .round)
+                    )
+                    .frame(width: 120, height: 120)
+                    .rotationEffect(.degrees(-90))
+                    .animation(.spring(response: 0.6, dampingFraction: 0.8), value: budgetRemainingProgress)
+
+                // Inner ring - Spent (84 diameter, 12 stroke, 4px gap)
+                // Background ring
+                Circle()
+                    .stroke(Color.blue.opacity(0.05), lineWidth: 12)
+                    .frame(width: 84, height: 84)
+
+                Circle()
+                    .trim(from: 0, to: spentProgress)
+                    .stroke(
+                        LinearGradient(
+                            colors: [.blue, .cyan],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
                         style: StrokeStyle(lineWidth: 12, lineCap: .round)
                     )
                     .frame(width: 84, height: 84)
                     .rotationEffect(.degrees(-90))
-                    .animation(.spring(response: 0.6, dampingFraction: 0.8), value: savingsProgress)
+                    .animation(.spring(response: 0.6, dampingFraction: 0.8), value: spentProgress)
 
                 // Center value
                 VStack(spacing: 2) {
-                    Text(String(format: "%.0f%%", budgetProgress * 100))
+                    Text(String(format: "%.0f%%", spentProgress * 100))
                         .font(.system(size: 22, weight: .bold, design: .rounded))
-                    Text("Budget")
+                    Text("Spent")
                         .font(.system(size: 9))
                         .foregroundColor(.gray)
                 }
@@ -616,19 +715,19 @@ struct FitnessRingsView: View {
             // Ring legends
             HStack(spacing: 12) {
                 RingLegend(
-                    color: budgetProgress < 0.7 ? .green : budgetProgress < 0.9 ? .orange : .red,
+                    color: .purple,
+                    label: "Saved",
+                    value: income - spent
+                )
+                RingLegend(
+                    color: budgetRemainingProgress > 0.3 ? .green : budgetRemainingProgress > 0.1 ? .orange : .red,
                     label: "Budget",
-                    value: limit
+                    value: max(0, limit - spent)
                 )
                 RingLegend(
                     color: .blue,
                     label: "Spent",
                     value: spent
-                )
-                RingLegend(
-                    color: .purple,
-                    label: "Saved",
-                    value: income - spent
                 )
             }
             .font(.system(size: 10))
@@ -716,6 +815,107 @@ struct StatCard: View {
             RoundedRectangle(cornerRadius: 10)
                 .stroke(Color.white.opacity(0.1), lineWidth: 1)
         )
+    }
+}
+
+// MARK: - Weekly Spending Chart
+struct WeeklySpendingChart: View {
+    let dailyData: [DailyBreakdown]
+
+    // Ensure all 7 days are present
+    var allDays: [DailyBreakdown] {
+        let dayOrder = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+        let dataDict = Dictionary(uniqueKeysWithValues: dailyData.map { ($0.dayOfWeek, $0) })
+
+        return dayOrder.map { dayName in
+            dataDict[dayName] ?? DailyBreakdown(
+                date: "",
+                dayOfWeek: dayName,
+                categories: [],
+                total: 0
+            )
+        }
+    }
+
+    // Calculate segment data with gaps
+    struct SegmentData: Identifiable {
+        let id = UUID()
+        let day: String
+        let category: String
+        let yStart: Double
+        let yEnd: Double
+        let color: Color
+    }
+
+    var segmentedData: [SegmentData] {
+        var segments: [SegmentData] = []
+        let gapSize: Double = 2.5  // Gap between segments
+
+        for day in allDays {
+            var cumulativeHeight: Double = 0
+
+            for cat in day.categories {
+                let segmentStart = cumulativeHeight
+                let segmentEnd = cumulativeHeight + cat.amount
+
+                segments.append(SegmentData(
+                    day: day.dayOfWeek,
+                    category: cat.category,
+                    yStart: segmentStart,
+                    yEnd: segmentEnd - gapSize,  // Subtract gap
+                    color: CategoryColorMap.getColor(for: cat.category)
+                ))
+
+                cumulativeHeight = segmentEnd
+            }
+        }
+
+        return segments
+    }
+
+    var body: some View {
+        Chart {
+            ForEach(segmentedData) { segment in
+                BarMark(
+                    x: .value("Day", segment.day),
+                    yStart: .value("Start", segment.yStart),
+                    yEnd: .value("End", segment.yEnd),
+                    width: 12
+                )
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: [
+                            segment.color,
+                            segment.color.opacity(0.7)
+                        ],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+                .cornerRadius(5)
+            }
+        }
+        .chartXAxis {
+            AxisMarks(values: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]) { value in
+                AxisValueLabel()
+                    .font(.system(size: 9))
+                    .foregroundStyle(.white)
+            }
+        }
+        .chartYAxis {
+            AxisMarks(position: .leading, values: .automatic(desiredCount: 5)) { value in
+                AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5))
+                    .foregroundStyle(Color.white.opacity(0.1))
+                AxisValueLabel()
+                    .font(.system(size: 7))
+                    .foregroundStyle(.gray)
+            }
+        }
+        .chartPlotStyle { plotArea in
+            plotArea.background(.clear)
+        }
+        .frame(height: 135)
+        .padding(.horizontal, 4)
     }
 }
 
