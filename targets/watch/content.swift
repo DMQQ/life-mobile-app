@@ -154,6 +154,84 @@ struct ExpensesData: Codable {
     let lastUpdated: String
 }
 
+// MARK: - HTTP Client
+enum HTTPMethod: String {
+    case get = "GET"
+    case post = "POST"
+}
+
+class HTTPClient {
+    static let shared = HTTPClient()
+    private init() {}
+
+    func request<T: Decodable>(
+        _ method: HTTPMethod,
+        url: URL,
+        authToken: String,
+        body: [String: Any]? = nil
+    ) async throws -> T {
+        var request = URLRequest(url: url)
+        request.httpMethod = method.rawValue
+        request.setValue(authToken, forHTTPHeaderField: "authentication")
+
+        if let body = body {
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        }
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw NSError(domain: "APIError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid response"])
+        }
+
+        guard (200...299).contains(httpResponse.statusCode) else {
+            let responseBody = String(data: data, encoding: .utf8) ?? "No response body"
+            throw NSError(domain: "APIError", code: httpResponse.statusCode, userInfo: [
+                NSLocalizedDescriptionKey: "HTTP \(httpResponse.statusCode): \(responseBody)"
+            ])
+        }
+
+        do {
+            return try JSONDecoder().decode(T.self, from: data)
+        } catch {
+            let responseString = String(data: data, encoding: .utf8) ?? "Unable to decode"
+            throw NSError(domain: "DecodingError", code: 1, userInfo: [
+                NSLocalizedDescriptionKey: "Decode error: \(error.localizedDescription). Response: \(responseString.prefix(300))"
+            ])
+        }
+    }
+
+    func request(
+        _ method: HTTPMethod,
+        url: URL,
+        authToken: String,
+        body: [String: Any]? = nil
+    ) async throws {
+        var request = URLRequest(url: url)
+        request.httpMethod = method.rawValue
+        request.setValue(authToken, forHTTPHeaderField: "authentication")
+
+        if let body = body {
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        }
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw NSError(domain: "APIError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid response"])
+        }
+
+        guard (200...299).contains(httpResponse.statusCode) else {
+            let responseBody = String(data: data, encoding: .utf8) ?? "No response body"
+            throw NSError(domain: "APIError", code: httpResponse.statusCode, userInfo: [
+                NSLocalizedDescriptionKey: "HTTP \(httpResponse.statusCode): \(responseBody.prefix(100))"
+            ])
+        }
+    }
+}
+
 // MARK: - API Service
 class FinanceService: ObservableObject {
     @Published var categories: [ExpenseCategory] = []
@@ -165,6 +243,7 @@ class FinanceService: ObservableObject {
     @Published var isAuthenticated = false
 
     let defaultToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2NvdW50SWQiOiI0ZWVlZjY5Ny1kMjJlLTQyM2MtYThlNS1mZDhkYzRjYzc0OTQiLCJpYXQiOjE3NjUyMTE1NzksImV4cCI6MTc2ODgxMTU3OX0.ush-Y1U5p2xQn9_0_u_zCwXZzRi1i9UzpOXp81MmkF8"
+    private let httpClient = HTTPClient.shared
 
     var totalSpent: Double {
         categories.reduce(0) { $0 + $1.total }
@@ -185,6 +264,39 @@ class FinanceService: ObservableObject {
         isAuthenticated = !authToken.isEmpty
     }
 
+    // MARK: - Helper Methods
+    private func getCurrentMonthDateRange() throws -> (String, String) {
+        let calendar = Calendar.current
+        let now = Date()
+        guard let startOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: now)),
+              let endOfMonth = calendar.date(byAdding: DateComponents(month: 1, day: -1), to: startOfMonth) else {
+            throw NSError(domain: "DateError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Failed to calculate dates"])
+        }
+
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        return (dateFormatter.string(from: startOfMonth), dateFormatter.string(from: endOfMonth))
+    }
+
+    private func getCurrentWeekDateRange() throws -> (String, String) {
+        let calendar = Calendar.current
+        let now = Date()
+
+        var weekStart = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now))!
+        let weekday = calendar.component(.weekday, from: weekStart)
+        if weekday == 1 {
+            weekStart = calendar.date(byAdding: .day, value: 1, to: weekStart)!
+        }
+
+        guard let weekEnd = calendar.date(byAdding: .day, value: 6, to: weekStart) else {
+            throw NSError(domain: "DateError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Failed to calculate dates"])
+        }
+
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        return (dateFormatter.string(from: weekStart), dateFormatter.string(from: weekEnd))
+    }
+
     func fetchData() async {
         await MainActor.run {
             isLoading = true
@@ -199,29 +311,23 @@ class FinanceService: ObservableObject {
             isAuthenticated = true
         }
 
-        // Fetch data from API sequentially to see which fails
+        // Fetch all data in parallel
         do {
-            // Fetch expenses first
-            let expenses = try await fetchExpensesFromAPI(authToken: authToken)
+            async let expenses = fetchExpensesFromAPI(authToken: authToken)
+            async let walletInfo = fetchWalletDataFromAPI(authToken: authToken)
+            async let daily = fetchDailyBreakdownFromAPI(authToken: authToken)
+            async let recent = fetchRecentExpensesFromAPI(authToken: authToken)
 
-            // Then fetch wallet
-            let walletInfo = try await fetchWalletDataFromAPI(authToken: authToken)
-
-            // Fetch daily breakdown for last 7 days
-            let daily = try await fetchDailyBreakdownFromAPI(authToken: authToken)
-
-            // Fetch recent expenses
-            let recent = try await fetchRecentExpensesFromAPI(authToken: authToken)
+            let (expensesData, wallet, dailyData, recentData) = try await (expenses, walletInfo, daily, recent)
 
             await MainActor.run {
-                self.categories = expenses.statisticsLegend
-                self.walletData = walletInfo
-                self.dailyBreakdown = daily
-                self.recentExpenses = recent
+                self.categories = expensesData.statisticsLegend
+                self.walletData = wallet
+                self.dailyBreakdown = dailyData
+                self.recentExpenses = recentData
                 isLoading = false
             }
         } catch {
-            // Show detailed error
             let errorDesc: String
             if let nsError = error as NSError? {
                 errorDesc = "[\(nsError.domain):\(nsError.code)] \(error.localizedDescription)"
@@ -237,20 +343,8 @@ class FinanceService: ObservableObject {
     }
 
     private func fetchExpensesFromAPI(authToken: String) async throws -> ExpensesData {
-        // Calculate current month dates
-        let calendar = Calendar.current
-        let now = Date()
-        guard let startOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: now)),
-              let endOfMonth = calendar.date(byAdding: DateComponents(month: 1, day: -1), to: startOfMonth) else {
-            throw NSError(domain: "DateError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Failed to calculate dates"])
-        }
+        let (startDate, endDate) = try getCurrentMonthDateRange()
 
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd"
-        let startDate = dateFormatter.string(from: startOfMonth)
-        let endDate = dateFormatter.string(from: endOfMonth)
-
-        // Build REST URL with query parameters
         var components = URLComponents(string: "https://life.dmqq.dev/statistics/legend")!
         components.queryItems = [
             URLQueryItem(name: "startDate", value: startDate),
@@ -262,36 +356,7 @@ class FinanceService: ObservableObject {
             throw NSError(domain: "URLError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])
         }
 
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.setValue(authToken, forHTTPHeaderField: "authentication")
-
-        // Make request
-        let (data, response) = try await URLSession.shared.data(for: request)
-
-        // Better error handling with status code
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw NSError(domain: "APIError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid response"])
-        }
-
-        guard httpResponse.statusCode == 200 else {
-            let responseBody = String(data: data, encoding: .utf8) ?? "No response body"
-            throw NSError(domain: "APIError", code: httpResponse.statusCode, userInfo: [
-                NSLocalizedDescriptionKey: "HTTP \(httpResponse.statusCode): \(responseBody)"
-            ])
-        }
-
-        // Parse response - direct array, no GraphQL wrapper
-        let decoder = JSONDecoder()
-        let statisticsLegend: [ExpenseCategory]
-        do {
-            statisticsLegend = try decoder.decode([ExpenseCategory].self, from: data)
-        } catch {
-            let responseString = String(data: data, encoding: .utf8) ?? "Unable to decode"
-            throw NSError(domain: "DecodingError", code: 1, userInfo: [
-                NSLocalizedDescriptionKey: "Expenses decode error: \(error.localizedDescription). Response: \(responseString.prefix(300))"
-            ])
-        }
+        let statisticsLegend: [ExpenseCategory] = try await httpClient.request(.get, url: url, authToken: authToken)
 
         return ExpensesData(
             statisticsLegend: statisticsLegend,
@@ -300,50 +365,6 @@ class FinanceService: ObservableObject {
     }
 
     private func fetchWalletDataFromAPI(authToken: String) async throws -> WalletData {
-        // Calculate current month dates
-        let calendar = Calendar.current
-        let now = Date()
-        guard let startOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: now)),
-              let endOfMonth = calendar.date(byAdding: DateComponents(month: 1, day: -1), to: startOfMonth) else {
-            throw NSError(domain: "DateError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Failed to calculate dates"])
-        }
-
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd"
-        let startDate = dateFormatter.string(from: startOfMonth)
-        let endDate = dateFormatter.string(from: endOfMonth)
-
-        // Build REST URL with query parameters
-        var components = URLComponents(string: "https://life.dmqq.dev/statistics/wallet-summary")!
-        components.queryItems = [
-            URLQueryItem(name: "startDate", value: startDate),
-            URLQueryItem(name: "endDate", value: endDate)
-        ]
-
-        guard let url = components.url else {
-            throw NSError(domain: "URLError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])
-        }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.setValue(authToken, forHTTPHeaderField: "authentication")
-
-        // Make request
-        let (data, response) = try await URLSession.shared.data(for: request)
-
-        // Better error handling with status code
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw NSError(domain: "APIError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid response"])
-        }
-
-        guard httpResponse.statusCode == 200 else {
-            let responseBody = String(data: data, encoding: .utf8) ?? "No response body"
-            throw NSError(domain: "APIError", code: httpResponse.statusCode, userInfo: [
-                NSLocalizedDescriptionKey: "HTTP \(httpResponse.statusCode): \(responseBody)"
-            ])
-        }
-
-        // Parse response - direct object, no GraphQL wrapper
         struct WalletResponse: Codable {
             let balance: Double
             let income: Double
@@ -355,16 +376,19 @@ class FinanceService: ObservableObject {
             let monthlySpendings: WalletStatistics
         }
 
-        let decoder = JSONDecoder()
-        let restResponse: RestResponse
-        do {
-            restResponse = try decoder.decode(RestResponse.self, from: data)
-        } catch {
-            let responseString = String(data: data, encoding: .utf8) ?? "Unable to decode"
-            throw NSError(domain: "DecodingError", code: 1, userInfo: [
-                NSLocalizedDescriptionKey: "Wallet decode error: \(error.localizedDescription). Response: \(responseString.prefix(300))"
-            ])
+        let (startDate, endDate) = try getCurrentMonthDateRange()
+
+        var components = URLComponents(string: "https://life.dmqq.dev/statistics/wallet-summary")!
+        components.queryItems = [
+            URLQueryItem(name: "startDate", value: startDate),
+            URLQueryItem(name: "endDate", value: endDate)
+        ]
+
+        guard let url = components.url else {
+            throw NSError(domain: "URLError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])
         }
+
+        let restResponse: RestResponse = try await httpClient.request(.get, url: url, authToken: authToken)
 
         return WalletData(
             balance: restResponse.wallet.balance,
@@ -375,31 +399,8 @@ class FinanceService: ObservableObject {
     }
 
     private func fetchDailyBreakdownFromAPI(authToken: String) async throws -> [DailyBreakdown] {
-        let calendar = Calendar.current
-        let now = Date()
+        let (startDate, endDate) = try getCurrentWeekDateRange()
 
-        // Get reference date (current week or previous week based on flag)
-        let referenceDate = now
-
-        // Get the start of the week (Monday)
-        var weekStart = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: referenceDate))!
-        // Adjust to Monday if needed (some locales start week on Sunday)
-        let weekday = calendar.component(.weekday, from: weekStart)
-        if weekday == 1 { // Sunday
-            weekStart = calendar.date(byAdding: .day, value: 1, to: weekStart)!
-        }
-
-        // Get end of week (Sunday)
-        guard let weekEnd = calendar.date(byAdding: .day, value: 6, to: weekStart) else {
-            throw NSError(domain: "DateError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Failed to calculate dates"])
-        }
-
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd"
-        let startDate = dateFormatter.string(from: weekStart)
-        let endDate = dateFormatter.string(from: weekEnd)
-
-        // Build REST URL
         var components = URLComponents(string: "https://life.dmqq.dev/statistics/daily-breakdown")!
         components.queryItems = [
             URLQueryItem(name: "startDate", value: startDate),
@@ -410,70 +411,18 @@ class FinanceService: ObservableObject {
             throw NSError(domain: "URLError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])
         }
 
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.setValue(authToken, forHTTPHeaderField: "authentication")
-
-        let (data, response) = try await URLSession.shared.data(for: request)
-
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw NSError(domain: "APIError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid response"])
-        }
-
-        guard httpResponse.statusCode == 200 else {
-            let responseBody = String(data: data, encoding: .utf8) ?? "No response body"
-            throw NSError(domain: "APIError", code: httpResponse.statusCode, userInfo: [
-                NSLocalizedDescriptionKey: "HTTP \(httpResponse.statusCode): \(responseBody)"
-            ])
-        }
-
-        let decoder = JSONDecoder()
-        do {
-            return try decoder.decode([DailyBreakdown].self, from: data)
-        } catch {
-            let responseString = String(data: data, encoding: .utf8) ?? "Unable to decode"
-            throw NSError(domain: "DecodingError", code: 1, userInfo: [
-                NSLocalizedDescriptionKey: "Daily breakdown decode error: \(error.localizedDescription). Response: \(responseString.prefix(300))"
-            ])
-        }
+        return try await httpClient.request(.get, url: url, authToken: authToken)
     }
 
     private func fetchRecentExpensesFromAPI(authToken: String) async throws -> [RecentExpense] {
         var components = URLComponents(string: "https://life.dmqq.dev/statistics/recent-expenses")!
-        components.queryItems = [
-            URLQueryItem(name: "limit", value: "4")
-        ]
+        components.queryItems = [URLQueryItem(name: "limit", value: "4")]
 
         guard let url = components.url else {
             throw NSError(domain: "URLError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])
         }
 
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.setValue(authToken, forHTTPHeaderField: "authentication")
-
-        let (data, response) = try await URLSession.shared.data(for: request)
-
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw NSError(domain: "APIError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid response"])
-        }
-
-        guard httpResponse.statusCode == 200 else {
-            let responseBody = String(data: data, encoding: .utf8) ?? "No response body"
-            throw NSError(domain: "APIError", code: httpResponse.statusCode, userInfo: [
-                NSLocalizedDescriptionKey: "HTTP \(httpResponse.statusCode): \(responseBody)"
-            ])
-        }
-
-        let decoder = JSONDecoder()
-        do {
-            return try decoder.decode([RecentExpense].self, from: data)
-        } catch {
-            let responseString = String(data: data, encoding: .utf8) ?? "Unable to decode"
-            throw NSError(domain: "DecodingError", code: 1, userInfo: [
-                NSLocalizedDescriptionKey: "Recent expenses decode error: \(error.localizedDescription). Response: \(responseString.prefix(300))"
-            ])
-        }
+        return try await httpClient.request(.get, url: url, authToken: authToken)
     }
 }
 
@@ -520,11 +469,12 @@ struct ContentView: View {
                     Spacer(minLength: 0)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                .allowsHitTesting(true)
             }
             .edgesIgnoringSafeArea(.top)
         }
         .sheet(isPresented: $showingAddExpense) {
-            AddExpenseView(service: service)
+            AddExpenseView(service: service, isPresented: $showingAddExpense)
         }
         .task {
             await service.fetchData()
@@ -1172,8 +1122,9 @@ struct RecentExpenseRow: View {
 struct AddExpenseView: View {
     @Environment(\.dismiss) var dismiss
     let service: FinanceService
+    @Binding var isPresented: Bool
 
-    @State private var amount: Double = 0
+    @State private var amount: Double? = nil
     @State private var description: String = ""
     @State private var isIncome: Bool = false
     @State private var isSubmitting: Bool = false
@@ -1293,15 +1244,15 @@ struct AddExpenseView: View {
                     .frame(height: 50)
                 }
                 .buttonStyle(.plain)
-                .disabled(isSubmitting || amount <= 0)
-                .opacity((isSubmitting || amount <= 0) ? 0.5 : 1.0)
+                .disabled(isSubmitting || amount == nil || amount! <= 0)
+                .opacity((isSubmitting || amount == nil || amount! <= 0) ? 0.5 : 1.0)
             }
             .padding(.horizontal, 8)
         }
     }
 
     func submitExpense() {
-        guard amount > 0 else {
+        guard let validAmount = amount, validAmount > 0 else {
             errorMessage = "Invalid amount"
             return
         }
@@ -1312,12 +1263,13 @@ struct AddExpenseView: View {
         Task {
             do {
                 try await createExpenseAPI(
-                    amount: amount,
+                    amount: validAmount,
                     description: description.isEmpty ? (isIncome ? "Income" : "Expense") : description,
                     type: isIncome ? "income" : "expense"
                 )
 
                 await MainActor.run {
+                    isPresented = false
                     dismiss()
                     // Refresh data
                     Task {
@@ -1338,31 +1290,13 @@ struct AddExpenseView: View {
         let authToken = sharedDefaults?.string(forKey: "auth_token") ?? service.defaultToken
 
         let url = URL(string: "https://life.dmqq.dev/statistics/create-expense")!
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue(authToken, forHTTPHeaderField: "authentication")
-
         let body: [String: Any] = [
             "amount": amount,
             "description": description,
             "type": type
         ]
 
-        request.httpBody = try JSONSerialization.data(withJSONObject: body)
-
-        let (data, response) = try await URLSession.shared.data(for: request)
-
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw NSError(domain: "APIError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid response"])
-        }
-
-        guard httpResponse.statusCode == 201 || httpResponse.statusCode == 200 else {
-            let responseBody = String(data: data, encoding: .utf8) ?? "No response"
-            throw NSError(domain: "APIError", code: httpResponse.statusCode, userInfo: [
-                NSLocalizedDescriptionKey: "HTTP \(httpResponse.statusCode): \(responseBody.prefix(100))"
-            ])
-        }
+        try await HTTPClient.shared.request(.post, url: url, authToken: authToken, body: body)
     }
 }
 

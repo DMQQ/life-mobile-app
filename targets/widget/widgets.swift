@@ -1036,63 +1036,226 @@ struct WatchExpenseWidgetView: View {
 
     var body: some View {
         if family == .accessoryCircular {
-            if let walletDataString = UserDefaults.shared?.string(forKey: "wallet_data"),
-               let walletData = try? JSONDecoder().decode(WalletData.self, from: walletDataString.data(using: .utf8) ?? Data()) {
+            accessoryCircularView
+        } else {
+            iosWidgetView
+        }
+    }
 
-                let income = walletData.income
-                let spent = walletData.monthlySpent ?? 0
-                let limit = walletData.monthlyLimit ?? (income * walletData.monthlyPercentageTarget / 100)
+    @ViewBuilder
+    private var accessoryCircularView: some View {
+        if let walletDataString = UserDefaults.shared?.string(forKey: "wallet_data"),
+           let walletData = try? JSONDecoder().decode(WalletData.self, from: walletDataString.data(using: .utf8) ?? Data()) {
 
-                ZStack {
-                    // Outer ring - Savings (teal/green)
-                    Circle()
-                        .trim(from: 0, to: savedProgress(income: income, spent: spent))
-                        .stroke(
-                            Color(red: 0.0, green: 0.78, blue: 0.59),
-                            style: StrokeStyle(lineWidth: 6, lineCap: .round)
-                        )
-                        .rotationEffect(.degrees(-90))
+            let income = walletData.income
+            let spent = walletData.monthlySpent ?? 0
+            let limit = walletData.monthlyLimit ?? (income * walletData.monthlyPercentageTarget / 100)
 
-                    // Middle ring - Budget Remaining (violet/purple)
-                    Circle()
-                        .trim(from: 0, to: budgetRemainingProgress(limit: limit, spent: spent))
-                        .stroke(
-                            Color(red: 0.53, green: 0.52, blue: 0.94),
-                            style: StrokeStyle(lineWidth: 6, lineCap: .round)
-                        )
-                        .rotationEffect(.degrees(-90))
-                        .padding(8)
+            ZStack {
+                // Outer ring - Savings (teal/green)
+                Circle()
+                    .trim(from: 0, to: savedProgress(income: income, spent: spent))
+                    .stroke(
+                        Color(red: 0.0, green: 0.78, blue: 0.59),
+                        style: StrokeStyle(lineWidth: 6, lineCap: .round)
+                    )
+                    .rotationEffect(.degrees(-90))
 
-                    // Inner ring - Spending Rate (blue)
-                    Circle()
-                        .trim(from: 0, to: spentProgress(income: income, spent: spent))
-                        .stroke(
-                            Color(red: 0.20, green: 0.64, blue: 0.98),
-                            style: StrokeStyle(lineWidth: 6, lineCap: .round)
-                        )
-                        .rotationEffect(.degrees(-90))
-                        .padding(16)
+                // Middle ring - Budget Remaining (violet/purple)
+                Circle()
+                    .trim(from: 0, to: budgetRemainingProgress(limit: limit, spent: spent))
+                    .stroke(
+                        Color(red: 0.53, green: 0.52, blue: 0.94),
+                        style: StrokeStyle(lineWidth: 6, lineCap: .round)
+                    )
+                    .rotationEffect(.degrees(-90))
+                    .padding(8)
 
-                    // Center text
-                    VStack(spacing: 0) {
-                        Text("\(Int(spent))")
-                            .font(.system(size: 16, weight: .bold, design: .rounded))
-                        Text("spent")
-                            .font(.system(size: 8, weight: .medium))
-                            .foregroundColor(.secondary)
-                    }
-                }
-            } else {
-                ZStack {
-                    Circle()
-                        .stroke(Color.gray.opacity(0.3), lineWidth: 6)
-                    Text("--")
-                        .font(.system(size: 16, weight: .bold))
+                // Inner ring - Spending Rate (blue)
+                Circle()
+                    .trim(from: 0, to: spentProgress(income: income, spent: spent))
+                    .stroke(
+                        Color(red: 0.20, green: 0.64, blue: 0.98),
+                        style: StrokeStyle(lineWidth: 6, lineCap: .round)
+                    )
+                    .rotationEffect(.degrees(-90))
+                    .padding(16)
+
+                // Center text
+                VStack(spacing: 0) {
+                    Text("\(Int(spent))")
+                        .font(.system(size: 16, weight: .bold, design: .rounded))
+                    Text("spent")
+                        .font(.system(size: 8, weight: .medium))
+                        .foregroundColor(.secondary)
                 }
             }
         } else {
-            Text("Unsupported")
-                .font(.caption2)
+            ZStack {
+                Circle()
+                    .stroke(Color.gray.opacity(0.3), lineWidth: 6)
+                Text("--")
+                    .font(.system(size: 16, weight: .bold))
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var iosWidgetView: some View {
+        if let walletDataString = UserDefaults.shared?.string(forKey: "wallet_data"),
+           let walletData = try? JSONDecoder().decode(WalletData.self, from: walletDataString.data(using: .utf8) ?? Data()) {
+
+            let income = walletData.income
+            let spent = walletData.monthlySpent ?? 0
+            let limit = walletData.monthlyLimit ?? (income * walletData.monthlyPercentageTarget / 100)
+            let saved = income - spent
+
+            VStack(alignment: .leading, spacing: family == .systemLarge ? 12 : 8) {
+                HStack {
+                    Text("💰 Spending")
+                        .font(.headline)
+                        .fontWeight(.bold)
+                    Spacer()
+                }
+
+                // Rings visualization
+                HStack(spacing: 16) {
+                    ZStack {
+                        // Outer ring - Savings (teal/green)
+                        Circle()
+                            .trim(from: 0, to: savedProgress(income: income, spent: spent))
+                            .stroke(
+                                Color(red: 0.0, green: 0.78, blue: 0.59),
+                                style: StrokeStyle(lineWidth: 8, lineCap: .round)
+                            )
+                            .rotationEffect(.degrees(-90))
+
+                        // Middle ring - Budget Remaining (violet/purple)
+                        Circle()
+                            .trim(from: 0, to: budgetRemainingProgress(limit: limit, spent: spent))
+                            .stroke(
+                                Color(red: 0.53, green: 0.52, blue: 0.94),
+                                style: StrokeStyle(lineWidth: 8, lineCap: .round)
+                            )
+                            .rotationEffect(.degrees(-90))
+                            .padding(10)
+
+                        // Inner ring - Spending Rate (blue)
+                        Circle()
+                            .trim(from: 0, to: spentProgress(income: income, spent: spent))
+                            .stroke(
+                                Color(red: 0.20, green: 0.64, blue: 0.98),
+                                style: StrokeStyle(lineWidth: 8, lineCap: .round)
+                            )
+                            .rotationEffect(.degrees(-90))
+                            .padding(20)
+
+                        // Center text
+                        VStack(spacing: 0) {
+                            Text("\(Int(spent))")
+                                .font(.system(size: 20, weight: .bold, design: .rounded))
+                            Text("spent")
+                                .font(.system(size: 10, weight: .medium))
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .frame(width: 100, height: 100)
+
+                    if family == .systemMedium || family == .systemLarge {
+                        VStack(alignment: .leading, spacing: 6) {
+                            HStack {
+                                Circle()
+                                    .fill(Color(red: 0.20, green: 0.64, blue: 0.98))
+                                    .frame(width: 8, height: 8)
+                                Text("Spent")
+                                    .font(.caption2)
+                                    .foregroundColor(.secondary)
+                                Spacer()
+                                Text("\(Int(spent))zł")
+                                    .font(.caption)
+                                    .fontWeight(.semibold)
+                            }
+
+                            HStack {
+                                Circle()
+                                    .fill(Color(red: 0.53, green: 0.52, blue: 0.94))
+                                    .frame(width: 8, height: 8)
+                                Text("Budget Left")
+                                    .font(.caption2)
+                                    .foregroundColor(.secondary)
+                                Spacer()
+                                Text("\(Int(max(0, limit - spent)))zł")
+                                    .font(.caption)
+                                    .fontWeight(.semibold)
+                            }
+
+                            HStack {
+                                Circle()
+                                    .fill(Color(red: 0.0, green: 0.78, blue: 0.59))
+                                    .frame(width: 8, height: 8)
+                                Text("Saved")
+                                    .font(.caption2)
+                                    .foregroundColor(.secondary)
+                                Spacer()
+                                Text("\(Int(saved))zł")
+                                    .font(.caption)
+                                    .fontWeight(.semibold)
+                            }
+                        }
+                    }
+                }
+
+                if family == .systemLarge {
+                    Divider()
+
+                    HStack(spacing: 16) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Income")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                            Text("\(Int(income))zł")
+                                .font(.caption)
+                                .fontWeight(.bold)
+                        }
+
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Budget")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                            Text("\(Int(limit))zł")
+                                .font(.caption)
+                                .fontWeight(.bold)
+                        }
+
+                        Spacer()
+
+                        VStack(alignment: .trailing, spacing: 2) {
+                            Text("Save Rate")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                            Text("\(Int(savedProgress(income: income, spent: spent) * 100))%")
+                                .font(.caption)
+                                .fontWeight(.bold)
+                                .foregroundColor(.green)
+                        }
+                    }
+                }
+            }
+            .padding(.horizontal, 8)
+            .padding(.top, 4)
+            .padding(.bottom, 8)
+        } else {
+            VStack {
+                Text("💰 Spending")
+                    .font(.headline)
+                    .fontWeight(.bold)
+                Spacer()
+                Text("No data")
+                    .foregroundColor(.secondary)
+                    .font(.caption)
+                Spacer()
+            }
+            .padding()
         }
     }
 
@@ -1124,7 +1287,7 @@ struct WatchExpenseWidget: Widget {
         }
         .configurationDisplayName("Expenses")
         .description("View your spending rings")
-        .supportedFamilies([.accessoryCircular])
+        .supportedFamilies([.systemSmall, .systemMedium, .systemLarge, .accessoryCircular])
     }
 }
 
