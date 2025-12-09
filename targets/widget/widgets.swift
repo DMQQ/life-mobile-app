@@ -1029,13 +1029,112 @@ struct TimelineWidget: Widget {
     }
 }
 
+// MARK: - Watch Complication Widget
+struct WatchExpenseWidgetView: View {
+    var entry: Provider.Entry
+    @Environment(\.widgetFamily) var family
+
+    var body: some View {
+        if family == .accessoryCircular {
+            if let walletDataString = UserDefaults.shared?.string(forKey: "wallet_data"),
+               let walletData = try? JSONDecoder().decode(WalletData.self, from: walletDataString.data(using: .utf8) ?? Data()) {
+
+                let income = walletData.income
+                let spent = walletData.monthlySpent ?? 0
+                let limit = walletData.monthlyLimit ?? (income * walletData.monthlyPercentageTarget / 100)
+
+                ZStack {
+                    // Outer ring - Savings (teal/green)
+                    Circle()
+                        .trim(from: 0, to: savedProgress(income: income, spent: spent))
+                        .stroke(
+                            Color(red: 0.0, green: 0.78, blue: 0.59),
+                            style: StrokeStyle(lineWidth: 6, lineCap: .round)
+                        )
+                        .rotationEffect(.degrees(-90))
+
+                    // Middle ring - Budget Remaining (violet/purple)
+                    Circle()
+                        .trim(from: 0, to: budgetRemainingProgress(limit: limit, spent: spent))
+                        .stroke(
+                            Color(red: 0.53, green: 0.52, blue: 0.94),
+                            style: StrokeStyle(lineWidth: 6, lineCap: .round)
+                        )
+                        .rotationEffect(.degrees(-90))
+                        .padding(8)
+
+                    // Inner ring - Spending Rate (blue)
+                    Circle()
+                        .trim(from: 0, to: spentProgress(income: income, spent: spent))
+                        .stroke(
+                            Color(red: 0.20, green: 0.64, blue: 0.98),
+                            style: StrokeStyle(lineWidth: 6, lineCap: .round)
+                        )
+                        .rotationEffect(.degrees(-90))
+                        .padding(16)
+
+                    // Center text
+                    VStack(spacing: 0) {
+                        Text("\(Int(spent))")
+                            .font(.system(size: 16, weight: .bold, design: .rounded))
+                        Text("spent")
+                            .font(.system(size: 8, weight: .medium))
+                            .foregroundColor(.secondary)
+                    }
+                }
+            } else {
+                ZStack {
+                    Circle()
+                        .stroke(Color.gray.opacity(0.3), lineWidth: 6)
+                    Text("--")
+                        .font(.system(size: 16, weight: .bold))
+                }
+            }
+        } else {
+            Text("Unsupported")
+                .font(.caption2)
+        }
+    }
+
+    private func savedProgress(income: Double, spent: Double) -> Double {
+        guard income > 0 else { return 0 }
+        let saved = income - spent
+        return max(0, min(saved / income, 1.0))
+    }
+
+    private func budgetRemainingProgress(limit: Double, spent: Double) -> Double {
+        guard limit > 0 else { return 0 }
+        let remaining = max(0, limit - spent)
+        return min(remaining / limit, 1.0)
+    }
+
+    private func spentProgress(income: Double, spent: Double) -> Double {
+        guard income > 0 else { return 0 }
+        return min(spent / income, 1.0)
+    }
+}
+
+struct WatchExpenseWidget: Widget {
+    let kind: String = "WatchExpenseWidget"
+
+    var body: some WidgetConfiguration {
+        AppIntentConfiguration(kind: kind, intent: ConfigurationAppIntent.self, provider: Provider()) { entry in
+            WatchExpenseWidgetView(entry: entry)
+                .containerBackground(.fill.tertiary, for: .widget)
+        }
+        .configurationDisplayName("Expenses")
+        .description("View your spending rings")
+        .supportedFamilies([.accessoryCircular])
+    }
+}
+
 extension ConfigurationAppIntent {
     fileprivate static var smiley: ConfigurationAppIntent {
         let intent = ConfigurationAppIntent()
         intent.favoriteEmoji = "😀"
         return intent
     }
-    
+
     fileprivate static var starEyes: ConfigurationAppIntent {
         let intent = ConfigurationAppIntent()
         intent.favoriteEmoji = "🤩"

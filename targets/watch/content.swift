@@ -164,11 +164,7 @@ class FinanceService: ObservableObject {
     @Published var errorMessage: String?
     @Published var isAuthenticated = false
 
-    // Default token for development/testing
     let defaultToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2NvdW50SWQiOiI0ZWVlZjY5Ny1kMjJlLTQyM2MtYThlNS1mZDhkYzRjYzc0OTQiLCJpYXQiOjE3NjUyMTE1NzksImV4cCI6MTc2ODgxMTU3OX0.ush-Y1U5p2xQn9_0_u_zCwXZzRi1i9UzpOXp81MmkF8"
-
-    // TOGGLE THIS FOR PRODUCTION: Set to false to show current week, true for previous week (demo data)
-    private let usePreviousWeekForDemo = true
 
     var totalSpent: Double {
         categories.reduce(0) { $0 + $1.total }
@@ -383,8 +379,7 @@ class FinanceService: ObservableObject {
         let now = Date()
 
         // Get reference date (current week or previous week based on flag)
-        let referenceDate = usePreviousWeekForDemo ?
-            calendar.date(byAdding: .day, value: -7, to: now)! : now
+        let referenceDate = now
 
         // Get the start of the week (Monday)
         var weekStart = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: referenceDate))!
@@ -704,15 +699,13 @@ struct FinanceScrollView: View {
             // Page 2 - Recent Expenses
             VStack(spacing: 4) {
                 if !service.recentExpenses.isEmpty {
-                    ScrollView {
-                        VStack(spacing: 6) {
-                            ForEach(service.recentExpenses) { expense in
-                                RecentExpenseRow(expense: expense)
-                            }
-                        }
-                        .padding(.horizontal, 4)
-                        .padding(.top, 28)
-                    }
+                      VStack(spacing: 6) {
+                          ForEach(service.recentExpenses) { expense in
+                              RecentExpenseRow(expense: expense)
+                          }
+                      }
+                      .padding(.horizontal, 4)
+                      .padding(.top, 28)
                 } else {
                     Spacer()
                     Text("No expenses")
@@ -725,11 +718,9 @@ struct FinanceScrollView: View {
 
             // Page 3 - Bar Chart
             if !service.categories.isEmpty {
-                ScrollView {
-                    CategoryBarChart(categories: service.categories)
-                        .padding(.top, 28)
-                }
-                .tag(3)
+                  CategoryBarChart(categories: service.categories)
+                      .padding(.top, 28)
+                      .tag(3)
             }
         }
         .tabViewStyle(.verticalPage)
@@ -772,14 +763,17 @@ struct FitnessRingsView: View {
                 // Outer ring - Savings (152 diameter, 15 stroke)
                 // Background ring
                 Circle()
-                    .stroke(Color.purple.opacity(0.1), lineWidth: 15)
+                    .stroke(Color(red: 0.0, green: 0.78, blue: 0.59).opacity(0.1), lineWidth: 15)
                     .frame(width: 152, height: 152)
 
                 Circle()
                     .trim(from: 0, to: savingsProgress)
                     .stroke(
                         LinearGradient(
-                            colors: [.purple, .pink],
+                            colors: [
+                                Color(red: 0.0, green: 0.78, blue: 0.59),  // #00C896 teal
+                                Color(red: 0.34, green: 0.98, blue: 0.52)  // lighter mint green
+                            ],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         ),
@@ -792,15 +786,17 @@ struct FitnessRingsView: View {
                 // Middle ring - Budget Remaining (114 diameter, 13 stroke, 4px gap)
                 // Background ring
                 Circle()
-                    .stroke(Color.green.opacity(0.05), lineWidth: 13)
+                    .stroke(Color(red: 0.53, green: 0.52, blue: 0.94).opacity(0.1), lineWidth: 13)
                     .frame(width: 114, height: 114)
 
                 Circle()
                     .trim(from: 0, to: budgetRemainingProgress)
                     .stroke(
                         LinearGradient(
-                            colors: budgetRemainingProgress > 0.3 ? [.green, .mint] :
-                                   budgetRemainingProgress > 0.1 ? [.orange, .yellow] : [.red, .pink],
+                            colors: [
+                                Color(red: 0.53, green: 0.52, blue: 0.94),  // #8685EF violet
+                                Color(red: 0.73, green: 0.72, blue: 0.98)   // lighter lavender
+                            ],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         ),
@@ -813,14 +809,17 @@ struct FitnessRingsView: View {
                 // Inner ring - Spent (80 diameter, 11 stroke, 4px gap)
                 // Background ring
                 Circle()
-                    .stroke(Color.blue.opacity(0.05), lineWidth: 11)
+                    .stroke(Color(red: 0.20, green: 0.64, blue: 0.98).opacity(0.1), lineWidth: 11)
                     .frame(width: 80, height: 80)
 
                 Circle()
                     .trim(from: 0, to: spentProgress)
                     .stroke(
                         LinearGradient(
-                            colors: [.blue, .cyan],
+                            colors: [
+                                Color(red: 0.20, green: 0.64, blue: 0.98),  // #34A3FA blue
+                                Color(red: 0.34, green: 0.89, blue: 0.98)   // lighter cyan
+                            ],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         ),
@@ -843,17 +842,17 @@ struct FitnessRingsView: View {
             // Ring legends
             HStack(spacing: 12) {
                 RingLegend(
-                    color: .purple,
+                    color: Color(red: 0.0, green: 0.78, blue: 0.59),
                     label: "Saved",
                     value: income - spent
                 )
                 RingLegend(
-                    color: budgetRemainingProgress > 0.3 ? .green : budgetRemainingProgress > 0.1 ? .orange : .red,
+                    color: Color(red: 0.53, green: 0.52, blue: 0.94),
                     label: "Budget",
                     value: max(0, limit - spent)
                 )
                 RingLegend(
-                    color: .blue,
+                    color: Color(red: 0.20, green: 0.64, blue: 0.98),
                     label: "Spent",
                     value: spent
                 )
@@ -1132,7 +1131,9 @@ struct RecentExpenseRow: View {
                 .frame(width: 20, height: 20)
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(expense.category.capitalized)
+                Text(expense.category.capitalized.split(separator: ":")[
+                  expense.category.contains(":") ? 1 : 0
+                ])
                     .font(.system(size: 10, weight: .medium))
                     .foregroundColor(.white)
 
@@ -1218,7 +1219,7 @@ struct AddExpenseView: View {
                         .font(.system(size: 10))
                         .foregroundColor(.gray)
 
-                    TextField("0", value: $amount, format: .number)
+                    TextField("", value: $amount, format: .number)
                 }
 
                 // Description Input (supports voice dictation automatically on watchOS)
@@ -1289,7 +1290,7 @@ struct AddExpenseView: View {
                             Spacer()
                         }
                     }
-                    .frame(height: 44)
+                    .frame(height: 50)
                 }
                 .buttonStyle(.plain)
                 .disabled(isSubmitting || amount <= 0)
