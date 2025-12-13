@@ -15,6 +15,7 @@ import {
     StyleSheet,
     Text,
     View,
+    VirtualizedList,
 } from "react-native"
 import Ripple from "react-native-material-ripple"
 import Animated from "react-native-reanimated"
@@ -26,7 +27,7 @@ import { init, useWalletContext } from "../WalletContext"
 import WalletLimits from "./Limits"
 import WalletItem, { parseDateToText } from "./WalletItem"
 
-const AnimatedFlashList = Animated.createAnimatedComponent(FlashList)
+const AnimatedList = Animated.createAnimatedComponent(VirtualizedList)
 
 interface Subscription {
     id: string
@@ -301,11 +302,12 @@ export default function WalletList2({
 
     return (
         <>
-            <AnimatedFlashList
+            <AnimatedList
                 keyboardDismissMode={"on-drag"}
                 data={unifiedData}
+                getItem={(_, index) => _[index]}
+                getItemCount={(data) => data.length}
                 renderItem={renderItem as any}
-                getItemType={getItemType as any}
                 keyExtractor={(item: any, index: number) => {
                     switch (item.type) {
                         case "limits":
@@ -325,10 +327,12 @@ export default function WalletList2({
                     }
                 }}
                 onScroll={onScroll}
-                contentContainerStyle={styles.contentContainer}
+                contentContainerStyle={{ padding: 15, paddingTop: 250, paddingBottom: 120 }}
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
                 onEndReached={onEndReached}
                 onEndReachedThreshold={0.75}
+                removeClippedSubviews
+                windowSize={5}
             />
             {showExpenses && <ClearFiltersButton />}
         </>
