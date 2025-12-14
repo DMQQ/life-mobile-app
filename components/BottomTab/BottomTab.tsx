@@ -34,7 +34,6 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         position: "absolute",
         bottom: 20,
-        height: 70,
         alignSelf: "center",
         paddingHorizontal: 15,
         left: 0,
@@ -74,7 +73,7 @@ const SearchButton = ({
     }, [isExpanded])
 
     const searchContainerStyle = useAnimatedStyle(() => {
-        const width = interpolate(searchProgress.value, [0, 1], [70, Layout.screen.width - 30 - 70])
+        const width = interpolate(searchProgress.value, [0, 1], [70, Layout.screen.width - 30 - 60])
 
         return {
             width,
@@ -83,16 +82,12 @@ const SearchButton = ({
 
     const inputContainerStyle = useAnimatedStyle(() => ({
         opacity: searchProgress.value,
-        width: interpolate(searchProgress.value, [0, 1], [0, Layout.screen.width - 30 - 80 - 70]),
+        width: interpolate(searchProgress.value, [0, 1], [0, Layout.screen.width - 30 - 80]),
     }))
 
     const glassWrapper = useAnimatedStyle(
         () => ({
-            width: interpolate(
-                searchProgress.value,
-                [0, 1],
-                [70, Layout.screen.width - 30 - 70 - 15 - (isExpanded && keyboard ? 70 : 0)],
-            ),
+            width: interpolate(searchProgress.value, [0, 1], [70, Layout.screen.width - 30 - 60]),
             paddingLeft: isExpanded ? 15 : 0,
         }),
         [isExpanded, keyboard],
@@ -104,8 +99,8 @@ const SearchButton = ({
                 {
                     position: "absolute",
                     right: 15,
-                    height: 70,
                     justifyContent: "center",
+                    bottom: 0,
                 },
                 searchContainerStyle,
             ]}
@@ -113,7 +108,7 @@ const SearchButton = ({
             <Animated.View style={glassWrapper}>
                 <GlassView
                     style={{
-                        height: 70,
+                        height: isExpanded ? 60 : 70,
                         borderRadius: 100,
                         flexDirection: "row",
                         alignItems: "center",
@@ -140,7 +135,6 @@ const SearchButton = ({
                     )}
 
                     <Pressable
-                        disabled={isExpanded}
                         style={{
                             width: 70,
                             height: 70,
@@ -149,36 +143,12 @@ const SearchButton = ({
                             position: "absolute",
                             right: 0,
                         }}
-                        onPress={toggleSearch}
+                        onPress={isExpanded ? () => onChangeText("") : toggleSearch}
                     >
                         <SymbolView name="magnifyingglass" size={26} tintColor={"#fff"} weight="semibold" />
                     </Pressable>
                 </GlassView>
             </Animated.View>
-
-            {isExpanded && keyboard && (
-                <GlassView
-                    style={{
-                        alignItems: "center",
-                        position: "absolute",
-                        right: 0,
-                        borderRadius: 100,
-                        width: 70,
-                        height: 70,
-                        justifyContent: "center",
-                    }}
-                >
-                    <Pressable
-                        onPress={() => {
-                            Keyboard.dismiss()
-                            onChangeText("")
-                            toggleSearch()
-                        }}
-                    >
-                        <SymbolView name="xmark" size={26} tintColor={"#fff"} weight="semibold" />
-                    </Pressable>
-                </GlassView>
-            )}
         </Animated.View>
     )
 }
@@ -478,9 +448,13 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
         }
     }, [buttonWidth])
 
-    const tabBarWidthStyle = useAnimatedStyle(() => ({
-        width: interpolate(tabsOpacity.value, [0, 1], [70, Layout.screen.width - 30 - 70 - 15]),
-    }))
+    const tabBarWidthStyle = useAnimatedStyle(
+        () => ({
+            width: interpolate(tabsOpacity.value, [0, 1], [60, Layout.screen.width - 30 - 70 - 15]),
+            height: isSearchActive ? 60 : 70,
+        }),
+        [isSearchActive],
+    )
 
     const isOpenSubScreen = (state.routes[state.index].state?.index || 0) > 0
 
@@ -526,14 +500,13 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
         <>
             <Animated.View style={[animatedStyle, styles.container]} entering={FadeInDown} exiting={FadeInDown}>
                 <GestureDetector gesture={panGesture}>
-                    <Animated.View style={[tabBarWidthStyle, { height: 70 }]}>
+                    <Animated.View style={[tabBarWidthStyle]}>
                         <GlassView
                             style={[
                                 styles.innerContainer,
                                 {
                                     borderRadius: 100,
                                     flex: 1,
-                                    height: 70,
                                 },
                             ]}
                         >
@@ -563,7 +536,13 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
                             {isSearchActive && (
                                 <Animated.View
                                     entering={FadeIn.delay(150)}
-                                    style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 70 }}
+                                    style={{
+                                        position: "absolute",
+                                        left: 0,
+                                        top: 0,
+                                        bottom: 0,
+                                        width: isSearchActive ? 60 : 70,
+                                    }}
                                 >
                                     <Pressable
                                         style={{

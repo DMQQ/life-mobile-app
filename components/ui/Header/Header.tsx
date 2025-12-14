@@ -398,8 +398,8 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         gap: 8,
         zIndex: 250,
-        padding: 10,
-        borderRadius: 1000,
+        padding: 8.5,
+        borderRadius: 100,
     },
     animatedTitle: {
         color: Colors.foreground,

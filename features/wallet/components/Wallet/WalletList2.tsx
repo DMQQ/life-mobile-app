@@ -298,8 +298,6 @@ export default function WalletList2({
         )
     }
 
-    console.log("RERENDERING WALLET LIST 2", { onScroll })
-
     return (
         <>
             <AnimatedList
