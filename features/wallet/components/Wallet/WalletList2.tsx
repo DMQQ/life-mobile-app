@@ -19,7 +19,7 @@ import {
 } from "react-native"
 import Ripple from "react-native-material-ripple"
 import Animated from "react-native-reanimated"
-import { FlashList, ListRenderItem } from "@shopify/flash-list"
+import { ListRenderItem } from "@shopify/flash-list"
 import useGetSubscriptions from "../../hooks/useGetSubscriptions"
 import { getInvalidExpenses } from "../../pages/WalletCharts"
 import SubscriptionItem from "../Subscription/SubscriptionItem"
@@ -130,19 +130,19 @@ export default function WalletList2({
     }, [wallet?.expenses])
 
     const calculateDaySum = useCallback((dayExpenses: Expense[]) => {
-        const expenses = dayExpenses.reduce((acc, expense) => {
-            if (getInvalidExpenses(expense)) return acc
-            const value = expense.amount
-            return acc + (isNaN(value) ? 0 : value)
-        }, 0)
-
-        const income = dayExpenses.reduce((acc, expense) => {
-            if (expense.type !== "income") return acc
-            const value = expense.amount
-            return acc + (isNaN(value) ? 0 : value)
-        }, 0)
-
-        return [expenses, income] as [number, number]
+        return dayExpenses.reduce(
+            (acc, expense) => {
+                if (getInvalidExpenses(expense)) return acc
+                const value = expense.amount
+                if (expense.type === "income") {
+                    acc[1] += isNaN(value) ? 0 : value
+                } else {
+                    acc[0] += isNaN(value) ? 0 : value
+                }
+                return acc
+            },
+            [0, 0] as [number, number],
+        )
     }, [])
 
     const unifiedData = useMemo(() => {
@@ -330,7 +330,7 @@ export default function WalletList2({
                 onEndReached={onEndReached}
                 onEndReachedThreshold={0.75}
                 removeClippedSubviews
-                windowSize={5}
+                windowSize={3}
             />
             {showExpenses && <ClearFiltersButton />}
         </>

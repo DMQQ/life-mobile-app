@@ -78,7 +78,6 @@ export default function ContextMenu({ children, items, anchor = "middle" }: Cont
 
     const clonedChildren = useMemo(() => {
         const childElement = children as React.ReactElement
-
         //@ts-ignore
         const originalOnPress = childElement.props.onPress
         //@ts-ignore
@@ -262,7 +261,7 @@ export default function ContextMenu({ children, items, anchor = "middle" }: Cont
     })
 
     const animatedBlur = useAnimatedProps(() => ({
-        intensity: interpolate(progress.value, [0, 1], [0, 20]),
+        intensity: interpolate(progress.value, [0, 1], [0, 50]),
     }))
 
     return (
@@ -274,7 +273,6 @@ export default function ContextMenu({ children, items, anchor = "middle" }: Cont
                     <AnimatedBlurView
                         animatedProps={animatedBlur}
                         style={[StyleSheet.absoluteFillObject]}
-                        intensity={20}
                         tint="dark"
                     />
 

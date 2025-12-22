@@ -80,7 +80,6 @@ export const useActivityManager = (): UseActivityManagerReturn => {
         const syncActivitiesWithBackend = async () => {
             try {
                 const activities = await ExpoLiveActivityModule.getActivityTokens()
-                console.log("Syncing activities with backend:", activities)
 
                 if (serverHook && Object.keys(activities).length > 0) {
                     for (const [activityID, activityData] of Object.entries(activities)) {
@@ -101,10 +100,6 @@ export const useActivityManager = (): UseActivityManagerReturn => {
         }
 
         syncActivitiesWithBackend()
-
-        const syncInterval = setInterval(syncActivitiesWithBackend, 30000)
-
-        return () => clearInterval(syncInterval)
     }, [activeActivities])
 
     useEffect(() => {

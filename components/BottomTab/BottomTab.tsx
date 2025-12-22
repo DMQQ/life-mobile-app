@@ -351,10 +351,7 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
             dragScaleY.value = withSpring(1, { damping: 12, stiffness: 320 })
             isDragging.value = false
 
-            indicatorPosition.value = withSpring(routes.indexOf(activeRoute), {
-                damping: 24,
-                stiffness: 240,
-            })
+            indicatorPosition.value = withTiming(routes.indexOf(activeRoute))
             iconScale.value = withSequence(
                 withSpring(0.85, { damping: 18, stiffness: 320 }),
                 withSpring(1.05, { damping: 10, stiffness: 280 }),
@@ -388,10 +385,7 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
                 dragScale.value = withSpring(1, { damping: 14, stiffness: 280 })
                 dragScaleY.value = withSpring(1, { damping: 12, stiffness: 320 })
                 isDragging.value = false
-                indicatorPosition.value = withSpring(routes.indexOf(activeRoute), {
-                    damping: 18,
-                    stiffness: 240,
-                })
+                indicatorPosition.value = withTiming(routes.indexOf(activeRoute))
             }
         })
         .onEnd((event) => {
@@ -401,10 +395,7 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
             const targetIndex = Math.round(Math.max(0, Math.min(routes.length - 1, finalPosition)))
             const currentActiveIndex = routes.indexOf(activeRoute)
 
-            indicatorPosition.value = withSpring(targetIndex, {
-                damping: 14,
-                stiffness: 200,
-            })
+            indicatorPosition.value = withTiming(targetIndex)
 
             dragScale.value = withSpring(1, { damping: 14, stiffness: 280 })
             dragScaleY.value = withSpring(1, { damping: 12, stiffness: 320 })
@@ -500,7 +491,15 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
         <>
             <Animated.View style={[animatedStyle, styles.container]} entering={FadeInDown} exiting={FadeInDown}>
                 <GestureDetector gesture={panGesture}>
-                    <Animated.View style={[tabBarWidthStyle]}>
+                    <Animated.View
+                        style={[
+                            tabBarWidthStyle,
+                            {
+                                borderRadius: 100,
+                                overflow: "hidden",
+                            },
+                        ]}
+                    >
                         <GlassView
                             style={[
                                 styles.innerContainer,

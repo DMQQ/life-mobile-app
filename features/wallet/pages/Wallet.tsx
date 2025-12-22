@@ -74,8 +74,6 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
 
     useScreenSearch((value) => {
         wallet.dispatch({ type: "SET_QUERY", payload: value.trim() })
-
-        console.log("Search query set to:", value.trim())
     })
 
     const buttons = useMemo(

@@ -1,5 +1,5 @@
 import { memo } from "react"
-import { TextStyle } from "react-native"
+import { Text, TextStyle } from "react-native"
 import Animated, { AnimatedStyle, FadeInDown } from "react-native-reanimated"
 
 interface AnimatedNumberProps {
@@ -11,23 +11,29 @@ interface AnimatedNumberProps {
 
 const AnimatedNumber = memo<AnimatedNumberProps>(
     ({ value, style, formatValue = (val) => val.toFixed(2), delay = 0 }) => {
-        const formattedValue = formatValue(value)
-        const characters = formattedValue.split("")
+        // const formattedValue = formatValue(value)
+        // const characters = formattedValue.split("")
+
+        // return (
+        //     <Animated.View style={{ flexDirection: "row", alignItems: "baseline" }}>
+        //         {characters.map((char, index) => (
+        //             <Animated.Text
+        //                 key={`${value}-${index}-${char}`}
+        //                 entering={FadeInDown.delay(delay + index * 25)
+        //                     .springify()
+        //                     .damping(20)
+        //                     .stiffness(200)}
+        //                 style={style}
+        //             >
+        //                 {char}
+        //             </Animated.Text>
+        //         ))}
+        //     </Animated.View>
+        // )
 
         return (
             <Animated.View style={{ flexDirection: "row", alignItems: "baseline" }}>
-                {characters.map((char, index) => (
-                    <Animated.Text
-                        key={`${value}-${index}-${char}`}
-                        entering={FadeInDown.delay(delay + index * 25)
-                            .springify()
-                            .damping(20)
-                            .stiffness(200)}
-                        style={style}
-                    >
-                        {char}
-                    </Animated.Text>
-                ))}
+                <Animated.Text style={style}>{formatValue(value)}</Animated.Text>
             </Animated.View>
         )
     },

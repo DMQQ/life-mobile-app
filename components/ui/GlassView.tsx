@@ -3,7 +3,7 @@ import { GlassView as GlassViewOriginal, GlassViewProps } from "expo-glass-effec
 import { PropsWithChildren } from "react"
 import Colors from "@/constants/Colors"
 
-const tint = Color(Colors.primary).alpha(0.1).toString()
+const tint = Color(Colors.primary_darker).alpha(0.1).toString()
 
 export default function GlassView({ children, ...rest }: PropsWithChildren<GlassViewProps>) {
     return (

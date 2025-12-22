@@ -1,7 +1,6 @@
 import { Card } from "@/components"
 import Colors from "@/constants/Colors"
 import { Expense } from "@/types"
-import moment from "moment"
 import { memo, useMemo } from "react"
 import { StyleProp, StyleSheet, Text, View, ViewStyle } from "react-native"
 import { AnimatedStyle } from "react-native-reanimated"
@@ -75,6 +74,14 @@ const styles = StyleSheet.create({
         marginTop: 15,
         paddingHorizontal: 15,
     },
+
+    container: {
+        marginBottom: 15,
+        position: "relative",
+    },
+    innerContainer: { flexDirection: "row", height: 40 },
+
+    descContainer: { height: "100%", justifyContent: "center", flex: 3 },
 })
 
 const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
@@ -101,7 +108,9 @@ function dateFormatter(date: string) {
     const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10)
     if (dateStr === yesterday) return "Yesterday"
 
-    return moment(date).fromNow()
+    const [year, month, day] = dateStr.split("-")
+
+    return `${day} ${months[parseInt(month) - 1]} ${year}`
 }
 
 function WalletItem(
@@ -165,26 +174,19 @@ function WalletItem(
     return (
         <ContextMenu anchor="middle" items={items}>
             <Card
-                style={[
-                    {
-                        marginBottom: 15,
-                        position: "relative",
-                    },
-                    item.animatedStyle as any,
-                    item.containerStyle,
-                ]}
+                style={[styles.container, item.animatedStyle as any, item.containerStyle]}
                 ripple
                 disabled={isBalanceEdit}
                 onPress={() => item.handlePress()}
             >
-                <View style={{ flexDirection: "row", height: 40 }}>
+                <View style={styles.innerContainer}>
                     <CategoryIcon
                         style={{ padding: 0 }}
                         type={item.type as "income" | "expense" | "refunded"}
                         category={isBalanceEdit ? "edit" : item.category}
                     />
 
-                    <View style={{ height: "100%", justifyContent: "center", flex: 3 }}>
+                    <View style={styles.descContainer}>
                         <Text style={styles.title} numberOfLines={1}>
                             {item.description}
                         </Text>
@@ -240,4 +242,4 @@ function WalletItem(
     )
 }
 
-export default memo(WalletItem)
+export default WalletItem

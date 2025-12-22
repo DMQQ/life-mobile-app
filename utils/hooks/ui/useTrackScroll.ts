@@ -22,17 +22,18 @@ export default function useTrackScroll(options: UseTrackScrollOptions = {}) {
         try {
             const { scrollYValues, onScroll, setActiveScreen, resetScrollY } = useScrollYContext()
 
-            // Initialize scroll position when screen first mounts
             useEffect(() => {
                 if (screenName) {
-                    // Always initialize to 0 if not already set
                     if (scrollYValues.value[screenName] === undefined) {
+                        resetScrollY(screenName)
+                    }
+
+                    return () => {
                         resetScrollY(screenName)
                     }
                 }
             }, [screenName])
 
-            // Set active screen when focused
             useFocusEffect(
                 useCallback(() => {
                     if (screenName) {
