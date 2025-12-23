@@ -673,10 +673,8 @@ export const UpdateButton: React.FC = () => {
         checkForUpdate()
     }, [])
 
-    if (!isUpdateAvailable) return null
-
     return (
-        <Button icon="download" onPress={downloadAndRestart} disabled={isDownloading}>
+        <Button onPress={downloadAndRestart} disabled={isDownloading}>
             {isDownloading ? "Updating..." : "Update App"}
         </Button>
     )
@@ -701,7 +699,10 @@ const WatchConnectionSection: React.FC = () => {
 
             const isAvailable = ExpoAppleWatch.isWatchAvailable()
             if (!isAvailable) {
-                Alert.alert("Apple Watch Not Available", "Please make sure your Apple Watch is paired and the watch app is installed.")
+                Alert.alert(
+                    "Apple Watch Not Available",
+                    "Please make sure your Apple Watch is paired and the watch app is installed.",
+                )
                 setWatchStatus("Watch not available")
                 return
             }
