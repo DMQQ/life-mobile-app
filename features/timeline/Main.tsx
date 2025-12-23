@@ -11,6 +11,8 @@ import TimelineDetails from "./pages/TimelineDetails"
 import TodosTransferModal from "./pages/TodosTransferModal"
 import CopyTimelineModal from "./pages/CopyTimelineModal"
 import type { TimelineRootStack as RootStackParamList } from "./types"
+import Color from "color"
+import Colors from "@/constants/Colors"
 
 const Stack = createNativeStackNavigator<RootStackParamList>()
 
@@ -77,7 +79,12 @@ export default function TimelineScreens({ route, navigation }: RootStackScreenPr
                 component={CreateTimelineTodos}
                 options={{
                     headerShown: false,
-                    presentation: "modal",
+                    presentation: "formSheet",
+                    sheetGrabberVisible: true,
+                    sheetAllowedDetents: [0.45, 0.9],
+                    contentStyle: {
+                        backgroundColor: Color(Colors.primary).alpha(0.5).string(),
+                    },
                 }}
                 initialParams={{
                     timelineId: "",

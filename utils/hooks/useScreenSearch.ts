@@ -1,6 +1,6 @@
-import { useEffect } from 'react'
-import { useAppSelector } from '../redux'
-import { setSearchHandler } from '../redux/search/search'
+import { useEffect } from "react"
+import { useAppSelector } from "../redux"
+import { setSearchHandler } from "../redux/search/search"
 
 /**
  * Hook for screens that need to handle search functionality
@@ -8,17 +8,11 @@ import { setSearchHandler } from '../redux/search/search'
  * @returns Object with search state and control functions
  */
 export const useScreenSearch = (searchHandler: (value: string) => void) => {
-    const { isActive, value } = useAppSelector(state => state.search)
+    const { isActive, value } = useAppSelector((state) => state.search)
 
     useEffect(() => {
-        // Register the search handler when component mounts
-        setSearchHandler(searchHandler)
-        
-        // Cleanup on unmount
-        return () => {
-            setSearchHandler(() => {})
-        }
-    }, [searchHandler])
+        searchHandler(value)
+    }, [searchHandler, value])
 
     return {
         isSearchActive: isActive,

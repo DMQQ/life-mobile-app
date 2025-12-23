@@ -15,7 +15,7 @@
         "updates": {
             "fallbackToCacheTimeout": 0,
             "url": "https://u.expo.dev/5596a83c-661a-4477-806f-ee4c8a125f7e",
-            "checkAutomatically": "ALWAYS"
+            "checkAutomatically": "NEVER"
         },
         "assetBundlePatterns": ["**/*"],
         "ios": {

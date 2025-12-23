@@ -12,6 +12,7 @@ import Filters from "./pages/Filters"
 import SubscriptionScreen from "./pages/Subscription"
 import Wallet from "./pages/Wallet"
 import WalletCharts from "./pages/WalletCharts"
+import Color from "color"
 
 interface WalletRootStack extends ParamListBase {
     Wallet: {
@@ -87,7 +88,13 @@ export default function WalletScreens({ navigation, route }: WalletScreens<"Wall
                     name="Filters"
                     component={Filters}
                     options={{
-                        presentation: "modal",
+                        presentation: "formSheet",
+                        headerShown: false,
+                        sheetGrabberVisible: true,
+                        sheetAllowedDetents: [0.45, 0.9],
+                        contentStyle: {
+                            backgroundColor: Color(Colors.primary).alpha(0.5).string(),
+                        },
                     }}
                 />
 

@@ -61,8 +61,9 @@ const Forms = (props: ExpenseFiltersProps) => {
     })
 
     return (
-        <View style={{ flex: 1 }}>
+        <View style={{ flex: 1, height: "100%" }}>
             <Header
+                shadow={false}
                 containerStyle={{
                     height: 60,
                     paddingTop: 15,
@@ -191,20 +192,7 @@ const Forms = (props: ExpenseFiltersProps) => {
                     }}
                     isActive={(category) => props.filters.category.includes(category)}
                 />
-                {/* Query for top 5 categories and list here as buttons */}
             </Animated.ScrollView>
-            <View style={{ padding: 15, paddingBottom: 30 }}>
-                <Button
-                    variant="primary"
-                    type="contained"
-                    onPress={() => navigation.goBack()}
-                    style={{
-                        borderRadius: 100,
-                    }}
-                >
-                    Close Filters
-                </Button>
-            </View>
         </View>
     )
 }

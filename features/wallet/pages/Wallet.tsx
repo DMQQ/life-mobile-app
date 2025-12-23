@@ -72,9 +72,12 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
 
     const [showSubscriptionsView, setShowSubscriptionsView] = useState(false)
 
-    useScreenSearch((value) => {
-        wallet.dispatch({ type: "SET_QUERY", payload: value.trim() })
-    })
+    useScreenSearch(
+        useCallback((value) => {
+            wallet.dispatch({ type: "SET_QUERY", payload: value.trim() })
+            console.log("Search query set to:", value)
+        }, []),
+    )
 
     const buttons = useMemo(
         () =>
@@ -97,6 +100,11 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
                                 title: "Edit Balance",
                                 systemImage: "pencil.and.outline",
                                 onPress: handleShowEditSheet,
+                            },
+                            {
+                                title: "Filters",
+                                systemImage: "line.horizontal.3.decrease.circle",
+                                onPress: () => navigation.navigate("Filters"),
                             },
                         ],
                     },

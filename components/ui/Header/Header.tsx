@@ -100,9 +100,11 @@ interface HeaderProps {
      * This is used to set the initial font size of the animated title.
      */
     initialTitleFontSize?: number
+
+    shadow?: boolean
 }
 
-function Header(props: HeaderProps) {
+function Header({ shadow = true, ...props }: HeaderProps) {
     const insets = useSafeAreaInsets()
     const navigation = useNavigation()
 
@@ -143,21 +145,23 @@ function Header(props: HeaderProps) {
 
     return (
         <GlassContainer style={[styles.blurContainer]}>
-            <LinearGradient
-                colors={[
-                    Color("#000").alpha(0.8).toString(),
-                    Color(Colors.primary).alpha(0.6).toString(),
-                    Color(Colors.primary).alpha(0.15).toString(),
-                    "transparent",
-                ]}
-                style={{
-                    position: "absolute",
-                    top: 0,
-                    width: Layout.screen.width,
-                    height: 300,
-                }}
-                pointerEvents="none"
-            />
+            {shadow && (
+                <LinearGradient
+                    colors={[
+                        Color("#000").alpha(0.8).toString(),
+                        Color(Colors.primary).alpha(0.6).toString(),
+                        Color(Colors.primary).alpha(0.15).toString(),
+                        "transparent",
+                    ]}
+                    style={{
+                        position: "absolute",
+                        top: 0,
+                        width: Layout.screen.width,
+                        height: 300,
+                    }}
+                    pointerEvents="none"
+                />
+            )}
             <Animated.View style={{ position: "relative" }}>
                 <View
                     style={[

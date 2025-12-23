@@ -91,7 +91,6 @@ const styles = StyleSheet.create({
 })
 
 import Feedback from "react-native-haptic-feedback"
-import { CommonActions } from "@react-navigation/native"
 
 export default function CreateTimelineTodos({ route, navigation }: TimelineScreenProps<"CreateTimelineTodos">) {
     const mode = route.params?.mode || "create"
@@ -265,6 +264,7 @@ const TodoInput = ({
                     overflow: "hidden",
                     borderWidth: 1,
                     borderColor: Color(Colors.primary_light).lighten(0.3).hex(),
+                    backgroundColor: Color(Colors.primary_light).lighten(0.3).hex(),
                 }}
             >
                 <AnimatedBlurView
