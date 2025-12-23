@@ -17,6 +17,7 @@ import { STORE_KEY } from "./utils/hooks/useUser"
 import { store } from "./utils/redux"
 import { setLogVerbosity } from "@apollo/client"
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet"
+import { SearchMenuProvider } from "./contexts/SearchMenuContext"
 
 setLogVerbosity("error")
 
@@ -82,12 +83,14 @@ export default function App() {
                     <BottomSheetModalProvider>
                         <ThemeContextProvider>
                             <ScrollYContextProvider>
-                                <ApolloProvider client={apolloClient}>
-                                    <Provider store={store}>
-                                        <StatusBar backgroundColor={Colors.primary} />
-                                        <Navigation />
-                                    </Provider>
-                                </ApolloProvider>
+                                <SearchMenuProvider>
+                                    <ApolloProvider client={apolloClient}>
+                                        <Provider store={store}>
+                                            <StatusBar backgroundColor={Colors.primary} />
+                                            <Navigation />
+                                        </Provider>
+                                    </ApolloProvider>
+                                </SearchMenuProvider>
                             </ScrollYContextProvider>
                         </ThemeContextProvider>
                     </BottomSheetModalProvider>

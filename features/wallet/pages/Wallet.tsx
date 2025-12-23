@@ -1,7 +1,7 @@
 import Header, { HeaderItem } from "@/components/ui/Header/Header"
 import Colors from "@/constants/Colors"
 import useTrackScroll from "@/utils/hooks/ui/useTrackScroll"
-import { AntDesign, Entypo, Feather, Ionicons } from "@expo/vector-icons"
+import { AntDesign, Entypo, Ionicons } from "@expo/vector-icons"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { StyleSheet } from "react-native"
 import Haptic from "react-native-haptic-feedback"
@@ -14,6 +14,10 @@ import { useWalletContext } from "../components/WalletContext"
 import useGetWallet from "../hooks/useGetWallet"
 import { WalletScreens } from "../Main"
 import { SafeAreaView } from "react-native-safe-area-context"
+import { useSetSearchMenu } from "@/hooks/useSetSearchMenu"
+import { Icons, CategoryUtils } from "../components/Expense/ExpenseIcon"
+import dayjs from "dayjs"
+import type { SearchMenuItem } from "@/contexts/SearchMenuContext"
 
 const styles = StyleSheet.create({
     container: {
@@ -50,6 +54,26 @@ const styles = StyleSheet.create({
     balance: { color: "rgba(255,255,255,0.6)", fontSize: 16, textAlign: "center", opacity: 0.8 },
 })
 
+const categoryIconMap: Record<string, string> = {
+    housing: "house.fill",
+    transportation: "car.fill",
+    food: "fork.knife",
+    drinks: "mug.fill",
+    shopping: "cart.fill",
+    addictions: "smoke.fill",
+    work: "briefcase.fill",
+    clothes: "tshirt.fill",
+    health: "pills.fill",
+    entertainment: "play.rectangle.fill",
+    utilities: "bolt.fill",
+    debt: "creditcard.fill",
+    education: "book.fill",
+    savings: "banknote.fill",
+    travel: "airplane",
+    animals: "pawprint.fill",
+    gifts: "gift.fill",
+}
+
 export default function WalletScreen({ navigation, route }: WalletScreens<"Wallet">) {
     const { data, loading, refetch, onEndReached, error } = useGetWallet()
     const wallet = useWalletContext()
@@ -75,9 +99,123 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
     useScreenSearch(
         useCallback((value) => {
             wallet.dispatch({ type: "SET_QUERY", payload: value.trim() })
-            console.log("Search query set to:", value)
         }, []),
     )
+
+    const searchMenuItems = useMemo(() => {
+        const categories = Object.keys(Icons).filter((key) => !["edit", "income"].includes(key)) as (keyof typeof Icons)[]
+
+        const categoryMenuItems: SearchMenuItem[] = categories.map((category) => ({
+            title: CategoryUtils.getCategoryName(category),
+            systemImage: categoryIconMap[category],
+            checked: wallet.filters.category.includes(category),
+            onPress: () => {
+                wallet.dispatch({ type: "TOGGLE_CATEGORY", payload: category })
+            },
+        }))
+
+        const typeMenuItems: SearchMenuItem[] = [
+            {
+                title: "All",
+                checked: wallet.filters.type === undefined,
+                onPress: () => wallet.dispatch({ type: "SET_TYPE", payload: undefined }),
+            },
+            {
+                title: "Income",
+                systemImage: "arrow.down.circle",
+                checked: wallet.filters.type === "income",
+                onPress: () => wallet.dispatch({ type: "SET_TYPE", payload: "income" }),
+            },
+            {
+                title: "Expense",
+                systemImage: "arrow.up.circle",
+                checked: wallet.filters.type === "expense",
+                onPress: () => wallet.dispatch({ type: "SET_TYPE", payload: "expense" }),
+            },
+            {
+                title: "Refunded",
+                systemImage: "arrow.uturn.backward.circle",
+                checked: wallet.filters.type === "refunded",
+                onPress: () => wallet.dispatch({ type: "SET_TYPE", payload: "refunded" }),
+            },
+        ]
+
+        const dateMenuItems: SearchMenuItem[] = [
+            {
+                title: "Today",
+                systemImage: "calendar.badge.clock",
+                checked:
+                    wallet.filters.date.from === dayjs().format("YYYY-MM-DD") &&
+                    wallet.filters.date.to === dayjs().format("YYYY-MM-DD"),
+                onPress: () => {
+                    const today = dayjs().format("YYYY-MM-DD")
+                    wallet.dispatch({ type: "SET_DATE_MIN", payload: today })
+                    wallet.dispatch({ type: "SET_DATE_MAX", payload: today })
+                },
+            },
+            {
+                title: "This Week",
+                systemImage: "calendar.badge.plus",
+                checked:
+                    wallet.filters.date.from === dayjs().startOf("week").format("YYYY-MM-DD") &&
+                    wallet.filters.date.to === dayjs().endOf("week").format("YYYY-MM-DD"),
+                onPress: () => {
+                    wallet.dispatch({ type: "SET_DATE_MIN", payload: dayjs().startOf("week").format("YYYY-MM-DD") })
+                    wallet.dispatch({ type: "SET_DATE_MAX", payload: dayjs().endOf("week").format("YYYY-MM-DD") })
+                },
+            },
+            {
+                title: "This Month",
+                systemImage: "calendar",
+                checked:
+                    wallet.filters.date.from === dayjs().startOf("month").format("YYYY-MM-DD") &&
+                    wallet.filters.date.to === dayjs().endOf("month").format("YYYY-MM-DD"),
+                onPress: () => {
+                    wallet.dispatch({ type: "SET_DATE_MIN", payload: dayjs().startOf("month").format("YYYY-MM-DD") })
+                    wallet.dispatch({ type: "SET_DATE_MAX", payload: dayjs().endOf("month").format("YYYY-MM-DD") })
+                },
+            },
+            {
+                title: "Clear Date Filter",
+                systemImage: "xmark.circle",
+                onPress: () => {
+                    wallet.dispatch({ type: "SET_DATE_MIN", payload: "" })
+                    wallet.dispatch({ type: "SET_DATE_MAX", payload: "" })
+                },
+            },
+        ]
+
+        return [
+            {
+                title: "Type",
+                systemImage: "tag",
+                children: typeMenuItems,
+            },
+            {
+                title: "Date Range",
+                systemImage: "calendar",
+                children: dateMenuItems,
+            },
+            {
+                title: "Categories",
+                systemImage: "square.grid.2x2",
+                children: categoryMenuItems,
+            },
+            {
+                title: "Clear All Filters",
+                systemImage: "xmark.circle.fill",
+                destructive: true,
+                onPress: () => wallet.dispatch({ type: "RESET" }),
+            },
+            {
+                title: "Advanced Filters",
+                systemImage: "slider.horizontal.3",
+                onPress: () => navigation.navigate("Filters"),
+            },
+        ]
+    }, [wallet.filters])
+
+    useSetSearchMenu(searchMenuItems)
 
     const buttons = useMemo(
         () =>
@@ -101,15 +239,9 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
                                 systemImage: "pencil.and.outline",
                                 onPress: handleShowEditSheet,
                             },
-                            {
-                                title: "Filters",
-                                systemImage: "line.horizontal.3.decrease.circle",
-                                onPress: () => navigation.navigate("Filters"),
-                            },
                         ],
                     },
                 },
-
                 {
                     onPress: () => navigation.navigate("Charts"),
                     icon: <Ionicons name="stats-chart" size={20} color={Colors.foreground} />,

@@ -27,6 +27,8 @@ import { setSearchActive, setSearchValue, clearSearch } from "../../utils/redux/
 import { useNavigation } from "@react-navigation/native"
 import { LinearGradient } from "expo-linear-gradient"
 import useKeyboard from "@/utils/hooks/useKeyboard"
+import { ContextMenu, Host, Button as SwiftUIButton, Submenu } from "@expo/ui/swift-ui"
+import { useSearchMenu, type SearchMenuItem } from "@/contexts/SearchMenuContext"
 
 const styles = StyleSheet.create({
     container: {
@@ -54,6 +56,38 @@ const styles = StyleSheet.create({
     },
 })
 
+const renderMenuItem = (item: SearchMenuItem): React.ReactNode => {
+    if (item.children && item.children.length > 0) {
+        return (
+            <Submenu
+                key={item.title}
+                button={
+                    <SwiftUIButton systemImage={item.systemImage} variant="glass">
+                        {item.title}
+                    </SwiftUIButton>
+                }
+            >
+                {item.children.map((child) => renderMenuItem(child))}
+            </Submenu>
+        )
+    }
+
+    return (
+        <SwiftUIButton
+            key={item.title}
+            systemImage={item.systemImage}
+            onPress={() => {
+                item.onPress?.()
+                Feedback.trigger("impactLight")
+            }}
+            role={item.destructive ? "destructive" : "default"}
+            variant="glass"
+        >
+            {item.checked ? `✓ ${item.title}` : item.title}
+        </SwiftUIButton>
+    )
+}
+
 const SearchButton = ({
     toggleSearch,
     isExpanded,
@@ -67,16 +101,20 @@ const SearchButton = ({
 }) => {
     const searchProgress = useSharedValue(0)
     const keyboard = useKeyboard()
+    const { menuItems } = useSearchMenu()
+    const hasMenu = menuItems.length > 0
 
     useEffect(() => {
         searchProgress.value = withTiming(isExpanded ? 1 : 0, { duration: 300 })
     }, [isExpanded])
 
     const searchContainerStyle = useAnimatedStyle(() => {
-        const width = interpolate(searchProgress.value, [0, 1], [70, Layout.screen.width - 30 - 60])
+        const width = interpolate(searchProgress.value, [0, 1], [70, Layout.screen.width - 30 - 70])
 
         return {
             width,
+            height: isExpanded ? withTiming(60, { duration: 150 }) : 70,
+            paddingLeft: 15,
         }
     })
 
@@ -87,66 +125,70 @@ const SearchButton = ({
 
     const glassWrapper = useAnimatedStyle(
         () => ({
-            width: interpolate(searchProgress.value, [0, 1], [70, Layout.screen.width - 30 - 60]),
-            paddingLeft: isExpanded ? 15 : 0,
+            width: interpolate(searchProgress.value, [0, 1], [70, Layout.screen.width - 30 - 70]),
+            height: isExpanded ? withTiming(60, { duration: 150 }) : 70,
         }),
         [isExpanded, keyboard],
     )
 
     return (
-        <Animated.View
-            style={[
-                {
-                    position: "absolute",
-                    right: 15,
-                    justifyContent: "center",
-                    bottom: 0,
-                },
-                searchContainerStyle,
-            ]}
-        >
+        <Animated.View style={[searchContainerStyle]}>
             <Animated.View style={glassWrapper}>
-                <GlassView
-                    style={{
-                        height: isExpanded ? 60 : 70,
-                        borderRadius: 100,
-                        flexDirection: "row",
-                        alignItems: "center",
-                    }}
-                >
-                    {isExpanded && (
-                        <Animated.View style={[{ flex: 1, paddingHorizontal: 15 }, inputContainerStyle]}>
-                            <TextInput
-                                value={value}
-                                onChangeText={onChangeText}
-                                style={{
-                                    color: Colors.foreground,
-                                    fontSize: 16,
-                                    paddingHorizontal: 10,
-                                    height: 40,
-                                    flex: 1,
-                                }}
-                                placeholder="Search..."
-                                placeholderTextColor={Color(Colors.foreground).alpha(0.6).string()}
-                                autoFocus={false}
-                                returnKeyType="search"
-                            />
-                        </Animated.View>
-                    )}
-
-                    <Pressable
-                        style={{
-                            width: 70,
-                            height: 70,
-                            justifyContent: "center",
-                            alignItems: "center",
-                            position: "absolute",
-                            right: 0,
-                        }}
-                        onPress={isExpanded ? () => onChangeText("") : toggleSearch}
-                    >
-                        <SymbolView name="magnifyingglass" size={26} tintColor={"#fff"} weight="semibold" />
-                    </Pressable>
+                <GlassView style={{ flex: 1, borderRadius: 100 }}>
+                    <Host>
+                        <ContextMenu activationMethod={"longPress"}>
+                            <ContextMenu.Items>{menuItems.map((item) => renderMenuItem(item))}</ContextMenu.Items>
+                            <ContextMenu.Trigger>
+                                <View
+                                    style={{
+                                        flexDirection: "row",
+                                        height: "100%",
+                                        borderRadius: 100,
+                                    }}
+                                >
+                                    {isExpanded && (
+                                        <Animated.View
+                                            style={[{ flex: 1, paddingHorizontal: 15 }, inputContainerStyle]}
+                                        >
+                                            <TextInput
+                                                value={value}
+                                                onChangeText={onChangeText}
+                                                style={{
+                                                    color: Colors.foreground,
+                                                    fontSize: 16,
+                                                    height: 40,
+                                                    flex: 1,
+                                                }}
+                                                placeholder="Search..."
+                                                placeholderTextColor={Color(Colors.foreground).alpha(0.6).string()}
+                                                autoFocus={false}
+                                                returnKeyType="search"
+                                            />
+                                        </Animated.View>
+                                    )}
+                                    <Pressable
+                                        style={{
+                                            width: 70,
+                                            height: "100%",
+                                            justifyContent: "center",
+                                            alignItems: "center",
+                                            position: "absolute",
+                                            right: 0,
+                                            top: 0,
+                                        }}
+                                        onPress={isExpanded ? () => onChangeText("") : toggleSearch}
+                                    >
+                                        <SymbolView
+                                            name="magnifyingglass"
+                                            size={26}
+                                            tintColor={"#fff"}
+                                            weight="semibold"
+                                        />
+                                    </Pressable>
+                                </View>
+                            </ContextMenu.Trigger>
+                        </ContextMenu>
+                    </Host>
                 </GlassView>
             </Animated.View>
         </Animated.View>

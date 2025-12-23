@@ -15,11 +15,20 @@ import IconButton from "../IconButton/IconButton"
 import { GlassContainer } from "expo-glass-effect"
 import { LinearGradient } from "expo-linear-gradient"
 import GlassView from "../GlassView"
-import { ContextMenu, Host, Button as SwiftUIButton } from "@expo/ui/swift-ui"
+import { ContextMenu, Host, Button as SwiftUIButton, Submenu } from "@expo/ui/swift-ui"
 
 const AnimatedRipple = Animated.createAnimatedComponent(Ripple)
 
 const THRESHOLD = 200
+
+export interface ContextMenuItem {
+    title: string
+    systemImage?: any
+    onPress?: () => void
+    destructive?: boolean
+    checked?: boolean
+    children?: ContextMenuItem[]
+}
 
 export interface HeaderItem {
     onPress: () => void
@@ -32,12 +41,7 @@ export interface HeaderItem {
 
     tintColor?: string
     contextMenu?: {
-        items: {
-            title: string
-            systemImage?: any
-            onPress: () => void
-            destructive?: boolean
-        }[]
+        items: ContextMenuItem[]
     }
 }
 
@@ -132,9 +136,6 @@ function Header({ shadow = true, ...props }: HeaderProps) {
                 right: [] as HeaderItem[],
             },
         )
-        // {
-        //     return (props.buttons || []).filter(Boolean).filter((button) => button!.standalone)
-        // }
     }, [props.buttons])
 
     const regularButtons = useMemo(() => {
@@ -238,27 +239,44 @@ function Header({ shadow = true, ...props }: HeaderProps) {
     )
 }
 
+const renderMenuItem = (item: ContextMenuItem): React.ReactNode => {
+    if (item.children && item.children.length > 0) {
+        return (
+            <Submenu
+                key={item.title}
+                button={
+                    <SwiftUIButton systemImage={item.systemImage} variant="glass">
+                        {item.title}
+                    </SwiftUIButton>
+                }
+            >
+                {item.children.map((child) => renderMenuItem(child))}
+            </Submenu>
+        )
+    }
+
+    return (
+        <SwiftUIButton
+            key={item.title}
+            systemImage={item.systemImage}
+            onPress={() => {
+                item.onPress?.()
+                Haptic.trigger("impactLight")
+            }}
+            role={item.destructive ? "destructive" : "default"}
+            variant="glass"
+        >
+            {item.checked ? `✓ ${item.title}` : item.title}
+        </SwiftUIButton>
+    )
+}
+
 const HeaderIconButton = memo(({ button, index }: { button: HeaderItem; index: number }) => {
     if (button.contextMenu) {
         return (
             <Host>
                 <ContextMenu activationMethod="singlePress">
-                    <ContextMenu.Items>
-                        {button.contextMenu.items.map((item, itemIndex) => (
-                            <SwiftUIButton
-                                key={itemIndex}
-                                systemImage={item.systemImage}
-                                onPress={() => {
-                                    item.onPress?.()
-                                    Haptic.trigger("impactLight")
-                                }}
-                                role={item.destructive ? "destructive" : "default"}
-                                variant="glass"
-                            >
-                                {item.title}
-                            </SwiftUIButton>
-                        ))}
-                    </ContextMenu.Items>
+                    <ContextMenu.Items>{button.contextMenu.items.map((item) => renderMenuItem(item))}</ContextMenu.Items>
                     <ContextMenu.Trigger>
                         <IconButton
                             style={button.style}
