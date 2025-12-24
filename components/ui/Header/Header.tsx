@@ -15,7 +15,7 @@ import IconButton from "../IconButton/IconButton"
 import { GlassContainer } from "expo-glass-effect"
 import { LinearGradient } from "expo-linear-gradient"
 import GlassView from "../GlassView"
-import { ContextMenu, Host, Button as SwiftUIButton, Submenu } from "@expo/ui/swift-ui"
+import ContextMenuView, { type ContextMenuAction } from "react-native-context-menu-view"
 
 const AnimatedRipple = Animated.createAnimatedComponent(Ripple)
 
@@ -239,56 +239,61 @@ function Header({ shadow = true, ...props }: HeaderProps) {
     )
 }
 
-const renderMenuItem = (item: ContextMenuItem): React.ReactNode => {
-    if (item.children && item.children.length > 0) {
-        return (
-            <Submenu
-                key={item.title}
-                button={
-                    <SwiftUIButton systemImage={item.systemImage} variant="glass">
-                        {item.title}
-                    </SwiftUIButton>
-                }
-            >
-                {item.children.map((child) => renderMenuItem(child))}
-            </Submenu>
-        )
+const convertMenuItemToAction = (item: ContextMenuItem): ContextMenuAction => {
+    const action: ContextMenuAction = {
+        title: item.checked ? `✓ ${item.title}` : item.title,
+        systemIcon: item.systemImage,
     }
 
-    return (
-        <SwiftUIButton
-            key={item.title}
-            systemImage={item.systemImage}
-            onPress={() => {
-                item.onPress?.()
-                Haptic.trigger("impactLight")
-            }}
-            role={item.destructive ? "destructive" : "default"}
-            variant="glass"
-        >
-            {item.checked ? `✓ ${item.title}` : item.title}
-        </SwiftUIButton>
-    )
+    if (item.destructive) {
+        action.destructive = true
+    }
+
+    if (item.children && item.children.length > 0) {
+        action.actions = item.children.map((child) => convertMenuItemToAction(child))
+    }
+
+    return action
 }
 
 const HeaderIconButton = memo(({ button, index }: { button: HeaderItem; index: number }) => {
+    const handleMenuPress = (e: any) => {
+        const indexPath = e.nativeEvent.indexPath || [e.nativeEvent.index]
+        const items = button.contextMenu?.items || []
+
+        let currentItem: ContextMenuItem | undefined = undefined
+        let currentLevel = items
+
+        for (const idx of indexPath) {
+            currentItem = currentLevel[idx]
+            if (!currentItem) return
+            if (currentItem.children && currentItem.children.length > 0) {
+                currentLevel = currentItem.children
+            }
+        }
+
+        if (currentItem?.onPress) {
+            currentItem.onPress()
+            Haptic.trigger("impactLight")
+        }
+    }
+
     if (button.contextMenu) {
         return (
-            <Host>
-                <ContextMenu activationMethod="singlePress">
-                    <ContextMenu.Items>{button.contextMenu.items.map((item) => renderMenuItem(item))}</ContextMenu.Items>
-                    <ContextMenu.Trigger>
-                        <IconButton
-                            style={button.style}
-                            onPress={throttle(() => {
-                                button.onPress()
-                                Haptic.trigger("impactLight")
-                            }, 250)}
-                            icon={button.icon}
-                        />
-                    </ContextMenu.Trigger>
-                </ContextMenu>
-            </Host>
+            <ContextMenuView
+                actions={button.contextMenu.items.map((item) => convertMenuItemToAction(item))}
+                onPress={handleMenuPress}
+                dropdownMenuMode={true}
+            >
+                <IconButton
+                    style={button.style}
+                    onPress={throttle(() => {
+                        button.onPress()
+                        Haptic.trigger("impactLight")
+                    }, 250)}
+                    icon={button.icon}
+                />
+            </ContextMenuView>
         )
     } else {
         return (

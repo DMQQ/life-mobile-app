@@ -5,7 +5,8 @@ import { memo, useMemo } from "react"
 import { StyleProp, StyleSheet, Text, View, ViewStyle } from "react-native"
 import { AnimatedStyle } from "react-native-reanimated"
 import { CategoryIcon, Icons } from "../Expense/ExpenseIcon"
-import ContextMenu from "@/components/ui/ContextMenu"
+// import ContextMenu from "@/components/ui/ContextMenu"
+import ContextMenu, { ContextMenuAction } from "react-native-context-menu-view"
 import { useNavigation } from "@react-navigation/native"
 import useDeleteActivity from "../../hooks/useDeleteActivity"
 
@@ -133,23 +134,19 @@ function WalletItem(
     const items = useMemo(
         () => [
             {
-                leading: "pencil",
-                text: "Edit",
+                systemIcon: "pencil",
+                title: "Edit",
                 onPress: () => {
+                    console.log("Editing item:", item)
                     navigation.navigate("CreateExpense", {
                         ...(item as any),
                         isEditing: true,
                     })
                 },
             },
-            // {
-            //     leading: "arrow.trianglehead.clockwise.rotate.90",
-            //     text: "Refund",
-            //     onPress: () => {},
-            // },
             {
-                leading: "clipboard",
-                text: "Duplicate",
+                systemIcon: "clipboard",
+                title: "Duplicate",
                 onPress: () => {
                     navigation.navigate("CreateExpense", {
                         ...(item as any),
@@ -158,10 +155,12 @@ function WalletItem(
                 },
             },
             {
-                leading: "trash",
-                text: "Delete",
+                systemIcon: "trash",
+                title: "Delete",
                 destructive: true,
-                onPress: () => deleteActivity({ variables: { id: item.id } }),
+                onPress: () => {
+                    deleteActivity({ variables: { id: item.id } })
+                },
             },
         ],
         [item],
@@ -172,7 +171,15 @@ function WalletItem(
     }
 
     return (
-        <ContextMenu anchor="middle" items={items}>
+        <ContextMenu
+            actions={items}
+            onPress={(e) => {
+                const action = items[e.nativeEvent.index] as (typeof items)[number]
+                if (action && action.onPress) {
+                    action.onPress()
+                }
+            }}
+        >
             <Card
                 style={[styles.container, item.animatedStyle as any, item.containerStyle]}
                 ripple

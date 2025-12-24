@@ -27,7 +27,7 @@ import { setSearchActive, setSearchValue, clearSearch } from "../../utils/redux/
 import { useNavigation } from "@react-navigation/native"
 import { LinearGradient } from "expo-linear-gradient"
 import useKeyboard from "@/utils/hooks/useKeyboard"
-import { ContextMenu, Host, Button as SwiftUIButton, Submenu } from "@expo/ui/swift-ui"
+import ContextMenuView, { type ContextMenuAction } from "react-native-context-menu-view"
 import { useSearchMenu, type SearchMenuItem } from "@/contexts/SearchMenuContext"
 
 const styles = StyleSheet.create({
@@ -56,36 +56,21 @@ const styles = StyleSheet.create({
     },
 })
 
-const renderMenuItem = (item: SearchMenuItem): React.ReactNode => {
-    if (item.children && item.children.length > 0) {
-        return (
-            <Submenu
-                key={item.title}
-                button={
-                    <SwiftUIButton systemImage={item.systemImage} variant="glass">
-                        {item.title}
-                    </SwiftUIButton>
-                }
-            >
-                {item.children.map((child) => renderMenuItem(child))}
-            </Submenu>
-        )
+const convertMenuItemToAction = (item: SearchMenuItem): ContextMenuAction => {
+    const action: ContextMenuAction = {
+        title: item.checked ? `✓ ${item.title}` : item.title,
+        systemIcon: item.systemImage,
     }
 
-    return (
-        <SwiftUIButton
-            key={item.title}
-            systemImage={item.systemImage}
-            onPress={() => {
-                item.onPress?.()
-                Feedback.trigger("impactLight")
-            }}
-            role={item.destructive ? "destructive" : "default"}
-            variant="glass"
-        >
-            {item.checked ? `✓ ${item.title}` : item.title}
-        </SwiftUIButton>
-    )
+    if (item.destructive) {
+        action.destructive = true
+    }
+
+    if (item.children && item.children.length > 0) {
+        action.actions = item.children.map((child) => convertMenuItemToAction(child))
+    }
+
+    return action
 }
 
 const SearchButton = ({
@@ -114,7 +99,6 @@ const SearchButton = ({
         return {
             width,
             height: isExpanded ? withTiming(60, { duration: 150 }) : 70,
-            paddingLeft: 15,
         }
     })
 
@@ -131,67 +115,83 @@ const SearchButton = ({
         [isExpanded, keyboard],
     )
 
+    const handleMenuPress = (e: any, menuItems: SearchMenuItem[]) => {
+        const indexPath = e.nativeEvent.indexPath || [e.nativeEvent.index]
+
+        let currentItem: SearchMenuItem | undefined = undefined
+        let currentLevel = menuItems
+
+        for (const index of indexPath) {
+            currentItem = currentLevel[index]
+            if (!currentItem) return
+            if (currentItem.children && currentItem.children.length > 0) {
+                currentLevel = currentItem.children
+            }
+        }
+
+        if (currentItem?.onPress) {
+            currentItem.onPress()
+            Feedback.trigger("impactLight")
+        }
+    }
+
     return (
-        <Animated.View style={[searchContainerStyle]}>
-            <Animated.View style={glassWrapper}>
-                <GlassView style={{ flex: 1, borderRadius: 100 }}>
-                    <Host>
-                        <ContextMenu activationMethod={"longPress"}>
-                            <ContextMenu.Items>{menuItems.map((item) => renderMenuItem(item))}</ContextMenu.Items>
-                            <ContextMenu.Trigger>
-                                <View
-                                    style={{
-                                        flexDirection: "row",
-                                        height: "100%",
-                                        borderRadius: 100,
-                                    }}
-                                >
-                                    {isExpanded && (
-                                        <Animated.View
-                                            style={[{ flex: 1, paddingHorizontal: 15 }, inputContainerStyle]}
-                                        >
-                                            <TextInput
-                                                value={value}
-                                                onChangeText={onChangeText}
-                                                style={{
-                                                    color: Colors.foreground,
-                                                    fontSize: 16,
-                                                    height: 40,
-                                                    flex: 1,
-                                                }}
-                                                placeholder="Search..."
-                                                placeholderTextColor={Color(Colors.foreground).alpha(0.6).string()}
-                                                autoFocus={false}
-                                                returnKeyType="search"
-                                            />
-                                        </Animated.View>
-                                    )}
-                                    <Pressable
+        <ContextMenuView
+            actions={menuItems.map((item) => convertMenuItemToAction(item))}
+            onPress={(e) => {
+                handleMenuPress(e, menuItems)
+            }}
+            disabled={!hasMenu}
+            style={{ position: "absolute", right: 15, bottom: 0 }}
+            previewBackgroundColor="transparent"
+        >
+            <Animated.View style={[searchContainerStyle]}>
+                <Animated.View style={glassWrapper}>
+                    <GlassView style={{ flex: 1, borderRadius: 100 }}>
+                        <View
+                            style={{
+                                flexDirection: "row",
+                                height: "100%",
+                                borderRadius: 100,
+                            }}
+                        >
+                            {isExpanded && (
+                                <Animated.View style={[{ flex: 1, paddingHorizontal: 15 }, inputContainerStyle]}>
+                                    <TextInput
+                                        value={value}
+                                        onChangeText={onChangeText}
                                         style={{
-                                            width: 70,
-                                            height: "100%",
-                                            justifyContent: "center",
-                                            alignItems: "center",
-                                            position: "absolute",
-                                            right: 0,
-                                            top: 0,
+                                            color: Colors.foreground,
+                                            fontSize: 16,
+                                            height: 40,
+                                            flex: 1,
                                         }}
-                                        onPress={isExpanded ? () => onChangeText("") : toggleSearch}
-                                    >
-                                        <SymbolView
-                                            name="magnifyingglass"
-                                            size={26}
-                                            tintColor={"#fff"}
-                                            weight="semibold"
-                                        />
-                                    </Pressable>
-                                </View>
-                            </ContextMenu.Trigger>
-                        </ContextMenu>
-                    </Host>
-                </GlassView>
+                                        placeholder="Search..."
+                                        placeholderTextColor={Color(Colors.foreground).alpha(0.6).string()}
+                                        autoFocus={false}
+                                        returnKeyType="search"
+                                    />
+                                </Animated.View>
+                            )}
+                            <Pressable
+                                style={{
+                                    width: 70,
+                                    height: "100%",
+                                    justifyContent: "center",
+                                    alignItems: "center",
+                                    position: "absolute",
+                                    right: 0,
+                                    top: 0,
+                                }}
+                                onPress={isExpanded ? () => onChangeText("") : toggleSearch}
+                            >
+                                <SymbolView name="magnifyingglass" size={26} tintColor={"#fff"} weight="semibold" />
+                            </Pressable>
+                        </View>
+                    </GlassView>
+                </Animated.View>
             </Animated.View>
-        </Animated.View>
+        </ContextMenuView>
     )
 }
 
@@ -538,7 +538,6 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
                             tabBarWidthStyle,
                             {
                                 borderRadius: 100,
-                                overflow: "hidden",
                             },
                         ]}
                     >
@@ -560,7 +559,6 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
                                             top: 5,
                                             height: 60,
                                             borderRadius: 100,
-                                            overflow: "hidden",
                                         },
                                     ]}
                                     entering={FadeIn.delay((routes.indexOf(activeRoute) + 1) * 50)}
