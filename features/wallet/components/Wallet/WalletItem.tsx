@@ -5,8 +5,7 @@ import { memo, useMemo } from "react"
 import { StyleProp, StyleSheet, Text, View, ViewStyle } from "react-native"
 import { AnimatedStyle } from "react-native-reanimated"
 import { CategoryIcon, Icons } from "../Expense/ExpenseIcon"
-// import ContextMenu from "@/components/ui/ContextMenu"
-import ContextMenu, { ContextMenuAction } from "react-native-context-menu-view"
+import ContextMenu from "react-native-context-menu-view"
 import { useNavigation } from "@react-navigation/native"
 import useDeleteActivity from "../../hooks/useDeleteActivity"
 
@@ -32,7 +31,6 @@ interface WalletItemProps extends WalletElement {}
 
 const styles = StyleSheet.create({
     expense_item: {
-        height: 60,
         flexDirection: "row",
         backgroundColor: Colors.primary_lighter,
     },
@@ -179,6 +177,8 @@ function WalletItem(
                     action.onPress()
                 }
             }}
+            previewBackgroundColor="transparent"
+            style={{ height: 85 }}
         >
             <Card
                 style={[styles.container, item.animatedStyle as any, item.containerStyle]}
@@ -249,4 +249,4 @@ function WalletItem(
     )
 }
 
-export default WalletItem
+export default memo(WalletItem)

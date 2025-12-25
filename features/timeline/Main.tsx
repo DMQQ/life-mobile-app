@@ -81,7 +81,7 @@ export default function TimelineScreens({ route, navigation }: RootStackScreenPr
                     headerShown: false,
                     presentation: "formSheet",
                     sheetGrabberVisible: true,
-                    sheetAllowedDetents: [0.45, 0.9],
+                    sheetAllowedDetents: [0.9],
                     contentStyle: {
                         backgroundColor: Color(Colors.primary).alpha(0.5).string(),
                     },

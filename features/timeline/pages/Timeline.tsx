@@ -93,17 +93,6 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
 
     const eventsCount = timeline.data?.timeline?.length || 0
 
-    const dateListAnimatedStyle = useAnimatedStyle(() => {
-        if (!scrollY) return { transform: [{ translateY: 0 }] }
-
-        const scrollValue = scrollY.value
-        const clampedValue = Math.max(0, Math.min(scrollValue, 200))
-
-        return {
-            transform: [{ translateY: interpolate(clampedValue, [0, 200], [0, -175], Extrapolation.CLAMP) }],
-        }
-    })
-
     const renderItem = useCallback(
         ({ item }: { item: any }): any => (<TimelineItem {...item} location="timeline" />) as any,
         [],
@@ -116,6 +105,11 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
         await timeline.refetch()
         setRefreshing(false)
     }
+
+    const renderAnimatedTimelineItem = useCallback(
+        () => <RenderAnimatedItem scrollY={scrollY} timeline={timeline} />,
+        [scrollY, timeline],
+    )
 
     return (
         <View style={{ flex: 1 }}>
@@ -144,20 +138,7 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
                 }
                 animatedSubtitle={`${selectedDateFormatted} - ${eventsCount} Events`}
                 initialTitleFontSize={55 - timeline.query.length}
-                renderAnimatedItem={
-                    !isSearchActive
-                        ? () => (
-                              <Animated.View style={[{ marginTop: 175 }, dateListAnimatedStyle]}>
-                                  <DateList
-                                      dayEvents={timeline.dayEventsSorted}
-                                      selectedDate={timeline.selected}
-                                      setSelected={timeline.setSelected}
-                                      scrollY={scrollY}
-                                  />
-                              </Animated.View>
-                          )
-                        : undefined
-                }
+                renderAnimatedItem={!isSearchActive ? renderAnimatedTimelineItem : undefined}
             />
 
             {isSearchActive ? (
@@ -195,5 +176,31 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
                 </PagerView>
             )}
         </View>
+    )
+}
+
+const RenderAnimatedItem = ({
+    scrollY,
+    timeline,
+}: {
+    timeline: ReturnType<typeof useTimeline>
+    scrollY: Animated.SharedValue<number>
+}) => {
+    const dateListAnimatedStyle = useAnimatedStyle(() => {
+        if (!scrollY) return { transform: [{ translateY: 0 }] }
+
+        return {
+            transform: [{ translateY: interpolate(scrollY.value, [0, 200], [0, -160], Extrapolation.CLAMP) }],
+        }
+    })
+    return (
+        <Animated.View style={[{ marginTop: 175 }, dateListAnimatedStyle]}>
+            <DateList
+                dayEvents={timeline.dayEventsSorted}
+                selectedDate={timeline.selected}
+                setSelected={timeline.setSelected}
+                scrollY={scrollY}
+            />
+        </Animated.View>
     )
 }

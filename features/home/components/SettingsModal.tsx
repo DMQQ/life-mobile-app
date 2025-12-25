@@ -1,4 +1,4 @@
-import { AnimatedSelector, TextInput } from "@/components"
+import { AnimatedSelector } from "@/components"
 import Button from "@/components/ui/Button/Button"
 import Text from "@/components/ui/Text/Text"
 import Colors, { defaultColors } from "@/constants/Colors"
@@ -14,6 +14,7 @@ import { FlatList, Modal, ScrollView, StyleSheet, TouchableOpacity, View, Alert 
 import Feedback from "react-native-haptic-feedback"
 import Ripple from "react-native-material-ripple"
 import * as ExpoAppleWatch from "@/modules/expo-apple-watch"
+import ColorPicker, { Panel1, HueSlider, OpacitySlider, Preview } from "reanimated-color-picker"
 
 interface ColorPalette {
     name: string
@@ -25,6 +26,14 @@ interface ColorPalette {
 }
 
 const colorPalettes: ColorPalette[] = [
+    {
+        name: "24.12.2025",
+        primary: "#111111",
+        secondary: "#334af1",
+        ternary: "#f13c3c",
+        foreground: "#f5f5f5",
+        category: "Finance",
+    },
     {
         name: "Default (Dark Mode)",
         primary: defaultColors.primary,
@@ -261,47 +270,6 @@ const styles = StyleSheet.create({
     colorPickerContainer: {
         marginBottom: 20,
     },
-    colorTypeSelector: {
-        flexDirection: "row",
-        marginBottom: 15,
-        backgroundColor: "rgba(255, 255, 255, 0.1)",
-        borderRadius: 8,
-        padding: 2,
-    },
-    colorTypeButton: {
-        flex: 1,
-        paddingVertical: 8,
-        paddingHorizontal: 12,
-        borderRadius: 6,
-        alignItems: "center",
-    },
-    activeColorType: {
-        backgroundColor: "rgba(255, 255, 255, 0.2)",
-    },
-    colorTypeText: {
-        color: "#fff",
-    },
-    colorPicker: {
-        marginBottom: 15,
-    },
-    colorInput: {},
-    quickColors: {
-        flexDirection: "row",
-        flexWrap: "wrap",
-        gap: 10,
-        marginBottom: 15,
-    },
-    quickColorItem: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        borderWidth: 2,
-        borderColor: "rgba(255, 255, 255, 0.3)",
-    },
-    selectedQuickColor: {
-        borderColor: "#fff",
-        borderWidth: 3,
-    },
     customPreview: {
         flexDirection: "row",
         justifyContent: "space-between",
@@ -398,22 +366,6 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
             ...prev,
             [activeColorType]: color,
         }))
-    }
-
-    const isValidHex = (color: string) => {
-        return /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(color)
-    }
-
-    const getQuickColors = () => {
-        if (activeColorType === "primary") {
-            return ["#0D1421", "#1A1A1A", "#121212", "#0F1419", "#1E1E1E", "#2F2F2F", "#1C1C1C", "#0A0A0A"]
-        } else if (activeColorType === "secondary") {
-            return ["#00C896", "#FF0080", "#87CEEB", "#9D4EDD", "#00E5FF", "#FF6B6B", "#FFD700", "#98FB98"]
-        } else if (activeColorType === "ternary") {
-            return ["#FFA726", "#00FFFF", "#FF69B4", "#FFD60A", "#B39DDB", "#4ECDC4", "#CD7F32", "#F0E68C"]
-        } else {
-            return ["#FFFFFF", "#F5F5F5", "#F0F0F0", "#E8E8E8", "#FAF8FF", "#F8F8FF", "#FFF8F0", "#F0FFF0"]
-        }
     }
 
     const handleModeToggle = (isCustom: boolean) => {
@@ -562,27 +514,43 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
                                                     />
 
                                                     <View style={styles.colorPickerContainer}>
-                                                        <TextInput
-                                                            label={`${activeColorType.charAt(0).toUpperCase() + activeColorType.slice(1)} Color`}
+                                                        <ColorPicker
                                                             value={customColors[activeColorType]}
-                                                            onChangeText={handleColorChange}
-                                                            style={styles.colorInput}
-                                                        />
-
-                                                        <View style={styles.quickColors}>
-                                                            {getQuickColors().map((color) => (
-                                                                <TouchableOpacity
-                                                                    key={color}
-                                                                    style={[
-                                                                        styles.quickColorItem,
-                                                                        { backgroundColor: color },
-                                                                        customColors[activeColorType] === color &&
-                                                                            styles.selectedQuickColor,
-                                                                    ]}
-                                                                    onPress={() => handleColorChange(color)}
-                                                                />
-                                                            ))}
-                                                        </View>
+                                                            onCompleteJS={(colors) => {
+                                                                handleColorChange(colors.hex)
+                                                            }}
+                                                            style={{ width: "100%" }}
+                                                        >
+                                                            <Preview
+                                                                style={{
+                                                                    marginBottom: 20,
+                                                                    height: 60,
+                                                                    borderRadius: 12,
+                                                                    borderWidth: 2,
+                                                                    borderColor: "rgba(255, 255, 255, 0.2)",
+                                                                }}
+                                                            />
+                                                            <Panel1
+                                                                style={{
+                                                                    height: 200,
+                                                                    borderRadius: 12,
+                                                                    marginBottom: 20,
+                                                                }}
+                                                            />
+                                                            <HueSlider
+                                                                style={{
+                                                                    height: 40,
+                                                                    borderRadius: 12,
+                                                                    marginBottom: 10,
+                                                                }}
+                                                            />
+                                                            <OpacitySlider
+                                                                style={{
+                                                                    height: 40,
+                                                                    borderRadius: 12,
+                                                                }}
+                                                            />
+                                                        </ColorPicker>
                                                     </View>
 
                                                     <View style={styles.customPreview}>

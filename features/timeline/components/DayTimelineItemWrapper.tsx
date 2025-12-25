@@ -3,11 +3,11 @@ import { useNavigation } from "@react-navigation/native"
 import { useCallback, useMemo } from "react"
 import { Pressable, View } from "react-native"
 import Color from "color"
-import ContextMenu from "@/components/ui/ContextMenu"
 import useRemoveTimelineMutation from "../hooks/mutation/useRemoveTimelineMutation"
 import { useActivityUtils } from "@/utils/hooks/useActivityManager"
 import useCompleteTimeline from "../hooks/mutation/useCompleteTimeline"
 import DayTimelineItem from "./DayTimelineItem"
+import ContextMenu, { ContextMenuAction } from "react-native-context-menu-view"
 
 interface DayTimelineItemWrapperProps {
     item: any
@@ -51,24 +51,24 @@ export default function DayTimelineItemWrapper({ item, style, onLongPress }: Day
         () =>
             [
                 {
-                    leading: "bell",
-                    text: isPending ? "Activity pending" : "Start live activity",
+                    systemIcon: "bell",
+                    title: isPending ? "Activity pending" : "Start live activity",
                     onPress: startLiveActivityLocally,
                     disabled: isPending,
                 },
                 !timeline.isCompleted && {
-                    leading: "checkmark",
-                    text: "Complete",
+                    systemIcon: "checkmark",
+                    title: "Complete",
                     onPress: completeTimeline,
                 },
                 {
-                    leading: "clipboard",
-                    text: "Copy",
+                    systemIcon: "clipboard",
+                    title: "Copy",
                     onPress: handleCopyPress,
                 },
                 {
-                    leading: "pencil",
-                    text: "Edit",
+                    systemIcon: "pencil",
+                    title: "Edit",
                     onPress: () => {
                         navigation.navigate("TimelineCreate", {
                             mode: "edit",
@@ -78,8 +78,8 @@ export default function DayTimelineItemWrapper({ item, style, onLongPress }: Day
                     },
                 },
                 {
-                    leading: "trash",
-                    text: "Delete",
+                    systemIcon: "trash",
+                    title: "Delete",
                     onPress: () => {
                         remove()
                     },
@@ -100,37 +100,44 @@ export default function DayTimelineItemWrapper({ item, style, onLongPress }: Day
     }
 
     return (
-        <ContextMenu anchor="right" items={items as any} style={[style]}>
+        <ContextMenu
+            style={[style]}
+            actions={items as ContextMenuAction[]}
+            onPress={(e) => {
+                const action = items[e.nativeEvent.index]
+                if (action && action.onPress) {
+                    action.onPress()
+                }
+            }}
+            previewBackgroundColor="transparent"
+        >
             <Pressable
-                onLongPress={() => onLongPress?.(timeline)}
-                onPress={onPress}
                 style={[
                     {
                         backgroundColor: Color(Colors.primary_lighter).lighten(0.25).toString(),
                         borderRadius: 10,
                         overflow: "hidden",
                         borderWidth: 1,
-                        borderColor: "#222222ff",
-                        padding: 10,
+                        borderColor: Color(Colors.primary).lighten(2).toString(),
+
                         flex: 1,
                     },
                     timeline.isCompleted && {
                         opacity: 0.5,
                     },
-                    style,
                 ]}
+                onLongPress={() => onLongPress?.(timeline)}
+                onPress={onPress}
             >
-                <View style={{ flex: 1 }}>
-                    <DayTimelineItem
-                        {...timeline}
-                        location="timeline"
-                        textColor={textColor}
-                        styles={{
-                            flex: 1,
-                        }}
-                        isSmall={style.height < 100}
-                    />
-                </View>
+                <DayTimelineItem
+                    {...timeline}
+                    location="timeline"
+                    textColor={textColor}
+                    styles={{
+                        flex: 1,
+                    }}
+                    isSmall={style.height < 100}
+                />
             </Pressable>
         </ContextMenu>
     )

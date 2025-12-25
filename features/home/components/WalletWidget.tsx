@@ -141,7 +141,6 @@ const MetricCard = ({
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: Colors.primary,
         borderRadius: Rounded.xl,
         overflow: "hidden",
         width: Layout.screen.width - 30,
@@ -150,7 +149,6 @@ const styles = StyleSheet.create({
     },
     loadingContainer: {
         height: 420,
-        backgroundColor: Colors.primary,
         borderRadius: Rounded.xl,
         width: Layout.screen.width - 30,
         alignSelf: "center",

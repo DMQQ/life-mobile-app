@@ -96,6 +96,7 @@ export default StyleSheet.create({
     status: {
         color: "#fff",
         fontWeight: "600",
+        fontSize: 13,
     },
 
     floatingContainer: {

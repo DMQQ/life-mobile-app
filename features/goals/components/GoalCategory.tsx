@@ -7,6 +7,8 @@ import { useMemo } from "react"
 import { View } from "react-native"
 import { FadeIn } from "react-native-reanimated"
 import GoalActivityGrid from "./StatGrid"
+import useDeleteGoals from "../hooks/useDeleteGoals"
+import ContextMenu from "react-native-context-menu-view"
 
 interface GoalCategoryProps extends Group {
     icon: string
@@ -35,42 +37,60 @@ export const GoalCategory = ({ name, icon, description, entries = [], onPress, .
         }))
     }, [entries])
 
+    const { removeGroup } = useDeleteGoals()
+
     return (
-        <Card
-            animated
-            ripple
-            onLongPress={rest.onLongPress}
-            onPress={() => {
-                navigation.navigate("Goal", { id: rest.id })
+        <ContextMenu
+            previewBackgroundColor={"transparent"}
+            actions={[
+                {
+                    title: "Delete Goal",
+                    systemIcon: "trash",
+                    destructive: true,
+                },
+            ]}
+            onPress={(e) => {
+                if (e.nativeEvent.name === "Delete Goal") {
+                    removeGroup({ variables: { id: rest.id } })
+                }
             }}
-            style={{
-                marginVertical: 7.5,
-            }}
-            entering={FadeIn.delay((rest.index + 1) * 50)}
         >
-            <View style={{ pointerEvents: "box-none" }}>
-                <GoalActivityGrid
-                    contributionData={contributionData}
-                    primaryColor={secondary_candidates[rest?.index % secondary_candidates.length]}
-                    goalThreshold={rest.target}
-                />
-            </View>
-            <View
-                style={{
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    alignItems: "flex-end",
-                    paddingBottom: 5,
+            <Card
+                animated
+                ripple
+                onLongPress={rest.onLongPress}
+                onPress={() => {
+                    navigation.navigate("Goal", { id: rest.id })
                 }}
+                style={{
+                    marginVertical: 7.5,
+                }}
+                entering={FadeIn.delay((rest.index + 1) * 50)}
             >
-                <View>
-                    <Text style={{ color: Colors.foreground, marginTop: 15, fontSize: 18, fontWeight: "600" }}>
-                        {name}
-                    </Text>
-                    <Text style={{ color: Colors.foreground, fontSize: 16, marginTop: 10 }}>{description}</Text>
+                <View style={{ pointerEvents: "box-none" }}>
+                    <GoalActivityGrid
+                        contributionData={contributionData}
+                        primaryColor={secondary_candidates[rest?.index % secondary_candidates.length]}
+                        goalThreshold={rest.target}
+                    />
                 </View>
-            </View>
-        </Card>
+                <View
+                    style={{
+                        flexDirection: "row",
+                        justifyContent: "space-between",
+                        alignItems: "flex-end",
+                        paddingBottom: 5,
+                    }}
+                >
+                    <View>
+                        <Text style={{ color: Colors.foreground, marginTop: 15, fontSize: 18, fontWeight: "600" }}>
+                            {name}
+                        </Text>
+                        <Text style={{ color: Colors.foreground, fontSize: 16, marginTop: 10 }}>{description}</Text>
+                    </View>
+                </View>
+            </Card>
+        </ContextMenu>
     )
 }
 

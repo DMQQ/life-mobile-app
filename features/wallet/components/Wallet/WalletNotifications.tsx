@@ -270,7 +270,7 @@ function NotificationCard({
     const { handleDismiss, handlePress } = useReadNotification(notification, onDismiss)
 
     return (
-        <Animated.View style={styles.notificationCard} entering={FadeInDown.delay((index + 1) * 75)}>
+        <View style={styles.notificationCard}>
             <GlassView style={styles.blurContainer}>
                 <Ripple
                     disabled={notification.read}
@@ -310,7 +310,7 @@ function NotificationCard({
                     </View>
                 </Ripple>
             </GlassView>
-        </Animated.View>
+        </View>
     )
 }
 

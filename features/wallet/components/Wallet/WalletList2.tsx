@@ -3,10 +3,10 @@ import Layout from "@/constants/Layout"
 import { Expense, Wallet } from "@/types"
 import { gql, useQuery } from "@apollo/client"
 import { AntDesign } from "@expo/vector-icons"
-import { useNavigation, useRoute } from "@react-navigation/native"
+import { useNavigation } from "@react-navigation/native"
 import Color from "color"
 import moment from "moment"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 import {
     NativeScrollEvent,
     NativeSyntheticEvent,
@@ -64,6 +64,38 @@ type ListItemType =
     | { type: "expense"; data: Expense; expenses: Expense[]; index: number; monthIndex: number }
     | { type: "date-header"; date: string; sum: [number, number] }
 
+const keyExtractor = (item: any, index: number) => {
+    switch (item.type) {
+        case "limits":
+            return "limits"
+        case "subscription-header":
+            return `sub-header-${item.title}`
+        case "subscription":
+            return `sub-${item.data.id}`
+        case "month-header":
+            return `month-${item.data.month}`
+        case "date-header":
+            return `date-${item.date}`
+        case "expense":
+            return `expense-${item.data.id}`
+        default:
+            return `item-${index}`
+    }
+}
+
+const getItem = (data: ListItemType[], index: number) => {
+    return data[index]
+}
+
+const getItemCount = (data: ListItemType[]) => {
+    return data.length
+}
+
+const getItemLayout = (data: ListItemType[] | null | undefined, index: number) => {
+    const ITEM_HEIGHT = 85 // approximate height of each item
+    return { length: ITEM_HEIGHT, offset: ITEM_HEIGHT * index, index }
+}
+
 export default function WalletList2({
     wallet,
     onScroll,
@@ -72,27 +104,10 @@ export default function WalletList2({
     showSubscriptions = true,
     showExpenses = true,
 }: WalletList2Props) {
-    const route = useRoute<any>()
     const navigation = useNavigation<any>()
     const { data: subscriptionsData, refetch: refetchSubscriptions } = useGetSubscriptions()
 
     const [refreshing, setRefreshing] = useState(false)
-
-    useEffect(() => {
-        if (wallet?.expenses?.length === undefined) return
-
-        if (route?.params?.expenseId && wallet?.expenses?.length > 0) {
-            const expense = wallet.expenses.find((expense) => expense.id === route?.params?.expenseId)
-
-            if (!expense) return
-
-            navigation.setParams({ expenseId: null })
-
-            navigation.navigate("Expense", {
-                expense: expense,
-            })
-        }
-    }, [wallet?.expenses?.length])
 
     const groupedSubscriptions = useMemo(() => {
         if (!subscriptionsData?.subscriptions) return { active: [], inactive: [] }
@@ -224,65 +239,58 @@ export default function WalletList2({
         setRefreshing(false)
     }, [refetch, refetchSubscriptions])
 
-    const renderItem: ListRenderItem<ListItemType> = useCallback(
-        ({ item }) => {
-            switch (item.type) {
-                case "limits":
-                    return <WalletLimits navigation={navigation} />
+    const renderItem: ListRenderItem<ListItemType> = useCallback(({ item }) => {
+        switch (item.type) {
+            case "limits":
+                return <WalletLimits navigation={navigation} />
 
-                case "subscription-header":
-                    return (
-                        <View style={styles.subscriptionHeaderContainer}>
-                            <View style={styles.monthRow}>
-                                <Text style={styles.monthText}>{item.title}</Text>
-                                <View style={[styles.countBadge, { backgroundColor: item.color }]}>
-                                    <Text style={styles.countText}>{item.count}</Text>
-                                </View>
+            case "subscription-header":
+                return (
+                    <View style={styles.subscriptionHeaderContainer}>
+                        <View style={styles.monthRow}>
+                            <Text style={styles.monthText}>{item.title}</Text>
+                            <View style={[styles.countBadge, { backgroundColor: item.color }]}>
+                                <Text style={styles.countText}>{item.count}</Text>
                             </View>
                         </View>
-                    )
+                    </View>
+                )
 
-                case "subscription":
-                    return (
-                        <SubscriptionItem
-                            subscription={item.data}
-                            index={item.index}
-                            onPress={() => {
-                                navigation.navigate("Subscription", {
-                                    subscriptionId: item.data.id,
-                                })
-                            }}
-                        />
-                    )
+            case "subscription":
+                return (
+                    <SubscriptionItem
+                        subscription={item.data}
+                        index={item.index}
+                        onPress={() => {
+                            navigation.navigate("Subscription", {
+                                subscriptionId: item.data.id,
+                            })
+                        }}
+                    />
+                )
 
-                case "month-header":
-                    return <MonthExpenseHeader monthData={item.data} monthIndex={item.monthIndex} />
+            case "month-header":
+                return <MonthExpenseHeader monthData={item.data} monthIndex={item.monthIndex} />
 
-                case "date-header":
-                    return <DateHeader date={item.date} sum={item.sum} />
+            case "date-header":
+                return <DateHeader date={item.date} sum={item.sum} />
 
-                case "expense":
-                    return (
-                        <WalletItem
-                            index={item.index}
-                            handlePress={() => {
-                                navigation.navigate("Expense", {
-                                    expense: item.data,
-                                })
-                            }}
-                            {...(item.data as any)}
-                        />
-                    )
+            case "expense":
+                return (
+                    <WalletItem
+                        index={item.index}
+                        handlePress={() => {
+                            navigation.navigate("Expense", {
+                                expense: item.data,
+                            })
+                        }}
+                        {...(item.data as any)}
+                    />
+                )
 
-                default:
-                    return null
-            }
-        },
-        [navigation],
-    )
-
-    const getItemType = useCallback((item: ListItemType) => {
-        return item.type
+            default:
+                return null
+        }
     }, [])
 
     if (
@@ -303,34 +311,19 @@ export default function WalletList2({
             <AnimatedList
                 keyboardDismissMode={"on-drag"}
                 data={unifiedData}
-                getItem={(_, index) => _[index]}
-                getItemCount={(data) => data.length}
+                getItem={getItem}
+                getItemCount={getItemCount}
                 renderItem={renderItem as any}
-                keyExtractor={(item: any, index: number) => {
-                    switch (item.type) {
-                        case "limits":
-                            return "limits"
-                        case "subscription-header":
-                            return `sub-header-${item.title}`
-                        case "subscription":
-                            return `sub-${item.data.id}`
-                        case "month-header":
-                            return `month-${item.data.month}`
-                        case "date-header":
-                            return `date-${item.date}`
-                        case "expense":
-                            return `expense-${item.data.id}`
-                        default:
-                            return `item-${index}`
-                    }
-                }}
+                keyExtractor={keyExtractor}
                 onScroll={onScroll}
                 contentContainerStyle={{ padding: 15, paddingTop: 250, paddingBottom: 120 }}
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
                 onEndReached={onEndReached}
-                onEndReachedThreshold={0.75}
+                onEndReachedThreshold={0.5}
                 removeClippedSubviews
-                windowSize={3}
+                windowSize={4}
+                getItemLayout={getItemLayout}
+                initialNumToRender={6}
             />
             {showExpenses && <ClearFiltersButton />}
         </>

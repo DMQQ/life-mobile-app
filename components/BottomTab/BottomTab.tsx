@@ -104,7 +104,7 @@ const SearchButton = ({
 
     const inputContainerStyle = useAnimatedStyle(() => ({
         opacity: searchProgress.value,
-        width: interpolate(searchProgress.value, [0, 1], [0, Layout.screen.width - 30 - 80]),
+        width: interpolate(searchProgress.value, [0.01, 1], [0, Layout.screen.width - 30 - 80]),
     }))
 
     const glassWrapper = useAnimatedStyle(
@@ -145,9 +145,9 @@ const SearchButton = ({
             style={{ position: "absolute", right: 15, bottom: 0 }}
             previewBackgroundColor="transparent"
         >
-            <Animated.View style={[searchContainerStyle]}>
-                <Animated.View style={glassWrapper}>
-                    <GlassView style={{ flex: 1, borderRadius: 100 }}>
+            <GlassView style={{ flex: 1, borderRadius: 100 }}>
+                <Animated.View style={[searchContainerStyle]}>
+                    <Animated.View style={glassWrapper}>
                         <View
                             style={{
                                 flexDirection: "row",
@@ -188,9 +188,9 @@ const SearchButton = ({
                                 <SymbolView name="magnifyingglass" size={26} tintColor={"#fff"} weight="semibold" />
                             </Pressable>
                         </View>
-                    </GlassView>
+                    </Animated.View>
                 </Animated.View>
-            </Animated.View>
+            </GlassView>
         </ContextMenuView>
     )
 }
@@ -423,11 +423,15 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
             indicatorPosition.value = clampedPosition
 
             if (Math.abs(event.y) > 50) {
-                scheduleOnRN(handleLongPress, activeRoute)
+                const draggedToIndex = Math.round(clampedPosition)
+                const draggedToRoute = routes[draggedToIndex]
+
                 dragScale.value = withSpring(1, { damping: 14, stiffness: 280 })
                 dragScaleY.value = withSpring(1, { damping: 12, stiffness: 320 })
                 isDragging.value = false
                 indicatorPosition.value = withTiming(routes.indexOf(activeRoute))
+
+                scheduleOnRN(handleLongPress, draggedToRoute)
             }
         })
         .onEnd((event) => {

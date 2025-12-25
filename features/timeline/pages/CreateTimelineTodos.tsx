@@ -42,12 +42,6 @@ const styles = StyleSheet.create({
         borderRadius: 100,
         flexDirection: "row-reverse",
     },
-    stickyFooter: {
-        position: "absolute",
-        bottom: 0,
-        left: 0,
-        right: 0,
-    },
 
     todoCard: {
         flexDirection: "row",
@@ -146,9 +140,11 @@ export default function CreateTimelineTodos({ route, navigation }: TimelineScree
                 </Button>
             </View>
 
-            <TodosList dispatch={dispatch} todos={state.todos} />
+            <View style={{ flex: 1 }}>
+                <TodosList dispatch={dispatch} todos={state.todos} />
+            </View>
 
-            <Animated.View style={styles.stickyFooter}>
+            <Animated.View>
                 <TodoInput
                     saveTodos={onSubmit}
                     loading={loading}

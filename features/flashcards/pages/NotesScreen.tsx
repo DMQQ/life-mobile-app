@@ -64,8 +64,6 @@ export default function NotesScreen({ navigation }: ScreenProps<any>) {
         return [...groups]?.sort((a, b) => b.createdAt.localeCompare(a.createdAt)) || []
     }, [groups])
 
-    const [selectedGroupForDeletion, setSelectedGroupForDeletion] = useState<Group | null>(null)
-
     const [refreshing, setRefreshing] = useState(false)
 
     const onRefresh = async () => {
@@ -77,7 +75,7 @@ export default function NotesScreen({ navigation }: ScreenProps<any>) {
     }
 
     const [query, setQuery] = useState("")
-    
+
     // Register search functionality
     useScreenSearch(setQuery)
 
@@ -99,16 +97,8 @@ export default function NotesScreen({ navigation }: ScreenProps<any>) {
                 />
                 <AnimatedFlashList
                     data={groupsSorted}
-                    estimatedItemSize={150}
                     renderItem={({ item: group, index }: any) => (
-                        <FlashCardGroup
-                            {...group}
-                            index={index}
-                            length={groups.length}
-                            onLongPress={() => {
-                                setSelectedGroupForDeletion(group)
-                            }}
-                        />
+                        <FlashCardGroup {...group} index={index} length={groups.length} />
                     )}
                     keyExtractor={(key: any) => key.id.toString()}
                     onScroll={onAnimatedScrollHandler}
@@ -122,11 +112,6 @@ export default function NotesScreen({ navigation }: ScreenProps<any>) {
                     refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
                 />
             </View>
-            <DeleteFlashCardGroupDialog
-                isVisible={!!selectedGroupForDeletion}
-                item={selectedGroupForDeletion || undefined}
-                onDismiss={() => setSelectedGroupForDeletion(null)}
-            />
         </>
     )
 }

@@ -7,7 +7,7 @@ import { FlashList } from "@shopify/flash-list"
 import { useState } from "react"
 import { RefreshControl, View } from "react-native"
 import Feedback from "react-native-haptic-feedback"
-import Animated, { useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated"
+import Animated from "react-native-reanimated"
 import useTrackScroll from "@/utils/hooks/ui/useTrackScroll"
 import { GoalCategory } from "../components/GoalCategory"
 import AnimatedLoader from "../components/GoalsLoader"
@@ -20,8 +20,6 @@ export default function Goals({ navigation }: any) {
 
     const [scrollY, onAnimatedScrollHandler] = useTrackScroll({ screenName: "GoalsScreens" })
 
-    const [selectedGroupForDeletion, setSelectedGroupForDeletion] = useState<{ id: string; name: string } | null>(null)
-
     const [refreshing, setRefreshing] = useState(false)
 
     const onRefresh = async () => {
@@ -33,8 +31,7 @@ export default function Goals({ navigation }: any) {
     }
 
     const [query, setQuery] = useState("")
-    
-    // Register search functionality
+
     useScreenSearch(setQuery)
 
     return (
@@ -55,17 +52,12 @@ export default function Goals({ navigation }: any) {
             <AnimatedFlashList
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
                 data={goals}
-                estimatedItemSize={100}
                 renderItem={({ item, index }: any) => (
                     <GoalCategory
                         index={index}
                         length={goals?.length}
                         onPress={() => {
                             navigation.navigate("Goal", { id: item.id })
-                        }}
-                        onLongPress={() => {
-                            Feedback.trigger("impactMedium")
-                            setSelectedGroupForDeletion(item)
                         }}
                         {...item}
                     />
@@ -77,13 +69,7 @@ export default function Goals({ navigation }: any) {
                     paddingBottom: 100,
                     paddingTop: 300,
                 }}
-                scrollEventThrottle={16}
                 removeClippedSubviews
-            />
-            <DeleteGoalsGroupDialog
-                isVisible={!!selectedGroupForDeletion}
-                item={selectedGroupForDeletion || undefined}
-                onDismiss={() => setSelectedGroupForDeletion(null)}
             />
         </View>
     )

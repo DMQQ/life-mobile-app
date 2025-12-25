@@ -10,10 +10,8 @@ import Animated, {
     Easing,
     useAnimatedProps,
 } from "react-native-reanimated"
-import { GlassView } from "expo-glass-effect"
 import { SFSymbol, SymbolView } from "expo-symbols"
 import Colors from "@/constants/Colors"
-import Color from "color"
 import Feedback from "react-native-haptic-feedback"
 
 interface ContextMenuItemProps {

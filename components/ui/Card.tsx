@@ -1,8 +1,8 @@
 import Colors from "@/constants/Colors"
 import Color from "color"
-import { Pressable, StyleSheet, View, ViewProps } from "react-native"
-import Ripple from "react-native-material-ripple"
-import Animated, { AnimatedProps } from "react-native-reanimated"
+import { useCallback, useRef } from "react"
+import { Pressable, PressableProps, StyleSheet, View, ViewProps } from "react-native"
+import Animated, { AnimatedProps, useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated"
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable)
 
@@ -17,6 +17,34 @@ type CardProps<T extends boolean = false> = {
     ref?: React.RefObject<View | null>
 } & (T extends true ? AnimatedProps<ViewProps> : ViewProps)
 
+const Clickable = (props: PressableProps) => {
+    const scale = useSharedValue(1)
+
+    const animatedStyle = useAnimatedStyle(() => ({
+        transform: [{ scale: scale.value }],
+    }))
+
+    const timeout = useRef<NodeJS.Timeout | null>(null)
+
+    const onPress = useCallback(
+        (ev: any) => {
+            if (timeout.current) {
+                clearTimeout(timeout.current)
+            }
+            scale.value = withTiming(0.97, { duration: 100 })
+
+            props.onPress && props.onPress(ev)
+
+            timeout.current = setTimeout(() => {
+                scale.value = withTiming(1, { duration: 100 })
+            }, 100)
+        },
+        [props.onPress],
+    )
+
+    return <AnimatedPressable {...props} onPress={onPress} style={[animatedStyle, props.style]} />
+}
+
 export default function Card<T extends boolean = false>({
     ref,
 
@@ -26,7 +54,7 @@ export default function Card<T extends boolean = false>({
     ...rest
 }: CardProps<T>) {
     const Component = (
-        animated ? (ripple ? AnimatedPressable : Animated.View) : ripple ? Ripple : View
+        animated ? (ripple ? Clickable : Animated.View) : ripple ? Clickable : View
     ) as React.ComponentType<CardProps<T>>
 
     return (

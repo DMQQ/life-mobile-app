@@ -76,13 +76,12 @@ const categoryIconMap: Record<string, string> = {
 
 export default function WalletScreen({ navigation, route }: WalletScreens<"Wallet">) {
     const { data, loading, refetch, onEndReached, error } = useGetWallet()
-    const wallet = useWalletContext()
-
     const [scrollY, onScroll] = useTrackScroll({ screenName: "WalletScreens" })
 
     useEffect(() => {
         if (route.params?.expenseId && data?.wallet) {
             const expense = data.wallet.expenses.find((expense) => expense.id === route.params?.expenseId)
+            navigation.setParams({ expenseId: null })
             navigation.navigate("Expense", { expense })
         }
     }, [route.params?.expenseId])
@@ -95,127 +94,6 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
     }, [])
 
     const [showSubscriptionsView, setShowSubscriptionsView] = useState(false)
-
-    useScreenSearch(
-        useCallback((value) => {
-            wallet.dispatch({ type: "SET_QUERY", payload: value.trim() })
-        }, []),
-    )
-
-    const searchMenuItems = useMemo(() => {
-        const categories = Object.keys(Icons).filter((key) => !["edit", "income"].includes(key)) as (keyof typeof Icons)[]
-
-        const categoryMenuItems: SearchMenuItem[] = categories.map((category) => ({
-            title: CategoryUtils.getCategoryName(category),
-            systemImage: categoryIconMap[category],
-            checked: wallet.filters.category.includes(category),
-            onPress: () => {
-                wallet.dispatch({ type: "TOGGLE_CATEGORY", payload: category })
-            },
-        }))
-
-        const typeMenuItems: SearchMenuItem[] = [
-            {
-                title: "All",
-                checked: wallet.filters.type === undefined,
-                onPress: () => wallet.dispatch({ type: "SET_TYPE", payload: undefined }),
-            },
-            {
-                title: "Income",
-                systemImage: "arrow.down.circle",
-                checked: wallet.filters.type === "income",
-                onPress: () => wallet.dispatch({ type: "SET_TYPE", payload: "income" }),
-            },
-            {
-                title: "Expense",
-                systemImage: "arrow.up.circle",
-                checked: wallet.filters.type === "expense",
-                onPress: () => wallet.dispatch({ type: "SET_TYPE", payload: "expense" }),
-            },
-            {
-                title: "Refunded",
-                systemImage: "arrow.uturn.backward.circle",
-                checked: wallet.filters.type === "refunded",
-                onPress: () => wallet.dispatch({ type: "SET_TYPE", payload: "refunded" }),
-            },
-        ]
-
-        const dateMenuItems: SearchMenuItem[] = [
-            {
-                title: "Today",
-                systemImage: "calendar.badge.clock",
-                checked:
-                    wallet.filters.date.from === dayjs().format("YYYY-MM-DD") &&
-                    wallet.filters.date.to === dayjs().format("YYYY-MM-DD"),
-                onPress: () => {
-                    const today = dayjs().format("YYYY-MM-DD")
-                    wallet.dispatch({ type: "SET_DATE_MIN", payload: today })
-                    wallet.dispatch({ type: "SET_DATE_MAX", payload: today })
-                },
-            },
-            {
-                title: "This Week",
-                systemImage: "calendar.badge.plus",
-                checked:
-                    wallet.filters.date.from === dayjs().startOf("week").format("YYYY-MM-DD") &&
-                    wallet.filters.date.to === dayjs().endOf("week").format("YYYY-MM-DD"),
-                onPress: () => {
-                    wallet.dispatch({ type: "SET_DATE_MIN", payload: dayjs().startOf("week").format("YYYY-MM-DD") })
-                    wallet.dispatch({ type: "SET_DATE_MAX", payload: dayjs().endOf("week").format("YYYY-MM-DD") })
-                },
-            },
-            {
-                title: "This Month",
-                systemImage: "calendar",
-                checked:
-                    wallet.filters.date.from === dayjs().startOf("month").format("YYYY-MM-DD") &&
-                    wallet.filters.date.to === dayjs().endOf("month").format("YYYY-MM-DD"),
-                onPress: () => {
-                    wallet.dispatch({ type: "SET_DATE_MIN", payload: dayjs().startOf("month").format("YYYY-MM-DD") })
-                    wallet.dispatch({ type: "SET_DATE_MAX", payload: dayjs().endOf("month").format("YYYY-MM-DD") })
-                },
-            },
-            {
-                title: "Clear Date Filter",
-                systemImage: "xmark.circle",
-                onPress: () => {
-                    wallet.dispatch({ type: "SET_DATE_MIN", payload: "" })
-                    wallet.dispatch({ type: "SET_DATE_MAX", payload: "" })
-                },
-            },
-        ]
-
-        return [
-            {
-                title: "Type",
-                systemImage: "tag",
-                children: typeMenuItems,
-            },
-            {
-                title: "Date Range",
-                systemImage: "calendar",
-                children: dateMenuItems,
-            },
-            {
-                title: "Categories",
-                systemImage: "square.grid.2x2",
-                children: categoryMenuItems,
-            },
-            {
-                title: "Clear All Filters",
-                systemImage: "xmark.circle.fill",
-                destructive: true,
-                onPress: () => wallet.dispatch({ type: "RESET" }),
-            },
-            {
-                title: "Advanced Filters",
-                systemImage: "slider.horizontal.3",
-                onPress: () => navigation.navigate("Filters"),
-            },
-        ]
-    }, [wallet.filters])
-
-    useSetSearchMenu(searchMenuItems)
 
     const buttons = useMemo(
         () =>
@@ -302,6 +180,140 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
                 showSubscriptions={showSubscriptionsView}
                 showExpenses={!showSubscriptionsView}
             />
+
+            <WalletSearchContext navigation={navigation} />
         </SafeAreaView>
     )
+}
+
+const WalletSearchContext = ({ navigation }: Omit<WalletScreens<"Wallet">, "route">) => {
+    const wallet = useWalletContext()
+
+    useScreenSearch(
+        useCallback((value) => {
+            wallet.dispatch({ type: "SET_QUERY", payload: value.trim() })
+        }, []),
+    )
+
+    const searchMenuItems = useMemo(() => {
+        const categories = Object.keys(Icons).filter(
+            (key) => !["edit", "income"].includes(key),
+        ) as (keyof typeof Icons)[]
+
+        const categoryMenuItems: SearchMenuItem[] = categories.map((category) => ({
+            title: CategoryUtils.getCategoryName(category),
+            systemImage: categoryIconMap[category],
+            checked: wallet.filters.category.includes(category),
+            onPress: () => {
+                wallet.dispatch({ type: "TOGGLE_CATEGORY", payload: category })
+            },
+        }))
+
+        const typeMenuItems: SearchMenuItem[] = [
+            {
+                title: "All",
+                checked: wallet.filters.type === undefined,
+                onPress: () => wallet.dispatch({ type: "SET_TYPE", payload: undefined }),
+            },
+            {
+                title: "Income",
+                systemImage: "arrow.down.circle",
+                checked: wallet.filters.type === "income",
+                onPress: () => wallet.dispatch({ type: "SET_TYPE", payload: "income" }),
+            },
+            {
+                title: "Expense",
+                systemImage: "arrow.up.circle",
+                checked: wallet.filters.type === "expense",
+                onPress: () => wallet.dispatch({ type: "SET_TYPE", payload: "expense" }),
+            },
+            {
+                title: "Refunded",
+                systemImage: "arrow.uturn.backward.circle",
+                checked: wallet.filters.type === "refunded",
+                onPress: () => wallet.dispatch({ type: "SET_TYPE", payload: "refunded" }),
+            },
+        ]
+
+        const dateMenuItems: SearchMenuItem[] = [
+            {
+                title: "Today",
+                systemImage: "calendar.badge.clock",
+                checked:
+                    wallet.filters.date.from === dayjs().format("YYYY-MM-DD") &&
+                    wallet.filters.date.to === dayjs().format("YYYY-MM-DD"),
+                onPress: () => {
+                    const today = dayjs().format("YYYY-MM-DD")
+                    wallet.dispatch({ type: "SET_DATE_MIN", payload: today })
+                    wallet.dispatch({ type: "SET_DATE_MAX", payload: today })
+                },
+            },
+            {
+                title: "This Week",
+                systemImage: "calendar.badge.plus",
+                checked:
+                    wallet.filters.date.from === dayjs().startOf("week").format("YYYY-MM-DD") &&
+                    wallet.filters.date.to === dayjs().endOf("week").format("YYYY-MM-DD"),
+                onPress: () => {
+                    wallet.dispatch({ type: "SET_DATE_MIN", payload: dayjs().startOf("week").format("YYYY-MM-DD") })
+                    wallet.dispatch({ type: "SET_DATE_MAX", payload: dayjs().endOf("week").format("YYYY-MM-DD") })
+                },
+            },
+            {
+                title: "This Month",
+                systemImage: "calendar",
+                checked:
+                    wallet.filters.date.from === dayjs().startOf("month").format("YYYY-MM-DD") &&
+                    wallet.filters.date.to === dayjs().endOf("month").format("YYYY-MM-DD"),
+                onPress: () => {
+                    wallet.dispatch({
+                        type: "SET_DATE_MIN",
+                        payload: dayjs().startOf("month").format("YYYY-MM-DD"),
+                    })
+                    wallet.dispatch({ type: "SET_DATE_MAX", payload: dayjs().endOf("month").format("YYYY-MM-DD") })
+                },
+            },
+            {
+                title: "Clear Date Filter",
+                systemImage: "xmark.circle",
+                onPress: () => {
+                    wallet.dispatch({ type: "SET_DATE_MIN", payload: "" })
+                    wallet.dispatch({ type: "SET_DATE_MAX", payload: "" })
+                },
+            },
+        ]
+
+        return [
+            {
+                title: "Type",
+                systemImage: "tag",
+                children: typeMenuItems,
+            },
+            {
+                title: "Date Range",
+                systemImage: "calendar",
+                children: dateMenuItems,
+            },
+            {
+                title: "Categories",
+                systemImage: "square.grid.2x2",
+                children: categoryMenuItems,
+            },
+            {
+                title: "Clear All Filters",
+                systemImage: "xmark.circle.fill",
+                destructive: true,
+                onPress: () => wallet.dispatch({ type: "RESET" }),
+            },
+            {
+                title: "Advanced Filters",
+                systemImage: "slider.horizontal.3",
+                onPress: () => navigation.navigate("Filters"),
+            },
+        ]
+    }, [wallet.filters])
+
+    useSetSearchMenu(searchMenuItems)
+
+    return null
 }

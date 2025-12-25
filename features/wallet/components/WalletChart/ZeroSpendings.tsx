@@ -368,7 +368,6 @@ export default function ZeroExpenseStats() {
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: Colors.primary,
         width: Layout.screen.width - 30,
         marginTop: 10,
     },

@@ -91,7 +91,7 @@ export default function WalletScreens({ navigation, route }: WalletScreens<"Wall
                         presentation: "formSheet",
                         headerShown: false,
                         sheetGrabberVisible: true,
-                        sheetAllowedDetents: [0.45, 0.9],
+                        sheetAllowedDetents: [0.9],
                         contentStyle: {
                             backgroundColor: Color(Colors.primary).alpha(0.5).string(),
                         },

@@ -7,10 +7,11 @@ import { GetTimelineQuery } from "../hooks/query/useGetTimeLineQuery"
 import timelineStyles from "./timeline.styles"
 import TodosPreviewSection from "./TodosPreviewSection"
 import { Card } from "@/components"
-import ContextMenu from "@/components/ui/ContextMenu"
+// import ContextMenu from "@/components/ui/ContextMenu"
 import useRemoveTimelineMutation from "../hooks/mutation/useRemoveTimelineMutation"
 import { useActivityUtils } from "@/utils/hooks/useActivityManager"
 import useCompleteTimeline from "../hooks/mutation/useCompleteTimeline"
+import ContextMenu, { ContextMenuAction } from "react-native-context-menu-view"
 
 export default function TimelineItem(
     timeline: GetTimelineQuery & {
@@ -89,50 +90,61 @@ export default function TimelineItem(
 
     const items = useMemo(
         () =>
-            [
-                {
-                    leading: "bell",
-                    text: isPending ? "Activity pending" : "Start live activity",
-                    onPress: startLiveActivityLocally,
-                    disabled: isPending,
-                },
-                !timeline.isCompleted && {
-                    leading: "checkmark",
-                    text: "Complete",
-                    onPress: completeTimeline,
-                },
-                {
-                    leading: "clipboard",
-                    text: "Copy",
-                    onPress: handleCopyPress,
-                },
+            (
+                [
+                    {
+                        systemIcon: "bell",
+                        title: isPending ? "Activity pending" : "Start live activity",
+                        onPress: startLiveActivityLocally,
+                        disabled: isPending,
+                    },
+                    !timeline.isCompleted && {
+                        systemIcon: "checkmark",
+                        title: "Complete",
+                        onPress: completeTimeline,
+                    },
+                    {
+                        systemIcon: "clipboard",
+                        title: "Copy",
+                        onPress: handleCopyPress,
+                    },
 
-                {
-                    leading: "pencil",
-                    text: "Edit",
-                    onPress: () => {
-                        ;(navigation as any).navigate("TimelineCreate", {
-                            mode: "edit",
-                            selectedDate: timeline?.date,
-                            timelineId: timeline?.id,
-                        })
+                    {
+                        systemIcon: "pencil",
+                        title: "Edit",
+                        onPress: () => {
+                            ;(navigation as any).navigate("TimelineCreate", {
+                                mode: "edit",
+                                selectedDate: timeline?.date,
+                                timelineId: timeline?.id,
+                            })
+                        },
                     },
-                },
-                {
-                    leading: "trash",
-                    text: "Delete",
-                    onPress: () => {
-                        remove()
+                    {
+                        systemIcon: "trash",
+                        title: "Delete",
+                        onPress: () => {
+                            remove()
+                        },
+                        destructive: true,
                     },
-                    destructive: true,
-                },
-            ].filter(Boolean),
+                ] as (ContextMenuAction & { onPress?: () => void })[]
+            ).filter(Boolean),
         [completeTimeline, handleCopyPress, navigation, remove, startLiveActivityLocally, timeline],
     )
 
     return (
-        <ContextMenu anchor="right" items={items as any}>
-            <Pressable onLongPress={timeline?.onLongPress} onPress={onPress} style={{ flex: 1 }}>
+        <ContextMenu
+            actions={items as any}
+            previewBackgroundColor="transparent"
+            onPress={(e) => {
+                const action = items[e.nativeEvent.index] as (typeof items)[number]
+                if (action && action.onPress) {
+                    action.onPress()
+                }
+            }}
+        >
+            <Pressable onPress={onPress} style={{ flex: 1 }}>
                 <Card style={[timelineStyles.itemContainer, timeline.styles]}>
                     <View style={[timelineStyles.itemContainerTitleRow]}>
                         <Text
