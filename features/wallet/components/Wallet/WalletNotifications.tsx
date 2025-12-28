@@ -329,10 +329,7 @@ export function FloatingNotificationItem({
 
     return (
         <Pressable onPress={handlePress}>
-            <Animated.View
-                style={[styles.notificationCard, { zIndex: isExpanded ? 9999 : index }]}
-                entering={FadeInDown.delay((index + 1) * 75)}
-            >
+            <Animated.View style={[styles.notificationCard, { zIndex: isExpanded ? 9999 : index }]}>
                 <GlassView style={styles.blurContainer}>
                     <View style={[styles.notificationContent, { paddingRight: 15 }]}>
                         <View

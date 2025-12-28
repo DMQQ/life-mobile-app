@@ -8,7 +8,7 @@ import Color from "color"
 import dayjs from "dayjs"
 import { StyleSheet, Text, View } from "react-native"
 import Animated, { LinearTransition } from "react-native-reanimated"
-import WeeklyComparisonChart from "./WalletChart"
+import ChartSwitcher from "./ChartSwitcher"
 
 const Typography = {
     display: { fontSize: 48, fontWeight: "700", letterSpacing: -1 },
@@ -84,7 +84,7 @@ const AvailableBalanceWidget = ({ data }: Props) => {
             </View>
 
             <View style={styles.chartSection}>
-                <WeeklyComparisonChart />
+                <ChartSwitcher />
                 <ZeroExpenseStats />
             </View>
         </Animated.View>
