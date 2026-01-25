@@ -1,5 +1,6 @@
 import * as Updates from "expo-updates"
 import { useCallback, useEffect, useState } from "react"
+import { Alert } from "react-native"
 
 interface UpdateState {
     isChecking: boolean
@@ -40,6 +41,7 @@ export const useExpoUpdates = (autoCheck = false): UseExpoUpdatesReturn => {
                 isUpdateAvailable: update.isAvailable,
             }))
         } catch (error) {
+            Alert.alert("Update Check Failed", error instanceof Error ? error.message : "Unknown error")
             setState((prev) => ({
                 ...prev,
                 isChecking: false,
@@ -61,6 +63,7 @@ export const useExpoUpdates = (autoCheck = false): UseExpoUpdatesReturn => {
             setState((prev) => ({ ...prev, isDownloading: false, isUpdatePending: true }))
             await Updates.reloadAsync()
         } catch (error) {
+            Alert.alert("Update Download Failed", error instanceof Error ? error.message : "Unknown error")
             setState((prev) => ({
                 ...prev,
                 isDownloading: false,

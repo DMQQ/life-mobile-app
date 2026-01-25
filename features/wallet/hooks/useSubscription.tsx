@@ -63,6 +63,27 @@ const RENEW_SUBSCRIPTION_MUTATION = gql`
     }
 `
 
+const ASSIGN_EXPENSE_TO_SUBSCRIPTION_MUTATION = gql`
+    mutation assignExpenseToSubscription($expenseId: ID!, $subscriptionId: ID) {
+        assignExpenseToSubscription(expenseId: $expenseId, subscriptionId: $subscriptionId) {
+            id
+            amount
+            date
+            description
+            type
+            category
+            balanceBeforeInteraction
+            note
+            subscription {
+                id
+                isActive
+                nextBillingDate
+                dateStart
+            }
+        }
+    }
+`
+
 export default function useSubscription() {
     const [cancelSubscription, cancelSubscriptionState] = useMutation(CANCEL_SUBSCRIPTION_MUTATION, {
         refetchQueries: ["GetWallet"],
@@ -76,6 +97,13 @@ export default function useSubscription() {
         refetchQueries: ["GetWallet"],
     })
 
+    const [assignExpenseToSubscription, assignExpenseToSubscriptionState] = useMutation(
+        ASSIGN_EXPENSE_TO_SUBSCRIPTION_MUTATION,
+        {
+            refetchQueries: ["GetWallet", "Subscriptions"],
+        },
+    )
+
     return {
         cancelSubscription,
         cancelSubscriptionState,
@@ -83,5 +111,7 @@ export default function useSubscription() {
         createSubscriptionState,
         renewSubscription,
         renewSubscriptionState,
+        assignExpenseToSubscription,
+        assignExpenseToSubscriptionState,
     }
 }

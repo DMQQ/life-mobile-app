@@ -641,11 +641,7 @@ export const UpdateButton: React.FC = () => {
         checkForUpdate()
     }, [])
 
-    return (
-        <Button onPress={downloadAndRestart} disabled={isDownloading}>
-            {isDownloading ? "Updating..." : "Update App"}
-        </Button>
-    )
+    return <Button onPress={downloadAndRestart}>{isDownloading ? "Updating..." : "Update App"}</Button>
 }
 
 const WatchConnectionSection: React.FC = () => {

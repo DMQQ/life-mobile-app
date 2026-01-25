@@ -55,7 +55,12 @@ function makePreviousRange(range: string) {
 export default function WalletLimits({ navigation }: { navigation: any }) {
     const [selectedRange, setSelectedRange] = useState("monthly")
 
-    const { data: limits, loading, error } = useQuery(GET_LIMITS, { variables: { range: selectedRange } })
+    const {
+        data: limitsData,
+        loading: isLoading,
+        error,
+        previousData,
+    } = useQuery(GET_LIMITS, { variables: { range: selectedRange } })
 
     const date = useMemo(() => makePreviousRange(selectedRange), [selectedRange])
 
@@ -63,7 +68,12 @@ export default function WalletLimits({ navigation }: { navigation: any }) {
         variables: { range: selectedRange, date },
         skip: !date,
         fetchPolicy: "no-cache",
+        returnPartialData: true,
     })
+
+    const limits = limitsData || previousData
+
+    const loading = isLoading && !limitsData
 
     const prevMap = useMemo(
         () =>
@@ -122,14 +132,6 @@ export default function WalletLimits({ navigation }: { navigation: any }) {
     const handleRangeChange = (range: any) => {
         Feedback.trigger("impactLight")
         setSelectedRange(range)
-    }
-
-    if (loading) {
-        return (
-            <View style={[styles.loadingContainer, { height }]}>
-                <ActivityIndicator size="large" color={Colors.secondary} />
-            </View>
-        )
     }
 
     if (error) {
@@ -202,7 +204,6 @@ export default function WalletLimits({ navigation }: { navigation: any }) {
                         return (
                             <Animated.View
                                 key={limit.id}
-                                entering={FadeIn.delay(index * 100)}
                                 layout={LinearTransition}
                                 style={[
                                     {

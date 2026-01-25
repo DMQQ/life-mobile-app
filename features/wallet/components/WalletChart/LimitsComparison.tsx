@@ -56,15 +56,8 @@ interface LimitBarItem {
   isMiddleInCategory?: boolean;
 }
 
-interface CategoryItem {
-  type: "category";
-  category: string;
-}
-
-type ChartItem = LimitBarItem | CategoryItem;
-
 interface CustomLimitChartProps {
-  data: ChartItem[];
+  data: LimitBarItem[];
   maxValue: number;
 }
 
@@ -72,16 +65,8 @@ const CustomLimitChart: React.FC<CustomLimitChartProps> = ({ data, maxValue }) =
   const [selectedBarInfo, setSelectedBarInfo] = useState<LimitBarItem | null>(null);
 
   const BAR_SPACING = 6;
-  const CHART_HEIGHT = 250;
+  const CHART_HEIGHT = 180;
   const MIN_BAR_HEIGHT = 20;
-
-  // Calculate number of months for label positioning
-  const monthCount = useMemo(() => {
-    const bars = data.filter((item) => item.type === "bar") as LimitBarItem[];
-    if (bars.length === 0) return 0;
-    const firstCategory = bars[0].category;
-    return bars.filter((bar) => bar.category === firstCategory).length;
-  }, [data]);
 
   const getBarHeight = (value: number): number => {
     if (!value || !maxValue) return 0;
@@ -104,7 +89,7 @@ const CustomLimitChart: React.FC<CustomLimitChartProps> = ({ data, maxValue }) =
 
   return (
     <View style={styles.chartWrapper}>
-      <View style={styles.yAxisLabels}>
+      <View style={[styles.yAxisLabels, { height: CHART_HEIGHT }]}>
         {[4, 3, 2, 1, 0].map((i) => (
           <Text key={i} style={styles.yAxisLabel}>
             {Math.round((maxValue / 4) * i)}zł
@@ -113,83 +98,65 @@ const CustomLimitChart: React.FC<CustomLimitChartProps> = ({ data, maxValue }) =
       </View>
 
       <View style={styles.chartContent}>
-        <View style={styles.gridLines}>
+        <View style={[styles.gridLines, { height: CHART_HEIGHT }]}>
           {[0, 1, 2, 3, 4].map((i) => (
             <View key={i} style={[styles.gridLine, { top: CHART_HEIGHT - (CHART_HEIGHT / 4) * i }]} />
           ))}
         </View>
 
-        <ScrollView horizontal showsHorizontalScrollIndicator={true} contentContainerStyle={{ height: CHART_HEIGHT + 80 }}>
-          <View style={{ flexDirection: "row", paddingTop: 10, height: CHART_HEIGHT + 80, marginLeft: 15 }}>
-            {data &&
-              data.map((item, index) => {
-                if (item.type === "category") {
-                  return null;
-                } else if (item.type === "bar") {
-                  const spentHeight = getBarHeight(item.spent);
-                  const limitLineHeight = getLimitLineHeight(item.limit);
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ height: CHART_HEIGHT + 40 }}>
+          <View style={{ flexDirection: "row", paddingTop: 10, height: CHART_HEIGHT + 40, marginLeft: 15 }}>
+            {data.map((item, index) => {
+              const spentHeight = getBarHeight(item.spent);
+              const limitLineHeight = getLimitLineHeight(item.limit);
 
-                  return (
-                    <TouchableOpacity
-                      key={`bar-${index}`}
+              return (
+                <TouchableOpacity
+                  key={`bar-${index}`}
+                  style={[
+                    styles.barContainer,
+                    {
+                      marginRight: BAR_SPACING,
+                      width: BAR_WIDTH,
+                      height: CHART_HEIGHT,
+                    },
+                  ]}
+                  onPress={() => handleBarPress(item)}
+                  activeOpacity={0.7}
+                >
+                  <View
+                    style={[
+                      styles.bar,
+                      {
+                        height: spentHeight,
+                        backgroundColor: item.exceeded ? "#ff6b6b" : item.color,
+                        marginTop: CHART_HEIGHT - spentHeight,
+                      },
+                    ]}
+                  >
+                    {item.spent > 0 && spentHeight > 30 && (
+                      <View style={styles.barValueLabelWrapper}>
+                        <Text style={styles.barValueLabelInside}>{item.spent.toFixed(0)}</Text>
+                      </View>
+                    )}
+                  </View>
+
+                  {item.limit > 0 && (
+                    <View
                       style={[
-                        styles.barContainer,
+                        styles.limitLine,
                         {
-                          marginRight: item.isLastInCategory ? GROUP_SPACING : BAR_SPACING,
-                          width: BAR_WIDTH,
+                          bottom: limitLineHeight,
+                          borderColor: item.exceeded ? "#ff3333" : "#4CAF50",
                         },
                       ]}
-                      onPress={() => handleBarPress(item)}
-                      activeOpacity={0.7}
-                    >
-                      <View
-                        style={[
-                          styles.bar,
-                          {
-                            height: spentHeight,
-                            backgroundColor: item.exceeded ? "#ff6b6b" : item.color,
-                            marginTop: CHART_HEIGHT - spentHeight,
-                          },
-                        ]}
-                      >
-                        {item.spent > 0 && (
-                          <View style={styles.barValueLabelWrapper}>
-                            <Text style={styles.barValueLabelInside}>{item.spent.toFixed(0)}</Text>
-                          </View>
-                        )}
-                      </View>
+                    />
+                  )}
 
-                      {item.limit > 0 && (
-                        <View
-                          style={[
-                            styles.limitLine,
-                            {
-                              bottom: limitLineHeight,
-                              borderColor: item.exceeded ? "#ff3333" : "#4CAF50",
-                            },
-                          ]}
-                        />
-                      )}
-
-                      <Text style={[styles.monthLabel, { color: item.color }]}>{moment(item.month).format("MMM")}</Text>
-                      {item.isMiddleInCategory && (
-                        <View
-                          style={[
-                            styles.categoryLabelContainer,
-                            {
-                              left: -((monthCount * BAR_WIDTH + (monthCount - 1) * BAR_SPACING) / 2 - BAR_WIDTH / 2),
-                              width: monthCount * BAR_WIDTH + (monthCount - 1) * BAR_SPACING,
-                            },
-                          ]}
-                        >
-                          <Text style={styles.categoryLabelText}>{CategoryUtils.getCategoryName(item.category)}</Text>
-                        </View>
-                      )}
-                    </TouchableOpacity>
-                  );
-                }
-                return null;
-              })}
+                  <Text style={[styles.monthLabel, { color: item.color }]}>{moment(item.month).format("MMM")}</Text>
+                </TouchableOpacity>
+              );
+            })}
           </View>
         </ScrollView>
 
@@ -199,7 +166,6 @@ const CustomLimitChart: React.FC<CustomLimitChartProps> = ({ data, maxValue }) =
             <Text style={[styles.tooltipValue, { color: selectedBarInfo.exceeded ? "#ff6b6b" : "#4CAF50" }]}>
               {selectedBarInfo.spent.toFixed(2)}zł / {selectedBarInfo.limit.toFixed(2)}zł
             </Text>
-            <Text style={styles.tooltipCategory}>{CategoryUtils.getCategoryName(selectedBarInfo.category)}</Text>
             {selectedBarInfo.exceeded && <Text style={styles.tooltipExceeded}>Limit Exceeded!</Text>}
           </View>
         )}
@@ -211,7 +177,12 @@ const CustomLimitChart: React.FC<CustomLimitChartProps> = ({ data, maxValue }) =
 const blueText = Color(Colors.primary).lighten(10).string();
 
 const BAR_WIDTH = 35;
-const GROUP_SPACING = 40;
+
+interface CategoryChartData {
+  category: string;
+  data: LimitBarItem[];
+  maxValue: number;
+}
 
 const LimitsComparisonComponent = ({ dateRange }: { dateRange: [string, string] }) => {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -233,9 +204,9 @@ const LimitsComparisonComponent = ({ dateRange }: { dateRange: [string, string] 
     setShowGeneral(true);
   };
 
-  const { chartData, categories, maxValue } = useMemo(() => {
+  const { categoryCharts, categories } = useMemo(() => {
     if (!data?.statisticsSpendingsLimits || !Array.isArray(data.statisticsSpendingsLimits)) {
-      return { chartData: [], categories: [], maxValue: 100 };
+      return { categoryCharts: [], categories: [] };
     }
 
     const allCategories = new Set<string>();
@@ -251,14 +222,10 @@ const LimitsComparisonComponent = ({ dateRange }: { dateRange: [string, string] 
 
     const categoriesArray = Array.from(allCategories);
     const categoriesToShow = selectedCategories.length === 0 && showGeneral ? ["general", ...categoriesArray] : selectedCategories;
-    let chartDataArray: ChartItem[] = [];
-    let allValues: number[] = [];
 
-    categoriesToShow.forEach((category) => {
-      chartDataArray.push({
-        type: "category",
-        category,
-      });
+    const charts: CategoryChartData[] = categoriesToShow.map((category) => {
+      const chartData: LimitBarItem[] = [];
+      const values: number[] = [];
 
       data.statisticsSpendingsLimits.forEach((monthData: MonthLimitData, monthIndex: number) => {
         let spent = 0;
@@ -278,9 +245,9 @@ const LimitsComparisonComponent = ({ dateRange }: { dateRange: [string, string] 
           }
         }
 
-        allValues.push(spent, limit);
+        values.push(spent, limit);
 
-        chartDataArray.push({
+        chartData.push({
           type: "bar",
           category,
           month: monthData.month,
@@ -293,14 +260,19 @@ const LimitsComparisonComponent = ({ dateRange }: { dateRange: [string, string] 
           isMiddleInCategory: monthIndex === Math.floor(data.statisticsSpendingsLimits.length / 2),
         });
       });
+
+      const maxValue = values.length > 0 ? Math.max(...values) * 1.1 : 100;
+
+      return {
+        category,
+        data: chartData,
+        maxValue,
+      };
     });
 
-    const maxValueCalculated = allValues.length > 0 ? Math.max(...allValues) * 1.1 : 100;
-
     return {
-      chartData: chartDataArray,
+      categoryCharts: charts,
       categories: categoriesArray,
-      maxValue: maxValueCalculated,
     };
   }, [data, selectedCategories, showGeneral]);
 
@@ -382,8 +354,40 @@ const LimitsComparisonComponent = ({ dateRange }: { dateRange: [string, string] 
         ))}
       </ScrollView>
 
-      {chartData.length > 0 ? (
-        <CustomLimitChart data={chartData} maxValue={maxValue} />
+      {categoryCharts.length > 0 ? (
+        <ScrollView
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          decelerationRate="fast"
+          snapToInterval={Layout.screen.width - 30}
+          snapToAlignment="start"
+          contentContainerStyle={styles.horizontalChartsContainer}
+        >
+          {categoryCharts.map((chart) => (
+            <View key={chart.category} style={styles.categoryChartContainer}>
+              <View style={styles.categoryChartHeader}>
+                {Icons[chart.category as keyof typeof Icons]?.icon ? (
+                  <View style={{ marginRight: 8 }}>
+                    {React.cloneElement(Icons[chart.category as keyof typeof Icons]?.icon, {
+                      size: 18,
+                      color: Icons[chart.category as keyof typeof Icons]?.backgroundColor,
+                    })}
+                  </View>
+                ) : null}
+                <Text
+                  style={[
+                    styles.categoryChartTitle,
+                    { color: Icons[chart.category as keyof typeof Icons]?.backgroundColor || Colors.secondary },
+                  ]}
+                >
+                  {CategoryUtils.getCategoryName(chart.category)}
+                </Text>
+              </View>
+              <CustomLimitChart data={chart.data} maxValue={chart.maxValue} />
+            </View>
+          ))}
+        </ScrollView>
       ) : (
         <View style={styles.noDataContainer}>
           <Text style={styles.noDataText}>No data available for the selected date range</Text>
@@ -473,12 +477,11 @@ const styles = StyleSheet.create({
   },
   chartWrapper: {
     flexDirection: "row",
-    height: 330,
+    height: 230,
     marginTop: 10,
   },
   yAxisLabels: {
-    width: 40,
-    height: 250,
+    width: 50,
     justifyContent: "space-between",
     alignItems: "flex-end",
     paddingRight: 5,
@@ -496,7 +499,6 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    height: 250,
   },
   gridLine: {
     position: "absolute",
@@ -505,25 +507,8 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: Color(Colors.primary).lighten(0.8).string(),
   },
-  categoryLabelContainer: {
-    position: "absolute",
-    bottom: -50,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  categoryLabelText: {
-    color: Colors.foreground,
-    fontSize: 12,
-    fontWeight: "bold",
-    backgroundColor: Color(Colors.primary).lighten(0.3).string(),
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 4,
-    textAlign: "center",
-  },
   barContainer: {
     alignItems: "center",
-    height: 250,
     position: "relative",
   },
   bar: {
@@ -617,6 +602,22 @@ const styles = StyleSheet.create({
   legendText: {
     color: Colors.foreground,
     fontSize: 12,
+  },
+  horizontalChartsContainer: {
+    flexDirection: "row",
+  },
+  categoryChartContainer: {
+    width: Layout.screen.width - 30,
+  },
+  categoryChartHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 5,
+    paddingLeft: 10,
+  },
+  categoryChartTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });
 

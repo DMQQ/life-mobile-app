@@ -230,14 +230,10 @@ export default function PredictionView(
     const categoryIcon = Icons[item.category as keyof typeof Icons]
     const iconBackgroundColor = categoryIcon?.backgroundColor || "#00FFC8"
 
-    if (item.description.trim().toLowerCase() !== item.currentEntryText.trim().toLowerCase()) return null
-
     return (
         <AnimatedPressable
             key={item.description}
             onPress={item.applyPrediction}
-            entering={slideInUpWithScale}
-            exiting={slideOutDownWithScale}
             style={[
                 pulseStyle,
                 {

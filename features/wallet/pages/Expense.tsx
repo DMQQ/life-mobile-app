@@ -1,4 +1,5 @@
 import Header from "@/components/ui/Header/Header"
+import Select from "@/components/ui/Select/Select"
 import Colors from "@/constants/Colors"
 import Url from "@/constants/Url"
 import { Expense as ExpenseType } from "@/types"
@@ -14,6 +15,7 @@ import WalletItem, { CategoryIcon } from "../components/Wallet/WalletItem"
 import useDeleteActivity from "../hooks/useDeleteActivity"
 import useRefund from "../hooks/useRefundExpense"
 import useSubscription from "../hooks/useSubscription"
+import useGetSubscriptions from "../hooks/useGetSubscriptions"
 
 import { CategoryUtils, Icons } from "../components/Expense/ExpenseIcon"
 
@@ -213,12 +215,34 @@ export default function Expense({ route: { params }, navigation }: any) {
     }
 
     const subscription = useSubscription()
+    const { data: subscriptionsData } = useGetSubscriptions()
     const isSubscriptionLoading =
-        subscription.createSubscriptionState.loading || subscription.cancelSubscriptionState.loading
+        subscription.createSubscriptionState.loading ||
+        subscription.cancelSubscriptionState.loading ||
+        subscription.assignExpenseToSubscriptionState.loading
 
     const hasSubscription = !!selected?.subscription?.id
 
     const isSubscriptionActive = hasSubscription && selected?.subscription?.isActive
+
+    const subscriptionOptions = [{ id: null, description: "None" }, ...(subscriptionsData?.subscriptions || [])]
+
+    const handleAssignSubscription = async (subscriptionId: string | null) => {
+        try {
+            const result = await subscription.assignExpenseToSubscription({
+                variables: {
+                    expenseId: selected.id,
+                    subscriptionId,
+                },
+            })
+
+            if (result.data?.assignExpenseToSubscription) {
+                setSelected(result.data.assignExpenseToSubscription)
+            }
+        } catch (error) {
+            Alert.alert("Error", "Failed to assign subscription. Please try again.")
+        }
+    }
 
     const handleSubscriptionAction = () => {
         const actionTitle = hasSubscription
@@ -456,7 +480,7 @@ export default function Expense({ route: { params }, navigation }: any) {
                                 {
                                     backgroundColor: "transparent",
                                     opacity: selected?.type === "refunded" ? 0.5 : 1,
-                                    justifyContent: "space-between"
+                                    justifyContent: "space-between",
                                 },
                             ]}
                             onPress={selected?.type === "refunded" ? undefined : handleRefund}
@@ -558,6 +582,35 @@ export default function Expense({ route: { params }, navigation }: any) {
                             </Text>
                             {isSubscriptionLoading && <ActivityIndicator size="small" color={Colors.ternary} />}
                         </Ripple>
+
+                        {/* Assign to existing subscription */}
+                        <View style={{ paddingHorizontal: 15, paddingTop: 10 }}>
+                            <Text style={{ color: Colors.secondary_light_2, fontSize: 14, marginBottom: 10 }}>
+                                Assign to subscription
+                            </Text>
+                            <Select
+                                options={subscriptionOptions.map((s) => s.description)}
+                                selected={
+                                    selected?.subscription?.id
+                                        ? [
+                                              subscriptionOptions.find((s) => s.id === selected?.subscription?.id)
+                                                  ?.description || "None",
+                                          ]
+                                        : ["None"]
+                                }
+                                setSelected={(selectedItems) => {
+                                    const selectedDescription = selectedItems[0]
+                                    const selectedSub = subscriptionOptions.find(
+                                        (s) => s.description === selectedDescription,
+                                    )
+                                    if (selectedSub) {
+                                        handleAssignSubscription(selectedSub.id)
+                                    }
+                                }}
+                                closeOnSelect
+                                placeholderText="Select subscription"
+                            />
+                        </View>
                     </View>
                 </View>
 

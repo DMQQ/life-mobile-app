@@ -14,6 +14,7 @@ import Animated, {
     withSpring,
     withTiming,
 } from "react-native-reanimated"
+import { LiquidGlassView } from "@callstack/liquid-glass"
 
 const NumbersPad = memo(
     ({
@@ -40,7 +41,10 @@ const NumbersPad = memo(
                     [7, 8, 9],
                     [".", 0, "C"],
                 ].map((row) => (
-                    <View style={{ flexDirection: "row", gap: 15 }} key={row.toString()}>
+                    <View
+                        style={{ flexDirection: "row", gap: 15, justifyContent: "space-around" }}
+                        key={row.toString()}
+                    >
                         {row.map((num) => (
                             <NumpadNumber
                                 navigation={navigation}
@@ -92,10 +96,14 @@ const NumpadNumber = (props: {
     const interval = useRef<NodeJS.Timeout | null>(null)
 
     return (
-        <View style={{ width: "30%", height: 75, overflow: "hidden" }}>
+        <LiquidGlassView
+            interactive
+            tintColor={Colors.primary_light}
+            style={{ width: "25%", height: 80, overflow: "hidden", borderRadius: 100 }}
+        >
             <AnimatedRipple
                 rippleCentered
-                rippleColor={Colors.primary_light}
+                rippleColor={Colors.primary}
                 onPress={onPress}
                 onLongPress={() => {
                     if (interval.current) clearInterval(interval.current!)
@@ -119,7 +127,7 @@ const NumpadNumber = (props: {
                     </Text>
                 )}
             </AnimatedRipple>
-        </View>
+        </LiquidGlassView>
     )
 }
 
