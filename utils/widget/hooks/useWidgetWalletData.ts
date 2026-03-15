@@ -35,7 +35,7 @@ export const useWidgetWalletData = () => {
     useEffect(() => {
         if (!wallet) return
 
-        const recentExpenses = wallet.expenses.slice(0, 5).map(transformExpenseForWidget)
+        const recentExpenses = wallet.expenses2?.flatMap((m) => m.expenses).slice(0, 5).map(transformExpenseForWidget) ?? []
 
         const monthlySpent = statistics?.statistics?.expense || 0
 

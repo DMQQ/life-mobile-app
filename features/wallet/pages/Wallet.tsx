@@ -80,7 +80,9 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
 
     useEffect(() => {
         if (route.params?.expenseId && data?.wallet) {
-            const expense = data.wallet.expenses.find((expense) => expense.id === route.params?.expenseId)
+            const expense = data.wallet.expenses2
+                .flatMap((m) => m.expenses)
+                .find((expense) => expense.id === route.params?.expenseId)
             navigation.setParams({ expenseId: null })
             navigation.navigate("Expense", { expense })
         }

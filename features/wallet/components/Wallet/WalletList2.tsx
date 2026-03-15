@@ -1,12 +1,12 @@
 import Colors, { Sizing } from "@/constants/Colors"
 import Layout from "@/constants/Layout"
-import { Expense, Wallet } from "@/types"
+import { Expense, MonthlyExpenses, Wallet } from "@/types"
 import { gql, useQuery } from "@apollo/client"
 import { AntDesign } from "@expo/vector-icons"
 import { useNavigation } from "@react-navigation/native"
 import Color from "color"
 import moment from "moment"
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import {
     NativeScrollEvent,
     NativeSyntheticEvent,
@@ -18,7 +18,7 @@ import {
     VirtualizedList,
 } from "react-native"
 import Ripple from "react-native-material-ripple"
-import Animated from "react-native-reanimated"
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated"
 import { ListRenderItem } from "@shopify/flash-list"
 import useGetSubscriptions from "../../hooks/useGetSubscriptions"
 import { getInvalidExpenses } from "../../pages/WalletCharts"
@@ -60,11 +60,9 @@ type ListItemType =
     | { type: "limits" }
     | { type: "subscription-header"; title: string; count: number; color: string }
     | { type: "subscription"; data: Subscription; index: number }
-    | { type: "month-header"; data: { month: string; expenses: Expense[] }; monthIndex: number }
-    | { type: "expense"; data: Expense; expenses: Expense[]; index: number; monthIndex: number }
-    | { type: "date-header"; date: string; sum: [number, number] }
+    | { type: "month"; data: MonthlyExpenses; monthIndex: number }
 
-const keyExtractor = (item: any, index: number) => {
+const keyExtractor = (item: ListItemType, index: number) => {
     switch (item.type) {
         case "limits":
             return "limits"
@@ -72,29 +70,15 @@ const keyExtractor = (item: any, index: number) => {
             return `sub-header-${item.title}`
         case "subscription":
             return `sub-${item.data.id}`
-        case "month-header":
+        case "month":
             return `month-${item.data.month}`
-        case "date-header":
-            return `date-${item.date}`
-        case "expense":
-            return `expense-${item.data.id}`
         default:
             return `item-${index}`
     }
 }
 
-const getItem = (data: ListItemType[], index: number) => {
-    return data[index]
-}
-
-const getItemCount = (data: ListItemType[]) => {
-    return data.length
-}
-
-const getItemLayout = (data: ListItemType[] | null | undefined, index: number) => {
-    const ITEM_HEIGHT = 85 // approximate height of each item
-    return { length: ITEM_HEIGHT, offset: ITEM_HEIGHT * index, index }
-}
+const getItem = (data: ListItemType[], index: number) => data[index]
+const getItemCount = (data: ListItemType[]) => data.length
 
 export default function WalletList2({
     wallet,
@@ -106,63 +90,16 @@ export default function WalletList2({
 }: WalletList2Props) {
     const navigation = useNavigation<any>()
     const { data: subscriptionsData, refetch: refetchSubscriptions } = useGetSubscriptions()
-
     const [refreshing, setRefreshing] = useState(false)
 
     const groupedSubscriptions = useMemo(() => {
         if (!subscriptionsData?.subscriptions) return { active: [], inactive: [] }
-
         const active = subscriptionsData.subscriptions.filter((sub: Subscription) => sub.isActive)
         const inactive = subscriptionsData.subscriptions.filter((sub: Subscription) => !sub.isActive)
-
-        return { active, inactive } as {
-            active: Subscription[]
-            inactive: Subscription[]
-        }
+        return { active, inactive } as { active: Subscription[]; inactive: Subscription[] }
     }, [subscriptionsData?.subscriptions])
 
-    const getExpenseData = useCallback(() => {
-        const sorted = [] as {
-            month: string
-            expenses: Expense[]
-        }[]
-
-        if (!wallet?.expenses) return sorted
-
-        for (const expense of wallet.expenses) {
-            const previous = sorted[sorted.length - 1]
-            if (previous && previous?.expenses[0]?.date.slice(0, 7) === expense.date.slice(0, 7)) {
-                previous.expenses.push(expense)
-            } else {
-                sorted.push({
-                    month: expense.date,
-                    expenses: [expense],
-                })
-            }
-        }
-
-        return sorted
-    }, [wallet?.expenses])
-
-    const calculateDaySum = useCallback((dayExpenses: Expense[]) => {
-        return dayExpenses.reduce(
-            (acc, expense) => {
-                if (getInvalidExpenses(expense)) return acc
-                const value = expense.amount
-                if (expense.type === "income") {
-                    acc[1] += isNaN(value) ? 0 : value
-                } else {
-                    acc[0] += isNaN(value) ? 0 : value
-                }
-                return acc
-            },
-            [0, 0] as [number, number],
-        )
-    }, [])
-
     const unifiedData = useMemo(() => {
-        const expenseData = getExpenseData()
-
         const items: ListItemType[] = []
 
         items.push({ type: "limits" })
@@ -198,39 +135,13 @@ export default function WalletList2({
         }
 
         if (showExpenses) {
-            expenseData.forEach((monthData, monthIndex) => {
-                items.push({ type: "month-header", data: monthData, monthIndex })
-
-                const groupedByDay = new Map<string, typeof monthData.expenses>()
-
-                monthData.expenses.forEach((expense) => {
-                    const day = expense.date.slice(0, 10)
-                    if (!groupedByDay.has(day)) {
-                        groupedByDay.set(day, [])
-                    }
-                    //@ts-ignore
-                    groupedByDay.get(day).push(expense)
-                })
-
-                let expenseIndex = 0
-                groupedByDay.forEach((dayExpenses, date) => {
-                    const sum = calculateDaySum(dayExpenses)
-                    items.push({ type: "date-header", date: dayExpenses[0].date, sum })
-
-                    dayExpenses.forEach((expense) => {
-                        items.push({
-                            type: "expense",
-                            data: expense,
-                            expenses: monthData.expenses,
-                            index: expenseIndex++,
-                            monthIndex,
-                        })
-                    })
-                })
+            ;(wallet?.expenses2 ?? []).forEach((monthData, monthIndex) => {
+                items.push({ type: "month", data: monthData, monthIndex })
             })
         }
+
         return items
-    }, [showSubscriptions, showExpenses, groupedSubscriptions, getExpenseData])
+    }, [showSubscriptions, showExpenses, groupedSubscriptions, wallet?.expenses2])
 
     const onRefresh = useCallback(async () => {
         setRefreshing(true)
@@ -261,30 +172,16 @@ export default function WalletList2({
                     <SubscriptionItem
                         subscription={item.data}
                         index={item.index}
-                        onPress={() => {
-                            navigation.navigate("Subscription", {
-                                subscriptionId: item.data.id,
-                            })
-                        }}
+                        onPress={() => navigation.navigate("Subscription", { subscriptionId: item.data.id })}
                     />
                 )
 
-            case "month-header":
-                return <MonthExpenseHeader monthData={item.data} monthIndex={item.monthIndex} />
-
-            case "date-header":
-                return <DateHeader date={item.date} sum={item.sum} />
-
-            case "expense":
+            case "month":
                 return (
-                    <WalletItem
-                        index={item.index}
-                        handlePress={() => {
-                            navigation.navigate("Expense", {
-                                expense: item.data,
-                            })
-                        }}
-                        {...(item.data as any)}
+                    <MonthItem
+                        monthData={item.data}
+                        monthIndex={item.monthIndex}
+                        defaultExpanded={item.monthIndex === 0}
                     />
                 )
 
@@ -314,7 +211,7 @@ export default function WalletList2({
                 getItem={getItem}
                 getItemCount={getItemCount}
                 renderItem={renderItem as any}
-                keyExtractor={keyExtractor}
+                keyExtractor={keyExtractor as any}
                 onScroll={onScroll}
                 contentContainerStyle={{ padding: 15, paddingTop: 250, paddingBottom: 120 }}
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
@@ -322,7 +219,6 @@ export default function WalletList2({
                 onEndReachedThreshold={0.5}
                 removeClippedSubviews
                 windowSize={4}
-                getItemLayout={getItemLayout}
                 initialNumToRender={6}
             />
             {showExpenses && <ClearFiltersButton />}
@@ -330,79 +226,102 @@ export default function WalletList2({
     )
 }
 
-import Haptics from "react-native-haptic-feedback"
-import GlassView from "@/components/ui/GlassView"
+// ─── Month Item ───────────────────────────────────────────────────────────────
 
-const ClearFiltersButton = () => {
-    const { filters, dispatch } = useWalletContext()
+const MonthItem = ({
+    monthData,
+    monthIndex,
+    defaultExpanded,
+}: {
+    monthData: MonthlyExpenses
+    monthIndex: number
+    defaultExpanded: boolean
+}) => {
+    const navigation = useNavigation<any>()
+    const [isExpanded, setIsExpanded] = useState(defaultExpanded)
+    const [collapsedDates, setCollapsedDates] = useState<Set<string>>(new Set())
 
-    const [hasFilters, diffCount] = useMemo(() => {
-        let isDifferent = false
-        let diffCount = 0
+    const toggleMonth = useCallback(() => setIsExpanded((prev) => !prev), [])
 
-        const flatFilters = (obj: Record<string, any>) => {
-            const output = {} as Record<string, any>
+    const toggleDate = useCallback((day: string) => {
+        setCollapsedDates((prev) => {
+            const next = new Set(prev)
+            if (next.has(day)) next.delete(day)
+            else next.add(day)
+            return next
+        })
+    }, [])
 
-            const flatten = (obj: Record<string, any>, parentKey = "") => {
-                for (const key in obj) {
-                    const value = obj[key]
-                    const newKey = parentKey ? `${parentKey}.${key}` : key
+    const groupedByDay = useMemo(() => {
+        const map = new Map<string, Expense[]>()
+        monthData.expenses.forEach((expense) => {
+            const day = expense.date.slice(0, 10)
+            if (!map.has(day)) map.set(day, [])
+            map.get(day)!.push(expense)
+        })
+        return map
+    }, [monthData.expenses])
 
-                    if (typeof value === "object" && value !== null) {
-                        flatten(value, newKey)
-                    } else {
-                        output[newKey] = value
-                    }
-                }
-            }
-
-            flatten(obj)
-
-            return output
-        }
-
-        const flatInitFilters = flatFilters(init)
-        const flatCurrentFilters = flatFilters(filters)
-
-        for (const key in flatCurrentFilters) {
-            if (flatCurrentFilters[key] !== flatInitFilters[key]) {
-                isDifferent = true
-                diffCount++
-            }
-        }
-
-        return [isDifferent, diffCount]
-    }, [filters])
-
-    const clearFilters = () => {
-        Haptics.trigger("impactLight")
-        dispatch({ type: "RESET" })
-    }
-
-    if (!hasFilters) return null
+    const calculateDaySum = useCallback((dayExpenses: Expense[]): [number, number] => {
+        return dayExpenses.reduce(
+            (acc, expense) => {
+                if (getInvalidExpenses(expense)) return acc
+                const value = expense.amount
+                if (expense.type === "income") acc[1] += isNaN(value) ? 0 : value
+                else acc[0] += isNaN(value) ? 0 : value
+                return acc
+            },
+            [0, 0] as [number, number],
+        )
+    }, [])
 
     return (
-        <Animated.View style={styles.clearFiltersContainer}>
-            <Pressable onPress={clearFilters}>
-                <GlassView style={styles.clearFiltersButton}>
-                    <Text style={styles.clearFiltersText}>
-                        {diffCount > 0
-                            ? `Reset (${diffCount}) ${diffCount > 1 ? "filters" : "filter"}`
-                            : "Reset filters"}
-                    </Text>
-                    <AntDesign name="close" size={18} color={Colors.secondary_light_2} />
-                </GlassView>
-            </Pressable>
-        </Animated.View>
+        <View style={[styles.monthContainer, monthIndex === 0 && styles.monthContainerFirst]}>
+            <MonthHeader monthData={monthData} isExpanded={isExpanded} onToggle={toggleMonth} />
+
+            {isExpanded && (
+                <View style={styles.monthContent}>
+                    {Array.from(groupedByDay.entries()).map(([day, dayExpenses]) => {
+                        const isDateExpanded = !collapsedDates.has(day)
+                        const sum = calculateDaySum(dayExpenses)
+
+                        return (
+                            <View key={day}>
+                                <DateHeader
+                                    date={dayExpenses[0].date}
+                                    sum={sum}
+                                    isExpanded={isDateExpanded}
+                                    onToggle={() => toggleDate(day)}
+                                />
+
+                                {isDateExpanded &&
+                                    dayExpenses.map((expense, index) => (
+                                        <WalletItem
+                                            key={expense.id}
+                                            index={index}
+                                            handlePress={() => navigation.navigate("Expense", { expense })}
+                                            {...(expense as any)}
+                                        />
+                                    ))}
+                            </View>
+                        )
+                    })}
+                </View>
+            )}
+        </View>
     )
 }
 
-const MonthExpenseHeader = ({
+// ─── Month Header ─────────────────────────────────────────────────────────────
+
+const MonthHeader = ({
     monthData,
-    monthIndex,
+    isExpanded,
+    onToggle,
 }: {
-    monthData: { month: string; expenses: Expense[] }
-    monthIndex: number
+    monthData: MonthlyExpenses
+    isExpanded: boolean
+    onToggle: () => void
 }) => {
     const { data, previousData } = useQuery(
         gql`
@@ -420,75 +339,244 @@ const MonthExpenseHeader = ({
     const amount = data?.getMonthTotal ?? previousData?.getMonthTotal ?? 0
 
     return (
-        <Animated.View style={monthIndex === 0 ? styles.monthHeaderContainerFirst : styles.monthHeaderContainer}>
-            <View style={styles.monthRow}>
+        <Pressable onPress={onToggle} style={styles.monthHeaderRow}>
+            <View style={styles.monthTitleRow}>
+                <ChevronIcon isExpanded={isExpanded} />
                 <Text style={styles.monthText}>{moment(monthData.month).format("MMMM YYYY")}</Text>
-
-                <View style={styles.monthAmountRow}>
-                    <Text style={amount > 0 ? styles.monthAmountPositive : styles.monthAmountNegative}>
-                        {amount > 0 ? `+${amount.toFixed(2)}` : amount.toFixed(2)}
-                        <Text
-                            style={[
-                                amount > 0 ? styles.monthAmountPositive : styles.monthAmountNegative,
-                                styles.monthAmountCurrency,
-                            ]}
-                        >
-                            zł
-                        </Text>
-                    </Text>
-                </View>
             </View>
-        </Animated.View>
+
+            <Text style={amount > 0 ? styles.monthAmountPositive : styles.monthAmountNegative}>
+                {amount > 0 ? `+${amount.toFixed(2)}` : amount.toFixed(2)}
+                <Text
+                    style={[
+                        amount > 0 ? styles.monthAmountPositive : styles.monthAmountNegative,
+                        styles.monthAmountCurrency,
+                    ]}
+                >
+                    zł
+                </Text>
+            </Text>
+        </Pressable>
     )
 }
 
-const DateHeader = ({ date, sum }: { date: string; sum: [number, number] }) => {
+// ─── Date Header ──────────────────────────────────────────────────────────────
+
+const DateHeader = ({
+    date,
+    sum,
+    isExpanded,
+    onToggle,
+}: {
+    date: string
+    sum: [number, number]
+    isExpanded: boolean
+    onToggle: () => void
+}) => {
     const {
         calendar: { setCalendarDate },
     } = useWalletContext()
-
     const navigation = useNavigation<any>()
 
     const onPress = useCallback(() => {
         setCalendarDate(moment(date).toDate())
-        navigation.navigate("CreateExpense", {
-            date: moment(date).format("YYYY-MM-DD"),
-        })
+        navigation.navigate("CreateExpense", { date: moment(date).format("YYYY-MM-DD") })
     }, [date])
 
     return (
-        <Ripple onPress={onPress} style={styles.dateTextContainer}>
-            <Text style={styles.dateText}>{parseDateToText(date)}</Text>
-
-            <View style={styles.dateSumContainer}>
-                {sum[0] > 0 && (
-                    <Text style={[styles.expenseAmount, styles.expenseAmountNegative]}>
-                        {sum[0] > 0 ? `-${sum[0].toFixed(2)}` : sum[0].toFixed(2)}zł
-                    </Text>
-                )}
-                {sum[0] > 0 && sum[1] > 0 && <Text style={styles.dateText}>/</Text>}
-                {sum[1] > 0 && (
-                    <Text style={[styles.expenseAmount, styles.incomeAmountPositive]}>
-                        {sum[1] > 0 ? `+${sum[1].toFixed(2)}` : sum[1].toFixed(2)}zł
-                    </Text>
-                )}
-            </View>
-        </Ripple>
+        <View style={styles.dateRow}>
+            <Pressable onPress={onToggle} hitSlop={10} style={styles.dateChevron}>
+                <ChevronIcon isExpanded={isExpanded} />
+            </Pressable>
+            <Ripple onPress={onPress} style={styles.dateTextContainer}>
+                <Text style={styles.dateText}>{parseDateToText(date)}</Text>
+                <View style={styles.dateSumContainer}>
+                    {sum[0] > 0 && (
+                        <Text style={[styles.expenseAmount, styles.expenseAmountNegative]}>
+                            {`-${sum[0].toFixed(2)}`}zł
+                        </Text>
+                    )}
+                    {sum[0] > 0 && sum[1] > 0 && <Text style={styles.dateText}>/</Text>}
+                    {sum[1] > 0 && (
+                        <Text style={[styles.expenseAmount, styles.incomeAmountPositive]}>
+                            {`+${sum[1].toFixed(2)}`}zł
+                        </Text>
+                    )}
+                </View>
+            </Ripple>
+        </View>
     )
 }
 
+// ─── Chevron ──────────────────────────────────────────────────────────────────
+
+const ChevronIcon = ({ isExpanded }: { isExpanded: boolean }) => {
+    const rotation = useSharedValue(isExpanded ? 0 : -90)
+
+    useEffect(() => {
+        rotation.value = withTiming(isExpanded ? 0 : -90, { duration: 200 })
+    }, [isExpanded])
+
+    const animatedStyle = useAnimatedStyle(() => ({
+        transform: [{ rotate: `${rotation.value}deg` }],
+    }))
+
+    return (
+        <Animated.View style={animatedStyle}>
+            <AntDesign name="down" size={14} color="rgba(255,255,255,0.5)" />
+        </Animated.View>
+    )
+}
+
+// ─── Clear Filters ────────────────────────────────────────────────────────────
+
+import Haptics from "react-native-haptic-feedback"
+import GlassView from "@/components/ui/GlassView"
+
+const ClearFiltersButton = () => {
+    const { filters, dispatch } = useWalletContext()
+
+    const [hasFilters, diffCount] = useMemo(() => {
+        let isDifferent = false
+        let diffCount = 0
+
+        const flatFilters = (obj: Record<string, any>) => {
+            const output = {} as Record<string, any>
+            const flatten = (obj: Record<string, any>, parentKey = "") => {
+                for (const key in obj) {
+                    const value = obj[key]
+                    const newKey = parentKey ? `${parentKey}.${key}` : key
+                    if (typeof value === "object" && value !== null) flatten(value, newKey)
+                    else output[newKey] = value
+                }
+            }
+            flatten(obj)
+            return output
+        }
+
+        const flatInitFilters = flatFilters(init)
+        const flatCurrentFilters = flatFilters(filters)
+
+        for (const key in flatCurrentFilters) {
+            if (flatCurrentFilters[key] !== flatInitFilters[key]) {
+                isDifferent = true
+                diffCount++
+            }
+        }
+
+        return [isDifferent, diffCount]
+    }, [filters])
+
+    if (!hasFilters) return null
+
+    return (
+        <Animated.View style={styles.clearFiltersContainer}>
+            <Pressable
+                onPress={() => {
+                    Haptics.trigger("impactLight")
+                    dispatch({ type: "RESET" })
+                }}
+            >
+                <GlassView style={styles.clearFiltersButton}>
+                    <Text style={styles.clearFiltersText}>
+                        {diffCount > 0
+                            ? `Reset (${diffCount}) ${diffCount > 1 ? "filters" : "filter"}`
+                            : "Reset filters"}
+                    </Text>
+                    <AntDesign name="close" size={18} color={Colors.secondary_light_2} />
+                </GlassView>
+            </Pressable>
+        </Animated.View>
+    )
+}
+
+// ─── Styles ───────────────────────────────────────────────────────────────────
+
 const styles = StyleSheet.create({
-    headerContainer: {
+    monthContainer: {
+        marginTop: 30,
+    },
+    monthContainerFirst: {
+        marginTop: 15,
+    },
+    monthContent: {
+        marginTop: 8,
+    },
+    monthHeaderRow: {
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
-        marginBottom: 15,
-        marginTop: 10,
+        paddingVertical: 4,
     },
-    headerText: {
-        fontSize: Sizing.text,
-        fontWeight: "600",
+    monthTitleRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 10,
+    },
+    monthText: {
+        fontSize: 25,
+        fontWeight: "700",
         color: Colors.text_light,
+    },
+    monthAmountPositive: {
+        color: "#66E875",
+        fontSize: 17,
+        fontWeight: "600",
+    },
+    monthAmountNegative: {
+        color: "#F07070",
+        fontSize: 17,
+        fontWeight: "600",
+    },
+    monthAmountCurrency: {
+        fontSize: 13,
+    },
+    dateRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginTop: 20,
+        marginBottom: 8,
+    },
+    dateTextContainer: {
+        flex: 1,
+        flexDirection: "row",
+        justifyContent: "space-between",
+        paddingVertical: 5,
+        alignItems: "center",
+    },
+    dateChevron: {
+        marginRight: 10,
+        paddingVertical: 5,
+    },
+    dateText: {
+        color: "rgba(255,255,255,0.7)",
+        fontWeight: "600",
+        fontSize: 15,
+    },
+    dateSumContainer: {
+        flexDirection: "row",
+        gap: 5,
+        alignItems: "center",
+    },
+    expenseAmount: {
+        fontSize: 15,
+        fontWeight: "600",
+    },
+    expenseAmountNegative: {
+        color: "#F07070",
+    },
+    incomeAmountPositive: {
+        color: "#66E875",
+    },
+    monthRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginTop: 30,
+    },
+    subscriptionHeaderContainer: {
+        marginBottom: 30,
+        marginTop: 30,
     },
     countBadge: {
         paddingHorizontal: 12,
@@ -502,16 +590,6 @@ const styles = StyleSheet.create({
         color: Colors.foreground,
         fontSize: 12,
         fontWeight: "bold",
-    },
-    loadingContainer: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        padding: 20,
-    },
-    loadingText: {
-        color: Colors.text_light,
-        fontSize: 16,
     },
     emptyContainer: {
         flex: 1,
@@ -530,54 +608,6 @@ const styles = StyleSheet.create({
         fontSize: 14,
         textAlign: "center",
     },
-    monthText: {
-        fontSize: 25,
-        fontWeight: "700",
-        color: Colors.text_light,
-    },
-    dateTextContainer: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        padding: 5,
-        marginBottom: 15,
-        marginTop: 25,
-        alignItems: "center",
-    },
-    dateText: {
-        color: "rgba(255,255,255,0.7)",
-        fontWeight: "600",
-        fontSize: 15,
-    },
-    monthRow: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        marginTop: 30,
-    },
-    filtersButton: {
-        zIndex: 1000,
-        paddingVertical: 7.5,
-        paddingHorizontal: 22.5,
-        borderRadius: 50,
-        borderWidth: 1,
-        borderColor: Color(Colors.secondary_light_1).darken(0.5).string(),
-        backgroundColor: Color(Colors.secondary_light_1).darken(0.8).string(),
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: 5,
-        paddingRight: 15,
-        width: 160,
-    },
-    subscriptionHeaderContainer: {
-        marginBottom: 30,
-        marginTop: 30,
-    },
-    contentContainer: {
-        padding: 15,
-        paddingTop: 250,
-        paddingBottom: 120,
-    },
     clearFiltersContainer: {
         position: "absolute",
         bottom: 100,
@@ -594,43 +624,5 @@ const styles = StyleSheet.create({
     },
     clearFiltersText: {
         color: Colors.secondary_light_2,
-    },
-    monthHeaderContainer: {
-        marginBottom: 30,
-    },
-    monthHeaderContainerFirst: {
-        marginBottom: 30,
-        marginTop: 30,
-    },
-    monthAmountRow: {
-        flexDirection: "row",
-        alignItems: "center",
-    },
-    monthAmountPositive: {
-        color: "#66E875",
-        fontSize: 17,
-        fontWeight: "600",
-    },
-    monthAmountNegative: {
-        color: "#F07070",
-        fontSize: 17,
-        fontWeight: "600",
-    },
-    monthAmountCurrency: {
-        fontSize: 13,
-    },
-    dateSumContainer: {
-        gap: 5,
-        flexDirection: "row",
-    },
-    expenseAmount: {
-        fontSize: 15,
-        fontWeight: "600",
-    },
-    expenseAmountNegative: {
-        color: "#F07070",
-    },
-    incomeAmountPositive: {
-        color: "#66E875",
     },
 })

@@ -85,10 +85,22 @@ export interface ExerciseProgress {
   date: string;
 }
 
+export interface MonthlyFlow {
+  income: number;
+  expense: number;
+}
+
+export interface MonthlyExpenses {
+  month: string;
+  flow: MonthlyFlow;
+  expenses: Expense[];
+}
+
 export interface Wallet {
   id: string;
   balance: number;
   expenses: Expense[];
+  expenses2: MonthlyExpenses[];
 }
 
 export interface Subscription {

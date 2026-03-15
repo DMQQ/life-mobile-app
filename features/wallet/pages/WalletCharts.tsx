@@ -95,7 +95,6 @@ export default function WalletChartComponent(props: any) {
 export const getInvalidExpenses = (curr: Expense) =>
     !curr.category ||
     curr.description.startsWith("Balance") ||
-    curr.type === "income" ||
     curr.type === "refunded" ||
     curr.category === "refunded" ||
     curr.amount == 0

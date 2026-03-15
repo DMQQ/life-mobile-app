@@ -1,4 +1,4 @@
-import { Expense, Wallet } from "@/types"
+import { Expense, MonthlyExpenses, Wallet } from "@/types"
 import { gql, useQuery } from "@apollo/client"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { init, useWalletContext } from "../components/WalletContext"
@@ -19,38 +19,45 @@ export const GET_WALLET = gql`
             income
             monthlyPercentageTarget
 
-            expenses(filters: $filters, take: $take, skip: $skip) {
-                id
-                amount
-                date
-                description
-                type
-                category
-
-                subscription @include(if: $includeSubscription) {
-                    id
-                    isActive
-                    nextBillingDate
-                    dateStart
+            expenses2(filters: $filters, take: $take, skip: $skip) {
+                month
+                flow {
+                    income
+                    expense
                 }
-
-                location @include(if: $includeLocation) {
+                expenses {
                     id
-                }
+                    amount
+                    date
+                    description
+                    type
+                    category
 
-                files @include(if: $includeFiles) {
-                    id
-                }
+                    subscription @include(if: $includeSubscription) {
+                        id
+                        isActive
+                        nextBillingDate
+                        dateStart
+                    }
 
-                subexpenses @include(if: $includeSubexpenses) {
-                    id
+                    location @include(if: $includeLocation) {
+                        id
+                    }
+
+                    files @include(if: $includeFiles) {
+                        id
+                    }
+
+                    subexpenses @include(if: $includeSubexpenses) {
+                        id
+                    }
                 }
             }
         }
     }
 `
 
-const PAGINATION_TAKE = 20
+const PAGINATION_TAKE = 3 // months
 
 export default function useGetWallet(options?: {
     fetchAll?: boolean
@@ -133,6 +140,7 @@ export default function useGetWallet(options?: {
     })
 
     const onEndReached = useCallback(async () => {
+        console.log("End reached, loading more...")
         if (st.loading || endReached || options?.fetchAll) return
 
         const nextSkip = skip + PAGINATION_TAKE
@@ -146,28 +154,32 @@ export default function useGetWallet(options?: {
                     ...directiveVariables,
                 },
                 updateQuery(previousQueryResult, { fetchMoreResult }) {
-                    if (!fetchMoreResult || !fetchMoreResult.wallet || !fetchMoreResult.wallet.expenses) {
+                    if (!fetchMoreResult?.wallet?.expenses2) {
                         setEndReached(true)
                         return previousQueryResult
                     }
 
-                    const newExpenses = fetchMoreResult.wallet.expenses
-                    if (newExpenses.length === 0 || newExpenses.length < PAGINATION_TAKE) {
+                    const newMonths: MonthlyExpenses[] = fetchMoreResult.wallet.expenses2
+                    if (newMonths.length === 0 || newMonths.length < PAGINATION_TAKE) {
                         setEndReached(true)
                     }
 
-                    if (!previousQueryResult?.wallet?.expenses) {
+                    if (!previousQueryResult?.wallet?.expenses2) {
                         return fetchMoreResult
                     }
 
-                    const mergeExpenses = (previousExpenses: Expense[], newExpenses: Expense[]): Expense[] =>
-                        Array.from(new Map([...previousExpenses, ...newExpenses].map((exp) => [exp.id, exp])).values())
+                    const monthMap = new Map<string, MonthlyExpenses>(
+                        previousQueryResult.wallet.expenses2.map((m: MonthlyExpenses) => [m.month, m]),
+                    )
+                    for (const m of newMonths) {
+                        monthMap.set(m.month, m)
+                    }
 
                     return {
                         wallet: {
                             ...previousQueryResult.wallet,
                             ...fetchMoreResult.wallet,
-                            expenses: mergeExpenses(previousQueryResult.wallet.expenses, newExpenses),
+                            expenses2: Array.from(monthMap.values()),
                         },
                     }
                 },
