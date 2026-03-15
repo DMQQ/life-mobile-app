@@ -199,8 +199,6 @@ export default function WalletLimits({ navigation }: { navigation: any }) {
                             filters.category === limit.category ||
                             (Array.isArray(filters.category) && filters.category.includes(limit.category))
 
-                        const lightIcon = Color(iconData.backgroundColor).lighten(0.35).hex()
-
                         return (
                             <Animated.View
                                 key={limit.id}
@@ -221,9 +219,9 @@ export default function WalletLimits({ navigation }: { navigation: any }) {
                                     style={[
                                         styles.limitCard,
                                         {
-                                            backgroundColor: lowOpacity(iconData.backgroundColor || color, 0.1),
+                                            backgroundColor: Colors.primary_lighter,
                                             borderWidth: 1,
-                                            borderColor: lowOpacity(iconData.backgroundColor || color, 0.15),
+                                            borderColor: Color(Colors.primary_lighter).lighten(0.5).hex(),
                                             flexDirection: compactMode ? "column" : "row",
                                             padding: compactMode ? 15 : 22.5,
                                         },
@@ -242,28 +240,10 @@ export default function WalletLimits({ navigation }: { navigation: any }) {
                                     <View
                                         style={[
                                             styles.iconContainer,
-                                            { backgroundColor: lowOpacity(iconData.backgroundColor || color, 0.1) },
+                                            { backgroundColor: Colors.primary_lighter },
                                             compactMode && { marginRight: 0 },
                                         ]}
                                     >
-                                        <Animated.View
-                                            style={{
-                                                position: "absolute",
-                                                top: -7.5,
-                                                left: -7.5,
-                                                borderWidth: 1,
-                                                padding: 2.5,
-                                                borderRadius: 100,
-                                                backgroundColor: lowOpacity(iconData.backgroundColor, 0.25),
-                                                borderColor: iconData.backgroundColor,
-                                            }}
-                                        >
-                                            {limit.current > prevMap[limit.category] ? (
-                                                <AntDesign name="arrow-up" size={12} color={lightIcon} />
-                                            ) : (
-                                                <AntDesign name="arrow-down" size={12} color={lightIcon} />
-                                            )}
-                                        </Animated.View>
                                         <CategoryIcon
                                             category={limit.category}
                                             type="expense"
@@ -319,16 +299,11 @@ export default function WalletLimits({ navigation }: { navigation: any }) {
                                                             ? "#F07070"
                                                             : iconData.backgroundColor || color,
                                                     },
-                                                    compactMode && { fontSize: 16 },
+                                                    compactMode && { fontSize: 12 },
                                                 ]}
-                                                numberOfLines={1}
+                                                numberOfLines={2}
                                             >
-                                                {/* {limit.current > prevMap[limit.category] ? (
-                          <AntDesign name="arrow-up" size={12} color={isOverLimit ? "#F07070" : iconData.backgroundColor || color} />
-                        ) : (
-                          <AntDesign name="arrow-down" size={12} color={isOverLimit ? "#F07070" : iconData.backgroundColor || color} />
-                        )} */}
-                                                {((limit.current / limit.amount) * 100).toFixed(0)}%
+                                                {percentage.toFixed(0)}%
                                             </Text>
                                         </View>
                                     </View>

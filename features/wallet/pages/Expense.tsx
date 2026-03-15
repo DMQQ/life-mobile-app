@@ -614,10 +614,6 @@ export default function Expense({ route: { params }, navigation }: any) {
                     </View>
                 </View>
 
-                <FileUpload id={selected.id} images={selected?.files} />
-
-                <MapPicker location={selected.location} id={selected.id} />
-
                 {similar?.wallet?.expenses?.length > 1 && (
                     <View style={{ paddingHorizontal: 15, marginBottom: 25 }}>
                         <Txt size={20} color={Colors.foreground}>
@@ -641,6 +637,10 @@ export default function Expense({ route: { params }, navigation }: any) {
                         </View>
                     </View>
                 )}
+
+                <FileUpload id={selected.id} images={selected?.files} />
+
+                <MapPicker location={selected.location} id={selected.id} />
             </Animated.ScrollView>
         </View>
     )

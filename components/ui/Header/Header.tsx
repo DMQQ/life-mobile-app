@@ -43,6 +43,8 @@ export interface HeaderItem {
     contextMenu?: {
         items: ContextMenuItem[]
     }
+
+    children?: React.ReactNode
 }
 
 interface HeaderProps {
@@ -212,11 +214,13 @@ function Header({ shadow = true, ...props }: HeaderProps) {
                             </View>
                         ))}
 
-                        <GlassView style={styles.iconContainer}>
-                            {(regularButtons || []).map((button, index) => {
-                                return <HeaderIconButton key={index} button={button!} index={index} />
-                            })}
-                        </GlassView>
+                        {regularButtons.length > 0 && (
+                            <GlassView style={styles.iconContainer}>
+                                {(regularButtons || []).map((button, index) => {
+                                    return <HeaderIconButton key={index} button={button!} index={index} />
+                                })}
+                            </GlassView>
+                        )}
 
                         {standaloneButtons.right.map((button, index) => (
                             <View key={index} style={{ overflow: "hidden", borderRadius: 100 }}>
@@ -276,6 +280,10 @@ const HeaderIconButton = memo(({ button, index }: { button: HeaderItem; index: n
             currentItem.onPress()
             Haptic.trigger("impactLight")
         }
+    }
+
+    if (button.children) {
+        return button.children
     }
 
     if (button.contextMenu) {

@@ -27,6 +27,14 @@ interface ColorPalette {
 
 const colorPalettes: ColorPalette[] = [
     {
+        name: "Deep dark",
+        primary: "#000",
+        secondary: defaultColors.secondary,
+        ternary: "#333",
+        foreground: "#fff",
+        category: "Finance",
+    },
+    {
         name: "24.12.2025",
         primary: "#111111",
         secondary: "#334af1",

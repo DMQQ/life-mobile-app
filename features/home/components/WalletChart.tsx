@@ -19,22 +19,22 @@ interface AnimatedBarProps {
     index: number
 }
 
+const CHART_HEIGHT = 200
+const MIN_BAR_HEIGHT = 12
+
+const getBarHeight = (val: number, maxValue: number): number => {
+    if (!val || !maxValue) return 0
+    const proportion = val / maxValue
+    return Math.max(proportion * CHART_HEIGHT, val > 0 ? MIN_BAR_HEIGHT : 0)
+}
+
 const AnimatedBar = ({ value, prevValue, maxValue, color, label, index }: AnimatedBarProps) => {
     const animatedHeight = useSharedValue(0)
     const animatedPrevHeight = useSharedValue(0)
     const animatedOpacity = useSharedValue(0)
 
-    const CHART_HEIGHT = 150
-    const MIN_BAR_HEIGHT = 12
-
-    const getBarHeight = (val: number): number => {
-        if (!val || !maxValue) return 0
-        const proportion = val / maxValue
-        return Math.max(proportion * CHART_HEIGHT, val > 0 ? MIN_BAR_HEIGHT : 0)
-    }
-
-    const targetHeight = getBarHeight(value)
-    const targetPrevHeight = getBarHeight(prevValue)
+    const targetHeight = getBarHeight(value, maxValue)
+    const targetPrevHeight = getBarHeight(prevValue, maxValue)
 
     useEffect(() => {
         animatedOpacity.value = withDelay(index * 100, withTiming(1, { duration: 400 }))
@@ -158,6 +158,11 @@ const CompactSpendingChart = ({}: CompactSpendingChartProps) => {
         }
     }, [query.data, prevQuery.data])
 
+    const labelValues = useMemo(
+        () => [...new Set(chartData.map((d) => d.value))].sort((a, b) => a - b).reverse(),
+        [chartData],
+    )
+
     if (query.loading || prevQuery.loading) {
         return (
             <View style={styles.container}>
@@ -172,11 +177,29 @@ const CompactSpendingChart = ({}: CompactSpendingChartProps) => {
         <View style={styles.container}>
             <View style={styles.chartWrapper}>
                 <View style={styles.yAxisLabels}>
-                    {[4, 3, 2, 1, 0].map((i) => {
-                        const value = Math.round((maxValue / 4) * i)
+                    {labelValues.map((v, i, array) => {
+                        const value = Math.round(v)
+
+                        const previousValue = array[i - 1] ? Math.round(array[i - 1]) : 0
+                        const prevDistance = getBarHeight(previousValue, maxValue)
+                        const currentDistance = getBarHeight(value, maxValue)
+
+                        if (prevDistance - currentDistance < 12 && i !== 0) {
+                            return null
+                        }
+
                         return (
-                            <Text key={i} style={styles.yAxisLabel}>
-                                {value > 1000 ? `${(value / 1000).toFixed(1)}k` : value}
+                            <Text
+                                key={i}
+                                style={[
+                                    styles.yAxisLabel,
+                                    {
+                                        position: "absolute",
+                                        bottom: currentDistance + 15,
+                                    },
+                                ]}
+                            >
+                                {value > 1000 ? `${(value / 1000).toFixed(1)}k` : value + "zł"}
                             </Text>
                         )
                     })}
@@ -184,8 +207,9 @@ const CompactSpendingChart = ({}: CompactSpendingChartProps) => {
 
                 <View style={styles.chartContent}>
                     <View style={styles.gridLines}>
-                        {[0, 1, 2, 3, 4].map((i) => (
-                            <View key={i} style={[styles.gridLine, { bottom: (132 / 4) * i }]} />
+                        {labelValues.map((value, i) => (
+                            // 15 is the height of the label, we add some padding to make sure it doesn't overlap with the grid line
+                            <View key={i} style={[styles.gridLine, { bottom: getBarHeight(value, maxValue) + 15 }]} />
                         ))}
                     </View>
 
@@ -196,7 +220,7 @@ const CompactSpendingChart = ({}: CompactSpendingChartProps) => {
                                 value={item.value}
                                 prevValue={item.prevValue}
                                 maxValue={maxValue}
-                                color={secondary_candidates[index % secondary_candidates.length]}
+                                color={Colors.secondary}
                                 label={item.label}
                                 index={index}
                             />
@@ -275,16 +299,18 @@ const styles = StyleSheet.create({
         alignItems: "flex-end",
     },
     yAxisLabels: {
-        width: 35,
-        height: 160,
+        width: 40,
+        height: 200,
         justifyContent: "space-between",
         alignItems: "flex-start",
         paddingRight: 8,
     },
     yAxisLabel: {
-        color: Colors.text_light,
-        fontSize: 10,
-        opacity: 0.7,
+        color: "#fff",
+        fontSize: 12,
+        fontWeight: "500",
+        width: 50,
+        marginLeft: -5,
     },
     chartContent: {
         flex: 1,
@@ -295,20 +321,20 @@ const styles = StyleSheet.create({
         top: 0,
         left: 0,
         right: 0,
-        height: 160,
+        height: 200,
     },
     gridLine: {
         position: "absolute",
         left: 0,
         right: 0,
         height: 0.5,
-        backgroundColor: Color(Colors.secondary).alpha(0.1).string(),
+        backgroundColor: Color(Colors.secondary).alpha(0.15).string(),
     },
     chartContainer: {
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "flex-end",
-        height: 170,
+        height: 200,
         marginBottom: 4,
         paddingHorizontal: 8,
     },
@@ -318,7 +344,7 @@ const styles = StyleSheet.create({
     },
     barWrapper: {
         width: 36,
-        height: 170,
+        height: 200,
         justifyContent: "flex-end",
         alignItems: "center",
         position: "relative",

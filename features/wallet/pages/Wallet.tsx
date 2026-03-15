@@ -99,7 +99,6 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
         () =>
             [
                 {
-                    standalone: true,
                     icon: <Entypo name="dots-three-vertical" size={20} color={Colors.foreground} />,
                     onPress: () => {},
                     contextMenu: {
@@ -125,6 +124,8 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
                     icon: <Ionicons name="stats-chart" size={20} color={Colors.foreground} />,
                 },
                 {
+                    position: "right",
+                    standalone: true,
                     onPress: () => navigation.navigate("CreateExpense"),
                     icon: <AntDesign name="plus" size={20} color={Colors.foreground} />,
                 },

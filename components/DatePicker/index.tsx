@@ -60,6 +60,11 @@ export default function DatePicker({
 
         setSelecting(null)
         setTempStartDate(null)
+
+        return () => {
+            setSelecting(null)
+            setTempStartDate(null)
+        }
     }, [dates, mode])
 
     const handleDayPress = (day: any) => {
@@ -115,16 +120,31 @@ export default function DatePicker({
                 color: Colors.secondary,
             }
         } else {
-            let current = startMoment.clone()
-            while (current.isSameOrBefore(endMoment)) {
-                const dateString = current.format("YYYY-MM-DD")
-                range[dateString] = {
+            const daysDiff = endMoment.diff(startMoment, "day")
+            if (daysDiff > 365) {
+                // For very large ranges, only mark start and end to avoid Hermes property limit
+                range[startMoment.format("YYYY-MM-DD")] = {
                     selected: true,
-                    startingDay: current.isSame(startMoment),
-                    endingDay: current.isSame(endMoment),
+                    startingDay: true,
                     color: Colors.secondary,
                 }
-                current.add(1, "day")
+                range[endMoment.format("YYYY-MM-DD")] = {
+                    selected: true,
+                    endingDay: true,
+                    color: Colors.secondary,
+                }
+            } else {
+                let current = startMoment.clone()
+                while (current.isSameOrBefore(endMoment)) {
+                    const dateString = current.format("YYYY-MM-DD")
+                    range[dateString] = {
+                        selected: true,
+                        startingDay: current.isSame(startMoment),
+                        endingDay: current.isSame(endMoment),
+                        color: Colors.secondary,
+                    }
+                    current.add(1, "day")
+                }
             }
         }
 

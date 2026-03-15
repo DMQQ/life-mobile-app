@@ -14,6 +14,18 @@ const ChartSwitcher = () => {
 
     return (
         <View style={styles.container}>
+            <View style={styles.chartContent}>
+                {activeChart === "weekly" ? (
+                    <Animated.View entering={FadeIn} exiting={FadeOut} key="weekly">
+                        <WeeklyComparisonChart />
+                    </Animated.View>
+                ) : (
+                    <Animated.View entering={FadeIn} exiting={FadeOut} key="prediction">
+                        <BalancePredictionChart />
+                    </Animated.View>
+                )}
+            </View>
+
             <View style={styles.tabContainer}>
                 <Pressable
                     style={[styles.tab, activeChart === "weekly" && styles.activeTab]}
@@ -22,7 +34,9 @@ const ChartSwitcher = () => {
                     <MaterialCommunityIcons
                         name="chart-bar"
                         size={16}
-                        color={activeChart === "weekly" ? Colors.text_light : Color(Colors.text_light).alpha(0.5).string()}
+                        color={
+                            activeChart === "weekly" ? Colors.text_light : Color(Colors.text_light).alpha(0.5).string()
+                        }
                     />
                     <Text style={[styles.tabText, activeChart === "weekly" && styles.activeTabText]}>Weekly</Text>
                 </Pressable>
@@ -34,24 +48,16 @@ const ChartSwitcher = () => {
                     <MaterialCommunityIcons
                         name="chart-line"
                         size={16}
-                        color={activeChart === "prediction" ? Colors.text_light : Color(Colors.text_light).alpha(0.5).string()}
+                        color={
+                            activeChart === "prediction"
+                                ? Colors.text_light
+                                : Color(Colors.text_light).alpha(0.5).string()
+                        }
                     />
                     <Text style={[styles.tabText, activeChart === "prediction" && styles.activeTabText]}>
                         Prediction
                     </Text>
                 </Pressable>
-            </View>
-
-            <View style={styles.chartContent}>
-                {activeChart === "weekly" ? (
-                    <Animated.View entering={FadeIn} exiting={FadeOut} key="weekly">
-                        <WeeklyComparisonChart />
-                    </Animated.View>
-                ) : (
-                    <Animated.View entering={FadeIn} exiting={FadeOut} key="prediction">
-                        <BalancePredictionChart />
-                    </Animated.View>
-                )}
             </View>
         </View>
     )

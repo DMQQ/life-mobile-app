@@ -63,28 +63,29 @@ const AvailableBalanceWidget = ({ data }: Props) => {
 
     return (
         <Animated.View style={styles.container} layout={LinearTransition.delay(200)}>
-            <View style={styles.metricsGrid}>
-                <MetricCard label="Days left" value={daysLeft.toString()} icon="calendar-clock" postfix="d" />
-                <MetricCard
-                    label="Daily budget"
-                    value={`${Math.abs(dailyBudgetLeft).toFixed(0)}zł`}
-                    icon="wallet-outline"
-                    status={isDailyBudgetNegative ? "error" : "neutral"}
-                    prefix={isDailyBudgetNegative ? "-" : ""}
-                    postfix="zł"
-                />
-                <MetricCard
-                    label="Total saved"
-                    value={`${savings.toFixed(0)}zł`}
-                    icon="piggy-bank"
-                    prefix=""
-                    postfix="zł"
-                />
-                <MetricCard label="Target" value={spentPercentage.toFixed(2)} icon="target" postfix="%" />
-            </View>
-
             <View style={styles.chartSection}>
                 <ChartSwitcher />
+
+                <View style={styles.metricsGrid}>
+                    <MetricCard label="Days left" value={daysLeft.toString()} icon="calendar-clock" postfix="d" />
+                    <MetricCard
+                        label="For today"
+                        value={`${Math.abs(dailyBudgetLeft).toFixed(0)}zł`}
+                        icon="wallet-outline"
+                        status={isDailyBudgetNegative ? "error" : "neutral"}
+                        prefix={isDailyBudgetNegative ? "-" : ""}
+                        postfix="zł"
+                    />
+                    <MetricCard
+                        label="Saved"
+                        value={`${savings.toFixed(0)}zł`}
+                        icon="piggy-bank"
+                        prefix=""
+                        postfix="zł"
+                    />
+                    <MetricCard label="Spent %" value={spentPercentage.toFixed(2)} icon="target" postfix="%" />
+                </View>
+
                 <ZeroExpenseStats />
             </View>
         </Animated.View>
@@ -201,9 +202,9 @@ const styles = StyleSheet.create({
     metricsGrid: {
         flexDirection: "row",
         justifyContent: "space-between",
-        marginBottom: 16,
+        marginBottom: 15,
         marginTop: 15,
-        gap: 15,
+        gap: 30,
     },
     metricCard: {
         flex: 1,

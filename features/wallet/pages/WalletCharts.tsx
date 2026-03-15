@@ -29,6 +29,9 @@ import StatisticsSummary from "../components/WalletChart/StatisticsSummary"
 import WalletContextProvider from "../components/WalletContext"
 import useGetLegendData from "../hooks/useGetLegendData"
 import useGetWallet, { useGetBalance } from "../hooks/useGetWallet"
+import DatePicker from "@/components/DatePicker"
+import dayjs from "dayjs"
+import { IconButton } from "@/components"
 
 const AnimatedVirtualizedList = Animated.createAnimatedComponent(VirtualizedList)
 
@@ -214,27 +217,27 @@ function WalletCharts({ navigation }: any) {
     const headerButtons = useMemo(
         () => [
             {
-                icon: (
-                    <MaterialIcons
-                        name="bar-chart"
-                        size={20}
-                        color={chartType === "bar" ? Colors.secondary : Colors.foreground}
+                children: (
+                    <DatePicker
+                        mode="period"
+                        dates={{
+                            start: dayjs(filters.date.from).toDate(),
+                            end: dayjs(filters.date.to).toDate(),
+                        }}
+                        setDates={({ start, end }) => {
+                            dispatch({ type: "SET_DATE_MAX", payload: dayjs(end).format("YYYY-MM-DD") })
+                            dispatch({ type: "SET_DATE_MIN", payload: dayjs(start).format("YYYY-MM-DD") })
+                        }}
+                        buttonComponent={() => (
+                            <IconButton
+                                icon={<MaterialIcons name="date-range" size={20} color={Colors.foreground} />}
+                            />
+                        )}
                     />
                 ),
-                onPress: () => setChartType("bar"),
-            },
-            {
-                icon: (
-                    <MaterialIcons
-                        name="pie-chart"
-                        size={20}
-                        color={chartType === "pie" ? Colors.secondary : Colors.foreground}
-                    />
-                ),
-                onPress: () => setChartType("pie"),
             },
         ],
-        [chartType],
+        [chartType, filters.date.from, filters.date.to],
     )
 
     const [step, setStep] = useState(5)
@@ -274,17 +277,18 @@ function WalletCharts({ navigation }: any) {
                 ref={listRef}
                 ListHeaderComponent={
                     <View style={styles.listHeader}>
-                        <View style={{ height: Layout.screen.height / 2.8, marginBottom: 15 }}>
+                        <View style={{ height: Layout.screen.height / 2.8 }}>
                             {chartType === "pie" ? (
                                 <PieChart data={chartData} totalSum={sumOfExpenses} onPress={onChartPress} />
                             ) : (
                                 <Charts data={chartData} onPress={onChartPress} />
                             )}
                         </View>
-                        <DateRangePicker
-                            filters={filters}
-                            dispatch={wrapWithFunction(dispatch, () => setSelected(""))}
-                        />
+                        <View>
+                            <Text style={{ color: Colors.foreground, fontWeight: "bold", fontSize: 12 }}>
+                                {filters.date.from} - {filters.date.to}
+                            </Text>
+                        </View>
                         <Legend
                             excluded={excluded}
                             onLongPress={onLongPress}
@@ -309,7 +313,6 @@ function WalletCharts({ navigation }: any) {
                                             textTransform: "capitalize",
                                         }}
                                     >
-                                        {" "}
                                         {CategoryUtils.getCategoryName(selected) || "All"}
                                     </Text>
                                 </Text>
