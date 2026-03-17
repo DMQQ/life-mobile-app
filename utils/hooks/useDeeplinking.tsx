@@ -14,11 +14,9 @@ export default function useDeeplinking(navigationRef: React.RefObject<Navigation
         if (!url.startsWith("mylife") && !url.startsWith("lifeapp")) return
 
         if (url.includes("wallet/create-expense")) {
-            navigationRef.current?.navigate<any>({
-                name: "WalletScreens",
-                params: {
-                    expenseId: null,
-                },
+            navigationRef.current?.navigate<any>("WalletScreens", {
+                screen: "CreateExpense",
+                params: { expenseId: null },
             })
         } else if (url.includes("wallet/expense/id/")) {
             const expenseId = url.split("/").pop()
@@ -27,6 +25,18 @@ export default function useDeeplinking(navigationRef: React.RefObject<Navigation
                 screen: "Wallet",
                 params: { expenseId },
             })
+        } else if (url.includes("wallet/charts")) {
+            navigationRef.current?.navigate<any>("WalletScreens", {
+                screen: "Charts",
+            })
+        } else if (url.includes("wallet")) {
+            navigationRef.current?.navigate<any>("WalletScreens", {
+                screen: "Wallet",
+            })
+        } else if (url.includes("timeline/create")) {
+            navigationRef.current?.navigate<any>("TimelineScreens", {
+                screen: "TimelineCreate",
+            })
         } else if (url.includes("timeline/id/")) {
             const timelineId = url.split("/").pop()
 
@@ -34,8 +44,8 @@ export default function useDeeplinking(navigationRef: React.RefObject<Navigation
                 timelineId,
             })
         } else if (url.includes("timeline")) {
-            navigationRef.current?.navigate("TimelineScreens", {
-                screen: "",
+            navigationRef.current?.navigate<any>("TimelineScreens", {
+                screen: "Timeline",
             })
         }
     }

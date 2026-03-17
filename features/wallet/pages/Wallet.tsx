@@ -1,7 +1,7 @@
 import Header, { HeaderItem } from "@/components/ui/Header/Header"
 import Colors from "@/constants/Colors"
 import useTrackScroll from "@/utils/hooks/ui/useTrackScroll"
-import { AntDesign, Entypo, Ionicons } from "@expo/vector-icons"
+import { AntDesign, Entypo, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { StyleSheet } from "react-native"
 import Haptic from "react-native-haptic-feedback"
@@ -106,19 +106,31 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
                     contextMenu: {
                         items: [
                             {
-                                title: showSubscriptionsView ? "Show Expenses" : "Show Subscriptions",
-                                systemImage: showSubscriptionsView ? "list.bullet" : "repeat",
-                                onPress: () => {
-                                    setShowSubscriptionsView((prev) => !prev)
-                                    Haptic.trigger("impactLight")
-                                },
-                            },
-                            {
                                 title: "Edit Balance",
                                 systemImage: "pencil.and.outline",
                                 onPress: handleShowEditSheet,
                             },
+                            {
+                                title: "Filters",
+                                systemImage: "camera.filters",
+                                onPress: () => {
+                                    navigation.navigate("Filters")
+                                },
+                            },
                         ],
+                    },
+                },
+                {
+                    icon: (
+                        <MaterialCommunityIcons
+                            name={showSubscriptionsView ? "repeat" : "cash"}
+                            size={20}
+                            color={Colors.foreground}
+                        />
+                    ),
+                    onPress: () => {
+                        setShowSubscriptionsView((prev) => !prev)
+                        Haptic.trigger("impactLight")
                     },
                 },
                 {

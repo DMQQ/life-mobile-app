@@ -55,14 +55,17 @@ const GET_WIDGET_ANALYTICS = gql`
 `
 
 export const useWidgetAnalyticsData = () => {
-    const now = moment()
+    const today = moment()
     const { data } = useQuery(GET_WIDGET_ANALYTICS, {
         variables: {
             range: "monthly",
-            date: now.format("YYYY-MM-DD"),
-            statsRange: [now.startOf("month").format("YYYY-MM-DD"), now.endOf("month").format("YYYY-MM-DD")],
-            startDate: now.subtract(6, "days").format("YYYY-MM-DD"),
-            endDate: moment().format("YYYY-MM-DD"),
+            date: today.format("YYYY-MM-DD"),
+            statsRange: [
+                moment().startOf("month").format("YYYY-MM-DD"),
+                moment().endOf("month").format("YYYY-MM-DD"),
+            ],
+            startDate: moment().subtract(6, "days").format("YYYY-MM-DD"),
+            endDate: today.format("YYYY-MM-DD"),
             detailed: "monthly",
         },
     })
@@ -73,7 +76,7 @@ export const useWidgetAnalyticsData = () => {
         const limits = (data.limits || [])
             .filter((l: any) => l.current > 0)
             .sort((a: any, b: any) => b.current - a.current)
-            .slice(0, 4)
+            .slice(0, 6)
             .map((l: any) => ({
                 category: l.category,
                 amount: l.amount,
@@ -89,7 +92,7 @@ export const useWidgetAnalyticsData = () => {
 
         const topCategories = [...(data.statisticsLegend || [])]
             .sort((a: any, b: any) => b.total - a.total)
-            .slice(0, 4)
+            .slice(0, 6)
             .map((c: any) => ({
                 name: c.category,
                 amount: c.total,

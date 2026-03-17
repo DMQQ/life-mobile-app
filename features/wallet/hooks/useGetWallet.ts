@@ -139,9 +139,12 @@ export default function useGetWallet(options?: {
         },
     })
 
+    const [endReachedLoading, setEndReachedLoading] = useState(false)
+
     const onEndReached = useCallback(async () => {
-        console.log("End reached, loading more...")
-        if (st.loading || endReached || options?.fetchAll) return
+        if (st.loading || endReached || options?.fetchAll || endReachedLoading) return
+
+        setEndReachedLoading(true)
 
         const nextSkip = skip + PAGINATION_TAKE
 
@@ -188,8 +191,10 @@ export default function useGetWallet(options?: {
             setSkip(nextSkip)
         } catch (error) {
             console.error("Error loading more:", error)
+        } finally {
+            setEndReachedLoading(false)
         }
-    }, [st.loading, endReached, skip, baseFilters, directiveVariables, options?.fetchAll])
+    }, [st.loading, endReached, skip, baseFilters, directiveVariables, options?.fetchAll, endReachedLoading])
 
     useEffect(() => {
         const timeout = setTimeout(async () => {

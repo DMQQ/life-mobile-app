@@ -1,9 +1,13 @@
 import WidgetKit
 import SwiftUI
 
+// MARK: - Shared
+
 extension UserDefaults {
     static let shared = UserDefaults(suiteName: "group.com.dmq.mylifemobile")
 }
+
+private let widgetBg = Color(red: 0.051, green: 0.059, blue: 0.078)
 
 struct Provider: AppIntentTimelineProvider {
     func placeholder(in context: Context) -> SimpleEntry {
@@ -13,18 +17,15 @@ struct Provider: AppIntentTimelineProvider {
     func snapshot(for configuration: ConfigurationAppIntent, in context: Context) async -> SimpleEntry {
         SimpleEntry(date: Date(), configuration: configuration)
     }
-    
+
     func timeline(for configuration: ConfigurationAppIntent, in context: Context) async -> Timeline<SimpleEntry> {
         var entries: [SimpleEntry] = []
-
-
         let currentDate = Date()
         for minuteOffset in 0 ..< 5 {
             let entryDate = Calendar.current.date(byAdding: .minute, value: minuteOffset, to: currentDate)!
             let entry = SimpleEntry(date: entryDate, configuration: configuration)
             entries.append(entry)
         }
-
         return Timeline(entries: entries, policy: .atEnd)
     }
 }
@@ -33,6 +34,8 @@ struct SimpleEntry: TimelineEntry {
     let date: Date
     let configuration: ConfigurationAppIntent
 }
+
+// MARK: - Data Models
 
 struct WalletSubscription: Codable {
     let id: String
@@ -57,7 +60,7 @@ struct AnalyticsData: Codable {
     let limits: [AnalyticsLimit]
     let weeklySpending: [Double]
     let topCategories: [AnalyticsCategory]
-    let savings: AnalyticsSavings
+    let savings: AnalyticsSavings?
     let lastUpdated: String
 }
 
@@ -112,171 +115,241 @@ struct TimelineTodo: Codable {
     let isCompleted: Bool
 }
 
+// MARK: - Shared Widget Components
+
+private struct WidgetLabel: View {
+    let text: String
+    var body: some View {
+        Text(text)
+            .font(.system(size: 10, weight: .semibold, design: .rounded))
+            .tracking(1.4)
+            .foregroundColor(.white.opacity(0.55))
+    }
+}
+
+private func relativeTimeString(_ isoString: String) -> String {
+    let f = DateFormatter()
+    f.locale = Locale(identifier: "en_US_POSIX")
+    f.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+    f.timeZone = TimeZone(abbreviation: "UTC")
+    guard let date = f.date(from: isoString) else { return "" }
+    let secs = Int(Date().timeIntervalSince(date))
+    if secs < 60 { return "just now" }
+    if secs < 3600 { return "\(secs / 60)m ago" }
+    if secs < 86400 { return "\(secs / 3600)h ago" }
+    return "\(secs / 86400)d ago"
+}
+
+private func weekRangeString() -> String {
+    let cal = Calendar.current
+    let today = Date()
+    let weekday = cal.component(.weekday, from: today)
+    let daysFromMonday = (weekday == 1) ? 6 : weekday - 2
+    guard let monday = cal.date(byAdding: .day, value: -daysFromMonday, to: today) else { return "" }
+    let df = DateFormatter()
+    df.dateFormat = "MMM d"
+    return "\(df.string(from: monday)) – \(df.string(from: today))"
+}
+
+private struct WidgetCard<Content: View>: View {
+    let content: Content
+    init(@ViewBuilder _ content: () -> Content) { self.content = content() }
+    var body: some View {
+        content
+            .padding(.horizontal, 10)
+            .padding(.vertical, 8)
+            .background(Color.white.opacity(0.13))
+            .clipShape(RoundedRectangle(cornerRadius: 11, style: .continuous))
+    }
+}
+
+private struct WidgetProgressBar: View {
+    let value: Double   // 0–1
+    let tint: Color
+    var body: some View {
+        GeometryReader { geo in
+            ZStack(alignment: .leading) {
+                Capsule().fill(Color.white.opacity(0.2)).frame(height: 5)
+                Capsule()
+                    .fill(tint)
+                    .frame(width: max(4, geo.size.width * min(1, max(0, value))), height: 5)
+            }
+        }
+        .frame(height: 5)
+    }
+}
+
+// MARK: - Wallet Widget
+
 struct WalletWidgetView: View {
     var entry: Provider.Entry
     @Environment(\.widgetFamily) var family
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            if let walletDataString = UserDefaults.shared?.string(forKey: "wallet_data"),
-               let walletData = try? JSONDecoder().decode(WalletData.self, from: walletDataString.data(using: .utf8) ?? Data()) {
-                
-                HStack {
-                    Text("💰 Wallet")
-                        .font(.headline)
-                        .fontWeight(.bold)
-                    Spacer()
-                    Text("\(walletData.balance, specifier: "%.2f")zł")
-                        .font(.title2)
-                        .fontWeight(.black)
-                }
-                
-                if family == .systemLarge,
-                   let monthlySpent = walletData.monthlySpent,
-                   let monthlyLimit = walletData.monthlyLimit,
-                   monthlyLimit > 0 {
-                    VStack(alignment: .leading, spacing: 4) {
-                        HStack {
-                            Text("Monthly Spending")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                            Spacer()
-                            Text("\(monthlySpent, specifier: "%.0f") / \(monthlyLimit, specifier: "%.0f")zł")
-                                .font(.caption)
-                                .fontWeight(.medium)
-                        }
-                        
-                        ZStack(alignment: .leading) {
-                            RoundedRectangle(cornerRadius: 4)
-                                .fill(Color.gray.opacity(0.3))
-                                .frame(height: 8)
-                            
-                            RoundedRectangle(cornerRadius: 4)
-                                .fill(monthlySpent > monthlyLimit ? .red : .blue)
-                                .frame(height: 8)
-                                .frame(maxWidth: .infinity)
-                                .scaleEffect(x: min(1.0, monthlySpent / monthlyLimit), anchor: .leading)
-                                .clipped()
-                        }
-                        
-                        HStack {
-                            Text("\(Int((monthlySpent / monthlyLimit) * 100))% used")
-                                .font(.caption2)
-                                .foregroundColor(monthlySpent > monthlyLimit ? .red : .secondary)
-                            Spacer()
-                            if monthlySpent <= monthlyLimit {
-                                Text("\(monthlyLimit - monthlySpent, specifier: "%.0f")zł left")
-                                    .font(.caption2)
-                                    .foregroundColor(.green)
-                            } else {
-                                Text("\(monthlySpent - monthlyLimit, specifier: "%.0f")zł over")
-                                    .font(.caption2)
-                                    .foregroundColor(.red)
-                            }
-                        }
-                    }
-                    .padding(.top, 8)
-                    .padding(.bottom, 4)
-                }
-                
-                let expenseCount = family == .systemLarge ? 5 : 2
-                let expensesToShow: [WalletExpense] = Array(walletData.recentExpenses.prefix(expenseCount))
-                ForEach(expensesToShow, id: \.id) { (expense: WalletExpense) in
-                    Link(destination: URL(string: "mylife://wallet/expense/id/\(expense.id)")!) {
-                        HStack(spacing: 8) {
-                                Image(systemName: getCategoryIcon(expense.category))
-                                .font(.caption)
-                                .foregroundColor(getCategoryColor(expense.category))
-                                .frame(width: 16, height: 16)
-                            
-                            VStack(alignment: .leading, spacing: 1) {
-                                Text(expense.description)
-                                    .font(.caption2)
-                                    .lineLimit(1)
-                                HStack(spacing: 4) {
-                                    Text(expense.category)
-                                        .font(.caption2)
-                                        .foregroundColor(.secondary)
-                                    Text("•")
-                                        .font(.caption2)
-                                        .foregroundColor(.secondary)
-                                    Text(formatDate(expense.date))
-                                        .font(.caption2)
-                                        .foregroundColor(.secondary)
-                                }
-                            }
-                            Spacer()
-                            Text("\(expense.type == "income" ? "+" : "-")\(expense.amount, specifier: "%.2f")zł")
-                                .font(.caption2)
-                                .fontWeight(.medium)
-                                .foregroundColor(expense.type == "income" ? .green : .red)
-                                .strikethrough(expense.type == "refunded", color: .gray)
-                        }
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 6)
-                        .background(
-                            RoundedRectangle(cornerRadius: 10)
-                                .fill(Color.primary.opacity(0.05))
-                        )
-                    }
-                }
-                
-                if family == .systemLarge,
-                   let subscriptions = walletData.upcomingSubscriptions,
-                   !subscriptions.isEmpty {
-                    
-                    Text("Upcoming Subscriptions:")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                        .padding(.top, 8)
-                    
-                    let subscriptionsToShow: [WalletSubscription] = Array(subscriptions.prefix(2))
-                    ForEach(subscriptionsToShow, id: \.id) { (subscription: WalletSubscription) in
-                        HStack {
-                            VStack(alignment: .leading, spacing: 1) {
-                                Text(subscription.description)
-                                    .font(.caption2)
-                                    .lineLimit(1)
-                                Text(formatDate(subscription.nextBillingDate))
-                                    .font(.caption2)
-                                    .foregroundColor(.orange)
-                            }
-                            Spacer()
-                            Text("\(subscription.amount, specifier: "%.2f")zł")
-                                .font(.caption2)
-                                .fontWeight(.medium)
-                                .foregroundColor(.orange)
-                        }
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(
-                            RoundedRectangle(cornerRadius: 6)
-                                .fill(Color.orange.opacity(0.1))
-                        )
-                    }
-                }
-                
+        VStack(alignment: .leading, spacing: 0) {
+            if let str = UserDefaults.shared?.string(forKey: "wallet_data"),
+               let data = try? JSONDecoder().decode(WalletData.self, from: str.data(using: .utf8) ?? Data()) {
+                walletContent(data)
             } else {
-                Text("No wallet data")
-                    .foregroundColor(.secondary)
+                emptyState("wallet.pass")
+            }
+            Spacer(minLength: 0)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .padding(14)
+    }
+
+    @ViewBuilder
+    private func walletContent(_ data: WalletData) -> some View {
+        // Header
+        HStack(alignment: .top) {
+            VStack(alignment: .leading, spacing: 2) {
+                WidgetLabel(text: "SPENT THIS MONTH")
+                let spent = data.monthlySpent ?? 0
+                Text(formatCurrency(spent))
+                    .font(.system(size: 32, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.65)
+                if let limit = data.monthlyLimit, limit > 0 {
+                    let pct = Int((spent / limit) * 100)
+                    let over = spent > limit
+                    Text(over ? "\(Int(spent - limit)) zł over limit" : "\(Int(limit - spent)) zł left of \(Int(limit)) zł")
+                        .font(.system(size: 10, weight: .medium))
+                        .foregroundColor(over ? Color(red: 1, green: 0.45, blue: 0.45) : .white.opacity(0.5))
+                } else if data.income > 0 {
+                    let pct = Int((spent / data.income) * 100)
+                    Text("\(pct)% of income")
+                        .font(.system(size: 10, weight: .medium))
+                        .foregroundColor(.white.opacity(0.5))
+                }
+            }
+            Spacer()
+            VStack(alignment: .trailing, spacing: 6) {
+                Link(destination: URL(string: "mylife://wallet/create-expense")!) {
+                    ZStack {
+                        Circle().fill(Color.white.opacity(0.15)).frame(width: 30, height: 30)
+                        Image(systemName: "plus").font(.system(size: 13, weight: .bold)).foregroundColor(.white)
+                    }
+                }
+                let updated = relativeTimeString(data.lastUpdated)
+                if !updated.isEmpty {
+                    Text(updated).font(.system(size: 9)).foregroundColor(.white.opacity(0.35))
+                }
             }
         }
-        .padding(.horizontal, 8)
-        .padding(.top, 4)
-        .padding(.bottom, 8)
+        .padding(.bottom, 12)
+
+        // Budget progress bar (medium + large)
+        if family != .systemSmall,
+           let spent = data.monthlySpent,
+           let limit = data.monthlyLimit,
+           limit > 0 {
+            WidgetProgressBar(
+                value: spent / limit,
+                tint: spent > limit ? Color(red: 1, green: 0.4, blue: 0.4) : .white
+            )
+            .padding(.bottom, 10)
+        }
+
+        // Expense rows
+        let count = family == .systemLarge ? 5 : (family == .systemMedium ? 3 : 2)
+        VStack(spacing: 5) {
+            ForEach(Array(data.recentExpenses.prefix(count)), id: \.id) { expense in
+                Link(destination: URL(string: "mylife://wallet/expense/id/\(expense.id)")!) {
+                    expenseRow(expense)
+                }
+            }
+        }
+
+        // Subscriptions (large only)
+        if family == .systemLarge,
+           let subs = data.upcomingSubscriptions, !subs.isEmpty {
+            WidgetLabel(text: "UPCOMING")
+                .padding(.top, 14)
+                .padding(.bottom, 5)
+            VStack(spacing: 5) {
+                ForEach(Array(subs.prefix(2)), id: \.id) { sub in
+                    WidgetCard {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(sub.description)
+                                    .font(.system(size: 12, weight: .semibold))
+                                    .foregroundColor(.white)
+                                    .lineLimit(1)
+                                Text(formatDate(sub.nextBillingDate))
+                                    .font(.system(size: 10))
+                                    .foregroundColor(.white.opacity(0.55))
+                            }
+                            Spacer()
+                            Text("–\(formatCurrency(sub.amount))")
+                                .font(.system(size: 12, weight: .bold, design: .rounded))
+                                .foregroundColor(Color(red: 1, green: 0.8, blue: 0.35))
+                        }
+                    }
+                }
+            }
+        }
     }
-    
+
+    @ViewBuilder
+    private func expenseRow(_ expense: WalletExpense) -> some View {
+        WidgetCard {
+            HStack(spacing: 10) {
+                ZStack {
+                    Circle()
+                        .fill(Color.white.opacity(0.15))
+                        .frame(width: 28, height: 28)
+                    Image(systemName: getCategoryIcon(expense.category))
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundColor(.white)
+                }
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(expense.description)
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(.white)
+                        .lineLimit(1)
+                    Text(expense.category.capitalized)
+                        .font(.system(size: 10))
+                        .foregroundColor(.white.opacity(0.5))
+                }
+                Spacer()
+                Text("\(expense.type == "income" ? "+" : "–")\(formatCurrency(expense.amount))")
+                    .font(.system(size: 12, weight: .bold, design: .rounded))
+                    .foregroundColor(expense.type == "income" ? Color(red: 0.4, green: 1, blue: 0.65) : .white)
+                    .strikethrough(expense.type == "refunded", color: .white.opacity(0.5))
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func emptyState(_ icon: String) -> some View {
+        VStack(spacing: 6) {
+            Image(systemName: icon)
+                .font(.system(size: 22, weight: .light))
+                .foregroundColor(.white.opacity(0.35))
+            Text("No data")
+                .font(.system(size: 12))
+                .foregroundColor(.white.opacity(0.4))
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private func formatCurrency(_ amount: Double) -> String {
+        String(format: amount.truncatingRemainder(dividingBy: 1) == 0 ? "%.0f zł" : "%.2f zł", amount)
+    }
+
     private func formatDate(_ dateString: String) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
-        if let date = formatter.date(from: dateString) {
-            let displayFormatter = DateFormatter()
-            displayFormatter.dateFormat = "MMM dd"
-            return displayFormatter.string(from: date)
+        let f = DateFormatter()
+        f.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+        if let date = f.date(from: dateString) {
+            let d = DateFormatter()
+            d.dateFormat = "MMM d"
+            return d.string(from: date)
         }
         return dateString
     }
-    
+
     private func getCategoryIcon(_ category: String) -> String {
         switch category.lowercased() {
         case "housing": return "house.fill"
@@ -304,354 +377,412 @@ struct WalletWidgetView: View {
         default: return "circle.fill"
         }
     }
-    
-    private func getCategoryColor(_ category: String) -> Color {
-        switch category.lowercased() {
-        case "housing": return .green
-        case "transportation": return .red
-        case "food": return .purple
-        case "drinks": return .orange
-        case "shopping": return .red
-        case "addictions": return .red
-        case "work": return .blue
-        case "clothes": return .red
-        case "health": return .cyan
-        case "entertainment": return .purple
-        case "utilities": return .blue
-        case "debt": return .red
-        case "education": return .yellow
-        case "savings": return .pink
-        case "travel": return .green
-        case "income": return .green
-        case "animals": return .red
-        case "refunded": return .gray
-        case "gifts": return .green
-        case "sports": return .green
-        case "tech": return .blue
-        case "goingout": return .purple
-        default: return .gray
-        }
-    }
 }
+
+// MARK: - Timeline Widget
 
 struct TimelineWidgetView: View {
     var entry: Provider.Entry
     @Environment(\.widgetFamily) var family
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            if let timelineDataString = UserDefaults.shared?.string(forKey: "timeline_data"),
-               let timelineData = try? JSONDecoder().decode(TimelineData.self, from: timelineDataString.data(using: .utf8) ?? Data()) {
-                
-                HStack {
-                    Text("📅 Timeline")
-                        .font(.headline)
-                        .fontWeight(.bold)
-                    Spacer()
-                    HStack(spacing: 4) {
-                        Circle()
-                            .fill(.green)
-                            .frame(width: 6, height: 6)
-                        Text("\(timelineData.completedEvents)")
-                            .font(.caption)
-                            .fontWeight(.medium)
-                        Text("/")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        Text("\(timelineData.totalEvents)")
-                            .font(.caption)
-                            .fontWeight(.medium)
-                    }
-                }
-                .padding(.bottom, 8)
-                
-                let eventCount = family == .systemLarge ? 4 : 2
-                let eventsToShow: [TimelineEvent] = Array(timelineData.events.prefix(eventCount))
-                ForEach(eventsToShow, id: \.id) { (event: TimelineEvent) in
-                    Link(destination: URL(string: "mylife://timeline/id/\(event.id)")!) {
-                        VStack(alignment: .leading, spacing: 4) {
-                            HStack(spacing: 8) {
-                                let isCompleted = event.isCompleted
-                                Image(systemName: isCompleted ? "checkmark.circle.fill" : "circle")
-                                    .foregroundColor(isCompleted ? .green : .blue)
-                                    .font(.caption)
-                                    .frame(width: 16, height: 16)
-                                
-                                VStack(alignment: .leading, spacing: 1) {
-                                    Text(event.title)
-                                        .font(.caption)
-                                        .fontWeight(.medium)
-                                        .lineLimit(1)
-                                    
-                                    if !event.description.isEmpty && event.todos.isEmpty {
-                                        Text(event.description)
-                                            .font(.caption2)
-                                            .foregroundColor(.secondary)
-                                            .lineLimit(1)
-                                    }
-                                }
-                                
-                                Spacer()
-                                
-                                VStack(alignment: .trailing, spacing: 1) {
-                                    Text(formatEventDate(event.date))
-                                        .font(.caption2)
-                                        .foregroundColor(.secondary)
-                                    Text("\(formatTime(event.beginTime)) - \(formatTime(event.endTime))")
-                                        .font(.caption2)
-                                        .foregroundColor(.secondary)
-                                }
-                            }
-                            
-                            if !event.todos.isEmpty {
-                                VStack(alignment: .leading, spacing: 2) {
-                                    let todoCount = family == .systemLarge ? 2 : 1
-                                    let todosToShow: [TimelineTodo] = Array(event.todos.prefix(todoCount))
-                                    ForEach(todosToShow, id: \.id) { (todo: TimelineTodo) in
-                                        HStack(spacing: 6) {
-                                            Image(systemName: todo.isCompleted ? "checkmark.square.fill" : "square")
-                                                .foregroundColor(todo.isCompleted ? .green : .gray)
-                                                .font(.caption2)
-                                                .frame(width: 12, height: 12)
-                                            Text(todo.title)
-                                                .font(.caption2)
-                                                .lineLimit(1)
-                                                .strikethrough(todo.isCompleted)
-                                                .foregroundColor(todo.isCompleted ? .secondary : .primary)
-                                            Spacer()
-                                        }
-                                        .padding(.leading, 20)
-                                    }
-                                }
-                            }
-                        }
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 6)
-                        .background(
-                            RoundedRectangle(cornerRadius: 10)
-                                .fill(Color.primary.opacity(0.05))
-                        )
-                    }
-                }
-                
+        VStack(alignment: .leading, spacing: 0) {
+            if let str = UserDefaults.shared?.string(forKey: "timeline_data"),
+               let data = try? JSONDecoder().decode(TimelineData.self, from: str.data(using: .utf8) ?? Data()) {
+                timelineContent(data)
             } else {
-                Text("No timeline data")
-                    .foregroundColor(.secondary)
+                VStack(alignment: .leading, spacing: 2) {
+                    WidgetLabel(text: "TIMELINE")
+                    Text(todayDateString())
+                        .font(.system(size: 32, weight: .bold, design: .rounded))
+                        .foregroundColor(.white)
+                    Text("Nothing scheduled")
+                        .font(.system(size: 10, weight: .medium))
+                        .foregroundColor(.white.opacity(0.4))
+                        .padding(.top, 2)
+                }
+            }
+            Spacer(minLength: 0)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .padding(14)
+    }
+
+    @ViewBuilder
+    private func timelineContent(_ data: TimelineData) -> some View {
+        // Header
+        HStack(alignment: .top) {
+            VStack(alignment: .leading, spacing: 2) {
+                WidgetLabel(text: "TIMELINE")
+                Text(todayDateString())
+                    .font(.system(size: 32, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
+                HStack(spacing: 4) {
+                    Text("\(data.completedEvents) / \(data.totalEvents) done")
+                        .font(.system(size: 10, weight: .medium))
+                        .foregroundColor(.white.opacity(0.5))
+                }
+            }
+            Spacer()
+            VStack(alignment: .trailing, spacing: 6) {
+                Link(destination: URL(string: "mylife://timeline/create")!) {
+                    ZStack {
+                        Circle().fill(Color.white.opacity(0.15)).frame(width: 30, height: 30)
+                        Image(systemName: "plus").font(.system(size: 13, weight: .bold)).foregroundColor(.white)
+                    }
+                }
+                let updated = relativeTimeString(data.lastUpdated)
+                if !updated.isEmpty {
+                    Text(updated).font(.system(size: 9)).foregroundColor(.white.opacity(0.35))
+                }
+                if data.totalEvents > 0 {
+                    ZStack {
+                        Circle()
+                            .stroke(Color.white.opacity(0.2), lineWidth: 3)
+                        Circle()
+                            .trim(from: 0, to: Double(data.completedEvents) / Double(data.totalEvents))
+                            .stroke(Color.white, style: StrokeStyle(lineWidth: 3, lineCap: .round))
+                            .rotationEffect(.degrees(-90))
+                    }
+                    .frame(width: 28, height: 28)
+                }
             }
         }
-        .padding(.horizontal, 8)
-        .padding(.top, 2)
-        .padding(.bottom, 8)
-    }
-    
-    private func formatTime(_ timeString: String) -> String {
-        if timeString.contains(":") {
-            let components = timeString.split(separator: ":")
-            if components.count >= 2 {
-                return "\(components[0]):\(components[1])"
+        .padding(.bottom, 12)
+
+        // Events
+        let count = family == .systemLarge ? 4 : 2
+        VStack(spacing: 5) {
+            ForEach(Array(data.events.prefix(count)), id: \.id) { event in
+                Link(destination: URL(string: "mylife://timeline/id/\(event.id)")!) {
+                    eventRow(event)
+                }
             }
         }
-        return timeString
     }
-    
+
+    @ViewBuilder
+    private func eventRow(_ event: TimelineEvent) -> some View {
+        let dimmed = event.isCompleted
+        WidgetCard {
+            VStack(alignment: .leading, spacing: 6) {
+                HStack(spacing: 9) {
+                    Image(systemName: event.isCompleted ? "checkmark.circle.fill" : "circle")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(event.isCompleted ? Color(red: 0.4, green: 1, blue: 0.65).opacity(0.6) : .white.opacity(0.7))
+
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text(event.title)
+                            .font(.system(size: 12, weight: dimmed ? .regular : .semibold))
+                            .foregroundColor(.white.opacity(dimmed ? 0.4 : 1))
+                            .lineLimit(1)
+                            .strikethrough(dimmed, color: .white.opacity(0.3))
+                        if !event.description.isEmpty && event.todos.isEmpty {
+                            Text(event.description)
+                                .font(.system(size: 10))
+                                .foregroundColor(.white.opacity(dimmed ? 0.25 : 0.5))
+                                .lineLimit(1)
+                        }
+                    }
+
+                    Spacer()
+
+                    VStack(alignment: .trailing, spacing: 1) {
+                        Text(formatEventDate(event.date))
+                            .font(.system(size: 10, weight: .medium))
+                            .foregroundColor(.white.opacity(dimmed ? 0.25 : 0.55))
+                        Text("\(formatTime(event.beginTime))–\(formatTime(event.endTime))")
+                            .font(.system(size: 10))
+                            .foregroundColor(.white.opacity(dimmed ? 0.2 : 0.4))
+                    }
+                }
+
+                if !event.todos.isEmpty {
+                    let todoCount = family == .systemLarge ? 2 : 1
+                    VStack(alignment: .leading, spacing: 3) {
+                        ForEach(Array(event.todos.prefix(todoCount)), id: \.id) { todo in
+                            HStack(spacing: 6) {
+                                Image(systemName: todo.isCompleted ? "checkmark.square.fill" : "square")
+                                    .font(.system(size: 10))
+                                    .foregroundColor(todo.isCompleted ? Color(red: 0.4, green: 1, blue: 0.65) : .white.opacity(0.4))
+                                Text(todo.title)
+                                    .font(.system(size: 10))
+                                    .foregroundColor(todo.isCompleted ? .white.opacity(0.4) : .white.opacity(0.75))
+                                    .strikethrough(todo.isCompleted, color: .white.opacity(0.3))
+                                    .lineLimit(1)
+                            }
+                            .padding(.leading, 6)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private func todayDateString() -> String {
+        let df = DateFormatter()
+        df.dateFormat = "EEE, MMM d"
+        return df.string(from: Date())
+    }
+
+    private func formatTime(_ t: String) -> String {
+        if t.contains(":") {
+            let c = t.split(separator: ":")
+            if c.count >= 2 { return "\(c[0]):\(c[1])" }
+        }
+        return t
+    }
+
     private func formatEventDate(_ dateString: String) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
-        guard let date = formatter.date(from: dateString) else { return dateString }
-        
+        let f = DateFormatter()
+        f.dateFormat = "yyyy-MM-dd"
+        guard let date = f.date(from: dateString) else { return dateString }
         let today = Calendar.current.startOfDay(for: Date())
-        let eventDate = Calendar.current.startOfDay(for: date)
-        
-        let daysDiff = Calendar.current.dateComponents([.day], from: today, to: eventDate).day ?? 0
-        
-        switch daysDiff {
+        let eventDay = Calendar.current.startOfDay(for: date)
+        let diff = Calendar.current.dateComponents([.day], from: today, to: eventDay).day ?? 0
+        switch diff {
         case 0: return "Today"
         case 1: return "Tomorrow"
-        case 2: return "Day After"
         default:
-            let displayFormatter = DateFormatter()
-            displayFormatter.dateFormat = "MMM dd"
-            return displayFormatter.string(from: date)
+            let d = DateFormatter(); d.dateFormat = "MMM d"
+            return d.string(from: date)
         }
     }
 }
 
+// MARK: - Analytics Widget
+
 struct AnalyticsWidgetView: View {
     var entry: Provider.Entry
     @Environment(\.widgetFamily) var family
-    
+
     private var currentView: Int {
-        let minutes = Int(entry.date.timeIntervalSince1970) / 60
-        return minutes % 3
+        UserDefaults.shared?.integer(forKey: "analytics_view_index") ?? 0
     }
-    
+
     private var analyticsData: AnalyticsData? {
-        guard let analyticsDataString = UserDefaults.shared?.string(forKey: "analytics_data"),
-              let data = analyticsDataString.data(using: .utf8),
-              let decoded = try? JSONDecoder().decode(AnalyticsData.self, from: data) else {
-            return nil
-        }
+        guard let str = UserDefaults.shared?.string(forKey: "analytics_data"),
+              let data = str.data(using: .utf8),
+              let decoded = try? JSONDecoder().decode(AnalyticsData.self, from: data) else { return nil }
         return decoded
     }
-    
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 0) {
             if let data = analyticsData {
-                
-                HStack {
-                    Text("📊 Analytics")
-                        .font(.headline)
-                        .fontWeight(.bold)
-                    Spacer()
-                    Text(getViewTitle(currentView))
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }.padding(.bottom, 6)
-                
+                // Header — compact on medium to maximise chart space
+                if family == .systemMedium {
+                    HStack(alignment: .center) {
+                        VStack(alignment: .leading, spacing: 1) {
+                            WidgetLabel(text: "ANALYTICS")
+                            Text(viewTitle)
+                                .font(.system(size: 20, weight: .bold, design: .rounded))
+                                .foregroundColor(.white)
+                        }
+                        Spacer()
+                        HStack(spacing: 8) {
+                            HStack(spacing: 3) {
+                                ForEach(0..<3, id: \.self) { i in
+                                    Circle()
+                                        .fill(i == currentView ? Color.white : Color.white.opacity(0.3))
+                                        .frame(width: i == currentView ? 5 : 3, height: i == currentView ? 5 : 3)
+                                }
+                            }
+                            Button(intent: SwitchAnalyticsViewIntent()) {
+                                ZStack {
+                                    Circle().fill(Color.white.opacity(0.15)).frame(width: 26, height: 26)
+                                    Image(systemName: "chevron.right").font(.system(size: 10, weight: .bold)).foregroundColor(.white)
+                                }
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .padding(.bottom, 8)
+                } else {
+                    // Large: full header with subtitle and context
+                    HStack(alignment: .top) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            WidgetLabel(text: "ANALYTICS")
+                            Text(viewTitle)
+                                .font(.system(size: 32, weight: .bold, design: .rounded))
+                                .foregroundColor(.white)
+                            Group {
+                                if currentView == 0 {
+                                    let overCount = data.limits.filter { $0.current > $0.amount }.count
+                                    if overCount > 0 {
+                                        Text("\(overCount) limit\(overCount > 1 ? "s" : "") exceeded")
+                                            .foregroundColor(Color(red: 1, green: 0.45, blue: 0.45))
+                                    } else {
+                                        Text("All within budget")
+                                            .foregroundColor(Color(red: 0.4, green: 1, blue: 0.65))
+                                    }
+                                } else if currentView == 1 {
+                                    let total = data.weeklySpending.reduce(0, +)
+                                    Text("\(weekRangeString()) · \(Int(total)) zł")
+                                } else {
+                                    let total = data.topCategories.reduce(0) { $0 + $1.amount }
+                                    Text("Total \(Int(total)) zł this month")
+                                }
+                            }
+                            .font(.system(size: 10, weight: .medium))
+                            .foregroundColor(.white.opacity(0.5))
+                        }
+                        Spacer()
+                        VStack(alignment: .trailing, spacing: 6) {
+                            Button(intent: SwitchAnalyticsViewIntent()) {
+                                ZStack {
+                                    Circle().fill(Color.white.opacity(0.15)).frame(width: 30, height: 30)
+                                    Image(systemName: "chevron.right").font(.system(size: 11, weight: .bold)).foregroundColor(.white)
+                                }
+                            }
+                            .buttonStyle(.plain)
+                            let updated = relativeTimeString(data.lastUpdated)
+                            if !updated.isEmpty {
+                                Text(updated).font(.system(size: 9)).foregroundColor(.white.opacity(0.35))
+                            }
+                            HStack(spacing: 4) {
+                                ForEach(0..<3, id: \.self) { i in
+                                    Circle()
+                                        .fill(i == currentView ? Color.white : Color.white.opacity(0.3))
+                                        .frame(width: i == currentView ? 6 : 4, height: i == currentView ? 6 : 4)
+                                }
+                            }
+                        }
+                    }
+                    .padding(.bottom, 10)
+                }
+
                 switch currentView {
                 case 0:
-                    LimitsChartView(limits: data.limits, family: family)
-                case 1:
-                    WeeklySpendingView(analyticsData: data, family: family)
-                default:
-                    CategoryChartView(categories: data.topCategories, family: family)
-                }
-                
-            } else {
-                VStack {
-                    Text("📊 Analytics")
-                        .font(.headline)
-                        .fontWeight(.bold)
-                        .padding(.bottom, 6)
-                    
-                    if let analyticsDataString = UserDefaults.shared?.string(forKey: "analytics_data") {
-                        Text("Data found but decode failed")
-                            .foregroundColor(.orange)
-                            .font(.caption)
-                        Text("Length: \(analyticsDataString.count)")
-                            .foregroundColor(.secondary)
-                            .font(.caption2)
+                    if data.limits.isEmpty {
+                        analyticsEmpty("No limits configured", icon: "slider.horizontal.3")
                     } else {
-                        Text("No analytics data in UserDefaults")
-                            .foregroundColor(.secondary)
-                            .font(.caption)
+                        LimitsChartView(limits: data.limits, family: family)
+                    }
+                case 1:
+                    if data.weeklySpending.isEmpty || data.weeklySpending.allSatisfy({ $0 == 0 }) {
+                        analyticsEmpty("No spending this week", icon: "chart.bar")
+                    } else {
+                        WeeklySpendingView(analyticsData: data, family: family)
+                            .layoutPriority(1)
+                    }
+                default:
+                    if data.topCategories.isEmpty {
+                        analyticsEmpty("No category data yet", icon: "tag")
+                    } else {
+                        CategoryChartView(categories: data.topCategories, family: family)
                     }
                 }
+
+            } else {
+                VStack(spacing: 6) {
+                    WidgetLabel(text: "ANALYTICS")
+                    Spacer()
+                    Image(systemName: "chart.bar.xaxis")
+                        .font(.system(size: 22, weight: .light))
+                        .foregroundColor(.white.opacity(0.35))
+                    Text("No data available")
+                        .font(.system(size: 12))
+                        .foregroundColor(.white.opacity(0.4))
+                    Spacer()
+                }
+                .frame(maxWidth: .infinity)
             }
+            Spacer(minLength: 0)
         }
-        .padding(.horizontal, 8)
-        .padding(.top, 4)
-        .padding(.bottom, 8)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .padding(14)
     }
-    
-    private func getViewTitle(_ index: Int) -> String {
-        switch index {
+
+    private var viewTitle: String {
+        switch currentView {
         case 0: return "Limits"
         case 1: return "Weekly"
         default: return "Categories"
         }
     }
+
+    @ViewBuilder
+    private func analyticsEmpty(_ message: String, icon: String) -> some View {
+        VStack(spacing: 6) {
+            Image(systemName: icon)
+                .font(.system(size: 20, weight: .light))
+                .foregroundColor(.white.opacity(0.35))
+            Text(message)
+                .font(.system(size: 11))
+                .foregroundColor(.white.opacity(0.4))
+                .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
 }
+
+// MARK: - Limits Chart
 
 struct LimitsChartView: View {
     let limits: [AnalyticsLimit]
     let family: WidgetFamily
-    
+
     var body: some View {
-        let itemCount = family == .systemLarge ? 6 : 3
-        let columns = [GridItem(.flexible())]
-        
-        LazyVGrid(columns: columns, spacing: family == .systemLarge ? 12 : 6) {
-            ForEach(limits.prefix(itemCount), id: \.category) { limit in
-                VStack(alignment: .leading, spacing: family == .systemLarge ? 16 : 6) {
-                    HStack(spacing: 6) {
-                        Image(systemName: getCategorySystemIcon(limit.category))
-                            .font(.caption)
-                            .foregroundColor(getCategoryLimitColor(limit.category))
-                            .frame(width: 16, height: 16)
-                        
-                        VStack(alignment: .leading, spacing: 1) {
-                            Text(limit.category.capitalized)
-                                .font(family == .systemLarge ? .caption2 : .caption2)
-                                .fontWeight(.medium)
-                                .lineLimit(1)
-                            
-                            if family == .systemLarge {
-                                Text("\(Int(limit.current))zł / \(Int(limit.amount))zł")
-                                    .font(.caption2)
-                                    .foregroundColor(.secondary)
+        if family == .systemLarge {
+            // Full card view for large
+            VStack(spacing: 7) {
+                ForEach(Array(limits.prefix(6)), id: \.category) { limit in
+                    let pct = limit.amount > 0 ? limit.current / limit.amount : 0
+                    let over = limit.current > limit.amount
+                    let tint: Color = over ? Color(red: 1, green: 0.4, blue: 0.4) : .white
+                    WidgetCard {
+                        VStack(spacing: 5) {
+                            HStack(spacing: 8) {
+                                Image(systemName: getCategorySystemIcon(limit.category))
+                                    .font(.system(size: 11, weight: .semibold))
+                                    .foregroundColor(.white)
+                                    .frame(width: 16)
+                                Text(limit.category.capitalized)
+                                    .font(.system(size: 12, weight: .semibold))
+                                    .foregroundColor(.white)
                                     .lineLimit(1)
-                            }
-                        }
-                        
-                        Spacer()
-                        
-                        if family != .systemLarge {
-                            Text("\(Int(limit.current))/\(Int(limit.amount))")
-                                .font(.caption2)
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                    
-                    VStack(alignment: .leading, spacing: 2) {
-                        ZStack(alignment: .leading) {
-                            RoundedRectangle(cornerRadius: family == .systemLarge ? 4 : 3)
-                                .fill(Color.gray.opacity(0.2))
-                                .frame(height: family == .systemLarge ? 8 : 6)
-                            
-                            RoundedRectangle(cornerRadius: family == .systemLarge ? 4 : 3)
-                                .fill(LinearGradient(
-                                    gradient: Gradient(colors: [
-                                        limit.current > limit.amount ? .red.opacity(0.8) : getCategoryLimitColor(limit.category).opacity(0.8),
-                                        limit.current > limit.amount ? .red : getCategoryLimitColor(limit.category)
-                                    ]),
-                                    startPoint: .leading,
-                                    endPoint: .trailing
-                                ))
-                                .frame(height: family == .systemLarge ? 8 : 6)
-                                .frame(maxWidth: .infinity)
-                                .scaleEffect(x: min(1.0, limit.amount > 0 ? limit.current / limit.amount : 0), anchor: .leading)
-                                .clipped()
-                        }
-                        
-                        if family == .systemLarge && limit.amount > 0 {
-                            let percentage = (limit.current / limit.amount) * 100
-                            let remaining = max(0, limit.amount - limit.current)
-                            
-                            HStack {
-                                Text("\(Int(percentage))% used")
-                                    .font(.caption2)
-                                    .foregroundColor(limit.current > limit.amount ? .red : .secondary)
-                                
                                 Spacer()
-                                
-                                if remaining > 0 {
-                                    Text("\(Int(remaining))zł left")
-                                        .font(.caption2)
-                                        .foregroundColor(.green)
-                                } else {
-                                    Text("\(Int(limit.current - limit.amount))zł over")
-                                        .font(.caption2)
-                                        .foregroundColor(.red)
-                                }
+                                Text("\(Int(limit.current)) / \(Int(limit.amount)) zł")
+                                    .font(.system(size: 10, weight: .semibold, design: .rounded))
+                                    .foregroundColor(over ? Color(red: 1, green: 0.5, blue: 0.5) : .white.opacity(0.7))
                             }
+                            WidgetProgressBar(value: pct, tint: tint)
                         }
                     }
                 }
-                .padding(.horizontal, family == .systemLarge ? 10 : 8)
-                .padding(.vertical, family == .systemLarge ? 8 : 6)
-                .background(
-                    RoundedRectangle(cornerRadius: family == .systemLarge ? 10 : 8)
-                        .fill(getCategoryLimitColor(limit.category).opacity(0.05))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: family == .systemLarge ? 10 : 8)
-                                .stroke(getCategoryLimitColor(limit.category).opacity(0.2), lineWidth: 1)
-                        )
-                )
+            }
+        } else {
+            // Compact rows for medium — fits 5 items
+            VStack(spacing: 6) {
+                ForEach(Array(limits.prefix(5)), id: \.category) { limit in
+                    let pct = limit.amount > 0 ? limit.current / limit.amount : 0
+                    let over = limit.current > limit.amount
+                    let tint: Color = over ? Color(red: 1, green: 0.4, blue: 0.4) : .white
+                    VStack(spacing: 3) {
+                        HStack(spacing: 7) {
+                            Image(systemName: getCategorySystemIcon(limit.category))
+                                .font(.system(size: 10, weight: .semibold))
+                                .foregroundColor(.white.opacity(0.75))
+                                .frame(width: 13)
+                            Text(limit.category.capitalized)
+                                .font(.system(size: 11, weight: .semibold))
+                                .foregroundColor(.white)
+                                .lineLimit(1)
+                            Spacer()
+                            Text("\(Int(limit.current)) / \(Int(limit.amount)) zł")
+                                .font(.system(size: 10, weight: .medium, design: .rounded))
+                                .foregroundColor(over ? Color(red: 1, green: 0.5, blue: 0.5) : .white.opacity(0.55))
+                        }
+                        WidgetProgressBar(value: pct, tint: tint)
+                    }
+                }
             }
         }
     }
-    
+
     private func getCategorySystemIcon(_ category: String) -> String {
         switch category.lowercased() {
         case "housing": return "house.fill"
@@ -685,241 +816,134 @@ struct LimitsChartView: View {
         default: return "circle.fill"
         }
     }
-    
-    private func getCategoryLimitColor(_ category: String) -> Color {
-        switch category.lowercased() {
-        case "housing": return Color(red: 0.02, green: 0.68, blue: 0.13)
-        case "transportation": return Color(red: 0.67, green: 0.02, blue: 0.02)
-        case "food": return Color(red: 0.34, green: 0.2, blue: 1.0)
-        case "drinks": return Color(red: 1.0, green: 0.47, blue: 0.31)
-        case "shopping": return Color(red: 1.0, green: 0.34, blue: 0.2)
-        case "addictions": return Color(red: 1.0, green: 0.34, blue: 0.2)
-        case "work": return Color(red: 0.34, green: 0.2, blue: 1.0)
-        case "clothes": return Color(red: 1.0, green: 0.34, blue: 0.2)
-        case "health": return Color(red: 0.03, green: 0.73, blue: 0.71)
-        case "entertainment": return Color(red: 0.6, green: 0.02, blue: 0.51)
-        case "utilities": return Color(red: 0.34, green: 0.2, blue: 1.0)
-        case "debt": return Color(red: 1.0, green: 0.34, blue: 0.2)
-        case "education": return Color(red: 0.8, green: 0.6, blue: 0.11)
-        case "savings": return Color(red: 0.81, green: 0.04, blue: 0.5)
-        case "travel": return Color(red: 0.2, green: 1.0, blue: 0.34)
-        case "animals", "pets": return Color(red: 0.51, green: 0.46, blue: 0.09)
-        case "gifts": return Color(red: 0.2, green: 1.0, blue: 0.34)
-        case "sports": return Color(red: 0.3, green: 0.69, blue: 0.31)
-        case "tech": return Color(red: 0.01, green: 0.53, blue: 0.82)
-        case "goingout": return Color(red: 0.61, green: 0.15, blue: 0.69)
-        case "subscriptions": return Color(red: 0.5, green: 0.2, blue: 1.0)
-        case "investments": return Color(red: 0.2, green: 1.0, blue: 0.54)
-        case "maintenance": return Color(red: 1.0, green: 0.55, blue: 0.2)
-        case "insurance": return Color(red: 0.2, green: 0.34, blue: 1.0)
-        case "taxes": return Color(red: 1.0, green: 0.2, blue: 0.2)
-        case "children": return Color(red: 1.0, green: 0.2, blue: 0.82)
-        case "donations": return Color(red: 0.2, green: 1.0, blue: 0.83)
-        case "beauty": return Color(red: 1.0, green: 0.2, blue: 0.63)
-        default: return .blue
-        }
-    }
 }
+
+// MARK: - Weekly Spending
 
 struct WeeklySpendingView: View {
     let analyticsData: AnalyticsData
     let family: WidgetFamily
-    
-    private var weeklySpending: [Double] {
-        analyticsData.weeklySpending
-    }
-    
+
+    private var weeklySpending: [Double] { analyticsData.weeklySpending }
+
     var body: some View {
-        if family == .systemLarge {
-            VStack(alignment: .leading, spacing: 4) {                
-                GeometryReader { geometry in
-                    HStack(alignment: .bottom, spacing: geometry.size.width / 24) {
-                        ForEach(0..<min(7, weeklySpending.count), id: \.self) { index in
-                            let maxValue = weeklySpending.max() ?? 1
-                            let barHeight = (geometry.size.height * 0.8) * (maxValue > 0 ? (weeklySpending[index] / maxValue) : 0)
-                            
-                            VStack(spacing: 6) {
-                                Text(String(format: "%.0f", weeklySpending[index]))
-                                    .font(.caption)
-                                    .fontWeight(.semibold)
-                                
-                                RoundedRectangle(cornerRadius: 5)
-                                    .fill(LinearGradient(
-                                        gradient: Gradient(colors: isCurrentDay(index) ? [.orange, .red] : [.cyan, .blue]),
-                                        startPoint: .top,
-                                        endPoint: .bottom
-                                    ))
-                                    .frame(height: max(12, barHeight))
-                                
-                                Text(getDayLabel(index))
-                                    .font(.caption)
-                                    .fontWeight(isCurrentDay(index) ? .bold : .medium)
-                                    .foregroundColor(isCurrentDay(index) ? .primary : .secondary)
+        let maxVal = weeklySpending.max() ?? 1
+        let todayIdx = currentDayIndex()
+        let isLarge = family == .systemLarge
+
+        GeometryReader { geo in
+            let dayLabelH: CGFloat = 13
+            let valueH: CGFloat = isLarge ? 13 : 0
+            let spacing: CGFloat = isLarge ? 8 : 4 // spacing above and below bar
+            let barMaxH = max(20, geo.size.height - dayLabelH - valueH - spacing)
+
+            HStack(alignment: .bottom, spacing: 0) {
+                ForEach(0..<min(7, weeklySpending.count), id: \.self) { i in
+                    let h = CGFloat(weeklySpending[i] / maxVal) * barMaxH
+                    let isToday = i == todayIdx
+                    let isFuture = i > todayIdx
+                    let barOpacity: Double = isToday ? 1.0 : isFuture ? 0.15 : max(0.25, 0.6 - Double(todayIdx - i) * 0.06)
+                    VStack(spacing: 4) {
+                        if isLarge {
+                            if weeklySpending[i] > 0 {
+                                Text("\(Int(weeklySpending[i]))")
+                                    .font(.system(size: 9, weight: isToday ? .bold : .regular, design: .rounded))
+                                    .foregroundColor(.white.opacity(isToday ? 0.9 : 0.45))
+                            } else {
+                                Text(" ").font(.system(size: 9))
                             }
-                            .frame(maxWidth: .infinity)
                         }
+                        RoundedRectangle(cornerRadius: 5, style: .continuous)
+                            .fill(Color.white.opacity(barOpacity))
+                            .frame(height: max(4, h))
+                        Text(getDayLabel(i))
+                            .font(.system(size: 9, weight: isToday ? .bold : .regular))
+                            .foregroundColor(.white.opacity(isToday ? 1 : 0.45))
                     }
-                }
-                
-                HStack {
-                    let total = weeklySpending.reduce(0, +)
-                    let average = weeklySpending.isEmpty ? 0 : total / Double(weeklySpending.count)
-                    
-                    Text("Total: **\(String(format: "%.0f", total))zł**")
-                    Spacer()
-                    Text("Avg: **\(String(format: "%.0f", average))zł**")
-                    Spacer()
-                    Text("Max: **\(String(format: "%.0f", weeklySpending.max() ?? 0))zł**")
-                }
-                .font(.caption)
-                .foregroundColor(.secondary)
-                .padding(.top, 4)
-            }
-            .padding(.vertical)
-            .padding(.horizontal, 12)
-            
-        } else {
-            VStack(alignment: .leading, spacing: 4) {
-                HStack {
-                    Text("Last 7 days")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    Spacer()
-                    Text("Total: \(String(format: "%.0f", weeklySpending.reduce(0, +)))zł")
-                        .font(.caption2)
-                        .fontWeight(.medium)
-                }
-                
-                HStack(alignment: .bottom, spacing: 0) {
-                    ForEach(0..<min(7, weeklySpending.count), id: \.self) { index in
-                        let maxHeight: CGFloat = 50
-                        let maxValue = weeklySpending.max() ?? 1
-                        let height = CGFloat(weeklySpending[index] / maxValue) * maxHeight
-                        
-                        VStack(spacing: 2) {
-                            Text("\(Int(weeklySpending[index]))")
-                                .font(.caption2)
-                                .foregroundColor(.primary)
-                                .opacity(0.8)
-                            
-                            RoundedRectangle(cornerRadius: 2)
-                                .fill(LinearGradient(
-                                    gradient: Gradient(colors: isCurrentDay(index) ? [.orange.opacity(0.8), .orange] : [.blue.opacity(0.8), .blue]),
-                                    startPoint: .top,
-                                    endPoint: .bottom
-                                ))
-                                .frame(height: max(4, height))
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 2)
-                                        .stroke(isCurrentDay(index) ? .orange.opacity(0.3) : .blue.opacity(0.3), lineWidth: 0.5)
-                                )
-                            
-                            Text(getDayLabel(index))
-                                .font(.caption2)
-                                .fontWeight(isCurrentDay(index) ? .bold : .regular)
-                                .foregroundColor(isCurrentDay(index) ? .primary : .secondary)
-                        }
-                        .frame(maxWidth: .infinity)
-                    }
+                    .frame(maxWidth: .infinity)
                 }
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
-    
+
     private func getDayLabel(_ index: Int) -> String {
-        let days = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
-        return days[index % 7]
+        ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"][index % 7]
     }
-    
-    private func isCurrentDay(_ index: Int) -> Bool {
-        let calendar = Calendar.current
-        let today = Date()
-        let currentWeekday = calendar.component(.weekday, from: today)
-        let mondayBasedWeekday = (currentWeekday == 1) ? 6 : currentWeekday - 2
-        return index == mondayBasedWeekday
+
+    private func currentDayIndex() -> Int {
+        let wd = Calendar.current.component(.weekday, from: Date())
+        return (wd == 1) ? 6 : wd - 2
     }
 }
+
+// MARK: - Category Chart
 
 struct CategoryChartView: View {
     let categories: [AnalyticsCategory]
     let family: WidgetFamily
-    
+
     var body: some View {
-        let itemCount = family == .systemLarge ? 6 : 3
-        let columns = [GridItem(.flexible())]
-        
-        VStack(alignment: .leading, spacing: 4) {
-            Text("Top spending categories")
-                .font(.caption)
-                .foregroundColor(.secondary)
-                .padding(.bottom, 8)
-            
-            LazyVGrid(columns: columns, spacing: family == .systemLarge ? 8 : 6) {
-                ForEach(categories.prefix(itemCount), id: \.name) { category in
-                    VStack(alignment: .leading, spacing: family == .systemLarge ? 6 : 4) {
-                        HStack(spacing: 6) {
-                            Image(systemName: getCategorySystemIcon(category.name))
-                                .font(.caption)
-                                .foregroundColor(getCategoryChartColor(category.name))
-                                .frame(width: 16, height: 16)
-                            
-                            VStack(alignment: .leading, spacing: 1) {
-                                Text(category.name.capitalized)
-                                    .font(family == .systemLarge ? .caption2 : .caption2)
-                                    .fontWeight(.medium)
+        let total = categories.reduce(0) { $0 + $1.amount }
+        let maxAmt = categories.max(by: { $0.amount < $1.amount })?.amount ?? 1
+        if family == .systemLarge {
+            VStack(spacing: 7) {
+                ForEach(Array(categories.prefix(6)), id: \.name) { cat in
+                    let pct = total > 0 ? cat.amount / total : 0
+                    WidgetCard {
+                        VStack(spacing: 5) {
+                            HStack(spacing: 8) {
+                                Image(systemName: getCategorySystemIcon(cat.name))
+                                    .font(.system(size: 11, weight: .semibold))
+                                    .foregroundColor(.white)
+                                    .frame(width: 16)
+                                Text(cat.name.capitalized)
+                                    .font(.system(size: 12, weight: .semibold))
+                                    .foregroundColor(.white)
                                     .lineLimit(1)
-                                
-                                if family == .systemLarge {
-                                    let totalSpending = categories.reduce(0) { $0 + $1.amount }
-                                    let percentage = totalSpending > 0 ? (category.amount / totalSpending) * 100 : 0
-                                    Text("\(percentage, specifier: "%.0f")% of total")
-                                        .font(.caption2)
-                                        .foregroundColor(.secondary)
-                                        .lineLimit(1)
-                                }
+                                Spacer()
+                                Text("\(Int(pct * 100))%")
+                                    .font(.system(size: 10, weight: .medium))
+                                    .foregroundColor(.white.opacity(0.55))
+                                Text("\(Int(cat.amount)) zł")
+                                    .font(.system(size: 12, weight: .bold, design: .rounded))
+                                    .foregroundColor(.white)
                             }
-                            
-                            Spacer()
-                            
-                            Text("\(category.amount, specifier: "%.0f")zł")
-                                .font(family == .systemLarge ? .caption : .caption2)
-                                .fontWeight(.medium)
-                                .foregroundColor(getCategoryChartColor(category.name))
-                        }
-                        
-                        if family == .systemLarge {
-                            let maxAmount = categories.max(by: { $0.amount < $1.amount })?.amount ?? 1
-                            let percentage = maxAmount > 0 ? category.amount / maxAmount : 0
-                            
-                            ZStack(alignment: .leading) {
-                                RoundedRectangle(cornerRadius: 2)
-                                    .fill(Color.gray.opacity(0.2))
-                                    .frame(height: 4)
-                                
-                                RoundedRectangle(cornerRadius: 2)
-                                    .fill(getCategoryChartColor(category.name))
-                                    .frame(height: 4)
-                                    .frame(maxWidth: .infinity)
-                                    .scaleEffect(x: percentage, anchor: .leading)
-                                    .clipped()
-                            }
+                            WidgetProgressBar(value: cat.amount / maxAmt, tint: .white.opacity(0.85))
                         }
                     }
-                    .padding(.horizontal, family == .systemLarge ? 10 : 8)
-                    .padding(.vertical, family == .systemLarge ? 8 : 6)
-                    .background(
-                        RoundedRectangle(cornerRadius: family == .systemLarge ? 10 : 8)
-                            .fill(getCategoryChartColor(category.name).opacity(0.05))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: family == .systemLarge ? 10 : 8)
-                                    .stroke(getCategoryChartColor(category.name).opacity(0.2), lineWidth: 1)
-                            )
-                    )
+                }
+            }
+        } else {
+            // Compact rows for medium — fits 5 items without card background
+            VStack(spacing: 6) {
+                ForEach(Array(categories.prefix(5)), id: \.name) { cat in
+                    let pct = total > 0 ? cat.amount / total : 0
+                    VStack(spacing: 3) {
+                        HStack(spacing: 7) {
+                            Image(systemName: getCategorySystemIcon(cat.name))
+                                .font(.system(size: 10, weight: .semibold))
+                                .foregroundColor(.white.opacity(0.75))
+                                .frame(width: 13)
+                            Text(cat.name.capitalized)
+                                .font(.system(size: 11, weight: .semibold))
+                                .foregroundColor(.white)
+                                .lineLimit(1)
+                            Spacer()
+                            Text("\(Int(pct * 100))%")
+                                .font(.system(size: 10, weight: .medium))
+                                .foregroundColor(.white.opacity(0.55))
+                            Text("\(Int(cat.amount)) zł")
+                                .font(.system(size: 11, weight: .bold, design: .rounded))
+                                .foregroundColor(.white)
+                        }
+                        WidgetProgressBar(value: cat.amount / maxAmt, tint: .white.opacity(0.85))
+                    }
                 }
             }
         }
     }
-    
+
     private func getCategorySystemIcon(_ category: String) -> String {
         switch category.lowercased() {
         case "housing": return "house.fill"
@@ -953,41 +977,9 @@ struct CategoryChartView: View {
         default: return "circle.fill"
         }
     }
-    
-    private func getCategoryChartColor(_ category: String) -> Color {
-        switch category.lowercased() {
-        case "housing": return Color(red: 0.02, green: 0.68, blue: 0.13)
-        case "transportation": return Color(red: 0.67, green: 0.02, blue: 0.02)
-        case "food": return Color(red: 0.34, green: 0.2, blue: 1.0)
-        case "drinks": return Color(red: 1.0, green: 0.47, blue: 0.31)
-        case "shopping": return Color(red: 1.0, green: 0.34, blue: 0.2)
-        case "addictions": return Color(red: 1.0, green: 0.34, blue: 0.2)
-        case "work": return Color(red: 0.34, green: 0.2, blue: 1.0)
-        case "clothes": return Color(red: 1.0, green: 0.34, blue: 0.2)
-        case "health": return Color(red: 0.03, green: 0.73, blue: 0.71)
-        case "entertainment": return Color(red: 0.6, green: 0.02, blue: 0.51)
-        case "utilities": return Color(red: 0.34, green: 0.2, blue: 1.0)
-        case "debt": return Color(red: 1.0, green: 0.34, blue: 0.2)
-        case "education": return Color(red: 0.8, green: 0.6, blue: 0.11)
-        case "savings": return Color(red: 0.81, green: 0.04, blue: 0.5)
-        case "travel": return Color(red: 0.2, green: 1.0, blue: 0.34)
-        case "animals", "pets": return Color(red: 0.51, green: 0.46, blue: 0.09)
-        case "gifts": return Color(red: 0.2, green: 1.0, blue: 0.34)
-        case "sports": return Color(red: 0.3, green: 0.69, blue: 0.31)
-        case "tech": return Color(red: 0.01, green: 0.53, blue: 0.82)
-        case "goingout": return Color(red: 0.61, green: 0.15, blue: 0.69)
-        case "subscriptions": return Color(red: 0.5, green: 0.2, blue: 1.0)
-        case "investments": return Color(red: 0.2, green: 1.0, blue: 0.54)
-        case "maintenance": return Color(red: 1.0, green: 0.55, blue: 0.2)
-        case "insurance": return Color(red: 0.2, green: 0.34, blue: 1.0)
-        case "taxes": return Color(red: 1.0, green: 0.2, blue: 0.2)
-        case "children": return Color(red: 1.0, green: 0.2, blue: 0.82)
-        case "donations": return Color(red: 0.2, green: 1.0, blue: 0.83)
-        case "beauty": return Color(red: 1.0, green: 0.2, blue: 0.63)
-        default: return .blue
-        }
-    }
 }
+
+// MARK: - Widget Configurations
 
 struct WalletWidget: Widget {
     let kind: String = "WalletWidget"
@@ -995,7 +987,7 @@ struct WalletWidget: Widget {
     var body: some WidgetConfiguration {
         AppIntentConfiguration(kind: kind, intent: ConfigurationAppIntent.self, provider: Provider()) { entry in
             WalletWidgetView(entry: entry)
-                .containerBackground(.fill.tertiary, for: .widget)
+                .containerBackground(widgetBg, for: .widget)
         }
         .configurationDisplayName("Wallet")
         .description("View your balance and recent expenses")
@@ -1008,7 +1000,7 @@ struct AnalyticsWidget: Widget {
     var body: some WidgetConfiguration {
         AppIntentConfiguration(kind: kind, intent: ConfigurationAppIntent.self, provider: Provider()) { entry in
             AnalyticsWidgetView(entry: entry)
-                .containerBackground(.fill.tertiary, for: .widget)
+                .containerBackground(widgetBg, for: .widget)
         }
         .configurationDisplayName("Analytics")
         .description("View spending analytics and charts")
@@ -1022,14 +1014,15 @@ struct TimelineWidget: Widget {
     var body: some WidgetConfiguration {
         AppIntentConfiguration(kind: kind, intent: ConfigurationAppIntent.self, provider: Provider()) { entry in
             TimelineWidgetView(entry: entry)
-                .containerBackground(.fill.tertiary, for: .widget)
+                .containerBackground(widgetBg, for: .widget)
         }
         .configurationDisplayName("Timeline")
         .description("View your schedule and tasks")
     }
 }
 
-// MARK: - Watch Complication Widget
+// MARK: - Watch Expense Widget
+
 struct WatchExpenseWidgetView: View {
     var entry: Provider.Entry
     @Environment(\.widgetFamily) var family
@@ -1044,44 +1037,28 @@ struct WatchExpenseWidgetView: View {
 
     @ViewBuilder
     private var accessoryCircularView: some View {
-        if let walletDataString = UserDefaults.shared?.string(forKey: "wallet_data"),
-           let walletData = try? JSONDecoder().decode(WalletData.self, from: walletDataString.data(using: .utf8) ?? Data()) {
+        if let str = UserDefaults.shared?.string(forKey: "wallet_data"),
+           let data = try? JSONDecoder().decode(WalletData.self, from: str.data(using: .utf8) ?? Data()) {
 
-            let income = walletData.income
-            let spent = walletData.monthlySpent ?? 0
-            let limit = walletData.monthlyLimit ?? (income * walletData.monthlyPercentageTarget / 100)
+            let income = data.income
+            let spent = data.monthlySpent ?? 0
+            let limit = data.monthlyLimit ?? (income * data.monthlyPercentageTarget / 100)
 
             ZStack {
-                // Outer ring - Savings (teal/green)
                 Circle()
                     .trim(from: 0, to: savedProgress(income: income, spent: spent))
-                    .stroke(
-                        Color(red: 0.0, green: 0.78, blue: 0.59),
-                        style: StrokeStyle(lineWidth: 6, lineCap: .round)
-                    )
+                    .stroke(Color(red: 0.0, green: 0.78, blue: 0.59), style: StrokeStyle(lineWidth: 6, lineCap: .round))
                     .rotationEffect(.degrees(-90))
-
-                // Middle ring - Budget Remaining (violet/purple)
                 Circle()
                     .trim(from: 0, to: budgetRemainingProgress(limit: limit, spent: spent))
-                    .stroke(
-                        Color(red: 0.53, green: 0.52, blue: 0.94),
-                        style: StrokeStyle(lineWidth: 6, lineCap: .round)
-                    )
+                    .stroke(Color(red: 0.53, green: 0.52, blue: 0.94), style: StrokeStyle(lineWidth: 6, lineCap: .round))
                     .rotationEffect(.degrees(-90))
                     .padding(8)
-
-                // Inner ring - Spending Rate (blue)
                 Circle()
                     .trim(from: 0, to: spentProgress(income: income, spent: spent))
-                    .stroke(
-                        Color(red: 0.20, green: 0.64, blue: 0.98),
-                        style: StrokeStyle(lineWidth: 6, lineCap: .round)
-                    )
+                    .stroke(Color(red: 0.20, green: 0.64, blue: 0.98), style: StrokeStyle(lineWidth: 6, lineCap: .round))
                     .rotationEffect(.degrees(-90))
                     .padding(16)
-
-                // Center text
                 VStack(spacing: 0) {
                     Text("\(Int(spent))")
                         .font(.system(size: 16, weight: .bold, design: .rounded))
@@ -1092,183 +1069,136 @@ struct WatchExpenseWidgetView: View {
             }
         } else {
             ZStack {
-                Circle()
-                    .stroke(Color.gray.opacity(0.3), lineWidth: 6)
-                Text("--")
-                    .font(.system(size: 16, weight: .bold))
+                Circle().stroke(Color.gray.opacity(0.3), lineWidth: 6)
+                Text("--").font(.system(size: 16, weight: .bold))
             }
         }
     }
 
     @ViewBuilder
     private var iosWidgetView: some View {
-        if let walletDataString = UserDefaults.shared?.string(forKey: "wallet_data"),
-           let walletData = try? JSONDecoder().decode(WalletData.self, from: walletDataString.data(using: .utf8) ?? Data()) {
+        if let str = UserDefaults.shared?.string(forKey: "wallet_data"),
+           let data = try? JSONDecoder().decode(WalletData.self, from: str.data(using: .utf8) ?? Data()) {
 
-            let income = walletData.income
-            let spent = walletData.monthlySpent ?? 0
-            let limit = walletData.monthlyLimit ?? (income * walletData.monthlyPercentageTarget / 100)
+            let income = data.income
+            let spent = data.monthlySpent ?? 0
+            let limit = data.monthlyLimit ?? (income * data.monthlyPercentageTarget / 100)
             let saved = income - spent
 
-            VStack(alignment: .leading, spacing: family == .systemLarge ? 12 : 8) {
-                HStack {
-                    Text("💰 Spending")
-                        .font(.headline)
-                        .fontWeight(.bold)
-                    Spacer()
+            VStack(alignment: .leading, spacing: 0) {
+                // Header
+                VStack(alignment: .leading, spacing: 2) {
+                    WidgetLabel(text: "SPENDING")
+                    Text("\(Int(spent)) zł")
+                        .font(.system(size: family == .systemSmall ? 26 : 30, weight: .bold, design: .rounded))
+                        .foregroundColor(.white)
                 }
+                .padding(.bottom, 12)
 
-                // Rings visualization
-                HStack(spacing: 16) {
+                HStack(spacing: 14) {
+                    // Rings
                     ZStack {
-                        // Outer ring - Savings (teal/green)
+                        Circle()
+                            .stroke(Color.white.opacity(0.12), lineWidth: 7)
                         Circle()
                             .trim(from: 0, to: savedProgress(income: income, spent: spent))
-                            .stroke(
-                                Color(red: 0.0, green: 0.78, blue: 0.59),
-                                style: StrokeStyle(lineWidth: 8, lineCap: .round)
-                            )
+                            .stroke(Color(red: 0.4, green: 1, blue: 0.65), style: StrokeStyle(lineWidth: 7, lineCap: .round))
                             .rotationEffect(.degrees(-90))
-
-                        // Middle ring - Budget Remaining (violet/purple)
+                        Circle()
+                            .stroke(Color.white.opacity(0.12), lineWidth: 7)
+                            .padding(10)
                         Circle()
                             .trim(from: 0, to: budgetRemainingProgress(limit: limit, spent: spent))
-                            .stroke(
-                                Color(red: 0.53, green: 0.52, blue: 0.94),
-                                style: StrokeStyle(lineWidth: 8, lineCap: .round)
-                            )
+                            .stroke(Color.white.opacity(0.75), style: StrokeStyle(lineWidth: 7, lineCap: .round))
                             .rotationEffect(.degrees(-90))
                             .padding(10)
-
-                        // Inner ring - Spending Rate (blue)
+                        Circle()
+                            .stroke(Color.white.opacity(0.12), lineWidth: 7)
+                            .padding(20)
                         Circle()
                             .trim(from: 0, to: spentProgress(income: income, spent: spent))
-                            .stroke(
-                                Color(red: 0.20, green: 0.64, blue: 0.98),
-                                style: StrokeStyle(lineWidth: 8, lineCap: .round)
-                            )
+                            .stroke(Color(red: 1, green: 0.8, blue: 0.35), style: StrokeStyle(lineWidth: 7, lineCap: .round))
                             .rotationEffect(.degrees(-90))
                             .padding(20)
-
-                        // Center text
-                        VStack(spacing: 0) {
-                            Text("\(Int(spent))")
-                                .font(.system(size: 20, weight: .bold, design: .rounded))
-                            Text("spent")
-                                .font(.system(size: 10, weight: .medium))
-                                .foregroundColor(.secondary)
-                        }
                     }
-                    .frame(width: 100, height: 100)
+                    .frame(width: 90, height: 90)
 
                     if family == .systemMedium || family == .systemLarge {
-                        VStack(alignment: .leading, spacing: 6) {
-                            HStack {
-                                Circle()
-                                    .fill(Color(red: 0.20, green: 0.64, blue: 0.98))
-                                    .frame(width: 8, height: 8)
-                                Text("Spent")
-                                    .font(.caption2)
-                                    .foregroundColor(.secondary)
-                                Spacer()
-                                Text("\(Int(spent))zł")
-                                    .font(.caption)
-                                    .fontWeight(.semibold)
-                            }
-
-                            HStack {
-                                Circle()
-                                    .fill(Color(red: 0.53, green: 0.52, blue: 0.94))
-                                    .frame(width: 8, height: 8)
-                                Text("Budget Left")
-                                    .font(.caption2)
-                                    .foregroundColor(.secondary)
-                                Spacer()
-                                Text("\(Int(max(0, limit - spent)))zł")
-                                    .font(.caption)
-                                    .fontWeight(.semibold)
-                            }
-
-                            HStack {
-                                Circle()
-                                    .fill(Color(red: 0.0, green: 0.78, blue: 0.59))
-                                    .frame(width: 8, height: 8)
-                                Text("Saved")
-                                    .font(.caption2)
-                                    .foregroundColor(.secondary)
-                                Spacer()
-                                Text("\(Int(saved))zł")
-                                    .font(.caption)
-                                    .fontWeight(.semibold)
-                            }
+                        VStack(alignment: .leading, spacing: 8) {
+                            ringLegend(color: Color(red: 1, green: 0.8, blue: 0.35), label: "Spent", value: "\(Int(spent)) zł")
+                            ringLegend(color: .white.opacity(0.75), label: "Budget left", value: "\(Int(max(0, limit - spent))) zł")
+                            ringLegend(color: Color(red: 0.4, green: 1, blue: 0.65), label: "Saved", value: "\(Int(saved)) zł")
                         }
                     }
                 }
 
                 if family == .systemLarge {
-                    Divider()
-
-                    HStack(spacing: 16) {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Income")
-                                .font(.caption2)
-                                .foregroundColor(.secondary)
-                            Text("\(Int(income))zł")
-                                .font(.caption)
-                                .fontWeight(.bold)
-                        }
-
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Budget")
-                                .font(.caption2)
-                                .foregroundColor(.secondary)
-                            Text("\(Int(limit))zł")
-                                .font(.caption)
-                                .fontWeight(.bold)
-                        }
-
+                    Spacer().frame(height: 14)
+                    HStack {
+                        statBlock(label: "Income", value: "\(Int(income)) zł")
                         Spacer()
-
-                        VStack(alignment: .trailing, spacing: 2) {
-                            Text("Save Rate")
-                                .font(.caption2)
-                                .foregroundColor(.secondary)
-                            Text("\(Int(savedProgress(income: income, spent: spent) * 100))%")
-                                .font(.caption)
-                                .fontWeight(.bold)
-                                .foregroundColor(.green)
-                        }
+                        statBlock(label: "Budget", value: "\(Int(limit)) zł")
+                        Spacer()
+                        statBlock(label: "Save rate", value: "\(Int(savedProgress(income: income, spent: spent) * 100))%")
                     }
+                    .padding(.top, 6)
+                    .padding(.horizontal, 2)
                 }
+                Spacer(minLength: 0)
             }
-            .padding(.horizontal, 8)
-            .padding(.top, 4)
-            .padding(.bottom, 8)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .padding(14)
         } else {
-            VStack {
-                Text("💰 Spending")
-                    .font(.headline)
-                    .fontWeight(.bold)
+            VStack(spacing: 6) {
+                WidgetLabel(text: "SPENDING")
                 Spacer()
+                Image(systemName: "chart.pie")
+                    .font(.system(size: 22, weight: .light))
+                    .foregroundColor(.white.opacity(0.35))
                 Text("No data")
-                    .foregroundColor(.secondary)
-                    .font(.caption)
+                    .font(.system(size: 12))
+                    .foregroundColor(.white.opacity(0.4))
                 Spacer()
             }
-            .padding()
+            .padding(14)
+        }
+    }
+
+    @ViewBuilder
+    private func ringLegend(color: Color, label: String, value: String) -> some View {
+        HStack(spacing: 6) {
+            Circle().fill(color).frame(width: 7, height: 7)
+            Text(label)
+                .font(.system(size: 11))
+                .foregroundColor(.white.opacity(0.55))
+            Spacer()
+            Text(value)
+                .font(.system(size: 12, weight: .bold, design: .rounded))
+                .foregroundColor(.white)
+        }
+    }
+
+    @ViewBuilder
+    private func statBlock(label: String, value: String) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(label.uppercased())
+                .font(.system(size: 9, weight: .semibold))
+                .tracking(0.8)
+                .foregroundColor(.white.opacity(0.5))
+            Text(value)
+                .font(.system(size: 14, weight: .bold, design: .rounded))
+                .foregroundColor(.white)
         }
     }
 
     private func savedProgress(income: Double, spent: Double) -> Double {
         guard income > 0 else { return 0 }
-        let saved = income - spent
-        return max(0, min(saved / income, 1.0))
+        return max(0, min((income - spent) / income, 1.0))
     }
 
     private func budgetRemainingProgress(limit: Double, spent: Double) -> Double {
         guard limit > 0 else { return 0 }
-        let remaining = max(0, limit - spent)
-        return min(remaining / limit, 1.0)
+        return min(max(0, limit - spent) / limit, 1.0)
     }
 
     private func spentProgress(income: Double, spent: Double) -> Double {
@@ -1283,13 +1213,15 @@ struct WatchExpenseWidget: Widget {
     var body: some WidgetConfiguration {
         AppIntentConfiguration(kind: kind, intent: ConfigurationAppIntent.self, provider: Provider()) { entry in
             WatchExpenseWidgetView(entry: entry)
-                .containerBackground(.fill.tertiary, for: .widget)
+                .containerBackground(widgetBg, for: .widget)
         }
         .configurationDisplayName("Expenses")
         .description("View your spending rings")
         .supportedFamilies([.systemSmall, .systemMedium, .systemLarge, .accessoryCircular])
     }
 }
+
+// MARK: - Previews
 
 extension ConfigurationAppIntent {
     fileprivate static var smiley: ConfigurationAppIntent {

@@ -159,7 +159,7 @@ const CompactSpendingChart = ({}: CompactSpendingChartProps) => {
     }, [query.data, prevQuery.data])
 
     const labelValues = useMemo(
-        () => [...new Set(chartData.map((d) => d.value))].sort((a, b) => a - b).reverse(),
+        () => [...new Set(chartData.map((d) => [d.value, d.prevValue]).flat())].sort((a, b) => a - b).reverse(),
         [chartData],
     )
 

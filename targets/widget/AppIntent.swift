@@ -5,9 +5,20 @@ struct ConfigurationAppIntent: WidgetConfigurationIntent {
     static var title: LocalizedStringResource { "Configuration" }
     static var description: IntentDescription { "This is an example widget." }
 
-    // An example configurable parameter.
     @Parameter(title: "Favorite Emoji", default: "😃")
     var favoriteEmoji: String
+}
+
+struct SwitchAnalyticsViewIntent: AppIntent {
+    static var title: LocalizedStringResource { "Switch Analytics View" }
+    static var isDiscoverable: Bool { false }
+
+    func perform() async throws -> some IntentResult {
+        let current = UserDefaults.shared?.integer(forKey: "analytics_view_index") ?? 0
+        UserDefaults.shared?.set((current + 1) % 3, forKey: "analytics_view_index")
+        WidgetCenter.shared.reloadTimelines(ofKind: "AnalyticsWidget")
+        return .result()
+    }
 }
 
 struct CompleteActivityIntent: AppIntent {

@@ -15,6 +15,7 @@ import IconButton from "../IconButton/IconButton"
 import { GlassContainer } from "expo-glass-effect"
 import { LinearGradient } from "expo-linear-gradient"
 import GlassView from "../GlassView"
+import { SFSymbol } from "expo-symbols"
 import ContextMenuView, { type ContextMenuAction } from "react-native-context-menu-view"
 
 const AnimatedRipple = Animated.createAnimatedComponent(Ripple)
@@ -23,7 +24,7 @@ const THRESHOLD = 200
 
 export interface ContextMenuItem {
     title: string
-    systemImage?: any
+    systemImage?: SFSymbol
     onPress?: () => void
     destructive?: boolean
     checked?: boolean
