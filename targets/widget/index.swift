@@ -7,6 +7,7 @@ struct exportWidgets: WidgetBundle {
         // Export widgets here
         WalletWidget()
         TimelineWidget()
+        DailyRoutineWidget()
         AnalyticsWidget()
         WatchExpenseWidget()
 //        widgetControl()

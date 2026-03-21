@@ -18,6 +18,7 @@ import { useSetSearchMenu } from "@/hooks/useSetSearchMenu"
 import { Icons, CategoryUtils } from "../components/Expense/ExpenseIcon"
 import dayjs from "dayjs"
 import type { SearchMenuItem } from "@/contexts/SearchMenuContext"
+import { SFSymbol } from "expo-symbols"
 
 const styles = StyleSheet.create({
     container: {
@@ -121,13 +122,7 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
                     },
                 },
                 {
-                    icon: (
-                        <MaterialCommunityIcons
-                            name={showSubscriptionsView ? "repeat" : "cash"}
-                            size={20}
-                            color={Colors.foreground}
-                        />
-                    ),
+                    icon: showSubscriptionsView ? "repeat" : ("wallet.bifold" as SFSymbol),
                     onPress: () => {
                         setShowSubscriptionsView((prev) => !prev)
                         Haptic.trigger("impactLight")

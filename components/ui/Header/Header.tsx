@@ -33,7 +33,7 @@ export interface ContextMenuItem {
 
 export interface HeaderItem {
     onPress: () => void
-    icon: React.ReactNode
+    icon: SFSymbol | React.ReactNode
     style?: StyleProp<ViewStyle>
 
     standalone?: boolean

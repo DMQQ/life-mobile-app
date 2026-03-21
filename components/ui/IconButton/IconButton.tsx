@@ -1,11 +1,15 @@
+import { SFSymbol } from "expo-symbols"
 import Ripple, { RippleProps } from "react-native-material-ripple"
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated"
+import { SymbolView } from "expo-symbols"
+import { SFSymbols6_0 } from "sf-symbols-typescript"
 
 const AnimatedRipple = Animated.createAnimatedComponent(Ripple)
 
 export default function IconButton(
     props: RippleProps & {
-        icon: React.ReactNode
+        icon: React.ReactNode | SFSymbols6_0
+        size?: number
     },
 ) {
     const animatedPress = useSharedValue(1)
@@ -45,7 +49,11 @@ export default function IconButton(
             ]}
             onPress={onPress}
         >
-            {props.icon}
+            {typeof props.icon === "string" ? (
+                <SymbolView tintColor={"#fff"} name={props.icon as SFSymbols6_0} size={props.size ?? 20} />
+            ) : (
+                props.icon
+            )}
         </AnimatedRipple>
     )
 }

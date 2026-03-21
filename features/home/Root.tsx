@@ -5,6 +5,7 @@ import { ScreenProps } from "@/types"
 import RefreshContextProvider, { useRefresh } from "@/utils/context/RefreshContext"
 import useTrackScroll from "@/utils/hooks/ui/useTrackScroll"
 import useAppBackground from "@/utils/hooks/useAppBackground"
+import useRoutinePendingCompletions from "@/utils/widget/hooks/useRoutinePendingCompletions"
 import { GET_MAIN_SCREEN, getMainScreenBaseVariables } from "@/utils/schemas/GET_MAIN_SCREEN"
 import { useQuery } from "@apollo/client"
 import { AntDesign } from "@expo/vector-icons"
@@ -39,7 +40,8 @@ function Root({}: ScreenProps<"Root">) {
     const { refreshing, refresh } = useRefresh([refetchHome, refetchNotifications], [])
     const [scrollY, onScroll] = useTrackScroll({ screenName: "Root" })
 
-    useAppBackground({ onForeground: refresh })
+    const { processPending } = useRoutinePendingCompletions()
+    useAppBackground({ onForeground: () => { refresh(); processPending() } })
 
     const trendPercentage = home?.lastMonthSpendings?.expense
         ? ((home?.monthlySpendings?.expense - home?.lastMonthSpendings?.expense) / home?.lastMonthSpendings?.expense) *

@@ -106,6 +106,7 @@ struct TimelineEvent: Codable {
     let beginTime: String
     let endTime: String
     let isCompleted: Bool
+    let isRepeat: Bool
     let todos: [TimelineTodo]
 }
 
@@ -113,6 +114,7 @@ struct TimelineTodo: Codable {
     let id: String
     let title: String
     let isCompleted: Bool
+    let modifiedAt: String?
 }
 
 // MARK: - Shared Widget Components
@@ -979,6 +981,366 @@ struct CategoryChartView: View {
     }
 }
 
+// MARK: - Daily Routine Widget
+
+struct RoutineEntry: TimelineEntry {
+    let date: Date
+    let configuration: ConfigurationAppIntent
+}
+
+struct RoutineProvider: AppIntentTimelineProvider {
+    func placeholder(in context: Context) -> RoutineEntry {
+        RoutineEntry(date: Date(), configuration: ConfigurationAppIntent())
+    }
+
+    func snapshot(for configuration: ConfigurationAppIntent, in context: Context) async -> RoutineEntry {
+        RoutineEntry(date: Date(), configuration: configuration)
+    }
+
+    func timeline(for configuration: ConfigurationAppIntent, in context: Context) async -> Timeline<RoutineEntry> {
+        var entries: [RoutineEntry] = []
+        let now = Date()
+        entries.append(RoutineEntry(date: now, configuration: configuration))
+
+        // Schedule a new entry at each future event's beginTime so the widget
+        // automatically reveals events as they unlock throughout the day
+        if let str = UserDefaults.shared?.string(forKey: "timeline_data"),
+           let raw = str.data(using: .utf8),
+           let data = try? JSONDecoder().decode(TimelineData.self, from: raw) {
+            let today = Calendar.current.startOfDay(for: now)
+            let todayStr: String = {
+                let f = DateFormatter(); f.dateFormat = "yyyy-MM-dd"; return f.string(from: now)
+            }()
+            for event in data.events where event.date == todayStr {
+                if let begin = routineParseTime(event.beginTime, on: today) {
+                    let showFrom = begin.addingTimeInterval(-30 * 60)
+                    if showFrom > now { entries.append(RoutineEntry(date: showFrom, configuration: configuration)) }
+                }
+                if let end = routineParseTime(event.endTime, on: today) {
+                    let hideAt = end.addingTimeInterval(30 * 60)
+                    if hideAt > now { entries.append(RoutineEntry(date: hideAt, configuration: configuration)) }
+                }
+            }
+        }
+
+        // Refresh at midnight each day so the next day's events load (3 days stored)
+        for dayOffset in 1...2 {
+            let midnight = Calendar.current.startOfDay(
+                for: Calendar.current.date(byAdding: .day, value: dayOffset, to: now)!
+            )
+            entries.append(RoutineEntry(date: midnight, configuration: configuration))
+        }
+
+        return Timeline(entries: entries.sorted { $0.date < $1.date }, policy: .atEnd)
+    }
+}
+
+private func routineParseTime(_ timeString: String, on day: Date) -> Date? {
+    let parts = timeString.split(separator: ":")
+    guard parts.count >= 2,
+          let hour = Int(parts[0]),
+          let minute = Int(parts[1]) else { return nil }
+    return Calendar.current.date(bySettingHour: hour, minute: minute, second: 0, of: day)
+}
+
+struct DailyRoutineWidgetView: View {
+    var entry: RoutineProvider.Entry
+    @Environment(\.widgetFamily) var family
+
+    private var data: TimelineData? {
+        guard let str = UserDefaults.shared?.string(forKey: "timeline_data"),
+              let raw = str.data(using: .utf8),
+              let decoded = try? JSONDecoder().decode(TimelineData.self, from: raw) else { return nil }
+        return decoded
+    }
+
+    // All events for today sorted by beginTime
+    private var todayEvents: [TimelineEvent] {
+        guard let data else { return [] }
+        let todayStr = iso8601DateOnly(entry.date)
+        return data.events
+            .filter { $0.date == todayStr }
+            .sorted { $0.beginTime < $1.beginTime }
+    }
+
+    // All today's events (alias kept for checklist body)
+    private var unlockedEvents: [TimelineEvent] { todayEvents }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            headerView
+            Spacer().frame(height: 10)
+            if family == .systemSmall {
+                smallBody
+            } else {
+                checklistBody
+            }
+            Spacer(minLength: 0)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .padding(14)
+    }
+
+    // MARK: Header
+
+    @ViewBuilder
+    private var headerView: some View {
+        let total = totalAllItems
+        let done = doneItems
+        let allDone = allDoneCheck
+
+        HStack(alignment: .top) {
+            VStack(alignment: .leading, spacing: 2) {
+                WidgetLabel(text: "DAILY ROUTINE")
+                if todayEvents.isEmpty {
+                    Text("Nothing today")
+                        .font(.system(size: 26, weight: .bold, design: .rounded))
+                        .foregroundColor(.white.opacity(0.35))
+                } else {
+                    HStack(alignment: .firstTextBaseline, spacing: 4) {
+                        Text("\(done)")
+                            .font(.system(size: 32, weight: .bold, design: .rounded))
+                            .foregroundColor(allDone ? Color(red: 0.4, green: 1, blue: 0.65) : .white)
+                        Text("/ \(total)")
+                            .font(.system(size: 20, weight: .medium, design: .rounded))
+                            .foregroundColor(.white.opacity(0.35))
+                    }
+                }
+            }
+            Spacer()
+            Link(destination: URL(string: "mylife://timeline")!) {
+                ZStack {
+                    Circle()
+                        .stroke(Color.white.opacity(0.15), lineWidth: 3)
+                    if total > 0 {
+                        Circle()
+                            .trim(from: 0, to: Double(done) / Double(total))
+                            .stroke(
+                                allDone ? Color(red: 0.4, green: 1, blue: 0.65) : Color.white,
+                                style: StrokeStyle(lineWidth: 3, lineCap: .round)
+                            )
+                            .rotationEffect(.degrees(-90))
+                    }
+                    Circle().fill(Color.white.opacity(0.12)).frame(width: 26, height: 26)
+                    Image(systemName: "calendar")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(.white)
+                }
+                .frame(width: 34, height: 34)
+            }
+        }
+    }
+
+    // MARK: Small (progress only)
+
+    @ViewBuilder
+    private var smallBody: some View {
+        if todayEvents.isEmpty {
+            VStack(spacing: 4) {
+                Image(systemName: "calendar.badge.checkmark")
+                    .font(.system(size: 16, weight: .light))
+                    .foregroundColor(.white.opacity(0.25))
+                Text("No routine\ntoday")
+                    .font(.system(size: 10))
+                    .foregroundColor(.white.opacity(0.25))
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2)
+            }
+        } else {
+            let done = doneItems
+            let unlocked = totalItems
+            VStack(alignment: .leading, spacing: 8) {
+                WidgetProgressBar(value: totalAllItems > 0 ? Double(done) / Double(totalAllItems) : 0, tint: Color(red: 0.4, green: 1, blue: 0.65))
+                VStack(alignment: .leading, spacing: 4) {
+                    ForEach(Array(unlockedEvents.prefix(2)), id: \.id) { event in
+                        HStack(spacing: 6) {
+                            Image(systemName: event.isCompleted ? "checkmark.circle.fill" : "circle")
+                                .font(.system(size: 11))
+                                .foregroundColor(event.isCompleted ? Color(red: 0.4, green: 1, blue: 0.65) : .white.opacity(0.5))
+                            Text(event.title)
+                                .font(.system(size: 11, weight: event.isCompleted ? .regular : .medium))
+                                .foregroundColor(.white.opacity(event.isCompleted ? 0.35 : 0.9))
+                                .strikethrough(event.isCompleted, color: .white.opacity(0.3))
+                                .lineLimit(1)
+                        }
+                    }
+                    if unlocked > 2 {
+                        Text("+\(unlocked - 2) more")
+                            .font(.system(size: 10))
+                            .foregroundColor(.white.opacity(0.3))
+                    }
+                }
+            }
+        }
+    }
+
+    // MARK: Medium / Large checklist
+
+    @ViewBuilder
+    private var checklistBody: some View {
+        if todayEvents.isEmpty {
+            HStack(spacing: 8) {
+                Image(systemName: "calendar.badge.checkmark")
+                    .font(.system(size: 14, weight: .light))
+                    .foregroundColor(.white.opacity(0.3))
+                Text("Nothing scheduled for today")
+                    .font(.system(size: 11))
+                    .foregroundColor(.white.opacity(0.3))
+                    .lineLimit(2)
+            }
+        } else {
+            VStack(spacing: 6) {
+                ForEach(unlockedEvents, id: \.id) { event in
+                    routineRow(event)
+                }
+            }
+            if allDoneCheck {
+                HStack(spacing: 5) {
+                    Image(systemName: "checkmark.seal.fill")
+                        .font(.system(size: 11))
+                        .foregroundColor(Color(red: 0.4, green: 1, blue: 0.65))
+                    Text("All done for today!")
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundColor(Color(red: 0.4, green: 1, blue: 0.65))
+                }
+                .padding(.top, 6)
+            }
+        }
+    }
+
+    // MARK: Item counts (todos-aware)
+
+    private var doneItems: Int {
+        unlockedEvents.reduce(0) { acc, event in
+            event.todos.isEmpty ? acc + (event.isCompleted ? 1 : 0) : acc + event.todos.filter { $0.isCompleted }.count
+        }
+    }
+
+    private var totalItems: Int {
+        unlockedEvents.reduce(0) { $0 + ($1.todos.isEmpty ? 1 : $1.todos.count) }
+    }
+
+    private var totalAllItems: Int {
+        todayEvents.reduce(0) { $0 + ($1.todos.isEmpty ? 1 : $1.todos.count) }
+    }
+
+    private var allDoneCheck: Bool { totalItems > 0 && doneItems == totalItems }
+
+    // MARK: Checkbox shape
+
+    @ViewBuilder
+    private func checkboxShape(completed: Bool) -> some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 5, style: .continuous)
+                .fill(completed
+                    ? Color(red: 0.4, green: 1, blue: 0.65).opacity(0.2)
+                    : Color.white.opacity(0.12))
+                .frame(width: 22, height: 22)
+            if completed {
+                Image(systemName: "checkmark")
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundColor(Color(red: 0.4, green: 1, blue: 0.65))
+            }
+        }
+    }
+
+    // MARK: Rows
+
+    @ViewBuilder
+    private func routineRow(_ event: TimelineEvent) -> some View {
+        if event.todos.isEmpty {
+            // Event with no todos — one checkbox for the whole event
+            WidgetCard {
+                HStack(spacing: 10) {
+                    Button(intent: ToggleRoutineEventIntent(eventId: event.id)) {
+                        checkboxShape(completed: event.isCompleted)
+                    }
+                    .buttonStyle(.plain)
+                    Text(event.title)
+                        .font(.system(size: 13, weight: event.isCompleted ? .regular : .semibold))
+                        .foregroundColor(.white.opacity(event.isCompleted ? 0.35 : 1))
+                        .strikethrough(event.isCompleted, color: .white.opacity(0.25))
+                        .lineLimit(1)
+                    Spacer()
+                    Text(routineFormatTime(event.beginTime))
+                        .font(.system(size: 10, weight: .medium, design: .rounded))
+                        .foregroundColor(.white.opacity(event.isCompleted ? 0.2 : 0.45))
+                }
+            }
+        } else {
+            // Event with todos — group header + one row per todo
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Text(event.title)
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundColor(.white.opacity(0.45))
+                        .lineLimit(1)
+                    Spacer()
+                    Text(routineFormatTime(event.beginTime))
+                        .font(.system(size: 9, weight: .medium, design: .rounded))
+                        .foregroundColor(.white.opacity(0.3))
+                }
+                .padding(.horizontal, 10)
+                .padding(.vertical, 5)
+                .background(Color.white.opacity(0.06))
+                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+
+                ForEach(event.todos, id: \.id) { todo in
+                    routineTodoRow(todo, eventId: event.id, date: event.date)
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func routineTodoRow(_ todo: TimelineTodo, eventId: String, date: String) -> some View {
+        WidgetCard {
+            HStack(spacing: 10) {
+                Button(intent: ToggleRoutineTodoIntent(todoId: todo.id, eventId: eventId, date: date, newIsCompleted: !todo.isCompleted)) {
+                    checkboxShape(completed: todo.isCompleted)
+                }
+                .buttonStyle(.plain)
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(todo.title)
+                        .font(.system(size: 13, weight: todo.isCompleted ? .regular : .semibold))
+                        .foregroundColor(.white.opacity(todo.isCompleted ? 0.35 : 1))
+                        .strikethrough(todo.isCompleted, color: .white.opacity(0.25))
+                        .lineLimit(1)
+                    if todo.isCompleted, let at = todo.modifiedAt, let timeStr = parseTodoTime(at) {
+                        Text("Done at \(timeStr)")
+                            .font(.system(size: 9))
+                            .foregroundColor(.white.opacity(0.3))
+                    }
+                }
+                Spacer()
+            }
+        }
+    }
+
+    private func parseTodoTime(_ iso: String) -> String? {
+        let f = ISO8601DateFormatter()
+        f.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        guard let date = f.date(from: iso) else { return nil }
+        let d = DateFormatter()
+        d.dateFormat = "HH:mm"
+        return d.string(from: date)
+    }
+
+    // MARK: Helpers
+
+    private func routineFormatTime(_ t: String) -> String {
+        let parts = t.split(separator: ":")
+        guard parts.count >= 2 else { return t }
+        return "\(parts[0]):\(parts[1])"
+    }
+
+    private func iso8601DateOnly(_ date: Date) -> String {
+        let f = DateFormatter()
+        f.dateFormat = "yyyy-MM-dd"
+        return f.string(from: date)
+    }
+}
+
 // MARK: - Widget Configurations
 
 struct WalletWidget: Widget {
@@ -1018,6 +1380,19 @@ struct TimelineWidget: Widget {
         }
         .configurationDisplayName("Timeline")
         .description("View your schedule and tasks")
+    }
+}
+
+struct DailyRoutineWidget: Widget {
+    let kind: String = "DailyRoutineWidget"
+
+    var body: some WidgetConfiguration {
+        AppIntentConfiguration(kind: kind, intent: ConfigurationAppIntent.self, provider: RoutineProvider()) { entry in
+            DailyRoutineWidgetView(entry: entry)
+                .containerBackground(widgetBg, for: .widget)
+        }
+        .configurationDisplayName("Daily Routine")
+        .description("Check off your recurring daily events as they unlock")
     }
 }
 

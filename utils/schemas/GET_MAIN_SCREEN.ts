@@ -11,6 +11,9 @@ export const GET_MAIN_SCREEN = gql`
             beginTime
             endTime
             isCompleted
+            isRepeat
+            repeatOn
+            occurrenceDate
 
             todos {
                 id

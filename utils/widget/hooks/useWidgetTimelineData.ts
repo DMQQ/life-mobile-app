@@ -6,20 +6,22 @@ import { ExtensionStorage } from "@bacons/apple-targets"
 import { useQuery } from "@apollo/client"
 import moment from "moment"
 
-const transformTodoForWidget = (todo: { id: string; title: string; isCompleted: boolean }): WidgetTodo => ({
+const transformTodoForWidget = (todo: { id: string; title: string; isCompleted: boolean; modifiedAt?: string }): WidgetTodo => ({
     id: todo.id,
     title: todo.title,
     isCompleted: todo.isCompleted,
+    modifiedAt: todo.modifiedAt,
 })
 
 const transformEventForWidget = (event: GetTimelineQuery): WidgetTimelineEvent => ({
     id: event.id,
     title: event.title,
     description: event.description,
-    date: event.date,
+    date: event.occurrenceDate ?? event.date,
     beginTime: event.beginTime,
     endTime: event.endTime,
     isCompleted: event.isCompleted,
+    isRepeat: event.isRepeat,
     todos: event.todos.map(transformTodoForWidget),
 })
 
@@ -45,19 +47,29 @@ export const useWidgetTimelineData = () => {
 
         if (allEvents.length === 0) return
 
-        const sortedEvents = allEvents.sort((a, b) => {
-            const dateA = moment(`${a.date} ${a.beginTime}`)
-            const dateB = moment(`${b.date} ${b.beginTime}`)
+        // Deduplicate: recurring events appear across multiple day queries with the same id
+        // Use occurrenceDate (the actual day) to disambiguate
+        const seen = new Set<string>()
+        const uniqueEvents = allEvents.filter((event) => {
+            const key = `${event.id}_${event.occurrenceDate ?? event.date}`
+            if (seen.has(key)) return false
+            seen.add(key)
+            return true
+        })
+
+        const sortedEvents = uniqueEvents.sort((a, b) => {
+            const dateA = moment(`${(a.occurrenceDate ?? a.date).split(",")[0]} ${a.beginTime}`)
+            const dateB = moment(`${(b.occurrenceDate ?? b.date).split(",")[0]} ${b.beginTime}`)
             return dateA.isBefore(dateB) ? -1 : 1
         })
 
         const recentEvents = sortedEvents.slice(0, 8).map(transformEventForWidget)
-        const completedEvents = allEvents.filter((event) => event.isCompleted).length
+        const completedEvents = uniqueEvents.filter((event) => event.isCompleted).length
 
         const widgetData: WidgetTimelineData = {
             events: recentEvents,
             selectedDate: moment().format("YYYY-MM-DD"),
-            totalEvents: allEvents.length,
+            totalEvents: uniqueEvents.length,
             completedEvents,
             lastUpdated: new Date().toISOString(),
         }

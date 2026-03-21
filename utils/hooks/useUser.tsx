@@ -6,6 +6,7 @@ import { useApolloClient, useMutation, gql } from "@apollo/client"
 import * as SplashScreen from "expo-splash-screen"
 import { useEffect } from "react"
 import store from "../widget/store"
+import Url from "@/constants/Url"
 
 export const STORE_KEY = "user"
 
@@ -22,6 +23,7 @@ export default function useUser() {
             dispatch(userActions.loadUser({ user: user.user, token: user.token }))
 
             store.set("auth_token", user.token)
+            store.set("api_url", Url.API + "/graphql")
         } else {
             dispatch(userActions.notSigned())
             await SplashScreen.hideAsync()
@@ -59,6 +61,7 @@ export default function useUser() {
 
                     // Update shared UserDefaults for Watch app and other extensions
                     store.set("auth_token", data.refreshToken)
+                    store.set("api_url", Url.API + "/graphql")
                 }
             }
             refresh()
@@ -71,6 +74,7 @@ export default function useUser() {
 
         // Update shared UserDefaults for Watch app and other extensions
         store.set("auth_token", input.token)
+        store.set("api_url", Url.API + "/graphql")
     }
 
     return { ...user, loadUser, saveUser, removeUser }

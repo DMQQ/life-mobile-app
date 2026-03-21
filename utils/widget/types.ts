@@ -32,6 +32,7 @@ export interface WidgetTodo {
   id: string
   title: string
   isCompleted: boolean
+  modifiedAt?: string
 }
 
 export interface WidgetTimelineEvent {
@@ -42,6 +43,7 @@ export interface WidgetTimelineEvent {
   beginTime: string
   endTime: string
   isCompleted: boolean
+  isRepeat: boolean
   todos: WidgetTodo[]
 }
 
