@@ -5,7 +5,7 @@ import { Pressable, View } from "react-native"
 import Color from "color"
 import useRemoveTimelineMutation from "../hooks/mutation/useRemoveTimelineMutation"
 import { useActivityUtils } from "@/utils/hooks/useActivityManager"
-import useCompleteTimeline from "../hooks/mutation/useCompleteTimeline"
+import useCompleteOccurrence from "../hooks/mutation/useCompleteOccurrence"
 import DayTimelineItem from "./DayTimelineItem"
 import ContextMenu, { ContextMenuAction } from "react-native-context-menu-view"
 
@@ -22,7 +22,8 @@ export default function DayTimelineItemWrapper({ item, style, onLongPress }: Day
 
     const { remove } = useRemoveTimelineMutation(timeline || { id: "", date: "", name: "" })
     const { isPending, startActivity } = useActivityUtils(timeline?.id)
-    const [completeTimeline] = useCompleteTimeline(timeline.id)
+    const [completeOccurrenceMutation] = useCompleteOccurrence(timeline.id)
+    const completeTimeline = () => completeOccurrenceMutation({ variables: { id: timeline.id, isCompleted: !timeline.isCompleted } })
 
     const handleCopyPress = useCallback(() => {
         navigation.navigate("CopyTimelineModal", {

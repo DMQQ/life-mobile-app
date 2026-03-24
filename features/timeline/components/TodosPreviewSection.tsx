@@ -9,11 +9,12 @@ interface TodosPreviewSectionProps {
         isCompleted: boolean
     }>
     timelineId: string
+    occurrenceDate: string
     textColor?: string
     maxItems?: number
 }
 
-export default function TodosPreviewSection({ todos, timelineId, textColor, maxItems = 3 }: TodosPreviewSectionProps) {
+export default function TodosPreviewSection({ todos, timelineId, occurrenceDate, textColor, maxItems = 3 }: TodosPreviewSectionProps) {
     if (!todos || todos.length === 0) {
         return null
     }
@@ -24,7 +25,7 @@ export default function TodosPreviewSection({ todos, timelineId, textColor, maxI
     return (
         <View style={styles.container}>
             {visibleTodos.map((todo) => (
-                <TodoPreviewCard key={todo.id} todo={todo} timelineId={timelineId} textColor={textColor} />
+                <TodoPreviewCard key={todo.id} todo={todo} timelineId={timelineId} occurrenceDate={occurrenceDate} textColor={textColor} />
             ))}
             {remainingCount > 0 && (
                 <Text style={[styles.moreText, textColor && { color: textColor }]}>

@@ -14,7 +14,7 @@ import { TimelineScreenLoader } from "../components/LoaderSkeleton"
 import TimelineItem from "../components/TimelineItem"
 import TimelineDayPage from "../components/TimelineDayPage"
 import useTimeline from "../hooks/general/useTimeline"
-import { GetTimelineQuery } from "../hooks/query/useGetTimeLineQuery"
+import { OccurrenceItem } from "../hooks/query/useGetOccurrencesQuery"
 import { TimelineScreenProps } from "../types"
 import Text from "@/components/ui/Text/Text"
 import PagerView from "react-native-pager-view"
@@ -91,7 +91,7 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
         [timeline.selected],
     )
 
-    const eventsCount = timeline.data?.timeline?.length || 0
+    const eventsCount = timeline.data?.occurrences?.length || 0
 
     const renderItem = useCallback(
         ({ item }: { item: any }): any => (<TimelineItem {...item} location="timeline" />) as any,
@@ -155,14 +155,14 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
                     }
                     onScroll={onScroll}
                     contentContainerStyle={{
-                        paddingBottom: (timeline.data?.timeline?.length || 0) > 0 ? 120 : 0,
+                        paddingBottom: (timeline.data?.occurrences?.length || 0) > 0 ? 120 : 0,
                         padding: 15,
                         paddingTop: 250,
                     }}
-                    data={(timeline.data?.timeline as GetTimelineQuery[]) || []}
+                    data={(timeline.data?.occurrences as OccurrenceItem[]) || []}
                     initialNumToRender={3}
                     keyExtractor={(item: any) => item.id}
-                    getItem={(data, index) => data[index] as GetTimelineQuery}
+                    getItem={(data, index) => data[index] as OccurrenceItem}
                     getItemCount={(data) => data.length}
                     renderItem={renderItem}
                 />

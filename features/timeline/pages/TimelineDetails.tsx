@@ -2,27 +2,19 @@ import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
 import Layout from "@/constants/Layout"
 import { StackScreenProps } from "@/types"
-import { AntDesign, Feather, FontAwesome, FontAwesome5, Ionicons } from "@expo/vector-icons"
+import { AntDesign, Feather, FontAwesome, Ionicons } from "@expo/vector-icons"
 import Color from "color"
 import { useCallback, useMemo, useState } from "react"
 import { StyleSheet, View } from "react-native"
-import Animated, {
-    Extrapolation,
-    interpolate,
-    SharedValue,
-    useAnimatedScrollHandler,
-    useAnimatedStyle,
-    useSharedValue,
-} from "react-native-reanimated"
+import Animated, { useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated"
 import FileList from "../components/FileList"
 import LoaderSkeleton from "../components/LoaderSkeleton"
 import TimelineTodos from "../components/TimelineTodos"
-import useCompleteTimeline from "../hooks/mutation/useCompleteTimeline"
-import useGetTimelineById from "../hooks/query/useGetTimelineById"
+import useCompleteOccurrence from "../hooks/mutation/useCompleteOccurrence"
+import useGetOccurrenceById from "../hooks/query/useGetOccurrenceById"
 
 import { Header } from "@/components"
 import DeleteTimelineEvent from "@/components/ui/Dialog/Delete/DeleteTimelineEvent"
-import { GetTimelineQuery } from "../hooks/query/useGetTimeLineQuery"
 import { HeaderItem } from "@/components/ui/Header/Header"
 import { useActivityUtils } from "@/utils/hooks/useActivityManager"
 
@@ -44,18 +36,6 @@ const styles = StyleSheet.create({
         position: "absolute",
         bottom: 0,
     },
-    fab: {
-        padding: 10,
-        position: "absolute",
-        right: 15,
-        bottom: 25,
-        backgroundColor: Colors.secondary,
-        width: 60,
-        height: 60,
-        borderRadius: 100,
-        justifyContent: "center",
-        alignItems: "center",
-    },
 })
 
 const capitalize = (text: string | undefined) => {
@@ -67,8 +47,8 @@ export default function TimelineDetails({
     route,
     navigation,
 }: StackScreenProps<{ TimelineDetails: { timelineId: string } }, "TimelineDetails">) {
-    const { data, loading } = useGetTimelineById(route.params.timelineId)
-    const [completeTimeline] = useCompleteTimeline(route.params.timelineId)
+    const { data, loading } = useGetOccurrenceById(route.params.timelineId)
+    const [completeOccurrence] = useCompleteOccurrence(route.params.timelineId)
 
     const scrollY = useSharedValue(0)
 
@@ -103,14 +83,14 @@ export default function TimelineDetails({
         })
     }, [isPending, data])
 
+    const [selectedEventForDeletion, setSelectedEventForDeletion] = useState<any | null>(null)
+
     const buttons = useMemo(
         () =>
             [
                 {
                     icon: <Feather name="trash" size={20} color="#fff" />,
-                    onPress: () => {
-                        setSelectedEventForDeletion(data)
-                    },
+                    onPress: () => setSelectedEventForDeletion(data),
                 },
                 {
                     icon: <Feather name="edit-2" size={20} color={Colors.foreground} />,
@@ -128,17 +108,12 @@ export default function TimelineDetails({
                     ),
                     standalone: true,
                     position: "right",
-                    onPress: completeTimeline,
-
+                    onPress: () => completeOccurrence({ variables: { id: data?.id, isCompleted: !data?.isCompleted } }),
                     tintColor: !data?.isCompleted ? Colors.secondary : "green",
                 },
             ] as HeaderItem[],
         [data?.isCompleted, data, isPending],
     )
-
-    console.log("Timeline Details Rendered", { isPending })
-
-    const [selectedEventForDeletion, setSelectedEventForDeletion] = useState<GetTimelineQuery | null>(null)
 
     return (
         <View style={{ backgroundColor: Colors.primary }}>

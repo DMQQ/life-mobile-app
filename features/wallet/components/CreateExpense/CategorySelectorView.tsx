@@ -52,7 +52,7 @@ const CategorySelector = (props: { current: string; onPress: (item: string) => v
 
             <Animated.FlatList
                 initialNumToRender={10}
-                getItemLayout={(_, index) => ({ length: 60, offset: 75 * index, index })}
+                getItemLayout={(_, index) => ({ length: 60, offset: 70 * index, index })}
                 ref={listRef}
                 layout={LinearTransition}
                 style={styles.optionsGrid}
@@ -62,7 +62,7 @@ const CategorySelector = (props: { current: string; onPress: (item: string) => v
                 renderItem={({ item, index }) => (
                     <Animated.View
                         style={{ marginBottom: 10, height: 60 }}
-                        entering={FadeIn.delay(Math.min((index + 1) * 10, 150))}
+                        entering={FadeIn.delay(Math.max(Math.min((index + 1) * 10, 150), 500))}
                     >
                         <Ripple
                             onPress={() => {

@@ -1,6 +1,4 @@
-import Button2 from "@/components/ui/Button/Button2"
 import IconButton from "@/components/ui/IconButton/IconButton"
-import SegmentedButtons from "@/components/ui/SegmentedButtons"
 import Text from "@/components/ui/Text/Text"
 import ValidatedInput from "@/components/ui/ValidatedInput"
 import Colors from "@/constants/Colors"
@@ -12,17 +10,15 @@ import { useState } from "react"
 import { ActivityIndicator, Platform, Pressable, ScrollView, StyleSheet, View } from "react-native"
 import Ripple from "react-native-material-ripple"
 import DateTimePicker from "react-native-modal-datetime-picker"
-import Animated, { useAnimatedKeyboard, useAnimatedStyle } from "react-native-reanimated"
+import Animated from "react-native-reanimated"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import CreateRepeatableTimeline from "../components/CreateTimeline/CreateRepeatableTimeline"
-import SuggestedEvents from "../components/CreateTimeline/SuggestedEvents/SuggestedEvents"
+import EditScopeSheet from "../components/EditScopeSheet"
 import TimelineCreateHeader from "../components/CreateTimeline/TimelineCreateHeader"
 import timelineStyles from "../components/timeline.styles"
 import useCreateTimeline from "../hooks/general/useCreateTimeline"
 import type { TimelineScreenProps } from "../types"
 import { Button } from "@/components"
-import { useIsFocused } from "@react-navigation/native"
-import TodoItem from "../components/TodoItem"
 import { Todo } from "./CreateTimelineTodos"
 
 const styles = StyleSheet.create({
@@ -52,7 +48,7 @@ const radioOptions = [
 export default function CreateTimeLineEventModal({ route, navigation }: TimelineScreenProps<"TimelineCreate">) {
     const isKeyboardOpen = useKeyboard()
 
-    const { f, isLoading, isEditing, sheetRef, handleChangeDate } = useCreateTimeline({
+    const { f, isLoading, isEditing, sheetRef, scopeSheetRef, onScopeSelected, handleChangeDate } = useCreateTimeline({
         route,
         navigation,
     })
@@ -76,21 +72,23 @@ export default function CreateTimeLineEventModal({ route, navigation }: Timeline
                     selectedDate={route.params.selectedDate}
                 />
 
-                <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 15 }} keyboardDismissMode={"on-drag"}>
+                <ScrollView
+                    style={{ flex: 1 }}
+                    contentContainerStyle={{ padding: 15, paddingTop: 80 }}
+                    keyboardDismissMode={"on-drag"}
+                >
                     <Animated.View>
-                        {/* {!isEditing && <SuggestedEvents date={route.params.selectedDate} />} */}
-
                         <ValidatedInput
                             placeholder="Like  'take out the trash' etc.."
                             name="title"
-                            label="Event's title*"
+                            label="Title*"
                             showLabel
                             formik={f}
                             helperStyle={{ marginLeft: 2.5 }}
                         />
                         <ValidatedInput
                             showLabel
-                            label="Event's content"
+                            label="Content"
                             numberOfLines={
                                 isEditing ? f.values.desc.split("\n").length + 10 : f.values.desc.split("\n").length + 3
                             }
@@ -215,7 +213,6 @@ export default function CreateTimeLineEventModal({ route, navigation }: Timeline
                 <SubmitButton
                     f={f}
                     openSheet={() => {
-                        console.log("Opening sheet, ref:", sheetRef.current)
                         sheetRef.current?.expand()
                     }}
                     isEditing={isEditing}
@@ -225,6 +222,7 @@ export default function CreateTimeLineEventModal({ route, navigation }: Timeline
             </View>
 
             <CreateRepeatableTimeline formik={f} ref={sheetRef as any} />
+            <EditScopeSheet ref={scopeSheetRef as any} onScopeSelected={onScopeSelected} />
         </>
     )
 }

@@ -12,13 +12,15 @@ interface TodoPreviewCardProps {
         isCompleted: boolean
     }
     timelineId: string
+    occurrenceDate: string
     textColor?: string
 }
 
-export default function TodoPreviewCard({ todo, timelineId, textColor }: TodoPreviewCardProps) {
+export default function TodoPreviewCard({ todo, timelineId, occurrenceDate, textColor }: TodoPreviewCardProps) {
     const [completeTodo, { loading }] = useQuickCompleteTodo({
         todoId: todo.id,
         timelineId,
+        occurrenceDate,
         currentlyCompleted: todo.isCompleted,
     })
 

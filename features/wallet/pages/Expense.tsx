@@ -354,7 +354,6 @@ export default function Expense({ route: { params }, navigation }: any) {
     }
 
     const scrollY = useSharedValue(0)
-    const insets = useSafeAreaInsets()
 
     const onScroll = useAnimatedScrollHandler({
         onScroll: (ev) => {
@@ -381,7 +380,7 @@ export default function Expense({ route: { params }, navigation }: any) {
                         style: { marginLeft: 5 },
                     },
                 ]}
-                animatedSubtitle={`Amount: ${selected.amount.toFixed(2)}zł`}
+                animatedSubtitle={`${selected.type === "expense" ? "-" : ""}${selected.amount.toFixed(2)}zł`}
                 subtitleStyles={{
                     fontSize: 25,
                     color:

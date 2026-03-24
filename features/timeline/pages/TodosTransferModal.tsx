@@ -2,7 +2,7 @@ import Text from "@/components/ui/Text/Text"
 import { useState, useMemo } from "react"
 import { View, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator, Alert, TextInput } from "react-native"
 import { useRoute, useNavigation } from "@react-navigation/native"
-import useGetTimeLineQuery, { GetTimelineQuery } from "../hooks/query/useGetTimeLineQuery"
+import useGetOccurrencesQuery, { OccurrenceItem } from "../hooks/query/useGetOccurrencesQuery"
 import useTransferTodos from "../hooks/mutation/useTransferTodos"
 import Colors from "@/constants/Colors"
 import { Ionicons } from "@expo/vector-icons"
@@ -20,13 +20,13 @@ export default function TodosTransferModal({ route, navigation }: any) {
     const { timelineId: sourceTimelineId } = route.params as TodosTransferModalParams
 
     const [selectedDate, setSelectedDate] = useState(moment().format("YYYY-MM-DD"))
-    const { data, loading, error, setSelected } = useGetTimeLineQuery(selectedDate)
+    const { data, loading, error, setSelected } = useGetOccurrencesQuery(selectedDate)
 
     const [transferring, setTransferring] = useState(false)
     const [searchQuery, setSearchQuery] = useState("")
 
     const availableTimelines = useMemo(() => {
-        const filtered = data?.timeline?.filter((t) => t.id !== sourceTimelineId) || []
+        const filtered = data?.occurrences?.filter((t) => t.id !== sourceTimelineId) || []
 
         if (!searchQuery.trim()) {
             return filtered
@@ -37,7 +37,7 @@ export default function TodosTransferModal({ route, navigation }: any) {
                 timeline.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 timeline.description?.toLowerCase().includes(searchQuery.toLowerCase()),
         )
-    }, [data?.timeline, sourceTimelineId, searchQuery])
+    }, [data?.occurrences, sourceTimelineId, searchQuery])
 
     const [targetTimelineId, setTargetTimelineId] = useState<string>("")
     const [transferTodos, transferState] = useTransferTodos(sourceTimelineId, targetTimelineId)
@@ -68,7 +68,7 @@ export default function TodosTransferModal({ route, navigation }: any) {
         setSelected(newDate)
     }
 
-    const renderTimelineItem = ({ item }: { item: GetTimelineQuery }) => (
+    const renderTimelineItem = ({ item }: { item: OccurrenceItem }) => (
         <TouchableOpacity
             style={[
                 styles.timelineItem,

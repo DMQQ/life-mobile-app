@@ -55,7 +55,11 @@ const Skeleton = ({
     }))
 
     return (
-        <Reanimated.View style={{ width, height, marginVertical, marginHorizontal }}>
+        <Reanimated.View
+            entering={FadeIn}
+            exiting={FadeOut}
+            style={{ width, height, marginVertical, marginHorizontal }}
+        >
             <MaskedView
                 androidRenderingMode="hardware"
                 maskElement={children}

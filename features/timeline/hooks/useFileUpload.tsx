@@ -6,7 +6,7 @@ import axios from "axios"
 import Url from "@/constants/Url"
 import Haptic from "react-native-haptic-feedback"
 import { useApolloClient, gql } from "@apollo/client"
-import { GET_TIMELINE } from "./query/useGetTimelineById"
+import { GET_OCCURRENCE_BY_ID } from "./query/useGetOccurrenceById"
 
 interface UseFileUploadProps {
     todoId: string
@@ -77,12 +77,12 @@ export const useFileUpload = ({ todoId, timelineId }: UseFileUploadProps) => {
             const uploadedFile = response.data
             if (uploadedFile && uploadedFile.id) {
                 const timelineData = client.readQuery({
-                    query: GET_TIMELINE,
+                    query: GET_OCCURRENCE_BY_ID,
                     variables: { id: timelineId },
                 }) as any
 
                 if (timelineData) {
-                    const updatedTodos = timelineData.timelineById.todos.map((t: any) => {
+                    const updatedTodos = timelineData.occurrenceById.todos.map((t: any) => {
                         if (t.id === todoId) {
                             return {
                                 ...t,
@@ -93,11 +93,11 @@ export const useFileUpload = ({ todoId, timelineId }: UseFileUploadProps) => {
                     })
 
                     client.writeQuery({
-                        query: GET_TIMELINE,
+                        query: GET_OCCURRENCE_BY_ID,
                         variables: { id: timelineId },
                         data: {
-                            timelineById: {
-                                ...timelineData.timelineById,
+                            occurrenceById: {
+                                ...timelineData.occurrenceById,
                                 todos: updatedTodos,
                             },
                         },
@@ -110,8 +110,8 @@ export const useFileUpload = ({ todoId, timelineId }: UseFileUploadProps) => {
 
             const { data: updatedTodo } = await client.query({
                 query: gql`
-                    query GetTodo($id: ID!) {
-                        timelineTodo(id: $id) {
+                    query GetOccurrenceTodo($id: ID!) {
+                        occurrenceTodo(id: $id) {
                             id
                             title
                             isCompleted
@@ -128,29 +128,29 @@ export const useFileUpload = ({ todoId, timelineId }: UseFileUploadProps) => {
                 fetchPolicy: "network-only",
             })
 
-            if (updatedTodo?.timelineTodo) {
+            if (updatedTodo?.occurrenceTodo) {
                 const timelineData = client.readQuery({
-                    query: GET_TIMELINE,
+                    query: GET_OCCURRENCE_BY_ID,
                     variables: { id: timelineId },
                 }) as any
 
                 if (timelineData) {
-                    const updatedTodos = timelineData.timelineById.todos.map((t: any) => {
+                    const updatedTodos = timelineData.occurrenceById.todos.map((t: any) => {
                         if (t.id === todoId) {
                             return {
                                 ...t,
-                                files: updatedTodo.timelineTodo.files,
+                                files: updatedTodo.occurrenceTodo.files,
                             }
                         }
                         return t
                     })
 
                     client.writeQuery({
-                        query: GET_TIMELINE,
+                        query: GET_OCCURRENCE_BY_ID,
                         variables: { id: timelineId },
                         data: {
-                            timelineById: {
-                                ...timelineData.timelineById,
+                            occurrenceById: {
+                                ...timelineData.occurrenceById,
                                 todos: updatedTodos,
                             },
                         },

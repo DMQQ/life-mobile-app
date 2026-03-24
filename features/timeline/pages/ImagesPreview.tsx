@@ -12,12 +12,12 @@ import { Gesture, GestureDetector } from "react-native-gesture-handler"
 import Ripple from "react-native-material-ripple"
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
-import useGetTimelineById from "../hooks/query/useGetTimelineById"
+import useGetOccurrenceById from "../hooks/query/useGetOccurrenceById"
 import { TimelineScreenProps } from "../types"
 import { BlurView } from "expo-blur"
 
 export default function ImagesPreview({ route, navigation }: TimelineScreenProps<"ImagesPreview">) {
-    const { data } = useGetTimelineById(route.params.timelineId! as string, {
+    const { data } = useGetOccurrenceById(route.params.timelineId! as string, {
         fetchPolicy: "cache-only",
     })
 

@@ -81,6 +81,7 @@ export default function DayTimelineItem(
                         <TodosPreviewSection
                             todos={timeline.todos}
                             timelineId={timeline.id}
+                            occurrenceDate={timeline.date}
                             textColor={timeline.textColor}
                             maxItems={3}
                         />

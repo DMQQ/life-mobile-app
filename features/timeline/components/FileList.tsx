@@ -13,7 +13,7 @@ import { memo, useState } from "react"
 import { ActivityIndicator, FlatList, StyleSheet, ToastAndroid, View } from "react-native"
 import Ripple from "react-native-material-ripple"
 import Animated from "react-native-reanimated"
-import useGetTimelineById from "../hooks/query/useGetTimelineById"
+import useGetOccurrenceById from "../hooks/query/useGetOccurrenceById"
 
 const styles = StyleSheet.create({
     available: {
@@ -105,7 +105,7 @@ const useUploadFiles = (timelineId: string, refetch: () => Promise<any>) => {
 export default function FileList({ timelineId }: FileListProps) {
     const navigation = useNavigation<any>()
 
-    const { data, refetch } = useGetTimelineById(timelineId)
+    const { data, refetch } = useGetOccurrenceById(timelineId)
 
     async function removePhoto(photoId: string) {
         await axios.delete(Url.API + "/upload/timeline/" + photoId)

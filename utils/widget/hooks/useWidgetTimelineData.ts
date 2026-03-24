@@ -1,6 +1,6 @@
 import { useEffect } from "react"
 import store from "../store"
-import { GetTimelineQuery, GET_TIMELINE_QUERY } from "@/features/timeline/hooks/query/useGetTimeLineQuery"
+import { OccurrenceItem, GET_OCCURRENCES_QUERY } from "@/features/timeline/hooks/query/useGetOccurrencesQuery"
 import { WidgetTimelineData, WidgetTimelineEvent, WidgetTodo } from "../types"
 import { ExtensionStorage } from "@bacons/apple-targets"
 import { useQuery } from "@apollo/client"
@@ -13,11 +13,11 @@ const transformTodoForWidget = (todo: { id: string; title: string; isCompleted: 
     modifiedAt: todo.modifiedAt,
 })
 
-const transformEventForWidget = (event: GetTimelineQuery): WidgetTimelineEvent => ({
+const transformEventForWidget = (event: OccurrenceItem): WidgetTimelineEvent => ({
     id: event.id,
     title: event.title,
     description: event.description,
-    date: event.occurrenceDate ?? event.date,
+    date: event.date,
     beginTime: event.beginTime,
     endTime: event.endTime,
     isCompleted: event.isCompleted,
@@ -26,40 +26,38 @@ const transformEventForWidget = (event: GetTimelineQuery): WidgetTimelineEvent =
 })
 
 export const useWidgetTimelineData = () => {
-    const todayQuery = useQuery<{ timeline: GetTimelineQuery[] }>(GET_TIMELINE_QUERY, {
+    const todayQuery = useQuery<{ occurrences: OccurrenceItem[] }>(GET_OCCURRENCES_QUERY, {
         variables: { date: moment().format("YYYY-MM-DD") },
     })
 
-    const tomorrowQuery = useQuery<{ timeline: GetTimelineQuery[] }>(GET_TIMELINE_QUERY, {
+    const tomorrowQuery = useQuery<{ occurrences: OccurrenceItem[] }>(GET_OCCURRENCES_QUERY, {
         variables: { date: moment().add(1, "day").format("YYYY-MM-DD") },
     })
 
-    const dayAfterQuery = useQuery<{ timeline: GetTimelineQuery[] }>(GET_TIMELINE_QUERY, {
+    const dayAfterQuery = useQuery<{ occurrences: OccurrenceItem[] }>(GET_OCCURRENCES_QUERY, {
         variables: { date: moment().add(2, "days").format("YYYY-MM-DD") },
     })
 
     useEffect(() => {
-        const allEvents: GetTimelineQuery[] = [
-            ...(todayQuery.data?.timeline || []),
-            ...(tomorrowQuery.data?.timeline || []),
-            ...(dayAfterQuery.data?.timeline || []),
+        const allEvents: OccurrenceItem[] = [
+            ...(todayQuery.data?.occurrences || []),
+            ...(tomorrowQuery.data?.occurrences || []),
+            ...(dayAfterQuery.data?.occurrences || []),
         ]
 
         if (allEvents.length === 0) return
 
-        // Deduplicate: recurring events appear across multiple day queries with the same id
-        // Use occurrenceDate (the actual day) to disambiguate
+        // Each occurrence has a unique id — no deduplication needed, but guard against duplicates
         const seen = new Set<string>()
         const uniqueEvents = allEvents.filter((event) => {
-            const key = `${event.id}_${event.occurrenceDate ?? event.date}`
-            if (seen.has(key)) return false
-            seen.add(key)
+            if (seen.has(event.id)) return false
+            seen.add(event.id)
             return true
         })
 
         const sortedEvents = uniqueEvents.sort((a, b) => {
-            const dateA = moment(`${(a.occurrenceDate ?? a.date).split(",")[0]} ${a.beginTime}`)
-            const dateB = moment(`${(b.occurrenceDate ?? b.date).split(",")[0]} ${b.beginTime}`)
+            const dateA = moment(`${a.date} ${a.beginTime}`)
+            const dateB = moment(`${b.date} ${b.beginTime}`)
             return dateA.isBefore(dateB) ? -1 : 1
         })
 

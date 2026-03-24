@@ -2,15 +2,15 @@ import { useFormik } from "formik"
 import moment from "moment"
 import { useRef, useState } from "react"
 import { TimelineScreenProps } from "../../types"
-import useCreateTimelineMutation from "../mutation/useCreateTimeline"
-import useEditTimeline from "../mutation/useEditTimeline"
-import useGetTimelineById from "../query/useGetTimelineById"
+import useCreateEvent from "../mutation/useCreateEvent"
+import useEditOccurrence from "../mutation/useEditOccurrence"
+import useGetOccurrenceById from "../query/useGetOccurrenceById"
 
 import { DATE_FORMAT } from "@/utils/functions/parseDate"
 import { useApolloClient } from "@apollo/client"
 import BottomSheetType from "@gorhom/bottom-sheet"
-import { GET_TIMELINE_QUERY } from "../query/useGetTimeLineQuery"
-import { GET_MONTHLY_EVENTS } from "./useTimeline"
+import { GET_OCCURRENCES_QUERY } from "../query/useGetOccurrencesQuery"
+import { GET_MONTHLY_OCCURRENCES } from "./useTimeline"
 
 export default function useCreateTimeline({ route, navigation }: TimelineScreenProps<"TimelineCreate">) {
     const {
@@ -18,21 +18,22 @@ export default function useCreateTimeline({ route, navigation }: TimelineScreenP
         initialValues,
         validationSchema,
         state: { loading: isLoading },
-    } = useCreateTimelineMutation({
+    } = useCreateEvent({
         selectedDate: route.params.selectedDate,
     })
 
     const sheetRef = useRef<BottomSheetType>(null)
+    const scopeSheetRef = useRef<BottomSheetType>(null)
 
     const client = useApolloClient()
 
     const isEditing = route.params.mode === "edit"
 
-    const { data } = useGetTimelineById(route.params.timelineId || "", {
+    const { data } = useGetOccurrenceById(route.params.timelineId || "", {
         skip: !isEditing || route?.params?.timelineId === undefined,
     })
 
-    const { editTimeline, initialFormProps: initialEditFormValues } = useEditTimeline(
+    const { editOccurrence, initialFormProps: initialEditFormValues, isRepeat } = useEditOccurrence(
         route.params.timelineId || "",
         isEditing,
     )
@@ -48,24 +49,40 @@ export default function useCreateTimeline({ route, navigation }: TimelineScreenP
                   notification: "none",
               }
 
+    // Holds pending edit input when scope selection is required
+    const [pendingEdit, setPendingEdit] = useState<{ input: typeof initialFormValues; date: string } | null>(null)
+
     const formikSubmitForm = async (input: typeof initialFormValues) => {
         if (isEditing) {
-            await editTimeline(input, route.params.selectedDate)
+            if (isRepeat) {
+                // Show scope sheet; actual mutation fires from onScopeSelected
+                setPendingEdit({ input, date: route.params.selectedDate })
+                scopeSheetRef.current?.expand()
+                return
+            }
+            await editOccurrence(input, route.params.selectedDate, "THIS_ONLY")
         } else {
             await handleSubmit({ ...input, todos: route.params?.todos || [] })
         }
 
         await Promise.allSettled([
-            client.refetchQueries({
-                include: [GET_MONTHLY_EVENTS],
-            }),
+            client.refetchQueries({ include: [GET_MONTHLY_OCCURRENCES] }),
+            client.query({ query: GET_OCCURRENCES_QUERY, variables: { date: input.date } }),
+            client.query({ query: GET_OCCURRENCES_QUERY, variables: { date: initialEditFormValues.date } }),
+        ])
+    }
+
+    const onScopeSelected = async (scope: "THIS_ONLY" | "ALL") => {
+        if (!pendingEdit) return
+        scopeSheetRef.current?.close()
+        await editOccurrence(pendingEdit.input, pendingEdit.date, scope)
+        setPendingEdit(null)
+
+        await Promise.allSettled([
+            client.refetchQueries({ include: [GET_MONTHLY_OCCURRENCES] }),
             client.query({
-                query: GET_TIMELINE_QUERY,
-                variables: { date: input.date },
-            }),
-            client.query({
-                query: GET_TIMELINE_QUERY,
-                variables: { date: initialEditFormValues.date },
+                query: GET_OCCURRENCES_QUERY,
+                variables: { date: pendingEdit.input.date },
             }),
         ])
     }
@@ -98,6 +115,9 @@ export default function useCreateTimeline({ route, navigation }: TimelineScreenP
         initialValues,
         handleSubmit,
         sheetRef,
+        scopeSheetRef,
+        onScopeSelected,
+        isRepeat,
         handleChangeDate,
     }
 }

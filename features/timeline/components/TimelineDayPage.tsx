@@ -5,7 +5,7 @@ import { RefreshControl, View, VirtualizedList } from "react-native"
 import Animated from "react-native-reanimated"
 import DayTimeline from "./DayTimeline"
 import TimelineItem from "./TimelineItem"
-import useGetTimeLineQuery, { GetTimelineQuery } from "../hooks/query/useGetTimeLineQuery"
+import useGetOccurrencesQuery, { OccurrenceItem } from "../hooks/query/useGetOccurrencesQuery"
 
 const AnimatedVirtualizedList = Animated.createAnimatedComponent(VirtualizedList)
 
@@ -16,7 +16,7 @@ interface TimelineDayPageProps {
 }
 
 export default function TimelineDayPage({ date, onScroll, switchView }: TimelineDayPageProps) {
-    const { data, loading, refetch } = useGetTimeLineQuery(date)
+    const { data, loading, refetch } = useGetOccurrencesQuery(date)
     const [refreshing, setRefreshing] = useState(false)
 
     const onRefresh = useCallback(async () => {
@@ -25,7 +25,7 @@ export default function TimelineDayPage({ date, onScroll, switchView }: Timeline
         setRefreshing(false)
     }, [refetch])
 
-    const eventsCount = data?.timeline?.length || 0
+    const eventsCount = data?.occurrences?.length || 0
 
     return switchView !== "timeline" ? (
         <AnimatedVirtualizedList
@@ -38,10 +38,10 @@ export default function TimelineDayPage({ date, onScroll, switchView }: Timeline
                 padding: 15,
                 paddingTop: 450,
             }}
-            data={(data?.timeline as GetTimelineQuery[]) || []}
+            data={(data?.occurrences as OccurrenceItem[]) || []}
             initialNumToRender={3}
             keyExtractor={(item: any) => item.id}
-            getItem={(data, index) => data[index] as GetTimelineQuery}
+            getItem={(data, index) => data[index] as OccurrenceItem}
             getItemCount={(data) => data.length}
             renderItem={({ item }: { item: any }) => <TimelineItem {...item} location="timeline" />}
         />
@@ -50,12 +50,12 @@ export default function TimelineDayPage({ date, onScroll, switchView }: Timeline
             onScroll={onScroll}
             selected={date}
             date={date}
-            events={data?.timeline || []}
+            events={data?.occurrences || []}
             theme={{}}
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         >
             <View style={{ paddingTop: 150 }}>
-                {data?.timeline?.length === 0 && (
+                {data?.occurrences?.length === 0 && (
                     <View style={{ height: 225, marginTop: 30, paddingHorizontal: 15 }}>
                         <ListEmptyComponent isLoading={loading} length={eventsCount} selectedDate={date} />
                     </View>

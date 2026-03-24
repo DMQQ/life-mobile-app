@@ -3,18 +3,18 @@ import { useNavigation } from "@react-navigation/native"
 import moment from "moment"
 import { useCallback, useMemo, useState } from "react"
 import { StyleProp, StyleSheet, Text, View, ViewStyle, TouchableOpacity, Pressable } from "react-native"
-import { GetTimelineQuery } from "../hooks/query/useGetTimeLineQuery"
+import { OccurrenceItem } from "../hooks/query/useGetOccurrencesQuery"
 import timelineStyles from "./timeline.styles"
 import TodosPreviewSection from "./TodosPreviewSection"
 import { Card } from "@/components"
 // import ContextMenu from "@/components/ui/ContextMenu"
 import useRemoveTimelineMutation from "../hooks/mutation/useRemoveTimelineMutation"
 import { useActivityUtils } from "@/utils/hooks/useActivityManager"
-import useCompleteTimeline from "../hooks/mutation/useCompleteTimeline"
+import useCompleteOccurrence from "../hooks/mutation/useCompleteOccurrence"
 import ContextMenu, { ContextMenuAction } from "react-native-context-menu-view"
 
 export default function TimelineItem(
-    timeline: GetTimelineQuery & {
+    timeline: OccurrenceItem & {
         location: "timeline" | "root"
         textColor?: string
         styles?: StyleProp<ViewStyle>
@@ -71,7 +71,8 @@ export default function TimelineItem(
 
     const { isPending, startActivity } = useActivityUtils(timeline?.id)
 
-    const [completeTimeline] = useCompleteTimeline(timeline.id)
+    const [completeOccurrenceMutation] = useCompleteOccurrence(timeline.id)
+    const completeTimeline = () => completeOccurrenceMutation({ variables: { id: timeline.id, isCompleted: !timeline.isCompleted } })
 
     const startLiveActivityLocally = useCallback(() => {
         if (!timeline || isPending) return
@@ -182,6 +183,7 @@ export default function TimelineItem(
                             <TodosPreviewSection
                                 todos={timeline.todos}
                                 timelineId={timeline.id}
+                                occurrenceDate={timeline.date}
                                 textColor={timeline.textColor}
                                 maxItems={3}
                             />

@@ -115,12 +115,12 @@ const CreateRepeatableTimeline = forwardRef<BottomSheetType, CreateRepeatableTim
     }))
 
     const onArrowUpPress = () => {
-        f.setFieldValue("repeatCount", (+f.values.repeatCount + 1).toString())
+        f.setFieldValue("repeatCount", String(Number(f.values.repeatCount) + 1))
     }
 
     const onArrowDownPress = () => {
-        if (+f.values.repeatCount - 1 < 0) return
-        f.setFieldValue("repeatCount", (+f.values.repeatCount - 1).toString())
+        if (Number(f.values.repeatCount) - 1 < 0) return
+        f.setFieldValue("repeatCount", String(Number(f.values.repeatCount) - 1))
     }
 
     const [view, setView] = useState<"form" | "calendar">("form")
@@ -200,7 +200,7 @@ const CreateRepeatableTimeline = forwardRef<BottomSheetType, CreateRepeatableTim
                                     placeholderTextColor={"gray"}
                                     left={
                                         <ArrowButton
-                                            disabled={Number(f.values.repeatCount) === 0 || f.values.repeatCount === ""}
+                                            disabled={Number(f.values.repeatCount) <= 0 || f.values.repeatCount === ""}
                                             arrow="arrow-down"
                                             onPress={onArrowDownPress}
                                         />

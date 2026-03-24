@@ -1,34 +1,27 @@
-import { Timeline, CopyTimelineVariables } from "@/types"
 import { useMutation } from "@apollo/client"
 import { useNavigation } from "@react-navigation/native"
-import { GET_TIMELINE_QUERY } from "../query/useGetTimeLineQuery"
-import { COPY_TIMELINE } from "../schemas/schemas"
-
 import { Platform, ToastAndroid } from "react-native"
-
-import { GET_MAIN_SCREEN, getMainScreenBaseVariables } from "@/utils/schemas/GET_MAIN_SCREEN"
 import moment from "moment"
-import { GET_MONTHLY_EVENTS } from "../general/useTimeline"
+
+import { GET_OCCURRENCES_QUERY } from "../query/useGetOccurrencesQuery"
+import { COPY_OCCURRENCE } from "../schemas/schemas"
+import { GET_MONTHLY_OCCURRENCES } from "../general/useTimeline"
+import { GET_MAIN_SCREEN, getMainScreenBaseVariables } from "@/utils/schemas/GET_MAIN_SCREEN"
 
 export default function useCopyTimeline() {
     const navigation = useNavigation<any>()
 
-    const [copyTimelineMutation, state] = useMutation(COPY_TIMELINE, {})
+    const [copyOccurrenceMutation, state] = useMutation(COPY_OCCURRENCE, {})
 
-    const copyTimeline = async ({ timelineId, newDate }: CopyTimelineVariables) => {
+    const copyTimeline = async ({ timelineId, newDate }: { timelineId: string; newDate?: string }) => {
         try {
-            const { data } = await copyTimelineMutation({
-                variables: {
-                    timelineId,
-                    newDate,
-                },
+            const { data } = await copyOccurrenceMutation({
+                variables: { occurrenceId: timelineId, newDate },
 
                 refetchQueries: [
                     {
-                        query: GET_MONTHLY_EVENTS,
-                        variables: {
-                            date: moment().format("YYYY-MM-DD"),
-                        },
+                        query: GET_MONTHLY_OCCURRENCES,
+                        variables: { date: moment().format("YYYY-MM-DD") },
                     },
                     {
                         query: GET_MAIN_SCREEN,
@@ -36,48 +29,39 @@ export default function useCopyTimeline() {
                     },
                 ],
 
-                update(cache, { data: { copyTimeline } }) {
-                    // Update cache for the target date
-                    const targetDate = newDate || copyTimeline.date
-
+                update(cache, { data: { copyOccurrence } }) {
+                    const targetDate = newDate || copyOccurrence.date
                     try {
-                        const existingData = cache.readQuery({
-                            query: GET_TIMELINE_QUERY,
+                        const existing = cache.readQuery({
+                            query: GET_OCCURRENCES_QUERY,
                             variables: { date: targetDate },
-                        }) as { timeline: Timeline[] } | null
+                        }) as { occurrences: any[] } | null
 
-                        if (existingData) {
+                        if (existing) {
                             cache.writeQuery({
-                                query: GET_TIMELINE_QUERY,
+                                query: GET_OCCURRENCES_QUERY,
                                 variables: { date: targetDate },
-                                data: {
-                                    timeline: [copyTimeline, ...existingData.timeline],
-                                },
+                                data: { occurrences: [copyOccurrence, ...existing.occurrences] },
                                 overwrite: true,
                             })
                         }
-                    } catch (e) {
-                        // Cache miss is okay, the refetchQueries will handle it
-                        console.log("Cache miss for timeline query, refetch will handle it")
+                    } catch {
+                        // Cache miss — refetch handles it
                     }
                 },
 
                 onError: (err) => {
-                    console.error("Copy timeline error:", err)
-                    Platform.OS === "android" && ToastAndroid.show("Could not copy timeline", ToastAndroid.LONG)
+                    console.error("Copy occurrence error:", err)
+                    Platform.OS === "android" && ToastAndroid.show("Could not copy event", ToastAndroid.LONG)
                 },
             })
 
-            return data?.copyTimeline
+            return data?.copyOccurrence
         } catch (error) {
-            console.error("Failed to copy timeline:", error)
+            console.error("Failed to copy occurrence:", error)
             throw error
         }
     }
 
-    return {
-        copyTimeline,
-        loading: state.loading,
-        error: state.error,
-    }
+    return { copyTimeline, loading: state.loading, error: state.error }
 }

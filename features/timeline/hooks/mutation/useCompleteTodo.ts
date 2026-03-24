@@ -1,11 +1,11 @@
 import { gql, useMutation } from "@apollo/client"
-import { GET_TIMELINE } from "../query/useGetTimelineById"
+import { GET_OCCURRENCE_BY_ID } from "../query/useGetOccurrenceById"
 
 export default function useCompleteTodo(props: { todoId: string; timelineId: string; currentlyCompleted?: boolean }) {
     const [completeTodo, state] = useMutation(
         gql`
-            mutation CompleteTodo($todoId: ID!, $isCompleted: Boolean!) {
-                completeTimelineTodo(id: $todoId, isCompleted: $isCompleted) {
+            mutation CompleteOccurrenceTodo($todoId: ID!, $isCompleted: Boolean!) {
+                completeOccurrenceTodo(id: $todoId, isCompleted: $isCompleted) {
                     isCompleted
                     id
                     title
@@ -15,7 +15,7 @@ export default function useCompleteTodo(props: { todoId: string; timelineId: str
             }
         `,
         {
-            refetchQueries: [{ query: GET_TIMELINE, variables: { id: props.timelineId } }],
+            refetchQueries: [{ query: GET_OCCURRENCE_BY_ID, variables: { id: props.timelineId } }],
         },
     )
 
@@ -23,10 +23,7 @@ export default function useCompleteTodo(props: { todoId: string; timelineId: str
         (isCompleted?: boolean) => {
             const newCompletedState = isCompleted ?? !props.currentlyCompleted
             return completeTodo({
-                variables: {
-                    todoId: props.todoId,
-                    isCompleted: newCompletedState,
-                },
+                variables: { todoId: props.todoId, isCompleted: newCompletedState },
             })
         },
         state,

@@ -133,8 +133,8 @@ struct ToggleRoutineTodoIntent: AppIntent {
 
         // Fire direct GraphQL mutation; fallback queue above handles retry on app foreground
         let mutation = """
-        mutation CompleteTimelineTodo($id: String!, $isCompleted: Boolean!, $occurrenceDate: String) {
-            completeTimelineTodo(id: $id, isCompleted: $isCompleted, occurrenceDate: $occurrenceDate) {
+        mutation CompleteOccurrenceTodo($id: ID!, $isCompleted: Boolean!) {
+            completeOccurrenceTodo(id: $id, isCompleted: $isCompleted) {
                 id
                 isCompleted
             }
@@ -143,7 +143,6 @@ struct ToggleRoutineTodoIntent: AppIntent {
         let vars: [String: Any] = [
             "id": todoId,
             "isCompleted": newIsCompleted,
-            "occurrenceDate": date
         ]
         let succeeded = await graphQL(mutation, variables: vars)
         if succeeded {
@@ -168,9 +167,19 @@ struct ToggleRoutineEventIntent: AppIntent {
     init(eventId: String) { self.eventId = eventId }
 
     func perform() async throws -> some IntentResult {
+        // Determine new completion state from current widget data
+        var newIsCompleted = true
+        if let str = UserDefaults.shared?.string(forKey: "timeline_data"),
+           let raw = str.data(using: .utf8),
+           let decoded = try? JSONDecoder().decode(TimelineData.self, from: raw),
+           let event = decoded.events.first(where: { $0.id == eventId }) {
+            newIsCompleted = !event.isCompleted
+        }
+
         // Queue for the React Native app to process the actual GraphQL mutation
+        let item = "{\"id\":\"\(eventId)\",\"isCompleted\":\(newIsCompleted ? "true" : "false")}"
         var pending = UserDefaults.shared?.stringArray(forKey: "routine_pending_completions") ?? []
-        pending.append(eventId)
+        pending.append(item)
         UserDefaults.shared?.set(pending, forKey: "routine_pending_completions")
 
         // Optimistic update in timeline_data so the checkbox flips immediately
@@ -187,7 +196,7 @@ struct ToggleRoutineEventIntent: AppIntent {
                     date: event.date,
                     beginTime: event.beginTime,
                     endTime: event.endTime,
-                    isCompleted: !event.isCompleted,
+                    isCompleted: newIsCompleted,
                     isRepeat: event.isRepeat,
                     todos: event.todos
                 )
@@ -210,17 +219,17 @@ struct ToggleRoutineEventIntent: AppIntent {
 
         // Fire direct GraphQL mutation; fallback queue above handles retry on app foreground
         let mutation = """
-        mutation ToggleTimelineCompletion($id: String!) {
-            toggleTimelineCompletion(id: $id) {
+        mutation CompleteOccurrence($id: ID!, $isCompleted: Boolean!) {
+            completeOccurrence(id: $id, isCompleted: $isCompleted) {
                 id
                 isCompleted
             }
         }
         """
-        let succeeded = await graphQL(mutation, variables: ["id": eventId])
+        let succeeded = await graphQL(mutation, variables: ["id": eventId, "isCompleted": newIsCompleted])
         if succeeded {
             var current = UserDefaults.shared?.stringArray(forKey: "routine_pending_completions") ?? []
-            current.removeAll { $0 == eventId }
+            current.removeAll { $0 == item }
             UserDefaults.shared?.set(current, forKey: "routine_pending_completions")
         }
 
