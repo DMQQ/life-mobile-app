@@ -19,6 +19,14 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingBottom: 15,
     },
+    input: {
+        flex: 1,
+        paddingHorizontal: 15,
+        paddingVertical: 16,
+        fontSize: 16,
+        color: Colors.text_light,
+        fontFamily: "System",
+    },
     header: {
         flexDirection: "row",
         justifyContent: "space-between",
@@ -100,6 +108,16 @@ export default function CreateTimelineTodos({ route, navigation }: TimelineScree
         }
     }, [route.params?.todos])
 
+    const [keyboardHeight, setKeyboardHeight] = useState(0)
+    useEffect(() => {
+        const show = Keyboard.addListener("keyboardWillShow", (e) => setKeyboardHeight(e.endCoordinates.height))
+        const hide = Keyboard.addListener("keyboardWillHide", () => setKeyboardHeight(0))
+        return () => {
+            show.remove()
+            hide.remove()
+        }
+    }, [])
+
     const todoCount = state.todos.filter((todo) => todo.value.trim().length > 0).length
 
     const onSubmit = (text: string) => {
@@ -119,7 +137,7 @@ export default function CreateTimelineTodos({ route, navigation }: TimelineScree
     }
 
     return (
-        <View style={{ flex: 1, backgroundColor: "transparent" }}>
+        <View style={{ flex: 1, backgroundColor: Colors.primary, paddingBottom: keyboardHeight }}>
             <View style={styles.header}>
                 <View>
                     <Text variant="subheading" style={styles.title}>
@@ -253,14 +271,12 @@ const TodoInput = ({
     }))
 
     return (
-        <View style={{ padding: 15 }}>
+        <View style={[{ padding: 15 }]}>
             <View
                 style={{
                     borderRadius: 20,
+                    backgroundColor: Colors.primary_lighter,
                     overflow: "hidden",
-                    borderWidth: 1,
-                    borderColor: Color(Colors.primary_light).lighten(0.3).hex(),
-                    backgroundColor: Color(Colors.primary_light).lighten(0.3).hex(),
                 }}
             >
                 <AnimatedBlurView
@@ -272,14 +288,7 @@ const TodoInput = ({
                 >
                     <TextInput
                         ref={ref}
-                        style={{
-                            flex: 1,
-                            paddingHorizontal: 15,
-                            paddingVertical: 16,
-                            fontSize: 16,
-                            color: Colors.text_light,
-                            fontFamily: "System",
-                        }}
+                        style={styles.input}
                         placeholder="What needs to be done?"
                         placeholderTextColor={Colors.text_dark}
                         onChangeText={onTextChange}
@@ -300,14 +309,7 @@ const TodoInput = ({
                         />
                     )}
 
-                    <Animated.View
-                        style={[
-                            { position: "absolute", right: 0, bottom: 2.5 },
-                            useAnimatedStyle(() => ({
-                                transform: [{ translateX: keyboard.height.value }],
-                            })),
-                        ]}
-                    >
+                    <Animated.View style={[{ position: "absolute", right: 0, bottom: 2.5 }]}>
                         <IconButton
                             icon={<AntDesign name="check" size={20} color={Colors.text_light} />}
                             onPress={onSaveTodosPress}
@@ -317,12 +319,6 @@ const TodoInput = ({
                     </Animated.View>
                 </AnimatedBlurView>
             </View>
-            <Animated.View
-                style={useAnimatedStyle(() => ({
-                    height: keyboard.height.value > 20 ? keyboard.height.value : 20,
-                    width: 100,
-                }))}
-            />
         </View>
     )
 }

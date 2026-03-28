@@ -88,12 +88,10 @@ export default function WalletScreens({ navigation, route }: WalletScreens<"Wall
                     name="Filters"
                     component={Filters}
                     options={{
-                        presentation: "formSheet",
+                        presentation: "modal",
                         headerShown: false,
-                        sheetGrabberVisible: true,
-                        sheetAllowedDetents: [0.9],
                         contentStyle: {
-                            backgroundColor: Color(Colors.primary).alpha(0.5).string(),
+                            backgroundColor: Colors.primary,
                         },
                     }}
                 />

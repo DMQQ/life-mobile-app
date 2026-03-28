@@ -24,7 +24,11 @@ function Root({}: ScreenProps<"Root">) {
     const [showNotifications, setShowNotifications] = useState(false)
     const [showSettings, setShowSettings] = useState(false)
 
-    const { data: home, refetch: refetchHome } = useQuery(GET_MAIN_SCREEN, {
+    const {
+        data: home,
+        refetch: refetchHome,
+        error,
+    } = useQuery(GET_MAIN_SCREEN, {
         variables: getMainScreenBaseVariables(),
         onCompleted: async (data) => {
             await SplashScreen.hideAsync()
@@ -41,7 +45,12 @@ function Root({}: ScreenProps<"Root">) {
     const [scrollY, onScroll] = useTrackScroll({ screenName: "Root" })
 
     const { processPending } = useRoutinePendingCompletions()
-    useAppBackground({ onForeground: () => { refresh(); processPending() } })
+    useAppBackground({
+        onForeground: () => {
+            refresh()
+            processPending()
+        },
+    })
 
     const trendPercentage = home?.lastMonthSpendings?.expense
         ? ((home?.monthlySpendings?.expense - home?.lastMonthSpendings?.expense) / home?.lastMonthSpendings?.expense) *
@@ -85,14 +94,7 @@ function Root({}: ScreenProps<"Root">) {
                 buttons={headerButtons}
             />
 
-            <MainContent
-                data={home}
-                home={home}
-                loading={loading}
-                refreshing={refreshing}
-                refresh={refresh}
-                onScroll={onScroll}
-            />
+            <MainContent home={home} loading={loading} refreshing={refreshing} refresh={refresh} onScroll={onScroll} />
 
             <NotificationsModal visible={showNotifications} onClose={() => setShowNotifications(false)} />
 

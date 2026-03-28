@@ -65,9 +65,16 @@ export default function Button({
             .string(),
     }
 
+    const tintColor = disabled
+        ? style?.backgroundColor
+            ? lowOpacity(style?.backgroundColor, 0.1)
+            : lowOpacity(mainColor, 0.5)
+        : mainColor
+
     return (
         <GlassView
-            tintColor={style?.backgroundColor || Colors.secondary}
+            key={tintColor}
+            tintColor={tintColor}
             style={[
                 styles.button,
                 buttonStyle,
@@ -78,13 +85,21 @@ export default function Button({
                 },
             ]}
         >
-            <Ripple testID={"Button"} rippleCentered onPress={callback} disabled={disabled} {...rest}>
+            <Ripple
+                style={{ flexDirection: "row", gap: 10 }}
+                testID={"Button"}
+                rippleCentered
+                onPress={callback}
+                disabled={disabled}
+                {...rest}
+            >
+                <View style={iconStyle}>{icon}</View>
+
                 {typeof children !== "undefined" && (
                     <Text variant="body" style={[styles.text, textStyle, fontStyle]}>
                         {children}
                     </Text>
                 )}
-                <View style={iconStyle}>{icon}</View>
             </Ripple>
         </GlassView>
     )

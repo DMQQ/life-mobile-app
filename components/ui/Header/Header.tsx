@@ -209,7 +209,7 @@ function Header({ shadow = true, ...props }: HeaderProps) {
                     <View style={{ borderRadius: 100, overflow: "hidden", flexDirection: "row", gap: 10 }}>
                         {standaloneButtons.left.map((button, index) => (
                             <View key={index} style={{ overflow: "hidden", borderRadius: 100 }}>
-                                <GlassView style={styles.iconContainer}>
+                                <GlassView style={styles.iconContainer} tintColor={button.tintColor}>
                                     <HeaderIconButton button={button!} index={index} />
                                 </GlassView>
                             </View>

@@ -1,5 +1,4 @@
 import Input from "@/components/ui/TextInput/TextInput"
-import Layout from "@/constants/Layout"
 import { useEffect, useMemo, useState } from "react"
 import { View } from "react-native"
 import Text from "@/components/ui/Text/Text"
@@ -8,7 +7,6 @@ import Button from "@/components/ui/Button/Button"
 import DateTimePicker from "react-native-modal-datetime-picker"
 import { formatDate } from "@/utils/functions/parseDate"
 import CategorySelect from "../components/CreateExpense/CategorySelect"
-import { ScrollView } from "react-native-gesture-handler"
 import Color from "color"
 import Colors from "@/constants/Colors"
 import { useNavigation } from "@react-navigation/native"
@@ -74,6 +72,7 @@ const Forms = (props: ExpenseFiltersProps) => {
                 backIcon={<AntDesign name="close" size={20} color={Colors.foreground} />}
                 buttons={[
                     {
+                        tintColor: Colors.error,
                         icon: <MaterialCommunityIcons size={20} name="trash-can-outline" color={Colors.foreground} />,
                         onPress: () => {
                             props.dispatch({ type: "RESET" })

@@ -53,6 +53,10 @@ const useCreateOccurrenceTodo = (occurrenceId: string) => {
             headers: { authentication: usr.token },
         },
 
+        variables: {
+            occurrenceId,
+        },
+
         onError(err) {
             console.log("useCreateOccurrenceTodo:", err)
         },

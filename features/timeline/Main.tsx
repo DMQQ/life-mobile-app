@@ -13,6 +13,7 @@ import CopyTimelineModal from "./pages/CopyTimelineModal"
 import type { TimelineRootStack as RootStackParamList } from "./types"
 import Color from "color"
 import Colors from "@/constants/Colors"
+import Text from "@/components/ui/Text/Text"
 
 const Stack = createNativeStackNavigator<RootStackParamList>()
 
@@ -38,7 +39,13 @@ export default function TimelineScreens({ route, navigation }: RootStackScreenPr
                 gestureDirection: "horizontal",
             }}
         >
-            <Stack.Screen name="Timeline" component={Timeline} options={{ headerShown: false }} />
+            <Stack.Screen
+                name="Timeline"
+                component={Timeline}
+                options={{
+                    headerShown: false,
+                }}
+            />
             <Stack.Screen
                 name="TimelineDetails"
                 component={TimelineDetails}
@@ -79,9 +86,7 @@ export default function TimelineScreens({ route, navigation }: RootStackScreenPr
                 component={CreateTimelineTodos}
                 options={{
                     headerShown: false,
-                    presentation: "formSheet",
-                    sheetGrabberVisible: true,
-                    sheetAllowedDetents: [0.9],
+                    presentation: "modal",
                     contentStyle: {
                         backgroundColor: Color(Colors.primary).alpha(0.5).string(),
                     },

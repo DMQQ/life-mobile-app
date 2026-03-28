@@ -3,10 +3,8 @@ import AvailableBalanceWidget from "@/features/home/components/WalletWidget"
 import { useAppSelector } from "@/utils/redux"
 import { RefreshControl } from "react-native"
 import Animated from "react-native-reanimated"
-import WorkoutWidget from "../../workout/components/WorkoutWidget"
 
 interface MainContentProps {
-    data: any
     home: any
     loading: boolean
     refreshing: boolean
@@ -14,9 +12,7 @@ interface MainContentProps {
     onScroll: (event: any) => void
 }
 
-export default function MainContent({ data, home, loading, refreshing, refresh, onScroll }: MainContentProps) {
-    const workout = useAppSelector((s) => s.workout)
-
+export default function MainContent({ home, loading, refreshing, refresh, onScroll }: MainContentProps) {
     return (
         <Animated.ScrollView
             scrollToOverflowEnabled={false}
@@ -40,10 +36,6 @@ export default function MainContent({ data, home, loading, refreshing, refresh, 
                 }}
                 loading={loading}
             />
-
-            <TodaysTimelineEvents data={data?.timelineByCurrentDate} loading={loading} />
-
-            {workout.isWorkoutPending && <WorkoutWidget />}
         </Animated.ScrollView>
     )
 }

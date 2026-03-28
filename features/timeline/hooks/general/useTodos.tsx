@@ -1,6 +1,6 @@
 import { useReducer } from "react"
 import { Keyboard } from "react-native"
-import useCreateTodo from "../mutation/useCreateTodo"
+import useCreateOccurrenceTodo from "../mutation/useCreateOccurrenceTodo"
 
 export interface TodoInput {
     index: number
@@ -60,7 +60,7 @@ export default function useTodos(timelineId: string, onSuccessfulSave?: () => vo
     const {
         createTodo,
         state: { loading },
-    } = useCreateTodo(timelineId)
+    } = useCreateOccurrenceTodo(timelineId)
 
     const onSaveTodos = async (extraText: string) => {
         if ((loading || !timelineId || state.todos.length === 0) && extraText.trim() === "") return
@@ -72,7 +72,9 @@ export default function useTodos(timelineId: string, onSuccessfulSave?: () => vo
         }
 
         try {
-            const promises = filteredTodos.map((todo) => createTodo({ variables: { title: todo.value, timelineId } }))
+            const promises = filteredTodos.map((todo) =>
+                createTodo({ variables: { title: todo.value, occurrenceId: timelineId } }),
+            )
 
             await Promise.all(promises)
         } catch (error) {

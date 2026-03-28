@@ -18,8 +18,9 @@ import TimelineCreateHeader from "../components/CreateTimeline/TimelineCreateHea
 import timelineStyles from "../components/timeline.styles"
 import useCreateTimeline from "../hooks/general/useCreateTimeline"
 import type { TimelineScreenProps } from "../types"
-import { Button } from "@/components"
+import Button2 from "@/components/ui/Button/Button2"
 import { Todo } from "./CreateTimelineTodos"
+import GlassView from "@/components/ui/GlassView"
 
 const styles = StyleSheet.create({
     timeContainer: {
@@ -239,16 +240,22 @@ interface SubmitButtonProps {
 
 const SubmitButton = (props: SubmitButtonProps) => (
     <View style={{ flexDirection: "row", paddingHorizontal: 15 }}>
-        <IconButton
-            onPress={props.openSheet}
+        <GlassView
             style={{
-                padding: 7.5,
-                width: 35,
                 marginRight: 15,
+                borderRadius: 100,
+                width: 50,
+                height: 50,
+                justifyContent: "center",
+                alignItems: "center",
             }}
-            icon={<AntDesign name="calendar" color={Colors.foreground} size={20} />}
-        />
-        <Button
+        >
+            <IconButton
+                onPress={props.openSheet}
+                icon={<AntDesign name="calendar" color={Colors.foreground} size={20} />}
+            />
+        </GlassView>
+        <Button2
             icon={
                 props.isLoading ? (
                     <ActivityIndicator style={{ marginRight: 5 }} size={18} color={Colors.foreground} />
@@ -268,7 +275,7 @@ const SubmitButton = (props: SubmitButtonProps) => (
             fontStyle={{ fontSize: 16 }}
         >
             {props.isEditing ? "Save changes" : "Create new event"}
-        </Button>
+        </Button2>
     </View>
 )
 

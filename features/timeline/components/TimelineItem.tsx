@@ -72,7 +72,8 @@ export default function TimelineItem(
     const { isPending, startActivity } = useActivityUtils(timeline?.id)
 
     const [completeOccurrenceMutation] = useCompleteOccurrence(timeline.id)
-    const completeTimeline = () => completeOccurrenceMutation({ variables: { id: timeline.id, isCompleted: !timeline.isCompleted } })
+    const completeTimeline = () =>
+        completeOccurrenceMutation({ variables: { id: timeline.id, isCompleted: !timeline.isCompleted } })
 
     const startLiveActivityLocally = useCallback(() => {
         if (!timeline || isPending) return
@@ -137,7 +138,7 @@ export default function TimelineItem(
     return (
         <ContextMenu
             actions={items as any}
-            previewBackgroundColor="transparent"
+            previewBackgroundColor={Colors.primary_lighter}
             onPress={(e) => {
                 const action = items[e.nativeEvent.index] as (typeof items)[number]
                 if (action && action.onPress) {

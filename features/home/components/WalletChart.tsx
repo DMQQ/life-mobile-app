@@ -207,10 +207,19 @@ const CompactSpendingChart = ({}: CompactSpendingChartProps) => {
 
                 <View style={styles.chartContent}>
                     <View style={styles.gridLines}>
-                        {labelValues.map((value, i) => (
-                            // 15 is the height of the label, we add some padding to make sure it doesn't overlap with the grid line
-                            <View key={i} style={[styles.gridLine, { bottom: getBarHeight(value, maxValue) + 15 }]} />
-                        ))}
+                        {labelValues.map((v, i, array) => {
+                            const value = Math.round(v)
+
+                            const previousValue = array[i - 1] ? Math.round(array[i - 1]) : 0
+                            const prevDistance = getBarHeight(previousValue, maxValue)
+                            const currentDistance = getBarHeight(value, maxValue)
+
+                            if (prevDistance - currentDistance < 12 && i !== 0) {
+                                return null
+                            }
+
+                            return <View key={i} style={[styles.gridLine, { bottom: currentDistance + 15 }]} />
+                        })}
                     </View>
 
                     <View style={styles.chartContainer}>

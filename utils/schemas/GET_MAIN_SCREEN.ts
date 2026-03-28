@@ -3,24 +3,6 @@ import moment from "moment"
 
 export const GET_MAIN_SCREEN = gql`
     query GetRootView($range: [String!]!, $lastRange: [String!]!) {
-        timelineByCurrentDate {
-            id
-            title
-            description
-            date
-            beginTime
-            endTime
-            isCompleted
-            isRepeat
-            repeatOn
-            occurrenceDate
-
-            todos {
-                id
-                title
-                isCompleted
-            }
-        }
         wallet {
             id
             balance
