@@ -64,8 +64,8 @@ export const useWidgetAnalyticsData = () => {
                 moment().startOf("month").format("YYYY-MM-DD"),
                 moment().endOf("month").format("YYYY-MM-DD"),
             ],
-            startDate: moment().subtract(6, "days").format("YYYY-MM-DD"),
-            endDate: today.format("YYYY-MM-DD"),
+            startDate: moment().startOf("isoWeek").format("YYYY-MM-DD"),
+            endDate: moment().endOf("isoWeek").format("YYYY-MM-DD"),
             detailed: "monthly",
         },
     })

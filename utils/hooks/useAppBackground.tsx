@@ -16,7 +16,7 @@ export default function useAppBackground({ onBackground, onForeground }: { onBac
     });
 
     return () => {
-      sub.remove;
+      sub.remove();
     };
   }, []);
 }
