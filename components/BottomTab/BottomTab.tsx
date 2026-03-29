@@ -3,7 +3,6 @@ import Color from "color"
 import moment from "moment"
 import { useEffect, useMemo, useState } from "react"
 import { Pressable, StyleSheet, TextInput, Keyboard, Text, View } from "react-native"
-import Feedback from "react-native-haptic-feedback"
 import { SymbolView } from "expo-symbols"
 import Animated, {
     FadeInDown,
@@ -131,7 +130,6 @@ const SearchButton = ({
 
         if (currentItem?.onPress) {
             currentItem.onPress()
-            Feedback.trigger("impactLight")
         }
     }
 
@@ -226,10 +224,6 @@ const Btn = ({ buttonWidth, iconScale, activeRoute, ...props }: ButtonProps) => 
 
     const handlePressIn = (route: string) => {
         pressScale.value = withTiming(0.85, { duration: 100 })
-        Feedback.trigger("impactLight", {
-            enableVibrateFallback: false,
-            ignoreAndroidSystemSettings: false,
-        })
 
         navigation.navigate(route)
     }
@@ -304,7 +298,6 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
     const handleLongPress = (route: string) => {
         switch (route) {
             case "WalletScreens":
-                Feedback.trigger("impactMedium")
                 navigation.navigate({
                     name: "WalletScreens",
                     params: {
@@ -313,7 +306,6 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
                 })
                 break
             case "TimelineScreens":
-                Feedback.trigger("impactMedium")
                 navigation.navigate({
                     name: "TimelineScreens",
                     params: {
@@ -380,7 +372,6 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
         } else {
             dispatch(setSearchActive(true))
         }
-        Feedback.trigger("impactMedium")
     }
 
     const handleSearchValueChange = (value: string) => {
@@ -516,7 +507,7 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
     const [showIndicator, setShowIndicator] = useState(false)
 
     useEffect(() => {
-        let timeout: NodeJS.Timeout
+        let timeout: number
 
         if (!isSearchActive) {
             timeout = setTimeout(() => {

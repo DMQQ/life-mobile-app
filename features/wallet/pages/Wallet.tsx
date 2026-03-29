@@ -118,6 +118,13 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
                                     navigation.navigate("Filters")
                                 },
                             },
+                            {
+                                title: "Correction Rules",
+                                systemImage: "arrow.left.arrow.right",
+                                onPress: () => {
+                                    navigation.navigate("CorrectionMaps")
+                                },
+                            },
                         ],
                     },
                 },

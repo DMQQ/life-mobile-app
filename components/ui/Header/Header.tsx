@@ -393,8 +393,7 @@ const AnimatedContent = memo(
                 : (props.animatedValue || 0).toFixed(2)
 
         return (
-            <AnimatedRipple
-                onLongPress={props.onAnimatedTitleLongPress}
+            <Animated.View
                 style={[{ position: "absolute" }, props.textContainerStyle, props.animated && animatedContentStyle]}
             >
                 {props.animatedValue !== undefined ? (
@@ -420,7 +419,7 @@ const AnimatedContent = memo(
                         {props.animatedSubtitle}
                     </Animated.Text>
                 )}
-            </AnimatedRipple>
+            </Animated.View>
         )
     },
 )

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, ReactNode } from "react"
+import React, { useState, useEffect, useRef, ReactNode, forwardRef, useImperativeHandle } from "react"
 import { View, Alert, TouchableOpacity, StyleSheet } from "react-native"
 import Text from "@/components/ui/Text/Text"
 import Map, { PROVIDER_DEFAULT, Marker, Callout } from "react-native-maps"
@@ -117,7 +117,9 @@ export const getCurrentLocation = async () => {
     }
 }
 
-const MapPicker = (props: Pick<ExpenseType, "location"> & { id: string }) => {
+export type MapPickerHandle = { triggerSearch: () => void }
+
+const MapPicker = forwardRef<MapPickerHandle, Pick<ExpenseType, "location"> & { id: string }>((props, ref) => {
     const [location, setLocation] = useState({
         latitude: 53.7701,
         longitude: 20.4862,
@@ -154,6 +156,15 @@ const MapPicker = (props: Pick<ExpenseType, "location"> & { id: string }) => {
 
     const [assignedMarker, setAssignedMarker] = useState(props.location || null)
     const [editMode, setEditMode] = useState(false)
+    const [locationQuery, setLocationQuery] = useState("")
+
+    useImperativeHandle(ref, () => ({
+        triggerSearch: () => {
+            Alert.prompt("Location Search", "Enter location name:", (name) => {
+                if (name) setLocationQuery(name)
+            })
+        },
+    }))
 
     const [queryLocation, { data: points }] = useLazyQuery(gql`
         query ($query: String) {
@@ -166,8 +177,6 @@ const MapPicker = (props: Pick<ExpenseType, "location"> & { id: string }) => {
             }
         }
     `)
-
-    const [locationQuery, setLocationQuery] = useState("")
 
     useEffect(() => {
         if (locationQuery) {
@@ -241,6 +250,8 @@ const MapPicker = (props: Pick<ExpenseType, "location"> & { id: string }) => {
             Alert.alert("Error", "Failed to assign location")
         }
     }
+
+    if (!assignedMarker) return null
 
     return (
         <View style={{ padding: 15, marginBottom: 40 }}>
@@ -386,7 +397,7 @@ const MapPicker = (props: Pick<ExpenseType, "location"> & { id: string }) => {
             </Map>
         </View>
     )
-}
+})
 
 const styles = StyleSheet.create({
     text: {

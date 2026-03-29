@@ -271,7 +271,7 @@ const TodoInput = ({
     }))
 
     return (
-        <View style={[{ padding: 15 }]}>
+        <View style={[{ padding: 15, paddingBottom: 30 }]}>
             <View
                 style={{
                     borderRadius: 20,

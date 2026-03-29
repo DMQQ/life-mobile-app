@@ -8,7 +8,7 @@ import { gql, useLazyQuery, useMutation, useQuery } from "@apollo/client"
 import { AntDesign, Feather, MaterialIcons } from "@expo/vector-icons"
 import axios from "axios"
 import moment from "moment"
-import { ReactNode, useEffect, useState } from "react"
+import { ReactNode, useEffect, useRef, useState } from "react"
 import { ActivityIndicator, Alert, FlatList, Image, StyleSheet, Text, View } from "react-native"
 import Ripple from "react-native-material-ripple"
 import WalletItem, { CategoryIcon } from "../components/Wallet/WalletItem"
@@ -353,6 +353,32 @@ export default function Expense({ route: { params }, navigation }: any) {
         }
     }
 
+    const fileUploadRef = useRef<FileUploadHandle>(null)
+    const mapPickerRef = useRef<MapPickerHandle>(null)
+
+    const subscriptionMenuOptions: ContextMenuOption[] = [
+        {
+            label: hasSubscription
+                ? isSubscriptionActive
+                    ? "Disable Subscription"
+                    : "Enable Subscription"
+                : "Create Monthly Subscription",
+            icon: hasSubscription ? (isSubscriptionActive ? "pause.circle" : "play.circle") : "plus.circle",
+            onPress: handleSubscriptionAction,
+            loading: isSubscriptionLoading,
+        },
+        ...(hasSubscription
+            ? [
+                  {
+                      label: "Remove from Subscription",
+                      icon: "xmark.circle" as const,
+                      onPress: () => handleAssignSubscription(null),
+                      destructive: true,
+                  },
+              ]
+            : []),
+    ]
+
     const scrollY = useSharedValue(0)
 
     const onScroll = useAnimatedScrollHandler({
@@ -397,7 +423,10 @@ export default function Expense({ route: { params }, navigation }: any) {
             <Animated.ScrollView
                 onScroll={onScroll}
                 keyboardDismissMode={"on-drag"}
-                style={{ flex: 1, paddingTop: getModalMarginTop(selected?.description) }}
+                style={{
+                    flex: 1,
+                    paddingTop: getModalMarginTop(selected?.description),
+                }}
             >
                 <View style={{ marginBottom: 30, paddingHorizontal: 15 }}>
                     {selected.subexpenses?.length > 0 && (
@@ -428,9 +457,26 @@ export default function Expense({ route: { params }, navigation }: any) {
                                     clear
                                 />
 
-                                <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>
+                                <Text style={{ color: Colors.secondary_light_2, fontSize: 18, flex: 1 }}>
                                     {capitalize(CategoryUtils.getCategoryName(selected?.category || ""))}
                                 </Text>
+
+                                <Ripple
+                                    onPress={() =>
+                                        navigation.navigate("CorrectionMaps", {
+                                            prefill: {
+                                                shop: selected?.shop || undefined,
+                                                description: selected?.description || undefined,
+                                                category: selected?.category || undefined,
+                                                amount: selected?.amount || undefined,
+                                            },
+                                        })
+                                    }
+                                    style={styles.correctionBtn}
+                                >
+                                    <AntDesign name="swap" size={12} color={Colors.secondary} />
+                                    <Text style={styles.correctionBtnText}>Fix rule</Text>
+                                </Ripple>
                             </View>
                         )}
 
@@ -471,144 +517,87 @@ export default function Expense({ route: { params }, navigation }: any) {
                                 Balance before: {selected?.balanceBeforeInteraction} zł
                             </Text>
                         </View>
-
-                        {/* Refund section */}
-                        <Ripple
-                            style={[
-                                styles.row,
-                                {
-                                    backgroundColor: "transparent",
-                                    opacity: selected?.type === "refunded" ? 0.5 : 1,
-                                    justifyContent: "space-between",
-                                },
-                            ]}
-                            onPress={selected?.type === "refunded" ? undefined : handleRefund}
-                            disabled={refundLoading || selected?.type === "refunded"}
-                        >
-                            <Feather
-                                name="rotate-ccw"
-                                size={24}
-                                color={selected?.type === "refunded" ? Colors.secondary_light_2 : Colors.ternary}
-                                style={{ paddingHorizontal: 7.5, padding: 2.5 }}
-                            />
-                            <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>
-                                {selected?.type === "refunded"
-                                    ? (selected?.note?.trim() ?? `Refunded at ${moment().format("YYYY-MM-DD")}`)
-                                    : "Refund expense"}
-                            </Text>
-                            {refundLoading && <ActivityIndicator size="small" color={Colors.ternary} />}
-                        </Ripple>
                     </View>
 
                     {/* Subscription section */}
-                    <View
-                        style={{
-                            marginTop: 20,
-                            paddingBottom: 20,
-                            backgroundColor: Colors.primary_light,
-                            borderRadius: 15,
-                        }}
-                    >
-                        <View style={styles.row}>
-                            <MaterialIcons
-                                name={isSubscriptionActive ? "refresh" : "refresh"}
-                                size={24}
-                                color={Colors.ternary}
-                                style={{ paddingHorizontal: 7.5, padding: 2.5 }}
-                            />
-
-                            <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>
-                                {hasSubscription
-                                    ? isSubscriptionActive
-                                        ? "Subscription active"
-                                        : "Subscription inactive"
-                                    : "Set up subscription"}
-                            </Text>
-
-                            {isSubscriptionLoading && (
-                                <ActivityIndicator size="small" color={Colors.ternary} style={{ marginLeft: 10 }} />
+                    <View style={styles.card}>
+                        <View style={styles.cardHeader}>
+                            <Text style={styles.cardTitle}>Subscription</Text>
+                            {hasSubscription && (
+                                <View
+                                    style={[
+                                        styles.statusPill,
+                                        {
+                                            backgroundColor: isSubscriptionActive
+                                                ? "rgba(102,232,117,0.15)"
+                                                : "rgba(255,255,255,0.07)",
+                                        },
+                                    ]}
+                                >
+                                    <View
+                                        style={[
+                                            styles.statusDot,
+                                            { backgroundColor: isSubscriptionActive ? "#66E875" : Colors.text_dark },
+                                        ]}
+                                    />
+                                    <Text
+                                        style={[
+                                            styles.statusPillText,
+                                            { color: isSubscriptionActive ? "#66E875" : Colors.text_dark },
+                                        ]}
+                                    >
+                                        {isSubscriptionActive ? "Active" : "Inactive"}
+                                    </Text>
+                                </View>
                             )}
                         </View>
 
                         {hasSubscription && (
-                            <>
-                                <View style={styles.row}>
-                                    <MaterialIcons
-                                        name="date-range"
-                                        size={24}
-                                        color={Colors.ternary}
-                                        style={{ paddingHorizontal: 7.5, padding: 2.5 }}
-                                    />
-                                    <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>
-                                        {isSubscriptionActive ? "Next payment: " : "Last payment: "}
-                                        {selected.subscription?.nextBillingDate &&
-                                            moment(+selected?.subscription?.nextBillingDate).format("YYYY-MM-DD")}
+                            <View style={styles.cardDates}>
+                                <View style={styles.dateRow}>
+                                    <Text style={styles.dateLabel}>
+                                        {isSubscriptionActive ? "Next payment" : "Last payment"}
+                                    </Text>
+                                    <Text style={styles.dateValue}>
+                                        {selected.subscription?.nextBillingDate
+                                            ? moment(+selected.subscription.nextBillingDate).format("MMM D, YYYY")
+                                            : "—"}
                                     </Text>
                                 </View>
-                                <View style={styles.row}>
-                                    <MaterialIcons
-                                        name="history"
-                                        size={24}
-                                        color={Colors.ternary}
-                                        style={{ paddingHorizontal: 7.5, padding: 2.5 }}
-                                    />
-                                    <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>
-                                        {isSubscriptionActive ? "Active since: " : "Created on: "}
-                                        {moment(+selected?.subscription?.dateStart).format("YYYY-MM-DD")}
+                                <View style={styles.dateRow}>
+                                    <Text style={styles.dateLabel}>
+                                        {isSubscriptionActive ? "Active since" : "Created on"}
+                                    </Text>
+                                    <Text style={styles.dateValue}>
+                                        {moment(+selected.subscription.dateStart).format("MMM D, YYYY")}
                                     </Text>
                                 </View>
-                            </>
+                            </View>
                         )}
 
-                        {/* Subscription action button */}
-                        <Ripple
-                            style={[styles.row, { backgroundColor: "transparent", justifyContent: "space-between" }]}
-                            onPress={handleSubscriptionAction}
-                            disabled={isSubscriptionLoading}
-                        >
-                            <MaterialIcons
-                                name={hasSubscription ? (isSubscriptionActive ? "pause" : "play-arrow") : "refresh"}
-                                size={24}
-                                color={Colors.ternary}
-                                style={{ paddingHorizontal: 7.5, padding: 2.5 }}
-                            />
-                            <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>
-                                {hasSubscription
-                                    ? isSubscriptionActive
-                                        ? "Disable subscription"
-                                        : "Enable subscription"
-                                    : "Create monthly subscription"}
-                            </Text>
-                            {isSubscriptionLoading && <ActivityIndicator size="small" color={Colors.ternary} />}
-                        </Ripple>
-
-                        {/* Assign to existing subscription */}
-                        <View style={{ paddingHorizontal: 15, paddingTop: 10 }}>
-                            <Text style={{ color: Colors.secondary_light_2, fontSize: 14, marginBottom: 10 }}>
-                                Assign to subscription
-                            </Text>
-                            <Select
-                                options={subscriptionOptions.map((s) => s.description)}
-                                selected={
-                                    selected?.subscription?.id
-                                        ? [
-                                              subscriptionOptions.find((s) => s.id === selected?.subscription?.id)
-                                                  ?.description || "None",
-                                          ]
-                                        : ["None"]
-                                }
-                                setSelected={(selectedItems) => {
-                                    const selectedDescription = selectedItems[0]
-                                    const selectedSub = subscriptionOptions.find(
-                                        (s) => s.description === selectedDescription,
-                                    )
-                                    if (selectedSub) {
-                                        handleAssignSubscription(selectedSub.id)
+                        <View style={{ marginTop: 12 }}>
+                            <Text style={styles.dateLabel}>Assign to subscription</Text>
+                            <View style={{ marginTop: 8 }}>
+                                <Select
+                                    options={subscriptionOptions.map((s) => s.description)}
+                                    selected={
+                                        selected?.subscription?.id
+                                            ? [
+                                                  subscriptionOptions.find((s) => s.id === selected?.subscription?.id)
+                                                      ?.description || "None",
+                                              ]
+                                            : ["None"]
                                     }
-                                }}
-                                closeOnSelect
-                                placeholderText="Select subscription"
-                            />
+                                    setSelected={(selectedItems) => {
+                                        const selectedSub = subscriptionOptions.find(
+                                            (s) => s.description === selectedItems[0],
+                                        )
+                                        if (selectedSub) handleAssignSubscription(selectedSub.id)
+                                    }}
+                                    closeOnSelect
+                                    placeholderText="Select subscription"
+                                />
+                            </View>
                         </View>
                     </View>
                 </View>
@@ -637,25 +626,42 @@ export default function Expense({ route: { params }, navigation }: any) {
                     </View>
                 )}
 
-                <FileUpload id={selected.id} images={selected?.files} />
+                <FileUpload ref={fileUploadRef} id={selected.id} images={selected?.files} />
 
-                <MapPicker location={selected.location} id={selected.id} />
+                <MapPicker ref={mapPickerRef} location={selected.location} id={selected.id} />
+
+                <View style={{ height: 100 }} />
             </Animated.ScrollView>
+
+            <FloatingBottomToolBar
+                onRefund={handleRefund}
+                refundLoading={refundLoading}
+                isRefunded={selected?.type === "refunded"}
+                onTakePhoto={() => fileUploadRef.current?.takePhoto()}
+                onPickImage={() => fileUploadRef.current?.pickImage()}
+                subscriptionMenuOptions={subscriptionMenuOptions}
+                isSubscriptionLoading={isSubscriptionLoading}
+                hasSubscription={hasSubscription}
+                isSubscriptionActive={isSubscriptionActive}
+                onSetLocation={() => mapPickerRef.current?.triggerSearch()}
+            />
         </View>
     )
 }
 
-import Button2 from "@/components/ui/Button/Button2"
 import Layout from "@/constants/Layout"
 import * as ImagePicker from "expo-image-picker"
 import Animated, { useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated"
-import { useSafeAreaInsets } from "react-native-safe-area-context"
 import ImageViewerModal from "../components/Expense/ImageViewer"
-import MapPicker from "../components/Expense/Map"
+import MapPicker, { MapPickerHandle } from "../components/Expense/Map"
 import SubexpenseStack from "../components/Expense/SubexpenseStack"
 import getModalMarginTop from "../utils/modalMarginTop"
+import FloatingBottomToolBar, { ContextMenuOption } from "../components/Expense/FloatingBottomToolBar"
+import { forwardRef, useImperativeHandle } from "react"
 
-const FileUpload = (props: { id: string; images: any[] }) => {
+type FileUploadHandle = { takePhoto: () => void; pickImage: () => void }
+
+const FileUpload = forwardRef<FileUploadHandle, { id: string; images: any[] }>((props, ref) => {
     const [files, setFiles] = useState<{ id: string; url: string }[]>(props.images ?? [])
 
     async function uploadPhotoAsync(photos: ImagePicker.ImagePickerResult) {
@@ -727,67 +733,46 @@ const FileUpload = (props: { id: string; images: any[] }) => {
         }
     }
 
+    useImperativeHandle(ref, () => ({
+        takePhoto: handleTakePhoto,
+        pickImage: handleImagesSelect,
+    }))
+
     const [selectedImage, setSelectedImage] = useState<string | null>(null)
+
+    if (files.length === 0) return null
 
     return (
         <View style={{ paddingHorizontal: 15, marginBottom: 40 }}>
-            <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                <Txt size={20} color={Colors.foreground}>
-                    Attachments
-                </Txt>
-
-                <View style={{ flexDirection: "row", gap: 20 }}>
-                    <Ripple onPress={handleTakePhoto}>
-                        <AntDesign name="camera" size={24} color={Colors.foreground} />
-                    </Ripple>
-                    <Ripple onPress={handleImagesSelect}>
-                        <AntDesign name="plus" size={24} color={Colors.foreground} onPress={handleImagesSelect} />
-                    </Ripple>
-                </View>
-            </View>
-            {files?.length > 0 ? (
-                <FlatList
-                    style={{ marginTop: 25 }}
-                    horizontal
-                    data={files}
-                    keyExtractor={(item) => item.id}
-                    renderItem={({ item }) => (
-                        <Ripple
-                            onPress={() => {
-                                setSelectedImage((p) => (p === item.url ? null : item.url))
+            <Txt size={20} color={Colors.foreground}>
+                Attachments
+            </Txt>
+            <FlatList
+                style={{ marginTop: 25 }}
+                horizontal
+                data={files}
+                keyExtractor={(item) => item.id}
+                renderItem={({ item }) => (
+                    <Ripple
+                        onPress={() => {
+                            setSelectedImage((p) => (p === item.url ? null : item.url))
+                        }}
+                    >
+                        <Image
+                            source={{
+                                uri: Url.API + "/upload/images/" + item?.url,
                             }}
-                        >
-                            <Image
-                                source={{
-                                    uri: Url.API + "/upload/images/" + item?.url,
-                                }}
-                                style={{
-                                    width: Layout.screen.width - 45,
-                                    height: 250,
-                                    borderRadius: 10,
-                                    marginRight: 10,
-                                }}
-                                resizeMode="cover"
-                            />
-                        </Ripple>
-                    )}
-                />
-            ) : (
-                <Ripple
-                    onPress={handleImagesSelect}
-                    style={{
-                        width: Layout.screen.width - 30,
-                        marginTop: 25,
-                        height: 200,
-                        justifyContent: "center",
-                        alignItems: "center",
-                        borderRadius: 10,
-                        backgroundColor: Colors.primary_light,
-                    }}
-                >
-                    <Text style={{ color: "gray" }}>Add file</Text>
-                </Ripple>
-            )}
+                            style={{
+                                width: Layout.screen.width - 45,
+                                height: 250,
+                                borderRadius: 10,
+                                marginRight: 10,
+                            }}
+                            resizeMode="cover"
+                        />
+                    </Ripple>
+                )}
+            />
 
             <ImageViewerModal
                 selectedImage={selectedImage}
@@ -797,7 +782,7 @@ const FileUpload = (props: { id: string; images: any[] }) => {
             />
         </View>
     )
-}
+})
 
 const styles = StyleSheet.create({
     text: {
@@ -819,5 +804,74 @@ const styles = StyleSheet.create({
         borderRadius: 15,
         backgroundColor: Colors.primary_light,
         marginTop: 10,
+    },
+    card: {
+        marginTop: 20,
+        backgroundColor: Colors.primary_light,
+        borderRadius: 15,
+        padding: 15,
+    },
+    cardHeader: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        marginBottom: 4,
+    },
+    cardTitle: {
+        color: Colors.foreground,
+        fontSize: 16,
+        fontWeight: "600",
+    },
+    statusPill: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 5,
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        borderRadius: 100,
+    },
+    statusDot: {
+        width: 6,
+        height: 6,
+        borderRadius: 3,
+    },
+    statusPillText: {
+        fontSize: 12,
+        fontWeight: "600",
+    },
+    cardDates: {
+        marginTop: 12,
+        gap: 8,
+    },
+    dateRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+    },
+    dateLabel: {
+        color: Colors.text_dark,
+        fontSize: 13,
+        fontWeight: "500",
+    },
+    dateValue: {
+        color: Colors.foreground_secondary,
+        fontSize: 13,
+        fontWeight: "500",
+    },
+    correctionBtn: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 4,
+        paddingHorizontal: 10,
+        paddingVertical: 5,
+        borderRadius: 100,
+        backgroundColor: "rgba(255,255,255,0.06)",
+        borderWidth: 1,
+        borderColor: "rgba(255,255,255,0.12)",
+    },
+    correctionBtnText: {
+        color: Colors.secondary,
+        fontSize: 12,
+        fontWeight: "500",
     },
 })

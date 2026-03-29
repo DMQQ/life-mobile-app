@@ -6,6 +6,7 @@ import { useEffect } from "react"
 import WalletContextProvider from "./components/WalletContext"
 import CreateExpenseModal from "./pages/CreateExpense"
 import CreateLimits from "./pages/CreateLimits"
+import CorrectionMaps from "./pages/CorrectionMaps"
 import EditBalance from "./pages/EditBalance"
 import Expense from "./pages/Expense"
 import Filters from "./pages/Filters"
@@ -22,6 +23,7 @@ interface WalletRootStack extends ParamListBase {
     Charts: undefined
     EditBalance: undefined
     CreateLimits: undefined
+    CorrectionMaps: { prefill?: { shop?: string; description?: string; category?: string; amount?: number } } | undefined
 }
 
 export type WalletScreens<Screen extends keyof WalletRootStack> = StackScreenProps<WalletRootStack, Screen>
@@ -110,6 +112,15 @@ export default function WalletScreens({ navigation, route }: WalletScreens<"Wall
                 <Stack.Screen
                     name="CreateLimits"
                     component={CreateLimits}
+                    options={{
+                        presentation: "modal",
+                        headerShown: false,
+                    }}
+                />
+
+                <Stack.Screen
+                    name="CorrectionMaps"
+                    component={CorrectionMaps}
                     options={{
                         presentation: "modal",
                         headerShown: false,
