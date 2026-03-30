@@ -481,18 +481,6 @@ export default function Expense({ route: { params }, navigation }: any) {
                         )}
 
                         <View style={styles.row}>
-                            <AntDesign
-                                name="calendar"
-                                size={24}
-                                color={Colors.ternary}
-                                style={{ paddingHorizontal: 7.5, padding: 2.5 }}
-                            />
-
-                            <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>
-                                {parseDate(selected?.date || "")}
-                            </Text>
-                        </View>
-                        <View style={styles.row}>
                             <MaterialIcons
                                 name="money"
                                 size={24}
@@ -517,6 +505,13 @@ export default function Expense({ route: { params }, navigation }: any) {
                                 Balance before: {selected?.balanceBeforeInteraction} zł
                             </Text>
                         </View>
+                    </View>
+
+                    <View style={{ marginTop: 20 }}>
+                        <CollapsibleThemedCalendar
+                            date={dayjs(selected?.date).format("YYYY-MM-DD")}
+                            markedDates={{ [dayjs(selected?.date).format("YYYY-MM-DD")]: { selected: true } }}
+                        />
                     </View>
 
                     {/* Subscription section */}
@@ -658,6 +653,8 @@ import SubexpenseStack from "../components/Expense/SubexpenseStack"
 import getModalMarginTop from "../utils/modalMarginTop"
 import FloatingBottomToolBar, { ContextMenuOption } from "../components/Expense/FloatingBottomToolBar"
 import { forwardRef, useImperativeHandle } from "react"
+import { CollapsibleThemedCalendar } from "@/components/ui/ThemedCalendar/ThemedCalendar"
+import dayjs from "dayjs"
 
 type FileUploadHandle = { takePhoto: () => void; pickImage: () => void }
 

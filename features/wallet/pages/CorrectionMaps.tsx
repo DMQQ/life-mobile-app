@@ -2,14 +2,8 @@ import Colors from "@/constants/Colors"
 import Text from "@/components/ui/Text/Text"
 import IconButton from "@/components/ui/IconButton/IconButton"
 import { AntDesign } from "@expo/vector-icons"
-import { useCallback } from "react"
-import {
-    ActivityIndicator,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    View,
-} from "react-native"
+import { useCallback, useEffect } from "react"
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 import Feedback from "react-native-haptic-feedback"
 import lowOpacity from "@/utils/functions/lowOpacity"
@@ -47,6 +41,12 @@ export default function CorrectionMapsScreen({ navigation, route }: WalletScreen
         await deleteCorrectionMap(id)
     }, [])
 
+    useEffect(() => {
+        if (prefill) {
+            openAdd()
+        }
+    }, [prefill, openAdd])
+
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.topBar}>
@@ -60,10 +60,7 @@ export default function CorrectionMapsScreen({ navigation, route }: WalletScreen
                     Correction Rules
                 </Text>
                 <GlassView style={{ borderRadius: 100, padding: 7.5 }}>
-                    <IconButton
-                        icon={<AntDesign name="plus" size={22} color={Colors.secondary} />}
-                        onPress={openAdd}
-                    />
+                    <IconButton icon={<AntDesign name="plus" size={22} color={Colors.secondary} />} onPress={openAdd} />
                 </GlassView>
             </View>
 

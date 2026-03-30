@@ -101,10 +101,6 @@ export default function TimelineDetails({
                     icon: <Feather name="edit-2" size={20} color={Colors.foreground} />,
                     onPress: onFabPress,
                 },
-                // !isPending && {
-                //     icon: <Ionicons name="play-outline" size={22.5} color="#fff" />,
-                //     onPress: startLiveActivityLocally,
-                // },
                 {
                     icon: data?.isCompleted ? (
                         <FontAwesome name="check-circle" size={20} color="#fff" />
@@ -125,6 +121,56 @@ export default function TimelineDetails({
             timelineId: data?.id,
         })
     }, [])
+
+    const client = useApolloClient()
+    const [uploadLoading, setUploadLoading] = useState(false)
+
+    const uploadAssets = useCallback(
+        async (assets: ImagePicker.ImagePickerAsset[]) => {
+            if (!data?.id) return
+            const formData = new FormData() as any
+            assets.forEach((asset) => {
+                formData.append("file", { uri: asset.uri, name: "File", type: "image/jpg" })
+            })
+            try {
+                setUploadLoading(true)
+                const { data: uploaded } = await axios.post(Url.API + "/upload/multiple", formData, {
+                    params: { type: "timeline", entityId: data.id },
+                    headers: { "Content-Type": "multipart/form-data" },
+                })
+                client.cache.modify({
+                    id: "TimelineEntity:" + data.id,
+                    fields: {
+                        images: (existing = []) => [...uploaded, ...existing],
+                    },
+                })
+            } catch {
+                // silent
+            } finally {
+                setUploadLoading(false)
+            }
+        },
+        [data?.id, client],
+    )
+
+    const handlePickImage = useCallback(async () => {
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: "images",
+            quality: 0.8,
+            allowsMultipleSelection: true,
+        })
+        if (!result.canceled && result.assets.length > 0) await uploadAssets(result.assets)
+    }, [uploadAssets])
+
+    const handleTakePhoto = useCallback(async () => {
+        await ImagePicker.requestCameraPermissionsAsync()
+        const result = await ImagePicker.launchCameraAsync({
+            mediaTypes: "images",
+            quality: 1,
+            allowsEditing: true,
+        })
+        if (!result.canceled && result.assets.length > 0) await uploadAssets(result.assets)
+    }, [uploadAssets])
 
     return (
         <View style={{ backgroundColor: Colors.primary }}>
@@ -176,9 +222,9 @@ export default function TimelineDetails({
                 activityPending={isPending}
                 onStartActivity={startLiveActivityLocally}
                 onAddTodo={handleCreateTodo}
-                onPickImage={() => {}}
-                onTakePhoto={() => {}}
-                uploadLoading={false}
+                onPickImage={handlePickImage}
+                onTakePhoto={handleTakePhoto}
+                uploadLoading={uploadLoading}
             />
         </View>
     )

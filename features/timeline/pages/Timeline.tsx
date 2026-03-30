@@ -179,13 +179,7 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
     )
 }
 
-const RenderAnimatedItem = ({
-    scrollY,
-    timeline,
-}: {
-    timeline: ReturnType<typeof useTimeline>
-    scrollY: Animated.SharedValue<number>
-}) => {
+const RenderAnimatedItem = ({ scrollY, timeline }: { timeline: ReturnType<typeof useTimeline>; scrollY: any }) => {
     const dateListAnimatedStyle = useAnimatedStyle(() => {
         if (!scrollY) return { transform: [{ translateY: 0 }] }
 
