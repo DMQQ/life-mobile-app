@@ -431,24 +431,22 @@ struct TimelineWidgetView: View {
             VStack(alignment: .trailing, spacing: 6) {
                 Link(destination: URL(string: "mylife://timeline/create")!) {
                     ZStack {
-                        Circle().fill(Color.white.opacity(0.15)).frame(width: 30, height: 30)
+                        Circle().fill(Color.white.opacity(0.12))
+                        if data.totalEvents > 0 {
+                            Circle()
+                                .stroke(Color.white.opacity(0.2), lineWidth: 3)
+                            Circle()
+                                .trim(from: 0, to: Double(data.completedEvents) / Double(data.totalEvents))
+                                .stroke(Color.white, style: StrokeStyle(lineWidth: 3, lineCap: .round))
+                                .rotationEffect(.degrees(-90))
+                        }
                         Image(systemName: "plus").font(.system(size: 13, weight: .bold)).foregroundColor(.white)
                     }
+                    .frame(width: 30, height: 30)
                 }
                 let updated = relativeTimeString(data.lastUpdated)
                 if !updated.isEmpty {
                     Text(updated).font(.system(size: 9)).foregroundColor(.white.opacity(0.35))
-                }
-                if data.totalEvents > 0 {
-                    ZStack {
-                        Circle()
-                            .stroke(Color.white.opacity(0.2), lineWidth: 3)
-                        Circle()
-                            .trim(from: 0, to: Double(data.completedEvents) / Double(data.totalEvents))
-                            .stroke(Color.white, style: StrokeStyle(lineWidth: 3, lineCap: .round))
-                            .rotationEffect(.degrees(-90))
-                    }
-                    .frame(width: 28, height: 28)
                 }
             }
         }
@@ -786,7 +784,8 @@ struct LimitsChartView: View {
     }
 
     private func getCategorySystemIcon(_ category: String) -> String {
-        switch category.lowercased() {
+        let name = category.split(separator: ":").last.map(String.init) ?? category
+        switch name.lowercased() {
         case "housing": return "house.fill"
         case "transportation": return "car.fill"
         case "food": return "fork.knife"
@@ -899,7 +898,7 @@ struct CategoryChartView: View {
                                     .font(.system(size: 11, weight: .semibold))
                                     .foregroundColor(.white)
                                     .frame(width: 16)
-                                Text(cat.name.capitalized)
+                                Text((cat.name.split(separator: ":").last.map(String.init) ?? cat.name).capitalized)
                                     .font(.system(size: 12, weight: .semibold))
                                     .foregroundColor(.white)
                                     .lineLimit(1)
@@ -947,7 +946,8 @@ struct CategoryChartView: View {
     }
 
     private func getCategorySystemIcon(_ category: String) -> String {
-        switch category.lowercased() {
+        let name = category.split(separator: ":").last.map(String.init) ?? category
+        switch name.lowercased() {
         case "housing": return "house.fill"
         case "transportation": return "car.fill"
         case "food": return "fork.knife"
@@ -1470,45 +1470,43 @@ struct WatchExpenseWidgetView: View {
                 }
                 .padding(.bottom, 12)
 
-                HStack(spacing: 14) {
-                    // Rings
-                    ZStack {
-                        Circle()
-                            .stroke(Color.white.opacity(0.12), lineWidth: 7)
-                        Circle()
-                            .trim(from: 0, to: savedProgress(income: income, spent: spent))
-                            .stroke(Color(red: 0.4, green: 1, blue: 0.65), style: StrokeStyle(lineWidth: 7, lineCap: .round))
-                            .rotationEffect(.degrees(-90))
-                        Circle()
-                            .stroke(Color.white.opacity(0.12), lineWidth: 7)
-                            .padding(10)
-                        Circle()
-                            .trim(from: 0, to: budgetRemainingProgress(limit: limit, spent: spent))
-                            .stroke(Color.white.opacity(0.75), style: StrokeStyle(lineWidth: 7, lineCap: .round))
-                            .rotationEffect(.degrees(-90))
-                            .padding(10)
-                        Circle()
-                            .stroke(Color.white.opacity(0.12), lineWidth: 7)
-                            .padding(20)
-                        Circle()
-                            .trim(from: 0, to: spentProgress(income: income, spent: spent))
-                            .stroke(Color(red: 1, green: 0.8, blue: 0.35), style: StrokeStyle(lineWidth: 7, lineCap: .round))
-                            .rotationEffect(.degrees(-90))
-                            .padding(20)
-                    }
-                    .frame(width: 90, height: 90)
+                if family == .systemLarge {
+                    HStack(alignment: .center, spacing: 20) {
+                        ZStack {
+                            Circle()
+                                .stroke(Color.white.opacity(0.12), lineWidth: 9)
+                            Circle()
+                                .trim(from: 0, to: savedProgress(income: income, spent: spent))
+                                .stroke(Color(red: 0.4, green: 1, blue: 0.65), style: StrokeStyle(lineWidth: 9, lineCap: .round))
+                                .rotationEffect(.degrees(-90))
+                            Circle()
+                                .stroke(Color.white.opacity(0.12), lineWidth: 9)
+                                .padding(14)
+                            Circle()
+                                .trim(from: 0, to: budgetRemainingProgress(limit: limit, spent: spent))
+                                .stroke(Color.white.opacity(0.75), style: StrokeStyle(lineWidth: 9, lineCap: .round))
+                                .rotationEffect(.degrees(-90))
+                                .padding(14)
+                            Circle()
+                                .stroke(Color.white.opacity(0.12), lineWidth: 9)
+                                .padding(28)
+                            Circle()
+                                .trim(from: 0, to: spentProgress(income: income, spent: spent))
+                                .stroke(Color(red: 1, green: 0.8, blue: 0.35), style: StrokeStyle(lineWidth: 9, lineCap: .round))
+                                .rotationEffect(.degrees(-90))
+                                .padding(28)
+                        }
+                        .aspectRatio(1, contentMode: .fit)
 
-                    if family == .systemMedium || family == .systemLarge {
-                        VStack(alignment: .leading, spacing: 8) {
+                        VStack(alignment: .leading, spacing: 14) {
                             ringLegend(color: Color(red: 1, green: 0.8, blue: 0.35), label: "Spent", value: "\(Int(spent)) zł")
                             ringLegend(color: .white.opacity(0.75), label: "Budget left", value: "\(Int(max(0, limit - spent))) zł")
                             ringLegend(color: Color(red: 0.4, green: 1, blue: 0.65), label: "Saved", value: "\(Int(saved)) zł")
                         }
+                        .frame(maxWidth: 130, alignment: .leading)
                     }
-                }
+                    .padding(.vertical, 6)
 
-                if family == .systemLarge {
-                    Spacer().frame(height: 14)
                     HStack {
                         statBlock(label: "Income", value: "\(Int(income)) zł")
                         Spacer()
@@ -1516,8 +1514,44 @@ struct WatchExpenseWidgetView: View {
                         Spacer()
                         statBlock(label: "Save rate", value: "\(Int(savedProgress(income: income, spent: spent) * 100))%")
                     }
-                    .padding(.top, 6)
+                    .padding(.top, 12)
                     .padding(.horizontal, 2)
+                } else {
+                    HStack(spacing: 14) {
+                        ZStack {
+                            Circle()
+                                .stroke(Color.white.opacity(0.12), lineWidth: 7)
+                            Circle()
+                                .trim(from: 0, to: savedProgress(income: income, spent: spent))
+                                .stroke(Color(red: 0.4, green: 1, blue: 0.65), style: StrokeStyle(lineWidth: 7, lineCap: .round))
+                                .rotationEffect(.degrees(-90))
+                            Circle()
+                                .stroke(Color.white.opacity(0.12), lineWidth: 7)
+                                .padding(10)
+                            Circle()
+                                .trim(from: 0, to: budgetRemainingProgress(limit: limit, spent: spent))
+                                .stroke(Color.white.opacity(0.75), style: StrokeStyle(lineWidth: 7, lineCap: .round))
+                                .rotationEffect(.degrees(-90))
+                                .padding(10)
+                            Circle()
+                                .stroke(Color.white.opacity(0.12), lineWidth: 7)
+                                .padding(20)
+                            Circle()
+                                .trim(from: 0, to: spentProgress(income: income, spent: spent))
+                                .stroke(Color(red: 1, green: 0.8, blue: 0.35), style: StrokeStyle(lineWidth: 7, lineCap: .round))
+                                .rotationEffect(.degrees(-90))
+                                .padding(20)
+                        }
+                        .frame(width: 90, height: 90)
+
+                        if family == .systemMedium {
+                            VStack(alignment: .leading, spacing: 8) {
+                                ringLegend(color: Color(red: 1, green: 0.8, blue: 0.35), label: "Spent", value: "\(Int(spent)) zł")
+                                ringLegend(color: .white.opacity(0.75), label: "Budget left", value: "\(Int(max(0, limit - spent))) zł")
+                                ringLegend(color: Color(red: 0.4, green: 1, blue: 0.65), label: "Saved", value: "\(Int(saved)) zł")
+                            }
+                        }
+                    }
                 }
                 Spacer(minLength: 0)
             }

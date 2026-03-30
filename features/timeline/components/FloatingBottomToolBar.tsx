@@ -5,73 +5,27 @@ import { SFSymbols6_0 } from "sf-symbols-typescript"
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native"
 import ContextMenu from "react-native-context-menu-view"
 
-export type ContextMenuOption = {
-    label: string
-    icon: string
-    onPress: () => void
-    destructive?: boolean
-}
-
 interface Props {
-    onRefund: () => void
-    refundLoading?: boolean
-    isRefunded?: boolean
+    onAddTodo: () => void
     onTakePhoto: () => void
     onPickImage: () => void
-    subscriptionMenuOptions: ContextMenuOption[]
-    isSubscriptionLoading?: boolean
-    hasSubscription?: boolean
-    isSubscriptionActive?: boolean
-    onSetLocation: () => void
+    uploadLoading?: boolean
+    onStartActivity: () => void
+    activityPending?: boolean
 }
 
 export default function FloatingBottomToolBar({
-    onRefund,
-    refundLoading,
-    isRefunded,
+    onAddTodo,
     onTakePhoto,
     onPickImage,
-    subscriptionMenuOptions,
-    isSubscriptionLoading,
-    hasSubscription,
-    isSubscriptionActive,
-    onSetLocation,
+    uploadLoading,
+    onStartActivity,
+    activityPending,
 }: Props) {
-    const subscriptionIcon: SFSymbols6_0 = hasSubscription
-        ? isSubscriptionActive
-            ? "repeat.circle.fill"
-            : "repeat.circle"
-        : "repeat"
-
     return (
         <View style={styles.toolbar} pointerEvents="box-none">
             <GlassView style={styles.toolbarInner}>
-                <ToolbarButton
-                    icon="arrow.counterclockwise"
-                    label="Refund"
-                    onPress={onRefund}
-                    disabled={isRefunded || refundLoading}
-                    loading={refundLoading}
-                    dimmed={isRefunded}
-                />
-
-                <ContextMenu
-                    style={{ flex: 1 }}
-                    dropdownMenuMode
-                    actions={subscriptionMenuOptions.map((o) => ({
-                        title: o.label,
-                        systemIcon: o.icon,
-                        destructive: o.destructive,
-                    }))}
-                    onPress={(e) => subscriptionMenuOptions[e.nativeEvent.index]?.onPress()}
-                >
-                    <ToolbarButton
-                        icon={subscriptionIcon}
-                        label="Subscription"
-                        loading={isSubscriptionLoading}
-                        hasBadge={!!(hasSubscription && isSubscriptionActive)}
-                    />
-                </ContextMenu>
+                <ToolbarButton icon="checklist" label="Add Todo" onPress={onAddTodo} />
 
                 <ContextMenu
                     style={{ flex: 1 }}
@@ -85,10 +39,16 @@ export default function FloatingBottomToolBar({
                         else onPickImage()
                     }}
                 >
-                    <ToolbarButton icon="photo.badge.plus" label="Upload" />
+                    <ToolbarButton icon="photo.badge.plus" label="Upload" loading={uploadLoading} />
                 </ContextMenu>
 
-                <ToolbarButton icon="location.fill" label="Location" onPress={onSetLocation} />
+                <ToolbarButton
+                    icon="play.circle"
+                    label="Activity"
+                    onPress={onStartActivity}
+                    disabled={activityPending}
+                    dimmed={activityPending}
+                />
             </GlassView>
         </View>
     )

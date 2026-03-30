@@ -30,11 +30,10 @@ const styles = StyleSheet.create({
 
 interface TodoHeaderProps {
     todos: Todos[]
-    onAddTodo: () => void
     onLongPress: () => void
 }
 
-export default function TodoHeader({ todos, onAddTodo, onLongPress }: TodoHeaderProps) {
+export default function TodoHeader({ todos, onLongPress }: TodoHeaderProps) {
     const completedCount = todos.filter((todo) => todo.isCompleted).length
 
     return (
@@ -53,10 +52,6 @@ export default function TodoHeader({ todos, onAddTodo, onLongPress }: TodoHeader
                     {completedCount}/{todos.length}
                 </Text>
             </View>
-
-            <ChipButton onPress={onAddTodo} onLongPress={onLongPress} icon="plus">
-                Add todo
-            </ChipButton>
         </View>
     )
 }

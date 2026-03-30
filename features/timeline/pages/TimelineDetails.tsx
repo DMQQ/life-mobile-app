@@ -1,13 +1,14 @@
 import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
 import Layout from "@/constants/Layout"
+import Url from "@/constants/Url"
 import { StackScreenProps } from "@/types"
-import { AntDesign, Feather, FontAwesome, Ionicons } from "@expo/vector-icons"
 import Color from "color"
 import { useCallback, useMemo, useState } from "react"
 import { StyleSheet, View } from "react-native"
 import Animated, { useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated"
 import FileList from "../components/FileList"
+import FloatingBottomToolBar from "../components/FloatingBottomToolBar"
 import LoaderSkeleton from "../components/LoaderSkeleton"
 import TimelineTodos from "../components/TimelineTodos"
 import useCompleteOccurrence from "../hooks/mutation/useCompleteOccurrence"
@@ -15,8 +16,12 @@ import useGetOccurrenceById from "../hooks/query/useGetOccurrenceById"
 
 import { Header } from "@/components"
 import DeleteTimelineEvent from "@/components/ui/Dialog/Delete/DeleteTimelineEvent"
-import { HeaderItem } from "@/components/ui/Header/Header"
 import { useActivityUtils } from "@/utils/hooks/useActivityManager"
+import { useApolloClient } from "@apollo/client"
+import axios from "axios"
+import * as ImagePicker from "expo-image-picker"
+import { AntDesign, Feather, FontAwesome, Ionicons } from "@expo/vector-icons"
+import { HeaderItem } from "@/components/ui/Header/Header"
 
 const styles = StyleSheet.create({
     title: {
@@ -96,10 +101,10 @@ export default function TimelineDetails({
                     icon: <Feather name="edit-2" size={20} color={Colors.foreground} />,
                     onPress: onFabPress,
                 },
-                !isPending && {
-                    icon: <Ionicons name="play-outline" size={22.5} color="#fff" />,
-                    onPress: startLiveActivityLocally,
-                },
+                // !isPending && {
+                //     icon: <Ionicons name="play-outline" size={22.5} color="#fff" />,
+                //     onPress: startLiveActivityLocally,
+                // },
                 {
                     icon: data?.isCompleted ? (
                         <FontAwesome name="check-circle" size={20} color="#fff" />
@@ -114,6 +119,12 @@ export default function TimelineDetails({
             ] as HeaderItem[],
         [data?.isCompleted, data, isPending],
     )
+
+    const handleCreateTodo = useCallback(() => {
+        ;(navigation as any).navigate("CreateTimelineTodos", {
+            timelineId: data?.id,
+        })
+    }, [])
 
     return (
         <View style={{ backgroundColor: Colors.primary }}>
@@ -136,15 +147,7 @@ export default function TimelineDetails({
                 ) : (
                     <View style={styles.container}>
                         <Text variant="body">{data?.description || "No description provided for this event."}</Text>
-                        <TimelineTodos
-                            expandSheet={() => {
-                                ;(navigation as any).navigate("CreateTimelineTodos", {
-                                    timelineId: data?.id,
-                                })
-                            }}
-                            timelineId={data?.id}
-                            sortedTodos={data?.todos || []}
-                        />
+                        <TimelineTodos timelineId={data?.id} sortedTodos={data?.todos || []} />
 
                         <FileList timelineId={data?.id} />
 
@@ -167,6 +170,15 @@ export default function TimelineDetails({
                         : undefined
                 }
                 onDismiss={() => setSelectedEventForDeletion(null)}
+            />
+
+            <FloatingBottomToolBar
+                activityPending={isPending}
+                onStartActivity={startLiveActivityLocally}
+                onAddTodo={handleCreateTodo}
+                onPickImage={() => {}}
+                onTakePhoto={() => {}}
+                uploadLoading={false}
             />
         </View>
     )

@@ -1,8 +1,7 @@
 import Colors from "@/constants/Colors"
 import Text from "@/components/ui/Text/Text"
-import ContextMenu from "@/components/ui/ContextMenu"
-import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons"
-import { Pressable, StyleSheet, View } from "react-native"
+import ContextMenu from "react-native-context-menu-view"
+import { StyleSheet, View } from "react-native"
 import Color from "color"
 import type { CorrectionMap } from "../../hooks/useCorrectionMaps"
 import { CategoryIcon, Icons } from "../Expense/ExpenseIcon"
@@ -14,177 +13,223 @@ interface Props {
     onToggle: (item: CorrectionMap) => void
 }
 
-function Tag({ label, value }: { label: string; value: string }) {
+const FIELD_LABELS: Record<string, string> = {
+    shop: "shop",
+    desc: "desc",
+    category: "cat",
+    amount: "amt",
+}
+
+function matchDescription(item: CorrectionMap): { field: string; value: string; isCategory?: boolean } | null {
+    if (item.matchShop) return { field: "shop", value: item.matchShop }
+    if (item.matchDescription) return { field: "desc", value: item.matchDescription }
+    if (item.matchCategory) return { field: "category", value: item.matchCategory, isCategory: true }
+    if (item.matchAmountMin !== null || item.matchAmountMax !== null) {
+        return { field: "amount", value: `${item.matchAmountMin ?? 0}–${item.matchAmountMax ?? "∞"} zł` }
+    }
+    return null
+}
+
+function overrideLines(item: CorrectionMap): Array<{ field: string; value: string; isCategory?: boolean }> {
+    const lines: Array<{ field: string; value: string; isCategory?: boolean }> = []
+    if (item.overrideShop) lines.push({ field: "shop", value: item.overrideShop })
+    if (item.overrideCategory) lines.push({ field: "category", value: item.overrideCategory, isCategory: true })
+    if (item.overrideDescription) lines.push({ field: "desc", value: item.overrideDescription })
+    return lines
+}
+
+function FieldRow({
+    prefix,
+    field,
+    value,
+    isCategory,
+    accentColor,
+}: {
+    prefix: string
+    field: string
+    value: string
+    isCategory?: boolean
+    accentColor: string
+}) {
     return (
-        <View style={styles.tag}>
-            <Text style={styles.tagLabel}>{label}</Text>
-            <Text style={styles.tagValue} numberOfLines={1}>
-                {value}
-            </Text>
+        <View style={styles.fieldRow}>
+            <View style={[styles.prefixBadge, { borderColor: Color(accentColor).alpha(0.3).string() }]}>
+                <Text style={[styles.prefixText, { color: accentColor }]}>{prefix}</Text>
+            </View>
+            <View style={[styles.fieldBadge]}>
+                <Text style={styles.fieldLabel}>{FIELD_LABELS[field] ?? field}</Text>
+            </View>
+            {isCategory ? (
+                <View style={styles.categoryRow}>
+                    <CategoryIcon category={value as keyof typeof Icons} type="expense" size={12} />
+                    <Text style={styles.fieldValue} numberOfLines={1}>
+                        {value}
+                    </Text>
+                </View>
+            ) : (
+                <Text style={styles.fieldValue} numberOfLines={1}>
+                    {value}
+                </Text>
+            )}
         </View>
     )
 }
 
 export default function CorrectionMapItem({ item, onEdit, onDelete, onToggle }: Props) {
-    const hasAmountRange = item.matchAmountMin !== null || item.matchAmountMax !== null
+    const match = matchDescription(item)
+    const overrides = overrideLines(item)
+    const accentColor = item.isActive ? Colors.secondary : Colors.foreground_disabled
 
     return (
         <ContextMenu
-            anchor="right"
-            items={[
+            previewBackgroundColor={"transparent"}
+            actions={[
+                { title: "Edit", systemIcon: "pencil" },
                 {
-                    text: "Edit",
-                    leading: "pencil",
-                    onPress: () => onEdit(item),
+                    title: item.isActive ? "Disable" : "Enable",
+                    systemIcon: item.isActive ? "pause.circle" : "play.circle",
                 },
-                {
-                    text: item.isActive ? "Disable" : "Enable",
-                    leading: item.isActive ? "pause.circle" : "play.circle",
-                    onPress: () => onToggle(item),
-                },
-                {
-                    text: "Delete",
-                    leading: "trash",
-                    destructive: true,
-                    onPress: () => onDelete(item.id),
-                },
+                { title: "Delete", systemIcon: "trash", destructive: true },
             ]}
+            onPress={({ nativeEvent }) => {
+                if (nativeEvent.index === 0) onEdit(item)
+                else if (nativeEvent.index === 1) onToggle(item)
+                else if (nativeEvent.index === 2) onDelete(item.id)
+            }}
         >
-            <Pressable style={[styles.card, !item.isActive && styles.cardInactive]}>
-                <View style={styles.row}>
-                    {/* Match side */}
-                    <View style={styles.side}>
-                        <Text style={styles.sideLabel}>Match</Text>
-                        <View style={styles.tags}>
-                            {item.matchShop && <Tag label="shop" value={item.matchShop} />}
-                            {item.matchDescription && <Tag label="desc" value={item.matchDescription} />}
-                            {item.matchCategory && (
-                                <View style={styles.categoryTag}>
-                                    <CategoryIcon
-                                        category={item.matchCategory as keyof typeof Icons}
-                                        type="expense"
-                                        size={14}
-                                    />
-                                    <Text style={styles.tagValue}>{item.matchCategory}</Text>
-                                </View>
-                            )}
-                            {hasAmountRange && (
-                                <Tag
-                                    label="amt"
-                                    value={`${item.matchAmountMin ?? "0"}–${item.matchAmountMax ?? "∞"} zł`}
-                                />
-                            )}
+            <View style={[styles.card, !item.isActive && styles.cardInactive]}>
+                <View style={styles.content}>
+                    {/* Header row: status */}
+                    <View style={styles.headerRow}>
+                        <View style={[styles.statusPill, { backgroundColor: Color(accentColor).alpha(0.12).string() }]}>
+                            <View style={[styles.statusDot, { backgroundColor: accentColor }]} />
+                            <Text style={[styles.statusText, { color: accentColor }]}>
+                                {item.isActive ? "Active" : "Paused"}
+                            </Text>
                         </View>
                     </View>
 
-                    {/* Arrow */}
-                    <AntDesign name="arrow-right" size={16} color={Colors.secondary} style={styles.arrow} />
+                    {/* Match row */}
+                    {match && (
+                        <FieldRow
+                            prefix="IF"
+                            field={match.field}
+                            value={match.value}
+                            isCategory={match.isCategory}
+                            accentColor={accentColor}
+                        />
+                    )}
 
-                    {/* Override side */}
-                    <View style={styles.side}>
-                        <Text style={styles.sideLabel}>Override</Text>
-                        <View style={styles.tags}>
-                            {item.overrideShop && <Tag label="shop" value={item.overrideShop} />}
-                            {item.overrideCategory && (
-                                <View style={styles.categoryTag}>
-                                    <CategoryIcon
-                                        category={item.overrideCategory as keyof typeof Icons}
-                                        type="expense"
-                                        size={14}
-                                    />
-                                    <Text style={styles.tagValue}>{item.overrideCategory}</Text>
-                                </View>
-                            )}
-                            {item.overrideDescription && <Tag label="desc" value={item.overrideDescription} />}
-                        </View>
-                    </View>
+                    {/* Divider */}
+                    <View style={styles.divider} />
 
-                    {/* Status dot */}
-                    <View style={[styles.dot, item.isActive ? styles.dotActive : styles.dotInactive]} />
+                    {/* Override rows */}
+                    {overrides.map((o, i) => (
+                        <FieldRow
+                            key={i}
+                            prefix="→"
+                            field={o.field}
+                            value={o.value}
+                            isCategory={o.isCategory}
+                            accentColor={accentColor}
+                        />
+                    ))}
                 </View>
-            </Pressable>
+            </View>
         </ContextMenu>
     )
 }
 
+const cardBg = Color(Colors.primary).lighten(0.15).hex()
+const cardBorder = Color(Colors.primary).lighten(0.28).hex()
+const badgeBg = Color(Colors.primary).lighten(0.3).hex()
+
 const styles = StyleSheet.create({
     card: {
-        backgroundColor: Color(Colors.primary).lighten(0.15).hex(),
+        backgroundColor: cardBg,
         borderRadius: 14,
-        padding: 14,
+        borderWidth: StyleSheet.hairlineWidth,
+        borderColor: cardBorder,
         marginBottom: 10,
-        borderWidth: 1,
-        borderColor: Color(Colors.primary).lighten(0.25).hex(),
+        overflow: "hidden",
     },
     cardInactive: {
-        opacity: 0.45,
+        opacity: 0.5,
     },
-    row: {
-        flexDirection: "row",
-        alignItems: "flex-start",
-    },
-    side: {
+    content: {
         flex: 1,
+        padding: 13,
+        gap: 8,
     },
-    sideLabel: {
+    headerRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        marginBottom: 2,
+    },
+    statusPill: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 5,
+        paddingHorizontal: 8,
+        paddingVertical: 3,
+        borderRadius: 100,
+    },
+    statusDot: {
+        width: 6,
+        height: 6,
+        borderRadius: 3,
+    },
+    statusText: {
         fontSize: 11,
-        color: Colors.foreground_secondary,
         fontWeight: "600",
-        textTransform: "uppercase",
-        letterSpacing: 0.5,
-        marginBottom: 6,
     },
-    tags: {
+    fieldRow: {
         flexDirection: "row",
-        flexWrap: "wrap",
-        gap: 5,
-    },
-    tag: {
-        backgroundColor: Color(Colors.primary).lighten(0.3).hex(),
-        borderRadius: 6,
-        paddingHorizontal: 7,
-        paddingVertical: 3,
-        flexDirection: "row",
-        gap: 4,
         alignItems: "center",
-        maxWidth: 120,
+        gap: 6,
     },
-    categoryTag: {
-        backgroundColor: Color(Colors.primary).lighten(0.3).hex(),
-        borderRadius: 6,
-        paddingHorizontal: 7,
-        paddingVertical: 3,
-        flexDirection: "row",
-        gap: 5,
+    prefixBadge: {
+        width: 26,
+        height: 20,
+        borderRadius: 5,
+        borderWidth: 1,
         alignItems: "center",
-        maxWidth: 120,
+        justifyContent: "center",
     },
-    tagLabel: {
+    prefixText: {
         fontSize: 10,
-        color: Colors.foreground_secondary,
-        fontWeight: "600",
+        fontWeight: "700",
+        letterSpacing: 0.3,
     },
-    tagValue: {
-        fontSize: 12,
-        color: Colors.foreground,
+    fieldBadge: {
+        backgroundColor: badgeBg,
+        paddingHorizontal: 6,
+        paddingVertical: 2,
+        borderRadius: 5,
+    },
+    fieldLabel: {
+        fontSize: 10,
+        fontWeight: "600",
+        color: Colors.foreground_secondary,
+        textTransform: "uppercase",
+        letterSpacing: 0.3,
+    },
+    fieldValue: {
+        fontSize: 13,
         fontWeight: "500",
+        color: Colors.foreground,
         flexShrink: 1,
     },
-    arrow: {
-        marginHorizontal: 8,
-        marginTop: 20,
+    categoryRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 4,
+        flexShrink: 1,
     },
-    dot: {
-        width: 8,
-        height: 8,
-        borderRadius: 4,
-        marginTop: 4,
-        marginLeft: 6,
-    },
-    dotActive: {
-        backgroundColor: "#34c759",
-    },
-    dotInactive: {
-        backgroundColor: Colors.foreground_secondary,
+    divider: {
+        height: StyleSheet.hairlineWidth,
+        backgroundColor: cardBorder,
+        marginVertical: 2,
     },
 })

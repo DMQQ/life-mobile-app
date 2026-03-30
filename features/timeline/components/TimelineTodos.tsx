@@ -32,13 +32,9 @@ const styles = StyleSheet.create({
 export default function TimelineTodos(props: {
     sortedTodos: Todos[]
     timelineId: string
-    expandSheet: () => void
     onDeleteTodo?: (todoId: string) => void
 }) {
     const navigation = useNavigation<any>()
-    const handleAddTodo = () => {
-        props.expandSheet()
-    }
 
     const handleLongPress = () => {
         navigation.navigate("TodosTransferModal", {
@@ -63,7 +59,7 @@ export default function TimelineTodos(props: {
     return (
         <>
             <View style={styles.container}>
-                <TodoHeader todos={props.sortedTodos} onAddTodo={handleAddTodo} onLongPress={handleLongPress} />
+                <TodoHeader todos={props.sortedTodos} onLongPress={handleLongPress} />
 
                 {finishedTodos.length > 0 || notFinishedTodos.length > 0 ? (
                     <>
