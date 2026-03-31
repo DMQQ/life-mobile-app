@@ -3,13 +3,12 @@ import Select from "@/components/ui/Select/Select"
 import Colors from "@/constants/Colors"
 import Url from "@/constants/Url"
 import { Expense as ExpenseType } from "@/types"
-import { parseDate } from "@/utils/functions/parseDate"
-import { gql, useLazyQuery, useMutation, useQuery } from "@apollo/client"
+import { gql, useMutation, useQuery } from "@apollo/client"
 import { AntDesign, Feather, MaterialIcons } from "@expo/vector-icons"
 import axios from "axios"
 import moment from "moment"
 import { ReactNode, useEffect, useRef, useState } from "react"
-import { ActivityIndicator, Alert, FlatList, Image, StyleSheet, Text, View } from "react-native"
+import { Alert, FlatList, Image, StyleSheet, Text, View } from "react-native"
 import Ripple from "react-native-material-ripple"
 import WalletItem, { CategoryIcon } from "../components/Wallet/WalletItem"
 import useDeleteActivity from "../hooks/useDeleteActivity"
@@ -17,67 +16,7 @@ import useRefund from "../hooks/useRefundExpense"
 import useSubscription from "../hooks/useSubscription"
 import useGetSubscriptions from "../hooks/useGetSubscriptions"
 
-import { CategoryUtils, Icons } from "../components/Expense/ExpenseIcon"
-
-const similarCategories = {
-    food: ["drinks"],
-    drinks: ["food"],
-    transport: ["travel"],
-    travel: ["transportation"],
-    entertainment: ["subscriptions", "gifts"],
-    electronics: ["subscriptions", "gifts", "entertainment"],
-} as const
-
-const useGetSimilarExpenses = ({ description: name, date, category, type, amount }: ExpenseType) => {
-    return useLazyQuery(
-        gql`
-            query GetSimilarExpenses($filters: GetWalletFilters, $skip: Int, $take: Int) {
-                wallet {
-                    id
-                    balance
-                    expenses(filters: $filters, take: $take, skip: $skip) {
-                        id
-                        amount
-                        date
-                        description
-                        type
-                        category
-                        balanceBeforeInteraction
-                        note
-                        subscription {
-                            id
-                            isActive
-                            nextBillingDate
-                            dateStart
-                        }
-                    }
-                }
-            }
-        `,
-        {
-            variables: {
-                filters: {
-                    title: name,
-                    amount: {
-                        from: amount - amount * 0.5,
-                        to: amount + amount * 0.5,
-                    },
-                    date: {
-                        // from: moment(date).subtract(30, "days").format("YYYY-MM-DD"),
-                        // to: moment(date).add(30, "days").format("YYYY-MM-DD"),
-                    },
-                    category: [
-                        category,
-                        ...(similarCategories[category as keyof typeof similarCategories] || []),
-                    ].filter(Boolean),
-                    type,
-                },
-                skip: 0,
-                take: 6,
-            },
-        },
-    )
-}
+import { CategoryUtils } from "../components/Expense/ExpenseIcon"
 
 const capitalize = (s = "") => s.charAt(0).toUpperCase() + s.slice(1)
 
@@ -99,41 +38,54 @@ export default function Expense({ route: { params }, navigation }: any) {
         gql`
             query Expense($id: ID!) {
                 expense(expenseId: $id) {
+                    ...ExpenseDetails
+                }
+
+                similarExpenses(expenseId: $id, limit: 10) {
+                    ...ExpenseDetails
+                }
+
+                wallet {
+                    income
+                    monthlyPercentageTarget
+                }
+            }
+
+            fragment ExpenseDetails on ExpenseEntity {
+                id
+                amount
+                date
+                description
+                type
+                category
+                balanceBeforeInteraction
+                note
+
+                subscription {
                     id
-                    amount
-                    date
+                    isActive
+                    nextBillingDate
+                    dateStart
+                }
+
+                location {
+                    id
+                    kind
+                    name
+                    latitude
+                    longitude
+                }
+
+                files {
+                    id
+                    url
+                }
+
+                subexpenses {
+                    id
                     description
-                    type
+                    amount
                     category
-                    balanceBeforeInteraction
-                    note
-
-                    subscription {
-                        id
-                        isActive
-                        nextBillingDate
-                        dateStart
-                    }
-
-                    location {
-                        id
-                        kind
-                        name
-                        latitude
-                        longitude
-                    }
-
-                    files {
-                        id
-                        url
-                    }
-
-                    subexpenses {
-                        id
-                        description
-                        amount
-                        category
-                    }
                 }
             }
         `,
@@ -156,44 +108,6 @@ export default function Expense({ route: { params }, navigation }: any) {
             type: "refunded",
         })
     })
-
-    const [getLazyExpenses, { data: similar, called }] = useGetSimilarExpenses(selected)
-    const [calls, setCalls] = useState(0)
-    useEffect(() => {
-        if (selected != null) {
-            getLazyExpenses()
-        }
-    }, [selected])
-
-    useEffect(() => {
-        if (!called || calls > 1) return
-
-        if (similar?.wallet?.expenses?.length === 1) {
-            getLazyExpenses({
-                variables: {
-                    filters: {
-                        title: "",
-                        amount: {
-                            from: 0,
-                            to: 1000000,
-                        },
-                        date: {
-                            // from: moment(selected.date).subtract(30, "days").format("YYYY-MM-DD"),
-                            // to: moment(selected.date).add(30, "days").format("YYYY-MM-DD"),
-                        },
-                        category: [
-                            selected?.category,
-                            ...(similarCategories[selected.category as keyof typeof similarCategories] || []),
-                        ].filter(Boolean),
-                        type: selected.type,
-                    },
-                    skip: 0,
-                    take: 6,
-                },
-            })
-            setCalls(calls + 1)
-        }
-    }, [similar?.wallet?.expenses, calls])
 
     const handleRefund = () => {
         Alert.alert("Refund Expense", "Are you sure you want to refund this expense?", [
@@ -365,7 +279,6 @@ export default function Expense({ route: { params }, navigation }: any) {
                 : "Create Monthly Subscription",
             icon: hasSubscription ? (isSubscriptionActive ? "pause.circle" : "play.circle") : "plus.circle",
             onPress: handleSubscriptionAction,
-            loading: isSubscriptionLoading,
         },
         ...(hasSubscription
             ? [
@@ -514,6 +427,12 @@ export default function Expense({ route: { params }, navigation }: any) {
                         />
                     </View>
 
+                    <MonthlyBreakdown
+                        expense={selected as ExpenseType}
+                        income={data?.wallet?.income || 0}
+                        monthlyPercentageTarget={data?.wallet?.monthlyPercentageTarget || 0}
+                    />
+
                     {/* Subscription section */}
                     <View style={styles.card}>
                         <View style={styles.cardHeader}>
@@ -597,14 +516,14 @@ export default function Expense({ route: { params }, navigation }: any) {
                     </View>
                 </View>
 
-                {similar?.wallet?.expenses?.length > 1 && (
+                {data?.similarExpenses?.length > 1 && (
                     <View style={{ paddingHorizontal: 15, marginBottom: 25 }}>
                         <Txt size={20} color={Colors.foreground}>
                             Recent similar expenses
                         </Txt>
 
                         <View style={{ marginTop: 25 }}>
-                            {similar?.wallet?.expenses
+                            {data?.similarExpenses
                                 ?.filter((items: any) => items.id !== selected?.id)
                                 .map((item: any) => (
                                     <WalletItem
@@ -640,6 +559,50 @@ export default function Expense({ route: { params }, navigation }: any) {
                 isSubscriptionActive={isSubscriptionActive}
                 onSetLocation={() => mapPickerRef.current?.triggerSearch()}
             />
+        </View>
+    )
+}
+
+interface MonthlyBreakdownProps {
+    income: number
+    monthlyPercentageTarget: number
+
+    expense: ExpenseType
+}
+
+const MonthlyBreakdown = ({ expense, income }: MonthlyBreakdownProps) => {
+    const workingDaysInMonth = 21
+    const dailyIncome = income / workingDaysInMonth
+    const hourlyIncome = dailyIncome / 8
+
+    const hoursToAfford = expense.amount / hourlyIncome
+    const workingDaysToAfford = hoursToAfford / 8
+
+    if (expense?.type !== "expense") return null
+
+    return (
+        <View style={styles.card}>
+            <View style={styles.cardHeader}>
+                <Text style={styles.cardTitle}>Expense Breakdown</Text>
+            </View>
+
+            <View style={styles.contentContainer}>
+                {/* Working Days Row */}
+                <View style={styles.statItem}>
+                    <Text style={styles.statValue}>
+                        {workingDaysToAfford.toFixed(1)} <Text style={styles.unit}>days</Text>
+                    </Text>
+                    <Text style={styles.statLabel}>Work days to afford</Text>
+                </View>
+
+                {/* Hours Row */}
+                <View style={styles.statItem}>
+                    <Text style={styles.statValue}>
+                        {hoursToAfford.toFixed(1)} <Text style={styles.unit}>hrs</Text>
+                    </Text>
+                    <Text style={styles.statLabel}>Hours to afford</Text>
+                </View>
+            </View>
         </View>
     )
 }
@@ -698,7 +661,7 @@ const FileUpload = forwardRef<FileUploadHandle, { id: string; images: any[] }>((
     }
 
     const handleTakePhoto = async () => {
-        const permission = await ImagePicker.requestCameraPermissionsAsync()
+        await ImagePicker.requestCameraPermissionsAsync()
 
         const result = await ImagePicker.launchCameraAsync({
             allowsEditing: true,
@@ -870,5 +833,30 @@ const styles = StyleSheet.create({
         color: Colors.secondary,
         fontSize: 12,
         fontWeight: "500",
+    },
+
+    contentContainer: {
+        gap: 10,
+        flexDirection: "row",
+    },
+    statItem: {
+        flexDirection: "column",
+
+        flex: 1,
+    },
+    statLabel: {
+        fontSize: 12,
+        color: Colors.text_dark,
+        fontWeight: "500",
+    },
+    statValue: {
+        fontSize: 35,
+        color: Colors.secondary,
+        fontWeight: "bold",
+    },
+    unit: {
+        fontSize: 12,
+        color: Colors.text_dark,
+        fontWeight: "normal",
     },
 })

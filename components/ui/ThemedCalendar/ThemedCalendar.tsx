@@ -144,9 +144,9 @@ const weekStyles = StyleSheet.create({
         marginBottom: 4,
     },
     month: {
-        fontSize: 18,
-        fontWeight: "700",
-        color: Colors.secondary,
+        fontSize: 16,
+        color: Colors.foreground,
+        fontWeight: "600",
     },
     year: {
         fontSize: 13,
