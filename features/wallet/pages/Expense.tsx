@@ -17,6 +17,7 @@ import useSubscription from "../hooks/useSubscription"
 import useGetSubscriptions from "../hooks/useGetSubscriptions"
 
 import { CategoryUtils } from "../components/Expense/ExpenseIcon"
+import SimilarExpensesChart from "../components/Expense/SimilarExpensesChart"
 
 const capitalize = (s = "") => s.charAt(0).toUpperCase() + s.slice(1)
 
@@ -41,7 +42,7 @@ export default function Expense({ route: { params }, navigation }: any) {
                     ...ExpenseDetails
                 }
 
-                similarExpenses(expenseId: $id, limit: 10) {
+                similarExpenses(expenseId: $id, limit: 20) {
                     ...ExpenseDetails
                 }
 
@@ -519,10 +520,12 @@ export default function Expense({ route: { params }, navigation }: any) {
                 {data?.similarExpenses?.length > 1 && (
                     <View style={{ paddingHorizontal: 15, marginBottom: 25 }}>
                         <Txt size={20} color={Colors.foreground}>
-                            Recent similar expenses
+                            Similar expenses
                         </Txt>
 
-                        <View style={{ marginTop: 25 }}>
+                        <SimilarExpensesChart expenses={data.similarExpenses} currentExpenseId={selected?.id} />
+
+                        <View style={{ marginTop: 20 }}>
                             {data?.similarExpenses
                                 ?.filter((items: any) => items.id !== selected?.id)
                                 .map((item: any) => (

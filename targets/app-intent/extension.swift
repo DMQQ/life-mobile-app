@@ -11,7 +11,8 @@ struct EntryExtension: AppIntentsExtension {
 // Bridges CLLocationManager's delegate callbacks into async/await.
 // The extension inherits location authorization from the host app.
 
-private final class LocationFetcher: NSObject, CLLocationManagerDelegate, @unchecked Sendable {
+@MainActor
+private final class LocationFetcher: NSObject, @preconcurrency CLLocationManagerDelegate {
     private let manager = CLLocationManager()
     private var continuation: CheckedContinuation<CLLocationCoordinate2D?, Never>?
 
