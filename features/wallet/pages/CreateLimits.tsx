@@ -1,5 +1,4 @@
 import { AnimatedSelector, Button } from "@/components"
-import Button2 from "@/components/ui/Button/Button2"
 import IconButton from "@/components/ui/IconButton/IconButton"
 import Text from "@/components/ui/Text/Text"
 import ValidatedInput from "@/components/ui/ValidatedInput"
@@ -15,6 +14,7 @@ import * as yup from "yup"
 import CategorySelector from "../components/CreateExpense/CategorySelectorView"
 import { CategoryIcon, Icons } from "../components/Expense/ExpenseIcon"
 import { WalletScreens } from "../Main"
+import GlassView from "@/components/ui/GlassView"
 
 const validationSchema = yup.object().shape({
     category: yup.string().required("Please select a category"),
@@ -68,10 +68,12 @@ export default function CreateLimits({ navigation }: WalletScreens<"CreateLimits
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.topBar}>
-                <IconButton
-                    icon={<AntDesign name="close" size={24} color={Colors.foreground} />}
-                    onPress={() => navigation.goBack()}
-                />
+                <GlassView style={{ borderRadius: 100, padding: 7.5 }}>
+                    <IconButton
+                        icon={<AntDesign name="close" size={24} color={Colors.foreground} />}
+                        onPress={() => navigation.goBack()}
+                    />
+                </GlassView>
                 <Text variant="title" style={styles.modalTitle}>
                     Create Spending Limit
                 </Text>

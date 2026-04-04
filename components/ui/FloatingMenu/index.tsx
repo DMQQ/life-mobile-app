@@ -1,5 +1,5 @@
 import { lessBouncySpring } from "@/constants/Animations"
-import { ReactElement, cloneElement, forwardRef, useEffect, useMemo, useRef, useState } from "react"
+import { ReactElement, cloneElement, forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react"
 import { Dimensions, Modal, TouchableOpacity, View } from "react-native"
 import Animated, { useAnimatedStyle, useSharedValue, withSpring, withTiming, runOnJS } from "react-native-reanimated"
 
@@ -110,6 +110,8 @@ const FloatingMenu = forwardRef<FloatingMenuRef, FloatingMenuProps>(
                 translateY.value = 0
             }
         }, [])
+
+        useImperativeHandle(ref, () => ({ close: hideMenu }))
 
         const measureAnchor = () => {
             anchorRef.current?.measure((x, y, width, height, pageX, pageY) => {

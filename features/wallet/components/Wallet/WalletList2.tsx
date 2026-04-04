@@ -576,7 +576,6 @@ const styles = StyleSheet.create({
     },
     subscriptionHeaderContainer: {
         marginBottom: 30,
-        marginTop: 30,
     },
     countBadge: {
         paddingHorizontal: 12,

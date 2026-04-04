@@ -1,20 +1,19 @@
 import { AnimatedSelector } from "@/components"
 import Colors, { secondary_candidates } from "@/constants/Colors"
 import Layout from "@/constants/Layout"
-import lowOpacity from "@/utils/functions/lowOpacity"
 import { gql, useQuery } from "@apollo/client"
-import { AntDesign } from "@expo/vector-icons"
 import Color from "color"
 import dayjs from "dayjs"
 import moment from "moment"
 import { useEffect, useMemo, useState } from "react"
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from "react-native"
+import { ScrollView, StyleSheet, Text, View } from "react-native"
 import Feedback from "react-native-haptic-feedback"
 import Ripple from "react-native-material-ripple"
 import Animated, { FadeIn, LinearTransition } from "react-native-reanimated"
 import useGetStatistics from "../../hooks/useGetStatistics"
 import { CategoryIcon, CategoryUtils, Icons } from "../Expense/ExpenseIcon"
 import { useWalletContext } from "../WalletContext"
+import { SymbolView } from "expo-symbols"
 
 const GET_LIMITS = gql`
     query Limits($range: String!, $date: String) {
@@ -156,12 +155,17 @@ export default function WalletLimits({ navigation }: { navigation: any }) {
             <View style={styles.headerContainer}>
                 <View style={{ flexDirection: "column" }}>
                     <Ripple
-                        onPress={() => setCompactMode((p) => !p)}
+                        onPress={() => {
+                            Feedback.trigger("impactLight")
+                            setCompactMode((p) => !p)
+                        }}
                         onLongPress={() => {
                             Feedback.trigger("impactLight")
-                            navigation.navigate("CreateLimits")
+                            setCompactMode((p) => !p)
                         }}
+                        style={{ flexDirection: "row", alignItems: "center", gap: 7.5 }}
                     >
+                        <SymbolView name="gauge" size={20} tintColor={Colors.secondary} />
                         <Text style={styles.header}>Spending Limits</Text>
                     </Ripple>
                 </View>

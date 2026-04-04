@@ -81,7 +81,7 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
                                 >
                                     {!state.changeView && !spontaneousView && (
                                         <Animated.View entering={FadeIn} style={{ gap: 5 }}>
-                                            <View style={{ flexDirection: "row", width: "100%", alignItems: "center" }}>
+                                            <View style={{ flexDirection: "row", width: "100%", alignItems: "center", zIndex: 1000 }}>
                                                 <NameInput
                                                     {...state}
                                                     {...methods}

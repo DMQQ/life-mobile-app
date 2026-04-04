@@ -155,6 +155,10 @@ const MapPicker = forwardRef<MapPickerHandle, Pick<ExpenseType, "location"> & { 
     }, [])
 
     const [assignedMarker, setAssignedMarker] = useState(props.location || null)
+
+    useEffect(() => {
+        if (props.location) setAssignedMarker(props.location)
+    }, [props.location])
     const [editMode, setEditMode] = useState(false)
     const [locationQuery, setLocationQuery] = useState("")
 

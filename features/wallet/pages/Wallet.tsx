@@ -107,6 +107,13 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
                     contextMenu: {
                         items: [
                             {
+                                title: "Limits",
+                                systemImage: "gauge",
+                                onPress: () => {
+                                    navigation.navigate("LimitsDetail")
+                                },
+                            },
+                            {
                                 title: "Edit Balance",
                                 systemImage: "pencil.and.outline",
                                 onPress: handleShowEditSheet,
@@ -118,6 +125,7 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
                                     navigation.navigate("Filters")
                                 },
                             },
+
                             {
                                 title: "Correction Rules",
                                 systemImage: "arrow.left.arrow.right",

@@ -2,18 +2,10 @@ import Colors from "@/constants/Colors"
 import { Entypo } from "@expo/vector-icons"
 import { useNavigation } from "@react-navigation/native"
 import { memo, useRef } from "react"
-import { View } from "react-native"
+import { Pressable, View } from "react-native"
 import Text from "@/components/ui/Text/Text"
 import Feedback from "react-native-haptic-feedback"
-import Ripple from "react-native-material-ripple"
-import Animated, {
-    FadeInDown,
-    useAnimatedStyle,
-    useSharedValue,
-    withSequence,
-    withSpring,
-    withTiming,
-} from "react-native-reanimated"
+import Animated, { FadeInDown } from "react-native-reanimated"
 import { LiquidGlassView } from "@callstack/liquid-glass"
 
 const NumbersPad = memo(
@@ -61,39 +53,21 @@ const NumbersPad = memo(
     },
 )
 
-const AnimatedRipple = Animated.createAnimatedComponent(Ripple)
-
 const NumpadNumber = (props: {
     onPress: VoidFunction
     num: string | number
     rotateBackButton: boolean
     navigation: any
 }) => {
-    const scale = useSharedValue(1)
+    const interval = useRef<NodeJS.Timeout | null>(null)
+
+    const isBackButton = props.num === "C"
+    const shouldGoBack = isBackButton && props.rotateBackButton
 
     const onPress = () => {
         Feedback.trigger("impactLight")
-
-        scale.value = withSequence(withSpring(0.8, { duration: 100 }), withSpring(1, { duration: 200 }))
-
-        props.num === "C" && props.rotateBackButton ? props.navigation.goBack() : props.onPress()
+        shouldGoBack ? props.navigation.goBack() : props.onPress()
     }
-
-    const animatedScale = useAnimatedStyle(
-        () => ({
-            transform: [
-                { scale: scale.value },
-                {
-                    rotate: withTiming(props.num === "C" && props.rotateBackButton ? "-90deg" : "0deg", {
-                        duration: 150,
-                    }),
-                },
-            ],
-        }),
-        [props.rotateBackButton],
-    )
-
-    const interval = useRef<NodeJS.Timeout | null>(null)
 
     return (
         <LiquidGlassView
@@ -101,9 +75,7 @@ const NumpadNumber = (props: {
             tintColor={Colors.primary_light}
             style={{ width: "25%", height: 80, overflow: "hidden", borderRadius: 100 }}
         >
-            <AnimatedRipple
-                rippleCentered
-                rippleColor={Colors.primary}
+            <Pressable
                 onPress={onPress}
                 onLongPress={() => {
                     if (interval.current) clearInterval(interval.current!)
@@ -114,19 +86,26 @@ const NumpadNumber = (props: {
                 onPressOut={() => {
                     if (interval.current) clearInterval(interval.current!)
                 }}
-                style={[
-                    { justifyContent: "center", alignItems: "center", width: "100%", height: "100%" },
-                    animatedScale,
-                ]}
+                style={({ pressed }) => ({
+                    justifyContent: "center",
+                    alignItems: "center",
+                    width: "100%",
+                    height: "100%",
+                    opacity: pressed ? 0.5 : 1,
+                    transform: [
+                        { scale: pressed ? 0.88 : 1 },
+                        { rotate: shouldGoBack ? "-90deg" : "0deg" },
+                    ],
+                })}
             >
-                {props.num === "C" ? (
+                {isBackButton ? (
                     <Entypo name="chevron-left" size={40} color={Colors.foreground} />
                 ) : (
                     <Text variant="title" style={{ color: Colors.foreground, fontWeight: "bold" }}>
                         {props.num}
                     </Text>
                 )}
-            </AnimatedRipple>
+            </Pressable>
         </LiquidGlassView>
     )
 }

@@ -206,6 +206,8 @@ function Header({ shadow = true, ...props }: HeaderProps) {
 
                     {props.children}
 
+                    {(props.animatedTitle || props.animatedValue !== undefined) && <AnimatedContent {...props} />}
+
                     <View style={{ borderRadius: 100, overflow: "hidden", flexDirection: "row", gap: 10 }}>
                         {standaloneButtons.left.map((button, index) => (
                             <View key={index} style={{ overflow: "hidden", borderRadius: 100 }}>
@@ -237,8 +239,6 @@ function Header({ shadow = true, ...props }: HeaderProps) {
                 </View>
 
                 {props.renderAnimatedItem && memodRenderItem}
-
-                {(props.animatedTitle || props.animatedValue !== undefined) && <AnimatedContent {...props} />}
             </Animated.View>
         </GlassContainer>
     )
