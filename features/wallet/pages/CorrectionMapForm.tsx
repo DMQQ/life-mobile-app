@@ -235,27 +235,37 @@ export default function CorrectionMapForm({ navigation, route }: WalletScreens<"
                             />
 
                             {state.matchType === "shop" && (
-                                <Input
-                                    label="Shop name contains"
-                                    value={state.values.matchShop}
-                                    onChangeText={(v) => setVal("matchShop", v)}
-                                    placeholder="e.g. Mariola Iwanska"
-                                    autoCapitalize="words"
-                                    returnKeyType="next"
-                                    autoFocus
-                                />
+                                <>
+                                    <Input
+                                        label="Shop name"
+                                        value={state.values.matchShop}
+                                        onChangeText={(v) => setVal("matchShop", v)}
+                                        placeholder="e.g. Mariola* or /^biedronka/i"
+                                        autoCapitalize="none"
+                                        returnKeyType="next"
+                                        autoFocus
+                                    />
+                                    <Text style={styles.patternHint}>
+                                        Substring by default · use <Text style={styles.patternHintMono}>*</Text> / <Text style={styles.patternHintMono}>?</Text> wildcards or <Text style={styles.patternHintMono}>/regex/flags</Text>
+                                    </Text>
+                                </>
                             )}
 
                             {state.matchType === "description" && (
-                                <Input
-                                    label="Description contains"
-                                    value={state.values.matchDescription}
-                                    onChangeText={(v) => setVal("matchDescription", v)}
-                                    placeholder="e.g. Biedronka"
-                                    autoCapitalize="words"
-                                    returnKeyType="next"
-                                    autoFocus
-                                />
+                                <>
+                                    <Input
+                                        label="Description"
+                                        value={state.values.matchDescription}
+                                        onChangeText={(v) => setVal("matchDescription", v)}
+                                        placeholder="e.g. *sklep* or /^biedronka/i"
+                                        autoCapitalize="none"
+                                        returnKeyType="next"
+                                        autoFocus
+                                    />
+                                    <Text style={styles.patternHint}>
+                                        Substring by default · use <Text style={styles.patternHintMono}>*</Text> / <Text style={styles.patternHintMono}>?</Text> wildcards or <Text style={styles.patternHintMono}>/regex/flags</Text>
+                                    </Text>
+                                </>
                             )}
 
                             {state.matchType === "category" && (
@@ -445,6 +455,18 @@ const styles = StyleSheet.create({
         color: Colors.foreground_secondary,
         fontSize: 14,
         paddingRight: 8,
+    },
+    patternHint: {
+        color: Colors.foreground_secondary,
+        fontSize: 11,
+        lineHeight: 16,
+        paddingHorizontal: 4,
+        paddingBottom: 2,
+        opacity: 0.7,
+    },
+    patternHintMono: {
+        fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",
+        fontSize: 11,
     },
     overrideRow: {
         flexDirection: "row",

@@ -6,7 +6,7 @@ import useKeyboard from "@/utils/hooks/useKeyboard"
 import { AntDesign } from "@expo/vector-icons"
 import Color from "color"
 import moment from "moment"
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { ActivityIndicator, Platform, Pressable, ScrollView, StyleSheet, View } from "react-native"
 import Ripple from "react-native-material-ripple"
 import DateTimePicker from "react-native-modal-datetime-picker"
@@ -55,6 +55,7 @@ export default function CreateTimeLineEventModal({ route, navigation }: Timeline
     })
 
     const [timePicker, setTimePicker] = useState<"begin" | "end" | "">("")
+    const endManuallyChanged = useRef(isEditing)
 
     const numberOfLines = f.values.desc.split("\n").length
 
@@ -191,12 +192,13 @@ export default function CreateTimeLineEventModal({ route, navigation }: Timeline
                                 if (timePicker === "begin") {
                                     f.setFieldValue("begin", finalDate.format("HH:mm"))
 
-                                    if (finalDate.isAfter(moment(f.values.end, "HH:mm"))) {
-                                        f.setFieldValue("end", finalDate.add(1, "hours").format("HH:mm"))
+                                    if (!endManuallyChanged.current) {
+                                        f.setFieldValue("end", finalDate.clone().add(1, "hours").format("HH:mm"))
                                     }
                                 }
 
                                 if (timePicker === "end") {
+                                    endManuallyChanged.current = true
                                     f.setFieldValue("end", finalDate.format("HH:mm"))
 
                                     if (finalDate.isBefore(moment(f.values.begin, "HH:mm"))) {

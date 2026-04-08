@@ -1,13 +1,15 @@
 import Colors from "@/constants/Colors"
 import { useNavigation } from "@react-navigation/native"
 import { useCallback, useMemo } from "react"
-import { Pressable, View } from "react-native"
+import { Pressable, StyleSheet, View } from "react-native"
 import Color from "color"
 import useRemoveTimelineMutation from "../hooks/mutation/useRemoveTimelineMutation"
 import { useActivityUtils } from "@/utils/hooks/useActivityManager"
 import useCompleteOccurrence from "../hooks/mutation/useCompleteOccurrence"
 import DayTimelineItem from "./DayTimelineItem"
 import ContextMenu, { ContextMenuAction } from "react-native-context-menu-view"
+import TimelineDetails from "../pages/TimelineDetails"
+import Layout from "@/constants/Layout"
 
 interface DayTimelineItemWrapperProps {
     item: any
@@ -23,7 +25,8 @@ export default function DayTimelineItemWrapper({ item, style, onLongPress }: Day
     const { remove } = useRemoveTimelineMutation(timeline || { id: "", date: "", name: "" })
     const { isPending, startActivity } = useActivityUtils(timeline?.id)
     const [completeOccurrenceMutation] = useCompleteOccurrence(timeline.id)
-    const completeTimeline = () => completeOccurrenceMutation({ variables: { id: timeline.id, isCompleted: !timeline.isCompleted } })
+    const completeTimeline = () =>
+        completeOccurrenceMutation({ variables: { id: timeline.id, isCompleted: !timeline.isCompleted } })
 
     const handleCopyPress = useCallback(() => {
         navigation.navigate("CopyTimelineModal", {
@@ -101,45 +104,54 @@ export default function DayTimelineItemWrapper({ item, style, onLongPress }: Day
     }
 
     return (
-        <ContextMenu
-            style={[style]}
-            actions={items as ContextMenuAction[]}
-            onPress={(e) => {
-                const action = items[e.nativeEvent.index]
-                if (action && action.onPress) {
-                    action.onPress()
-                }
-            }}
-            previewBackgroundColor="transparent"
-        >
-            <Pressable
-                style={[
-                    {
-                        backgroundColor: Color(Colors.primary_lighter).lighten(0.25).toString(),
-                        borderRadius: 10,
-                        overflow: "hidden",
-                        borderWidth: 1,
-                        borderColor: Color(Colors.primary).lighten(2).toString(),
-
-                        flex: 1,
-                    },
-                    timeline.isCompleted && {
-                        opacity: 0.5,
-                    },
-                ]}
-                onLongPress={() => onLongPress?.(timeline)}
-                onPress={onPress}
+        <View style={[style]}>
+            <ContextMenu
+                actions={items as ContextMenuAction[]}
+                onPress={(e) => {
+                    const action = items[e.nativeEvent.index]
+                    if (action && action.onPress) {
+                        action.onPress()
+                    }
+                }}
+                previewBackgroundColor={styles.wrapper.backgroundColor}
+                style={{ flex: 1, borderRadius: styles.wrapper.borderRadius }}
+                onPreviewPress={() => {
+                    console.log("onPreviewPress")
+                }}
             >
-                <DayTimelineItem
-                    {...timeline}
-                    location="timeline"
-                    textColor={textColor}
-                    styles={{
-                        flex: 1,
-                    }}
-                    isSmall={style.height < 100}
-                />
-            </Pressable>
-        </ContextMenu>
+                <Pressable
+                    style={[
+                        styles.wrapper,
+                        { flex: 1 },
+                        timeline.isCompleted && {
+                            opacity: 0.5,
+                        },
+                    ]}
+                    onLongPress={() => onLongPress?.(timeline)}
+                    onPress={onPress}
+                >
+                    <DayTimelineItem
+                        {...timeline}
+                        location="timeline"
+                        textColor={textColor}
+                        styles={{
+                            flex: 1,
+                        }}
+                        isSmall={style.height < 100}
+                        compactTodos={style.height < 80}
+                    />
+                </Pressable>
+            </ContextMenu>
+        </View>
     )
 }
+
+const styles = StyleSheet.create({
+    wrapper: {
+        backgroundColor: Color(Colors.primary_lighter).lighten(0.25).toString(),
+        borderRadius: 10,
+        overflow: "hidden",
+        borderWidth: 1,
+        borderColor: Color(Colors.primary).lighten(2).toString(),
+    },
+})

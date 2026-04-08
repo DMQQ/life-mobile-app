@@ -120,7 +120,7 @@ export default function TimelineDetails({
         ;(navigation as any).navigate("CreateTimelineTodos", {
             timelineId: data?.id,
         })
-    }, [])
+    }, [data?.id])
 
     const client = useApolloClient()
     const [uploadLoading, setUploadLoading] = useState(false)

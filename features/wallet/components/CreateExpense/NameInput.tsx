@@ -30,7 +30,7 @@ const GET_EXPENSE_SUGGESTIONS = gql`
     }
 `
 
-const ITEM_HEIGHT = 44
+const ITEM_HEIGHT = 36
 
 interface Suggestion {
     id: string
@@ -143,7 +143,6 @@ export default function NameInput({
                             onPress={() => {
                                 setSuppressed(true)
                                 setName(item.description)
-                                setAmount(item.amount.toString())
                                 setCategory(item.category as keyof typeof Icons)
                             }}
                             activeOpacity={0.6}
@@ -151,9 +150,6 @@ export default function NameInput({
                             <View style={styles.iconWrap}>{icon && cloneElement(icon, { size: 13 })}</View>
                             <Text variant="body" style={styles.itemDescription} numberOfLines={1}>
                                 {item.description}
-                            </Text>
-                            <Text variant="caption" style={styles.itemAmount}>
-                                {item.amount} zł
                             </Text>
                         </TouchableOpacity>
                     )
@@ -170,7 +166,10 @@ export default function NameInput({
                 style={styles.input}
                 placeholderTextColor={"rgba(255,255,255,0.3)"}
                 value={name}
-                onChangeText={(text) => { setSuppressed(false); setName(text) }}
+                onChangeText={(text) => {
+                    setSuppressed(false)
+                    setName(text)
+                }}
                 onBlur={() => setIsInputFocused(false)}
                 onFocus={() => setIsInputFocused(true)}
                 left={

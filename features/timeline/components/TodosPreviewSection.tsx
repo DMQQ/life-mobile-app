@@ -14,7 +14,13 @@ interface TodosPreviewSectionProps {
     maxItems?: number
 }
 
-export default function TodosPreviewSection({ todos, timelineId, occurrenceDate, textColor, maxItems = 3 }: TodosPreviewSectionProps) {
+export default function TodosPreviewSection({
+    todos,
+    timelineId,
+    occurrenceDate,
+    textColor,
+    maxItems = 3,
+}: TodosPreviewSectionProps) {
     if (!todos || todos.length === 0) {
         return null
     }
@@ -25,7 +31,13 @@ export default function TodosPreviewSection({ todos, timelineId, occurrenceDate,
     return (
         <View style={styles.container}>
             {visibleTodos.map((todo) => (
-                <TodoPreviewCard key={todo.id} todo={todo} timelineId={timelineId} occurrenceDate={occurrenceDate} textColor={textColor} />
+                <TodoPreviewCard
+                    key={todo.id}
+                    todo={todo}
+                    timelineId={timelineId}
+                    occurrenceDate={occurrenceDate}
+                    textColor={textColor}
+                />
             ))}
             {remainingCount > 0 && (
                 <Text style={[styles.moreText, textColor && { color: textColor }]}>
@@ -38,8 +50,7 @@ export default function TodosPreviewSection({ todos, timelineId, occurrenceDate,
 
 const styles = StyleSheet.create({
     container: {
-        gap: 6,
-        marginVertical: 8,
+        gap: 3,
     },
     moreText: {
         fontSize: 11,

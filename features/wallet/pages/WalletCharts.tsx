@@ -3,7 +3,6 @@ import Text from "@/components/ui/Text/Text"
 import Colors, { secondary_candidates } from "@/constants/Colors"
 import Layout from "@/constants/Layout"
 import { Expense } from "@/types"
-import wrapWithFunction from "@/utils/functions/wrapFn"
 import { AntDesign, MaterialIcons } from "@expo/vector-icons"
 import moment from "moment"
 import { useCallback, useMemo, useRef, useState } from "react"
@@ -16,7 +15,6 @@ import { CategoryUtils } from "../components/Expense/ExpenseIcon"
 import WalletItem, { Icons } from "../components/Wallet/WalletItem"
 import ChartLoader from "../components/WalletChart/ChartLoader"
 import Charts from "../components/WalletChart/Charts"
-import DateRangePicker from "../components/WalletChart/DateRangePicker"
 import FutureProjection from "../components/WalletChart/FutureProjection"
 import HourlySpendingsHeatMap from "../components/WalletChart/HourlyHeatMap"
 import Legend from "../components/WalletChart/Legend"
@@ -101,7 +99,7 @@ export const getInvalidExpenses = (curr: Expense) =>
 
 function WalletCharts({ navigation }: any) {
     const {
-        data = { wallet: { expenses: [] } },
+        data = { wallet: { expenses2: [] } },
         dispatch,
         filters,
         loading,
@@ -120,8 +118,14 @@ function WalletCharts({ navigation }: any) {
     })
 
     const filteredExpenses = useMemo(() => {
-        return data?.wallet?.expenses?.filter((item) => !getInvalidExpenses(item)) || []
-    }, [data?.wallet?.expenses])
+        return (
+            data?.wallet?.expenses2
+                .flatMap((expense) => expense.expenses)
+                ?.filter((item) => !getInvalidExpenses(item)) || []
+        )
+    }, [data?.wallet?.expenses2])
+
+    console.log("filtered", filteredExpenses)
 
     const [excluded, setExcluded] = useState<string[]>([])
 
@@ -150,7 +154,7 @@ function WalletCharts({ navigation }: any) {
     }, [legend.data?.statisticsLegend])
 
     const sumOfExpenses = useMemo(() => {
-        if (!data?.wallet?.expenses) return 0
+        if (!data?.wallet?.expenses2?.length) return 0
 
         return barData.reduce((acc, curr) => {
             if (excluded.includes(curr.label)) return acc
@@ -167,23 +171,13 @@ function WalletCharts({ navigation }: any) {
 
         setSelected((prev) => (prev === item.category ? "" : item.category))
         setStep(5)
-
-        try {
-            if (data.wallet?.expenses?.length === 0) return
-            setTimeout(() => {
-                listRef.current?.scrollToIndex({ index: 0, animated: true })
-            }, 100)
-        } catch (error) {}
     }
 
     const selectedCategoryData = useMemo(() => {
-        if (selected.trim() === "") return data?.wallet?.expenses || []
-
-        return (
-            data?.wallet?.expenses?.filter((item) => item.category.startsWith(selected) && item.type !== "refunded") ||
-            []
-        )
-    }, [selected])
+        const allExpenses = data?.wallet?.expenses2?.flatMap((g) => g.expenses) || []
+        if (selected.trim() === "") return allExpenses
+        return allExpenses.filter((item) => item.category.startsWith(selected) && item.type !== "refunded")
+    }, [selected, data?.wallet?.expenses2])
 
     const onChartPress = (e: any) => {
         if (!e.label) return

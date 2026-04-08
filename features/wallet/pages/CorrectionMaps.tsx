@@ -70,7 +70,7 @@ export default function CorrectionMapsScreen({ navigation, route }: WalletScreen
                 showsVerticalScrollIndicator={false}
             >
                 <Text style={styles.subtitle}>
-                    Auto-correct shop names and categories on card-tap expenses. First matching rule wins.
+                    Auto-correct shop names and categories on card-tap expenses. First matching rule wins. Supports substrings, wildcards (*/?), and /regex/flags.
                 </Text>
 
                 {loading ? (

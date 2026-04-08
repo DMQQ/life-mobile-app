@@ -17,6 +17,8 @@ export default function DayTimelineItem(
         isSmall: boolean
 
         onLongPress?: () => void
+
+        compactTodos?: boolean
     },
 ) {
     const start = moment(timeline.beginTime, "HH:mm").format("HH:mm")
@@ -83,7 +85,7 @@ export default function DayTimelineItem(
                             timelineId={timeline.id}
                             occurrenceDate={timeline.date}
                             textColor={timeline.textColor}
-                            maxItems={3}
+                            maxItems={timeline.compactTodos ? 1 : 3}
                         />
 
                         {timeline.images.length > 0 && (

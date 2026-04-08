@@ -1,56 +1,57 @@
 import { Card, IconButton } from "@/components"
-import Button from "@/components/ui/Button/Button"
 import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
 import { AntDesign } from "@expo/vector-icons"
 import Color from "color"
-import { BlurView } from "expo-blur"
-import { useEffect, useRef, useState } from "react"
-import { Keyboard, StyleSheet, TextInput, View } from "react-native"
+import { useRef, useState, useEffect } from "react"
+import { ActivityIndicator, Keyboard, Pressable, StyleSheet, TextInput, View } from "react-native"
 import { FlatList } from "react-native-gesture-handler"
-import Animated, { interpolate, useAnimatedKeyboard, useAnimatedProps, useAnimatedStyle } from "react-native-reanimated"
-import useTodos, { Action, TodoInput as ITodoInput } from "../hooks/general/useTodos"
+import Feedback from "react-native-haptic-feedback"
+import { SafeAreaView } from "react-native-safe-area-context"
+import useTodos, { TodoInput as ITodoInput } from "../hooks/general/useTodos"
 import type { TimelineScreenProps } from "../types"
 
 const styles = StyleSheet.create({
     container: {
-        paddingHorizontal: 16,
-        paddingTop: 8,
         flex: 1,
-        paddingBottom: 15,
-    },
-    input: {
-        flex: 1,
-        paddingHorizontal: 15,
-        paddingVertical: 16,
-        fontSize: 16,
-        color: Colors.text_light,
-        fontFamily: "System",
+        backgroundColor: Colors.primary,
     },
     header: {
         flexDirection: "row",
-        justifyContent: "space-between",
         alignItems: "center",
-        marginBottom: 15,
-        paddingTop: 30,
-        paddingHorizontal: 15,
+        justifyContent: "space-between",
+        paddingHorizontal: 25,
+        paddingVertical: 25,
     },
-    title: {
+    headerBtn: {
+        minWidth: 60,
+    },
+    headerTitle: {
+        fontSize: 17,
+        fontWeight: "600",
         color: Colors.foreground,
     },
-    subtitle: {
-        marginTop: 2,
+    headerCancel: {
+        fontSize: 16,
+        color: Colors.foreground_secondary,
     },
-    todosList: {
-        flex: 1,
+    headerSave: {
+        fontSize: 16,
+        fontWeight: "600",
+        color: Colors.secondary,
+        textAlign: "right",
+    },
+    headerSaveDisabled: {
+        opacity: 0.35,
+    },
+    divider: {
+        height: StyleSheet.hairlineWidth,
+        backgroundColor: "rgba(255,255,255,0.08)",
+    },
+    listContent: {
         paddingHorizontal: 15,
+        paddingBottom: 16,
     },
-    saveButton: {
-        marginTop: 8,
-        borderRadius: 100,
-        flexDirection: "row-reverse",
-    },
-
     todoCard: {
         flexDirection: "row",
         alignItems: "center",
@@ -59,40 +60,29 @@ const styles = StyleSheet.create({
         marginBottom: 12,
         backgroundColor: Colors.primary_lighter,
     },
-
-    todoCardRow: {
+    inputRow: {
         flexDirection: "row",
         alignItems: "center",
-        justifyContent: "space-between",
-        paddingVertical: 12,
-        paddingHorizontal: 12,
+        marginHorizontal: 15,
+        marginVertical: 12,
+        backgroundColor: Colors.primary_lighter,
+        borderRadius: 16,
+        paddingHorizontal: 14,
     },
-
-    clearAll: {
-        borderWidth: 1,
-        borderColor: Colors.error,
-        backgroundColor: "transparent",
-        padding: 5,
-        paddingHorizontal: 10,
+    input: {
+        flex: 1,
+        paddingVertical: 14,
+        fontSize: 16,
+        color: Colors.text_light,
+        fontFamily: "System",
     },
-
-    blur: {
-        paddingHorizontal: 16,
-        paddingTop: 8,
-        borderTopWidth: 1,
-        borderTopColor: Color(Colors.text_dark).alpha(0.1).string(),
+    todoDivider: {
+        height: StyleSheet.hairlineWidth,
+        backgroundColor: Color(Colors.text_dark).alpha(0.12).string(),
+        marginHorizontal: 15,
+        marginBottom: 12,
     },
-    blurBackground: {
-        position: "absolute",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-    },
-    blurContent: {},
 })
-
-import Feedback from "react-native-haptic-feedback"
 
 export default function CreateTimelineTodos({ route, navigation }: TimelineScreenProps<"CreateTimelineTodos">) {
     const mode = route.params?.mode || "create"
@@ -118,76 +108,106 @@ export default function CreateTimelineTodos({ route, navigation }: TimelineScree
         }
     }, [])
 
-    const todoCount = state.todos.filter((todo) => todo.value.trim().length > 0).length
+    const inputRef = useRef<TextInput>(null)
+    const textRef = useRef<string>("")
+    const [inputText, setInputText] = useState("")
 
-    const onSubmit = (text: string) => {
+    const addCurrentInput = (): boolean => {
+        const text = textRef.current.trim()
+        if (text.length === 0) return false
         Feedback.trigger("impactLight")
+        dispatch({ type: "add", payload: text })
+        textRef.current = ""
+        setInputText("")
+        inputRef.current?.clear()
+        return true
+    }
+
+    const onInputChange = (text: string) => {
+        textRef.current = text
+        setInputText(text)
+    }
+
+    const handleSave = async () => {
+        const extraText = textRef.current.trim()
 
         if (mode === "push-back") {
             const todos = state.todos.map((t) => t.value)
-
-            navigation.navigate("TimelineCreate", {
-                ...route.params,
-                todos,
-            })
+            if (extraText.length > 0) todos.unshift(extraText)
+            navigation.navigate("TimelineCreate", { ...route.params, todos })
             return
         }
 
-        onSaveTodos(text)
+        await onSaveTodos(extraText)
     }
 
+    const todoCount = state.todos.length
+    const hasContent = todoCount > 0 || inputText.trim().length > 0
+    const title = mode === "push-back" ? "Add Todos" : "Create Todos"
+
     return (
-        <View style={{ flex: 1, backgroundColor: Colors.primary, paddingBottom: keyboardHeight }}>
+        <SafeAreaView style={[styles.container, { paddingBottom: keyboardHeight }]}>
+            {/* Header */}
             <View style={styles.header}>
-                <View>
-                    <Text variant="subheading" style={styles.title}>
-                        Create Todos
-                    </Text>
-                    <Text variant="caption" color={Colors.text_dark} style={styles.subtitle}>
-                        {todoCount} todo{todoCount !== 1 ? "s" : ""} ready to save
-                    </Text>
-                </View>
+                <Pressable onPress={() => navigation.goBack()} hitSlop={12} style={styles.headerBtn}>
+                    <Text style={styles.headerCancel}>Cancel</Text>
+                </Pressable>
 
-                <Button
-                    type="text"
-                    onPress={() => dispatch({ type: "clear", payload: undefined })}
-                    style={styles.clearAll}
-                    fontStyle={{ color: Colors.error, fontSize: 13, textTransform: "none" }}
-                >
-                    Clear All
-                </Button>
+                <Text style={styles.headerTitle}>{title}</Text>
+
+                <Pressable onPress={handleSave} disabled={!hasContent || loading} hitSlop={12} style={styles.headerBtn}>
+                    {loading ? (
+                        <ActivityIndicator size="small" color={Colors.secondary} />
+                    ) : (
+                        <Text style={[styles.headerSave, (!hasContent || loading) && styles.headerSaveDisabled]}>
+                            Save
+                        </Text>
+                    )}
+                </Pressable>
             </View>
 
-            <View style={{ flex: 1 }}>
-                <TodosList dispatch={dispatch} todos={state.todos} />
-            </View>
+            <View style={styles.divider} />
 
-            <Animated.View>
-                <TodoInput
-                    saveTodos={onSubmit}
-                    loading={loading}
-                    isOpen={true}
-                    onAddTodo={(v) => dispatch({ type: "add", payload: v.trim() })}
+            {/* Input row */}
+            <View style={styles.inputRow}>
+                <TextInput
+                    ref={inputRef}
+                    style={styles.input}
+                    placeholder="What needs to be done?"
+                    placeholderTextColor={Colors.text_dark}
+                    onChangeText={onInputChange}
+                    onSubmitEditing={addCurrentInput}
+                    returnKeyType="done"
+                    keyboardAppearance="dark"
+                    enablesReturnKeyAutomatically
+                    autoFocus
+                    multiline={false}
+                    blurOnSubmit={false}
                 />
-            </Animated.View>
-        </View>
-    )
-}
+                {inputText.trim().length > 0 && (
+                    <IconButton
+                        icon={<AntDesign name="plus" size={20} color={Colors.secondary} />}
+                        onPress={addCurrentInput}
+                        style={{ marginLeft: 4 }}
+                    />
+                )}
+            </View>
 
-const TodosList = ({ todos, dispatch }: { todos: ITodoInput[]; dispatch: React.Dispatch<Action> }) => {
-    const onRemoveTodo = (todo: ITodoInput) => {
-        dispatch({ type: "remove", payload: todo.index })
-    }
+            {todoCount > 0 && <View style={styles.todoDivider} />}
 
-    return (
-        <FlatList
-            style={styles.todosList}
-            data={todos}
-            keyExtractor={(item) => item.index.toString()}
-            renderItem={({ item }) => <Todo {...item} onRemove={() => onRemoveTodo(item)} />}
-            contentContainerStyle={{ paddingBottom: 20 }}
-            keyboardDismissMode="on-drag"
-        />
+            {/* Todos list */}
+            <FlatList
+                style={{ flex: 1 }}
+                contentContainerStyle={styles.listContent}
+                data={state.todos}
+                keyExtractor={(item) => item.index.toString()}
+                renderItem={({ item }) => (
+                    <Todo {...item} onRemove={() => dispatch({ type: "remove", payload: item.index })} />
+                )}
+                keyboardDismissMode="on-drag"
+                keyboardShouldPersistTaps="handled"
+            />
+        </SafeAreaView>
     )
 }
 
@@ -196,12 +216,11 @@ export const Todo = ({
     ...todo
 }: ITodoInput & {
     onRemove?: () => any
-
     showRemove?: boolean
 }) => {
     return (
         <Card style={styles.todoCard}>
-            <Text variant="body" style={{ maxWidth: "95%" }}>
+            <Text variant="body" style={{ maxWidth: "90%", flexShrink: 1 }}>
                 {todo.value}
             </Text>
 
@@ -213,112 +232,5 @@ export const Todo = ({
                 />
             )}
         </Card>
-    )
-}
-
-const AnimatedBlurView = Animated.createAnimatedComponent(BlurView)
-
-const TodoInput = ({
-    onAddTodo,
-    saveTodos,
-    loading,
-    isOpen,
-}: {
-    onAddTodo: (value: string) => any
-    saveTodos: (text: string) => any
-    loading: boolean
-    isOpen?: boolean
-}) => {
-    const [hasText, setHasText] = useState<boolean>(false)
-    const [isFocused, setIsFocused] = useState<boolean>(false)
-    const ref = useRef<TextInput>(null)
-    const textRef = useRef<string>("")
-
-    const onSubmit = () => {
-        const currentText = textRef.current.trim()
-        if (currentText.length > 0) {
-            onAddTodo(currentText)
-            ref.current?.clear()
-            textRef.current = ""
-            setHasText(false)
-        }
-    }
-
-    const onSaveTodosPress = async () => {
-        saveTodos(textRef.current.trim())
-    }
-
-    const onTextChange = (text: string) => {
-        textRef.current = text
-        setHasText(text.trim().length > 0)
-    }
-
-    const onFocus = () => setIsFocused(true)
-    const onBlur = () => setIsFocused(false)
-
-    const keyboard = useAnimatedKeyboard()
-
-    useEffect(() => {
-        if (isOpen) {
-            ref.current?.focus()
-        } else {
-            ref.current?.blur()
-        }
-    }, [isOpen])
-
-    const animatedIntensity = useAnimatedProps(() => ({
-        intensity: interpolate(keyboard.height.value, [0, 300], [0, 30]),
-    }))
-
-    return (
-        <View style={[{ padding: 15, paddingBottom: 30 }]}>
-            <View
-                style={{
-                    borderRadius: 20,
-                    backgroundColor: Colors.primary_lighter,
-                    overflow: "hidden",
-                }}
-            >
-                <AnimatedBlurView
-                    style={{
-                        flexDirection: "row",
-                        alignItems: "center",
-                    }}
-                    animatedProps={animatedIntensity}
-                >
-                    <TextInput
-                        ref={ref}
-                        style={styles.input}
-                        placeholder="What needs to be done?"
-                        placeholderTextColor={Colors.text_dark}
-                        onChangeText={onTextChange}
-                        onSubmitEditing={onSubmit}
-                        onFocus={onFocus}
-                        onBlur={onBlur}
-                        returnKeyType="send"
-                        keyboardAppearance="dark"
-                        enablesReturnKeyAutomatically
-                        autoFocus={isOpen}
-                        multiline={false}
-                    />
-                    {isFocused && hasText && (
-                        <IconButton
-                            icon={<AntDesign name="plus" size={20} color={Colors.secondary} />}
-                            onPress={onSubmit}
-                            style={{ marginRight: 5 }}
-                        />
-                    )}
-
-                    <Animated.View style={[{ position: "absolute", right: 0, bottom: 2.5 }]}>
-                        <IconButton
-                            icon={<AntDesign name="check" size={20} color={Colors.text_light} />}
-                            onPress={onSaveTodosPress}
-                            disabled={loading}
-                            style={[{ backgroundColor: Colors.secondary, padding: 13.5, borderRadius: 100 }]}
-                        />
-                    </Animated.View>
-                </AnimatedBlurView>
-            </View>
-        </View>
     )
 }
