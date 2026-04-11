@@ -518,29 +518,10 @@ export default function Expense({ route: { params }, navigation }: any) {
                 </View>
 
                 {data?.similarExpenses?.length > 1 && (
-                    <View style={{ paddingHorizontal: 15, marginBottom: 25 }}>
-                        <Txt size={20} color={Colors.foreground}>
-                            Similar expenses
-                        </Txt>
-
-                        <SimilarExpensesChart expenses={data.similarExpenses} currentExpenseId={selected?.id} />
-
-                        <View style={{ marginTop: 20 }}>
-                            {data?.similarExpenses
-                                ?.filter((items: any) => items.id !== selected?.id)
-                                .map((item: any) => (
-                                    <WalletItem
-                                        key={item.id}
-                                        {...item}
-                                        handlePress={() => {
-                                            navigation.push("Expense", {
-                                                expense: item,
-                                            })
-                                        }}
-                                    />
-                                ))}
-                        </View>
-                    </View>
+                    <SimilarExpenses
+                        selected={selected}
+                        similarExpenses={data.similarExpenses.filter((e: any) => e.id !== selected.id)}
+                    />
                 )}
 
                 <FileUpload ref={fileUploadRef} id={selected.id} images={selected?.files} />
@@ -562,6 +543,41 @@ export default function Expense({ route: { params }, navigation }: any) {
                 isSubscriptionActive={isSubscriptionActive}
                 onSetLocation={() => mapPickerRef.current?.triggerSearch()}
             />
+        </View>
+    )
+}
+
+const SimilarExpenses = ({ similarExpenses, selected }: { similarExpenses: ExpenseType[]; selected: ExpenseType }) => {
+    const navigation = useNavigation<any>()
+    const [isExpanded, setIsExpanded] = useState(false)
+    return (
+        <View style={{ paddingHorizontal: 15, marginBottom: 25 }}>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 7.5 }}>
+                <IconButton
+                    icon={<AntDesign name="down" size={16} color={Colors.foreground} />}
+                    onPress={() => setIsExpanded(!isExpanded)}
+                />
+                <Txt size={20} color={Colors.foreground}>
+                    Similar expenses
+                </Txt>
+            </View>
+            <SimilarExpensesChart expenses={similarExpenses} currentExpenseId={selected?.id} />
+
+            {isExpanded && (
+                <View style={{ marginTop: 20 }}>
+                    {similarExpenses.map((item: any) => (
+                        <WalletItem
+                            key={item.id}
+                            {...item}
+                            handlePress={() => {
+                                navigation.push("Expense", {
+                                    expense: item,
+                                })
+                            }}
+                        />
+                    ))}
+                </View>
+            )}
         </View>
     )
 }
@@ -621,6 +637,8 @@ import FloatingBottomToolBar, { ContextMenuOption } from "../components/Expense/
 import { forwardRef, useImperativeHandle } from "react"
 import { CollapsibleThemedCalendar } from "@/components/ui/ThemedCalendar/ThemedCalendar"
 import dayjs from "dayjs"
+import { useNavigation } from "@react-navigation/native"
+import { IconButton } from "@/components"
 
 type FileUploadHandle = { takePhoto: () => void; pickImage: () => void }
 

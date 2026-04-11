@@ -89,3 +89,5 @@ google-services.json
 eas.json
 
 .env.*
+
+graphify-out

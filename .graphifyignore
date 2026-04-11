@@ -1,0 +1,8 @@
+# .graphifyignore
+node_modules/
+dist/
+.expo/
+ios/
+assets/
+graphify-out/
+build-*.ipa

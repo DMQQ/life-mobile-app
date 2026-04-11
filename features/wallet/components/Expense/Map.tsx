@@ -120,11 +120,12 @@ export const getCurrentLocation = async () => {
 export type MapPickerHandle = { triggerSearch: () => void }
 
 const MapPicker = forwardRef<MapPickerHandle, Pick<ExpenseType, "location"> & { id: string }>((props, ref) => {
+    const STREET_DELTA = { latitudeDelta: 0.003, longitudeDelta: 0.003 }
+
     const [location, setLocation] = useState({
-        latitude: 53.7701,
-        longitude: 20.4862,
-        latitudeDelta: 0.0922,
-        longitudeDelta: 0.0421,
+        latitude: props.location?.latitude ?? 53.7701,
+        longitude: props.location?.longitude ?? 20.4862,
+        ...STREET_DELTA,
     })
 
     const map = useRef<Map>(null)
@@ -132,26 +133,23 @@ const MapPicker = forwardRef<MapPickerHandle, Pick<ExpenseType, "location"> & { 
     const [selectedMarker, setSelectedMarker] = useState<any>(null)
 
     useEffect(() => {
-        getCurrentLocation().then((coords) => {
-            if (coords.latitude && coords.longitude) {
-                setLocation({
-                    latitude: coords.latitude,
-                    longitude: coords.longitude,
-                    latitudeDelta: 0.04,
-                    longitudeDelta: 0.05,
-                })
-
-                map.current?.animateToRegion(
-                    {
-                        latitude: coords.latitude,
-                        longitude: coords.longitude,
-                        latitudeDelta: 0.04,
-                        longitudeDelta: 0.05,
-                    },
-                    1000,
-                )
+        if (props.location?.latitude && props.location?.longitude) {
+            const region = {
+                latitude: props.location.latitude,
+                longitude: props.location.longitude,
+                ...STREET_DELTA,
             }
-        })
+            setLocation(region)
+            map.current?.animateToRegion(region, 500)
+        } else {
+            getCurrentLocation().then((coords) => {
+                if (coords.latitude && coords.longitude) {
+                    const region = { latitude: coords.latitude, longitude: coords.longitude, ...STREET_DELTA }
+                    setLocation(region)
+                    map.current?.animateToRegion(region, 1000)
+                }
+            })
+        }
     }, [])
 
     const [assignedMarker, setAssignedMarker] = useState(props.location || null)
@@ -205,8 +203,7 @@ const MapPicker = forwardRef<MapPickerHandle, Pick<ExpenseType, "location"> & { 
                             {
                                 latitude: closestPoint!.latitude,
                                 longitude: closestPoint!.longitude,
-                                latitudeDelta: 0.04,
-                                longitudeDelta: 0.05,
+                                ...STREET_DELTA,
                             },
                             1000,
                         )
