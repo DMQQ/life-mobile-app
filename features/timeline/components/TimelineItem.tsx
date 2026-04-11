@@ -13,6 +13,18 @@ import { useActivityUtils } from "@/utils/hooks/useActivityManager"
 import useCompleteOccurrence from "../hooks/mutation/useCompleteOccurrence"
 import ContextMenu, { ContextMenuAction } from "react-native-context-menu-view"
 
+function priorityColor(priority: number): string {
+    if (priority >= 7) return "#FF3B30"
+    if (priority >= 4) return "#007AFF"
+    return "#34C759"
+}
+
+function priorityLabel(priority: number): string {
+    if (priority >= 7) return "High"
+    if (priority >= 4) return "Med"
+    return "Low"
+}
+
 export default function TimelineItem(
     timeline: OccurrenceItem & {
         location: "timeline" | "root"
@@ -147,7 +159,7 @@ export default function TimelineItem(
             }}
         >
             <Pressable onPress={onPress} style={{ flex: 1 }}>
-                <Card style={[timelineStyles.itemContainer, timeline.styles]}>
+                <Card style={[timelineStyles.itemContainer, timeline.styles, { overflow: "hidden" }]}>
                     <View style={[timelineStyles.itemContainerTitleRow]}>
                         <Text
                             numberOfLines={1}
@@ -191,20 +203,13 @@ export default function TimelineItem(
                         </View>
                     </View>
 
-                    <View
-                        style={{
-                            flexDirection: "row",
-                            justifyContent: "flex-end",
-                            alignItems: "center",
-                        }}
-                    >
-                        <View
-                            style={[
-                                styles.statusBadge,
-                                timeline.isCompleted && styles.statusCompleted,
-                                isExpired && styles.statusExpired,
-                            ]}
-                        >
+                    <View style={{ flexDirection: "row", justifyContent: "flex-end", alignItems: "center", gap: 5 }}>
+                        {timeline.priority != null && (
+                            <View style={[styles.statusBadge, { backgroundColor: priorityColor(timeline.priority) }]}>
+                                <Text style={timelineStyles.status}>{priorityLabel(timeline.priority)}</Text>
+                            </View>
+                        )}
+                        <View style={[styles.statusBadge, timeline.isCompleted && styles.statusCompleted, isExpired && styles.statusExpired]}>
                             <Text style={timelineStyles.status}>
                                 {timeline.isCompleted ? "Finished" : isExpired ? "Late" : "To do"}
                             </Text>
@@ -217,6 +222,15 @@ export default function TimelineItem(
 }
 
 const styles = StyleSheet.create({
+    priorityStrip: {
+        position: "absolute",
+        left: 0,
+        top: 0,
+        bottom: 0,
+        width: 4,
+        borderTopLeftRadius: 25,
+        borderBottomLeftRadius: 25,
+    },
     contentRow: {
         flexDirection: "row",
         flexWrap: "wrap",

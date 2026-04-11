@@ -7,9 +7,9 @@ export type TimelineRootStack = {
         selectedDate: string
         mode: "create" | "edit" | "shopping-list"
         timelineId?: string
-
         todos?: string[]
     }
+    AiOrganizer: { selectedDate: string }
     ImagesPreview: { selectedImage: string; timelineId: string }
     Schedule: { selected: string; selectedDate: string }
     Search: undefined

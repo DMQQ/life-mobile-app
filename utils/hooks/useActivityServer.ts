@@ -108,14 +108,18 @@ export const useActivityServer = () => {
         }
     }
 
-    const setLiveActivityUpdateToken = async (activityId: string, updateToken: string, timelineId?: string): Promise<boolean> => {
+    const setLiveActivityUpdateToken = async (
+        activityId: string,
+        updateToken: string,
+        timelineId?: string,
+    ): Promise<boolean> => {
         try {
             const { data } = await setLiveActivityUpdateTokenMutation({
                 variables: {
                     input: {
                         activityId,
                         updateToken,
-                        timelineId, // Send the timeline ID if available
+                        // timelineId, // Send the timeline ID if available
                     },
                 },
             })

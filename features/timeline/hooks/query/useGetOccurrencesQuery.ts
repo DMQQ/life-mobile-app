@@ -17,6 +17,7 @@ export interface OccurrenceItem {
     isAllDay: boolean
     isRepeat: boolean
     tags: string
+    priority: number | null
     todos: {
         id: string
         title: string
@@ -40,6 +41,7 @@ export const GET_OCCURRENCES_QUERY = gql`
             isCompleted
             isSkipped
             isRepeat
+            priority
             todos {
                 id
                 title

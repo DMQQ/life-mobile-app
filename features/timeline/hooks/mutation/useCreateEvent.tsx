@@ -16,6 +16,8 @@ const initialValues = {
     begin: "",
     end: "",
     tags: "UNTAGGED",
+    priority: 5,
+
     repeatCount: "0",
     repeatOn: "",
     repeatEveryNth: "",
@@ -50,6 +52,7 @@ export default function useCreateEvent(props: { selectedDate: string }) {
                 end: input.end,
                 tags: input.tags,
                 date: props.selectedDate,
+                priority: input.priority,
                 todos: input.todos ?? [],
 
                 ...(hasRepeat(input) && {

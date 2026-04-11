@@ -49,13 +49,11 @@ export default function useCreateTimeline({ route, navigation }: TimelineScreenP
                   notification: "none",
               }
 
-    // Holds pending edit input when scope selection is required
     const [pendingEdit, setPendingEdit] = useState<{ input: typeof initialFormValues; date: string } | null>(null)
 
     const formikSubmitForm = async (input: typeof initialFormValues) => {
         if (isEditing) {
             if (isRepeat) {
-                // Show scope sheet; actual mutation fires from onScopeSelected
                 setPendingEdit({ input, date: route.params.selectedDate })
                 scopeSheetRef.current?.expand()
                 return

@@ -153,8 +153,6 @@ const CreateRepeatableTimeline = forwardRef<BottomSheetType, CreateRepeatableTim
         [],
     )
 
-    console.log("CreateRepeatableTimeline rendering, snapPoints:", snapPoints)
-
     return (
         <BottomSheetGorhom
             ref={ref}

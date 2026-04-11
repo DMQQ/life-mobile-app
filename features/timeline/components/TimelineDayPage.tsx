@@ -1,21 +1,17 @@
-import Colors from "@/constants/Colors"
 import NotFound from "@/features/home/components/NotFound"
 import { useCallback, useState } from "react"
 import { RefreshControl, View, VirtualizedList } from "react-native"
-import Animated from "react-native-reanimated"
 import DayTimeline from "./DayTimeline"
 import TimelineItem from "./TimelineItem"
 import useGetOccurrencesQuery, { OccurrenceItem } from "../hooks/query/useGetOccurrencesQuery"
 
-const AnimatedVirtualizedList = Animated.createAnimatedComponent(VirtualizedList)
-
 interface TimelineDayPageProps {
     date: string
-    onScroll: any
     switchView: "date-list" | "calendar" | "timeline"
+    contentPaddingTop?: number
 }
 
-export default function TimelineDayPage({ date, onScroll, switchView }: TimelineDayPageProps) {
+export default function TimelineDayPage({ date, switchView, contentPaddingTop = 0 }: TimelineDayPageProps) {
     const { data, loading, refetch } = useGetOccurrencesQuery(date)
     const [refreshing, setRefreshing] = useState(false)
 
@@ -28,15 +24,14 @@ export default function TimelineDayPage({ date, onScroll, switchView }: Timeline
     const eventsCount = data?.occurrences?.length || 0
 
     return switchView !== "timeline" ? (
-        <AnimatedVirtualizedList
+        <VirtualizedList
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
             ListHeaderComponent={<View style={{ height: 20 }} />}
             ListEmptyComponent={<ListEmptyComponent isLoading={loading} length={eventsCount} selectedDate={date} />}
-            onScroll={onScroll}
             contentContainerStyle={{
                 paddingBottom: eventsCount > 0 ? 120 : 0,
                 padding: 15,
-                paddingTop: 450,
+                paddingTop: contentPaddingTop,
             }}
             data={(data?.occurrences as OccurrenceItem[]) || []}
             initialNumToRender={3}
@@ -47,14 +42,13 @@ export default function TimelineDayPage({ date, onScroll, switchView }: Timeline
         />
     ) : (
         <DayTimeline
-            onScroll={onScroll}
             selected={date}
             date={date}
             events={data?.occurrences || []}
             theme={{}}
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         >
-            <View style={{ paddingTop: 150 }}>
+            <View style={{ paddingTop: contentPaddingTop }}>
                 {data?.occurrences?.length === 0 && (
                     <View style={{ height: 225, marginTop: 30, paddingHorizontal: 15 }}>
                         <ListEmptyComponent isLoading={loading} length={eventsCount} selectedDate={date} />

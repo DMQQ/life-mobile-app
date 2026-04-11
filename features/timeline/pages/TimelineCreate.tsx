@@ -3,14 +3,13 @@ import Text from "@/components/ui/Text/Text"
 import ValidatedInput from "@/components/ui/ValidatedInput"
 import Colors from "@/constants/Colors"
 import useKeyboard from "@/utils/hooks/useKeyboard"
-import { AntDesign } from "@expo/vector-icons"
+import { AntDesign, Ionicons } from "@expo/vector-icons"
 import Color from "color"
 import moment from "moment"
 import { useRef, useState } from "react"
 import { ActivityIndicator, Platform, Pressable, ScrollView, StyleSheet, View } from "react-native"
 import Ripple from "react-native-material-ripple"
 import DateTimePicker from "react-native-modal-datetime-picker"
-import Animated from "react-native-reanimated"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import CreateRepeatableTimeline from "../components/CreateTimeline/CreateRepeatableTimeline"
 import EditScopeSheet from "../components/EditScopeSheet"
@@ -39,12 +38,6 @@ const styles = StyleSheet.create({
         textAlign: "center",
     },
 })
-
-const radioOptions = [
-    { label: "None", value: "none" },
-    { label: "All day", value: "all-day" },
-    { label: "Repeatable", value: "repeatable" },
-]
 
 export default function CreateTimeLineEventModal({ route, navigation }: TimelineScreenProps<"TimelineCreate">) {
     const isKeyboardOpen = useKeyboard()
@@ -79,145 +72,140 @@ export default function CreateTimeLineEventModal({ route, navigation }: Timeline
                     contentContainerStyle={{ padding: 15, paddingTop: 80 }}
                     keyboardDismissMode={"on-drag"}
                 >
-                    <Animated.View>
-                        <ValidatedInput
-                            placeholder="Like  'take out the trash' etc.."
-                            name="title"
-                            label="Title*"
-                            showLabel
-                            formik={f}
-                            helperStyle={{ marginLeft: 2.5 }}
-                        />
-                        <ValidatedInput
-                            showLabel
-                            label="Content"
-                            numberOfLines={
-                                isEditing ? f.values.desc.split("\n").length + 10 : f.values.desc.split("\n").length + 3
-                            }
-                            style={{
-                                ...(Platform.OS === "ios" && {
-                                    minHeight: (numberOfLines <= 5 ? 5 : numberOfLines) * 20,
-                                }),
-                            }}
-                            multiline
-                            placeholder="What you wanted to do"
-                            name="desc"
-                            formik={f}
-                            scrollEnabled
-                            textAlignVertical="top"
-                        />
+                    <ValidatedInput
+                        placeholder="Like  'take out the trash' etc.."
+                        name="title"
+                        label="Title*"
+                        showLabel
+                        formik={f}
+                        helperStyle={{ marginLeft: 2.5 }}
+                    />
+                    <ValidatedInput
+                        showLabel
+                        label="Content"
+                        numberOfLines={
+                            isEditing ? f.values.desc.split("\n").length + 10 : f.values.desc.split("\n").length + 3
+                        }
+                        style={{
+                            ...(Platform.OS === "ios" && {
+                                minHeight: (numberOfLines <= 5 ? 5 : numberOfLines) * 20,
+                            }),
+                        }}
+                        multiline
+                        placeholder="What you wanted to do"
+                        name="desc"
+                        formik={f}
+                        scrollEnabled
+                        textAlignVertical="top"
+                    />
 
-                        <ValidatedInput.Label error={false} text="Time range*" />
-                        <View style={styles.timeContainer}>
-                            <Ripple style={{ flex: 1, padding: 5 }} onPress={() => setTimePicker("begin")}>
-                                <Text variant="title" style={styles.timeText}>
-                                    {f.values.begin.split(":").slice(0, 2).join(":")}
-                                </Text>
-                                <Text style={{ fontSize: 13, color: "gray", textAlign: "center" }}>From</Text>
-                            </Ripple>
-
-                            <Text variant="body" style={{ color: "gray", padding: 5 }}>
-                                -
+                    <ValidatedInput.Label error={false} text="Time range*" />
+                    <View style={styles.timeContainer}>
+                        <Ripple style={{ flex: 1, padding: 5 }} onPress={() => setTimePicker("begin")}>
+                            <Text variant="title" style={styles.timeText}>
+                                {f.values.begin.split(":").slice(0, 2).join(":")}
                             </Text>
+                            <Text style={{ fontSize: 13, color: "gray", textAlign: "center" }}>From</Text>
+                        </Ripple>
 
-                            <Ripple style={{ flex: 1, padding: 5 }} onPress={() => setTimePicker("end")}>
-                                <Text variant="title" style={styles.timeText}>
-                                    {f.values.end.split(":").slice(0, 2).join(":")}
-                                </Text>
-                                <Text style={{ fontSize: 13, color: "gray", textAlign: "center" }}>To</Text>
-                            </Ripple>
-                        </View>
+                        <Text variant="body" style={{ color: "gray", padding: 5 }}>
+                            -
+                        </Text>
 
-                        {!isEditing && (
-                            <View style={{ marginTop: 15 }}>
-                                <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                                    <ValidatedInput.Label error={false} text={"Todos "} />
+                        <Ripple style={{ flex: 1, padding: 5 }} onPress={() => setTimePicker("end")}>
+                            <Text variant="title" style={styles.timeText}>
+                                {f.values.end.split(":").slice(0, 2).join(":")}
+                            </Text>
+                            <Text style={{ fontSize: 13, color: "gray", textAlign: "center" }}>To</Text>
+                        </Ripple>
+                    </View>
 
-                                    <Pressable
-                                        onPress={() => {
-                                            ;(navigation as any).navigate("CreateTimelineTodos", {
-                                                mode: "push-back",
+                    {!isEditing && (
+                        <View style={{ marginTop: 15 }}>
+                            <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                                <ValidatedInput.Label error={false} text={"Todos "} />
 
-                                                selectedDate: route.params.selectedDate,
-
-                                                todos: route.params.todos || [],
-                                            })
+                                <Pressable
+                                    onPress={() => {
+                                        ;(navigation as any).navigate("CreateTimelineTodos", {
+                                            mode: "push-back",
+                                            selectedDate: route.params.selectedDate,
+                                            todos: route.params.todos || [],
+                                        })
+                                    }}
+                                >
+                                    <Text
+                                        style={{
+                                            fontSize: 16,
+                                            fontWeight: "bold",
+                                            color: Colors.secondary,
+                                            padding: 5,
                                         }}
                                     >
-                                        <Text
-                                            style={{
-                                                fontSize: 16,
-                                                fontWeight: "bold",
-                                                color: Colors.secondary,
-                                                padding: 5,
-                                            }}
-                                        >
-                                            Create new todos
-                                        </Text>
-                                    </Pressable>
-                                </View>
-                                <View style={{ marginTop: 2.5 }}>
-                                    {(route.params.todos?.length || 0) > 0 ? (
-                                        route.params.todos?.map((todo, index) => (
-                                            <Todo
-                                                index={index}
-                                                value={todo}
-                                                key={index}
-                                                showRemove
-                                                onRemove={() => {
-                                                    navigation.setParams({
-                                                        ...route.params,
-                                                        todos: route.params?.todos?.filter((_, i) => i !== index),
-                                                    })
-                                                }}
-                                            />
-                                        ))
-                                    ) : (
-                                        <View style={{ padding: 10 }}>
-                                            <Text style={{ color: "gray", fontStyle: "italic", fontSize: 15 }}>
-                                                No todos added yet.
-                                            </Text>
-                                        </View>
-                                    )}
-                                </View>
+                                        Create new todos
+                                    </Text>
+                                </Pressable>
                             </View>
-                        )}
+                            <View style={{ marginTop: 2.5 }}>
+                                {(route.params.todos?.length || 0) > 0 ? (
+                                    route.params.todos?.map((todo, index) => (
+                                        <Todo
+                                            index={index}
+                                            value={todo}
+                                            key={index}
+                                            showRemove
+                                            onRemove={() => {
+                                                navigation.setParams({
+                                                    ...route.params,
+                                                    todos: route.params?.todos?.filter((_, i) => i !== index),
+                                                })
+                                            }}
+                                        />
+                                    ))
+                                ) : (
+                                    <View style={{ padding: 10 }}>
+                                        <Text style={{ color: "gray", fontStyle: "italic", fontSize: 15 }}>
+                                            No todos added yet.
+                                        </Text>
+                                    </View>
+                                )}
+                            </View>
+                        </View>
+                    )}
 
-                        <TimePickerModal
-                            isVisible={!!timePicker}
-                            currentTime={timePicker === "begin" ? f.values.begin : f.values.end}
-                            onConfirm={(currentlySelectedTime) => {
-                                let finalDate = moment(currentlySelectedTime)
+                    <TimePickerModal
+                        isVisible={!!timePicker}
+                        currentTime={timePicker === "begin" ? f.values.begin : f.values.end}
+                        onConfirm={(currentlySelectedTime) => {
+                            let finalDate = moment(currentlySelectedTime)
 
-                                if (timePicker === "begin") {
-                                    f.setFieldValue("begin", finalDate.format("HH:mm"))
+                            if (timePicker === "begin") {
+                                f.setFieldValue("begin", finalDate.format("HH:mm"))
 
-                                    if (!endManuallyChanged.current) {
-                                        f.setFieldValue("end", finalDate.clone().add(1, "hours").format("HH:mm"))
-                                    }
+                                if (!endManuallyChanged.current) {
+                                    f.setFieldValue("end", finalDate.clone().add(1, "hours").format("HH:mm"))
                                 }
+                            }
 
-                                if (timePicker === "end") {
-                                    endManuallyChanged.current = true
-                                    f.setFieldValue("end", finalDate.format("HH:mm"))
+                            if (timePicker === "end") {
+                                endManuallyChanged.current = true
+                                f.setFieldValue("end", finalDate.format("HH:mm"))
 
-                                    if (finalDate.isBefore(moment(f.values.begin, "HH:mm"))) {
-                                        f.setFieldValue("begin", finalDate.subtract(1, "hours").format("HH:mm"))
-                                    }
+                                if (finalDate.isBefore(moment(f.values.begin, "HH:mm"))) {
+                                    f.setFieldValue("begin", finalDate.subtract(1, "hours").format("HH:mm"))
                                 }
+                            }
 
-                                setTimePicker("")
-                            }}
-                            onCancel={() => setTimePicker("")}
-                        />
-                    </Animated.View>
+                            setTimePicker("")
+                        }}
+                        onCancel={() => setTimePicker("")}
+                    />
                 </ScrollView>
 
                 <SubmitButton
                     f={f}
-                    openSheet={() => {
-                        sheetRef.current?.expand()
-                    }}
+                    openSheet={() => sheetRef.current?.expand()}
+                    openAiSheet={() => navigation.navigate("AiOrganizer", { selectedDate: route.params.selectedDate })}
                     isEditing={isEditing}
                     isKeyboardOpen={isKeyboardOpen || false}
                     isLoading={isLoading}
@@ -234,17 +222,15 @@ interface SubmitButtonProps {
     isKeyboardOpen: boolean
     isLoading: boolean
     f: any
-
     isEditing: boolean
-
     openSheet: () => void
+    openAiSheet: () => void
 }
 
 const SubmitButton = (props: SubmitButtonProps) => (
-    <View style={{ flexDirection: "row", paddingHorizontal: 15 }}>
+    <View style={{ flexDirection: "row", paddingHorizontal: 15, gap: 10 }}>
         <GlassView
             style={{
-                marginRight: 15,
                 borderRadius: 100,
                 width: 50,
                 height: 50,
@@ -257,6 +243,7 @@ const SubmitButton = (props: SubmitButtonProps) => (
                 icon={<AntDesign name="calendar" color={Colors.foreground} size={20} />}
             />
         </GlassView>
+
         <Button2
             icon={
                 props.isLoading ? (
@@ -278,6 +265,20 @@ const SubmitButton = (props: SubmitButtonProps) => (
         >
             {props.isEditing ? "Save changes" : "Create new event"}
         </Button2>
+        <GlassView
+            style={{
+                borderRadius: 100,
+                width: 50,
+                height: 50,
+                justifyContent: "center",
+                alignItems: "center",
+            }}
+        >
+            <IconButton
+                onPress={props.openAiSheet}
+                icon={<Ionicons name="sparkles" color={Colors.secondary} size={20} />}
+            />
+        </GlassView>
     </View>
 )
 

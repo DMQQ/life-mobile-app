@@ -17,6 +17,7 @@ export const OCCURRENCE_FIELDS = gql`
         isAllDay
         isRepeat
         tags
+        priority
         todos {
             id
             title
@@ -44,10 +45,11 @@ export const CREATE_EVENT = gql`
     mutation CreateEvent(
         $title: String!
         $desc: String!
-        $date: String!
+        $date: String
         $begin: String!
         $end: String!
         $tags: String!
+        $priority: Int
         $repeatCount: Int
         $repeatOn: String
         $repeatEveryNth: Int
@@ -62,6 +64,7 @@ export const CREATE_EVENT = gql`
                 beginTime: $begin
                 endTime: $end
                 tags: $tags
+                priority: $priority
                 todos: $todos
             }
             repeat: {

@@ -1,24 +1,34 @@
 import { useNavigation } from "@react-navigation/native"
 import moment from "moment"
 import { useMemo } from "react"
-import { Pressable, StyleProp, StyleSheet, View, ViewStyle } from "react-native"
+import { StyleProp, StyleSheet, View, ViewStyle } from "react-native"
 import Colors from "@/constants/Colors"
 import Text from "@/components/ui/Text/Text"
 import { GetTimelineQuery } from "../hooks/query/useGetTimeLineQuery"
 import timelineStyles from "./timeline.styles"
 import TodosPreviewSection from "./TodosPreviewSection"
 
+function priorityColor(priority: number): string {
+    if (priority >= 7) return "#FF3B30"
+    if (priority >= 4) return "#007AFF"
+    return "#34C759"
+}
+
+function priorityLabel(priority: number): string {
+    if (priority >= 7) return "High"
+    if (priority >= 4) return "Med"
+    return "Low"
+}
+
 export default function DayTimelineItem(
     timeline: GetTimelineQuery & {
         location: "timeline" | "root"
         textColor?: string
         styles?: StyleProp<ViewStyle>
-
         isSmall: boolean
-
         onLongPress?: () => void
-
         compactTodos?: boolean
+        priority?: number | null
     },
 ) {
     const start = moment(timeline.beginTime, "HH:mm").format("HH:mm")
@@ -101,13 +111,12 @@ export default function DayTimelineItem(
             )}
 
             <View style={styles.statusContainer}>
-                <View
-                    style={[
-                        styles.statusBadge,
-                        timeline.isCompleted && styles.statusCompleted,
-                        isExpired && styles.statusExpired,
-                    ]}
-                >
+                {timeline.priority != null && (
+                    <View style={[styles.statusBadge, { backgroundColor: priorityColor(timeline.priority) }]}>
+                        <Text style={timelineStyles.status}>{priorityLabel(timeline.priority)}</Text>
+                    </View>
+                )}
+                <View style={[styles.statusBadge, timeline.isCompleted && styles.statusCompleted, isExpired && styles.statusExpired]}>
                     <Text style={timelineStyles.status}>
                         {timeline.isCompleted ? "Finished" : isExpired ? "Late" : "To do"}
                     </Text>

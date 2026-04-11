@@ -27,7 +27,7 @@ interface CustomTimelineProps extends Partial<ScrollViewProps> {
 
     selected: string
 
-    onScroll: (event: any) => void
+    onScroll?: (event: any) => void
 
     onLongPress?: (event: TimelineEvent) => void
 
@@ -117,7 +117,7 @@ const CalendarTimetable = ({
     return (
         <Animated.ScrollView
             keyboardDismissMode={"on-drag"}
-            style={{ flex: 1, paddingBottom: items?.length > 0 ? 100 : 0, paddingTop: 300 }}
+            style={{ flex: 1, paddingBottom: items?.length > 0 ? 100 : 0 }}
             onScroll={onScroll}
             showsVerticalScrollIndicator={false}
             scrollEventThrottle={16}
@@ -134,6 +134,9 @@ const CalendarTimetable = ({
                 items={items as any}
                 hourHeight={150}
                 renderItem={renderItem}
+                scrollViewProps={{
+                    horizontal: false,
+                }}
             />
             {items?.length > 0 && <View style={{ height: 120 }} />}
         </Animated.ScrollView>
