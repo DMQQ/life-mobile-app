@@ -218,7 +218,7 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                 buttons={[
                     {
                         icon: <Feather name="edit-2" size={20} color={Colors.foreground} />,
-                        onPress: () => {},
+                        onPress: () => navigation.navigate("EditSubscription", { subscription }),
                     },
                 ]}
                 initialTitleFontSize={subscription?.description?.length > 25 ? 40 : 50}

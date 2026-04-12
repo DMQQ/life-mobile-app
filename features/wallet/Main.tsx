@@ -13,6 +13,7 @@ import EditBalance from "./pages/EditBalance"
 import Expense from "./pages/Expense"
 import Filters from "./pages/Filters"
 import SubscriptionScreen from "./pages/Subscription"
+import EditSubscription from "./pages/EditSubscription"
 import Wallet from "./pages/Wallet"
 import WalletCharts from "./pages/WalletCharts"
 import Color from "color"
@@ -106,6 +107,15 @@ export default function WalletScreens({ navigation, route }: WalletScreens<"Wall
                 />
 
                 <Stack.Screen name="Subscription" component={SubscriptionScreen as any} />
+
+                <Stack.Screen
+                    name="EditSubscription"
+                    component={EditSubscription as any}
+                    options={{
+                        presentation: "modal",
+                        headerShown: false,
+                    }}
+                />
 
                 <Stack.Screen
                     name="EditBalance"

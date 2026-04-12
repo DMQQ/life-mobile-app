@@ -1,5 +1,20 @@
 import { gql, useMutation } from "@apollo/client"
 
+const MODIFY_SUBSCRIPTION_MUTATION = gql`
+    mutation modifySubscription($input: UpdateSubscriptionInput!) {
+        modifySubscription(input: $input) {
+            id
+            amount
+            dateStart
+            dateEnd
+            description
+            isActive
+            nextBillingDate
+            billingCycle
+        }
+    }
+`
+
 const CANCEL_SUBSCRIPTION_MUTATION = gql`
     mutation cancelSubscription($subscriptionId: ID!) {
         cancelSubscription(subscriptionId: $subscriptionId) {
@@ -104,6 +119,10 @@ export default function useSubscription() {
         },
     )
 
+    const [modifySubscription, modifySubscriptionState] = useMutation(MODIFY_SUBSCRIPTION_MUTATION, {
+        refetchQueries: ["GetWallet", "Subscription"],
+    })
+
     return {
         cancelSubscription,
         cancelSubscriptionState,
@@ -113,5 +132,7 @@ export default function useSubscription() {
         renewSubscriptionState,
         assignExpenseToSubscription,
         assignExpenseToSubscriptionState,
+        modifySubscription,
+        modifySubscriptionState,
     }
 }
