@@ -1,12 +1,17 @@
 import Colors from "@/constants/Colors"
 import moment from "moment"
-import { ReactElement, useCallback, useEffect, useRef, useState } from "react"
+import { ReactElement, forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react"
 import { Calendar } from "react-native-calendars"
 import ChipButton from "../ui/Button/ChipButton"
 import FloatingMenu, { FloatingMenuRef } from "../ui/FloatingMenu"
 import Color from "color"
 import GlassView from "../ui/GlassView"
 import { View } from "react-native"
+
+export interface DatePickerRef {
+    open: () => void
+    close: () => void
+}
 
 const theme = {
     backgroundColor: "transparent",
@@ -38,18 +43,23 @@ interface DatePickerProps {
     buttonComponent?: (prop: { start: Date; end: Date }) => ReactElement
 }
 
-export default function DatePicker({
+const DatePicker = forwardRef<DatePickerRef, DatePickerProps>(function DatePicker({
     buttonComponent,
     dates,
     setDates,
     mode = "period",
     placeholder,
-}: DatePickerProps) {
+}, ref) {
     const [selectedRange, setSelectedRange] = useState<{ [key: string]: any }>({})
     const [selecting, setSelecting] = useState<"start" | "end" | null>(null)
     const [tempStartDate, setTempStartDate] = useState<Date | null>(null)
 
     const pickerRef = useRef<FloatingMenuRef>(null)
+
+    useImperativeHandle(ref, () => ({
+        open: () => pickerRef.current?.open(),
+        close: () => pickerRef.current?.close(),
+    }))
 
     useEffect(() => {
         if (mode === "single") {
@@ -204,4 +214,6 @@ export default function DatePicker({
             )}
         </FloatingMenu>
     )
-}
+})
+
+export default DatePicker

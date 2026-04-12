@@ -1,17 +1,17 @@
 import Colors from "@/constants/Colors"
 import { useNavigation } from "@react-navigation/native"
 import moment from "moment"
-import { useCallback, useMemo, useState } from "react"
-import { StyleProp, StyleSheet, Text, View, ViewStyle, TouchableOpacity, Pressable } from "react-native"
+import { useCallback, useMemo } from "react"
+import { StyleProp, StyleSheet, Text, View, ViewStyle, Pressable } from "react-native"
 import { OccurrenceItem } from "../hooks/query/useGetOccurrencesQuery"
 import timelineStyles from "./timeline.styles"
 import TodosPreviewSection from "./TodosPreviewSection"
 import { Card } from "@/components"
-// import ContextMenu from "@/components/ui/ContextMenu"
 import useRemoveTimelineMutation from "../hooks/mutation/useRemoveTimelineMutation"
 import { useActivityUtils } from "@/utils/hooks/useActivityManager"
 import useCompleteOccurrence from "../hooks/mutation/useCompleteOccurrence"
 import ContextMenu, { ContextMenuAction } from "react-native-context-menu-view"
+import { Feather } from "@expo/vector-icons"
 
 function priorityColor(priority: number): string {
     if (priority >= 7) return "#FF3B30"
@@ -168,6 +168,16 @@ export default function TimelineItem(
                                 { ...(timeline.textColor && { color: timeline.textColor }) },
                             ]}
                         >
+                            {timeline.isRepeat && (
+                                <View>
+                                    <Feather
+                                        style={{ marginRight: 5 }}
+                                        name="repeat"
+                                        size={15}
+                                        color={Colors.secondary_light_1}
+                                    />
+                                </View>
+                            )}
                             {timeline.title}
                         </Text>
                         <Text
@@ -209,7 +219,13 @@ export default function TimelineItem(
                                 <Text style={timelineStyles.status}>{priorityLabel(timeline.priority)}</Text>
                             </View>
                         )}
-                        <View style={[styles.statusBadge, timeline.isCompleted && styles.statusCompleted, isExpired && styles.statusExpired]}>
+                        <View
+                            style={[
+                                styles.statusBadge,
+                                timeline.isCompleted && styles.statusCompleted,
+                                isExpired && styles.statusExpired,
+                            ]}
+                        >
                             <Text style={timelineStyles.status}>
                                 {timeline.isCompleted ? "Finished" : isExpired ? "Late" : "To do"}
                             </Text>

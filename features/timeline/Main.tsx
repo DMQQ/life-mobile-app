@@ -11,6 +11,7 @@ import TimelineDetails from "./pages/TimelineDetails"
 import TodosTransferModal from "./pages/TodosTransferModal"
 import CopyTimelineModal from "./pages/CopyTimelineModal"
 import AiOrganizerModal from "./pages/AiOrganizerModal"
+import TimelineDoScreen from "./pages/TimelineDoScreen"
 import type { TimelineRootStack as RootStackParamList } from "./types"
 import Color from "color"
 import Colors from "@/constants/Colors"
@@ -115,6 +116,14 @@ export default function TimelineScreens({ route, navigation }: RootStackScreenPr
             <Stack.Screen
                 name="AiOrganizer"
                 component={AiOrganizerModal}
+                options={{
+                    headerShown: false,
+                    presentation: "modal",
+                }}
+            />
+            <Stack.Screen
+                name="TimelineDo"
+                component={TimelineDoScreen}
                 options={{
                     headerShown: false,
                     presentation: "modal",

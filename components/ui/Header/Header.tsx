@@ -5,7 +5,7 @@ import { AntDesign } from "@expo/vector-icons"
 import { useNavigation } from "@react-navigation/native"
 import Color from "color"
 import { memo, ReactNode, useMemo } from "react"
-import { StyleProp, StyleSheet, TextStyle, View, ViewStyle } from "react-native"
+import { StyleProp, StyleSheet, TextStyle, TouchableOpacity, View, ViewStyle } from "react-native"
 import Haptic from "react-native-haptic-feedback"
 import Ripple from "react-native-material-ripple"
 import Animated, { Extrapolation, interpolate, SharedValue, useAnimatedStyle } from "react-native-reanimated"
@@ -76,6 +76,7 @@ interface HeaderProps {
      * @returns This is used to handle long press on the animated title.
      */
     onAnimatedTitleLongPress?: () => void
+    onAnimatedTitlePress?: () => void
     /**
      * This is used to style the animated title.
      */
@@ -394,6 +395,7 @@ const AnimatedContent = memo(
 
         return (
             <Animated.View
+                pointerEvents={props.onAnimatedTitlePress ? "box-none" : "none"}
                 style={[{ position: "absolute" }, props.textContainerStyle, props.animated && animatedContentStyle]}
             >
                 {props.animatedValue !== undefined ? (
@@ -403,6 +405,15 @@ const AnimatedContent = memo(
                         style={[styles.numericTitle, animatedFontSize]}
                         formatValue={props.animatedValueFormat || ((value) => `${value.toFixed(2)}`)}
                     />
+                ) : props.onAnimatedTitlePress ? (
+                    <TouchableOpacity onPress={props.onAnimatedTitlePress} activeOpacity={0.7}>
+                        <Animated.Text
+                            numberOfLines={initialNumberOfLines}
+                            style={[styles.title, props.titleAnimatedStyle, animatedFontSize]}
+                        >
+                            {props.animatedTitle}
+                        </Animated.Text>
+                    </TouchableOpacity>
                 ) : (
                     <Animated.Text
                         numberOfLines={initialNumberOfLines}

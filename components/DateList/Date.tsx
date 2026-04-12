@@ -7,17 +7,17 @@ import { StyleSheet, TouchableOpacity, View } from "react-native"
 import Text from "@/components/ui/Text/Text"
 import Haptic from "react-native-haptic-feedback"
 import Animated, { FadeIn } from "react-native-reanimated"
-import Colors, { secondary_candidates } from "../../constants/Colors"
+import Colors from "../../constants/Colors"
 import { Date as TDate } from "./fns"
 import GlassView from "@/components/ui/GlassView"
 
 const styles = StyleSheet.create({
     container: {
         alignItems: "center",
-        borderRadius: Rounded.m,
+        borderRadius: Rounded.xl,
         width: 60,
         justifyContent: "center",
-        height: 75,
+        height: 70,
         margin: Padding.xs,
     },
     indicator: {
@@ -39,11 +39,7 @@ const Dots = memo((props: { tasks: number[] }) =>
     props.tasks.length > 0 ? (
         <View style={{ flexDirection: "row", position: "absolute", top: -3, overflow: "hidden" }}>
             {props.tasks.map((_, i) => (
-                <Animated.View
-                    entering={FadeIn}
-                    key={i}
-                    style={[styles.indicator, { backgroundColor: secondary_candidates[i] }]}
-                />
+                <Animated.View entering={FadeIn} key={i} style={[styles.indicator, { backgroundColor: "#fff" }]} />
             ))}
         </View>
     ) : null,
@@ -56,8 +52,8 @@ const DateComponent = (props: DateProps) => {
     const tintColor = props.isSelected
         ? Color(Colors.secondary).alpha(0.55).toString()
         : isToday
-          ? Color("#ffffff").alpha(0.12).toString()
-          : Color("#ffffff").alpha(0.04).toString()
+          ? Color("#ffffff").alpha(0.15).toString()
+          : undefined
 
     const date = new Date(props.date)
 
@@ -69,9 +65,9 @@ const DateComponent = (props: DateProps) => {
                 props.onLongPress()
             }}
             onPress={() => props.onPress()}
-            activeOpacity={0.75}
+            activeOpacity={0.85}
         >
-            <GlassView tintColor={tintColor} style={styles.container}>
+            <GlassView key={tintColor} tintColor={tintColor} style={styles.container}>
                 <Dots tasks={tasks} />
                 <Text
                     variant="title"

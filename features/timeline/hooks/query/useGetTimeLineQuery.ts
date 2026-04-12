@@ -11,6 +11,10 @@ export interface GetTimelineQuery {
     endTime: string
     isCompleted: boolean
 
+    isRepeat?: boolean
+
+    priority?: number | null
+
     todos: {
         id: string
         title: string

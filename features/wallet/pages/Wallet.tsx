@@ -137,7 +137,7 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
                     },
                 },
                 {
-                    icon: showSubscriptionsView ? "repeat" : ("wallet.bifold" as SFSymbol),
+                    icon: showSubscriptionsView ? ("wallet.bifold" as SFSymbol) : "repeat",
                     onPress: () => {
                         setShowSubscriptionsView((prev) => !prev)
                         Haptic.trigger("impactLight")

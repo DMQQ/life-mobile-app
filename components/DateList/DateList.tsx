@@ -74,6 +74,7 @@ const DateList = memo(({ selectedDate, setSelected, dayEvents }: DateListProps) 
                 data={dates}
                 keyExtractor={keyExtractor}
                 renderItem={renderItem}
+                contentContainerStyle={{ height: 90, paddingTop: 5 }}
             />
         </View>
     )

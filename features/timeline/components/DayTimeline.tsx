@@ -1,13 +1,11 @@
-import Colors, { secondary_candidates } from "@/constants/Colors"
+import Colors from "@/constants/Colors"
 import moment from "moment"
-import { memo, useCallback, useMemo } from "react"
+import { memo, useCallback, useMemo, useRef, useEffect, useState } from "react"
 import { ScrollViewProps, View } from "react-native"
 import TimeTable from "react-native-calendar-timetable"
 import Animated from "react-native-reanimated"
 import DayTimelineItemWrapper from "./DayTimelineItemWrapper"
-import Text from "@/components/ui/Text/Text"
 import Color from "color"
-import Layout from "@/constants/Layout"
 
 interface TimelineEvent {
     id: string
@@ -31,9 +29,6 @@ interface CustomTimelineProps extends Partial<ScrollViewProps> {
 
     onLongPress?: (event: TimelineEvent) => void
 
-    /**
-     * Header
-     */
     children?: React.ReactNode
 }
 
@@ -45,6 +40,11 @@ const CalendarTimetable = ({
     children,
     ...listProps
 }: CustomTimelineProps) => {
+    const scrollViewRef = useRef<Animated.ScrollView>(null)
+    const [headerHeight, setHeaderHeight] = useState(0)
+
+    const HOUR_HEIGHT = 150
+
     const items = useMemo(
         () =>
             events.map((t, index) => ({
@@ -60,14 +60,28 @@ const CalendarTimetable = ({
                 timeline: t,
                 id: index,
             })),
-        [events],
+        [events, selected],
     )
 
     const trimTime = (t: string, range = 2) => t.split(":").slice(0, range).join(":")
 
     const minHour = Math.min(...(events.map((v) => +trimTime(v.beginTime, 1)) || []))
 
-    const maxHour = Math.max(...(events.map((v) => +trimTime(v.endTime, 1)) || []))
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            const isToday = moment(selected).isSame(moment(), "day")
+
+            const currentHour = moment().hour()
+            const targetHour = isToday ? currentHour : minHour !== Infinity ? minHour : 8
+
+            scrollViewRef.current?.scrollTo({
+                y: targetHour * HOUR_HEIGHT + headerHeight,
+                animated: false,
+            })
+        }, 300)
+
+        return () => clearTimeout(timeout)
+    }, [selected, headerHeight, minHour])
 
     const renderItem = useCallback(
         (props: any) => {
@@ -100,7 +114,6 @@ const CalendarTimetable = ({
             lines: {
                 borderColor: Color(Colors.primary).lighten(2).toString(),
             },
-
             nowLine: {
                 line: {
                     backgroundColor: Colors.secondary,
@@ -116,6 +129,7 @@ const CalendarTimetable = ({
 
     return (
         <Animated.ScrollView
+            ref={scrollViewRef}
             keyboardDismissMode={"on-drag"}
             style={{ flex: 1, paddingBottom: items?.length > 0 ? 100 : 0 }}
             onScroll={onScroll}
@@ -123,16 +137,15 @@ const CalendarTimetable = ({
             scrollEventThrottle={16}
             {...listProps}
         >
-            {children}
+            <View onLayout={(e) => setHeaderHeight(e.nativeEvent.layout.height)}>{children}</View>
+
             <TimeTable
-                fromHour={Math.max(minHour, 0)}
-                toHour={Math.min(maxHour + 1, 24)}
                 date={moment(selected).toDate()}
                 stickyHours
                 style={style}
                 enableSnapping
                 items={items as any}
-                hourHeight={150}
+                hourHeight={HOUR_HEIGHT}
                 renderItem={renderItem}
                 scrollViewProps={{
                     horizontal: false,

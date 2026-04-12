@@ -13,6 +13,7 @@ interface FloatingMenuProps {
 
 interface FloatingMenuRef {
     close: () => void
+    open: () => void
 }
 
 const FloatingMenu = forwardRef<FloatingMenuRef, FloatingMenuProps>(
@@ -111,7 +112,7 @@ const FloatingMenu = forwardRef<FloatingMenuRef, FloatingMenuProps>(
             }
         }, [])
 
-        useImperativeHandle(ref, () => ({ close: hideMenu }))
+        useImperativeHandle(ref, () => ({ close: hideMenu, open: measureAnchor }))
 
         const measureAnchor = () => {
             anchorRef.current?.measure((x, y, width, height, pageX, pageY) => {

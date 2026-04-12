@@ -12,6 +12,8 @@ interface Props {
     uploadLoading?: boolean
     onStartActivity: () => void
     activityPending?: boolean
+    onDo?: () => void
+    isCompleted?: boolean
 }
 
 export default function FloatingBottomToolBar({
@@ -21,6 +23,8 @@ export default function FloatingBottomToolBar({
     uploadLoading,
     onStartActivity,
     activityPending,
+    onDo,
+    isCompleted,
 }: Props) {
     return (
         <View style={styles.toolbar} pointerEvents="box-none">
@@ -49,6 +53,8 @@ export default function FloatingBottomToolBar({
                     disabled={activityPending}
                     dimmed={activityPending}
                 />
+
+                {!isCompleted && onDo && <ToolbarButton icon="bolt.fill" label="Work on it" onPress={onDo} />}
             </GlassView>
         </View>
     )
@@ -62,6 +68,7 @@ function ToolbarButton({
     loading,
     dimmed,
     hasBadge,
+    accent,
 }: {
     icon: SFSymbols6_0
     label: string
@@ -70,6 +77,7 @@ function ToolbarButton({
     loading?: boolean
     dimmed?: boolean
     hasBadge?: boolean
+    accent?: boolean
 }) {
     return (
         <View style={styles.toolbarItem}>
@@ -79,14 +87,26 @@ function ToolbarButton({
                     onPress={onPress ?? (() => {})}
                     disabled={disabled}
                     size={26}
-                    style={[styles.iconBtn, (dimmed || disabled) && styles.iconBtnDisabled]}
+                    style={[
+                        styles.iconBtn,
+                        (dimmed || disabled) && styles.iconBtnDisabled,
+                        accent && styles.iconBtnAccent,
+                    ]}
                 />
                 {hasBadge && <View style={styles.badge} />}
             </View>
             {loading ? (
                 <ActivityIndicator size="small" color={Colors.secondary} style={{ marginTop: 3, height: 13 }} />
             ) : (
-                <Text style={[styles.btnLabel, (dimmed || disabled) && { opacity: 0.35 }]}>{label}</Text>
+                <Text
+                    style={[
+                        styles.btnLabel,
+                        (dimmed || disabled) && { opacity: 0.35 },
+                        accent && { color: Colors.secondary },
+                    ]}
+                >
+                    {label}
+                </Text>
             )}
         </View>
     )
@@ -117,6 +137,9 @@ const styles = StyleSheet.create({
     },
     iconBtnDisabled: {
         opacity: 0.3,
+    },
+    iconBtnAccent: {
+        backgroundColor: Colors.secondary + "22",
     },
     badge: {
         position: "absolute",

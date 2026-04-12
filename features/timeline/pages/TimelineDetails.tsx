@@ -225,6 +225,8 @@ export default function TimelineDetails({
                 onPickImage={handlePickImage}
                 onTakePhoto={handleTakePhoto}
                 uploadLoading={uploadLoading}
+                isCompleted={data?.isCompleted}
+                onDo={() => (navigation as any).navigate("TimelineDo", { timelineId: data?.id })}
             />
         </View>
     )

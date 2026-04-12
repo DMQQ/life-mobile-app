@@ -7,6 +7,7 @@ import Text from "@/components/ui/Text/Text"
 import { GetTimelineQuery } from "../hooks/query/useGetTimeLineQuery"
 import timelineStyles from "./timeline.styles"
 import TodosPreviewSection from "./TodosPreviewSection"
+import { AntDesign, Feather } from "@expo/vector-icons"
 
 function priorityColor(priority: number): string {
     if (priority >= 7) return "#FF3B30"
@@ -64,6 +65,16 @@ export default function DayTimelineItem(
                     numberOfLines={1}
                     style={[timelineStyles.itemTitle, { ...(timeline.textColor && { color: timeline.textColor }) }]}
                 >
+                    {timeline.isRepeat && (
+                        <View>
+                            <Feather
+                                style={{ marginRight: 5 }}
+                                name="repeat"
+                                size={15}
+                                color={Colors.secondary_light_1}
+                            />
+                        </View>
+                    )}
                     {timeline.title}
                 </Text>
                 <Text
@@ -116,7 +127,13 @@ export default function DayTimelineItem(
                         <Text style={timelineStyles.status}>{priorityLabel(timeline.priority)}</Text>
                     </View>
                 )}
-                <View style={[styles.statusBadge, timeline.isCompleted && styles.statusCompleted, isExpired && styles.statusExpired]}>
+                <View
+                    style={[
+                        styles.statusBadge,
+                        timeline.isCompleted && styles.statusCompleted,
+                        isExpired && styles.statusExpired,
+                    ]}
+                >
                     <Text style={timelineStyles.status}>
                         {timeline.isCompleted ? "Finished" : isExpired ? "Late" : "To do"}
                     </Text>

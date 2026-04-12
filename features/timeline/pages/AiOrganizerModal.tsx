@@ -508,7 +508,7 @@ const TaskCard = ({ task, onCreate }: { task: ResolvedTask; onCreate: () => Prom
             ) : (
                 <GlassView
                     tintColor={status === "loading" ? undefined : Colors.secondary}
-                    style={[s.addBtn, status === "loading" && { opacity: 0.6 }]}
+                    style={[s.addBtn, status === "loading" && { opacity: 0.6 }, { height: 40 }]}
                 >
                     <Pressable style={s.iconBtnInner} onPress={onAdd} disabled={status === "loading"}>
                         {status === "loading" ? (
