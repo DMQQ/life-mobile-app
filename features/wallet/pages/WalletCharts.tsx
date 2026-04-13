@@ -3,7 +3,7 @@ import Text from "@/components/ui/Text/Text"
 import Colors, { secondary_candidates } from "@/constants/Colors"
 import Layout from "@/constants/Layout"
 import { Expense } from "@/types"
-import { AntDesign, MaterialIcons } from "@expo/vector-icons"
+import { AntDesign, Ionicons, MaterialIcons } from "@expo/vector-icons"
 import moment from "moment"
 import { useCallback, useMemo, useRef, useState } from "react"
 import { StyleSheet, View, VirtualizedList } from "react-native"
@@ -125,14 +125,12 @@ function WalletCharts({ navigation }: any) {
         )
     }, [data?.wallet?.expenses2])
 
-    console.log("filtered", filteredExpenses)
-
     const [excluded, setExcluded] = useState<string[]>([])
 
     const listRef = useRef<VirtualizedList<any> | null>(null)
     const [selected, setSelected] = useState("")
 
-    const [chartType, setChartType] = useState<"pie" | "bar">("pie")
+    const [chartType] = useState<"pie" | "bar">("pie")
 
     const legend = useGetLegendData(
         moment().startOf("month").format("YYYY-MM-DD"),
@@ -229,8 +227,16 @@ function WalletCharts({ navigation }: any) {
                     />
                 ),
             },
+            {
+                icon: <Ionicons name="sparkles" size={20} color={Colors.secondary} />,
+                onPress: () =>
+                    navigation.navigate("AiStatsChat", {
+                        startDate: filters.date.from,
+                        endDate: filters.date.to,
+                    }),
+            },
         ],
-        [chartType, filters.date.from, filters.date.to],
+        [chartType, filters.date.from, filters.date.to, navigation],
     )
 
     const [step, setStep] = useState(5)

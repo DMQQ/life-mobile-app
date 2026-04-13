@@ -21,7 +21,7 @@ interface LegendProps {
     type: "total" | "avg" | "median" | "count"
 }
 
-interface BarItem {
+export interface BarItem {
     label: string
     value: number
     prevValue?: number
@@ -39,7 +39,8 @@ interface AnimatedBarProps {
     marginRight: number
 }
 
-const labels = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+export const DAY_LABELS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+const labels = DAY_LABELS
 
 const AnimatedBar: React.FC<AnimatedBarProps> = ({
     item,
@@ -189,7 +190,7 @@ function ChartLegend({ data, type }: LegendProps) {
     )
 }
 
-const CustomDayBarChart = ({ data, maxValue, type }: { data: BarItem[]; maxValue: number; type: Types }) => {
+export const CustomDayBarChart = ({ data, maxValue, type }: { data: BarItem[]; maxValue: number; type: Types }) => {
     const [selectedBar, setSelectedBar] = useState<BarItem | null>(null)
     const tooltipOpacity = useSharedValue(0)
     const tooltipScale = useSharedValue(0.8)
@@ -383,7 +384,7 @@ const SpendingsByDay = ({ type, ...props }: { dateRange: [string, string]; type:
 
     return (
         <View>
-            <View style={{ minHeight: 500 }}>
+            <View>
                 <CustomDayBarChart data={chartData} maxValue={maxValue} type={type} />
 
                 <View style={styles.periodLegendContainer}>
@@ -594,6 +595,8 @@ const styles = StyleSheet.create({
         fontSize: 16,
     },
 })
+
+export { SpendingsByDay }
 
 export default () => {
     return (

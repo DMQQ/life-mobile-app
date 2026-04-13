@@ -272,6 +272,8 @@ const AnimatedLineChart = ({ data, currentBalance, index, onPositionChange }: An
     )
 }
 
+export { AnimatedLineChart }
+
 const BalancePredictionChart = () => {
     const [selectedPoint, setSelectedPoint] = useState<{
         value: number

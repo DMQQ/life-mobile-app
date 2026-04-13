@@ -441,7 +441,6 @@ const styles = StyleSheet.create({
     color: Colors.secondary,
   },
   loadingContainer: {
-    flex: 1,
     justifyContent: "center",
     alignItems: "center",
     minHeight: 300,
@@ -620,6 +619,8 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
 });
+
+export { LimitsComparisonComponent }
 
 export default function LimitsComparison() {
   return (

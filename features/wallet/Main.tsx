@@ -9,6 +9,7 @@ import CreateLimits from "./pages/CreateLimits"
 import LimitsDetail from "./pages/LimitsDetail"
 import CorrectionMaps from "./pages/CorrectionMaps"
 import CorrectionMapForm from "./pages/CorrectionMapForm"
+import AiStatsChat from "./pages/AiStatsChat"
 import EditBalance from "./pages/EditBalance"
 import Expense from "./pages/Expense"
 import Filters from "./pages/Filters"
@@ -32,6 +33,7 @@ interface WalletRootStack extends ParamListBase {
         prefill?: { shop?: string; description?: string; category?: string; amount?: number }
         editingItem?: import("./hooks/useCorrectionMaps").CorrectionMap
     } | undefined
+    AiStatsChat: { startDate: string; endDate: string }
 }
 
 export type WalletScreens<Screen extends keyof WalletRootStack> = StackScreenProps<WalletRootStack, Screen>
@@ -153,6 +155,15 @@ export default function WalletScreens({ navigation, route }: WalletScreens<"Wall
                 <Stack.Screen
                     name="CorrectionMapForm"
                     component={CorrectionMapForm}
+                    options={{
+                        presentation: "modal",
+                        headerShown: false,
+                    }}
+                />
+
+                <Stack.Screen
+                    name="AiStatsChat"
+                    component={AiStatsChat}
                     options={{
                         presentation: "modal",
                         headerShown: false,

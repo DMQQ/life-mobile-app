@@ -77,19 +77,21 @@ function getSubscriptionDuration(startDate: string) {
 }
 
 export default function SubscriptionItem({ subscription, index, onPress }: SubscriptionItemProps) {
-    const totalSpent = subscription.expenses.reduce((sum, expense) => sum + expense.amount, 0)
+    const totalSpent = subscription.expenses?.reduce((sum, expense) => sum + expense.amount, 0) ?? 0
     const daysUntilNext = moment(parseInt(subscription.nextBillingDate)).diff(moment(), "days")
     const isOverdue = daysUntilNext < 0
 
-    const expenses = (() => {
+    const expenses = useMemo(() => {
+        if (!subscription.expenses) return []
+
         const copy = [...subscription.expenses]
 
         copy.sort((a, b) => moment(b.date).diff(moment(a.date)))
 
         return copy
-    })()
+    }, [subscription.expenses])
 
-    const subscriptionDuration = getSubscriptionDuration(expenses[expenses.length - 1]?.date || subscription.dateStart)
+    const subscriptionDuration = getSubscriptionDuration(expenses[expenses.length - 1]?.date || subscription?.dateStart)
 
     return (
         <Card
@@ -138,7 +140,7 @@ export default function SubscriptionItem({ subscription, index, onPress }: Subsc
                         ) : (
                             <Text style={{ color: "#F07070" }}>Inactive</Text>
                         )}
-                        {subscription.expenses.length > 0 && (
+                        {subscription.expenses?.length > 0 && (
                             <>
                                 {" • "}
                                 <Text style={{ color: secondary_candidates[1] }}>
