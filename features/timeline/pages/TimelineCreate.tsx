@@ -205,7 +205,6 @@ export default function CreateTimeLineEventModal({ route, navigation }: Timeline
                 <SubmitButton
                     f={f}
                     openSheet={() => sheetRef.current?.expand()}
-                    openAiSheet={() => navigation.navigate("AiOrganizer", { selectedDate: route.params.selectedDate })}
                     isEditing={isEditing}
                     isKeyboardOpen={isKeyboardOpen || false}
                     isLoading={isLoading}
@@ -224,7 +223,6 @@ interface SubmitButtonProps {
     f: any
     isEditing: boolean
     openSheet: () => void
-    openAiSheet: () => void
 }
 
 const SubmitButton = (props: SubmitButtonProps) => (
@@ -265,20 +263,6 @@ const SubmitButton = (props: SubmitButtonProps) => (
         >
             {props.isEditing ? "Save changes" : "Create new event"}
         </Button2>
-        <GlassView
-            style={{
-                borderRadius: 100,
-                width: 50,
-                height: 50,
-                justifyContent: "center",
-                alignItems: "center",
-            }}
-        >
-            <IconButton
-                onPress={props.openAiSheet}
-                icon={<Ionicons name="sparkles" color={Colors.secondary} size={20} />}
-            />
-        </GlassView>
     </View>
 )
 

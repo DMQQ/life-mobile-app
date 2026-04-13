@@ -1,5 +1,5 @@
 import Colors from "@/constants/Colors"
-import { useNavigation } from "@react-navigation/native"
+import { navigationRef } from "@/navigation"
 import moment from "moment"
 import { useCallback, useMemo } from "react"
 import { StyleProp, StyleSheet, Text, View, ViewStyle, Pressable } from "react-native"
@@ -34,24 +34,22 @@ export default function TimelineItem(
         onLongPress?: () => void
     },
 ) {
-    const navigation = useNavigation<any>()
-
     const onPress = () => {
-        timeline.location === "root"
-            ? navigation.navigate("TimelineScreens", {
-                  timelineId: timeline.id,
-              })
-            : navigation.navigate("TimelineDetails", {
-                  timelineId: timeline.id,
-              })
+        navigationRef.current?.navigate("TimelineScreens", {
+            screen: timeline.location === "root" ? "TimelineScreens" : "TimelineDetails",
+            params: { timelineId: timeline.id },
+        } as any)
     }
 
     const handleCopyPress = () => {
-        navigation.navigate("CopyTimelineModal", {
-            timelineId: timeline.id,
-            timelineTitle: timeline.title,
-            originalDate: timeline.date,
-        })
+        navigationRef.current?.navigate("TimelineScreens", {
+            screen: "CopyTimelineModal",
+            params: {
+                timelineId: timeline.id,
+                timelineTitle: timeline.title,
+                originalDate: timeline.date,
+            },
+        } as any)
     }
 
     const start = moment(timeline.beginTime, "HH:mm").format("HH:mm")
@@ -127,11 +125,14 @@ export default function TimelineItem(
                         systemIcon: "pencil",
                         title: "Edit",
                         onPress: () => {
-                            ;(navigation as any).navigate("TimelineCreate", {
-                                mode: "edit",
-                                selectedDate: timeline?.date,
-                                timelineId: timeline?.id,
-                            })
+                            navigationRef.current?.navigate("TimelineScreens", {
+                                screen: "TimelineCreate",
+                                params: {
+                                    mode: "edit",
+                                    selectedDate: timeline?.date,
+                                    timelineId: timeline?.id,
+                                },
+                            } as any)
                         },
                     },
                     {
@@ -144,7 +145,7 @@ export default function TimelineItem(
                     },
                 ] as (ContextMenuAction & { onPress?: () => void })[]
             ).filter(Boolean),
-        [completeTimeline, handleCopyPress, navigation, remove, startLiveActivityLocally, timeline],
+        [completeTimeline, handleCopyPress, remove, startLiveActivityLocally, timeline],
     )
 
     return (

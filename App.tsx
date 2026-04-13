@@ -18,6 +18,8 @@ import { store } from "./utils/redux"
 import { setLogVerbosity } from "@apollo/client"
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet"
 import { SearchMenuProvider } from "./contexts/SearchMenuContext"
+import { AiChatProvider } from "./contexts/AiChatContext"
+import GlobalAiChat from "./features/ai/GlobalAiChat"
 
 setLogVerbosity("error")
 
@@ -86,8 +88,11 @@ export default function App() {
                                 <SearchMenuProvider>
                                     <ApolloProvider client={apolloClient}>
                                         <Provider store={store}>
-                                            <StatusBar backgroundColor={Colors.primary} />
-                                            <Navigation />
+                                            <AiChatProvider>
+                                                <StatusBar backgroundColor={Colors.primary} />
+                                                <Navigation />
+                                                <GlobalAiChat />
+                                            </AiChatProvider>
                                         </Provider>
                                     </ApolloProvider>
                                 </SearchMenuProvider>

@@ -21,13 +21,9 @@ export default function TimelineDayPage({ date, switchView, contentPaddingTop = 
 
     useEffect(() => {
         if (switchView !== "timeline") {
-            const timeout = setTimeout(() => {
-                flatListRef.current?.scrollToOffset({ offset: 1, animated: false })
+            flatListRef.current?.scrollToOffset({ offset: 1, animated: false })
 
-                flatListRef.current?.scrollToOffset({ offset: 0, animated: false })
-            }, 1)
-
-            return () => clearTimeout(timeout)
+            flatListRef.current?.scrollToOffset({ offset: 0, animated: false })
         }
     }, [switchView])
 

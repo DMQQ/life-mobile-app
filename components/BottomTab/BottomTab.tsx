@@ -28,6 +28,7 @@ import { LinearGradient } from "expo-linear-gradient"
 import useKeyboard from "@/utils/hooks/useKeyboard"
 import ContextMenuView, { type ContextMenuAction } from "react-native-context-menu-view"
 import { useSearchMenu, type SearchMenuItem } from "@/contexts/SearchMenuContext"
+import { useAiChat } from "@/contexts/AiChatContext"
 
 const styles = StyleSheet.create({
     container: {
@@ -87,6 +88,7 @@ const SearchButton = ({
     const keyboard = useKeyboard()
     const { menuItems } = useSearchMenu()
     const hasMenu = menuItems.length > 0
+    const { open: openAiChat } = useAiChat()
 
     useEffect(() => {
         searchProgress.value = withTiming(isExpanded ? 1 : 0, { duration: 300 })
@@ -143,7 +145,11 @@ const SearchButton = ({
             style={{ position: "absolute", right: 15, bottom: 0 }}
             previewBackgroundColor="transparent"
         >
-            <GlassView style={{ flex: 1, borderRadius: 100 }}>
+            <GlassView
+                key={isExpanded ? "expanded" : "collapsed"}
+                style={{ flex: 1, borderRadius: 100 }}
+                tintColor={isExpanded ? undefined : Colors.ternary}
+            >
                 <Animated.View style={[searchContainerStyle]}>
                     <Animated.View style={glassWrapper}>
                         <View
@@ -181,9 +187,10 @@ const SearchButton = ({
                                     right: 0,
                                     top: 0,
                                 }}
-                                onPress={isExpanded ? () => onChangeText("") : toggleSearch}
+                                onPress={isExpanded ? () => onChangeText("") : openAiChat}
+                                onLongPress={isExpanded ? undefined : toggleSearch}
                             >
-                                <SymbolView name="magnifyingglass" size={26} tintColor={"#fff"} weight="semibold" />
+                                <SymbolView name="sparkles" size={26} tintColor={"#fff"} weight="semibold" />
                             </Pressable>
                         </View>
                     </Animated.View>

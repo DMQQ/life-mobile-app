@@ -123,14 +123,6 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
                         : undefined,
 
                     {
-                        icon: <Ionicons name="sparkles" color={"#fff"} size={20} />,
-                        onPress: () =>
-                            navigation.navigate("AiOrganizer", {
-                                selectedDate: moment(timeline.selected).format("YYYY-MM-DD"),
-                            }),
-                    },
-
-                    {
                         icon: <AntDesign name="plus" size={20} color={Colors.foreground} />,
                         onPress: () => timeline.createTimeline(),
                     },

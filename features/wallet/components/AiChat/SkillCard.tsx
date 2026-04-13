@@ -8,7 +8,7 @@ import WalletItem from "@/features/wallet/components/Wallet/WalletItem"
 import SubscriptionItem from "@/features/wallet/components/Subscription/SubscriptionItem"
 import { FontAwesome5, Ionicons, MaterialIcons } from "@expo/vector-icons"
 import { useMemo, useState } from "react"
-import { Pressable, StyleSheet, View } from "react-native"
+import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native"
 import Layout from "@/constants/Layout"
 import Text from "@/components/ui/Text/Text"
 import Color from "color"
@@ -16,6 +16,12 @@ import TimelineItem from "@/features/timeline/components/TimelineItem"
 import { AiChatMessageItem } from "../../pages/AiStatsChat"
 import GoalCategory from "@/features/goals/components/GoalCategory"
 import FlashCardGroup from "@/features/flashcards/components/FlashCardGroup"
+import { useMutation } from "@apollo/client"
+import { CREATE_EVENT } from "@/features/timeline/hooks/schemas/schemas"
+import { GET_OCCURRENCES_QUERY } from "@/features/timeline/hooks/query/useGetOccurrencesQuery"
+import { GET_MONTHLY_OCCURRENCES } from "@/features/timeline/hooks/general/useTimeline"
+import moment from "moment"
+import GlassView from "@/components/ui/GlassView"
 
 const NOOP = () => {}
 
@@ -46,20 +52,20 @@ export default function SkillCard({ skill, startDate, endDate }: SkillCardProps)
     }
 
     if (skill.type === "event") {
-        console.log("Rendering event skill with data:", data)
         return (
-            <View style={{ height: 120, overflow: "hidden", width: "100%" }}>
-                <TimelineItem styles={{ height: 120 }} {...data} />
+            <View style={{ minHeight: 120, overflow: "hidden", width: "100%" }}>
+                <TimelineItem styles={{ minHeight: 120 }} {...data} />
             </View>
         )
     }
     if (skill.type === "goals") return <GoalCategory {...data} />
     if (skill.type === "flashcards") return <FlashCardGroup {...data} />
 
+    if (skill.type === "timelineWidget") return <TimelineWidget data={data} />
+
     if (skill.type === "chart" && skill.data) {
         return (
             <View style={{ marginBottom: 15, maxHeight: 400, overflow: "hidden", alignSelf: "stretch" }}>
-                <Text style={{ fontSize: 16, fontWeight: "600", marginBottom: 8 }}>{skill.subtype}</Text>
                 <SkillWidget skill={skill} startDate={startDate} endDate={endDate} />
             </View>
         )
@@ -99,14 +105,210 @@ const SkillWidget = ({ skill, startDate, endDate }: SkillCardProps) => {
     }
 }
 
+interface AiTodo {
+    title: string
+    isCompleted: boolean
+}
+
+interface AiTask {
+    titleOverride: string
+    descriptionOverride: string | null
+    date: string | null
+    beginTimeOverride: string | null
+    endTimeOverride: string | null
+    isRepeat: boolean
+    repeatFrequency: string | null
+    repeatEveryNth: number | null
+    repeatCount: number | null
+    todos: AiTodo[] | null
+}
+
+interface ResolvedTask {
+    title: string
+    desc: string
+    begin: string
+    end: string
+    date: string
+    todos: string[]
+    isRepeat: boolean
+    repeatFrequency: string | null
+    repeatEveryNth: number | null
+    repeatCount: number | null
+}
+
+function resolveTask(task: AiTask): ResolvedTask {
+    const date = task.date ?? moment().format("YYYY-MM-DD")
+    const begin =
+        task.beginTimeOverride ??
+        moment()
+            .add(30 - (moment().minute() % 30), "minutes")
+            .startOf("minute")
+            .format("HH:mm")
+    const end = task.endTimeOverride ?? moment(begin, "HH:mm").add(30, "minutes").format("HH:mm")
+    return {
+        title: task.titleOverride || "Task",
+        desc: task.descriptionOverride ?? "",
+        begin,
+        end,
+        date,
+        todos: (task.todos ?? []).map((t) => t.title),
+        isRepeat: task.isRepeat,
+        repeatFrequency: task.repeatFrequency,
+        repeatEveryNth: task.repeatEveryNth,
+        repeatCount: task.repeatCount,
+    }
+}
+
+function TimelineWidget({ data }: { data: any }) {
+    const tasks: ResolvedTask[] = useMemo(() => {
+        const raw: AiTask[] = Array.isArray(data?.tasks) ? data.tasks : []
+        return raw.map(resolveTask)
+    }, [data])
+
+    if (!tasks.length) return null
+
+    return (
+        <View style={tw.widgetWrap}>
+            {!!data?.message && (
+                <View style={tw.msgBubble}>
+                    <Text style={tw.msgBubbleText}>{data.message}</Text>
+                </View>
+            )}
+            {tasks.map((task, i) => (
+                <TaskCard key={i} task={task} />
+            ))}
+        </View>
+    )
+}
+
+function TaskCard({ task }: { task: ResolvedTask }) {
+    const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle")
+    const [createEvent] = useMutation(CREATE_EVENT)
+
+    const onAdd = async () => {
+        setStatus("loading")
+        try {
+            await createEvent({
+                variables: {
+                    title: task.title,
+                    desc: task.desc,
+                    begin: task.begin,
+                    end: task.end,
+                    date: task.date,
+                    tags: "UNTAGGED",
+                    todos: task.todos,
+                    ...(task.isRepeat &&
+                        task.repeatFrequency && {
+                            repeatOn: task.repeatFrequency,
+                            repeatEveryNth: task.repeatEveryNth ?? 1,
+                            repeatCount: task.repeatCount ?? 1,
+                            startDate: task.date,
+                        }),
+                },
+                refetchQueries: [
+                    { query: GET_OCCURRENCES_QUERY, variables: { date: task.date } },
+                    { query: GET_MONTHLY_OCCURRENCES, variables: { date: moment().format("YYYY-MM-DD") } },
+                ],
+            })
+            setStatus("done")
+        } catch {
+            setStatus("error")
+        }
+    }
+
+    return (
+        <View style={tw.taskCard}>
+            <View style={tw.taskInfo}>
+                <Text style={tw.taskName}>{task.title}</Text>
+                <Text style={tw.taskMeta}>
+                    {task.begin}–{task.end} · {moment(task.date).format("DD MMM")}
+                    {task.isRepeat && task.repeatFrequency ? ` · ${task.repeatFrequency}` : ""}
+                </Text>
+                {!!task.desc && <Text style={tw.taskDesc}>{task.desc}</Text>}
+                {task.todos.length > 0 && (
+                    <View style={tw.todoList}>
+                        {task.todos.map((todo, i) => (
+                            <View key={i} style={tw.todoRow}>
+                                <View style={tw.todoDot} />
+                                <Text style={tw.todoText}>{todo}</Text>
+                            </View>
+                        ))}
+                    </View>
+                )}
+            </View>
+            {status === "done" ? (
+                <Ionicons name="checkmark-circle" size={26} color={Colors.secondary} />
+            ) : (
+                <GlassView
+                    tintColor={status === "loading" || status === "error" ? undefined : Colors.secondary}
+                    style={[tw.addBtn, (status === "loading" || status === "error") && { opacity: 0.6 }]}
+                >
+                    <Pressable style={tw.addBtnInner} onPress={onAdd} disabled={status === "loading"}>
+                        {status === "loading" ? (
+                            <ActivityIndicator size="small" color="#fff" />
+                        ) : status === "error" ? (
+                            <Ionicons name="refresh" size={14} color="#fff" />
+                        ) : (
+                            <Text style={tw.addBtnText}>Add</Text>
+                        )}
+                    </Pressable>
+                </GlassView>
+            )}
+        </View>
+    )
+}
+
+const tw = StyleSheet.create({
+    widgetWrap: { gap: 8, alignSelf: "stretch" },
+    msgBubble: {
+        backgroundColor: Colors.primary_light,
+        borderRadius: 16,
+        borderBottomLeftRadius: 4,
+        borderWidth: 1,
+        borderColor: Colors.primary_lighter,
+        padding: 12,
+        alignSelf: "stretch",
+    },
+    msgBubbleText: { fontSize: 14, lineHeight: 20, color: Colors.foreground },
+    taskCard: {
+        flexDirection: "row",
+        alignItems: "flex-start",
+        backgroundColor: Colors.primary_light,
+        borderRadius: 14,
+        padding: 12,
+        borderWidth: 1,
+        borderColor: Colors.primary_lighter,
+        gap: 10,
+    },
+    taskInfo: { flex: 1, gap: 3 },
+    taskName: { color: Colors.foreground, fontSize: 14, fontWeight: "600" },
+    taskMeta: { color: Colors.secondary, fontSize: 12, fontWeight: "500" },
+    taskDesc: { color: Colors.foreground_secondary, fontSize: 12 },
+    todoList: { gap: 4, marginTop: 4 },
+    todoRow: { flexDirection: "row", alignItems: "center", gap: 6 },
+    todoDot: { width: 4, height: 4, borderRadius: 2, backgroundColor: Colors.foreground_secondary },
+    todoText: { color: Colors.foreground_secondary, fontSize: 11, flex: 1 },
+    addBtn: { borderRadius: 20, minWidth: 54, height: 40, overflow: "hidden" },
+    addBtnInner: { flex: 1, justifyContent: "center", alignItems: "center", paddingHorizontal: 12 },
+    addBtnText: { color: "#fff", fontSize: 13, fontWeight: "700" },
+})
+
 function parseJson(str: string): any {
     if (!str) return null
     if (typeof str === "object") return str
     try {
-        return JSON.parse(str)
+        const first = JSON.parse(str)
+        if (typeof first === "string") return JSON.parse(first)
+        return first
     } catch {
         return null
     }
+}
+
+function safeMaxValue(bars: BarItem[]): number {
+    if (!bars.length) return 100
+    const m = Math.max(...bars.map((b) => b.value))
+    return m > 0 ? m * 1.1 : 1
 }
 
 function DayOfWeekView({ data }: { data: any[] }) {
@@ -121,26 +323,28 @@ function DayOfWeekView({ data }: { data: any[] }) {
             })),
         [items],
     )
-    const maxValue = bars.length ? Math.max(...bars.map((b) => b.value)) * 1.1 : 100
-    return <CustomDayBarChart data={bars} maxValue={maxValue} type="total" />
+    if (!bars.length) return null
+    return <CustomDayBarChart data={bars} maxValue={safeMaxValue(bars)} type="total" />
 }
 
 function DailySpendingsView({ data }: { data: any[] }) {
     const items = Array.isArray(data) ? data : []
     const bars: BarItem[] = useMemo(
         () =>
-            items.map((item, i) => ({
-                label: item.date
-                    ? new Date(item.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })
-                    : String(i + 1),
-                value: item.total ?? item.amount ?? item.value ?? 0,
-                frontColor: secondary_candidates[i % secondary_candidates.length],
-                day: i + 1,
-            })),
+            items
+                .filter((item) => (item.total ?? item.amount ?? item.value ?? 0) > 0)
+                .map((item, i) => ({
+                    label: item.date
+                        ? new Date(item.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })
+                        : String(i + 1),
+                    value: item.total ?? item.amount ?? item.value ?? 0,
+                    frontColor: secondary_candidates[i % secondary_candidates.length],
+                    day: i + 1,
+                })),
         [items],
     )
-    const maxValue = bars.length ? Math.max(...bars.map((b) => b.value)) * 1.1 : 100
-    return <CustomDayBarChart data={bars} maxValue={maxValue} type="total" />
+    if (!bars.length) return null
+    return <CustomDayBarChart data={bars} maxValue={safeMaxValue(bars)} type="total" />
 }
 
 function DailyBreakdownView({ data }: { data: any[] }) {
@@ -157,8 +361,8 @@ function DailyBreakdownView({ data }: { data: any[] }) {
             })),
         [items],
     )
-    const maxValue = bars.length ? Math.max(...bars.map((b) => b.value)) * 1.1 : 100
-    return <CustomDayBarChart data={bars} maxValue={maxValue} type="total" />
+    if (!bars.length) return null
+    return <CustomDayBarChart data={bars} maxValue={safeMaxValue(bars)} type="total" />
 }
 
 function LegendView({ data, startDate, endDate }: { data: any[]; startDate: string; endDate: string }) {

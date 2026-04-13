@@ -6,7 +6,7 @@ import { StyleProp, StyleSheet, Text, View, ViewStyle } from "react-native"
 import { AnimatedStyle } from "react-native-reanimated"
 import { CategoryIcon, Icons } from "../Expense/ExpenseIcon"
 import ContextMenu from "react-native-context-menu-view"
-import { useNavigation } from "@react-navigation/native"
+import { navigationRef } from "@/navigation"
 import useDeleteActivity from "../../hooks/useDeleteActivity"
 
 interface WalletElement extends Expense {
@@ -86,7 +86,8 @@ const styles = StyleSheet.create({
 const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
 export function parseDateToText(date: string) {
-    const dateStr = date.slice(0, 10)
+    if (!date) return ""
+    const dateStr = date?.slice(0, 10)
     const today = new Date().toISOString().slice(0, 10)
 
     if (dateStr === today) return "Today"
@@ -99,6 +100,7 @@ export function parseDateToText(date: string) {
 }
 
 function dateFormatter(date: string) {
+    if (!date) return ""
     const dateStr = date.slice(0, 10)
     const today = new Date().toISOString().slice(0, 10)
 
@@ -121,7 +123,6 @@ function WalletItem(
 ) {
     const { deleteActivity } = useDeleteActivity()
 
-    const navigation = useNavigation<any>()
     const price =
         item?.type === "expense"
             ? (item.amount * -1).toFixed(2)
@@ -136,20 +137,20 @@ function WalletItem(
                 title: "Edit",
                 onPress: () => {
                     console.log("Editing item:", item)
-                    navigation.navigate("CreateExpense", {
-                        ...(item as any),
-                        isEditing: true,
-                    })
+                    navigationRef.current?.navigate("WalletScreens", {
+                        screen: "CreateExpense",
+                        params: { ...(item as any), isEditing: true },
+                    } as any)
                 },
             },
             {
                 systemIcon: "clipboard",
                 title: "Duplicate",
                 onPress: () => {
-                    navigation.navigate("CreateExpense", {
-                        ...(item as any),
-                        isDuplicating: true,
-                    })
+                    navigationRef.current?.navigate("WalletScreens", {
+                        screen: "CreateExpense",
+                        params: { ...(item as any), isDuplicating: true },
+                    } as any)
                 },
             },
             {
