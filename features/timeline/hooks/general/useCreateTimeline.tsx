@@ -44,8 +44,10 @@ export default function useCreateTimeline({ route, navigation }: TimelineScreenP
             : {
                   ...initialValues,
                   date: route.params.selectedDate,
-                  begin: moment().format("HH:mm:ss"),
-                  end: moment().add(1, "hours").format("HH:mm:ss"),
+                  begin: route.params.beginTime ?? moment().format("HH:mm:ss"),
+                  end: route.params.endTime ?? moment().add(1, "hours").format("HH:mm:ss"),
+                  title: route.params.title ?? "",
+                  desc: route.params.description ?? "",
                   notification: "none",
               }
 

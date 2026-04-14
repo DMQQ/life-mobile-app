@@ -16,12 +16,14 @@ import TimelineItem from "@/features/timeline/components/TimelineItem"
 import { AiChatMessageItem } from "../../pages/AiStatsChat"
 import GoalCategory from "@/features/goals/components/GoalCategory"
 import FlashCardGroup from "@/features/flashcards/components/FlashCardGroup"
-import { useMutation } from "@apollo/client"
+import { gql, useMutation } from "@apollo/client"
 import { CREATE_EVENT } from "@/features/timeline/hooks/schemas/schemas"
 import { GET_OCCURRENCES_QUERY } from "@/features/timeline/hooks/query/useGetOccurrencesQuery"
 import { GET_MONTHLY_OCCURRENCES } from "@/features/timeline/hooks/general/useTimeline"
 import moment from "moment"
 import GlassView from "@/components/ui/GlassView"
+import { invalidateGetMainScreen } from "@/utils/schemas/GET_MAIN_SCREEN"
+import { navigationRef } from "@/navigation"
 
 const NOOP = () => {}
 
@@ -29,9 +31,10 @@ interface SkillCardProps {
     skill: AiChatMessageItem
     startDate: string
     endDate: string
+    onNavigate?: () => void
 }
 
-export default function SkillCard({ skill, startDate, endDate }: SkillCardProps) {
+export default function SkillCard({ skill, startDate, endDate, onNavigate }: SkillCardProps) {
     const data = useMemo(() => {
         return parseJson(skill.data || "")
     }, [skill.data])
@@ -63,6 +66,11 @@ export default function SkillCard({ skill, startDate, endDate }: SkillCardProps)
 
     if (skill.type === "timelineWidget") return <TimelineWidget data={data} />
 
+    if (skill.type === "form_expense_new") return <FormExpenseNew data={data} onNavigate={onNavigate} />
+    if (skill.type === "form_expense_edit") return <FormExpenseEdit data={data} onNavigate={onNavigate} />
+    if (skill.type === "form_event_new") return <FormEventNew data={data} onNavigate={onNavigate} />
+    if (skill.type === "form_event_edit") return <FormEventEdit data={data} onNavigate={onNavigate} />
+
     if (skill.type === "chart" && skill.data) {
         return (
             <View style={{ marginBottom: 15, maxHeight: 400, overflow: "hidden", alignSelf: "stretch" }}>
@@ -71,7 +79,12 @@ export default function SkillCard({ skill, startDate, endDate }: SkillCardProps)
         )
     }
 
-    return null
+    return (
+        <GlassView tintColor={Colors.error}>
+            <Text style={{ color: "#fff", padding: 12 }}>Unsupported skill type: {skill?.type ?? "UNDEFINED"}</Text>
+            <Text style={{ color: "#fff", padding: 12 }}>Data: {JSON.stringify(skill?.data ?? {})}</Text>
+        </GlassView>
+    )
 }
 
 const SkillWidget = ({ skill, startDate, endDate }: SkillCardProps) => {
@@ -292,6 +305,356 @@ const tw = StyleSheet.create({
     addBtnInner: { flex: 1, justifyContent: "center", alignItems: "center", paddingHorizontal: 12 },
     addBtnText: { color: "#fff", fontSize: 13, fontWeight: "700" },
 })
+
+const CREATE_EXPENSE_MUTATION = gql`
+    mutation CreateExpenseForm(
+        $amount: Float!
+        $description: String!
+        $type: String!
+        $category: String!
+        $date: String!
+    ) {
+        createExpense(amount: $amount, description: $description, type: $type, category: $category, date: $date) {
+            id
+            amount
+            description
+            date
+            type
+            category
+        }
+    }
+`
+
+const EDIT_EXPENSE_MUTATION = gql`
+    mutation EditExpenseForm(
+        $expenseId: ID!
+        $amount: Float!
+        $description: String!
+        $type: String!
+        $category: String!
+        $date: String!
+    ) {
+        editExpense(
+            expenseId: $expenseId
+            amount: $amount
+            description: $description
+            type: $type
+            category: $category
+            date: $date
+        ) {
+            id
+        }
+    }
+`
+
+const EDIT_OCCURRENCE_MUTATION = gql`
+    mutation EditOccurrenceForm($id: ID!, $title: String, $desc: String, $date: String, $begin: String, $end: String) {
+        editOccurrence(
+            id: $id
+            input: { title: $title, description: $desc, date: $date, beginTime: $begin, endTime: $end }
+            scope: "THIS_ONLY"
+        ) {
+            id
+            title
+            date
+            beginTime
+            endTime
+        }
+    }
+`
+
+function ActionRow({
+    status,
+    onSave,
+    onEdit,
+}: {
+    status: "idle" | "loading" | "done" | "error"
+    onSave: () => void
+    onEdit: () => void
+}) {
+    return (
+        <View style={sb.row}>
+            <GlassView style={sb.editBtn}>
+                <Pressable style={sb.btnInner} onPress={onEdit}>
+                    <Ionicons name="create-outline" size={15} color={Colors.foreground} />
+                    <Text style={sb.editBtnText}>Edit</Text>
+                </Pressable>
+            </GlassView>
+            {status === "done" ? (
+                <View style={sb.doneRow}>
+                    <Ionicons name="checkmark-circle" size={18} color={Colors.secondary} />
+                    <Text style={sb.doneText}>Saved</Text>
+                </View>
+            ) : (
+                <GlassView
+                    tintColor={status === "error" ? Colors.error : Colors.secondary}
+                    style={[sb.saveBtn, status === "loading" && { opacity: 0.6 }]}
+                >
+                    <Pressable style={sb.btnInner} onPress={onSave} disabled={status === "loading"}>
+                        {status === "loading" ? (
+                            <ActivityIndicator size="small" color="#fff" />
+                        ) : (
+                            <Text style={sb.btnText}>{status === "error" ? "Retry" : "Save"}</Text>
+                        )}
+                    </Pressable>
+                </GlassView>
+            )}
+        </View>
+    )
+}
+
+const sb = StyleSheet.create({
+    row: { flexDirection: "row", justifyContent: "flex-end", gap: 8, alignItems: "center" },
+    saveBtn: { borderRadius: 20, height: 36, overflow: "hidden", minWidth: 90 },
+    editBtn: { borderRadius: 20, height: 36, overflow: "hidden", minWidth: 72 },
+    btnInner: {
+        flex: 1,
+        flexDirection: "row",
+        justifyContent: "center",
+        alignItems: "center",
+        gap: 4,
+        paddingHorizontal: 14,
+    },
+    btnText: { color: "#fff", fontSize: 13, fontWeight: "700" },
+    editBtnText: { color: Colors.foreground, fontSize: 13, fontWeight: "600" },
+    doneRow: { flexDirection: "row", alignItems: "center", gap: 6, paddingVertical: 4 },
+    doneText: { color: Colors.secondary, fontSize: 13, fontWeight: "600" },
+})
+
+function FormExpenseNew({ data, onNavigate }: { data: any; onNavigate?: () => void }) {
+    const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle")
+    const [createExpense] = useMutation(CREATE_EXPENSE_MUTATION, {
+        refetchQueries: ["GetWallet", invalidateGetMainScreen()],
+    })
+
+    const onConfirm = async () => {
+        setStatus("loading")
+        try {
+            await createExpense({
+                variables: {
+                    amount: data.amount,
+                    description: data.description,
+                    date: data.date,
+                    type: data.type ?? "expense",
+                    category: data.category ?? "OTHER",
+                },
+            })
+            setStatus("done")
+        } catch {
+            setStatus("error")
+        }
+    }
+
+    const preview = { id: "preview", balanceBeforeInteraction: 0, type: "expense", category: "OTHER", ...data }
+
+    const onEdit = () => {
+        onNavigate?.()
+        navigationRef.current?.navigate("WalletScreens", { screen: "Wallet" } as any)
+        setTimeout(() => {
+            navigationRef.current?.navigate("WalletScreens", {
+                screen: "CreateExpense",
+                params: { ...preview, isEditing: false },
+            } as any)
+        }, 100)
+    }
+
+    return (
+        <View style={s.stretch}>
+            <WalletItem {...preview} handlePress={NOOP} animatedStyle={{}} containerStyle={{ marginBottom: 0 }} />
+            <ActionRow status={status} onSave={onConfirm} onEdit={onEdit} />
+        </View>
+    )
+}
+
+function FormExpenseEdit({ data, onNavigate }: { data: any; onNavigate?: () => void }) {
+    const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle")
+    const [editExpense] = useMutation(EDIT_EXPENSE_MUTATION, {
+        refetchQueries: ["GetWallet", invalidateGetMainScreen()],
+    })
+
+    const onConfirm = async () => {
+        setStatus("loading")
+        try {
+            await editExpense({
+                variables: {
+                    expenseId: data.id,
+                    amount: data.amount,
+                    description: data.description,
+                    date: data.date,
+                    type: data.type ?? "expense",
+                    category: data.category ?? "OTHER",
+                },
+            })
+            setStatus("done")
+        } catch {
+            setStatus("error")
+        }
+    }
+
+    const preview = {
+        balanceBeforeInteraction: 0,
+        type: "expense",
+        category: "OTHER",
+        date: moment().format("YYYY-MM-DD"),
+        ...data,
+    }
+
+    const onEdit = () => {
+        onNavigate?.()
+        navigationRef.current?.navigate("WalletScreens", { screen: "Wallet" } as any)
+        setTimeout(() => {
+            navigationRef.current?.navigate("WalletScreens", {
+                screen: "CreateExpense",
+                params: { ...preview, isEditing: true },
+            } as any)
+        }, 100)
+    }
+
+    return (
+        <View style={s.stretch}>
+            <WalletItem {...preview} handlePress={NOOP} animatedStyle={{}} containerStyle={{ marginBottom: 0 }} />
+            <ActionRow status={status} onSave={onConfirm} onEdit={onEdit} />
+        </View>
+    )
+}
+
+function FormEventNew({ data, onNavigate }: { data: any; onNavigate?: () => void }) {
+    const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle")
+    const [createEvent] = useMutation(CREATE_EVENT)
+
+    const begin =
+        data.beginTime ??
+        moment()
+            .add(30 - (moment().minute() % 30), "minutes")
+            .startOf("minute")
+            .format("HH:mm")
+    const end = data.endTime ?? moment(begin, "HH:mm").add(30, "minutes").format("HH:mm")
+
+    const onConfirm = async () => {
+        setStatus("loading")
+        try {
+            await createEvent({
+                variables: {
+                    title: data.title,
+                    desc: data.description ?? "",
+                    begin,
+                    end,
+                    date: data.date,
+                    tags: data.tags ?? "UNTAGGED",
+                    todos: [],
+                },
+                refetchQueries: [
+                    { query: GET_OCCURRENCES_QUERY, variables: { date: data.date } },
+                    { query: GET_MONTHLY_OCCURRENCES, variables: { date: moment().format("YYYY-MM-DD") } },
+                ],
+            })
+            setStatus("done")
+        } catch {
+            setStatus("error")
+        }
+    }
+
+    const preview = {
+        id: "preview",
+        seriesId: "",
+        isCompleted: false,
+        isSkipped: false,
+        isRepeat: false,
+        tags: "UNTAGGED",
+        priority: null,
+        todos: [],
+        images: [],
+        position: 0,
+        location: "timeline" as const,
+        beginTime: begin,
+        endTime: end,
+        date: moment().format("YYYY-MM-DD"),
+        ...data,
+    }
+
+    const onEdit = () => {
+        onNavigate?.()
+        navigationRef.current?.navigate("TimelineScreens", { screen: "Timeline" } as any)
+        setTimeout(() => {
+            navigationRef.current?.navigate("TimelineScreens", {
+                screen: "TimelineCreate",
+                params: { selectedDate: preview.date, ...preview },
+            } as any)
+        }, 100)
+    }
+
+    return (
+        <View style={{ width: "100%", gap: 8 }}>
+            <TimelineItem styles={{ marginBottom: 0, minHeight: 80 }} {...preview} />
+            <ActionRow status={status} onSave={onConfirm} onEdit={onEdit} />
+        </View>
+    )
+}
+
+function FormEventEdit({ data, onNavigate }: { data: any; onNavigate?: () => void }) {
+    const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle")
+    const [editOccurrence] = useMutation(EDIT_OCCURRENCE_MUTATION, {
+        refetchQueries: [
+            { query: GET_OCCURRENCES_QUERY, variables: { date: data?.date ?? moment().format("YYYY-MM-DD") } },
+            { query: GET_MONTHLY_OCCURRENCES, variables: { date: moment().format("YYYY-MM-DD") } },
+        ],
+    })
+
+    const onConfirm = async () => {
+        setStatus("loading")
+        try {
+            await editOccurrence({
+                variables: {
+                    id: data.id,
+                    ...(data.title && { title: data.title }),
+                    ...(data.description && { desc: data.description }),
+                    ...(data.date && { date: data.date }),
+                    ...(data.beginTime && { begin: data.beginTime }),
+                    ...(data.endTime && { end: data.endTime }),
+                },
+            })
+            setStatus("done")
+        } catch {
+            setStatus("error")
+        }
+    }
+
+    const preview = {
+        id: "preview",
+        seriesId: "",
+        isCompleted: false,
+        isSkipped: false,
+        isRepeat: false,
+        tags: "UNTAGGED",
+        priority: null,
+        todos: [],
+        images: [],
+        position: 0,
+        location: "timeline" as const,
+        beginTime: "00:00",
+        endTime: "00:30",
+        date: moment().format("YYYY-MM-DD"),
+        ...data,
+    }
+
+    const onEdit = () => {
+        onNavigate?.()
+        navigationRef.current?.navigate("TimelineScreens", { screen: "Timeline" } as any)
+        setTimeout(() => {
+            navigationRef.current?.navigate("TimelineScreens", {
+                screen: "TimelineCreate",
+                params: { selectedDate: preview.date, ...preview },
+            } as any)
+        }, 100)
+    }
+
+    return (
+        <View style={{ width: "100%", gap: 8 }}>
+            <TimelineItem styles={{ marginBottom: 0, minHeight: 80 }} {...preview} />
+            <ActionRow status={status} onSave={onConfirm} onEdit={onEdit} />
+        </View>
+    )
+}
 
 function parseJson(str: string): any {
     if (!str) return null

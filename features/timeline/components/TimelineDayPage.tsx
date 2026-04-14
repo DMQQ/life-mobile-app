@@ -17,16 +17,6 @@ export default function TimelineDayPage({ date, switchView, contentPaddingTop = 
     const { data, loading, refetch } = useGetOccurrencesQuery(date)
     const [refreshing, setRefreshing] = useState(false)
 
-    const flatListRef = useRef<any>(null)
-
-    useEffect(() => {
-        if (switchView !== "timeline") {
-            flatListRef.current?.scrollToOffset({ offset: 1, animated: false })
-
-            flatListRef.current?.scrollToOffset({ offset: 0, animated: false })
-        }
-    }, [switchView])
-
     const onRefresh = useCallback(async () => {
         setRefreshing(true)
         await refetch()
@@ -37,7 +27,6 @@ export default function TimelineDayPage({ date, switchView, contentPaddingTop = 
 
     return switchView !== "timeline" ? (
         <Animated.FlatList
-            ref={flatListRef}
             onScroll={onScroll}
             scrollEventThrottle={16}
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}

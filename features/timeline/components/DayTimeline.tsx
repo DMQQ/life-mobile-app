@@ -78,7 +78,7 @@ const CalendarTimetable = ({
                 y: targetHour * HOUR_HEIGHT + headerHeight,
                 animated: false,
             })
-        }, 300)
+        }, 0)
 
         return () => clearTimeout(timeout)
     }, [selected, headerHeight, minHour])

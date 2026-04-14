@@ -9,6 +9,10 @@ export type TimelineRootStack = {
         mode: "create" | "edit" | "shopping-list"
         timelineId?: string
         todos?: string[]
+        title?: string
+        description?: string
+        beginTime?: string
+        endTime?: string
     }
     ImagesPreview: { selectedImage: string; timelineId: string }
     Schedule: { selected: string; selectedDate: string }

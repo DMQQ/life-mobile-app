@@ -127,7 +127,8 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
                         onPress: () => timeline.createTimeline(),
                     },
                 ]}
-                shadow={false}
+                // shadow={false}
+                shadow
             >
                 {isSearchActive ? (
                     <DatePicker
@@ -156,13 +157,17 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
             </Header>
 
             {!isSearchActive && (
-                <Animated.View style={[{ position: "absolute", left: 0, right: 0, zIndex: 50 }, animatedDateListStyle]}>
-                    <DateList
-                        dayEvents={timeline.dayEventsSorted}
-                        selectedDate={timeline.selected}
-                        setSelected={timeline.setSelected}
-                    />
-                </Animated.View>
+                <>
+                    <Animated.View
+                        style={[{ position: "absolute", left: 0, right: 0, zIndex: 100 }, animatedDateListStyle]}
+                    >
+                        <DateList
+                            dayEvents={timeline.dayEventsSorted}
+                            selectedDate={timeline.selected}
+                            setSelected={timeline.setSelected}
+                        />
+                    </Animated.View>
+                </>
             )}
 
             <View style={{ flex: 1 }}>

@@ -16,14 +16,7 @@ import {
     TextInput,
     View,
 } from "react-native"
-import Animated, {
-    Easing,
-    FadeIn,
-    useAnimatedStyle,
-    useSharedValue,
-    withRepeat,
-    withTiming,
-} from "react-native-reanimated"
+import Animated, { Easing, useAnimatedStyle, useSharedValue, withRepeat, withTiming } from "react-native-reanimated"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import GlassView from "@/components/ui/GlassView"
 import { useAiChat } from "@/contexts/AiChatContext"
@@ -98,21 +91,29 @@ function AssistantBubble({
     entering = 0,
     startDate,
     endDate,
+    onNavigate,
 }: {
     msg: ChatMessage
     entering: number
     startDate: string
     endDate: string
+    onNavigate?: () => void
 }) {
     const groups = groupItems(msg.items || [])
     return (
-        <Animated.View entering={FadeIn.delay(entering)} style={{ gap: 6, alignItems: "flex-start", marginBottom: 10 }}>
+        <View style={{ gap: 6, alignItems: "flex-start", marginBottom: 10 }}>
             {groups.map((group, gi) => {
                 if (group.kind === "group") {
                     return (
                         <GlassView key={gi} style={{ alignSelf: "stretch" }}>
                             {group.items.map(({ item, index }) => (
-                                <SkillCard key={index} skill={item} startDate={startDate} endDate={endDate} />
+                                <SkillCard
+                                    key={index}
+                                    skill={item}
+                                    startDate={startDate}
+                                    endDate={endDate}
+                                    onNavigate={onNavigate}
+                                />
                             ))}
                         </GlassView>
                     )
@@ -129,9 +130,17 @@ function AssistantBubble({
                         </GlassView>
                     )
                 }
-                return <SkillCard key={index} skill={item} startDate={startDate} endDate={endDate} />
+                return (
+                    <SkillCard
+                        key={index}
+                        skill={item}
+                        startDate={startDate}
+                        endDate={endDate}
+                        onNavigate={onNavigate}
+                    />
+                )
             })}
-        </Animated.View>
+        </View>
     )
 }
 
@@ -208,6 +217,7 @@ export default function GlobalAiChat() {
                 })
                 const result = data?.aiChat
                 if (!result) throw new Error("Empty response")
+                console.log("AI response:", result)
                 setMessages((prev) => [
                     ...prev,
                     {
@@ -358,8 +368,7 @@ export default function GlobalAiChat() {
                         const entering = Math.max(0, 50 * (displayMessages.length - 1 - index))
                         if (msg.role === "user") {
                             return (
-                                <Animated.View
-                                    entering={FadeIn.delay(entering)}
+                                <View
                                     style={{
                                         alignItems: "center",
                                         marginBottom: 10,
@@ -381,7 +390,7 @@ export default function GlobalAiChat() {
                                     >
                                         <Text style={[s.bubbleText, s.bubbleTextUser]}>{msg.content}</Text>
                                     </GlassView>
-                                </Animated.View>
+                                </View>
                             )
                         }
                         return (
@@ -390,6 +399,7 @@ export default function GlobalAiChat() {
                                 msg={msg}
                                 startDate={dayjs(dates.start).format("YYYY-MM-DD")}
                                 endDate={dayjs(dates.end).format("YYYY-MM-DD")}
+                                onNavigate={close}
                             />
                         )
                     }}
@@ -414,6 +424,23 @@ export default function GlobalAiChat() {
                                     <Text style={s.errorText}>{error}</Text>
                                 </GlassView>
                             ) : null}
+
+                            {!busy && !partialText && displayMessages.length > 0 && (
+                                <View style={{ alignItems: "center", marginBottom: 20 }}>
+                                    <GlassView
+                                        tintColor={Colors.primary_lighter}
+                                        style={{
+                                            padding: 8,
+                                            paddingHorizontal: 16,
+                                            borderRadius: 100,
+                                        }}
+                                    >
+                                        <Pressable onPress={() => setMessages([])}>
+                                            <Text style={{ color: "#fff", fontSize: 14 }}>Clear conversation</Text>
+                                        </Pressable>
+                                    </GlassView>
+                                </View>
+                            )}
                         </>
                     }
                 />
@@ -447,9 +474,7 @@ export default function GlobalAiChat() {
                                     placeholder="Ask anything…"
                                     placeholderTextColor={Colors.foreground_disabled}
                                     onSubmitEditing={() => {
-                                        const t = inputText
-                                        setInputText("")
-                                        send(t)
+                                        send(inputText)
                                     }}
                                     returnKeyType="send"
                                     editable={!busy}
@@ -464,9 +489,7 @@ export default function GlobalAiChat() {
                                     style={s.iconBtnInner}
                                     disabled={!canSend}
                                     onPress={() => {
-                                        const t = inputText
-                                        setInputText("")
-                                        send(t)
+                                        send(inputText)
                                     }}
                                 >
                                     <Ionicons name="send" size={20} color="#fff" />
