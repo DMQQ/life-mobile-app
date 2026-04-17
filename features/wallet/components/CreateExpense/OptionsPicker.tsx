@@ -4,7 +4,7 @@ import Layout from "@/constants/Layout"
 import { SpontaneousRateChip } from "@/features/wallet/components/CreateExpense/SpontaneousRate"
 import { CategoryUtils, Icons } from "@/features/wallet/components/Expense/ExpenseIcon"
 import lowOpacity from "@/utils/functions/lowOpacity"
-import { AntDesign, Entypo } from "@expo/vector-icons"
+import { AntDesign, Entypo, MaterialCommunityIcons } from "@expo/vector-icons"
 import Color from "color"
 import dayjs from "dayjs"
 import moment from "moment/moment"
@@ -12,27 +12,22 @@ import { StyleSheet, Text, View } from "react-native"
 import Haptic from "react-native-haptic-feedback"
 import Ripple from "react-native-material-ripple"
 import Animated, { LinearTransition } from "react-native-reanimated"
+import { useSubAccounts } from "../../hooks/useSubAccounts"
 
 type Type = "expense" | "income" | null
 
 interface OptionsPickerProps {
     type: Type
-
     setType: React.Dispatch<React.SetStateAction<Type>>
-
     category: keyof typeof Icons
-
     setCategory: React.Dispatch<React.SetStateAction<keyof typeof Icons>>
-
     setChangeView: React.Dispatch<React.SetStateAction<boolean>>
-
     setSpontaneousView: React.Dispatch<React.SetStateAction<boolean>>
-
     spontaneousRate: number
-
     setDate: React.Dispatch<React.SetStateAction<string | null>>
-
     date: string | null
+    subAccountId: string | null
+    setSubAccountId: (id: string | null) => void
 }
 
 export default function OptionsPicker({
@@ -44,7 +39,12 @@ export default function OptionsPicker({
     category,
     spontaneousRate,
     date,
+    subAccountId,
+    setSubAccountId,
 }: OptionsPickerProps) {
+    const { data: subAccountsData } = useSubAccounts()
+    const subAccounts = subAccountsData?.wallet.subAccounts ?? []
+    const selectedAccount = subAccounts.find((a) => a.id === subAccountId) ?? null
     const typeBackgroundColor =
         type == null
             ? Colors.primary_lighter
@@ -175,6 +175,43 @@ export default function OptionsPicker({
                     setSpontaneousView(true)
                 })}
             />
+
+            {subAccounts.length > 0 && (
+                <Ripple
+                    onPress={onPressWithFeedback(() => {
+                        const idx = subAccounts.findIndex((a) => a.id === subAccountId)
+                        const next = subAccounts[(idx + 1) % (subAccounts.length + 1)]
+                        setSubAccountId(next ? next.id : null)
+                    })}
+                    style={[
+                        styles.chip,
+                        {
+                            backgroundColor: selectedAccount
+                                ? Color(selectedAccount.color).alpha(0.2).string()
+                                : Colors.primary_lighter,
+                            borderColor: selectedAccount
+                                ? Color(selectedAccount.color).alpha(0.35).string()
+                                : styles.chip.borderColor,
+                            gap: 8,
+                        },
+                    ]}
+                >
+                    <MaterialCommunityIcons
+                        name={selectedAccount ? (selectedAccount.icon as any) : "credit-card-outline"}
+                        size={15}
+                        color={selectedAccount ? selectedAccount.color : "rgba(255,255,255,0.7)"}
+                    />
+                    <Text
+                        style={{
+                            color: selectedAccount ? selectedAccount.color : "rgba(255,255,255,0.7)",
+                            fontSize: 14,
+                        }}
+                        numberOfLines={1}
+                    >
+                        {selectedAccount ? selectedAccount.name : "Account"}
+                    </Text>
+                </Ripple>
+            )}
         </Animated.ScrollView>
     )
 }

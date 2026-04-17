@@ -42,14 +42,35 @@ export default function SkillCard({ skill, startDate, endDate, onNavigate }: Ski
     if (skill.type === "expense") {
         return (
             <View style={s.stretch}>
-                <WalletItem {...data} handlePress={NOOP} animatedStyle={{}} />
+                <WalletItem
+                    {...data}
+                    handlePress={() => {
+                        onNavigate?.()
+                        navigationRef.current?.navigate("WalletScreens", {
+                            screen: "Expense",
+                            params: { expense: data },
+                        } as any)
+                    }}
+                    animatedStyle={{}}
+                />
             </View>
         )
     }
     if (skill.type === "subscription") {
         return (
             <View style={[]}>
-                <SubscriptionItem index={0} onPress={NOOP} subscription={data} />
+                <SubscriptionItem
+                    index={0}
+                    onPress={() => {
+                        onNavigate?.()
+
+                        navigationRef.current?.navigate("WalletScreens", {
+                            screen: "Subscription",
+                            params: { ...data },
+                        } as any)
+                    }}
+                    subscription={data}
+                />
             </View>
         )
     }
@@ -57,7 +78,7 @@ export default function SkillCard({ skill, startDate, endDate, onNavigate }: Ski
     if (skill.type === "event") {
         return (
             <View style={{ minHeight: 120, overflow: "hidden", width: "100%" }}>
-                <TimelineItem styles={{ minHeight: 120 }} {...data} />
+                <TimelineItem styles={{ minHeight: 120 }} {...data} onPress={onNavigate} />
             </View>
         )
     }

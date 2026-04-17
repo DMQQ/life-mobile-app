@@ -106,6 +106,8 @@ export default function useGetWallet(options?: {
                     : (defaultFilters.isExactCategory ?? init.isExactCategory),
             skip: filters.skip || defaultFilters.skip || init.skip,
             take: filters.take || defaultFilters.take || init.take,
+
+            accountId: filters.accountId,
         }
     }, [filters, options?.defaultFilters])
 
@@ -123,6 +125,7 @@ export default function useGetWallet(options?: {
             category: effectiveFilters.category,
             ...(effectiveFilters.type && { type: effectiveFilters.type }),
             ...(effectiveFilters.isExactCategory && { isExactCategory: effectiveFilters.isExactCategory }),
+            ...(effectiveFilters.accountId && { accountId: effectiveFilters.accountId }),
         }),
         [effectiveFilters],
     )

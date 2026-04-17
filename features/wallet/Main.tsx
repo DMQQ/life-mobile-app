@@ -11,6 +11,7 @@ import CorrectionMaps from "./pages/CorrectionMaps"
 import CorrectionMapForm from "./pages/CorrectionMapForm"
 import AiStatsChat from "./pages/AiStatsChat"
 import EditBalance from "./pages/EditBalance"
+import CreateSubAccount from "./pages/CreateSubAccount"
 import Expense from "./pages/Expense"
 import Filters from "./pages/Filters"
 import SubscriptionScreen from "./pages/Subscription"
@@ -34,6 +35,16 @@ interface WalletRootStack extends ParamListBase {
         editingItem?: import("./hooks/useCorrectionMaps").CorrectionMap
     } | undefined
     AiStatsChat: { startDate: string; endDate: string }
+    CreateSubAccount: {
+        editSubAccount?: {
+            id: string
+            name: string
+            description: string | null
+            color: string
+            icon: string
+            balance: number
+        }
+    } | undefined
 }
 
 export type WalletScreens<Screen extends keyof WalletRootStack> = StackScreenProps<WalletRootStack, Screen>
@@ -164,6 +175,15 @@ export default function WalletScreens({ navigation, route }: WalletScreens<"Wall
                 <Stack.Screen
                     name="AiStatsChat"
                     component={AiStatsChat}
+                    options={{
+                        presentation: "modal",
+                        headerShown: false,
+                    }}
+                />
+
+                <Stack.Screen
+                    name="CreateSubAccount"
+                    component={CreateSubAccount}
                     options={{
                         presentation: "modal",
                         headerShown: false,

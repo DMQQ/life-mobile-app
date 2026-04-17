@@ -14,6 +14,7 @@ export type Action =
     | { type: "SET_SKIP"; payload?: number }
     | { type: "RESET" }
     | { type: "SET_IS_EXACT_CATEGORY"; payload: boolean }
+    | { type: "SET_ACCOUNT_ID"; payload: string | undefined }
 
 const reducer = (state: typeof init, action: Action) => {
     if (action.type === "SET_QUERY") {
@@ -100,7 +101,12 @@ const reducer = (state: typeof init, action: Action) => {
             isExactCategory: action.payload,
         }
     }
-
+    if (action.type === "SET_ACCOUNT_ID") {
+        return {
+            ...state,
+            accountId: action.payload,
+        }
+    }
     return state
 }
 
@@ -126,6 +132,8 @@ export const init = {
     take: PAGINATION_TAKE,
 
     isExactCategory: false,
+
+    accountId: undefined as string | undefined,
 }
 
 type WalletContextType = {

@@ -32,9 +32,12 @@ export default function TimelineItem(
         styles?: StyleProp<ViewStyle>
 
         onLongPress?: () => void
+
+        onPress?: () => void
     },
 ) {
     const onPress = () => {
+        timeline.onPress?.()
         navigationRef.current?.navigate("TimelineScreens", {
             screen: timeline.location === "root" ? "TimelineScreens" : "TimelineDetails",
             params: { timelineId: timeline.id },

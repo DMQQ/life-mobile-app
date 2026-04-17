@@ -42,6 +42,7 @@ export default function useCreateExpensePage(
     const [isSubscription, setIsSubscription] = useState(false)
 
     const [spontaneousRate, setSpontaneousRate] = useState(params?.spontaneousRate || 0)
+    const [subAccountId, setSubAccountId] = useState<string | null>(params?.subAccountId || null)
 
     const [isSubExpenseMode, setIsSubExpenseMode] = useState(false)
 
@@ -89,6 +90,7 @@ export default function useCreateExpensePage(
                         expenseId: params.id,
                         date: date,
                         spontaneousRate,
+                        subAccountId: subAccountId ?? undefined,
                     },
                 }).catch((e) => console.log(e))
 
@@ -128,6 +130,7 @@ export default function useCreateExpensePage(
                     schedule: moment(date).isAfter(moment()),
                     isSubscription: isSubscription,
                     spontaneousRate: spontaneousRate,
+                    subAccountId: subAccountId ?? undefined,
                 },
             })
 
@@ -325,6 +328,7 @@ export default function useCreateExpensePage(
             category,
             changeView,
             spontaneousRate,
+            subAccountId,
         },
         methods: {
             setAmount,
@@ -345,6 +349,7 @@ export default function useCreateExpensePage(
             setSubExpenses,
             setCategory,
             setIsSubscription,
+            setSubAccountId,
         },
         animated: {
             transformX,

@@ -152,13 +152,11 @@ function WalletCharts({ navigation }: any) {
     }, [legend.data?.statisticsLegend])
 
     const sumOfExpenses = useMemo(() => {
-        if (!data?.wallet?.expenses2?.length) return 0
-
         return barData.reduce((acc, curr) => {
             if (excluded.includes(curr.label)) return acc
             return acc + curr.value
         }, 0)
-    }, [barData, excluded.length])
+    }, [barData, excluded])
 
     const onLegendItemPress = (item: { category: string }) => {
         if (!item.category) return

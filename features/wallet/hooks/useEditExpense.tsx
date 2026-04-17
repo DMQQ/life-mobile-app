@@ -12,6 +12,7 @@ export const useEditExpense = () => {
                 $expenseId: ID!
                 $date: String!
                 $spontaneousRate: Float
+                $subAccountId: ID
             ) {
                 editExpense(
                     amount: $amount
@@ -21,6 +22,7 @@ export const useEditExpense = () => {
                     expenseId: $expenseId
                     date: $date
                     spontaneousRate: $spontaneousRate
+                    subAccountId: $subAccountId
                 ) {
                     id
                 }

@@ -12,6 +12,7 @@ const CREATE_EXPENSE = gql`
         $schedule: Boolean
         $isSubscription: Boolean
         $spontaneousRate: Float
+        $subAccountId: ID
     ) {
         createExpense(
             amount: $amount
@@ -22,6 +23,7 @@ const CREATE_EXPENSE = gql`
             schedule: $schedule
             isSubscription: $isSubscription
             spontaneousRate: $spontaneousRate
+            subAccountId: $subAccountId
         ) {
             id
             amount

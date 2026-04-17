@@ -1,7 +1,7 @@
 import Header, { HeaderItem } from "@/components/ui/Header/Header"
 import Colors from "@/constants/Colors"
 import useTrackScroll from "@/utils/hooks/ui/useTrackScroll"
-import { AntDesign, Entypo, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons"
+import { AntDesign, Entypo, Ionicons } from "@expo/vector-icons"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { StyleSheet } from "react-native"
 import Haptic from "react-native-haptic-feedback"

@@ -46,6 +46,32 @@ const THINKING_MESSAGES = [
     "Crunching data…",
     "On it…",
     "Processing…",
+    "Consulting my digital crystal ball...",
+    "Herding 1s and 0s into a straight line...",
+    "Teaching a robot how to love (and calculate)...",
+    "Searching the couch cushions of the internet...",
+    "Loading the good response, please wait...",
+    "Pondering life, the universe, and your query...",
+    "Buffering my common sense...",
+    "Asking the local mainframe for a favor...",
+    "untangling thoughts...",
+    "gathering context...",
+    "squinting at data...",
+    "checking the math...",
+    "consulting the void...",
+    "finding the thread...",
+    "reading between lines...",
+    "polishing the gears...",
+    "overthinking it...",
+    "consulting the void...",
+    "guessing confidently...",
+    "shuffling the deck...",
+    "squinting at logic...",
+    "untangling noodles...",
+    "feeding the hamsters...",
+    "checking my ego...",
+    "ignoring distractions...",
+    "loading personality...",
 ]
 
 type InputMode = "voice" | "text"
@@ -153,7 +179,6 @@ export default function GlobalAiChat() {
     const [busy, setBusy] = useState(false)
     const [error, setError] = useState("")
     const [showHistory, setShowHistory] = useState(false)
-    const [thinkingMsg] = useState(() => THINKING_MESSAGES[Math.floor(Math.random() * THINKING_MESSAGES.length)])
     const [dates, setDates] = useState<{ start: Date; end: Date }>({
         start: dayjs().startOf("month").toDate(),
         end: dayjs().toDate(),
@@ -217,7 +242,7 @@ export default function GlobalAiChat() {
                 })
                 const result = data?.aiChat
                 if (!result) throw new Error("Empty response")
-                console.log("AI response:", result)
+
                 setMessages((prev) => [
                     ...prev,
                     {
@@ -412,12 +437,7 @@ export default function GlobalAiChat() {
                                     </GlassView>
                                 </View>
                             ) : null}
-                            {busy ? (
-                                <GlassView style={s.thinkingBubble}>
-                                    <ActivityIndicator size="small" color={Colors.secondary} />
-                                    <Text style={s.streamText}>{thinkingMsg}</Text>
-                                </GlassView>
-                            ) : null}
+                            {busy ? <ThinkingBubble /> : null}
                             {!!error ? (
                                 <GlassView tintColor={s.errorBox.backgroundColor} style={s.errorBox}>
                                     <AntDesign name="exclamation-circle" size={14} color={Colors.error} />
@@ -448,7 +468,7 @@ export default function GlobalAiChat() {
                 <KeyboardAvoidingView
                     style={s.inputRow}
                     behavior={Platform.OS === "ios" ? "padding" : "height"}
-                    keyboardVerticalOffset={120}
+                    keyboardVerticalOffset={80}
                 >
                     {isRecording ? (
                         <Animated.View style={[pulseStyle, { flex: 1 }]}>
@@ -500,6 +520,26 @@ export default function GlobalAiChat() {
                 </KeyboardAvoidingView>
             </View>
         </Modal>
+    )
+}
+
+const ThinkingBubble = () => {
+    const [thinkingMsg, setThinkingMsg] = useState(
+        () => THINKING_MESSAGES[Math.floor(Math.random() * THINKING_MESSAGES.length)],
+    )
+
+    useEffect(() => {
+        let interval = setInterval(() => {
+            setThinkingMsg(THINKING_MESSAGES[Math.floor(Math.random() * THINKING_MESSAGES.length)])
+        }, 1500)
+        return () => clearInterval(interval)
+    }, [])
+
+    return (
+        <GlassView style={s.thinkingBubble}>
+            <ActivityIndicator size="small" color={Colors.secondary} />
+            <Text style={s.streamText}>{thinkingMsg}</Text>
+        </GlassView>
     )
 }
 

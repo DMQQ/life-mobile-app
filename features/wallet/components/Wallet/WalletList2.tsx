@@ -61,6 +61,7 @@ type ListItemType =
     | { type: "subscription-header"; title: string; count: number; color: string }
     | { type: "subscription"; data: Subscription; index: number }
     | { type: "month"; data: MonthlyExpenses; monthIndex: number }
+    | { type: "cards" }
 
 const keyExtractor = (item: ListItemType, index: number) => {
     switch (item.type) {
@@ -101,6 +102,8 @@ export default function WalletList2({
 
     const unifiedData = useMemo(() => {
         const items: ListItemType[] = []
+
+        items.push({ type: "cards" })
 
         items.push({ type: "limits" })
 
@@ -150,45 +153,51 @@ export default function WalletList2({
         setRefreshing(false)
     }, [refetch, refetchSubscriptions])
 
-    const renderItem: ListRenderItem<ListItemType> = useCallback(({ item }) => {
-        switch (item.type) {
-            case "limits":
-                return <WalletLimits navigation={navigation} />
+    const renderItem: ListRenderItem<ListItemType> = useCallback(
+        ({ item }) => {
+            switch (item.type) {
+                case "limits":
+                    return <WalletLimits navigation={navigation} />
 
-            case "subscription-header":
-                return (
-                    <View style={styles.subscriptionHeaderContainer}>
-                        <View style={styles.monthRow}>
-                            <Text style={styles.monthText}>{item.title}</Text>
-                            <View style={[styles.countBadge, { backgroundColor: item.color }]}>
-                                <Text style={styles.countText}>{item.count}</Text>
+                case "cards":
+                    return <SubAccountCards />
+
+                case "subscription-header":
+                    return (
+                        <View style={styles.subscriptionHeaderContainer}>
+                            <View style={styles.monthRow}>
+                                <Text style={styles.monthText}>{item.title}</Text>
+                                <View style={[styles.countBadge, { backgroundColor: item.color }]}>
+                                    <Text style={styles.countText}>{item.count}</Text>
+                                </View>
                             </View>
                         </View>
-                    </View>
-                )
+                    )
 
-            case "subscription":
-                return (
-                    <SubscriptionItem
-                        subscription={item.data}
-                        index={item.index}
-                        onPress={() => navigation.navigate("Subscription", { subscriptionId: item.data.id })}
-                    />
-                )
+                case "subscription":
+                    return (
+                        <SubscriptionItem
+                            subscription={item.data}
+                            index={item.index}
+                            onPress={() => navigation.navigate("Subscription", { subscriptionId: item.data.id })}
+                        />
+                    )
 
-            case "month":
-                return (
-                    <MonthItem
-                        monthData={item.data}
-                        monthIndex={item.monthIndex}
-                        defaultExpanded={item.monthIndex === 0}
-                    />
-                )
+                case "month":
+                    return (
+                        <MonthItem
+                            monthData={item.data}
+                            monthIndex={item.monthIndex}
+                            defaultExpanded={item.monthIndex === 0}
+                        />
+                    )
 
-            default:
-                return null
-        }
-    }, [])
+                default:
+                    return null
+            }
+        },
+        [wallet?.balance],
+    )
 
     if (
         showSubscriptions &&
@@ -213,7 +222,7 @@ export default function WalletList2({
                 renderItem={renderItem as any}
                 keyExtractor={keyExtractor as any}
                 onScroll={onScroll}
-                contentContainerStyle={{ padding: 15, paddingTop: 250, paddingBottom: 120 }}
+                contentContainerStyle={{ padding: 15, paddingTop: 230, paddingBottom: 120 }}
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
                 onEndReached={onEndReached}
                 onEndReachedThreshold={0.5}
@@ -432,6 +441,7 @@ const ChevronIcon = ({ isExpanded }: { isExpanded: boolean }) => {
 
 import Haptics from "react-native-haptic-feedback"
 import GlassView from "@/components/ui/GlassView"
+import SubAccountCards from "./SubAccountCards"
 
 const ClearFiltersButton = () => {
     const { filters, dispatch } = useWalletContext()
