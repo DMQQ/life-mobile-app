@@ -44,12 +44,15 @@ export default function SubAccountCards() {
                     actions={[
                         { title: "Edit", systemIcon: "pencil" },
                         { title: "Remove", systemIcon: "trash", destructive: true },
+                        { title: "Transfer", systemIcon: "arrow.right.arrow.left" },
                     ]}
                     onPress={(e) => {
                         if (e.nativeEvent.name === "Edit") {
                             navigation.navigate("CreateSubAccount", { editSubAccount: a })
                         } else if (e.nativeEvent.name === "Remove") {
                             deleteSubAccount({ variables: { id: a.id } })
+                        } else if (e.nativeEvent.name === "Transfer") {
+                            navigation.navigate("TransferSubAccount", { from: a.id })
                         }
                     }}
                     previewBackgroundColor={a.color}

@@ -167,7 +167,7 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
                 animatedValue={parseFloat(balance)}
                 animatedValueLoading={loading && data?.wallet?.balance === undefined}
                 animatedValueFormat={(value) => `${value.toFixed(2)}zł`}
-                animatedSubtitle="Current Balance (zł)"
+                animatedSubtitle="Total balance across all accounts"
                 onAnimatedTitleLongPress={handleShowEditSheet}
             />
         )

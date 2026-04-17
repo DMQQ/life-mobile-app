@@ -12,6 +12,7 @@ import CorrectionMapForm from "./pages/CorrectionMapForm"
 import AiStatsChat from "./pages/AiStatsChat"
 import EditBalance from "./pages/EditBalance"
 import CreateSubAccount from "./pages/CreateSubAccount"
+import TransferSubAccount from "./pages/TransferSubAccount"
 import Expense from "./pages/Expense"
 import Filters from "./pages/Filters"
 import SubscriptionScreen from "./pages/Subscription"
@@ -45,6 +46,7 @@ interface WalletRootStack extends ParamListBase {
             balance: number
         }
     } | undefined
+    TransferSubAccount: { fromId?: string } | undefined
 }
 
 export type WalletScreens<Screen extends keyof WalletRootStack> = StackScreenProps<WalletRootStack, Screen>
@@ -184,6 +186,15 @@ export default function WalletScreens({ navigation, route }: WalletScreens<"Wall
                 <Stack.Screen
                     name="CreateSubAccount"
                     component={CreateSubAccount}
+                    options={{
+                        presentation: "modal",
+                        headerShown: false,
+                    }}
+                />
+
+                <Stack.Screen
+                    name="TransferSubAccount"
+                    component={TransferSubAccount}
                     options={{
                         presentation: "modal",
                         headerShown: false,

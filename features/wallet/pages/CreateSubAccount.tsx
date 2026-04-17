@@ -51,10 +51,12 @@ export default function CreateSubAccount({ navigation, route }: WalletScreens<"C
         navigation.goBack()
     })
 
-    const [updateSubAccount, { loading: updating }] = useUpdateSubAccount(() => {
+    const [updateSubAccount, { loading: updating, error }] = useUpdateSubAccount(() => {
         Feedback.trigger("impactLight")
         navigation.goBack()
     })
+
+    console.log({ error })
 
     const loading = creating || updating
 
@@ -94,6 +96,7 @@ export default function CreateSubAccount({ navigation, route }: WalletScreens<"C
                                     description: values.description || undefined,
                                     color: values.color,
                                     icon: values.icon,
+                                    balance: values.balance ? parseFloat(values.balance) : 0,
                                 },
                             },
                         })
@@ -148,22 +151,20 @@ export default function CreateSubAccount({ navigation, route }: WalletScreens<"C
                                 }
                             />
 
-                            {!editing && (
-                                <Input
-                                    value={f.values.balance}
-                                    onChangeText={(t) => f.setFieldValue("balance", t.replace(/[^0-9.]/g, ""))}
-                                    onBlur={f.handleBlur("balance")}
-                                    placeholder="Initial balance (optional)"
-                                    keyboardType="numeric"
-                                    error={!!(f.errors.balance && f.touched.balance)}
-                                    helperText={f.touched.balance ? f.errors.balance?.toString() : undefined}
-                                    left={
-                                        <View style={styles.inputIcon}>
-                                            <AntDesign name="wallet" size={18} color={Colors.secondary} />
-                                        </View>
-                                    }
-                                />
-                            )}
+                            <Input
+                                value={f.values.balance}
+                                onChangeText={(t) => f.setFieldValue("balance", t.replace(/[^0-9.]/g, ""))}
+                                onBlur={f.handleBlur("balance")}
+                                placeholder="Initial balance (optional)"
+                                keyboardType="numeric"
+                                error={!!(f.errors.balance && f.touched.balance)}
+                                helperText={f.touched.balance ? f.errors.balance?.toString() : undefined}
+                                left={
+                                    <View style={styles.inputIcon}>
+                                        <AntDesign name="wallet" size={18} color={Colors.secondary} />
+                                    </View>
+                                }
+                            />
 
                             <Text style={styles.label}>Color</Text>
                             <View style={styles.colorGrid}>
