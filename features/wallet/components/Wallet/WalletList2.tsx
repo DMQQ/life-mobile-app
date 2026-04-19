@@ -103,10 +103,6 @@ export default function WalletList2({
     const unifiedData = useMemo(() => {
         const items: ListItemType[] = []
 
-        items.push({ type: "cards" })
-
-        items.push({ type: "limits" })
-
         if (showSubscriptions) {
             if (groupedSubscriptions.active.length > 0) {
                 items.push({
@@ -156,12 +152,6 @@ export default function WalletList2({
     const renderItem: ListRenderItem<ListItemType> = useCallback(
         ({ item }) => {
             switch (item.type) {
-                case "limits":
-                    return <WalletLimits navigation={navigation} />
-
-                case "cards":
-                    return <SubAccountCards />
-
                 case "subscription-header":
                     return (
                         <View style={styles.subscriptionHeaderContainer}>
@@ -222,6 +212,13 @@ export default function WalletList2({
                 renderItem={renderItem as any}
                 keyExtractor={keyExtractor as any}
                 onScroll={onScroll}
+                ListHeaderComponent={
+                    <>
+                        <SubAccountCards />
+
+                        <WalletLimits navigation={navigation} />
+                    </>
+                }
                 contentContainerStyle={{ padding: 15, paddingTop: 230, paddingBottom: 120 }}
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
                 onEndReached={onEndReached}

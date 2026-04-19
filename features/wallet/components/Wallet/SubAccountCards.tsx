@@ -57,7 +57,11 @@ export default function SubAccountCards() {
                     }}
                     previewBackgroundColor={a.color}
                 >
-                    <AccountCard account={a} active={filters?.accountId === a.id} onPress={() => onPress(a)} />
+                    <AccountCard
+                        account={a}
+                        active={filters?.accountId === a.id || (!filters.accountId && a.isDefault)}
+                        onPress={() => onPress(a)}
+                    />
                 </ContextMenuView>
             ))}
             <AddCard onPress={() => navigation.navigate("CreateSubAccount")} />
