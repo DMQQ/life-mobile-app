@@ -18,6 +18,7 @@ import LoadingSkeleton from "./components/LoadingSkeleton"
 import MainContent from "./components/MainContent"
 import NotificationsModal from "./components/NotificationsModal"
 import SettingsModal from "./components/SettingsModal"
+import Background from "@/components/ui/Background"
 
 function Root({}: ScreenProps<"Root">) {
     const [loading, setLoading] = useState(true)
@@ -79,6 +80,7 @@ function Root({}: ScreenProps<"Root">) {
 
     return (
         <Animated.View style={{ flex: 1 }} layout={LinearTransition.delay(100)}>
+            <Background />
             {loading && <LoadingSkeleton />}
 
             <FloatingNotifications />

@@ -169,7 +169,7 @@ const MapPicker = forwardRef<MapPickerHandle, Pick<ExpenseType, "location"> & { 
     }))
 
     const [queryLocation, { data: points }] = useLazyQuery(gql`
-        query ($query: String) {
+        query SearchLocations($query: String) {
             locations(query: $query) {
                 id
                 name
@@ -218,7 +218,7 @@ const MapPicker = forwardRef<MapPickerHandle, Pick<ExpenseType, "location"> & { 
     }, [locationQuery])
 
     const [createMarker] = useMutation(gql`
-        mutation ($input: CreateLocationDto!) {
+        mutation CreateLocation($input: CreateLocationDto!) {
             createLocation(input: $input) {
                 id
                 name
@@ -230,7 +230,7 @@ const MapPicker = forwardRef<MapPickerHandle, Pick<ExpenseType, "location"> & { 
     `)
 
     const [assignLocation] = useMutation(gql`
-        mutation ($expenseId: ID!, $locationId: ID!) {
+        mutation AddExpenseLocation($expenseId: ID!, $locationId: ID!) {
             addExpenseLocation(expenseId: $expenseId, locationId: $locationId)
         }
     `)

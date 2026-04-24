@@ -1,142 +1,89 @@
-import { AnimatedNumber } from "@/components"
 import Colors from "@/constants/Colors"
 import Layout from "@/constants/Layout"
-import { Padding, Rounded } from "@/constants/Values"
-import ZeroExpenseStats from "@/features/wallet/components/WalletChart/ZeroSpendings"
-import { MaterialCommunityIcons } from "@expo/vector-icons"
-import Color from "color"
-import dayjs from "dayjs"
+import { Rounded } from "@/constants/Values"
+import { gql, useQuery } from "@apollo/client"
+import { MaterialIcons } from "@expo/vector-icons"
+import moment from "moment"
 import { StyleSheet, Text, View } from "react-native"
 import Animated, { LinearTransition } from "react-native-reanimated"
 import ChartSwitcher from "./ChartSwitcher"
 
-const Typography = {
-    display: { fontSize: 48, fontWeight: "700", letterSpacing: -1 },
-    headline: { fontSize: 24, fontWeight: "600", letterSpacing: -0.3 },
-    title: { fontSize: 18, fontWeight: "600" },
-    body: { fontSize: 16, fontWeight: "500" },
-    caption: { fontSize: 11, fontWeight: "500" },
-    overline: { fontSize: 10, fontWeight: "600", letterSpacing: 0.5 },
-} as const
-
-interface WalletStatistics {
-    total: number
-    average: number
-    max: number
-    min: number
-    count: number
-    theMostCommonCategory: string
-    theLeastCommonCategory: string
-    lastBalance: number
-    income: number
-    expense: number
-}
+const GET_ZERO_SPENDINGS = gql`
+    query HomeZeroSpendings($startDate: String!, $endDate: String!) {
+        statisticsZeroExpenseDays(startDate: $startDate, endDate: $endDate) {
+            days
+            saved
+            streak {
+                start
+                end
+            }
+        }
+    }
+`
 
 interface Props {
-    data: {
-        wallet: {
-            id: string
-            balance: number
-            income: number
-            monthlyPercentageTarget: number
-        }
-        statistics: WalletStatistics
-        lastMonthSpendings: WalletStatistics
-    }
+    data: any
     loading: boolean
 }
 
-const AvailableBalanceWidget = ({ data }: Props) => {
-    const wallet = data.wallet || {}
-    const stats = data.statistics || {}
+const ZeroSpendingsCompact = () => {
+    const startDate = moment().startOf("month").format("YYYY-MM-DD")
+    const endDate = moment().format("YYYY-MM-DD")
+    const totalDays = moment().diff(moment().startOf("month"), "days") + 1
 
-    const targetAmount = wallet?.income * (wallet?.monthlyPercentageTarget / 100)
-    const spentPercentage = targetAmount ? (stats?.expense / targetAmount) * 100 : 0
+    const { data } = useQuery(GET_ZERO_SPENDINGS, { variables: { startDate, endDate } })
+    const stats = data?.statisticsZeroExpenseDays
 
-    const remainingBudget = targetAmount - stats?.expense
-    const daysLeft = Math.abs(dayjs().diff(dayjs().endOf("month"), "day") - 1)
+    if (!stats) return null
 
-    const dailyBudgetLeft = daysLeft > 0 ? remainingBudget / daysLeft : 0
-    const savings = wallet?.income + stats?.income - stats?.expense
-
-    const isDailyBudgetNegative = dailyBudgetLeft < 0
+    const zeroDays = stats.days.length
+    const rate = Math.round((zeroDays / totalDays) * 100)
+    const currentStreak = stats.streak?.find(
+        (s: any) => moment(s.end).format("YYYY-MM-DD") === moment().format("YYYY-MM-DD"),
+    )
+    const streakLen = currentStreak ? moment(currentStreak.end).diff(moment(currentStreak.start), "days") + 1 : 0
 
     return (
-        <Animated.View style={styles.container} layout={LinearTransition.delay(200)}>
-            <View style={styles.chartSection}>
-                <ChartSwitcher />
-
-                <View style={styles.metricsGrid}>
-                    <MetricCard label="Days left" value={daysLeft.toString()} icon="calendar-clock" postfix="d" />
-                    <MetricCard
-                        label="For today"
-                        value={`${Math.abs(dailyBudgetLeft).toFixed(0)}zł`}
-                        icon="wallet-outline"
-                        status={isDailyBudgetNegative ? "error" : "neutral"}
-                        prefix={isDailyBudgetNegative ? "-" : ""}
-                        postfix="zł"
-                    />
-                    <MetricCard
-                        label="Saved"
-                        value={`${savings.toFixed(0)}zł`}
-                        icon="piggy-bank"
-                        prefix=""
-                        postfix="zł"
-                    />
-                    <MetricCard label="Spent %" value={spentPercentage.toFixed(2)} icon="target" postfix="%" />
+        <View style={styles.zeroCard}>
+            <Text style={styles.sectionTitle}>No-spend days</Text>
+            <View style={styles.zeroRow}>
+                <View style={styles.zeroStat}>
+                    <MaterialIcons name="event-available" size={16} color={Colors.secondary} />
+                    <Text style={styles.zeroValue}>{zeroDays}</Text>
+                    <Text style={styles.zeroLabel}>days</Text>
                 </View>
-
-                <ZeroExpenseStats />
+                <View style={styles.zeroDivider} />
+                <View style={styles.zeroStat}>
+                    <MaterialIcons name="trending-up" size={16} color="#66E875" />
+                    <Text style={[styles.zeroValue, { color: "#66E875" }]}>{rate}%</Text>
+                    <Text style={styles.zeroLabel}>rate</Text>
+                </View>
+                <View style={styles.zeroDivider} />
+                <View style={styles.zeroStat}>
+                    <MaterialIcons name="local-fire-department" size={16} color={streakLen > 0 ? "#F6B161" : Colors.text_dark} />
+                    <Text style={[styles.zeroValue, streakLen > 0 && { color: "#F6B161" }]}>{streakLen}</Text>
+                    <Text style={styles.zeroLabel}>streak</Text>
+                </View>
+                <View style={styles.zeroDivider} />
+                <View style={styles.zeroStat}>
+                    <MaterialIcons name="savings" size={16} color={Colors.secondary} />
+                    <Text style={styles.zeroValue}>{Math.round(stats.saved)}zł</Text>
+                    <Text style={styles.zeroLabel}>saved</Text>
+                </View>
             </View>
-        </Animated.View>
+        </View>
     )
 }
 
-const MetricCard = ({
-    label,
-    value,
-    icon,
-    status = "neutral",
-    prefix = "",
-    postfix = "",
-}: {
-    label: string
-    value: string
-    icon: keyof typeof MaterialCommunityIcons.glyphMap
-    status?: "success" | "error" | "neutral"
-    prefix?: string
-    postfix?: string
-}) => {
-    const getStatusColor = () => {
-        switch (status) {
-            case "success":
-                return Colors.secondary
-            case "error":
-                return Colors.error
-            default:
-                return Colors.text_light
-        }
-    }
-
-    const color = getStatusColor()
-
+const AvailableBalanceWidget = ({ data }: Props) => {
     return (
-        <View style={styles.metricCard}>
-            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "flex-start", gap: 2.5 }}>
-                <MaterialCommunityIcons
-                    name={icon}
-                    size={20}
-                    color={status === "neutral" ? Colors.secondary_light_1 : color}
-                />
-
-                <AnimatedNumber
-                    style={[styles.metricValue, { color: color }]}
-                    formatValue={(val) => `${prefix}${val}${postfix}`}
-                    value={Number.isNaN(Number(value)) ? +value.replace(/\D/g, "") : Number(value)}
-                />
+        <Animated.View style={styles.container} layout={LinearTransition.delay(200)}>
+            <View style={styles.card}>
+                <Text style={styles.sectionTitle}>Week overview</Text>
+                <ChartSwitcher />
             </View>
-            <Text style={[styles.metricLabel, { color }]}>{label}</Text>
-        </View>
+            <ZeroSpendingsCompact />
+        </Animated.View>
     )
 }
 
@@ -146,119 +93,53 @@ const styles = StyleSheet.create({
         overflow: "hidden",
         width: Layout.screen.width - 30,
         alignSelf: "center",
-        gap: 15,
+        gap: 10,
     },
-    loadingContainer: {
-        height: 420,
-        borderRadius: Rounded.xl,
-        width: Layout.screen.width - 30,
-        alignSelf: "center",
+    card: {
+        backgroundColor: Colors.primary_lighter,
+        borderRadius: 14,
+        padding: 14,
+        gap: 10,
     },
-    primarySection: {
+    sectionTitle: {
+        fontSize: 11,
+        fontWeight: "600",
+        letterSpacing: 0.8,
+        textTransform: "uppercase",
+        color: Colors.text_dark,
+        marginBottom: 2,
+    },
+    zeroCard: {
+        backgroundColor: Colors.primary_lighter,
+        borderRadius: 14,
+        padding: 14,
+        gap: 10,
+    },
+    zeroRow: {
         flexDirection: "row",
+        alignItems: "center",
         justifyContent: "space-between",
-        alignItems: "flex-start",
-        paddingTop: 25,
-        paddingBottom: 12,
     },
-    expenseDisplay: {
+    zeroStat: {
         flex: 1,
+        alignItems: "center",
+        gap: 3,
     },
-    expenseAmount: {
-        ...Typography.display,
-        fontSize: 60,
-        letterSpacing: 1,
-        lineHeight: 60,
+    zeroValue: {
+        fontSize: 15,
+        fontWeight: "700",
         color: Colors.text_light,
     },
-    expenseLabel: {
-        ...Typography.caption,
+    zeroLabel: {
+        fontSize: 10,
         color: Colors.text_dark,
-        marginTop: Padding.xs,
+        letterSpacing: 0.4,
         textTransform: "uppercase",
     },
-    trendIndicator: {
-        alignItems: "flex-end",
-        marginTop: 10,
-    },
-    trendBadge: {
-        flexDirection: "row",
-        alignItems: "center",
-        paddingHorizontal: Padding.m,
-        paddingVertical: Padding.xs,
-        borderRadius: 15,
-        gap: Padding.xs,
-    },
-    trendValue: {
-        ...Typography.body,
-        fontWeight: "600",
-    },
-    trendSubtext: {
-        ...Typography.overline,
-        color: Colors.text_dark,
-        marginTop: Padding.xs,
-        textTransform: "uppercase",
-    },
-    metricsGrid: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        marginBottom: 15,
-        marginTop: 15,
-        gap: 30,
-    },
-    metricCard: {
-        flex: 1,
-        alignItems: "center",
-        gap: Padding.xs,
-    },
-    metricIcon: {
-        width: 32,
-        height: 32,
-        borderRadius: Rounded.m,
-        backgroundColor: Color(Colors.text_dark).alpha(0.1).string(),
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    metricValue: {
-        ...Typography.title,
-        fontSize: 20,
-        lineHeight: 25,
-        fontWeight: "700",
-    },
-    metricLabel: {
-        ...Typography.overline,
-        color: Colors.secondary_light_2,
-        textAlign: "center",
-        textTransform: "uppercase",
-    },
-    targetProgress: {
-        padding: 15,
-        borderRadius: Rounded.l,
-        marginBottom: 16,
-    },
-    targetContent: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 8,
-        marginBottom: 4,
-    },
-    targetLabel: {
-        ...Typography.caption,
-        fontWeight: "600",
-        textTransform: "uppercase",
-        flex: 1,
-    },
-    targetPercentage: {
-        ...Typography.title,
-        fontWeight: "700",
-    },
-    targetSubtext: {
-        ...Typography.caption,
-        color: Colors.text_dark,
-        textAlign: "center",
-    },
-    chartSection: {
-        gap: 12,
+    zeroDivider: {
+        width: 1,
+        height: 28,
+        backgroundColor: "rgba(255,255,255,0.07)",
     },
 })
 

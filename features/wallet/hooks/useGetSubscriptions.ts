@@ -12,13 +12,9 @@ export default function useGetSubscriptions() {
                 isActive
                 nextBillingDate
                 billingCycle
-                expenses {
-                    amount
-                    id
-                    date
-                    description
-                    category
-                }
+                totalSpent
+                totalAmount
+                totalDuration
             }
         }
     `)

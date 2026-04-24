@@ -19,6 +19,7 @@ import { Icons, CategoryUtils } from "../components/Expense/ExpenseIcon"
 import dayjs from "dayjs"
 import type { SearchMenuItem } from "@/contexts/SearchMenuContext"
 import { SFSymbol } from "expo-symbols"
+import Background from "@/components/ui/Background"
 
 const styles = StyleSheet.create({
     container: {
@@ -186,6 +187,7 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
 
     return (
         <SafeAreaView style={{ flex: 1 }}>
+            <Background />
             {loading && (
                 <Animated.View
                     exiting={FadeOut.duration(250).delay(250)}

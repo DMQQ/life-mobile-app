@@ -1,6 +1,6 @@
 import { useMemo, useEffect } from "react"
 import { StyleSheet, Text, View } from "react-native"
-import Colors, { secondary_candidates } from "@/constants/Colors"
+import Colors from "@/constants/Colors"
 import Color from "color"
 import { gql, useQuery } from "@apollo/client"
 import { AntDesign } from "@expo/vector-icons"
@@ -19,7 +19,7 @@ interface AnimatedBarProps {
     index: number
 }
 
-const CHART_HEIGHT = 200
+const CHART_HEIGHT = 160
 const MIN_BAR_HEIGHT = 12
 
 const getBarHeight = (val: number, maxValue: number): number => {
@@ -39,25 +39,17 @@ const AnimatedBar = ({ value, prevValue, maxValue, color, label, index }: Animat
     useEffect(() => {
         animatedOpacity.value = withDelay(index * 100, withTiming(1, { duration: 400 }))
         animatedHeight.value = withDelay(index * 100, withTiming(targetHeight, { duration: 600 }))
-
         if (targetPrevHeight > 0) {
             animatedPrevHeight.value = withDelay(index * 100, withTiming(targetPrevHeight, { duration: 600 }))
         }
     }, [targetHeight, targetPrevHeight, index])
 
-    const animatedBarStyle = useAnimatedStyle(() => ({
-        height: animatedHeight.value,
-        opacity: animatedOpacity.value,
-    }))
-
+    const animatedBarStyle = useAnimatedStyle(() => ({ height: animatedHeight.value, opacity: animatedOpacity.value }))
     const animatedPrevBarStyle = useAnimatedStyle(() => ({
         height: animatedPrevHeight.value,
         opacity: animatedOpacity.value * 0.6,
     }))
-
-    const animatedContainerStyle = useAnimatedStyle(() => ({
-        opacity: animatedOpacity.value,
-    }))
+    const animatedContainerStyle = useAnimatedStyle(() => ({ opacity: animatedOpacity.value }))
 
     return (
         <Animated.View style={[styles.barContainer, animatedContainerStyle]}>
@@ -75,15 +67,7 @@ const AnimatedBar = ({ value, prevValue, maxValue, color, label, index }: Animat
                     />
                 )}
                 {value > 0 && (
-                    <Animated.View
-                        style={[
-                            styles.currentBar,
-                            {
-                                backgroundColor: color,
-                            },
-                            animatedBarStyle,
-                        ]}
-                    />
+                    <Animated.View style={[styles.currentBar, { backgroundColor: color }, animatedBarStyle]} />
                 )}
             </View>
             <Text style={[styles.dayLabel, { color }]}>{label}</Text>
@@ -92,7 +76,7 @@ const AnimatedBar = ({ value, prevValue, maxValue, color, label, index }: Animat
 }
 
 const STATISTICS_DAY_OF_WEEK = gql`
-    query StatisticsDayOfWeek($startDate: String!, $endDate: String!) {
+    query HomeStatisticsDayOfWeek($startDate: String!, $endDate: String!) {
         statisticsDayOfWeek(startDate: $startDate, endDate: $endDate) {
             day
             total
@@ -100,9 +84,7 @@ const STATISTICS_DAY_OF_WEEK = gql`
     }
 `
 
-interface CompactSpendingChartProps {}
-
-const CompactSpendingChart = ({}: CompactSpendingChartProps) => {
+const CompactSpendingChart = () => {
     const dateRange = useMemo(
         () => [moment().startOf("isoWeek").format("YYYY-MM-DD"), moment().endOf("isoWeek").format("YYYY-MM-DD")],
         [],
@@ -117,7 +99,6 @@ const CompactSpendingChart = ({}: CompactSpendingChartProps) => {
     )
 
     const query = useQuery(STATISTICS_DAY_OF_WEEK, { variables: { startDate: dateRange[0], endDate: dateRange[1] } })
-
     const prevQuery = useQuery(STATISTICS_DAY_OF_WEEK, {
         variables: { startDate: previousDateRange[0], endDate: previousDateRange[1] },
     })
@@ -133,13 +114,7 @@ const CompactSpendingChart = ({}: CompactSpendingChartProps) => {
         const days = Array.from({ length: 7 }, (_, i) => {
             const dayData = data.find((d) => d.day === i + 1)
             const prevValue = prevDataMap.get(i + 1) || 0
-
-            return {
-                label: labels[i],
-                value: dayData?.total || 0,
-                prevValue,
-                day: i + 1,
-            }
+            return { label: labels[i], value: dayData?.total || 0, prevValue, day: i + 1 }
         })
 
         const allValues = [...days.map((d) => d.value), ...days.map((d) => d.prevValue)].filter((v) => v > 0)
@@ -173,31 +148,23 @@ const CompactSpendingChart = ({}: CompactSpendingChartProps) => {
         )
     }
 
+    const isUp = percentageChange >= 0
+    const changeColor = isUp ? "#FF8A80" : "#4ECDC4"
+
     return (
         <View style={styles.container}>
             <View style={styles.chartWrapper}>
                 <View style={styles.yAxisLabels}>
                     {labelValues.map((v, i, array) => {
                         const value = Math.round(v)
-
                         const previousValue = array[i - 1] ? Math.round(array[i - 1]) : 0
                         const prevDistance = getBarHeight(previousValue, maxValue)
                         const currentDistance = getBarHeight(value, maxValue)
-
-                        if (prevDistance - currentDistance < 12 && i !== 0) {
-                            return null
-                        }
-
+                        if (prevDistance - currentDistance < 12 && i !== 0) return null
                         return (
                             <Text
                                 key={i}
-                                style={[
-                                    styles.yAxisLabel,
-                                    {
-                                        position: "absolute",
-                                        bottom: currentDistance + 15,
-                                    },
-                                ]}
+                                style={[styles.yAxisLabel, { position: "absolute", bottom: currentDistance + 15 }]}
                             >
                                 {value > 1000 ? `${(value / 1000).toFixed(1)}k` : value + "zł"}
                             </Text>
@@ -209,15 +176,10 @@ const CompactSpendingChart = ({}: CompactSpendingChartProps) => {
                     <View style={styles.gridLines}>
                         {labelValues.map((v, i, array) => {
                             const value = Math.round(v)
-
                             const previousValue = array[i - 1] ? Math.round(array[i - 1]) : 0
                             const prevDistance = getBarHeight(previousValue, maxValue)
                             const currentDistance = getBarHeight(value, maxValue)
-
-                            if (prevDistance - currentDistance < 12 && i !== 0) {
-                                return null
-                            }
-
+                            if (prevDistance - currentDistance < 12 && i !== 0) return null
                             return <View key={i} style={[styles.gridLine, { bottom: currentDistance + 15 }]} />
                         })}
                     </View>
@@ -239,39 +201,21 @@ const CompactSpendingChart = ({}: CompactSpendingChartProps) => {
             </View>
 
             <View style={styles.footer}>
-                <View style={styles.totalContainer}>
-                    <Text style={styles.prevAmount}>{Math.round(prevTotal)}zł</Text>
-                    <Text style={styles.totalLabel}>
-                        {previousDateRange.map((d) => d.split("-").slice(1).join("-")).join(" to ")}
+                <View style={styles.footerStat}>
+                    <Text style={styles.footerAmount}>{Math.round(prevTotal)}zł</Text>
+                    <Text style={styles.footerLabel}>last week</Text>
+                </View>
+
+                <View style={styles.changeBadge}>
+                    <AntDesign name={isUp ? "caret-up" : "caret-down"} size={9} color={changeColor} />
+                    <Text style={[styles.changeText, { color: changeColor }]}>
+                        {Math.abs(Math.round(percentageChange))}%
                     </Text>
                 </View>
 
-                <View style={styles.tinyLegendContainer}>
-                    <View style={styles.changeIndicator}>
-                        <AntDesign
-                            name={percentageChange >= 0 ? "caret-up" : "caret-down"}
-                            size={12}
-                            color={percentageChange >= 0 ? "#FF8A80" : "#4ECDC4"}
-                        />
-                        <Text
-                            style={[
-                                styles.changeText,
-                                {
-                                    color: percentageChange >= 0 ? "#FF8A80" : "#4ECDC4",
-                                },
-                            ]}
-                        >
-                            {Math.abs(Math.round(percentageChange))}% {percentageChange >= 0 ? "increase" : "decrease"}{" "}
-                            in this week
-                        </Text>
-                    </View>
-                </View>
-
-                <View style={styles.totalContainer}>
-                    <Text style={styles.totalAmount}>{Math.round(total)}zł</Text>
-                    <Text style={styles.totalLabel}>
-                        {dateRange.map((d) => d.split("-").slice(1).join("-")).join(" to ")}
-                    </Text>
+                <View style={[styles.footerStat, { alignItems: "flex-end" }]}>
+                    <Text style={[styles.footerAmount, { color: Colors.secondary }]}>{Math.round(total)}zł</Text>
+                    <Text style={styles.footerLabel}>this week</Text>
                 </View>
             </View>
         </View>
@@ -283,43 +227,24 @@ const styles = StyleSheet.create({
         paddingVertical: 4,
         paddingHorizontal: 4,
     },
-    header: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        marginBottom: 12,
-    },
-    title: {
-        fontSize: 16,
-        fontWeight: "600",
-        color: Colors.text_light,
-    },
-    changeIndicator: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 4,
-    },
-    changeText: {
-        fontSize: 14,
-        fontWeight: "600",
-    },
     chartWrapper: {
         flexDirection: "row",
         alignItems: "flex-end",
     },
     yAxisLabels: {
         width: 40,
-        height: 200,
+        height: CHART_HEIGHT,
         justifyContent: "space-between",
         alignItems: "flex-start",
         paddingRight: 8,
     },
     yAxisLabel: {
         color: "#fff",
-        fontSize: 12,
+        fontSize: 10,
         fontWeight: "500",
         width: 50,
         marginLeft: -5,
+        opacity: 0.5,
     },
     chartContent: {
         flex: 1,
@@ -330,20 +255,20 @@ const styles = StyleSheet.create({
         top: 0,
         left: 0,
         right: 0,
-        height: 200,
+        height: CHART_HEIGHT,
     },
     gridLine: {
         position: "absolute",
         left: 0,
         right: 0,
         height: 0.5,
-        backgroundColor: Color(Colors.secondary).alpha(0.15).string(),
+        backgroundColor: Color(Colors.secondary).alpha(0.1).string(),
     },
     chartContainer: {
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "flex-end",
-        height: 200,
+        height: CHART_HEIGHT,
         marginBottom: 4,
         paddingHorizontal: 8,
     },
@@ -353,7 +278,7 @@ const styles = StyleSheet.create({
     },
     barWrapper: {
         width: 36,
-        height: 200,
+        height: CHART_HEIGHT,
         justifyContent: "flex-end",
         alignItems: "center",
         position: "relative",
@@ -374,57 +299,48 @@ const styles = StyleSheet.create({
         borderWidth: 1,
     },
     dayLabel: {
-        fontSize: 11,
+        fontSize: 10,
         fontWeight: "600",
-        marginTop: 3,
+        marginTop: 4,
+        opacity: 0.7,
     },
     footer: {
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
-        marginTop: 15,
+        marginTop: 12,
+        paddingHorizontal: 4,
     },
-    totalContainer: {
-        alignItems: "center",
+    footerStat: {
+        gap: 2,
     },
-    totalAmount: {
-        fontSize: 24,
-        fontWeight: "bold",
+    footerAmount: {
+        fontSize: 16,
+        fontWeight: "700",
         color: Colors.text_light,
-        marginBottom: 2,
     },
-    prevAmount: {
-        fontSize: 24,
-        fontWeight: "bold",
-        color: Color(Colors.text_light).alpha(0.7).string(),
-        marginBottom: 2,
-    },
-    totalLabel: {
-        fontSize: 9,
+    footerLabel: {
+        fontSize: 10,
         color: Colors.text_light,
-        opacity: 0.6,
+        opacity: 0.4,
+        letterSpacing: 0.5,
+        textTransform: "uppercase",
     },
-    tinyLegendContainer: {
-        gap: 4,
-    },
-    tinyLegendItem: {
+    changeBadge: {
         flexDirection: "row",
         alignItems: "center",
-        gap: 5,
+        gap: 4,
+        backgroundColor: "rgba(255,255,255,0.06)",
+        paddingHorizontal: 10,
+        paddingVertical: 5,
+        borderRadius: 20,
     },
-    tinyLegendDot: {
-        width: 8,
-        height: 8,
-        borderRadius: 10,
-    },
-    tinyLegendText: {
-        fontSize: 12,
-        color: Colors.text_light,
-        opacity: 0.6,
-        fontWeight: "500",
+    changeText: {
+        fontSize: 13,
+        fontWeight: "700",
     },
     loadingContainer: {
-        height: 200,
+        height: CHART_HEIGHT,
         justifyContent: "center",
         alignItems: "center",
     },

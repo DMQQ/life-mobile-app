@@ -5,7 +5,7 @@ import Colors from "@/constants/Colors"
 import { Todos } from "@/types"
 import { useNavigation } from "@react-navigation/native"
 import Color from "color"
-import { memo, useCallback, useMemo } from "react"
+import { memo, useCallback, useMemo, useState } from "react"
 import { StyleSheet, View } from "react-native"
 import TodoHeader from "./TodoHeader"
 import TodoItem from "./TodoItem"
@@ -42,32 +42,18 @@ export default function TimelineTodos(props: {
         })
     }
 
-    const [finishedTodos, notFinishedTodos] = useMemo(() => {
-        return props.sortedTodos.reduce(
-            ([finished, notFinished], todo) => {
-                if (todo.isCompleted) {
-                    finished.push(todo)
-                } else {
-                    notFinished.push(todo)
-                }
-                return [finished, notFinished]
-            },
-            [[] as Todos[], [] as Todos[]],
-        )
-    }, [props.sortedTodos])
-
     return (
         <>
             <View style={styles.container}>
                 <TodoHeader todos={props.sortedTodos} onLongPress={handleLongPress} />
 
-                {finishedTodos.length > 0 || notFinishedTodos.length > 0 ? (
+                {props.sortedTodos.length > 0 || props.sortedTodos.length > 0 ? (
                     <>
-                        {notFinishedTodos.map((todo, index) => (
+                        {props.sortedTodos.map((todo, index) => (
                             <TodoItem key={todo.id} index={index} timelineId={props.timelineId} {...todo} />
                         ))}
 
-                        {notFinishedTodos.length === 0 && (
+                        {props.sortedTodos.length === 0 && (
                             <Card style={{ backgroundColor: Colors.primary_lighter }}>
                                 <AntDesign
                                     name="check-circle"
@@ -79,10 +65,6 @@ export default function TimelineTodos(props: {
                                     All todos are completed! Great job!
                                 </Text>
                             </Card>
-                        )}
-
-                        {finishedTodos.length > 0 && (
-                            <FinishedTodosStack todos={finishedTodos} timelineId={props.timelineId} />
                         )}
                     </>
                 ) : (
@@ -96,30 +78,3 @@ export default function TimelineTodos(props: {
         </>
     )
 }
-
-const getItemKey = (todo: Todos) => todo.id + (todo.isCompleted ? "1" : "0")
-
-const FinishedTodosStack = memo((props: { todos: Todos[]; timelineId: string }) => {
-    const renderItem = useCallback(
-        ({ item, index }: { item: Todos; index: number }) => (
-            <TodoItem key={item.id} index={index} {...item} timelineId={props.timelineId} />
-        ),
-
-        [props.timelineId],
-    )
-
-    const onDeleteItem = useCallback(() => {}, [])
-
-    return (
-        <CollapsibleStack
-            items={props.todos}
-            title="Completed"
-            onDeleteItem={onDeleteItem}
-            getItemKey={getItemKey}
-            renderItem={renderItem}
-            expandText="Show"
-            collapseText="Hide"
-            expandOnPress
-        />
-    )
-})

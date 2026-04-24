@@ -8,8 +8,6 @@ import { useActivityUtils } from "@/utils/hooks/useActivityManager"
 import useCompleteOccurrence from "../hooks/mutation/useCompleteOccurrence"
 import DayTimelineItem from "./DayTimelineItem"
 import ContextMenu, { ContextMenuAction } from "react-native-context-menu-view"
-import TimelineDetails from "../pages/TimelineDetails"
-import Layout from "@/constants/Layout"
 
 interface DayTimelineItemWrapperProps {
     item: any
@@ -115,9 +113,6 @@ export default function DayTimelineItemWrapper({ item, style, onLongPress }: Day
                 }}
                 previewBackgroundColor={styles.wrapper.backgroundColor}
                 style={{ flex: 1, borderRadius: styles.wrapper.borderRadius }}
-                onPreviewPress={() => {
-                    console.log("onPreviewPress")
-                }}
             >
                 <Pressable
                     style={[

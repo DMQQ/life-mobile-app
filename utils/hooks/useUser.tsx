@@ -42,7 +42,7 @@ export default function useUser() {
     }
 
     const [refreshToken] = useMutation(gql`
-        mutation {
+        mutation RefreshToken {
             refreshToken
         }
     `)

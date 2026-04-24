@@ -300,7 +300,6 @@ const Btn = ({ buttonWidth, iconScale, activeRoute, ...props }: ButtonProps) => 
 
 export default function BottomTab({ navigation, state }: BottomTabBarProps) {
     const activeRoute = state.routes[state.index].name
-    const routes = ["NotesScreens", "GoalsScreens", "Root", "WalletScreens", "TimelineScreens"]
 
     const handleLongPress = (route: string) => {
         switch (route) {
@@ -328,21 +327,8 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
     const dispatch = useAppDispatch()
     const { isActive: isSearchActive, value: searchValue } = useAppSelector((state) => state.search)
 
-    const totalButtons = state.routes.length
-    const buttonWidth = (Layout.screen.width - 30 - 70 - 15 - 10) / totalButtons
-
     const buttons = useMemo(
         () => [
-            {
-                route: "NotesScreens",
-                label: "Notes",
-                iconName: "rectangle.stack",
-            },
-            {
-                route: "GoalsScreens",
-                label: "Training",
-                iconName: "scope",
-            },
             {
                 route: "Root",
                 label: "Home",
@@ -360,9 +346,19 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
                 iconName: "calendar",
                 onLongPress: () => handleLongPress("TimelineScreens"),
             },
+            {
+                route: "GoalsScreens",
+                label: "Training",
+                iconName: "scope",
+            },
         ],
         [],
     )
+
+    const routes = buttons.map((btn) => btn.route)
+
+    const totalButtons = buttons.length
+    const buttonWidth = (Layout.screen.width - 30 - 70 - 15 - 10) / totalButtons
 
     const indicatorPosition = useSharedValue(routes.indexOf(activeRoute))
     const iconScale = useSharedValue(1)

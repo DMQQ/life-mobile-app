@@ -1,7 +1,7 @@
 import { gql, OperationVariables, QueryHookOptions, useQuery } from "@apollo/client"
 
 export const GET_TIMELINE = gql`
-    query GetTimeline($id: String!) {
+    query GetTimelineById($id: String!) {
         timelineById(id: $id) {
             id
             title

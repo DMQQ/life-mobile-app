@@ -13,7 +13,7 @@ import Text from "@/components/ui/Text/Text";
 export default function InitializeWallet() {
   const [createWallet, { loading, error }] = useMutation(
     gql`
-      mutation ($balance: Float!) {
+      mutation CreateWallet($balance: Float!) {
         createWallet(balance: $balance)
       }
     `,

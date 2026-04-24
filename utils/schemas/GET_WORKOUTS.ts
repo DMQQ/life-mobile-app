@@ -1,7 +1,7 @@
 import { gql } from "@apollo/client";
 
 export const GET_WORKOUTS = gql`
-  query GetWorkouts {
+  query GetWorkoutsSchema {
     workouts {
       id
       date

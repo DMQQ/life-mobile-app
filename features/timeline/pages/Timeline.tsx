@@ -20,6 +20,7 @@ import PagerView from "react-native-pager-view"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import Animated, { Extrapolation, interpolate, useAnimatedStyle, withTiming } from "react-native-reanimated"
 import useTrackScroll from "@/utils/hooks/ui/useTrackScroll"
+import Background from "@/components/ui/Background"
 
 const HEADER_THRESHOLD = 200
 
@@ -106,6 +107,8 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
 
     return (
         <View style={{ flex: 1 }}>
+            <Background />
+
             {timeline.loading && <TimelineScreenLoader />}
 
             <Header

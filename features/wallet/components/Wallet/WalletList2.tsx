@@ -107,7 +107,7 @@ export default function WalletList2({
             if (groupedSubscriptions.active.length > 0) {
                 items.push({
                     type: "subscription-header",
-                    title: "Active Subscriptions",
+                    title: "Active",
                     count: groupedSubscriptions.active.length,
                     color: Colors.secondary,
                 })
@@ -119,7 +119,7 @@ export default function WalletList2({
             if (groupedSubscriptions.inactive.length > 0) {
                 items.push({
                     type: "subscription-header",
-                    title: "Inactive Subscriptions",
+                    title: "Inactive",
                     count: groupedSubscriptions.inactive.length,
                     color: "#F07070",
                 })
@@ -154,14 +154,9 @@ export default function WalletList2({
             switch (item.type) {
                 case "subscription-header":
                     return (
-                        <View style={styles.subscriptionHeaderContainer}>
-                            <View style={styles.monthRow}>
-                                <Text style={styles.monthText}>{item.title}</Text>
-                                <View style={[styles.countBadge, { backgroundColor: item.color }]}>
-                                    <Text style={styles.countText}>{item.count}</Text>
-                                </View>
-                            </View>
-                        </View>
+                        <Text style={[styles.monthText, { marginTop: 30, marginBottom: 15 }]}>
+                            {item.title} ({item.count})
+                        </Text>
                     )
 
                 case "subscription":
@@ -213,11 +208,16 @@ export default function WalletList2({
                 keyExtractor={keyExtractor as any}
                 onScroll={onScroll}
                 ListHeaderComponent={
-                    <>
-                        <SubAccountCards />
-
-                        <WalletLimits navigation={navigation} />
-                    </>
+                    showExpenses ? (
+                        <>
+                            <SubAccountCards />
+                            <WalletLimits navigation={navigation} />
+                        </>
+                    ) : (
+                        <SubscriptionCalendar
+                            subscriptions={[...groupedSubscriptions.active, ...groupedSubscriptions.inactive]}
+                        />
+                    )
                 }
                 contentContainerStyle={{ padding: 15, paddingTop: 230, paddingBottom: 120 }}
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
@@ -231,8 +231,6 @@ export default function WalletList2({
         </>
     )
 }
-
-// ─── Month Item ───────────────────────────────────────────────────────────────
 
 const MonthItem = ({
     monthData,
@@ -439,6 +437,7 @@ const ChevronIcon = ({ isExpanded }: { isExpanded: boolean }) => {
 import Haptics from "react-native-haptic-feedback"
 import GlassView from "@/components/ui/GlassView"
 import SubAccountCards from "./SubAccountCards"
+import SubscriptionCalendar from "./SubscriptionCalendar"
 
 const ClearFiltersButton = () => {
     const { filters, dispatch } = useWalletContext()

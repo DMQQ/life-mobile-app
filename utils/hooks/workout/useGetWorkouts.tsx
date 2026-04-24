@@ -3,7 +3,7 @@ import { Workout } from "../../../types";
 import useUser from "../../hooks/useUser";
 
 export const GET_WORKOUTS = gql`
-  query GetWorkouts {
+  query GetWorkoutsLegacy {
     workouts {
       id
       date

@@ -1,10 +1,9 @@
-import NotesScreens from "@/features/flashcards/Main"
 import useDeeplinking from "@/utils/hooks/useDeeplinking"
 import useQuickActions from "@/utils/hooks/useQuickActions"
 import { useApolloClient } from "@apollo/client"
 import { BottomTabBarProps, createBottomTabNavigator } from "@react-navigation/bottom-tabs"
-import { DarkTheme, LinkingOptions, NavigationContainer, NavigationContainerRef } from "@react-navigation/native"
-import React, { useCallback, useEffect, useMemo } from "react"
+import { DarkTheme, NavigationContainer, NavigationContainerRef } from "@react-navigation/native"
+import React, { useCallback, useEffect } from "react"
 import BottomTab from "../components/BottomTab/BottomTab"
 import Colors from "../constants/Colors"
 import Authentication from "../features/authentication/Main"
@@ -79,6 +78,8 @@ export default function Navigation() {
                     headerStyle: {
                         backgroundColor: Colors.primary,
                     },
+
+                    lazy: false,
                 }}
             >
                 {isAuthenticated ? (
@@ -91,7 +92,7 @@ export default function Navigation() {
 
                         <Tab.Screen name="TimelineScreens" component={TimelineScreens} />
 
-                        <Tab.Screen name="NotesScreens" component={NotesScreens} />
+                        {/* <Tab.Screen name="NotesScreens" component={NotesScreens} /> */}
                     </>
                 ) : (
                     <>

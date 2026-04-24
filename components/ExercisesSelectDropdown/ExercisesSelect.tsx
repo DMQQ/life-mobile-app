@@ -12,7 +12,7 @@ import Color from "color";
 import { AntDesign } from "@expo/vector-icons";
 
 const GET_EXERCISES = gql`
-  query GetExercises {
+  query GetExercisesDropdown {
     exercises {
       exerciseId
       title

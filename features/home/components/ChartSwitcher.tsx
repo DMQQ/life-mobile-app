@@ -69,34 +69,38 @@ const styles = StyleSheet.create({
     },
     tabContainer: {
         flexDirection: "row",
-        backgroundColor: Color(Colors.primary_light).alpha(0.3).string(),
-        borderRadius: 12,
+        backgroundColor: Colors.primary_lighter,
+        borderRadius: 14,
         padding: 4,
-        gap: 6,
+        gap: 4,
     },
     tab: {
         flex: 1,
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "center",
-        paddingVertical: 10,
+        paddingVertical: 9,
         paddingHorizontal: 12,
-        borderRadius: 8,
+        borderRadius: 10,
         gap: 6,
     },
     activeTab: {
-        backgroundColor: Color(Colors.secondary).alpha(0.2).string(),
+        backgroundColor: Color(Colors.secondary).alpha(0.18).string(),
+        borderWidth: 1,
+        borderColor: Color(Colors.secondary).alpha(0.25).string(),
     },
     tabText: {
-        fontSize: 13,
+        fontSize: 12,
         fontWeight: "600",
-        color: Color(Colors.text_light).alpha(0.5).string(),
+        letterSpacing: 0.3,
+        color: Color(Colors.text_light).alpha(0.4).string(),
     },
     activeTabText: {
         color: Colors.text_light,
     },
     chartContent: {
-        minHeight: 250,
+        overflow: "hidden",
+        height: 230,
     },
 })
 

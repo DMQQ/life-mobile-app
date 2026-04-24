@@ -20,6 +20,7 @@ import type { TimelineScreenProps } from "../types"
 import Button2 from "@/components/ui/Button/Button2"
 import { Todo } from "./CreateTimelineTodos"
 import GlassView from "@/components/ui/GlassView"
+import { SegmentedButtons } from "@/components"
 
 const styles = StyleSheet.create({
     timeContainer: {

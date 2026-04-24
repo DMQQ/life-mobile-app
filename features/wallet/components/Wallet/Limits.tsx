@@ -27,7 +27,7 @@ const GET_LIMITS = gql`
 `
 
 const GET_WALLET = gql`
-    query {
+    query GetWalletLimits {
         wallet {
             income
             monthlyPercentageTarget

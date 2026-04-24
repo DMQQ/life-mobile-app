@@ -131,7 +131,7 @@ const CalendarTimetable = ({
         <Animated.ScrollView
             ref={scrollViewRef}
             keyboardDismissMode={"on-drag"}
-            style={{ flex: 1, paddingBottom: items?.length > 0 ? 100 : 0 }}
+            style={{ flex: 1, paddingBottom: items?.length > 0 ? 100 : 0, backgroundColor: "transparent" }}
             onScroll={onScroll}
             showsVerticalScrollIndicator={false}
             scrollEventThrottle={16}

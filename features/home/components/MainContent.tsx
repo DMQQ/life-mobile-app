@@ -1,6 +1,6 @@
-import TodaysTimelineEvents from "@/features/home/components/EventsWidget"
 import AvailableBalanceWidget from "@/features/home/components/WalletWidget"
-import { useAppSelector } from "@/utils/redux"
+import HomeExtras from "@/features/home/components/HomeExtras"
+import TimelineWidget from "@/features/home/components/TimelineWidget"
 import { RefreshControl } from "react-native"
 import Animated from "react-native-reanimated"
 
@@ -25,6 +25,7 @@ export default function MainContent({ home, loading, refreshing, refresh, onScro
                 paddingHorizontal: 15,
                 paddingBottom: 120,
                 paddingTop: 300,
+                gap: 10,
             }}
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} />}
         >
@@ -36,6 +37,8 @@ export default function MainContent({ home, loading, refreshing, refresh, onScro
                 }}
                 loading={loading}
             />
+            <TimelineWidget />
+            <HomeExtras />
         </Animated.ScrollView>
     )
 }

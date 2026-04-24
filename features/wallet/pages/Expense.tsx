@@ -236,7 +236,7 @@ export default function Expense({ route: { params }, navigation }: any) {
     }
 
     const [deleteSubExpense] = useMutation(gql`
-        mutation ($id: ID!) {
+        mutation DeleteSubExpense($id: ID!) {
             deleteSubExpense(id: $id)
         }
     `)

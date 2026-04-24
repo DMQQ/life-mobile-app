@@ -2,7 +2,7 @@ import { gql, useMutation } from "@apollo/client";
 import useUser from "../useUser";
 
 const CREATE_WORKOUT = gql`
-  mutation CreateWorkout($name: String!, $exercises: [String!]!) {
+  mutation CreateWorkoutLegacy($name: String!, $exercises: [String!]!) {
     createWorkout(name: $name, exercises: $exercises) {
       id
       name

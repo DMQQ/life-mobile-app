@@ -65,6 +65,8 @@ export default function useEditOccurrence(occurrenceId: string, isEditing: boole
         repeatCount: "0",
         repeatOn: "",
         repeatEveryNth: "",
+
+        scope: "THIS_ONLY",
     }
 
     const [edit] = useMutation(EDIT_OCCURRENCE, {

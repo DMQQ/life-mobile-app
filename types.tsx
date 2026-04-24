@@ -3,203 +3,202 @@
  * https://reactnavigation.org/docs/typescript/
  */
 
-import { ParamListBase, RouteProp } from "@react-navigation/native";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { ParamListBase, RouteProp } from "@react-navigation/native"
+import { NativeStackScreenProps } from "@react-navigation/native-stack"
 
-import { StackNavigationProp } from "@react-navigation/stack";
-import { Icons } from "./features/wallet/components/Expense/ExpenseIcon";
+import { StackNavigationProp } from "@react-navigation/stack"
+import { Icons } from "./features/wallet/components/Expense/ExpenseIcon"
 
 export interface ScreenProps<Route extends keyof RootStackParamList> {
-  navigation: StackNavigationProp<RootStackParamList, Route>;
-  route: RouteProp<RootStackParamList, Route>;
+    navigation: StackNavigationProp<RootStackParamList, Route>
+    route: RouteProp<RootStackParamList, Route>
 }
 
 export interface StackScreenProps<T extends ParamListBase, Route extends keyof T> {
-  navigation: StackNavigationProp<T, Route>;
-  route: RouteProp<T, Route>;
+    navigation: StackNavigationProp<T, Route>
+    route: RouteProp<T, Route>
 }
 
 export type RootStackParamList = {
-  Loader?: undefined;
+    Loader?: undefined
 
-  DEFAULT: any;
+    DEFAULT: any
 
-  Root: undefined;
+    Root: undefined
 
-  // Login: undefined;
+    Chat: undefined
 
-  // Register: undefined;
+    GoalsScreens: undefined
 
-  //  Landing: undefined;
+    Authentication: undefined
 
-  GoalsScreens: undefined;
+    WorkoutScreens: undefined
 
-  Authentication: undefined;
+    TimelineScreens: any
 
-  WorkoutScreens: undefined;
+    WalletScreens: undefined
 
-  TimelineScreens: any;
+    ImagesPreview: { uri: string }
 
-  WalletScreens: undefined;
+    NotesScreens: undefined
 
-  ImagesPreview: { uri: string };
+    Settings: undefined
+}
 
-  NotesScreens: undefined;
-
-  Settings: undefined;
-};
-
-export type RootStackScreenProps<Screen extends keyof RootStackParamList> = NativeStackScreenProps<RootStackParamList, Screen>;
+export type RootStackScreenProps<Screen extends keyof RootStackParamList> = NativeStackScreenProps<
+    RootStackParamList,
+    Screen
+>
 
 export interface Workout {
-  workoutId: string;
-  title: string;
-  description: string;
-  type: string;
-  difficulty: string;
+    workoutId: string
+    title: string
+    description: string
+    type: string
+    difficulty: string
 
-  exercises: Exercise[];
+    exercises: Exercise[]
 }
 
 export interface Exercise {
-  exerciseId: string;
-  title: string;
-  description: string;
-  difficulty: "Beginner" | "Intermediate" | "Advanced";
-  muscleGroup: string;
-  equipment: string;
-  image: string;
-  tips: {
-    tipId: string;
-    text: string;
-    image: string;
-  }[];
+    exerciseId: string
+    title: string
+    description: string
+    difficulty: "Beginner" | "Intermediate" | "Advanced"
+    muscleGroup: string
+    equipment: string
+    image: string
+    tips: {
+        tipId: string
+        text: string
+        image: string
+    }[]
 }
 
 export interface ExerciseProgress {
-  exerciseProgressId: string;
-  exerciseId: string;
-  reps: number;
-  weight: number;
-  sets: number;
-  date: string;
+    exerciseProgressId: string
+    exerciseId: string
+    reps: number
+    weight: number
+    sets: number
+    date: string
 }
 
 export interface MonthlyFlow {
-  income: number;
-  expense: number;
+    income: number
+    expense: number
 }
 
 export interface MonthlyExpenses {
-  month: string;
-  flow: MonthlyFlow;
-  expenses: Expense[];
+    month: string
+    flow: MonthlyFlow
+    expenses: Expense[]
 }
 
 export interface Wallet {
-  id: string;
-  balance: number;
-  expenses: Expense[];
-  expenses2: MonthlyExpenses[];
+    id: string
+    balance: number
+    expenses: Expense[]
+    expenses2: MonthlyExpenses[]
 }
 
 export interface Subscription {
-  id: string;
-  isActive: boolean;
-  nextBillingDate: string;
-  dateStart: string;
+    id: string
+    isActive: boolean
+    nextBillingDate: string
+    dateStart: string
 
-  description: string;
+    description: string
 
-  expenses: Expense[];
+    expenses: Expense[]
 
-  amount: number;
+    amount: number
 
-  category: keyof typeof Icons;
+    category: keyof typeof Icons
 
-  billingCycle: "monthly" | "yearly" | "weekly" | "daily";
+    billingCycle: "monthly" | "yearly" | "weekly" | "daily"
 }
 
 export interface Expense {
-  id: string;
-  amount: number;
-  description: string;
-  date: string;
-  type: string;
-  balanceBeforeInteraction: number;
-  category: keyof typeof Icons;
+    id: string
+    amount: number
+    description: string
+    date: string
+    type: string
+    balanceBeforeInteraction: number
+    category: keyof typeof Icons
 
-  spontaneousRate: number;
+    spontaneousRate: number
 
-  subscription: Subscription | null;
+    subscription: Subscription | null
 
-  location: { id: string; kind: string; name: string; latitude: number; longitude: number } | null;
+    location: { id: string; kind: string; name: string; latitude: number; longitude: number } | null
 
-  subexpenses: {
-    id: string;
-    amount: number;
-    description: string;
-    category: string;
-  }[];
+    subexpenses: {
+        id: string
+        amount: number
+        description: string
+        category: string
+    }[]
 
-  files?: {
-    id: string;
-    url: string;
-    expenseId: string | undefined;
-  }[];
+    files?: {
+        id: string
+        url: string
+        expenseId: string | undefined
+    }[]
 
-  note?: string;
+    note?: string
 
-  tags?: string;
+    tags?: string
 
-  shop?: string;
+    shop?: string
 }
 
 export interface Timeline {
-  id: string;
-  title: string;
-  description: string;
-  userId: string | null | undefined;
-  date: string;
-  beginTime: string;
-  endTime: string;
-  isCompleted: boolean;
-  tags: string;
+    id: string
+    title: string
+    description: string
+    userId: string | null | undefined
+    date: string
+    beginTime: string
+    endTime: string
+    isCompleted: boolean
+    tags: string
 
-  files: IFile[];
+    files: IFile[]
 
-  todos: Todos[];
+    todos: Todos[]
 }
 
 export interface CopyTimelineInput {
-  newDate?: string;
+    newDate?: string
 }
 
 export interface CopyTimelineVariables {
-  timelineId: string;
-  newDate?: string;
+    timelineId: string
+    newDate?: string
 }
 
 export interface Todos {
-  id: string;
-  title: string;
-  isCompleted: boolean;
+    id: string
+    title: string
+    isCompleted: boolean
 
-  createdAt: string;
+    createdAt: string
 
-  modifiedAt: string;
+    modifiedAt: string
 
-  files?: TodoFile[];
+    files?: TodoFile[]
 }
 
 export interface TodoFile {
-  id: string;
-  type: string;
-  url: string;
+    id: string
+    type: string
+    url: string
 }
 
 export interface IFile {
-  id: string;
-  url: string;
-  timelineId: string | undefined;
+    id: string
+    url: string
+    timelineId: string | undefined
 }

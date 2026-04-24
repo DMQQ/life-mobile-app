@@ -58,7 +58,9 @@ interface SubAccountsQueryResult {
 }
 
 export function useSubAccounts() {
-    return useQuery<SubAccountsQueryResult>(SUB_ACCOUNTS_QUERY)
+    return useQuery<SubAccountsQueryResult>(SUB_ACCOUNTS_QUERY, {
+        fetchPolicy: "cache-first",
+    })
 }
 
 export function useCreateSubAccount(onCompleted?: () => void) {

@@ -1,7 +1,6 @@
 import { Card } from "@/components"
 import Colors, { secondary_candidates } from "@/constants/Colors"
 import moment from "moment"
-import { useMemo } from "react"
 import { StyleSheet, Text, View } from "react-native"
 import { FadeIn, LinearTransition } from "react-native-reanimated"
 import { CategoryIcon } from "../Expense/ExpenseIcon"
@@ -16,7 +15,10 @@ interface SubscriptionItemProps {
         isActive: boolean
         nextBillingDate: string
         billingCycle: string
-        expenses: {
+        totalSpent?: number
+        totalAmount?: number
+        totalDuration?: number
+        expenses?: {
             amount: number
             id: string
             date: string
@@ -29,7 +31,7 @@ interface SubscriptionItemProps {
 }
 
 function formatBillingCycle(cycle: string) {
-    const cycles: { [key: string]: string } = {
+    const cycles: Record<string, string> = {
         daily: "Daily",
         weekly: "Weekly",
         monthly: "Monthly",
@@ -40,58 +42,32 @@ function formatBillingCycle(cycle: string) {
 }
 
 function parseDateToText(date: string) {
-    const providedDate = moment(parseInt(date))
+    const d = moment(parseInt(date))
     const today = moment()
-    const tomorrow = moment().add(1, "days")
-
-    if (providedDate.isSame(today, "day")) {
-        return "Today"
-    }
-    if (providedDate.isSame(tomorrow, "day")) {
-        return "Tomorrow"
-    }
-    if (providedDate.isAfter(today) && providedDate.diff(today, "days") <= 7) {
-        return providedDate.format("dddd")
-    }
-    return providedDate.format("MMM DD")
+    if (d.isSame(today, "day")) return "Today"
+    if (d.isSame(today.clone().add(1, "day"), "day")) return "Tomorrow"
+    if (d.isAfter(today) && d.diff(today, "days") <= 7) return d.format("dddd")
+    return d.format("MMM DD")
 }
 
-function getSubscriptionDuration(startDate: string) {
-    const start = moment(startDate)
-    const now = moment()
-    const duration = moment.duration(now.diff(start))
-
-    const years = duration.years()
-    const months = duration.months()
-    const days = duration.days()
-
-    if (years > 0) {
-        return `${years}y ${months}m`
-    } else if (months > 0) {
-        return `${months}m ${days}d`
-    } else if (days > 0) {
-        return `${days} days`
-    } else {
-        return "Started today"
-    }
+function formatDuration(days: number) {
+    if (days >= 365) return `${Math.floor(days / 365)}y ${Math.floor((days % 365) / 30)}m`
+    if (days >= 30) return `${Math.floor(days / 30)}m ${days % 30}d`
+    if (days > 0) return `${days}d`
+    return "Today"
 }
 
 export default function SubscriptionItem({ subscription, index, onPress }: SubscriptionItemProps) {
-    const totalSpent = subscription.expenses?.reduce((sum, expense) => sum + expense.amount, 0) ?? 0
     const daysUntilNext = moment(parseInt(subscription.nextBillingDate)).diff(moment(), "days")
     const isOverdue = daysUntilNext < 0
 
-    const expenses = useMemo(() => {
-        if (!subscription.expenses) return []
+    const nextLabel = subscription.isActive
+        ? isOverdue
+            ? "Overdue"
+            : parseDateToText(subscription.nextBillingDate)
+        : "Inactive"
 
-        const copy = [...subscription.expenses]
-
-        copy.sort((a, b) => moment(b.date).diff(moment(a.date)))
-
-        return copy
-    }, [subscription.expenses])
-
-    const subscriptionDuration = getSubscriptionDuration(expenses[expenses.length - 1]?.date || subscription?.dateStart)
+    const nextColor = !subscription.isActive ? "#F07070" : isOverdue ? "#F07070" : secondary_candidates[0]
 
     return (
         <Card
@@ -99,187 +75,115 @@ export default function SubscriptionItem({ subscription, index, onPress }: Subsc
             animated
             layout={LinearTransition}
             entering={FadeIn.delay((index + 1) * 50)}
-            style={[styles.container, styles.subscriptionItem]}
-            onPress={() => {
-                onPress()
-            }}
+            style={styles.card}
+            onPress={onPress}
         >
-            <View style={styles.iconContainer}>
+            <View style={styles.row}>
                 <CategoryIcon type="expense" category="subscriptions" />
-            </View>
 
-            <View style={styles.contentContainer}>
-                <View style={styles.topRow}>
-                    <Text style={styles.title} numberOfLines={1}>
-                        {subscription.description}
-                    </Text>
-                    <View style={styles.amountContainer}>
+                <View style={styles.body}>
+                    <View style={styles.topRow}>
+                        <Text style={styles.name} numberOfLines={1}>
+                            {subscription.description}
+                        </Text>
                         <Text style={styles.amount}>
                             -{subscription.amount.toFixed(2)}
-                            <Text style={styles.currency}>zł</Text>
+                            <Text style={styles.currency}> zł</Text>
                         </Text>
                     </View>
-                </View>
 
-                <View style={styles.firstDetailsRow}>
-                    <Text style={styles.details}>
-                        {formatBillingCycle(subscription.billingCycle)}
-                        {" • "}
-                        <Text style={{ color: secondary_candidates[2] }}>Running for {subscriptionDuration}</Text>
-                    </Text>
-                </View>
-
-                <View style={styles.secondDetailsRow}>
-                    <Text style={styles.details}>
-                        {subscription.isActive ? (
-                            <>
-                                <Text style={{ color: isOverdue ? "#F07070" : secondary_candidates[0] }}>
-                                    {isOverdue ? "Overdue" : `Next: ${parseDateToText(subscription.nextBillingDate)}`}
-                                </Text>
-                            </>
-                        ) : (
-                            <Text style={{ color: "#F07070" }}>Inactive</Text>
+                    <View style={styles.chips}>
+                        <Chip
+                            label={formatBillingCycle(subscription.billingCycle)}
+                            color="rgba(255,255,255,0.08)"
+                            textColor="rgba(255,255,255,0.5)"
+                        />
+                        <Chip label={nextLabel} color={nextColor + "22"} textColor={nextColor} />
+                        {subscription.totalDuration != null && (
+                            <Chip
+                                label={formatDuration(subscription.totalDuration)}
+                                color="rgba(255,255,255,0.05)"
+                                textColor="rgba(255,255,255,0.35)"
+                            />
                         )}
-                        {subscription.expenses?.length > 0 && (
-                            <>
-                                {" • "}
-                                <Text style={{ color: secondary_candidates[1] }}>
-                                    {subscription.expenses.length} payment
-                                    {subscription.expenses.length !== 1 ? "s" : ""}
-                                </Text>
-                            </>
+                        {subscription.totalSpent != null && subscription.totalSpent > 0 && (
+                            <Chip
+                                label={`Spent: ${subscription.totalSpent.toFixed(2)} zł`}
+                                color={secondary_candidates[1] + "22"}
+                                textColor={secondary_candidates[1]}
+                            />
                         )}
-                    </Text>
-                </View>
 
-                {totalSpent > 0 && (
-                    <View style={styles.totalRow}>
-                        <Text style={styles.totalSpent}>Total spent: {totalSpent.toFixed(2)}zł</Text>
+                        {subscription.totalAmount != null && subscription.amount > 0 && (
+                            <Chip
+                                label={`${Math.round(subscription.totalAmount / subscription.amount)}x`}
+                                color="rgba(255,255,255,0.05)"
+                                textColor="rgba(255,255,255,0.35)"
+                            />
+                        )}
                     </View>
-                )}
+                </View>
             </View>
         </Card>
     )
 }
 
+function Chip({ label, color, textColor }: { label: string; color: string; textColor: string }) {
+    return (
+        <View style={[styles.chip, { backgroundColor: color }]}>
+            <Text style={[styles.chipText, { color: textColor }]}>{label}</Text>
+        </View>
+    )
+}
+
 const styles = StyleSheet.create({
-    container: {
-        marginBottom: 20,
+    card: {
+        marginBottom: 15,
+        paddingHorizontal: 10,
+        paddingVertical: 10,
     },
-    subscriptionItem: {
-        minHeight: 100,
-        borderRadius: 20,
+    row: {
         flexDirection: "row",
         alignItems: "flex-start",
     },
-    iconContainer: {
-        marginTop: 2,
-        marginRight: 16,
-    },
-    contentContainer: {
+    iconWrap: {},
+    body: {
         flex: 1,
-        padding: 5,
+        gap: 8,
     },
     topRow: {
         flexDirection: "row",
         justifyContent: "space-between",
-        alignItems: "flex-start",
-        marginBottom: 10,
+        alignItems: "center",
+        gap: 8,
     },
-    title: {
-        color: Colors.foreground,
-        fontSize: 17,
-        fontWeight: "bold",
+    name: {
         flex: 1,
-        marginRight: 15,
-        lineHeight: 22,
-    },
-    amountContainer: {
-        alignItems: "flex-end",
+        fontSize: 16,
+        fontWeight: "700",
+        color: Colors.text_light,
     },
     amount: {
+        fontSize: 16,
+        fontWeight: "700",
         color: "#F07070",
-        fontSize: 17,
-        fontWeight: "600",
     },
     currency: {
-        fontSize: 15,
-    },
-    firstDetailsRow: {
-        marginBottom: 6,
-    },
-    secondDetailsRow: {
-        marginBottom: 6,
-    },
-    details: {
-        color: "#9f9f9f",
-        fontSize: 14,
-        lineHeight: 20,
-    },
-    totalRow: {
-        marginTop: 4,
-    },
-    totalSpent: {
-        color: "rgba(255,255,255,0.8)",
         fontSize: 13,
-        fontStyle: "italic",
-    },
-    inactiveIndicator: {
-        marginLeft: 12,
-        marginTop: 2,
-    },
-    inactiveText: {
-        color: "#F07070",
-        fontSize: 20,
-        fontWeight: "bold",
-    },
-    expanded: {
-        padding: 20,
-        paddingTop: 15,
-        borderTopWidth: 1,
-        borderTopColor: "rgba(255,255,255,0.1)",
-    },
-    expandedTitle: {
-        color: Colors.text_light,
-        fontSize: 15,
-        fontWeight: "600",
-        marginBottom: 15,
-    },
-    expenseItem: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        paddingVertical: 12,
-        paddingHorizontal: 16,
-        backgroundColor: Colors.primary,
-        borderRadius: 12,
-        marginBottom: 8,
-    },
-    expenseLeft: {
-        flex: 1,
-    },
-    expenseDescription: {
-        color: Colors.foreground,
-        fontSize: 15,
         fontWeight: "500",
-        marginBottom: 4,
-        lineHeight: 20,
     },
-    expenseDate: {
-        color: "#9f9f9f",
+    chips: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        gap: 6,
+    },
+    chip: {
+        paddingHorizontal: 9,
+        paddingVertical: 4,
+        borderRadius: 20,
+    },
+    chipText: {
         fontSize: 12,
-    },
-    expenseAmount: {
-        color: "#F07070",
-        fontSize: 15,
         fontWeight: "600",
-        marginLeft: 15,
-    },
-    moreText: {
-        color: "rgba(255,255,255,0.6)",
-        fontSize: 13,
-        textAlign: "center",
-        marginTop: 12,
-        fontStyle: "italic",
     },
 })

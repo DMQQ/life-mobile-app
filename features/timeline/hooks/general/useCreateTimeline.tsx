@@ -33,10 +33,11 @@ export default function useCreateTimeline({ route, navigation }: TimelineScreenP
         skip: !isEditing || route?.params?.timelineId === undefined,
     })
 
-    const { editOccurrence, initialFormProps: initialEditFormValues, isRepeat } = useEditOccurrence(
-        route.params.timelineId || "",
-        isEditing,
-    )
+    const {
+        editOccurrence,
+        initialFormProps: initialEditFormValues,
+        isRepeat,
+    } = useEditOccurrence(route.params.timelineId || "", isEditing)
 
     const initialFormValues =
         isEditing && data !== undefined
@@ -49,6 +50,8 @@ export default function useCreateTimeline({ route, navigation }: TimelineScreenP
                   title: route.params.title ?? "",
                   desc: route.params.description ?? "",
                   notification: "none",
+
+                  scope: "THIS_ONLY",
               }
 
     const [pendingEdit, setPendingEdit] = useState<{ input: typeof initialFormValues; date: string } | null>(null)
@@ -62,7 +65,7 @@ export default function useCreateTimeline({ route, navigation }: TimelineScreenP
             }
             await editOccurrence(input, route.params.selectedDate, "THIS_ONLY")
         } else {
-            await handleSubmit({ ...input, todos: route.params?.todos || [] })
+            await handleSubmit({ ...input, todos: route.params?.todos || [], priority: 1 })
         }
 
         await Promise.allSettled([
