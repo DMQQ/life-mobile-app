@@ -37,6 +37,7 @@ function formatBillingCycle(cycle: string) {
         monthly: "Monthly",
         yearly: "Yearly",
         quarterly: "Quarterly",
+        custom: "Custom",
     }
     return cycles[cycle.toLowerCase()] || cycle
 }

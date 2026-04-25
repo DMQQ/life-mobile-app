@@ -211,7 +211,7 @@ export default function WalletList2({
                     showExpenses ? (
                         <>
                             <SubAccountCards />
-                            <WalletLimits navigation={navigation} />
+                            {/* <WalletLimits navigation={navigation} /> */}
                         </>
                     ) : (
                         <SubscriptionCalendar

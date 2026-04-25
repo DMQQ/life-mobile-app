@@ -1,6 +1,14 @@
 import { invalidateGetMainScreen } from "@/utils/schemas/GET_MAIN_SCREEN"
 import { gql, useMutation } from "@apollo/client"
 
+export const useEditExpenseNote = () => {
+    return useMutation(gql`
+        mutation EditExpenseNote($expenseId: ID!, $note: String!) {
+            editExpenseNote(expenseId: $expenseId, note: $note)
+        }
+    `)
+}
+
 export const useEditExpense = () => {
     const [editExpense] = useMutation(
         gql`

@@ -11,6 +11,9 @@ const MODIFY_SUBSCRIPTION_MUTATION = gql`
             isActive
             nextBillingDate
             billingCycle
+            billingDay
+            customBillingMonths
+            reminderDaysBeforehand
         }
     }
 `
@@ -53,6 +56,24 @@ const CREATE_SUBSCRIPTION_MUTATION = gql`
                 nextBillingDate
                 dateStart
             }
+        }
+    }
+`
+
+const CREATE_SUBSCRIPTION_INPUT_MUTATION = gql`
+    mutation createSubscriptionFromInput($input: CreateSubscriptionInput!) {
+        create(input: $input) {
+            id
+            amount
+            dateStart
+            dateEnd
+            description
+            isActive
+            nextBillingDate
+            billingCycle
+            billingDay
+            customBillingMonths
+            reminderDaysBeforehand
         }
     }
 `
@@ -120,14 +141,27 @@ export default function useSubscription() {
     )
 
     const [modifySubscription, modifySubscriptionState] = useMutation(MODIFY_SUBSCRIPTION_MUTATION, {
-        refetchQueries: ["GetWallet", "Subscription"],
+        refetchQueries: ["GetWallet", "Subscription", "Subscriptions"],
     })
+
+    const [createSubscriptionFromInput, createSubscriptionFromInputState] = useMutation(
+        CREATE_SUBSCRIPTION_INPUT_MUTATION,
+        {
+            refetchQueries: ["GetWallet", "Subscriptions"],
+
+            onError(error) {
+                console.log("Error creating subscription:", JSON.stringify(error, null, 2))
+            },
+        },
+    )
 
     return {
         cancelSubscription,
         cancelSubscriptionState,
         createSubscription,
         createSubscriptionState,
+        createSubscriptionFromInput,
+        createSubscriptionFromInputState,
         renewSubscription,
         renewSubscriptionState,
         assignExpenseToSubscription,

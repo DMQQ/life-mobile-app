@@ -116,7 +116,10 @@ export interface Subscription {
 
     category: keyof typeof Icons
 
-    billingCycle: "monthly" | "yearly" | "weekly" | "daily"
+    billingCycle: "monthly" | "yearly" | "weekly" | "daily" | "custom"
+    billingDay?: number
+    customBillingMonths?: number[]
+    reminderDaysBeforehand?: number
 }
 
 export interface Expense {

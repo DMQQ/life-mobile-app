@@ -61,6 +61,9 @@ const SUBSCRIPTION_QUERY = gql`
             isActive
             nextBillingDate
             billingCycle
+            billingDay
+            customBillingMonths
+            reminderDaysBeforehand
             expenses {
                 id
                 amount
@@ -95,9 +98,12 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
             weekly: "Weekly",
             monthly: "Monthly",
             yearly: "Yearly",
+            custom: "Custom",
         }
         return cycles[cycle] || cycle
     }
+
+    const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
     const getSubscriptionDuration = () => {
         const start = moment(subscription?.dateStart ? new Date(+subscription?.dateStart) : new Date())
@@ -242,6 +248,61 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                                 {formatBillingCycle(subscription.billingCycle)} Subscription
                             </Text>
                         </View>
+
+                        {subscription.billingCycle === "custom" && subscription.billingDay != null && (
+                            <View style={styles.row}>
+                                <AntDesign
+                                    name="calendar"
+                                    size={24}
+                                    color={Colors.ternary}
+                                    style={{ paddingHorizontal: 7.5, padding: 2.5 }}
+                                />
+                                <Text variant="body" style={{ color: Colors.secondary_light_2 }}>
+                                    Billing day: {subscription.billingDay}
+                                </Text>
+                            </View>
+                        )}
+
+                        {subscription.billingCycle === "custom" && (subscription.customBillingMonths?.length ?? 0) > 0 && (
+                            <View style={[styles.row, { flexDirection: "column", alignItems: "flex-start", gap: 8 }]}>
+                                <Text variant="body" style={{ color: Colors.secondary_light_2 }}>
+                                    Active months:
+                                </Text>
+                                <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
+                                    {subscription.customBillingMonths!.map((m) => (
+                                        <View
+                                            key={m}
+                                            style={{
+                                                paddingHorizontal: 10,
+                                                paddingVertical: 4,
+                                                borderRadius: 20,
+                                                backgroundColor: Colors.secondary + "33",
+                                            }}
+                                        >
+                                            <Text variant="body" style={{ color: Colors.secondary, fontSize: 12 }}>
+                                                {MONTH_NAMES[m - 1]}
+                                            </Text>
+                                        </View>
+                                    ))}
+                                </View>
+                            </View>
+                        )}
+
+                        {subscription.reminderDaysBeforehand != null && (
+                            <View style={styles.row}>
+                                <MaterialIcons
+                                    name="notifications-none"
+                                    size={24}
+                                    color={Colors.ternary}
+                                    style={{ paddingHorizontal: 7.5, padding: 2.5 }}
+                                />
+                                <Text variant="body" style={{ color: Colors.secondary_light_2 }}>
+                                    Reminder: {subscription.reminderDaysBeforehand === 0
+                                        ? "on billing day"
+                                        : `${subscription.reminderDaysBeforehand}d before`}
+                                </Text>
+                            </View>
+                        )}
 
                         <View style={styles.row}>
                             <MaterialIcons

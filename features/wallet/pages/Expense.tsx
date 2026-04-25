@@ -34,64 +34,63 @@ const Txt = (props: { children: ReactNode; size: number; color?: any }) => (
     </Text>
 )
 
+const GET_EXPENSE = gql`
+    query Expense($id: ID!) {
+        expense(expenseId: $id) {
+            ...ExpenseDetails
+        }
+
+        similarExpenses(expenseId: $id, limit: 20) {
+            ...ExpenseDetails
+        }
+
+        wallet {
+            income
+            monthlyPercentageTarget
+        }
+    }
+
+    fragment ExpenseDetails on ExpenseEntity {
+        id
+        amount
+        date
+        description
+        type
+        category
+        balanceBeforeInteraction
+        note
+
+        subscription {
+            id
+            isActive
+            nextBillingDate
+            dateStart
+        }
+
+        location {
+            id
+            kind
+            name
+            latitude
+            longitude
+        }
+
+        files {
+            id
+            url
+        }
+
+        subexpenses {
+            id
+            description
+            amount
+            category
+        }
+    }
+`
+
 export default function Expense({ route: { params }, navigation }: any) {
-    const { data, error } = useQuery(
-        gql`
-            query Expense($id: ID!) {
-                expense(expenseId: $id) {
-                    ...ExpenseDetails
-                }
-
-                similarExpenses(expenseId: $id, limit: 20) {
-                    ...ExpenseDetails
-                }
-
-                wallet {
-                    income
-                    monthlyPercentageTarget
-                }
-            }
-
-            fragment ExpenseDetails on ExpenseEntity {
-                id
-                amount
-                date
-                description
-                type
-                category
-                balanceBeforeInteraction
-                note
-
-                subscription {
-                    id
-                    isActive
-                    nextBillingDate
-                    dateStart
-                }
-
-                location {
-                    id
-                    kind
-                    name
-                    latitude
-                    longitude
-                }
-
-                files {
-                    id
-                    url
-                }
-
-                subexpenses {
-                    id
-                    description
-                    amount
-                    category
-                }
-            }
-        `,
-        { variables: { id: params?.expense?.id } },
-    )
+    const { data } = useQuery(GET_EXPENSE, { variables: { id: params?.expense?.id } })
 
     const [selected, setSelected] = useState(params?.expense)
 
@@ -419,6 +418,7 @@ export default function Expense({ route: { params }, navigation }: any) {
                                 Balance before: {selected?.balanceBeforeInteraction} zł
                             </Text>
                         </View>
+                        <EditNote expense={selected} />
                     </View>
 
                     <View style={{ marginTop: 20 }}>
@@ -626,6 +626,63 @@ const MonthlyBreakdown = ({ expense, income }: MonthlyBreakdownProps) => {
     )
 }
 
+const EditNote = ({ expense }: { expense: ExpenseType }) => {
+    const [isEditing, setIsEditing] = useState(false)
+    const [text, setText] = useState(expense.note || "")
+    const [mutation] = useEditExpenseNote()
+
+    const handleUpdateNote = async (newNote: string) => {
+        try {
+            await mutation({
+                variables: {
+                    expenseId: expense.id,
+                    note: newNote,
+                },
+                refetchQueries: [
+                    {
+                        query: GET_EXPENSE,
+                        variables: { id: expense.id },
+                    },
+                ],
+            })
+        } catch (error) {
+            console.error("Error updating note:", error)
+            Alert.alert("Error", "Failed to update note. Please try again.")
+        }
+    }
+
+    return (
+        <View style={[styles.row, { height: 60, gap: 15, alignItems: "center", paddingLeft: 20 }]}>
+            <IconButton
+                icon={<Feather name="edit-2" size={20} color={Colors.ternary} />}
+                onPress={() => setIsEditing(!isEditing)}
+            />
+            {isEditing ? (
+                <Input
+                    placeholder="enter note text"
+                    value={text}
+                    onChangeText={setText}
+                    containerStyle={{
+                        flex: 1,
+                        height: 40,
+                    }}
+                    right={
+                        <IconButton
+                            icon={<AntDesign name="check" size={20} color={Colors.secondary} />}
+                            onPress={() => {
+                                handleUpdateNote(text)
+                                setIsEditing(false)
+                            }}
+                        />
+                    }
+                />
+            ) : (
+                <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>{expense.note || "-"}</Text>
+            )}
+        </View>
+    )
+}
+
 import Layout from "@/constants/Layout"
 import * as ImagePicker from "expo-image-picker"
 import Animated, { useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated"
@@ -639,6 +696,8 @@ import { CollapsibleThemedCalendar } from "@/components/ui/ThemedCalendar/Themed
 import dayjs from "dayjs"
 import { useNavigation } from "@react-navigation/native"
 import { IconButton } from "@/components"
+import { useEditExpenseNote } from "../hooks/useEditExpense"
+import Input from "@/components/ui/TextInput/TextInput"
 
 type FileUploadHandle = { takePhoto: () => void; pickImage: () => void }
 

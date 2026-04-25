@@ -45,10 +45,10 @@ const ZeroSpendingsCompact = () => {
 
     return (
         <View style={styles.zeroCard}>
-            <Text style={styles.sectionTitle}>No-spend days</Text>
+            <Text style={[styles.sectionTitle, { color: "#fff" }]}>No-spend days</Text>
             <View style={styles.zeroRow}>
                 <View style={styles.zeroStat}>
-                    <MaterialIcons name="event-available" size={16} color={Colors.secondary} />
+                    <MaterialIcons name="event-available" size={16} color={"#fff"} />
                     <Text style={styles.zeroValue}>{zeroDays}</Text>
                     <Text style={styles.zeroLabel}>days</Text>
                 </View>
@@ -60,13 +60,13 @@ const ZeroSpendingsCompact = () => {
                 </View>
                 <View style={styles.zeroDivider} />
                 <View style={styles.zeroStat}>
-                    <MaterialIcons name="local-fire-department" size={16} color={streakLen > 0 ? "#F6B161" : Colors.text_dark} />
+                    <MaterialIcons name="local-fire-department" size={16} color={streakLen > 0 ? "#F6B161" : "#fff"} />
                     <Text style={[styles.zeroValue, streakLen > 0 && { color: "#F6B161" }]}>{streakLen}</Text>
                     <Text style={styles.zeroLabel}>streak</Text>
                 </View>
                 <View style={styles.zeroDivider} />
                 <View style={styles.zeroStat}>
-                    <MaterialIcons name="savings" size={16} color={Colors.secondary} />
+                    <MaterialIcons name="savings" size={16} color={"#fff"} />
                     <Text style={styles.zeroValue}>{Math.round(stats.saved)}zł</Text>
                     <Text style={styles.zeroLabel}>saved</Text>
                 </View>
@@ -132,7 +132,7 @@ const styles = StyleSheet.create({
     },
     zeroLabel: {
         fontSize: 10,
-        color: Colors.text_dark,
+        color: "#fff",
         letterSpacing: 0.4,
         textTransform: "uppercase",
     },

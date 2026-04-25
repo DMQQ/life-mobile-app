@@ -1,64 +1,129 @@
-import { Button, IconButton } from "@/components"
+import { IconButton } from "@/components"
 import DatePicker from "@/components/DatePicker"
+import BottomSheet from "@/components/ui/BottomSheet/BottomSheet"
 import GlassView from "@/components/ui/GlassView"
 import Text from "@/components/ui/Text/Text"
 import Input from "@/components/ui/TextInput/TextInput"
 import Colors from "@/constants/Colors"
 import Layout from "@/constants/Layout"
 import { Subscription } from "@/types"
-import { AntDesign } from "@expo/vector-icons"
+import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons"
+import { BottomSheetScrollView, BottomSheetView } from "@gorhom/bottom-sheet"
 import Color from "color"
+import { useFormik } from "formik"
 import moment from "moment"
-import { useState } from "react"
+import { useMemo, useRef } from "react"
 import { ActivityIndicator, Keyboard, ScrollView, StyleSheet, TouchableWithoutFeedback, View } from "react-native"
+import { Calendar } from "react-native-calendars"
+import type { DateData, MarkedDates } from "react-native-calendars/src/types"
 import Feedback from "react-native-haptic-feedback"
-import Animated, { FadeIn, interpolate, useAnimatedStyle, useSharedValue } from "react-native-reanimated"
 import Ripple from "react-native-material-ripple"
+import Animated, { FadeIn, interpolate, useAnimatedStyle, useSharedValue } from "react-native-reanimated"
 import NumbersPad from "../components/CreateExpense/NumberPad"
 import useSubscription from "../hooks/useSubscription"
 
-type BillingCycle = "daily" | "weekly" | "monthly" | "yearly"
+type BillingCycle = "daily" | "weekly" | "monthly" | "yearly" | "custom"
 
 interface Props {
-    route: { params: { subscription: Subscription } }
+    route: { params: { subscription?: Subscription } }
     navigation: any
 }
 
-const BILLING_CYCLES: BillingCycle[] = ["daily", "weekly", "monthly", "yearly"]
+const BILLING_CYCLES: BillingCycle[] = ["daily", "weekly", "monthly", "yearly", "custom"]
+const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+const REMINDER_PRESETS = [0, 1, 3, 7, 14, 30]
+
+const CALENDAR_THEME = {
+    backgroundColor: "transparent",
+    calendarBackground: "transparent",
+    dayTextColor: Colors.foreground,
+    textDisabledColor: "rgba(255,255,255,0.2)",
+    monthTextColor: Colors.secondary,
+    textMonthFontSize: 17,
+    textMonthFontWeight: "700" as const,
+    selectedDayBackgroundColor: Colors.secondary,
+    selectedDayTextColor: "#fff",
+    arrowColor: Colors.secondary,
+    todayTextColor: Colors.secondary,
+    textDayFontSize: 15,
+    textDayFontWeight: "500" as const,
+    "stylesheet.calendar.header": {
+        week: { marginTop: 4, flexDirection: "row", justifyContent: "space-around" },
+        dayHeader: { fontSize: 12, color: "rgba(255,255,255,0.4)", fontWeight: "600" as const },
+    },
+}
 
 export default function EditSubscription({ route, navigation }: Props) {
-    const { subscription } = route.params
-    const { modifySubscription, modifySubscriptionState } = useSubscription()
+    const subscription = route.params?.subscription
+    const isEdit = !!subscription
+    const {
+        modifySubscription,
+        modifySubscriptionState,
+        createSubscriptionFromInput,
+        createSubscriptionFromInputState,
+    } = useSubscription()
 
-    const [description, setDescription] = useState(subscription.description || "")
-    const [amount, setAmount] = useState(subscription.amount?.toString() || "0")
-    const [billingCycle, setBillingCycle] = useState<BillingCycle>(subscription.billingCycle as BillingCycle)
-    const [dateStart, setDateStart] = useState<Date>(
-        subscription.dateStart ? new Date(+subscription.dateStart) : new Date(),
-    )
-    const [dateEnd, setDateEnd] = useState<Date>(subscription.dateEnd ? new Date(+subscription.dateEnd) : new Date())
-    const [nextBillingDate, setNextBillingDate] = useState<Date>(
-        subscription.nextBillingDate ? new Date(+subscription.nextBillingDate) : new Date(),
-    )
-
+    const reminderSheetRef = useRef<any>(null)
+    const customSheetRef = useRef<any>(null)
     const transformX = useSharedValue(0)
-    const loading = modifySubscriptionState.loading
+
+    const formik = useFormik({
+        initialValues: {
+            description: subscription?.description ?? "",
+            amount: subscription?.amount?.toString() ?? "0",
+            billingCycle: (subscription?.billingCycle ?? "monthly") as BillingCycle,
+            billingDay: subscription?.billingDay?.toString() ?? "1",
+            customBillingMonths: subscription?.customBillingMonths ?? ([] as number[]),
+            reminderDaysBeforehand: subscription?.reminderDaysBeforehand ?? 3,
+            dateStart: subscription?.dateStart ? new Date(+subscription.dateStart) : new Date(),
+            dateEnd: subscription?.dateEnd ? new Date(+subscription.dateEnd) : (null as Date | null),
+            nextBillingDate: subscription?.nextBillingDate ? new Date(+subscription.nextBillingDate) : new Date(),
+        },
+        onSubmit: async (values) => {
+            Feedback.trigger("impactLight")
+            const input = {
+                description: values.description.trim() || undefined,
+                amount: parseFloat(values.amount),
+                billingCycle: values.billingCycle,
+                dateStart: values.dateStart.toISOString(),
+                dateEnd: values.dateEnd?.toISOString() ?? undefined,
+                nextBillingDate: values.nextBillingDate.toISOString(),
+                reminderDaysBeforehand: values.reminderDaysBeforehand,
+                ...(values.billingCycle === "custom" && {
+                    billingDay: parseInt(values.billingDay) || 1,
+                    customBillingMonths: values.customBillingMonths,
+                }),
+            }
+            const result = await (async () => {
+                if (isEdit) {
+                    return await modifySubscription({ variables: { input: { id: subscription!.id, ...input } } })
+                } else {
+                    return await createSubscriptionFromInput({ variables: { input } })
+                }
+            })()
+
+            console.log({ input, result })
+            navigation.goBack()
+        },
+    })
+
+    const loading = modifySubscriptionState.loading || createSubscriptionFromInputState.loading
 
     const animatedAmount = useAnimatedStyle(
         () => ({
             transform: [{ translateX: transformX.value }],
-            fontSize: interpolate(amount.length, [0, 10, 15], [90, 60, 35], "clamp"),
+            fontSize: interpolate(formik.values.amount.length, [0, 10, 15], [90, 60, 35], "clamp"),
         }),
-        [amount],
+        [formik.values.amount],
     )
 
     const handleAmountChange = (value: string) => {
-        setAmount((prev) => {
+        formik.setFieldValue("amount", (prev: string) => {
             if (value === "C") {
                 const val = prev.slice(0, -1)
                 return val.length === 0 ? "0" : val
             }
-            if (typeof +value === "number" && prev.includes(".") && prev.split(".")[1].length === 2) return prev
+            if (prev.includes(".") && prev.split(".")[1].length === 2 && value !== "C") return prev
             if (prev.length === 1 && prev === "0" && value !== ".") return value
             if (prev.includes(".") && value === ".") return prev
             if (prev.length === 0 && value === ".") return "0."
@@ -66,27 +131,64 @@ export default function EditSubscription({ route, navigation }: Props) {
         })
     }
 
-    const handleSave = async () => {
-        Feedback.trigger("impactLight")
-        await modifySubscription({
-            variables: {
-                input: {
-                    id: subscription.id,
-                    description: description.trim() || undefined,
-                    amount: parseFloat(amount),
-                    billingCycle,
-                    dateStart: dateStart.toISOString(),
-                    dateEnd: dateEnd.toISOString(),
-                    nextBillingDate: nextBillingDate.toISOString(),
-                },
-            },
-        })
-        navigation.goBack()
+    const handleAmountChangeWrapper = (value: string) => {
+        const prev = formik.values.amount
+        let next = prev
+        if (value === "C") {
+            const val = prev.slice(0, -1)
+            next = val.length === 0 ? "0" : val
+        } else if (prev.includes(".") && prev.split(".")[1].length === 2) {
+            return
+        } else if (prev.length === 1 && prev === "0" && value !== ".") {
+            next = value
+        } else if (prev.includes(".") && value === ".") {
+            return
+        } else if (prev.length === 0 && value === ".") {
+            next = "0."
+        } else {
+            next = prev + value
+        }
+        formik.setFieldValue("amount", next)
     }
 
+    const dayPickerMarkedDates = useMemo<MarkedDates>(() => {
+        const day = Math.max(1, Math.min(31, parseInt(formik.values.billingDay) || 1))
+        const marks: MarkedDates = {}
+        const year = new Date().getFullYear()
+        for (let m = 1; m <= 12; m++) {
+            const daysInMonth = new Date(year, m, 0).getDate()
+            if (day > daysInMonth) continue
+            const key = `${year}-${String(m).padStart(2, "0")}-${String(day).padStart(2, "0")}`
+            marks[key] = { selected: true, selectedColor: Colors.secondary }
+        }
+        return marks
+    }, [formik.values.billingDay])
+
+    const handleDayPress = (day: DateData) => {
+        Feedback.trigger("impactLight")
+        formik.setFieldValue("billingDay", String(day.day))
+    }
+
+    const toggleMonth = (m: number) => {
+        Feedback.trigger("impactLight")
+        const prev = formik.values.customBillingMonths
+        formik.setFieldValue(
+            "customBillingMonths",
+            prev.includes(m) ? prev.filter((x) => x !== m) : [...prev, m].sort((a, b) => a - b),
+        )
+    }
+
+    const reminderLabel =
+        formik.values.reminderDaysBeforehand === 0 ? "Same day" : `${formik.values.reminderDaysBeforehand}d before`
+
+    const customLabel =
+        formik.values.customBillingMonths.length > 0
+            ? `Day ${formik.values.billingDay} · ${formik.values.customBillingMonths.map((m) => MONTH_NAMES[m - 1]).join(", ")}`
+            : `Day ${formik.values.billingDay}`
+
     return (
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <View style={{ flex: 1 }}>
+        <View style={{ flex: 1 }}>
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 <View style={{ flex: 1 }}>
                     <View style={styles.container}>
                         <GlassView style={styles.closeButton}>
@@ -98,7 +200,7 @@ export default function EditSubscription({ route, navigation }: Props) {
 
                         <View style={styles.amountContainer}>
                             <Animated.Text style={[styles.amountText, animatedAmount]}>
-                                {amount}
+                                {formik.values.amount}
                                 <Text variant="body" style={{ fontSize: 20 }}>
                                     zł
                                 </Text>
@@ -117,14 +219,14 @@ export default function EditSubscription({ route, navigation }: Props) {
                                         }}
                                     >
                                         <Input
-                                            value={description}
-                                            onChangeText={setDescription}
+                                            value={formik.values.description}
+                                            onChangeText={(v) => formik.setFieldValue("description", v)}
                                             placeholder="Description"
                                             style={{ flex: 1, width: "100%" }}
                                             containerStyle={{ flex: 1, borderRadius: 20 }}
                                             right={
                                                 <IconButton
-                                                    onPress={handleSave}
+                                                    onPress={() => formik.handleSubmit()}
                                                     disabled={loading}
                                                     icon={
                                                         <GlassView
@@ -135,7 +237,7 @@ export default function EditSubscription({ route, navigation }: Props) {
                                                                 <ActivityIndicator size={20} color="#fff" />
                                                             ) : (
                                                                 <AntDesign
-                                                                    name="edit"
+                                                                    name={isEdit ? "edit" : "plus"}
                                                                     size={20}
                                                                     color="rgba(255,255,255,0.7)"
                                                                 />
@@ -155,8 +257,8 @@ export default function EditSubscription({ route, navigation }: Props) {
                                     >
                                         <DatePicker
                                             mode="single"
-                                            dates={{ start: dateStart, end: dateStart }}
-                                            setDates={({ start }) => setDateStart(start)}
+                                            dates={{ start: formik.values.dateStart, end: formik.values.dateStart }}
+                                            setDates={({ start }) => formik.setFieldValue("dateStart", start)}
                                             buttonComponent={({ start }) => (
                                                 <Ripple style={styles.chip}>
                                                     <AntDesign
@@ -173,8 +275,11 @@ export default function EditSubscription({ route, navigation }: Props) {
 
                                         <DatePicker
                                             mode="single"
-                                            dates={{ start: nextBillingDate, end: nextBillingDate }}
-                                            setDates={({ start }) => setNextBillingDate(start)}
+                                            dates={{
+                                                start: formik.values.nextBillingDate,
+                                                end: formik.values.nextBillingDate,
+                                            }}
+                                            setDates={({ start }) => formik.setFieldValue("nextBillingDate", start)}
                                             buttonComponent={({ start }) => (
                                                 <Ripple style={styles.chip}>
                                                     <AntDesign
@@ -191,56 +296,177 @@ export default function EditSubscription({ route, navigation }: Props) {
 
                                         <DatePicker
                                             mode="single"
-                                            dates={{ start: dateEnd, end: dateEnd }}
-                                            setDates={({ start }) => setDateEnd(start)}
+                                            dates={{
+                                                start: formik.values.dateEnd ?? new Date(),
+                                                end: formik.values.dateEnd ?? new Date(),
+                                            }}
+                                            setDates={({ start }) => formik.setFieldValue("dateEnd", start)}
                                             buttonComponent={({ start }) => (
-                                                <Ripple style={styles.chip}>
+                                                <Ripple
+                                                    style={[styles.chip, formik.values.dateEnd && styles.chipActive]}
+                                                    onLongPress={() => formik.setFieldValue("dateEnd", null)}
+                                                >
                                                     <AntDesign
                                                         name="calendar"
                                                         size={15}
-                                                        color="rgba(255,255,255,0.7)"
+                                                        color={
+                                                            formik.values.dateEnd
+                                                                ? Colors.secondary
+                                                                : "rgba(255,255,255,0.7)"
+                                                        }
                                                     />
-                                                    <Text style={styles.chipText}>
-                                                        End {moment(start).format("DD.MM.YY")}
+                                                    <Text
+                                                        style={[
+                                                            styles.chipText,
+                                                            formik.values.dateEnd && styles.chipTextActive,
+                                                        ]}
+                                                    >
+                                                        {formik.values.dateEnd
+                                                            ? `End ${moment(start).format("DD.MM.YY")}`
+                                                            : "No end"}
                                                     </Text>
                                                 </Ripple>
                                             )}
                                         />
+
                                         {BILLING_CYCLES.map((cycle) => (
                                             <Ripple
                                                 key={cycle}
                                                 onPress={() => {
                                                     Feedback.trigger("impactLight")
-                                                    setBillingCycle(cycle)
+                                                    formik.setFieldValue("billingCycle", cycle)
                                                 }}
                                                 style={[
                                                     styles.chip,
-                                                    billingCycle === cycle && {
-                                                        backgroundColor: Color(Colors.secondary).alpha(0.2).string(),
-                                                        borderColor: Color(Colors.secondary).alpha(0.4).string(),
-                                                    },
+                                                    formik.values.billingCycle === cycle && styles.chipActive,
                                                 ]}
                                             >
                                                 <Text
                                                     style={[
                                                         styles.chipText,
-                                                        billingCycle === cycle && { color: Colors.secondary },
+                                                        formik.values.billingCycle === cycle && styles.chipTextActive,
                                                     ]}
                                                 >
                                                     {cycle.charAt(0).toUpperCase() + cycle.slice(1)}
                                                 </Text>
                                             </Ripple>
                                         ))}
+
+                                        <Ripple
+                                            style={[styles.chip, styles.chipActive]}
+                                            onPress={() => {
+                                                Keyboard.dismiss()
+                                                reminderSheetRef.current?.expand()
+                                            }}
+                                        >
+                                            <MaterialCommunityIcons
+                                                name="bell-outline"
+                                                size={15}
+                                                color={Colors.secondary}
+                                            />
+                                            <Text style={[styles.chipText, styles.chipTextActive]}>
+                                                {reminderLabel}
+                                            </Text>
+                                        </Ripple>
+
+                                        {formik.values.billingCycle === "custom" && (
+                                            <Ripple
+                                                style={[styles.chip, styles.chipActive]}
+                                                onPress={() => {
+                                                    Keyboard.dismiss()
+                                                    customSheetRef.current?.expand()
+                                                }}
+                                            >
+                                                <AntDesign name="setting" size={15} color={Colors.secondary} />
+                                                <Text
+                                                    style={[styles.chipText, styles.chipTextActive]}
+                                                    numberOfLines={1}
+                                                >
+                                                    {customLabel}
+                                                </Text>
+                                            </Ripple>
+                                        )}
                                     </ScrollView>
                                 </Animated.View>
 
-                                <NumbersPad handleAmountChange={handleAmountChange} rotateBackButton={amount === "0"} />
+                                <NumbersPad
+                                    handleAmountChange={handleAmountChangeWrapper}
+                                    rotateBackButton={formik.values.amount === "0"}
+                                />
                             </View>
                         </View>
                     </View>
                 </View>
-            </View>
-        </TouchableWithoutFeedback>
+            </TouchableWithoutFeedback>
+
+            <BottomSheet ref={reminderSheetRef} snapPoints={["40%"]}>
+                <BottomSheetView style={styles.sheetContent}>
+                    <Text variant="subtitle" style={styles.sheetTitle}>
+                        Reminder
+                    </Text>
+                    <View style={styles.sheetGrid}>
+                        {REMINDER_PRESETS.map((days) => {
+                            const active = formik.values.reminderDaysBeforehand === days
+                            return (
+                                <Ripple
+                                    key={days}
+                                    onPress={() => {
+                                        Feedback.trigger("impactLight")
+                                        formik.setFieldValue("reminderDaysBeforehand", days)
+                                        reminderSheetRef.current?.close()
+                                    }}
+                                    style={[styles.sheetOption, active && styles.sheetOptionActive]}
+                                >
+                                    <Text style={[styles.sheetOptionText, active && styles.sheetOptionTextActive]}>
+                                        {days === 0 ? "Same day" : `${days}d before`}
+                                    </Text>
+                                </Ripple>
+                            )
+                        })}
+                    </View>
+                </BottomSheetView>
+            </BottomSheet>
+
+            <BottomSheet ref={customSheetRef} snapPoints={["75%"]}>
+                <BottomSheetScrollView contentContainerStyle={styles.sheetContent}>
+                    <View style={styles.sheetRow}>
+                        <View>
+                            <Text variant="subtitle" style={styles.sheetTitle}>
+                                Custom Billing
+                            </Text>
+                            <Text style={styles.sheetHint}>Tap a day to set billing day of month</Text>
+                        </View>
+                        <View style={styles.daySummary}>
+                            <Text style={styles.daySummaryText}>Day {formik.values.billingDay}</Text>
+                        </View>
+                    </View>
+
+                    <Calendar
+                        onDayPress={handleDayPress}
+                        markedDates={dayPickerMarkedDates}
+                        enableSwipeMonths
+                        theme={CALENDAR_THEME as any}
+                        style={{ borderRadius: 14, marginBottom: 20 }}
+                    />
+
+                    <Text style={styles.sectionLabel}>Active months</Text>
+                    {MONTH_NAMES.map((name, i) => {
+                        const m = i + 1
+                        const active = formik.values.customBillingMonths.includes(m)
+                        return (
+                            <Ripple key={m} onPress={() => toggleMonth(m)} style={styles.monthRow}>
+                                <Text style={[styles.monthRowLabel, active && { color: Colors.foreground }]}>
+                                    {name}
+                                </Text>
+                                <View style={[styles.monthToggle, active && styles.monthToggleActive]}>
+                                    {active && <AntDesign name="check" size={13} color={Colors.secondary} />}
+                                </View>
+                            </Ripple>
+                        )
+                    })}
+                </BottomSheetScrollView>
+            </BottomSheet>
+        </View>
     )
 }
 
@@ -295,13 +521,108 @@ const styles = StyleSheet.create({
         borderWidth: 2,
         height: 45,
     },
+    chipActive: {
+        backgroundColor: Color(Colors.secondary).alpha(0.2).string(),
+        borderColor: Color(Colors.secondary).alpha(0.4).string(),
+    },
     chipText: {
         color: "rgba(255,255,255,0.7)",
         fontSize: 14,
     },
-    saveButton: {
-        padding: 15,
-        backgroundColor: Colors.primary_light,
-        paddingBottom: 30,
+    chipTextActive: {
+        color: Colors.secondary,
+    },
+    sheetContent: {
+        padding: 20,
+        paddingTop: 10,
+    },
+    sheetTitle: {
+        color: Colors.text_light,
+        fontWeight: "700",
+        fontSize: 18,
+        marginBottom: 2,
+    },
+    sheetHint: {
+        color: "rgba(255,255,255,0.35)",
+        fontSize: 12,
+        marginBottom: 16,
+    },
+    sheetGrid: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        gap: 10,
+    },
+    sheetOption: {
+        paddingHorizontal: 20,
+        paddingVertical: 12,
+        borderRadius: 14,
+        backgroundColor: Color(Colors.primary_lighter).lighten(0.1).string(),
+        borderWidth: 1.5,
+        borderColor: "rgba(255,255,255,0.08)",
+    },
+    sheetOptionActive: {
+        backgroundColor: Color(Colors.secondary).alpha(0.18).string(),
+        borderColor: Color(Colors.secondary).alpha(0.45).string(),
+    },
+    sheetOptionText: {
+        color: "rgba(255,255,255,0.65)",
+        fontSize: 15,
+        fontWeight: "600",
+    },
+    sheetOptionTextActive: {
+        color: Colors.secondary,
+    },
+    sheetRow: {
+        flexDirection: "row",
+        alignItems: "flex-start",
+        justifyContent: "space-between",
+        marginBottom: 14,
+    },
+    daySummary: {
+        backgroundColor: Color(Colors.secondary).alpha(0.18).string(),
+        borderRadius: 12,
+        paddingHorizontal: 14,
+        paddingVertical: 8,
+        borderWidth: 1.5,
+        borderColor: Color(Colors.secondary).alpha(0.4).string(),
+    },
+    daySummaryText: {
+        color: Colors.secondary,
+        fontWeight: "700",
+        fontSize: 16,
+    },
+    sectionLabel: {
+        color: "rgba(255,255,255,0.4)",
+        fontSize: 12,
+        fontWeight: "600",
+        textTransform: "uppercase",
+        letterSpacing: 0.5,
+        marginBottom: 10,
+    },
+    monthRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        paddingVertical: 13,
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        borderBottomColor: "rgba(255,255,255,0.06)",
+    },
+    monthRowLabel: {
+        color: "rgba(255,255,255,0.45)",
+        fontSize: 16,
+        fontWeight: "500",
+    },
+    monthToggle: {
+        width: 26,
+        height: 26,
+        borderRadius: 8,
+        borderWidth: 1.5,
+        borderColor: "rgba(255,255,255,0.12)",
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    monthToggleActive: {
+        borderColor: Color(Colors.secondary).alpha(0.5).string(),
+        backgroundColor: Color(Colors.secondary).alpha(0.15).string(),
     },
 })

@@ -2,13 +2,13 @@ import Colors from "@/constants/Colors"
 import { CategoryIcon } from "@/features/wallet/components/Expense/ExpenseIcon"
 import { AntDesign } from "@expo/vector-icons"
 import moment, { Moment } from "moment"
-import { useMemo, useState } from "react"
-import { Pressable, ScrollView, StyleProp, StyleSheet, Text, View, ViewStyle } from "react-native"
+import { memo, useMemo, useState } from "react"
+import { Pressable, StyleProp, StyleSheet, Text, View, ViewStyle } from "react-native"
 import Ripple from "react-native-material-ripple"
-import Color from "color"
 import SubscriptionItem from "../Subscription/SubscriptionItem"
 import WalletItem from "./WalletItem"
 import { useNavigation } from "@react-navigation/native"
+import Color from "color"
 
 interface Subscription {
     id: string
@@ -19,6 +19,8 @@ interface Subscription {
     isActive: boolean
     dateStart: string
     dateEnd: string
+    billingDay?: number
+    customBillingMonths?: number[]
     expenses: { amount: number; id: string; date: string; description: string; category: string }[]
 }
 
@@ -66,12 +68,98 @@ function projectBillingDate(sub: Subscription, month: Moment): string | null {
         return null
     }
 
+    if (cycle === "custom") {
+        const monthNum = month.month() + 1
+        const activeMonths = sub.customBillingMonths ?? []
+        if (activeMonths.length > 0 && !activeMonths.includes(monthNum)) return null
+        const day = sub.billingDay ?? anchor.date()
+        const candidate = month.clone().date(day)
+        if (candidate.isValid() && candidate.month() === month.month()) {
+            return candidate.format("YYYY-MM-DD")
+        }
+        return null
+    }
+
     const candidate = anchor.clone().year(month.year()).month(month.month())
     if (candidate.isBetween(monthStart, monthEnd, "day", "[]")) {
         return candidate.format("YYYY-MM-DD")
     }
     return null
 }
+
+interface DayCellProps {
+    day: Moment
+    isCurrentMonth: boolean
+    isToday: boolean
+    isSelected: boolean
+    subs: Subscription[]
+    dayExpenses: Expense[]
+    cellSize: number
+    onPress: () => void
+}
+
+const DayCell = memo(
+    ({ day, isCurrentMonth, isToday, isSelected, subs, dayExpenses, cellSize, onPress }: DayCellProps) => {
+        const icons = useMemo(() => {
+            const result: { category: string; type: "income" | "expense" | "refunded" }[] = []
+            for (const s of subs) {
+                if (result.length >= 2) break
+                result.push({ category: s.expenses?.[0]?.category ?? "subscriptions", type: "expense" })
+            }
+            for (const e of dayExpenses) {
+                if (result.length >= 2) break
+                result.push({ category: e.category, type: e.type as "income" | "expense" | "refunded" })
+            }
+            return result
+        }, [subs, dayExpenses])
+
+        return (
+            <Pressable
+                style={[
+                    styles.dayCell,
+                    { width: cellSize, height: cellSize * 1.15 },
+                    !isCurrentMonth && styles.cellFaded,
+                ]}
+                onPress={onPress}
+            >
+                <View
+                    style={[
+                        styles.dayInner,
+                        isSelected && styles.daySelected,
+                        isToday && !isSelected && styles.dayToday,
+                    ]}
+                >
+                    {icons.length > 0 && (
+                        <View style={styles.cellIcons}>
+                            {icons.map((ic, idx) => (
+                                <View key={idx} style={styles.cellIconClip}>
+                                    <CategoryIcon
+                                        category={ic.category as any}
+                                        type={ic.type}
+                                        size={14}
+                                        style={styles.cellIcon}
+                                    />
+                                </View>
+                            ))}
+                        </View>
+                    )}
+                </View>
+                <View style={styles.cellBottom}>
+                    <Text
+                        style={[
+                            styles.dayNumber,
+                            !isCurrentMonth && styles.dayFaded,
+                            isToday && styles.dayTodayText,
+                            isSelected && styles.daySelectedText,
+                        ]}
+                    >
+                        {day.date()}
+                    </Text>
+                </View>
+            </Pressable>
+        )
+    },
+)
 
 export default function SubscriptionCalendar({ subscriptions, expenses = [], style }: Props) {
     const [currentMonth, setCurrentMonth] = useState(moment().startOf("month"))
@@ -112,32 +200,56 @@ export default function SubscriptionCalendar({ subscriptions, expenses = [], sty
         return days
     }, [currentMonth])
 
-    const monthSubTotal = useMemo(
-        () => subscriptions.reduce((acc, s) => acc + s.amount, 0),
-        [subscriptions, currentMonth],
-    )
-
     const today = moment().format("YYYY-MM-DD")
     const selectedSubs = selectedDay ? (billingMap.get(selectedDay) ?? []) : []
     const selectedExpenses = selectedDay ? (expenseMap.get(selectedDay) ?? []) : []
 
+    const [size, setSize] = useState({ width: 0, height: 0 })
+
+    const cellSize = size.width / 7 - 4
+
+    const gridCells = useMemo(
+        () =>
+            calendarDays.map((day) => {
+                const key = day.format("YYYY-MM-DD")
+                return (
+                    <DayCell
+                        key={key}
+                        day={day}
+                        isCurrentMonth={day.month() === currentMonth.month()}
+                        isToday={key === today}
+                        isSelected={key === selectedDay}
+                        subs={billingMap.get(key) ?? []}
+                        dayExpenses={expenseMap.get(key) ?? []}
+                        cellSize={cellSize}
+                        onPress={() => setSelectedDay(key === selectedDay ? null : key)}
+                    />
+                )
+            }),
+        [calendarDays, billingMap, expenseMap, selectedDay, today, cellSize, currentMonth],
+    )
+
     return (
-        <View>
+        <View
+            style={{ minHeight: 420 }}
+            onLayout={(event) => {
+                setSize(event.nativeEvent.layout)
+            }}
+        >
             <View style={[styles.calendarCard, style]}>
                 <View style={styles.headerCenter}>
                     <View style={styles.monthNav}>
-                        <Ripple
+                        {/* <Ripple
                             onPress={() => setCurrentMonth((m) => m.clone().subtract(1, "month"))}
                             style={styles.navBtn}
                         >
                             <AntDesign name="left" size={13} color="rgba(255,255,255,0.5)" />
-                        </Ripple>
-                        <Text style={styles.monthTitle}>{currentMonth.format("MMM YYYY")}</Text>
-                        <Ripple onPress={() => setCurrentMonth((m) => m.clone().add(1, "month"))} style={styles.navBtn}>
+                        </Ripple> */}
+                        <Text style={styles.monthTitle}>{currentMonth.format("MMMM YYYY")}</Text>
+                        {/* <Ripple onPress={() => setCurrentMonth((m) => m.clone().add(1, "month"))} style={styles.navBtn}>
                             <AntDesign name="right" size={13} color="rgba(255,255,255,0.5)" />
-                        </Ripple>
+                        </Ripple> */}
                     </View>
-                    {monthSubTotal > 0 && <Text style={styles.monthTotal}>-{monthSubTotal.toFixed(2)} zł</Text>}
                 </View>
 
                 <View style={styles.weekRow}>
@@ -148,56 +260,7 @@ export default function SubscriptionCalendar({ subscriptions, expenses = [], sty
                     ))}
                 </View>
 
-                <View style={styles.grid}>
-                    {calendarDays.map((day) => {
-                        const key = day.format("YYYY-MM-DD")
-                        const isCurrentMonth = day.month() === currentMonth.month()
-                        const isToday = key === today
-                        const isSelected = key === selectedDay
-                        const subs = billingMap.get(key) ?? []
-                        const dayExpenses = expenseMap.get(key) ?? []
-                        const hasBilling = subs.length > 0
-                        const hasExpenses = dayExpenses.length > 0
-
-                        return (
-                            <Pressable
-                                key={key}
-                                style={styles.dayCell}
-                                onPress={() => setSelectedDay(isSelected ? null : key)}
-                            >
-                                <View
-                                    style={[
-                                        styles.dayInner,
-                                        isSelected && styles.daySelected,
-                                        isToday && !isSelected && styles.dayToday,
-                                    ]}
-                                >
-                                    <Text
-                                        style={[
-                                            styles.dayNumber,
-                                            !isCurrentMonth && styles.dayFaded,
-                                            isToday && styles.dayTodayText,
-                                            isSelected && styles.daySelectedText,
-                                        ]}
-                                    >
-                                        {day.date()}
-                                    </Text>
-
-                                    {(hasBilling || hasExpenses) && (
-                                        <View style={styles.dots}>
-                                            {hasBilling && (
-                                                <View style={[styles.dot, { backgroundColor: Colors.secondary }]} />
-                                            )}
-                                            {hasExpenses && (
-                                                <View style={[styles.dot, { backgroundColor: "#F6B161" }]} />
-                                            )}
-                                        </View>
-                                    )}
-                                </View>
-                            </Pressable>
-                        )
-                    })}
-                </View>
+                <View style={styles.grid}>{gridCells}</View>
 
                 <View style={styles.legend}>
                     <View style={styles.legendItem}>
@@ -248,8 +311,6 @@ export default function SubscriptionCalendar({ subscriptions, expenses = [], sty
 const styles = StyleSheet.create({
     calendarCard: {
         borderRadius: 18,
-        backgroundColor: Color(Colors.primary_lighter).lighten(0.1).hex(),
-        padding: 10,
     },
     headerCenter: {
         paddingTop: 5,
@@ -267,11 +328,12 @@ const styles = StyleSheet.create({
         padding: 6,
     },
     monthTitle: {
-        fontSize: 16,
-        fontWeight: "700",
+        fontSize: 22,
+        fontWeight: "800",
         color: Colors.text_light,
         minWidth: 80,
         textAlign: "center",
+        marginBottom: 10,
     },
     monthTotal: {
         fontSize: 12,
@@ -293,15 +355,23 @@ const styles = StyleSheet.create({
     grid: {
         flexDirection: "row",
         flexWrap: "wrap",
+        gap: 4,
     },
     dayCell: {
-        width: "14.285%",
-        aspectRatio: 1,
-        padding: 2,
+        backgroundColor: Colors.primary_light,
+        borderRadius: 7.5,
+    },
+    cellBottom: {
+        backgroundColor: Color(Colors.primary_lighter).lighten(0.3).hex(),
+        justifyContent: "center",
+        alignItems: "center",
+        borderBottomRightRadius: 7.5,
+        borderBottomLeftRadius: 7.5,
+        padding: 3,
     },
     dayInner: {
         flex: 1,
-        borderRadius: 10,
+        borderRadius: 7.5,
         alignItems: "center",
         justifyContent: "center",
         gap: 2,
@@ -313,12 +383,15 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.secondary,
     },
     dayNumber: {
-        fontSize: 13,
-        fontWeight: "500",
+        fontSize: 11,
+        fontWeight: "800",
         color: "rgba(255,255,255,0.75)",
     },
     dayFaded: {
         color: "rgba(255,255,255,0.18)",
+    },
+    cellFaded: {
+        backgroundColor: Colors.primary,
     },
     dayTodayText: {
         color: Colors.text_light,
@@ -327,6 +400,23 @@ const styles = StyleSheet.create({
     daySelectedText: {
         color: Colors.foreground,
         fontWeight: "700",
+    },
+    cellIcons: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 2,
+    },
+    cellIconClip: {
+        width: 18,
+        height: 18,
+        borderRadius: 9,
+        overflow: "hidden",
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    cellIcon: {
+        margin: -12,
     },
     dots: {
         flexDirection: "row",

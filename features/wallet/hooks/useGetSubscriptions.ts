@@ -12,9 +12,18 @@ export default function useGetSubscriptions() {
                 isActive
                 nextBillingDate
                 billingCycle
+                billingDay
+                customBillingMonths
+                reminderDaysBeforehand
                 totalSpent
                 totalAmount
                 totalDuration
+                expenses {
+                    id
+                    amount
+                    date
+                    description
+                }
             }
         }
     `)

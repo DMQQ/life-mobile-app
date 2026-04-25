@@ -151,7 +151,10 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
                 {
                     position: "right",
                     standalone: true,
-                    onPress: () => navigation.navigate("CreateExpense"),
+                    onPress: () =>
+                        showSubscriptionsView
+                            ? navigation.navigate("EditSubscription")
+                            : navigation.navigate("CreateExpense"),
                     icon: <AntDesign name="plus" size={20} color={Colors.foreground} />,
                 },
             ] as HeaderItem[],
