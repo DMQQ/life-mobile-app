@@ -1,5 +1,5 @@
-import Animated, { FadeIn, FadeInDown, LinearTransition } from "react-native-reanimated"
-import { CategoryUtils, Icons } from "../Expense/ExpenseIcon"
+import Animated, { FadeIn, LinearTransition } from "react-native-reanimated"
+import { CategoryIcon, CategoryUtils, Icons } from "../Expense/ExpenseIcon"
 import { useEffect, useRef, useState } from "react"
 import Input from "@/components/ui/TextInput/TextInput"
 import Colors from "@/constants/Colors"
@@ -59,11 +59,8 @@ const CategorySelector = (props: { current: string; onPress: (item: string) => v
                 data={filteredData}
                 keyExtractor={(item) => item[0]}
                 keyboardDismissMode={"on-drag"}
-                renderItem={({ item, index }) => (
-                    <Animated.View
-                        style={{ marginBottom: 10, height: 60 }}
-                        entering={FadeIn.delay(Math.max(Math.min((index + 1) * 10, 150), 500))}
-                    >
+                renderItem={({ item }) => (
+                    <Animated.View style={{ marginBottom: 15, height: 60 }}>
                         <Ripple
                             onPress={() => {
                                 Feedback.trigger("impactLight")
@@ -79,14 +76,7 @@ const CategorySelector = (props: { current: string; onPress: (item: string) => v
                                 },
                             ]}
                         >
-                            <View
-                                style={[
-                                    styles.iconContainer,
-                                    { backgroundColor: lowOpacity(item[1].backgroundColor, 0.25) },
-                                ]}
-                            >
-                                {item[1].icon}
-                            </View>
+                            <CategoryIcon category={item[0] as keyof typeof Icons} type="expense" />
 
                             {item[0]?.includes(":") ? (
                                 <View style={{ flex: 1, justifyContent: "center", gap: 5 }}>

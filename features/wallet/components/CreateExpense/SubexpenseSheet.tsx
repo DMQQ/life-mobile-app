@@ -2,7 +2,12 @@ import { Button } from "@/components"
 import Colors, { Sizing } from "@/constants/Colors"
 import Layout from "@/constants/Layout"
 import { Icons } from "@/features/wallet/components/Expense/ExpenseIcon"
-import BottomSheetModal, { BottomSheetBackdrop, BottomSheetFlatList, BottomSheetView } from "@gorhom/bottom-sheet"
+import BottomSheetModal, {
+    BottomSheetBackdrop,
+    BottomSheetBackdropProps,
+    BottomSheetFlatList,
+    BottomSheetView,
+} from "@gorhom/bottom-sheet"
 import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/types"
 import moment from "moment"
 import React, { useCallback } from "react"
@@ -34,7 +39,12 @@ const SubExpenseSheet = ({
     date,
     ref: subexpenseSheetRef,
 }: SubExpenseSheetProps) => {
-    const backdropComponent = useCallback((props) => <BottomSheetBackdrop {...props} appearsOnIndex={1} />, [])
+    const backdropComponent = useCallback(
+        (props: BottomSheetBackdropProps) => (
+            <BottomSheetBackdrop {...props} appearsOnIndex={1} disappearsOnIndex={0} pressBehavior={"collapse"} />
+        ),
+        [],
+    )
     return (
         <BottomSheetModal
             ref={subexpenseSheetRef}
@@ -126,7 +136,6 @@ const SubExpenseSheet = ({
                             subexpenses={[]}
                             files={[]}
                             animatedStyle={{} as any}
-                            index={index}
                             containerStyle={{ backgroundColor: Colors.primary_lighter } as StyleProp<ViewStyle>}
                         />
                     )}

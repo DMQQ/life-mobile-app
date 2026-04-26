@@ -36,10 +36,15 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
     const expandedContentPaddingTop = expandedHeaderHeight + dateListHeight
 
     const timeoutId = useRef<number | null>(null)
-    const { isSearchActive } = useScreenSearch((query) => {
-        if (timeoutId.current) clearTimeout(timeoutId.current)
-        timeoutId.current = setTimeout(() => timeline.setQuery(query), 200)
-    })
+    const { isSearchActive } = useScreenSearch(
+        useCallback(
+            (query) => {
+                if (timeoutId.current) clearTimeout(timeoutId.current)
+                timeoutId.current = setTimeout(() => timeline.setQuery(query), 200)
+            },
+            [timeline.setQuery],
+        ),
+    )
 
     const pagerRef = useRef<PagerView>(null)
     const datePickerRef = useRef<DatePickerRef>(null)
@@ -104,6 +109,10 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
             Extrapolation.CLAMP,
         ),
     }))
+
+    useEffect(() => {
+        scrollY.value = withTiming(0, { duration: 250 })
+    }, [timeline.switchView])
 
     return (
         <View style={{ flex: 1 }}>

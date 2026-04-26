@@ -13,8 +13,6 @@ import Haptic from "react-native-haptic-feedback"
 import Ripple from "react-native-material-ripple"
 import Animated, { LinearTransition } from "react-native-reanimated"
 import { useSubAccounts } from "../../hooks/useSubAccounts"
-import ContextMenu, { ContextMenuAction } from "react-native-context-menu-view"
-import { useMemo } from "react"
 
 type Type = "expense" | "income" | null
 
@@ -81,47 +79,6 @@ export default function OptionsPicker({
         }
     }
 
-    const actions = useMemo<(ContextMenuAction & { value: string })[]>(
-        () => [
-            {
-                title: "Expense",
-                value: "expense",
-                systemIcon: "arrow.down.circle.fill",
-            },
-            {
-                title: "Income",
-                value: "income",
-                systemIcon: "arrow.up.circle.fill",
-            },
-            {
-                title: "Refund",
-                value: "refund",
-                systemIcon: "clock.arrow.circlepath",
-            },
-        ],
-        [],
-    )
-
-    const onItemTypePress = (index: number) => {
-        setType(actions[index].value as Type)
-    }
-
-    const accountActions = useMemo<(ContextMenuAction & { id: string | null })[]>(
-        () => [
-            { title: "None", id: null, systemIcon: "xmark.circle" },
-            ...subAccounts.map((a) => ({
-                title: a.name,
-                id: a.id,
-                systemIcon: "creditcard",
-            })),
-        ],
-        [subAccounts],
-    )
-
-    const onAccountPress = (index: number) => {
-        setSubAccountId(accountActions[index].id)
-    }
-
     return (
         <Animated.ScrollView
             keyboardDismissMode={"on-drag"}
@@ -131,29 +88,31 @@ export default function OptionsPicker({
             style={{ flexDirection: "row" }}
             contentContainerStyle={{ gap: 10 }}
         >
-            <ContextMenu
-                dropdownMenuMode={true}
-                actions={actions}
-                onPress={(e) => onItemTypePress(e.nativeEvent.index)}
+            <Ripple
+                onPress={onPressWithFeedback(() => setType((p) => (p === "expense" ? "income" : "expense")))}
+                style={[
+                    styles.chip,
+                    {
+                        backgroundColor: typeBackgroundColor,
+                        gap: 10,
+                        borderColor: type == null ? styles.chip.borderColor : typeBackgroundColor,
+                    },
+                ]}
             >
-                <View
-                    style={[
-                        styles.chip,
-                        { backgroundColor: typeBackgroundColor },
-                        type && { borderColor: typeBackgroundColor },
-                    ]}
-                >
+                <View>
                     <TypeIcon type={type} />
-                    <Text
-                        style={{
-                            color: typeTextColor,
-                            fontSize: 14,
-                        }}
-                    >
-                        {typeButtonText}
-                    </Text>
                 </View>
-            </ContextMenu>
+
+                <Text
+                    numberOfLines={1}
+                    style={{
+                        color: typeTextColor,
+                        fontSize: 14,
+                    }}
+                >
+                    {typeButtonText}
+                </Text>
+            </Ripple>
 
             <DatePicker
                 mode="single"
@@ -218,41 +177,40 @@ export default function OptionsPicker({
             />
 
             {subAccounts.length > 0 && (
-                <ContextMenu
-                    dropdownMenuMode={true}
-                    actions={accountActions}
-                    onPress={(e) => onAccountPress(e.nativeEvent.index)}
+                <Ripple
+                    onPress={onPressWithFeedback(() => {
+                        const idx = subAccounts.findIndex((a) => a.id === subAccountId)
+                        const next = subAccounts[(idx + 1) % (subAccounts.length + 1)]
+                        setSubAccountId(next ? next.id : null)
+                    })}
+                    style={[
+                        styles.chip,
+                        {
+                            backgroundColor: selectedAccount
+                                ? Color(selectedAccount.color).alpha(0.2).string()
+                                : Colors.primary_lighter,
+                            borderColor: selectedAccount
+                                ? Color(selectedAccount.color).alpha(0.35).string()
+                                : styles.chip.borderColor,
+                            gap: 8,
+                        },
+                    ]}
                 >
-                    <View
-                        style={[
-                            styles.chip,
-                            {
-                                backgroundColor: selectedAccount
-                                    ? Color(selectedAccount.color).alpha(0.2).string()
-                                    : Colors.primary_lighter,
-                                borderColor: selectedAccount
-                                    ? Color(selectedAccount.color).alpha(0.35).string()
-                                    : styles.chip.borderColor,
-                                gap: 8,
-                            },
-                        ]}
+                    <MaterialCommunityIcons
+                        name={selectedAccount ? (selectedAccount.icon as any) : "credit-card-outline"}
+                        size={15}
+                        color={selectedAccount ? selectedAccount.color : "rgba(255,255,255,0.7)"}
+                    />
+                    <Text
+                        style={{
+                            color: selectedAccount ? selectedAccount.color : "rgba(255,255,255,0.7)",
+                            fontSize: 14,
+                        }}
+                        numberOfLines={1}
                     >
-                        <MaterialCommunityIcons
-                            name={selectedAccount ? (selectedAccount.icon as any) : "credit-card-outline"}
-                            size={15}
-                            color={selectedAccount ? selectedAccount.color : "rgba(255,255,255,0.7)"}
-                        />
-                        <Text
-                            style={{
-                                color: selectedAccount ? selectedAccount.color : "rgba(255,255,255,0.7)",
-                                fontSize: 14,
-                            }}
-                            numberOfLines={1}
-                        >
-                            {selectedAccount ? selectedAccount.name : "Account"}
-                        </Text>
-                    </View>
-                </ContextMenu>
+                        {selectedAccount ? selectedAccount.name : "Account"}
+                    </Text>
+                </Ripple>
             )}
         </Animated.ScrollView>
     )

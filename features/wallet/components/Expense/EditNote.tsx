@@ -6,6 +6,7 @@ import { IconButton } from "@/components"
 import Colors from "@/constants/Colors"
 import Input from "@/components/ui/TextInput/TextInput"
 import { useEditExpenseNote } from "../../hooks/useEditExpense"
+import { GET_EXPENSE } from "../../pages/Expense"
 
 export default function EditNote({ expense }: { expense: ExpenseType }) {
     const [isEditing, setIsEditing] = useState(false)
@@ -19,6 +20,12 @@ export default function EditNote({ expense }: { expense: ExpenseType }) {
                     expenseId: expense.id,
                     note: newNote,
                 },
+                refetchQueries: [
+                    {
+                        query: GET_EXPENSE,
+                        variables: { expenseId: expense.id },
+                    },
+                ],
             })
         } catch (error) {
             console.error("Error updating note:", error)
