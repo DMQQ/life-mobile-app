@@ -1,14 +1,15 @@
 import { Button } from "@/components"
-import Colors from "@/constants/Colors"
+import Colors, { Sizing } from "@/constants/Colors"
 import Layout from "@/constants/Layout"
 import { Icons } from "@/features/wallet/components/Expense/ExpenseIcon"
-import BottomSheet, { BottomSheetBackdrop } from "@gorhom/bottom-sheet"
-import { BottomSheetMethods } from "@gorhom/bottom-sheet/lib/typescript/types"
+import BottomSheetModal, { BottomSheetBackdrop, BottomSheetFlatList, BottomSheetView } from "@gorhom/bottom-sheet"
+import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/types"
 import moment from "moment"
-import React, { forwardRef, useCallback } from "react"
+import React, { useCallback } from "react"
 import { Alert, StyleProp, Text, View, ViewStyle } from "react-native"
-import { FlatList } from "react-native-gesture-handler"
 import WalletItem from "../Wallet/WalletItem"
+import Color from "color"
+import { MaterialIcons } from "@expo/vector-icons"
 
 interface SubExpense {
     id: string
@@ -22,61 +23,74 @@ interface SubExpenseSheetProps {
     setSubExpenses: React.Dispatch<React.SetStateAction<SubExpense[]>>
     SubExpenses: SubExpense[]
     date: string | null
+
+    ref: React.RefObject<BottomSheetModalMethods>
 }
 
-const SubExpenseSheet = forwardRef<
-    BottomSheetMethods,
-    SubExpenseSheetProps
->(({ setIsSubExpenseMode, setSubExpenses, SubExpenses, date }, subexpenseSheetRef) => {
-    const renderBackdrop = useCallback(
-        (props: React.ComponentProps<typeof BottomSheetBackdrop>) => (
-            <BottomSheetBackdrop {...props} appearsOnIndex={0} disappearsOnIndex={-1} />
-        ),
-        [],
-    )
+const SubExpenseSheet = ({
+    setIsSubExpenseMode,
+    setSubExpenses,
+    SubExpenses,
+    date,
+    ref: subexpenseSheetRef,
+}: SubExpenseSheetProps) => {
+    const backdropComponent = useCallback((props) => <BottomSheetBackdrop {...props} appearsOnIndex={1} />, [])
     return (
-        <BottomSheet
+        <BottomSheetModal
             ref={subexpenseSheetRef}
-            index={-1}
-            snapPoints={[Layout.screen.height / 1.6]}
-            enablePanDownToClose
-            backdropComponent={renderBackdrop}
-            backgroundStyle={{ backgroundColor: Colors.primary }}
-            handleIndicatorStyle={{ backgroundColor: Colors.secondary }}
+            index={0}
+            snapPoints={[50, Layout.screen.height / 2]}
+            animateOnMount={false}
+            handleIndicatorStyle={{ backgroundColor: "#fff", width: 120 }}
+            backgroundStyle={{
+                backgroundColor: Colors.primary_lighter,
+                borderWidth: 1,
+                borderColor: Color(Colors.primary_lighter).lighten(0.5).hex(),
+            }}
+            backdropComponent={backdropComponent}
         >
-            <View style={{ flex: 1, padding: 15 }}>
-                <FlatList
+            <BottomSheetView style={{ flex: 1, padding: 15 }}>
+                <BottomSheetFlatList
                     data={SubExpenses}
                     showsHorizontalScrollIndicator={false}
                     ListEmptyComponent={
-                        <View style={{ flex: 1 }}>
-                            <View
+                        <View style={{ flex: 1, justifyContent: "center", paddingVertical: 40, paddingHorizontal: 20 }}>
+                            <MaterialIcons
+                                name="receipt-long"
+                                size={56}
+                                color={Colors.foreground_secondary}
+                                style={{ marginBottom: 20 }}
+                            />
+                            <Text
                                 style={{
-                                    height: Layout.screen.height / 1.6 - 130,
-                                    justifyContent: "center",
+                                    color: Colors.text_light,
+                                    fontSize: Sizing.heading,
+                                    fontWeight: "700",
+                                    textAlign: "left",
+                                    marginBottom: 12,
                                 }}
                             >
-                                <Text
-                                    style={{
-                                        color: "rgba(255,255,255,0.7)",
-                                        fontSize: 18,
-                                        textAlign: "center",
-                                        padding: 15,
-                                    }}
-                                >
-                                    No subexpenses added yet.{"\n"}Press the button below to add one.
-                                </Text>
-                            </View>
-
+                                No subexpenses yet
+                            </Text>
+                            <Text
+                                style={{
+                                    color: Colors.foreground_secondary,
+                                    fontSize: Sizing.text,
+                                    textAlign: "left",
+                                    marginBottom: 32,
+                                }}
+                            >
+                                Add subexpenses to break down your expenses
+                            </Text>
                             <Button
                                 onPress={() => {
-                                    if (subexpenseSheetRef && 'current' in subexpenseSheetRef && subexpenseSheetRef.current) {
-                                        subexpenseSheetRef.current.snapToIndex(0)
-                                    }
                                     setIsSubExpenseMode(true)
                                 }}
                                 style={{
-                                    borderRadius: 100,
+                                    borderRadius: 12,
+                                    backgroundColor: Colors.secondary,
+                                    shadowOpacity: 0,
+                                    elevation: 0,
                                 }}
                             >
                                 Add Subexpense
@@ -117,9 +131,9 @@ const SubExpenseSheet = forwardRef<
                         />
                     )}
                 />
-            </View>
-        </BottomSheet>
+            </BottomSheetView>
+        </BottomSheetModal>
     )
-})
+}
 
 export default SubExpenseSheet

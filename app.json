@@ -117,7 +117,8 @@
       "expo-web-browser",
       "@bacons/apple-targets",
       "expo-audio",
-      "expo-speech-recognition"
+      "expo-speech-recognition",
+      "@react-native-community/datetimepicker"
     ],
     "extra": {
       "eas": {
