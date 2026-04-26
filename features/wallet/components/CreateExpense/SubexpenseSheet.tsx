@@ -49,7 +49,7 @@ const SubExpenseSheet = ({
         <BottomSheetModal
             ref={subexpenseSheetRef}
             index={0}
-            snapPoints={[50, Layout.screen.height / 2]}
+            snapPoints={[70, Layout.screen.height / 2]}
             animateOnMount={false}
             handleIndicatorStyle={{ backgroundColor: "#fff", width: 120 }}
             backgroundStyle={{
@@ -95,6 +95,7 @@ const SubExpenseSheet = ({
                             <Button
                                 onPress={() => {
                                     setIsSubExpenseMode(true)
+                                    subexpenseSheetRef.current?.collapse()
                                 }}
                                 style={{
                                     borderRadius: 12,

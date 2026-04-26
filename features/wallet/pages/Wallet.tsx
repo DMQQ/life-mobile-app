@@ -1,14 +1,15 @@
 import Header, { HeaderItem } from "@/components/ui/Header/Header"
 import Colors from "@/constants/Colors"
 import useTrackScroll from "@/utils/hooks/ui/useTrackScroll"
-import { AntDesign, Entypo, Ionicons } from "@expo/vector-icons"
+import { AntDesign, Entypo, Feather, Ionicons } from "@expo/vector-icons"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { StyleSheet } from "react-native"
 import Haptic from "react-native-haptic-feedback"
 import Animated, { FadeOut } from "react-native-reanimated"
 import InitializeWallet from "../components/Wallet/InitializeWallet"
 import { useScreenSearch } from "@/utils/hooks/useScreenSearch"
-import WalletList2 from "../components/Wallet/WalletList2"
+import ExpensesList from "../components/Wallet/ExpensesList"
+import SubscriptionsList from "../components/Wallet/SubscriptionsList"
 import WalletLoader from "../components/Wallet/WalletLoader"
 import { useWalletContext } from "../components/WalletContext"
 import useGetWallet from "../hooks/useGetWallet"
@@ -97,7 +98,7 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
         navigation.navigate("EditBalance")
     }, [])
 
-    const [showSubscriptionsView, setShowSubscriptionsView] = useState(false)
+    const [activeView, setActiveView] = useState<"expenses" | "subscriptions">("expenses")
 
     const buttons = useMemo(
         () =>
@@ -138,9 +139,9 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
                     },
                 },
                 {
-                    icon: showSubscriptionsView ? ("wallet.bifold" as SFSymbol) : "repeat",
+                    icon: <Feather name="repeat" color={"#fff"} size={20} />,
                     onPress: () => {
-                        setShowSubscriptionsView((prev) => !prev)
+                        setActiveView((prev) => (prev === "expenses" ? "subscriptions" : "expenses"))
                         Haptic.trigger("impactLight")
                     },
                 },
@@ -152,13 +153,13 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
                     position: "right",
                     standalone: true,
                     onPress: () =>
-                        showSubscriptionsView
+                        activeView === "subscriptions"
                             ? navigation.navigate("EditSubscription")
                             : navigation.navigate("CreateExpense"),
                     icon: <AntDesign name="plus" size={20} color={Colors.foreground} />,
                 },
             ] as HeaderItem[],
-        [showSubscriptionsView, handleShowEditSheet],
+        [activeView, handleShowEditSheet],
     )
 
     const header = useMemo(() => {
@@ -202,14 +203,11 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
 
             {header}
 
-            <WalletList2
-                refetch={refetch}
-                onScroll={onScroll}
-                wallet={data?.wallet}
-                onEndReached={onEndReached}
-                showSubscriptions={showSubscriptionsView}
-                showExpenses={!showSubscriptionsView}
-            />
+            {activeView === "expenses" ? (
+                <ExpensesList wallet={data?.wallet} onScroll={onScroll} refetch={refetch} onEndReached={onEndReached} />
+            ) : (
+                <SubscriptionsList onScroll={onScroll} />
+            )}
 
             <WalletSearchContext navigation={navigation} />
         </SafeAreaView>

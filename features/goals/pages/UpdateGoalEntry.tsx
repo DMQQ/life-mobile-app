@@ -1,5 +1,5 @@
 import DatePicker from "@/components/DatePicker"
-import Button from "@/components/ui/Button/Button"
+import GlassView from "@/components/ui/GlassView"
 import IconButton from "@/components/ui/IconButton/IconButton"
 import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
@@ -7,60 +7,29 @@ import Layout from "@/constants/Layout"
 import NumbersPad from "@/features/wallet/components/CreateExpense/NumberPad"
 import lowOpacity from "@/utils/functions/lowOpacity"
 import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons"
+import Color from "color"
 import dayjs from "dayjs"
 import moment from "moment"
 import { useCallback, useState } from "react"
-import { Keyboard, StyleSheet, TouchableWithoutFeedback, View } from "react-native"
-import Ripple from "react-native-material-ripple"
+import { Pressable, ScrollView, StyleSheet, View } from "react-native"
+import { LiquidGlassView } from "@callstack/liquid-glass"
 import Animated, {
     cancelAnimation,
     FadeIn,
+    interpolate,
     useAnimatedStyle,
     useSharedValue,
     withSpring,
     withTiming,
 } from "react-native-reanimated"
+import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { useGoal } from "../hooks/hooks"
 
-// Types
-interface QuickAction {
-    label: string
-    value: number
-}
-
-type QuickActionsMap = {
-    [key: string]: QuickAction[]
-}
-
-interface AddGoalEntryProps {
-    route: {
-        params: {
-            id: string
-        }
-    }
-    navigation: {
-        goBack: () => void
-        navigate: (screen: string, params?: any) => void
-    }
-}
-
-interface Goal {
-    id: string
-    name: string
-    icon: string
-    unit: string
-    min: number
-    max: number
-    target: number
-    description?: string
-}
-
-// Quick actions map
-const quickActions: QuickActionsMap = {
+const quickActions: Record<string, { label: string; value: number }[]> = {
     target: [{ label: "1 goal", value: 1 }],
     dumbbell: [
-        { label: "30 mins", value: 30 },
-        { label: "1 hour", value: 60 },
+        { label: "30 min", value: 30 },
+        { label: "1h", value: 60 },
         { label: "100 reps", value: 100 },
     ],
     run: [
@@ -91,12 +60,12 @@ const quickActions: QuickActionsMap = {
     "book-open-page-variant": [
         { label: "10 pages", value: 10 },
         { label: "Chapter", value: 25 },
-        { label: "Hour", value: 60 },
+        { label: "1h", value: 60 },
     ],
     brain: [
         { label: "15 min", value: 15 },
         { label: "30 min", value: 30 },
-        { label: "1 hour", value: 60 },
+        { label: "1h", value: 60 },
     ],
     cash: [
         { label: "$10", value: 10 },
@@ -121,7 +90,7 @@ const quickActions: QuickActionsMap = {
     "code-tags": [
         { label: "Bug fix", value: 1 },
         { label: "Feature", value: 1 },
-        { label: "Hour", value: 60 },
+        { label: "1h", value: 60 },
     ],
     music: [
         { label: "15 min", value: 15 },
@@ -130,7 +99,7 @@ const quickActions: QuickActionsMap = {
     ],
     coffee: [
         { label: "Cup", value: 1 },
-        { label: "ml", value: 200 },
+        { label: "200ml", value: 200 },
     ],
     "smoking-off": [
         { label: "Day", value: 1 },
@@ -149,57 +118,52 @@ const quickActions: QuickActionsMap = {
         { label: "Dose", value: 1 },
         { label: "Day", value: 1 },
     ],
-    // New mood tracking with emoji
     emoticon: [
-        { label: "😢 (1)", value: 1 },
-        { label: "😐 (3)", value: 3 },
-        { label: "😊 (5)", value: 5 },
+        { label: "😢 1", value: 1 },
+        { label: "😐 3", value: 3 },
+        { label: "😊 5", value: 5 },
     ],
     "emoticon-happy": [
-        { label: "😔 (2)", value: 2 },
-        { label: "😊 (4)", value: 4 },
-        { label: "😁 (5)", value: 5 },
+        { label: "😔 2", value: 2 },
+        { label: "😊 4", value: 4 },
+        { label: "😁 5", value: 5 },
     ],
     "emoticon-sad": [
-        { label: "😭 (1)", value: 1 },
-        { label: "😢 (2)", value: 2 },
-        { label: "😔 (3)", value: 3 },
+        { label: "😭 1", value: 1 },
+        { label: "😢 2", value: 2 },
+        { label: "😔 3", value: 3 },
     ],
     "weather-sunny": [
-        { label: "🌧️ (1)", value: 1 },
-        { label: "⛅ (3)", value: 3 },
-        { label: "☀️ (5)", value: 5 },
+        { label: "🌧️ 1", value: 1 },
+        { label: "⛅ 3", value: 3 },
+        { label: "☀️ 5", value: 5 },
     ],
     "stress-level": [
         { label: "😌 Low", value: 1 },
-        { label: "😐 Medium", value: 3 },
+        { label: "😐 Med", value: 3 },
         { label: "😫 High", value: 5 },
     ],
     "energy-level": [
         { label: "😴 Low", value: 1 },
-        { label: "😐 Medium", value: 3 },
+        { label: "😐 Med", value: 3 },
         { label: "⚡ High", value: 5 },
     ],
-    // Productivity
     "check-circle": [
         { label: "Task", value: 1 },
-        { label: "Project", value: 1 },
         { label: "3 tasks", value: 3 },
+        { label: "Project", value: 1 },
     ],
     timer: [
         { label: "Pomodoro", value: 1 },
-        { label: "Hours", value: 1 },
-        { label: "Sessions", value: 1 },
+        { label: "1h", value: 60 },
     ],
     "hammer-wrench": [
         { label: "Task", value: 1 },
-        { label: "Hours", value: 1 },
-        { label: "Project", value: 1 },
+        { label: "1h", value: 60 },
     ],
-    // Health
     "food-fork-drink": [
         { label: "Meal", value: 1 },
-        { label: "Calories", value: 500 },
+        { label: "500 cal", value: 500 },
         { label: "Snack", value: 1 },
     ],
     beer: [
@@ -208,22 +172,19 @@ const quickActions: QuickActionsMap = {
         { label: "Week", value: 7 },
     ],
     steps: [
-        { label: "1,000", value: 1000 },
-        { label: "5,000", value: 5000 },
-        { label: "10,000", value: 10000 },
+        { label: "1k", value: 1000 },
+        { label: "5k", value: 5000 },
+        { label: "10k", value: 10000 },
     ],
-    // Finances
     bank: [
         { label: "$10", value: 10 },
         { label: "$100", value: 100 },
-        { label: "$1000", value: 1000 },
+        { label: "$1k", value: 1000 },
     ],
     "currency-usd": [
         { label: "Expense", value: -1 },
         { label: "Income", value: 1 },
-        { label: "Saving", value: 1 },
     ],
-    // Habits
     calendar: [
         { label: "Day", value: 1 },
         { label: "Week", value: 7 },
@@ -232,75 +193,74 @@ const quickActions: QuickActionsMap = {
     "calendar-check": [
         { label: "Streak", value: 1 },
         { label: "Week", value: 7 },
-        { label: "Month", value: 30 },
     ],
-    // Learning
     school: [
         { label: "Lesson", value: 1 },
-        { label: "Hour", value: 1 },
-        { label: "Chapter", value: 1 },
+        { label: "1h", value: 60 },
     ],
     video: [
         { label: "Video", value: 1 },
-        { label: "Course", value: 1 },
-        { label: "Hour", value: 1 },
+        { label: "1h", value: 60 },
     ],
     pencil: [
         { label: "Page", value: 1 },
         { label: "Chapter", value: 1 },
-        { label: "Essay", value: 1 },
     ],
-    // Miscellaneous
     flask: [
         { label: "Experiment", value: 1 },
-        { label: "Project", value: 1 },
-        { label: "Hour", value: 1 },
+        { label: "1h", value: 60 },
     ],
     gamepad: [
-        { label: "Hour", value: 1 },
+        { label: "1h", value: 1 },
         { label: "Game", value: 1 },
-        { label: "Level", value: 1 },
     ],
     phone: [
         { label: "Call", value: 1 },
-        { label: "Minutes", value: 15 },
-        { label: "Hour", value: 60 },
+        { label: "15 min", value: 15 },
+        { label: "1h", value: 60 },
     ],
     account: [
         { label: "Meeting", value: 1 },
-        { label: "Hour", value: 1 },
-        { label: "Person", value: 1 },
+        { label: "1h", value: 60 },
     ],
     home: [
         { label: "Chore", value: 1 },
-        { label: "Task", value: 1 },
-        { label: "Hour", value: 1 },
+        { label: "1h", value: 60 },
     ],
     car: [
         { label: "Trip", value: 1 },
-        { label: "Mile/km", value: 10 },
-        { label: "Hour", value: 1 },
+        { label: "10km", value: 10 },
     ],
+}
+
+function parseAmount(v: string): number {
+    if (v.endsWith(".")) return +v.slice(0, -1)
+    if (v.includes(".")) {
+        const [int, dec] = v.split(".")
+        if (dec.length > 2) return +int + +`0.${dec.slice(0, 2)}`
+    }
+    return +v
 }
 
 export default function AddGoalEntry({ route, navigation }: any) {
     const { id } = route.params
     const { goals, upsertStats } = useGoal()
-    const goal = goals.find((goal: Goal) => goal.id === id)
-    const [amount, setAmount] = useState<string>("0")
-    const [date, setDate] = useState<string>(moment().format("YYYY-MM-DD"))
-    const [selectedQuickValue, setSelectedQuickValue] = useState<number | null>(null)
+    const goal = goals.find((g: any) => g.id === id)
 
+    const [amount, setAmount] = useState("0")
+    const [dates, setDates] = useState({ start: new Date(), end: new Date() })
+    const [selectedQuickValue, setSelectedQuickValue] = useState<number | null>(null)
+    const [loading, setLoading] = useState(false)
+
+    const insets = useSafeAreaInsets()
     const transformX = useSharedValue(0)
     const isAnimating = useSharedValue(false)
 
     const shake = () => {
         if (isAnimating.value) return
-
         isAnimating.value = true
         cancelAnimation(transformX)
         transformX.value = withSpring(15, { damping: 2, stiffness: 200, mass: 0.5 })
-
         setTimeout(() => {
             transformX.value = withSpring(-15, { damping: 2, stiffness: 200, mass: 0.5 })
             setTimeout(() => {
@@ -311,257 +271,278 @@ export default function AddGoalEntry({ route, navigation }: any) {
         }, 50)
     }
 
-    const handleSubmit = async () => {
-        if (!goal || !amount || amount === "0") return
-
-        const parseAmount = (amount: string) => {
-            if (amount.endsWith(".")) return +amount.slice(0, -1)
-
-            if (amount.includes(".")) {
-                const [int, dec] = amount.split(".")
-                if (dec.length > 2) {
-                    return +int + +`0.${dec.slice(0, 2)}`
-                }
-            }
-
-            return +amount
-        }
-
-        await upsertStats({
-            variables: {
-                goalsId: goal.id,
-                value: parseAmount(amount),
-                date: date,
-            },
-            refetchQueries: ["GetGoal"],
-            onCompleted: () => navigation.goBack(),
-            onError: (error) => console.error(JSON.stringify(error, null, 2)),
-        })
-    }
-
     const handleAmountChange = useCallback((value: string) => {
-        return setAmount((prev) => {
+        setAmount((prev) => {
             if (value === "C") {
-                const val = prev.toString().slice(0, -1)
+                const val = prev.slice(0, -1)
                 return val.length === 0 ? "0" : val
             }
-
             if (typeof +value === "number" && prev.includes(".") && prev.split(".")[1].length === 2) {
                 shake()
                 return prev
             }
-
-            if (prev.length === 1 && prev === "0" && value !== ".") {
-                return value
-            }
+            if (prev.length === 1 && prev === "0" && value !== ".") return value
             if (prev.includes(".") && value === ".") {
                 shake()
                 return prev
             }
-            if (prev.length === 0 && value === ".") {
-                return "0."
-            }
+            if (prev.length === 0 && value === ".") return "0."
             return prev + value
         })
     }, [])
 
-    const quickValues = goal?.icon ? quickActions[goal.icon] || [] : []
+    const handleSubmit = async () => {
+        if (!goal || amount === "0" || loading) return
+        setLoading(true)
 
-    const handleQuickValuePress = (value: number) => {
-        setAmount(value.toString())
-        setSelectedQuickValue(value)
-    }
+        const total = parseAmount(amount)
+        const start = dayjs(dates.start)
+        const end = dayjs(dates.end)
+        const numDays = end.diff(start, "day") + 1
+        const valuePerDay = Math.round(total / numDays)
 
-    const scale = (n: number) => {
-        "worklet"
-        return Math.max(90 - n * 3.5, 35)
+        const dayList = Array.from({ length: numDays }, (_, i) => start.add(i, "day").format("YYYY-MM-DD"))
+
+        try {
+            await Promise.all(
+                dayList.map((date) =>
+                    upsertStats({
+                        variables: { goalsId: goal.id, value: valuePerDay, date },
+                        refetchQueries: ["GetGoal"],
+                    }),
+                ),
+            )
+            navigation.goBack()
+        } catch (e) {
+            console.error(JSON.stringify(e, null, 2))
+        } finally {
+            setLoading(false)
+        }
     }
 
     const animatedAmount = useAnimatedStyle(
         () => ({
             transform: [{ translateX: transformX.value }],
-            fontSize: withTiming(scale(amount.length), { duration: 100 }),
+            fontSize: withTiming(interpolate(amount.length, [0, 10, 15], [80, 55, 35], "clamp"), { duration: 100 }),
         }),
         [amount],
     )
 
+    const quickValues = goal?.icon ? (quickActions[goal.icon] ?? []) : []
+
+    const isMultiDay = !dayjs(dates.start).isSame(dayjs(dates.end), "day")
+    const numDays = dayjs(dates.end).diff(dayjs(dates.start), "day") + 1
+
     return (
-        <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+        <View style={{ flex: 1 }}>
             <View style={{ flex: 1 }}>
-                <View style={styles.container}>
-                    <View style={{ justifyContent: "flex-end", flexDirection: "row" }}>
-                        <View style={{ position: "absolute", zIndex: 100, left: 0, top: 0 }}>
+                <View style={{ flex: 1 }}>
+                    <View style={styles.container}>
+                        <GlassView style={styles.closeButton}>
                             <IconButton
                                 onPress={() => navigation.goBack()}
-                                icon={<AntDesign name="close" size={24} color="rgba(255,255,255,0.7)" />}
+                                icon={<AntDesign name="close" size={20} color="#fff" />}
                             />
-                        </View>
+                        </GlassView>
 
-                        <DatePicker
-                            dates={{
-                                start: dayjs(date).toDate(),
-                                end: dayjs(date).toDate(),
-                            }}
-                            setDates={(dates) => {
-                                setDate(dayjs(dates.start).format("YYYY-MM-DD"))
-                            }}
-                            mode="single"
-                        />
-                    </View>
+                        <View style={styles.amountDisplay}>
+                            <Animated.Text style={[styles.amountText, animatedAmount]}>
+                                {amount}
+                                <Text variant="body" style={{ color: "rgba(255,255,255,0.4)", fontSize: 22 }}>
+                                    {" "}
+                                    {goal?.unit}
+                                </Text>
+                            </Animated.Text>
 
-                    <View
-                        style={{
-                            height: 250,
-                            justifyContent: "center",
-                            width: "100%",
-                            alignItems: "center",
-                            flexDirection: "row",
-                            paddingHorizontal: 15,
-                        }}
-                    >
-                        {/* Goal icon and value display */}
-                        <View style={{ alignItems: "center" }}>
-                            <View style={{ flexDirection: "row", gap: 15, alignItems: "center" }}>
-                                <Animated.Text
-                                    style={[{ color: Colors.foreground, fontWeight: "bold" }, animatedAmount]}
-                                >
-                                    {amount}
-                                    <Text variant="body" style={{ color: "rgba(255,255,255,0.7)" }}>
-                                        {" "}
-                                        {goal?.unit}
-                                    </Text>
-                                </Animated.Text>
-                            </View>
-                            <View style={{ flexDirection: "row", gap: 5 }}>
+                            <View style={styles.goalLabel}>
                                 <MaterialCommunityIcons
                                     name={goal?.icon || "progress-check"}
-                                    size={22.5}
+                                    size={16}
                                     color={Colors.secondary}
                                 />
-
-                                <Text variant="body" style={{ color: "rgba(255,255,255,0.7)", marginBottom: 15 }}>
+                                <Text variant="body" style={{ color: "rgba(255,255,255,0.55)" }}>
                                     {goal?.name}
                                 </Text>
-                            </View>
-                        </View>
-                    </View>
-
-                    <View style={{ marginTop: 20, flex: 1, gap: 15, maxHeight: Layout.screen.height / 1.85 - 5 }}>
-                        <View
-                            style={{
-                                borderRadius: 35,
-                                flex: 1,
-                            }}
-                        >
-                            <Animated.View entering={FadeIn} style={{ gap: 10 }}>
-                                {/* Quick Values */}
-                                {quickValues.length > 0 && (
-                                    <View>
-                                        <Text
-                                            variant="body"
-                                            style={{
-                                                color: "rgba(255,255,255,0.7)",
-                                                marginBottom: 10,
-                                                fontWeight: "500",
-                                            }}
-                                        >
-                                            Quick Values
+                                {isMultiDay && (
+                                    <View style={styles.multiDayBadge}>
+                                        <Text style={styles.multiDayText}>
+                                            ÷ {numDays} days = {(parseAmount(amount) / numDays).toFixed(2)}
+                                            {goal?.unit}/day
                                         </Text>
-                                        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                                            <View
-                                                style={{
-                                                    flexDirection: "row",
-                                                    flexWrap: "wrap",
-                                                    gap: 10,
-                                                    justifyContent: "flex-start",
-                                                }}
-                                            >
-                                                {quickValues.map((item, index) => (
-                                                    <Ripple
-                                                        key={`${item.label}-${index}`}
-                                                        style={[
-                                                            styles.quickValueButton,
-                                                            selectedQuickValue === item.value &&
-                                                                styles.quickValueButtonActive,
-                                                        ]}
-                                                        onPress={() => handleQuickValuePress(item.value)}
-                                                    >
-                                                        <Text
-                                                            style={[
-                                                                styles.quickValueText,
-                                                                selectedQuickValue === item.value &&
-                                                                    styles.quickValueTextActive,
-                                                            ]}
-                                                        >
-                                                            {item.label}
-                                                        </Text>
-                                                    </Ripple>
-                                                ))}
-                                            </View>
-                                            <Button
-                                                onPress={handleSubmit}
-                                                style={{
-                                                    borderRadius: 10,
-                                                    padding: 15,
-                                                    paddingVertical: 5,
-                                                    opacity: amount === "0" ? 0.5 : 1,
-                                                }}
-                                                disabled={amount === "0"}
-                                                fontStyle={{ fontSize: 14 }}
-                                            >
-                                                Save
-                                            </Button>
-                                        </View>
                                     </View>
                                 )}
+                            </View>
+                        </View>
+
+                        <View style={styles.contentContainer}>
+                            <Animated.View entering={FadeIn} style={styles.chipsRow}>
+                                <ScrollView
+                                    horizontal
+                                    showsHorizontalScrollIndicator={false}
+                                    contentContainerStyle={{ gap: 10, alignItems: "center" }}
+                                    style={{ flex: 1 }}
+                                >
+                                    <DatePicker
+                                        mode="period"
+                                        dates={dates}
+                                        setDates={setDates}
+                                        buttonComponent={({ start, end }) => (
+                                            <Pressable
+                                                style={({ pressed }) => [styles.chip, pressed && { opacity: 0.7 }]}
+                                            >
+                                                <AntDesign name="calendar" size={14} color="rgba(255,255,255,0.7)" />
+                                                <Text style={styles.chipText}>
+                                                    {dayjs(start).isSame(dayjs(end), "day")
+                                                        ? moment(start).format("DD.MM.YYYY")
+                                                        : `${moment(start).format("DD.MM")} – ${moment(end).format("DD.MM")}`}
+                                                </Text>
+                                            </Pressable>
+                                        )}
+                                    />
+
+                                    {quickValues.map((item, index) => {
+                                        const active = selectedQuickValue === item.value
+                                        return (
+                                            <Pressable
+                                                key={`${item.label}-${index}`}
+                                                style={({ pressed }) => [
+                                                    styles.chip,
+                                                    active && styles.chipActive,
+                                                    pressed && { opacity: 0.7 },
+                                                ]}
+                                                onPress={() => {
+                                                    setAmount(item.value.toString())
+                                                    setSelectedQuickValue(item.value)
+                                                }}
+                                            >
+                                                <Text style={[styles.chipText, active && styles.chipTextActive]}>
+                                                    {item.label}
+                                                </Text>
+                                            </Pressable>
+                                        )
+                                    })}
+                                </ScrollView>
+
+                                <LiquidGlassView
+                                    interactive
+                                    tintColor={amount === "0" ? Colors.primary_light : Colors.secondary}
+                                    style={[styles.saveGlass, { opacity: loading ? 0.5 : 1 }]}
+                                >
+                                    <Pressable
+                                        onPress={handleSubmit}
+                                        disabled={amount === "0" || loading}
+                                        style={({ pressed }) => [styles.saveGlassInner, pressed && { opacity: 0.7 }]}
+                                    >
+                                        <AntDesign name="check" size={18} color={"#fff"} />
+                                    </Pressable>
+                                </LiquidGlassView>
                             </Animated.View>
 
-                            {/* Keypad */}
                             <NumbersPad rotateBackButton={amount === "0"} handleAmountChange={handleAmountChange} />
                         </View>
                     </View>
                 </View>
             </View>
-        </TouchableWithoutFeedback>
+        </View>
     )
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 15,
         gap: 15,
-        backgroundColor: Colors.primary,
+        justifyContent: "space-between",
     },
-    iconContainer: {
-        width: 60,
-        height: 60,
+    closeButton: {
+        position: "absolute",
+        top: 15,
+        left: 15,
+        zIndex: 100,
+        padding: 10,
+        borderRadius: 100,
+    },
+    amountDisplay: {
+        height: 250,
         justifyContent: "center",
         alignItems: "center",
-        backgroundColor: Colors.primary_lighter,
-        borderRadius: 40,
-        borderWidth: 1,
-        borderColor: "rgba(255,255,255,0.1)",
+        paddingTop: 45,
     },
-    quickValueButton: {
-        backgroundColor: Colors.primary_lighter,
-        paddingVertical: 10,
-        paddingHorizontal: 15,
-        borderRadius: 12,
+    amountText: {
+        color: Colors.foreground,
+        fontWeight: "bold",
+        textAlign: "center",
+    },
+    goalLabel: {
+        flexDirection: "row",
         alignItems: "center",
+        gap: 6,
+        marginTop: 8,
+        flexWrap: "wrap",
+        justifyContent: "center",
+        paddingHorizontal: 20,
+    },
+    multiDayBadge: {
+        backgroundColor: lowOpacity(Colors.secondary, 0.15),
+        borderRadius: 8,
+        paddingHorizontal: 8,
+        paddingVertical: 3,
         borderWidth: 1,
-        borderColor: "rgba(255,255,255,0.1)",
+        borderColor: lowOpacity(Colors.secondary, 0.3),
     },
-    quickValueButtonActive: {
-        backgroundColor: lowOpacity(Colors.secondary, 0.3),
-        borderColor: Colors.secondary,
+    multiDayText: {
+        color: Colors.secondary,
+        fontSize: 12,
+        fontWeight: "600",
     },
-    quickValueText: {
-        color: "rgba(255,255,255,0.9)",
+    contentContainer: {
+        paddingTop: 12,
+        paddingHorizontal: 12,
+        flex: 1,
+        gap: 10,
+        backgroundColor: Colors.primary_light,
+        borderTopRightRadius: 30,
+        borderTopLeftRadius: 30,
+        maxHeight: Layout.screen.height / 1.8,
+    },
+    chipsRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 10,
+    },
+    chip: {
+        paddingVertical: 10,
+        paddingHorizontal: 16,
+        borderRadius: 15,
+        backgroundColor: Colors.primary_lighter,
+        borderWidth: 2,
+        borderColor: Color(Colors.primary_lighter).lighten(0.25).hex(),
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 8,
+        height: 45,
+    },
+    chipActive: {
+        backgroundColor: lowOpacity(Colors.secondary, 0.2),
+        borderColor: Color(Colors.secondary).alpha(0.5).string(),
+    },
+    chipText: {
+        color: "rgba(255,255,255,0.7)",
+        fontSize: 13,
         fontWeight: "500",
     },
-    quickValueTextActive: {
-        color: Colors.foreground,
-        fontWeight: "600",
+    chipTextActive: {
+        color: Colors.secondary,
+        fontWeight: "700",
+    },
+    saveGlass: {
+        borderRadius: 15,
+        overflow: "hidden",
+        height: 45,
+        width: 52,
+    },
+    saveGlassInner: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
     },
 })

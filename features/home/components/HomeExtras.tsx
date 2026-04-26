@@ -38,6 +38,11 @@ const GET_HOME_EXTRAS = gql`
                     description
                     type
                     category
+
+                    subscription {
+                        id
+                        isActive
+                    }
                 }
             }
         }
@@ -59,11 +64,8 @@ export default function HomeExtras() {
         },
     })
 
-    console.log("home extras error", JSON.stringify(error, null, 2))
-
     const limits = data?.limits ?? []
     const allExpenses = (data?.wallet?.expenses2 ?? []).flatMap((m: any) => m.expenses ?? [])
-    const activeSubscriptions = (data?.subscriptions ?? []).filter((s: any) => s.isActive)
 
     return (
         <View style={styles.card}>
@@ -74,7 +76,8 @@ export default function HomeExtras() {
             ) : (
                 <SubscriptionCalendar
                     style={{ padding: 0, backgroundColor: Colors.primary_lighter }}
-                    subscriptions={activeSubscriptions}
+                    // subscriptions={activeSubscriptions}
+                    subscriptions={[]}
                     expenses={allExpenses}
                 />
             )}

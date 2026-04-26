@@ -1,10 +1,9 @@
-import Colors, { Sizing } from "@/constants/Colors"
+import Colors from "@/constants/Colors"
 import Layout from "@/constants/Layout"
 import { Expense, MonthlyExpenses, Wallet } from "@/types"
 import { gql, useQuery } from "@apollo/client"
 import { AntDesign } from "@expo/vector-icons"
 import { useNavigation } from "@react-navigation/native"
-import Color from "color"
 import moment from "moment"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import {
@@ -19,214 +18,77 @@ import {
 } from "react-native"
 import Ripple from "react-native-material-ripple"
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated"
-import { ListRenderItem } from "@shopify/flash-list"
-import useGetSubscriptions from "../../hooks/useGetSubscriptions"
+import Haptics from "react-native-haptic-feedback"
 import { getInvalidExpenses } from "../../pages/WalletCharts"
-import SubscriptionItem from "../Subscription/SubscriptionItem"
 import { init, useWalletContext } from "../WalletContext"
-import WalletLimits from "./Limits"
+import GlassView from "@/components/ui/GlassView"
+import SubAccountCards from "./SubAccountCards"
 import WalletItem, { parseDateToText } from "./WalletItem"
 
-const AnimatedList = Animated.createAnimatedComponent(VirtualizedList)
+type ListItem = { type: "month"; data: MonthlyExpenses; monthIndex: number }
 
-interface Subscription {
-    id: string
-    amount: number
-    dateStart: string
-    dateEnd: string
-    description: string
-    isActive: boolean
-    nextBillingDate: string
-    billingCycle: string
-    expenses: {
-        amount: number
-        id: string
-        date: string
-        description: string
-        category: string
-    }[]
-}
+const getItem = (data: ListItem[], index: number) => data[index]
+const getItemCount = (data: ListItem[]) => data.length
+const keyExtractor = (item: ListItem, index: number) =>
+    item.type === "month" ? `month-${item.data.month}` : `item-${index}`
 
-interface WalletList2Props {
+const AnimatedList = Animated.createAnimatedComponent(VirtualizedList<ListItem>)
+
+interface Props {
     wallet?: Wallet
     onScroll?: (event: NativeSyntheticEvent<NativeScrollEvent>) => void
     refetch?: () => void
     onEndReached?: () => void
-    showSubscriptions?: boolean
-    showExpenses?: boolean
 }
 
-type ListItemType =
-    | { type: "limits" }
-    | { type: "subscription-header"; title: string; count: number; color: string }
-    | { type: "subscription"; data: Subscription; index: number }
-    | { type: "month"; data: MonthlyExpenses; monthIndex: number }
-    | { type: "cards" }
-
-const keyExtractor = (item: ListItemType, index: number) => {
-    switch (item.type) {
-        case "limits":
-            return "limits"
-        case "subscription-header":
-            return `sub-header-${item.title}`
-        case "subscription":
-            return `sub-${item.data.id}`
-        case "month":
-            return `month-${item.data.month}`
-        default:
-            return `item-${index}`
-    }
-}
-
-const getItem = (data: ListItemType[], index: number) => data[index]
-const getItemCount = (data: ListItemType[]) => data.length
-
-export default function WalletList2({
-    wallet,
-    onScroll,
-    refetch,
-    onEndReached,
-    showSubscriptions = true,
-    showExpenses = true,
-}: WalletList2Props) {
-    const navigation = useNavigation<any>()
-    const { data: subscriptionsData, refetch: refetchSubscriptions } = useGetSubscriptions()
+export default function ExpensesList({ wallet, onScroll, refetch, onEndReached }: Props) {
     const [refreshing, setRefreshing] = useState(false)
 
-    const groupedSubscriptions = useMemo(() => {
-        if (!subscriptionsData?.subscriptions) return { active: [], inactive: [] }
-        const active = subscriptionsData.subscriptions.filter((sub: Subscription) => sub.isActive)
-        const inactive = subscriptionsData.subscriptions.filter((sub: Subscription) => !sub.isActive)
-        return { active, inactive } as { active: Subscription[]; inactive: Subscription[] }
-    }, [subscriptionsData?.subscriptions])
-
-    const unifiedData = useMemo(() => {
-        const items: ListItemType[] = []
-
-        if (showSubscriptions) {
-            if (groupedSubscriptions.active.length > 0) {
-                items.push({
-                    type: "subscription-header",
-                    title: "Active",
-                    count: groupedSubscriptions.active.length,
-                    color: Colors.secondary,
-                })
-                groupedSubscriptions.active.forEach((subscription, index) => {
-                    items.push({ type: "subscription", data: subscription, index })
-                })
-            }
-
-            if (groupedSubscriptions.inactive.length > 0) {
-                items.push({
-                    type: "subscription-header",
-                    title: "Inactive",
-                    count: groupedSubscriptions.inactive.length,
-                    color: "#F07070",
-                })
-                groupedSubscriptions.inactive.forEach((subscription, index) => {
-                    items.push({
-                        type: "subscription",
-                        data: subscription,
-                        index: index + groupedSubscriptions.active.length,
-                    })
-                })
-            }
-        }
-
-        if (showExpenses) {
-            ;(wallet?.expenses2 ?? []).forEach((monthData, monthIndex) => {
-                items.push({ type: "month", data: monthData, monthIndex })
-            })
-        }
-
-        return items
-    }, [showSubscriptions, showExpenses, groupedSubscriptions, wallet?.expenses2])
+    const items: ListItem[] = useMemo(
+        () =>
+            (wallet?.expenses2 ?? []).map((data, monthIndex) => ({
+                type: "month",
+                data,
+                monthIndex,
+            })),
+        [wallet?.expenses2],
+    )
 
     const onRefresh = useCallback(async () => {
         setRefreshing(true)
-        if (refetch) refetch()
-        if (refetchSubscriptions) refetchSubscriptions()
+        refetch?.()
         setRefreshing(false)
-    }, [refetch, refetchSubscriptions])
+    }, [refetch])
 
-    const renderItem: ListRenderItem<ListItemType> = useCallback(
-        ({ item }) => {
-            switch (item.type) {
-                case "subscription-header":
-                    return (
-                        <Text style={[styles.monthText, { marginTop: 30, marginBottom: 15 }]}>
-                            {item.title} ({item.count})
-                        </Text>
-                    )
-
-                case "subscription":
-                    return (
-                        <SubscriptionItem
-                            subscription={item.data}
-                            index={item.index}
-                            onPress={() => navigation.navigate("Subscription", { subscriptionId: item.data.id })}
-                        />
-                    )
-
-                case "month":
-                    return (
-                        <MonthItem
-                            monthData={item.data}
-                            monthIndex={item.monthIndex}
-                            defaultExpanded={item.monthIndex === 0}
-                        />
-                    )
-
-                default:
-                    return null
-            }
-        },
-        [wallet?.balance],
-    )
-
-    if (
-        showSubscriptions &&
-        !showExpenses &&
-        (!subscriptionsData?.subscriptions || subscriptionsData.subscriptions.length === 0)
-    ) {
-        return (
-            <View style={styles.emptyContainer}>
-                <Text style={styles.emptyText}>No subscriptions found</Text>
-                <Text style={styles.emptySubtext}>Add your first subscription to start tracking</Text>
-            </View>
-        )
-    }
+    const renderItem = useCallback(({ item }: { item: ListItem }) => {
+        if (item.type === "month") {
+            return (
+                <MonthItem monthData={item.data} monthIndex={item.monthIndex} defaultExpanded={item.monthIndex === 0} />
+            )
+        }
+        return null
+    }, [])
 
     return (
         <>
             <AnimatedList
-                keyboardDismissMode={"on-drag"}
-                data={unifiedData}
+                keyboardDismissMode="on-drag"
+                data={items}
                 getItem={getItem}
                 getItemCount={getItemCount}
                 renderItem={renderItem as any}
                 keyExtractor={keyExtractor as any}
                 onScroll={onScroll}
-                ListHeaderComponent={
-                    showExpenses ? (
-                        <>
-                            <SubAccountCards />
-                        </>
-                    ) : (
-                        <SubscriptionCalendar
-                            subscriptions={[...groupedSubscriptions.active, ...groupedSubscriptions.inactive]}
-                        />
-                    )
-                }
-                contentContainerStyle={{ padding: 15, paddingTop: 230, paddingBottom: 120 }}
+                ListHeaderComponent={<SubAccountCards />}
+                contentContainerStyle={styles.contentContainer}
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
                 onEndReached={onEndReached}
-                onEndReachedThreshold={0.5}
+                onEndReachedThreshold={0.2}
                 removeClippedSubviews
                 windowSize={4}
                 initialNumToRender={6}
             />
-            {showExpenses && <ClearFiltersButton />}
+            <ClearFiltersButton />
         </>
     )
 }
@@ -287,7 +149,6 @@ const MonthItem = ({
                     {Array.from(groupedByDay.entries()).map(([day, dayExpenses]) => {
                         const isDateExpanded = !collapsedDates.has(day)
                         const sum = calculateDaySum(dayExpenses)
-
                         return (
                             <View key={day}>
                                 <DateHeader
@@ -296,7 +157,6 @@ const MonthItem = ({
                                     isExpanded={isDateExpanded}
                                     onToggle={() => toggleDate(day)}
                                 />
-
                                 {isDateExpanded &&
                                     dayExpenses.map((expense, index) => (
                                         <WalletItem
@@ -314,8 +174,6 @@ const MonthItem = ({
         </View>
     )
 }
-
-// ─── Month Header ─────────────────────────────────────────────────────────────
 
 const MonthHeader = ({
     monthData,
@@ -347,7 +205,6 @@ const MonthHeader = ({
                 <ChevronIcon isExpanded={isExpanded} />
                 <Text style={styles.monthText}>{moment(monthData.month).format("MMMM YYYY")}</Text>
             </View>
-
             <Text style={amount > 0 ? styles.monthAmountPositive : styles.monthAmountNegative}>
                 {amount > 0 ? `+${amount.toFixed(2)}` : amount.toFixed(2)}
                 <Text
@@ -362,8 +219,6 @@ const MonthHeader = ({
         </Pressable>
     )
 }
-
-// ─── Date Header ──────────────────────────────────────────────────────────────
 
 const DateHeader = ({
     date,
@@ -394,24 +249,14 @@ const DateHeader = ({
             <Ripple onPress={onPress} style={styles.dateTextContainer}>
                 <Text style={styles.dateText}>{parseDateToText(date)}</Text>
                 <View style={styles.dateSumContainer}>
-                    {sum[0] > 0 && (
-                        <Text style={[styles.expenseAmount, styles.expenseAmountNegative]}>
-                            {`-${sum[0].toFixed(2)}`}zł
-                        </Text>
-                    )}
+                    {sum[0] > 0 && <Text style={[styles.amount, styles.negative]}>{`-${sum[0].toFixed(2)}`}zł</Text>}
                     {sum[0] > 0 && sum[1] > 0 && <Text style={styles.dateText}>/</Text>}
-                    {sum[1] > 0 && (
-                        <Text style={[styles.expenseAmount, styles.incomeAmountPositive]}>
-                            {`+${sum[1].toFixed(2)}`}zł
-                        </Text>
-                    )}
+                    {sum[1] > 0 && <Text style={[styles.amount, styles.positive]}>{`+${sum[1].toFixed(2)}`}zł</Text>}
                 </View>
             </Ripple>
         </View>
     )
 }
-
-// ─── Chevron ──────────────────────────────────────────────────────────────────
 
 const ChevronIcon = ({ isExpanded }: { isExpanded: boolean }) => {
     const rotation = useSharedValue(isExpanded ? 0 : -90)
@@ -431,13 +276,6 @@ const ChevronIcon = ({ isExpanded }: { isExpanded: boolean }) => {
     )
 }
 
-// ─── Clear Filters ────────────────────────────────────────────────────────────
-
-import Haptics from "react-native-haptic-feedback"
-import GlassView from "@/components/ui/GlassView"
-import SubAccountCards from "./SubAccountCards"
-import SubscriptionCalendar from "./SubscriptionCalendar"
-
 const ClearFiltersButton = () => {
     const { filters, dispatch } = useWalletContext()
 
@@ -445,25 +283,22 @@ const ClearFiltersButton = () => {
         let isDifferent = false
         let diffCount = 0
 
-        const flatFilters = (obj: Record<string, any>) => {
-            const output = {} as Record<string, any>
-            const flatten = (obj: Record<string, any>, parentKey = "") => {
-                for (const key in obj) {
-                    const value = obj[key]
-                    const newKey = parentKey ? `${parentKey}.${key}` : key
-                    if (typeof value === "object" && value !== null) flatten(value, newKey)
-                    else output[newKey] = value
-                }
+        const flatten = (obj: Record<string, any>, parentKey = ""): Record<string, any> => {
+            const output: Record<string, any> = {}
+            for (const key in obj) {
+                const value = obj[key]
+                const newKey = parentKey ? `${parentKey}.${key}` : key
+                if (typeof value === "object" && value !== null) Object.assign(output, flatten(value, newKey))
+                else output[newKey] = value
             }
-            flatten(obj)
             return output
         }
 
-        const flatInitFilters = flatFilters(init)
-        const flatCurrentFilters = flatFilters(filters)
+        const flatInit = flatten(init)
+        const flatCurrent = flatten(filters)
 
-        for (const key in flatCurrentFilters) {
-            if (flatCurrentFilters[key] !== flatInitFilters[key]) {
+        for (const key in flatCurrent) {
+            if (flatCurrent[key] !== flatInit[key]) {
                 isDifferent = true
                 diffCount++
             }
@@ -475,15 +310,15 @@ const ClearFiltersButton = () => {
     if (!hasFilters) return null
 
     return (
-        <Animated.View style={styles.clearFiltersContainer}>
+        <Animated.View style={styles.clearContainer}>
             <Pressable
                 onPress={() => {
                     Haptics.trigger("impactLight")
                     dispatch({ type: "RESET" })
                 }}
             >
-                <GlassView style={styles.clearFiltersButton}>
-                    <Text style={styles.clearFiltersText}>
+                <GlassView style={styles.clearButton}>
+                    <Text style={styles.clearText}>
                         {diffCount > 0
                             ? `Reset (${diffCount}) ${diffCount > 1 ? "filters" : "filter"}`
                             : "Reset filters"}
@@ -495,9 +330,12 @@ const ClearFiltersButton = () => {
     )
 }
 
-// ─── Styles ───────────────────────────────────────────────────────────────────
-
 const styles = StyleSheet.create({
+    contentContainer: {
+        padding: 15,
+        paddingTop: 230,
+        paddingBottom: 120,
+    },
     monthContainer: {
         marginTop: 30,
     },
@@ -563,70 +401,31 @@ const styles = StyleSheet.create({
         gap: 5,
         alignItems: "center",
     },
-    expenseAmount: {
+    amount: {
         fontSize: 15,
         fontWeight: "600",
     },
-    expenseAmountNegative: {
+    negative: {
         color: "#F07070",
     },
-    incomeAmountPositive: {
+    positive: {
         color: "#66E875",
     },
-    monthRow: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        marginTop: 30,
-    },
-    subscriptionHeaderContainer: {
-        marginBottom: 30,
-    },
-    countBadge: {
-        paddingHorizontal: 12,
-        paddingVertical: 6,
-        borderRadius: 16,
-        minWidth: 32,
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    countText: {
-        color: Colors.foreground,
-        fontSize: 12,
-        fontWeight: "bold",
-    },
-    emptyContainer: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        padding: 20,
-    },
-    emptyText: {
-        color: Colors.text_light,
-        fontSize: 18,
-        fontWeight: "600",
-        marginBottom: 8,
-    },
-    emptySubtext: {
-        color: "rgba(255,255,255,0.7)",
-        fontSize: 14,
-        textAlign: "center",
-    },
-    clearFiltersContainer: {
+    clearContainer: {
         position: "absolute",
         bottom: 100,
         width: Layout.screen.width,
         justifyContent: "center",
         alignItems: "center",
     },
-    clearFiltersButton: {
+    clearButton: {
         padding: 5,
         borderRadius: 50,
         flexDirection: "row",
         gap: 5,
         paddingHorizontal: 15,
     },
-    clearFiltersText: {
+    clearText: {
         color: Colors.secondary_light_2,
     },
 })

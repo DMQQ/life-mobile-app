@@ -30,22 +30,28 @@ interface WalletRootStack extends ParamListBase {
     EditBalance: undefined
     CreateLimits: undefined
     LimitsDetail: undefined
-    CorrectionMaps: { prefill?: { shop?: string; description?: string; category?: string; amount?: number } } | undefined
-    CorrectionMapForm: {
-        prefill?: { shop?: string; description?: string; category?: string; amount?: number }
-        editingItem?: import("./hooks/useCorrectionMaps").CorrectionMap
-    } | undefined
+    CorrectionMaps:
+        | { prefill?: { shop?: string; description?: string; category?: string; amount?: number } }
+        | undefined
+    CorrectionMapForm:
+        | {
+              prefill?: { shop?: string; description?: string; category?: string; amount?: number }
+              editingItem?: import("./hooks/useCorrectionMaps").CorrectionMap
+          }
+        | undefined
     AiStatsChat: { startDate: string; endDate: string }
-    CreateSubAccount: {
-        editSubAccount?: {
-            id: string
-            name: string
-            description: string | null
-            color: string
-            icon: string
-            balance: number
-        }
-    } | undefined
+    CreateSubAccount:
+        | {
+              editSubAccount?: {
+                  id: string
+                  name: string
+                  description: string | null
+                  color: string
+                  icon: string
+                  balance: number
+              }
+          }
+        | undefined
     TransferSubAccount: { fromId?: string } | undefined
 }
 
@@ -79,6 +85,7 @@ export default function WalletScreens({ navigation, route }: WalletScreens<"Wall
                     component={CreateExpenseModal}
                     options={{
                         presentation: "modal",
+                        gestureEnabled: false,
                     }}
                     initialParams={{
                         type: null,
@@ -147,14 +154,11 @@ export default function WalletScreens({ navigation, route }: WalletScreens<"Wall
                     options={{
                         presentation: "modal",
                         headerShown: false,
+                        gestureEnabled: false,
                     }}
                 />
 
-                <Stack.Screen
-                    name="LimitsDetail"
-                    component={LimitsDetail}
-                    options={{ headerShown: false }}
-                />
+                <Stack.Screen name="LimitsDetail" component={LimitsDetail} options={{ headerShown: false }} />
 
                 <Stack.Screen
                     name="CorrectionMaps"
@@ -168,15 +172,6 @@ export default function WalletScreens({ navigation, route }: WalletScreens<"Wall
                 <Stack.Screen
                     name="CorrectionMapForm"
                     component={CorrectionMapForm}
-                    options={{
-                        presentation: "modal",
-                        headerShown: false,
-                    }}
-                />
-
-                <Stack.Screen
-                    name="AiStatsChat"
-                    component={AiStatsChat}
                     options={{
                         presentation: "modal",
                         headerShown: false,

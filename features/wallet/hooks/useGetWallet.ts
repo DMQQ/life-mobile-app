@@ -1,6 +1,6 @@
-import { Expense, MonthlyExpenses, Wallet } from "@/types"
+import { MonthlyExpenses, Wallet } from "@/types"
 import { gql, useQuery } from "@apollo/client"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { init, useWalletContext } from "../components/WalletContext"
 
 export const GET_WALLET = gql`
@@ -66,8 +66,12 @@ export default function useGetWallet(options?: {
 }) {
     const { filters, dispatch } = useWalletContext()
 
-    const [skip, setSkip] = useState(0)
+    const skipRef = useRef(0)
+    const fetchingRef = useRef(false)
+    const generationRef = useRef(0)
+    const isFirstMount = useRef(true)
     const [endReached, setEndReached] = useState(false)
+    const [paginatedMonths, setPaginatedMonths] = useState<MonthlyExpenses[]>([])
 
     const directiveVariables = useMemo(() => {
         const excludeFields = options?.excludeFields || []
@@ -130,7 +134,7 @@ export default function useGetWallet(options?: {
         [effectiveFilters],
     )
 
-    const st = useQuery(GET_WALLET, {
+    const st = useQuery<{ wallet: Wallet }>(GET_WALLET, {
         variables: {
             filters: baseFilters,
             skip: 0,
@@ -142,84 +146,90 @@ export default function useGetWallet(options?: {
         },
     })
 
-    const [endReachedLoading, setEndReachedLoading] = useState(false)
+    useEffect(() => {
+        const months = st.data?.wallet?.expenses2
+        if (!months) return
+        setPaginatedMonths((prev) => {
+            if (prev.length === 0) return months
+            const map = new Map(prev.map((m) => [m.month, m]))
+            for (const m of months) map.set(m.month, m)
+            return Array.from(map.values())
+        })
+    }, [st.data?.wallet?.expenses2])
 
     const onEndReached = useCallback(async () => {
-        if (st.loading || endReached || options?.fetchAll || endReachedLoading) return
+        if (endReached || options?.fetchAll || fetchingRef.current) return
 
-        setEndReachedLoading(true)
-
-        const nextSkip = skip + PAGINATION_TAKE
+        fetchingRef.current = true
+        const nextSkip = skipRef.current + PAGINATION_TAKE
+        const gen = generationRef.current
 
         try {
-            await st.fetchMore({
+            const result = await st.fetchMore({
                 variables: {
                     skip: nextSkip,
                     take: PAGINATION_TAKE,
                     filters: baseFilters,
                     ...directiveVariables,
                 },
-                updateQuery(previousQueryResult, { fetchMoreResult }) {
-                    if (!fetchMoreResult?.wallet?.expenses2) {
-                        setEndReached(true)
-                        return previousQueryResult
-                    }
-
-                    const newMonths: MonthlyExpenses[] = fetchMoreResult.wallet.expenses2
-                    if (newMonths.length === 0 || newMonths.length < PAGINATION_TAKE) {
-                        setEndReached(true)
-                    }
-
-                    if (!previousQueryResult?.wallet?.expenses2) {
-                        return fetchMoreResult
-                    }
-
-                    const monthMap = new Map<string, MonthlyExpenses>(
-                        previousQueryResult.wallet.expenses2.map((m: MonthlyExpenses) => [m.month, m]),
-                    )
-                    for (const m of newMonths) {
-                        monthMap.set(m.month, m)
-                    }
-
-                    return {
-                        wallet: {
-                            ...previousQueryResult.wallet,
-                            ...fetchMoreResult.wallet,
-                            expenses2: Array.from(monthMap.values()),
-                        },
-                    }
-                },
             })
 
-            setSkip(nextSkip)
+            if (gen !== generationRef.current) return
+
+            const newMonths: MonthlyExpenses[] = result.data?.wallet?.expenses2 ?? []
+            if (newMonths.length < PAGINATION_TAKE) setEndReached(true)
+            if (newMonths.length === 0) return
+
+            setPaginatedMonths((prev) => {
+                const map = new Map(prev.map((m) => [m.month, m]))
+                for (const m of newMonths) map.set(m.month, m)
+                return Array.from(map.values())
+            })
+
+            skipRef.current = nextSkip
         } catch (error) {
             console.error("Error loading more:", error)
         } finally {
-            setEndReachedLoading(false)
+            fetchingRef.current = false
         }
-    }, [st.loading, endReached, skip, baseFilters, directiveVariables, options?.fetchAll, endReachedLoading])
+    }, [endReached, baseFilters, directiveVariables, options?.fetchAll])
 
     useEffect(() => {
-        const timeout = setTimeout(async () => {
-            setSkip(0)
-            setEndReached(false)
+        if (isFirstMount.current) {
+            isFirstMount.current = false
+            return
+        }
 
-            await st.refetch({
+        const timeout = setTimeout(async () => {
+            const gen = ++generationRef.current
+            skipRef.current = 0
+            fetchingRef.current = false
+            setEndReached(false)
+            setPaginatedMonths([])
+
+            const result = await st.refetch({
                 skip: 0,
                 take: options?.fetchAll ? 99999 : PAGINATION_TAKE,
                 filters: baseFilters,
                 ...directiveVariables,
             })
+
+            if (gen === generationRef.current) {
+                setPaginatedMonths(result.data?.wallet?.expenses2 ?? [])
+            }
         }, 1000)
 
         return () => clearTimeout(timeout)
     }, [effectiveFilters])
 
+    const mergedData = useMemo(() => {
+        if (!st.data?.wallet) return st.data
+        return { wallet: { ...st.data.wallet, expenses2: paginatedMonths } }
+    }, [st.data, paginatedMonths])
+
     const filtersActive = useMemo(() => JSON.stringify(effectiveFilters) !== JSON.stringify(init), [effectiveFilters])
 
-    const data = useMemo(() => st.data as { wallet: Wallet }, [st.data])
-
-    return { ...st, data, filters: effectiveFilters, dispatch, onEndReached, endReached, filtersActive }
+    return { ...st, data: mergedData, filters: effectiveFilters, dispatch, onEndReached, endReached, filtersActive }
 }
 
 export const useGetBalance = () => {

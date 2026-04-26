@@ -377,10 +377,10 @@ const styles = StyleSheet.create({
         gap: 2,
     },
     dayToday: {
-        backgroundColor: "rgba(255,255,255,0.08)",
+        backgroundColor: "rgba(255,255,255,0.05)",
     },
     daySelected: {
-        backgroundColor: Colors.secondary,
+        backgroundColor: "rgba(255,255,255,0.1)",
     },
     dayNumber: {
         fontSize: 11,

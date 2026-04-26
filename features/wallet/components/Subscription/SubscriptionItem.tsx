@@ -146,11 +146,13 @@ const styles = StyleSheet.create({
     row: {
         flexDirection: "row",
         alignItems: "flex-start",
+        gap: 2.5,
     },
     iconWrap: {},
     body: {
+        paddingTop: 10,
         flex: 1,
-        gap: 8,
+        gap: 10,
     },
     topRow: {
         flexDirection: "row",
@@ -159,10 +161,11 @@ const styles = StyleSheet.create({
         gap: 8,
     },
     name: {
-        flex: 1,
-        fontSize: 16,
-        fontWeight: "700",
-        color: Colors.text_light,
+        color: Colors.foreground,
+        fontSize: 14,
+        fontWeight: "bold",
+        marginBottom: 5,
+        textTransform: "capitalize",
     },
     amount: {
         fontSize: 16,
