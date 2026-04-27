@@ -12,7 +12,6 @@ import Animated, {
     useAnimatedStyle,
     useSharedValue,
     withSequence,
-    withSpring,
     withTiming,
     useAnimatedKeyboard,
 } from "react-native-reanimated"
@@ -29,6 +28,7 @@ import useKeyboard from "@/utils/hooks/useKeyboard"
 import ContextMenuView, { type ContextMenuAction } from "react-native-context-menu-view"
 import { useSearchMenu, type SearchMenuItem } from "@/contexts/SearchMenuContext"
 import { useAiChat } from "@/contexts/AiChatContext"
+import { getGlobalScrollY } from "@/utils/hooks/ui/useTrackScroll"
 
 const styles = StyleSheet.create({
     container: {
@@ -95,11 +95,11 @@ const SearchButton = ({
     }, [isExpanded])
 
     const searchContainerStyle = useAnimatedStyle(() => {
-        const width = interpolate(searchProgress.value, [0, 1], [70, Layout.screen.width - 30 - 70])
+        const width = interpolate(searchProgress.value, [0, 1], [60, Layout.screen.width - 30 - 60])
 
         return {
             width,
-            height: isExpanded ? withTiming(60, { duration: 150 }) : 70,
+            height: isExpanded ? withTiming(60, { duration: 150 }) : 60,
         }
     })
 
@@ -110,8 +110,8 @@ const SearchButton = ({
 
     const glassWrapper = useAnimatedStyle(
         () => ({
-            width: interpolate(searchProgress.value, [0, 1], [70, Layout.screen.width - 30 - 70]),
-            height: isExpanded ? withTiming(60, { duration: 150 }) : 70,
+            width: interpolate(searchProgress.value, [0, 1], [60, Layout.screen.width - 30 - 60]),
+            height: isExpanded ? withTiming(60, { duration: 150 }) : 60,
         }),
         [isExpanded, keyboard],
     )
@@ -148,7 +148,7 @@ const SearchButton = ({
             <GlassView
                 key={isExpanded ? "expanded" : "collapsed"}
                 style={{ flex: 1, borderRadius: 100 }}
-                tintColor={isExpanded ? undefined : Colors.ternary}
+                tintColor={isExpanded ? undefined : Colors.secondary}
             >
                 <Animated.View style={[searchContainerStyle]}>
                     <Animated.View style={glassWrapper}>
@@ -179,7 +179,7 @@ const SearchButton = ({
                             )}
                             <Pressable
                                 style={{
-                                    width: 70,
+                                    width: 60,
                                     height: "100%",
                                     justifyContent: "center",
                                     alignItems: "center",
@@ -236,10 +236,7 @@ const Btn = ({ buttonWidth, iconScale, activeRoute, ...props }: ButtonProps) => 
     }
 
     const handlePressOut = () => {
-        pressScale.value = withSpring(1, {
-            damping: 15,
-            stiffness: 300,
-        })
+        pressScale.value = withTiming(1, { duration: 100 })
     }
 
     const navigation = useNavigation<any>()
@@ -256,7 +253,7 @@ const Btn = ({ buttonWidth, iconScale, activeRoute, ...props }: ButtonProps) => 
                         justifyContent: "center",
                         alignItems: "center",
                         flex: 1,
-                        height: 70,
+                        height: 60,
                         gap: 4,
                     },
                 ]}
@@ -283,16 +280,6 @@ const Btn = ({ buttonWidth, iconScale, activeRoute, ...props }: ButtonProps) => 
                         }}
                     />
                 </Animated.View>
-                <Text
-                    style={{
-                        color: "#fff",
-                        fontSize: 11,
-                        fontWeight: isActive ? "600" : "400",
-                        opacity: isActive ? 1 : 0.7,
-                    }}
-                >
-                    {props.label}
-                </Text>
             </Pressable>
         </Animated.View>
     )
@@ -332,12 +319,12 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
             {
                 route: "Root",
                 label: "Home",
-                iconName: "house.fill",
+                iconName: "house",
             },
             {
                 route: "WalletScreens",
                 label: "Wallet",
-                iconName: "creditcard.fill",
+                iconName: "creditcard",
                 onLongPress: () => handleLongPress("WalletScreens"),
             },
             {
@@ -358,7 +345,7 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
     const routes = buttons.map((btn) => btn.route)
 
     const totalButtons = buttons.length
-    const buttonWidth = (Layout.screen.width - 30 - 70 - 15 - 10) / totalButtons
+    const buttonWidth = (Layout.screen.width - 30 - 60 - 15 - 10) / totalButtons
 
     const indicatorPosition = useSharedValue(routes.indexOf(activeRoute))
     const iconScale = useSharedValue(1)
@@ -383,15 +370,15 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
 
     useEffect(() => {
         if (!isSearchActive) {
-            dragScale.value = withSpring(1, { damping: 14, stiffness: 280 })
-            dragScaleY.value = withSpring(1, { damping: 12, stiffness: 320 })
+            dragScale.value = withTiming(1, { duration: 200 })
+            dragScaleY.value = withTiming(1, { duration: 200 })
             isDragging.value = false
 
             indicatorPosition.value = withTiming(routes.indexOf(activeRoute))
             iconScale.value = withSequence(
-                withSpring(0.85, { damping: 18, stiffness: 320 }),
-                withSpring(1.05, { damping: 10, stiffness: 280 }),
-                withSpring(1, { damping: 14, stiffness: 240 }),
+                withTiming(0.85, { duration: 200 }),
+                withTiming(1.05, { duration: 200 }),
+                withTiming(1, { duration: 200 }),
             )
         }
     }, [activeRoute, isSearchActive])
@@ -404,8 +391,8 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
         .onBegin(() => {
             "worklet"
             isDragging.value = true
-            dragScale.value = withSpring(1.15, { damping: 14, stiffness: 320 })
-            dragScaleY.value = withSpring(1.2, { damping: 12, stiffness: 360 })
+            dragScale.value = withTiming(1.15, { duration: 200 })
+            dragScaleY.value = withTiming(1.2, { duration: 200 })
             dragStartIndex.value = routes.indexOf(activeRoute)
         })
         .onUpdate((event) => {
@@ -420,8 +407,8 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
                 const draggedToIndex = Math.round(clampedPosition)
                 const draggedToRoute = routes[draggedToIndex]
 
-                dragScale.value = withSpring(1, { damping: 14, stiffness: 280 })
-                dragScaleY.value = withSpring(1, { damping: 12, stiffness: 320 })
+                dragScale.value = withTiming(1, { duration: 200 })
+                dragScaleY.value = withTiming(1, { duration: 200 })
                 isDragging.value = false
                 indicatorPosition.value = withTiming(routes.indexOf(activeRoute))
 
@@ -437,8 +424,8 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
 
             indicatorPosition.value = withTiming(targetIndex)
 
-            dragScale.value = withSpring(1, { damping: 14, stiffness: 280 })
-            dragScaleY.value = withSpring(1, { damping: 12, stiffness: 320 })
+            dragScale.value = withTiming(1, { duration: 200 })
+            dragScaleY.value = withTiming(1, { duration: 200 })
             isDragging.value = false
 
             if (targetIndex !== currentActiveIndex && routes[targetIndex]) {
@@ -453,7 +440,7 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
         const baseTranslateX =
             indicatorPosition.value * buttonWidth + (buttonWidth - indicatorWidth) / 2 + containerPadding
 
-        const containerWidth = Layout.screen.width - 30 - 70 - 15
+        const containerWidth = Layout.screen.width - 30 - 60 - 15
         const maxTranslateX = containerWidth - indicatorWidth
 
         // For edge tabs, allow indicator to fill to the edges
@@ -481,10 +468,10 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
 
     const tabBarWidthStyle = useAnimatedStyle(
         () => ({
-            width: interpolate(tabsOpacity.value, [0, 1], [60, Layout.screen.width - 30 - 70 - 15]),
-            height: isSearchActive ? 60 : 70,
+            width: interpolate(tabsOpacity.value, [0, 1], [60, Layout.screen.width - 30 - 60 - 15]),
+            height: isSearchActive ? 60 : 60,
         }),
-        [isSearchActive],
+        [isSearchActive, activeRoute],
     )
 
     const isOpenSubScreen = (state.routes[state.index].state?.index || 0) > 0
@@ -554,7 +541,6 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
                                         indicatorStyle,
                                         {
                                             position: "absolute",
-                                            top: 5,
                                             height: 60,
                                             borderRadius: 100,
                                         },
@@ -578,7 +564,7 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
                                         left: 0,
                                         top: 0,
                                         bottom: 0,
-                                        width: isSearchActive ? 60 : 70,
+                                        width: isSearchActive ? 60 : 60,
                                     }}
                                 >
                                     <Pressable

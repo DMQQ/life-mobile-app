@@ -100,8 +100,8 @@ const RENEW_SUBSCRIPTION_MUTATION = gql`
 `
 
 const ASSIGN_EXPENSE_TO_SUBSCRIPTION_MUTATION = gql`
-    mutation assignExpenseToSubscription($expenseId: ID!, $subscriptionId: ID) {
-        assignExpenseToSubscription(expenseId: $expenseId, subscriptionId: $subscriptionId) {
+    mutation assignExpenseToSubscription($input: AssignExpenseToSubscriptionInput!) {
+        assignExpenseToSubscription(input: $input) {
             id
             amount
             date

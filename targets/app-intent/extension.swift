@@ -77,11 +77,15 @@ struct LogExpense: AppIntent {
         let variables: T
     }
 
-    struct GraphQLVariables: Codable {
+    struct CreateShortcutExpenseVariables: Codable {
         let amount: Double
         let description: String
         let latitude: Double?
         let longitude: Double?
+    }
+
+    struct GraphQLVariables: Codable {
+        let input: CreateShortcutExpenseVariables
     }
 
     struct GraphQLErrorDetail: Codable {
@@ -259,18 +263,8 @@ struct LogExpense: AppIntent {
         let coordinate = await fetchCoordinate()
 
         let mutation = """
-        mutation CreateExpense(
-            $amount: Float!,
-            $description: String!,
-            $latitude: Float,
-            $longitude: Float,
-        ) {
-            createShortcutExpense(
-                amount: $amount,
-                description: $description,
-                latitude: $latitude,
-                longitude: $longitude,
-            ) {
+        mutation CreateExpense($input: CreateShortcutExpenseInput!) {
+            createShortcutExpense(input: $input) {
                 id
                 amount
                 description
@@ -290,10 +284,12 @@ struct LogExpense: AppIntent {
         """
 
         let variables = GraphQLVariables(
-            amount: self.amount,
-            description: self.name,
-            latitude: coordinate?.latitude,
-            longitude: coordinate?.longitude
+            input: CreateShortcutExpenseVariables(
+                amount: self.amount,
+                description: self.name,
+                latitude: coordinate?.latitude,
+                longitude: coordinate?.longitude
+            )
         )
 
         let graphQLRequest = GraphQLRequest(query: mutation, variables: variables)

@@ -91,13 +91,9 @@ export default function Navigation() {
                         <Tab.Screen name="WalletScreens" component={WalletScreens as any} />
 
                         <Tab.Screen name="TimelineScreens" component={TimelineScreens} />
-
-                        {/* <Tab.Screen name="NotesScreens" component={NotesScreens} /> */}
                     </>
                 ) : (
-                    <>
-                        <Tab.Screen name="Authentication" component={Authentication} />
-                    </>
+                    <Tab.Screen name="Authentication" component={Authentication} />
                 )}
             </Tab.Navigator>
         </NavigationContainer>

@@ -41,15 +41,15 @@ const SubExpenseSheet = ({
 }: SubExpenseSheetProps) => {
     const backdropComponent = useCallback(
         (props: BottomSheetBackdropProps) => (
-            <BottomSheetBackdrop {...props} appearsOnIndex={1} disappearsOnIndex={0} pressBehavior={"collapse"} />
+            <BottomSheetBackdrop {...props} appearsOnIndex={0} disappearsOnIndex={-1} pressBehavior={"close"} />
         ),
         [],
     )
     return (
         <BottomSheetModal
             ref={subexpenseSheetRef}
-            index={0}
-            snapPoints={[70, Layout.screen.height / 2]}
+            index={-1}
+            snapPoints={[Layout.screen.height / 2]}
             animateOnMount={false}
             handleIndicatorStyle={{ backgroundColor: "#fff", width: 120 }}
             backgroundStyle={{

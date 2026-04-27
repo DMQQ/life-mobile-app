@@ -4,7 +4,6 @@ import { useCallback, useMemo, useState } from "react"
 import {
     NativeScrollEvent,
     NativeSyntheticEvent,
-    Pressable,
     RefreshControl,
     StyleSheet,
     Text,
@@ -68,7 +67,7 @@ export default function SubscriptionsList({ onScroll }: Props) {
     const items: ListItem[] = useMemo(() => {
         const list: ListItem[] = []
         if (active.length > 0) {
-            list.push({ type: "header", title: "Active", count: active.length, color: Colors.secondary })
+            list.push({ type: "header", title: "Active", count: active.length, color: "#fff" })
             active.forEach((sub, index) => list.push({ type: "subscription", data: sub, index }))
         }
         if (inactive.length > 0) {
@@ -124,9 +123,7 @@ export default function SubscriptionsList({ onScroll }: Props) {
             renderItem={renderItem as any}
             keyExtractor={keyExtractor as any}
             onScroll={onScroll}
-            ListHeaderComponent={
-                <SubscriptionCalendar subscriptions={[...active, ...inactive]} />
-            }
+            ListHeaderComponent={<SubscriptionCalendar subscriptions={[...active, ...inactive]} />}
             contentContainerStyle={styles.contentContainer}
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
             removeClippedSubviews

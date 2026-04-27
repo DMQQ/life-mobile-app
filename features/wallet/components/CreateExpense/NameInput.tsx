@@ -121,6 +121,13 @@ export default function NameInput({
         ? Color(Colors.primary).lighten(1.5).hex()
         : Color(Colors.primary_lighter).lighten(0.25).hex()
 
+    const tintColor =
+        !isValid && prediction
+            ? Icons[prediction.category as keyof typeof Icons]?.backgroundColor
+            : !isValid
+              ? Colors.primary
+              : Colors.secondary
+
     return (
         <View style={styles.wrapper}>
             <Animated.View
@@ -143,9 +150,8 @@ export default function NameInput({
                             onPress={() => {
                                 setSuppressed(true)
                                 setName(item.description)
-                                setCategory(item.category as keyof typeof Icons)
                             }}
-                            activeOpacity={0.6}
+                            activeOpacity={0.9}
                         >
                             <View style={styles.iconWrap}>{icon && cloneElement(icon, { size: 13 })}</View>
                             <Text variant="body" style={styles.itemDescription} numberOfLines={1}>
@@ -204,16 +210,7 @@ export default function NameInput({
                     />
                 }
                 right={
-                    <GlassView
-                        style={{ borderRadius: 100 }}
-                        tintColor={
-                            !isValid && prediction
-                                ? Icons[prediction.category as keyof typeof Icons]?.backgroundColor
-                                : !isValid
-                                  ? Colors.primary
-                                  : Colors.secondary
-                        }
-                    >
+                    <GlassView key={tintColor} style={{ borderRadius: 100 }} tintColor={tintColor}>
                         <Ripple
                             onPress={!isValid && prediction ? applyPrediction : handleSubmit}
                             style={styles.save}

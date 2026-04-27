@@ -1,8 +1,8 @@
 import { gql, useMutation } from "@apollo/client"
 
 const ADD_TODO_FILE = gql`
-    mutation AddTodoFile($todoId: ID!, $type: String!, $url: String!) {
-        addTodoFile(todoId: $todoId, type: $type, url: $url) {
+    mutation AddTodoFile($input: AddTodoFileInput!) {
+        addTodoFile(input: $input) {
             id
             type
             url

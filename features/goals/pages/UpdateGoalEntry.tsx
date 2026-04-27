@@ -307,7 +307,7 @@ export default function AddGoalEntry({ route, navigation }: any) {
             await Promise.all(
                 dayList.map((date) =>
                     upsertStats({
-                        variables: { goalsId: goal.id, value: valuePerDay, date },
+                        variables: { input: { goalsId: goal.id, value: valuePerDay, date } },
                         refetchQueries: ["GetGoal"],
                     }),
                 ),

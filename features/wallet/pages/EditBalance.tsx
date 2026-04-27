@@ -159,12 +159,14 @@ export default function EditBalance({ navigation }: WalletScreens<"EditBalance">
                     Feedback.trigger("impactLight")
                     await editBalance({
                         variables: {
-                            amount: values.balance && values.balance.trim() !== "" ? parseInt(values.balance) : null,
-                            paycheck:
-                                values.monthlySalary && values.monthlySalary.trim() !== ""
-                                    ? parseFloat(values.monthlySalary)
-                                    : null,
-                            paycheckDate: getPaycheckDate(),
+                            input: {
+                                amount: values.balance && values.balance.trim() !== "" ? parseInt(values.balance) : null,
+                                paycheck:
+                                    values.monthlySalary && values.monthlySalary.trim() !== ""
+                                        ? parseFloat(values.monthlySalary)
+                                        : null,
+                                paycheckDate: getPaycheckDate(),
+                            },
                         },
                     })
                 }}

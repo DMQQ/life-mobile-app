@@ -28,8 +28,8 @@ import DatePicker from "@/components/DatePicker"
 import { IconButton } from "@/components"
 
 const AI_CHAT = gql`
-    mutation GlobalAiChat($message: String!, $history: [ChatMessageInput!], $startDate: String!, $endDate: String!) {
-        aiChat(message: $message, history: $history, startDate: $startDate, endDate: $endDate) {
+    mutation GlobalAiChat($input: AiChatInput!) {
+        aiChat(input: $input) {
             messages {
                 type
                 data
@@ -233,11 +233,12 @@ export default function GlobalAiChat() {
                     }))
                 const { data } = await chat({
                     variables: {
-                        message: trimmed,
-                        history,
-
-                        startDate: dayjs(dates.start).format("YYYY-MM-DD"),
-                        endDate: dayjs(dates.end).format("YYYY-MM-DD"),
+                        input: {
+                            message: trimmed,
+                            history,
+                            startDate: dayjs(dates.start).format("YYYY-MM-DD"),
+                            endDate: dayjs(dates.end).format("YYYY-MM-DD"),
+                        },
                     },
                 })
                 const result = data?.aiChat

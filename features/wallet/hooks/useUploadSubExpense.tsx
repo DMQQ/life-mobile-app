@@ -3,8 +3,8 @@ import {gql, useMutation} from "@apollo/client";
 export const useUploadSubExpense = (onCompleted: () => void) => {
     return useMutation(
         gql`
-      mutation UploadSubExpense($expenseId: ID!, $input: [CreateSubExpenseDto!]!) {
-        addMultipleSubExpenses(expenseId: $expenseId, inputs: $input) {
+      mutation UploadSubExpense($input: AddMultipleSubExpensesInput!) {
+        addMultipleSubExpenses(input: $input) {
           id
           description
           amount

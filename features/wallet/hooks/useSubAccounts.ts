@@ -85,8 +85,8 @@ export function useDeleteSubAccount(onCompleted?: () => void) {
 }
 
 const TRANSFER_BETWEEN_SUB_ACCOUNTS = gql`
-    mutation TransferBetweenSubAccounts($fromId: ID!, $toId: ID!, $amount: Float!) {
-        transferBetweenSubAccounts(fromId: $fromId, toId: $toId, amount: $amount) {
+    mutation TransferBetweenSubAccounts($input: TransferBetweenSubAccountsInput!) {
+        transferBetweenSubAccounts(input: $input) {
             from
             to
         }

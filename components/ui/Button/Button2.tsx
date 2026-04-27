@@ -1,7 +1,5 @@
 import React from "react"
-import { StyleProp, TextStyle, View, ViewStyle } from "react-native"
-import Ripple, { RippleProps } from "react-native-material-ripple"
-
+import { Pressable, PressableProps, StyleProp, TextStyle, View, ViewStyle } from "react-native"
 import { BUTTON_BORDER_RADIUS, BUTTON_SIZE, BUTTON_TYPES, VARIANTS, styles } from "./assets"
 
 import Colors from "@/constants/Colors"
@@ -10,7 +8,7 @@ import lowOpacity from "@/utils/functions/lowOpacity"
 import Color from "color"
 import GlassView from "../GlassView"
 
-export interface ButtonProps extends RippleProps {
+export interface ButtonProps extends PressableProps {
     children?: React.ReactNode
     /** Function called on onPress event */
     callback?: () => void
@@ -72,26 +70,19 @@ export default function Button({
         : mainColor
 
     return (
-        <GlassView
-            key={tintColor}
-            tintColor={tintColor}
-            style={[
-                styles.button,
-                buttonStyle,
-                style,
-                {
-                    backgroundColor: undefined,
-                    borderRadius: 15,
-                },
-            ]}
-        >
-            <Ripple
-                style={{ flexDirection: "row", gap: 10 }}
-                testID={"Button"}
-                rippleCentered
-                onPress={callback}
-                disabled={disabled}
-                {...rest}
+        <Pressable style={{ flex: 1 }} onPress={callback} disabled={disabled} {...rest}>
+            <GlassView
+                key={tintColor}
+                tintColor={tintColor}
+                style={[
+                    styles.button,
+                    buttonStyle,
+                    style,
+                    {
+                        backgroundColor: undefined,
+                        borderRadius: 15,
+                    },
+                ]}
             >
                 <View style={iconStyle}>{icon}</View>
 
@@ -100,13 +91,13 @@ export default function Button({
                         {children}
                     </Text>
                 )}
-            </Ripple>
-        </GlassView>
+            </GlassView>
+        </Pressable>
     )
 }
 
 export const ViewMoreButton = (props: { onPress: () => any; text: string; disabled?: boolean; bg?: string }) => (
-    <Ripple
+    <Pressable
         onPress={props.onPress}
         disabled={props.disabled}
         style={{
@@ -123,5 +114,5 @@ export const ViewMoreButton = (props: { onPress: () => any; text: string; disabl
         >
             {props.text}
         </Text>
-    </Ripple>
+    </Pressable>
 )

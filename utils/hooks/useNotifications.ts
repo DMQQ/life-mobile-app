@@ -7,8 +7,8 @@ import { NavigationContainerRef } from "@react-navigation/native"
 import { RootStackParamList } from "@/types"
 
 const CREATE_NOTIFICATION = gql`
-    mutation createNotification($token: String!) {
-        setNotificationsToken(token: $token)
+    mutation createNotification($input: SetNotificationsTokenInput!) {
+        setNotificationsToken(input: $input)
     }
 `
 
@@ -86,7 +86,7 @@ export default function useNotifications(navigationRef: React.RefObject<Navigati
         try {
             const token = await registerForPushNotificationsAsync()
             if (token) {
-                await createNotificationToken({ variables: { token } })
+                await createNotificationToken({ variables: { input: { token } } })
                 setNotificationToken(token)
             }
         } catch (error) {

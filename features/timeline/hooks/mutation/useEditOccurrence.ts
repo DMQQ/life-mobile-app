@@ -5,21 +5,8 @@ import useGetOccurrenceById, { GET_OCCURRENCE_BY_ID } from "../query/useGetOccur
 import { GET_OCCURRENCES_QUERY } from "../query/useGetOccurrencesQuery"
 
 const EDIT_OCCURRENCE = gql`
-    mutation EditOccurrence(
-        $id: ID!
-        $title: String
-        $desc: String
-        $date: String
-        $begin: String
-        $end: String
-        $tags: String
-        $scope: String
-    ) {
-        editOccurrence(
-            id: $id
-            input: { title: $title, description: $desc, date: $date, beginTime: $begin, endTime: $end, tags: $tags }
-            scope: $scope
-        ) {
+    mutation EditOccurrence($input: EditOccurrenceArgsInput!) {
+        editOccurrence(input: $input) {
             id
             seriesId
             date
@@ -106,14 +93,18 @@ export default function useEditOccurrence(occurrenceId: string, isEditing: boole
     ) => {
         await edit({
             variables: {
-                id: occurrenceId,
-                title: input.title,
-                desc: input.desc,
-                begin: input.begin,
-                end: input.end,
-                tags: input.tags,
-                date,
-                scope,
+                input: {
+                    id: occurrenceId,
+                    input: {
+                        title: input.title,
+                        description: input.desc,
+                        beginTime: input.begin,
+                        endTime: input.end,
+                        tags: input.tags,
+                        date,
+                    },
+                    scope,
+                },
             },
         })
     }

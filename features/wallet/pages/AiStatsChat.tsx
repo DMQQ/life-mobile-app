@@ -39,8 +39,8 @@ const MESSAGE_FIELDS = gql`
 
 export const STATISTICS_AI_CHAT = gql`
     ${MESSAGE_FIELDS}
-    mutation StatisticsAiChat($message: String!, $startDate: String, $endDate: String, $history: [ChatMessageInput!]) {
-        aiChat(message: $message, startDate: $startDate, endDate: $endDate, history: $history) {
+    mutation StatisticsAiChat($input: AiChatInput!) {
+        aiChat(input: $input) {
             messages {
                 ...AiChatMessageFields
             }
@@ -177,10 +177,7 @@ export default function AiStatsChat({ route, navigation }: WalletScreens<"AiStat
                 }))
                 const { data, errors } = await chat({
                     variables: {
-                        message: trimmed,
-                        startDate,
-                        endDate,
-                        history,
+                        input: { message: trimmed, startDate, endDate, history },
                     },
                 })
                 if (errors) {

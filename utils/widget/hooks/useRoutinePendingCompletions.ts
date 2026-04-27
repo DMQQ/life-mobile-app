@@ -4,8 +4,8 @@ import store from "../store"
 import { ExtensionStorage } from "@bacons/apple-targets"
 
 const COMPLETE_OCCURRENCE = gql`
-    mutation CompleteOccurrenceFromWidget($id: ID!, $isCompleted: Boolean!) {
-        completeOccurrence(id: $id, isCompleted: $isCompleted) {
+    mutation CompleteOccurrenceFromWidget($input: CompleteOccurrenceInput!) {
+        completeOccurrence(input: $input) {
             id
             isCompleted
         }
@@ -13,8 +13,8 @@ const COMPLETE_OCCURRENCE = gql`
 `
 
 const COMPLETE_TODO = gql`
-    mutation CompleteOccurrenceTodoFromWidget($todoId: ID!, $isCompleted: Boolean!) {
-        completeOccurrenceTodo(id: $todoId, isCompleted: $isCompleted) {
+    mutation CompleteOccurrenceTodoFromWidget($input: CompleteOccurrenceTodoInput!) {
+        completeOccurrenceTodo(input: $input) {
             id
             isCompleted
         }
@@ -45,7 +45,7 @@ export default function useRoutinePendingCompletions() {
                 store.set("routine_pending_completions", JSON.stringify([]))
                 await Promise.allSettled(
                     items.map((item) =>
-                        completeOccurrence({ variables: { id: item.id, isCompleted: item.isCompleted } }),
+                        completeOccurrence({ variables: { input: { id: item.id, isCompleted: item.isCompleted } } }),
                     ),
                 )
             }
@@ -64,7 +64,7 @@ export default function useRoutinePendingCompletions() {
                 store.set("routine_pending_todo_completions", JSON.stringify([]))
                 await Promise.allSettled(
                     items.map((item) =>
-                        completeTodo({ variables: { todoId: item.todoId, isCompleted: item.isCompleted } }),
+                        completeTodo({ variables: { input: { id: item.todoId, isCompleted: item.isCompleted } } }),
                     ),
                 )
             }

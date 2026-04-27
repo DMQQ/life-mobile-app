@@ -133,16 +133,15 @@ struct ToggleRoutineTodoIntent: AppIntent {
 
         // Fire direct GraphQL mutation; fallback queue above handles retry on app foreground
         let mutation = """
-        mutation CompleteOccurrenceTodo($id: ID!, $isCompleted: Boolean!) {
-            completeOccurrenceTodo(id: $id, isCompleted: $isCompleted) {
+        mutation CompleteOccurrenceTodo($input: CompleteOccurrenceTodoInput!) {
+            completeOccurrenceTodo(input: $input) {
                 id
                 isCompleted
             }
         }
         """
         let vars: [String: Any] = [
-            "id": todoId,
-            "isCompleted": newIsCompleted,
+            "input": ["id": todoId, "isCompleted": newIsCompleted],
         ]
         let succeeded = await graphQL(mutation, variables: vars)
         if succeeded {
@@ -219,14 +218,14 @@ struct ToggleRoutineEventIntent: AppIntent {
 
         // Fire direct GraphQL mutation; fallback queue above handles retry on app foreground
         let mutation = """
-        mutation CompleteOccurrence($id: ID!, $isCompleted: Boolean!) {
-            completeOccurrence(id: $id, isCompleted: $isCompleted) {
+        mutation CompleteOccurrence($input: CompleteOccurrenceInput!) {
+            completeOccurrence(input: $input) {
                 id
                 isCompleted
             }
         }
         """
-        let succeeded = await graphQL(mutation, variables: ["id": eventId, "isCompleted": newIsCompleted])
+        let succeeded = await graphQL(mutation, variables: ["input": ["id": eventId, "isCompleted": newIsCompleted]])
         if succeeded {
             var current = UserDefaults.shared?.stringArray(forKey: "routine_pending_completions") ?? []
             current.removeAll { $0 == item }

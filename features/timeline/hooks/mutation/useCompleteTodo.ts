@@ -4,8 +4,8 @@ import { GET_OCCURRENCE_BY_ID } from "../query/useGetOccurrenceById"
 export default function useCompleteTodo(props: { todoId: string; timelineId: string; currentlyCompleted?: boolean }) {
     const [completeTodo, state] = useMutation(
         gql`
-            mutation CompleteOccurrenceTodo($todoId: ID!, $isCompleted: Boolean!) {
-                completeOccurrenceTodo(id: $todoId, isCompleted: $isCompleted) {
+            mutation CompleteOccurrenceTodo($input: CompleteOccurrenceTodoInput!) {
+                completeOccurrenceTodo(input: $input) {
                     isCompleted
                     id
                     title
@@ -23,7 +23,7 @@ export default function useCompleteTodo(props: { todoId: string; timelineId: str
         (isCompleted?: boolean) => {
             const newCompletedState = isCompleted ?? !props.currentlyCompleted
             return completeTodo({
-                variables: { todoId: props.todoId, isCompleted: newCompletedState },
+                variables: { input: { id: props.todoId, isCompleted: newCompletedState } },
             })
         },
         state,

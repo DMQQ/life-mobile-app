@@ -1,23 +1,42 @@
-import { useAnimatedScrollHandler, useSharedValue, useDerivedValue, runOnJS } from "react-native-reanimated"
-import { useScrollYContext } from "@/utils/context/ScrollYContext"
-import { useFocusEffect, useIsFocused } from "@react-navigation/native"
-import { useCallback, useEffect } from "react"
+import { useAnimatedScrollHandler, useSharedValue, makeMutable } from "react-native-reanimated"
+import { useFocusEffect } from "@react-navigation/native"
+import { useCallback } from "react"
 
 interface UseTrackScrollOptions {
     useGlobal?: boolean
     screenName?: string
+    resetOnFocus?: boolean
 }
 
-/**
- * @deprecated options
- */
+const scrollStore: Record<string, any> = {}
+
+export function getGlobalScrollY(key: string) {
+    if (!scrollStore[key]) {
+        scrollStore[key] = makeMutable(0)
+    }
+    return scrollStore[key]
+}
+
 export default function useTrackScroll(options: UseTrackScrollOptions = {}) {
+    const { useGlobal = false, screenName = "default", resetOnFocus = false } = options
+
     const localScrollY = useSharedValue(0)
-    const localOnScroll = useAnimatedScrollHandler({
+
+    const scrollY = useGlobal ? getGlobalScrollY(screenName) : localScrollY
+
+    const onScroll = useAnimatedScrollHandler({
         onScroll: (event) => {
-            localScrollY.value = event.contentOffset.y
+            scrollY.value = event.contentOffset.y
         },
     })
 
-    return [localScrollY, localOnScroll] as const
+    useFocusEffect(
+        useCallback(() => {
+            if (resetOnFocus) {
+                scrollY.value = 0
+            }
+        }, [scrollY, resetOnFocus]),
+    )
+
+    return [scrollY, onScroll] as const
 }

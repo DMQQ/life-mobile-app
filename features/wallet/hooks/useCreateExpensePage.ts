@@ -83,26 +83,30 @@ export default function useCreateExpensePage(
             if (params?.isEditing) {
                 await editExpense({
                     variables: {
-                        amount: parseAmount(amount),
-                        description: name,
-                        type: type,
-                        category: category,
-                        expenseId: params.id,
-                        date: date,
-                        spontaneousRate,
-                        subAccountId: subAccountId ?? undefined,
+                        input: {
+                            amount: parseAmount(amount),
+                            description: name,
+                            type: type,
+                            category: category,
+                            expenseId: params.id,
+                            date: date,
+                            spontaneousRate,
+                            subAccountId: subAccountId ?? undefined,
+                        },
                     },
                 }).catch((e) => console.log(e))
 
                 if (SubExpenses.length > 0) {
                     await uploadSubexpenses({
                         variables: {
-                            expenseId: params.id,
-                            input: SubExpenses.map((item) => ({
-                                description: item.description,
-                                amount: item.amount,
-                                category: item.category,
-                            })),
+                            input: {
+                                expenseId: params.id,
+                                inputs: SubExpenses.map((item) => ({
+                                    description: item.description,
+                                    amount: item.amount,
+                                    category: item.category,
+                                })),
+                            },
                         },
                     })
                 }
@@ -122,15 +126,17 @@ export default function useCreateExpensePage(
 
             const { data, errors } = await createExpense({
                 variables: {
-                    amount: parseAmount(amount),
-                    description: name,
-                    type: type,
-                    category: category,
-                    date: date ?? moment().format("YYYY-MM-DD"),
-                    schedule: moment(date).isAfter(moment()),
-                    isSubscription: isSubscription,
-                    spontaneousRate: spontaneousRate,
-                    subAccountId: subAccountId ?? undefined,
+                    input: {
+                        amount: parseAmount(amount),
+                        description: name,
+                        type: type,
+                        category: category,
+                        date: date ?? moment().format("YYYY-MM-DD"),
+                        schedule: moment(date).isAfter(moment()),
+                        isSubscription: isSubscription,
+                        spontaneousRate: spontaneousRate,
+                        subAccountId: subAccountId ?? undefined,
+                    },
                 },
             })
 
@@ -139,12 +145,14 @@ export default function useCreateExpensePage(
             if (SubExpenses.length > 0) {
                 await uploadSubexpenses({
                     variables: {
-                        expenseId: id,
-                        input: SubExpenses.map((item) => ({
-                            description: item.description,
-                            amount: item.amount,
-                            category: item.category,
-                        })),
+                        input: {
+                            expenseId: id,
+                            inputs: SubExpenses.map((item) => ({
+                                description: item.description,
+                                amount: item.amount,
+                                category: item.category,
+                            })),
+                        },
                     },
                 })
             }

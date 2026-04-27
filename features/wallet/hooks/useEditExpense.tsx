@@ -3,8 +3,8 @@ import { gql, useMutation } from "@apollo/client"
 
 export const useEditExpenseNote = () => {
     return useMutation(gql`
-        mutation EditExpenseNote($expenseId: ID!, $note: String!) {
-            editExpenseNote(expenseId: $expenseId, note: $note)
+        mutation EditExpenseNote($input: EditExpenseNoteInput!) {
+            editExpenseNote(input: $input)
         }
     `)
 }
@@ -12,26 +12,8 @@ export const useEditExpenseNote = () => {
 export const useEditExpense = () => {
     const [editExpense] = useMutation(
         gql`
-            mutation EditExpense(
-                $amount: Float!
-                $description: String!
-                $type: String!
-                $category: String!
-                $expenseId: ID!
-                $date: String!
-                $spontaneousRate: Float
-                $subAccountId: ID
-            ) {
-                editExpense(
-                    amount: $amount
-                    description: $description
-                    type: $type
-                    category: $category
-                    expenseId: $expenseId
-                    date: $date
-                    spontaneousRate: $spontaneousRate
-                    subAccountId: $subAccountId
-                ) {
+            mutation EditExpense($input: EditExpenseInput!) {
+                editExpense(input: $input) {
                     id
                 }
             }

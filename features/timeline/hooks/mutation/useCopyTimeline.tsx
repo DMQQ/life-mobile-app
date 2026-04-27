@@ -16,7 +16,7 @@ export default function useCopyTimeline() {
     const copyTimeline = async ({ timelineId, newDate }: { timelineId: string; newDate?: string }) => {
         try {
             const { data } = await copyOccurrenceMutation({
-                variables: { occurrenceId: timelineId, newDate },
+                variables: { input: { occurrenceId: timelineId, input: newDate ? { newDate } : undefined } },
 
                 refetchQueries: [
                     {

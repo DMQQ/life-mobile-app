@@ -9,7 +9,6 @@ import CreateLimits from "./pages/CreateLimits"
 import LimitsDetail from "./pages/LimitsDetail"
 import CorrectionMaps from "./pages/CorrectionMaps"
 import CorrectionMapForm from "./pages/CorrectionMapForm"
-import AiStatsChat from "./pages/AiStatsChat"
 import EditBalance from "./pages/EditBalance"
 import CreateSubAccount from "./pages/CreateSubAccount"
 import TransferSubAccount from "./pages/TransferSubAccount"
@@ -19,7 +18,6 @@ import SubscriptionScreen from "./pages/Subscription"
 import EditSubscription from "./pages/EditSubscription"
 import Wallet from "./pages/Wallet"
 import WalletCharts from "./pages/WalletCharts"
-import Color from "color"
 
 interface WalletRootStack extends ParamListBase {
     Wallet: {
@@ -59,6 +57,11 @@ export type WalletScreens<Screen extends keyof WalletRootStack> = StackScreenPro
 
 const Stack = createNativeStackNavigator<WalletRootStack>()
 
+const MODAL_OPTIONS = {
+    presentation: "modal",
+    headerShown: false,
+} as const
+
 export default function WalletScreens({ navigation, route }: WalletScreens<"Wallet">) {
     useEffect(() => {
         if (route.params?.expenseId !== undefined && route.params?.expenseId == null) {
@@ -83,10 +86,7 @@ export default function WalletScreens({ navigation, route }: WalletScreens<"Wall
                 <Stack.Screen
                     name={"CreateExpense"}
                     component={CreateExpenseModal}
-                    options={{
-                        presentation: "modal",
-                        gestureEnabled: false,
-                    }}
+                    options={MODAL_OPTIONS}
                     initialParams={{
                         type: null,
                         amount: 0,
@@ -116,85 +116,25 @@ export default function WalletScreens({ navigation, route }: WalletScreens<"Wall
 
                 <Stack.Screen name="Wallet" component={Wallet} />
 
-                <Stack.Screen
-                    name="Filters"
-                    component={Filters}
-                    options={{
-                        presentation: "modal",
-                        headerShown: false,
-                        contentStyle: {
-                            backgroundColor: Colors.primary,
-                        },
-                    }}
-                />
+                <Stack.Screen name="Filters" component={Filters} options={MODAL_OPTIONS} />
 
                 <Stack.Screen name="Subscription" component={SubscriptionScreen as any} />
 
-                <Stack.Screen
-                    name="EditSubscription"
-                    component={EditSubscription as any}
-                    options={{
-                        presentation: "modal",
-                        headerShown: false,
-                    }}
-                />
+                <Stack.Screen name="EditSubscription" component={EditSubscription as any} options={MODAL_OPTIONS} />
 
-                <Stack.Screen
-                    name="EditBalance"
-                    component={EditBalance}
-                    options={{
-                        presentation: "modal",
-                        headerShown: false,
-                    }}
-                />
+                <Stack.Screen name="EditBalance" component={EditBalance} options={MODAL_OPTIONS} />
 
-                <Stack.Screen
-                    name="CreateLimits"
-                    component={CreateLimits}
-                    options={{
-                        presentation: "modal",
-                        headerShown: false,
-                        gestureEnabled: false,
-                    }}
-                />
+                <Stack.Screen name="CreateLimits" component={CreateLimits} options={MODAL_OPTIONS} />
 
                 <Stack.Screen name="LimitsDetail" component={LimitsDetail} options={{ headerShown: false }} />
 
-                <Stack.Screen
-                    name="CorrectionMaps"
-                    component={CorrectionMaps}
-                    options={{
-                        presentation: "modal",
-                        headerShown: false,
-                    }}
-                />
+                <Stack.Screen name="CorrectionMaps" component={CorrectionMaps} options={MODAL_OPTIONS} />
 
-                <Stack.Screen
-                    name="CorrectionMapForm"
-                    component={CorrectionMapForm}
-                    options={{
-                        presentation: "modal",
-                        headerShown: false,
-                    }}
-                />
+                <Stack.Screen name="CorrectionMapForm" component={CorrectionMapForm} options={MODAL_OPTIONS} />
 
-                <Stack.Screen
-                    name="CreateSubAccount"
-                    component={CreateSubAccount}
-                    options={{
-                        presentation: "modal",
-                        headerShown: false,
-                    }}
-                />
+                <Stack.Screen name="CreateSubAccount" component={CreateSubAccount} options={MODAL_OPTIONS} />
 
-                <Stack.Screen
-                    name="TransferSubAccount"
-                    component={TransferSubAccount}
-                    options={{
-                        presentation: "modal",
-                        headerShown: false,
-                    }}
-                />
+                <Stack.Screen name="TransferSubAccount" component={TransferSubAccount} options={MODAL_OPTIONS} />
             </Stack.Navigator>
         </WalletContextProvider>
     )

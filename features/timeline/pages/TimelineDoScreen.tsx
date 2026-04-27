@@ -105,7 +105,7 @@ export default function TimelineDoScreen({ route, navigation }: TimelineScreenPr
     const completedCount = todos.filter((t) => t.isCompleted).length
 
     const handleFinish = async () => {
-        await completeOccurrence({ variables: { id: timelineId, isCompleted: true } })
+        await completeOccurrence({ variables: { input: { id: timelineId, isCompleted: true } } })
         navigation.goBack()
     }
 

@@ -73,7 +73,7 @@ export default function useTodos(timelineId: string, onSuccessfulSave?: () => vo
 
         try {
             const promises = filteredTodos.map((todo) =>
-                createTodo({ variables: { title: todo.value, occurrenceId: timelineId } }),
+                createTodo({ variables: { input: { title: todo.value, occurrenceId: timelineId } } }),
             )
 
             await Promise.all(promises)

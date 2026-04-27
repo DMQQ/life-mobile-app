@@ -230,8 +230,8 @@ const MapPicker = forwardRef<MapPickerHandle, Pick<ExpenseType, "location"> & { 
     `)
 
     const [assignLocation] = useMutation(gql`
-        mutation AddExpenseLocation($expenseId: ID!, $locationId: ID!) {
-            addExpenseLocation(expenseId: $expenseId, locationId: $locationId)
+        mutation AddExpenseLocation($input: AddExpenseLocationInput!) {
+            addExpenseLocation(input: $input)
         }
     `)
 
@@ -239,8 +239,7 @@ const MapPicker = forwardRef<MapPickerHandle, Pick<ExpenseType, "location"> & { 
         try {
             await assignLocation({
                 variables: {
-                    expenseId: props.id,
-                    locationId: locationId,
+                    input: { expenseId: props.id, locationId: locationId },
                 },
             })
             const newAssignedLocation = points.locations.find((loc: any) => loc.id === locationId)

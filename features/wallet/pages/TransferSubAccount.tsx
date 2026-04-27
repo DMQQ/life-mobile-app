@@ -54,9 +54,11 @@ export default function TransferSubAccount({ navigation, route }: WalletScreens<
         if (!canSubmit) return
         transfer({
             variables: {
-                fromId: fromAccount!.id,
-                toId: toAccount!.id,
-                amount: parseFloat(amount),
+                input: {
+                    fromId: fromAccount!.id,
+                    toId: toAccount!.id,
+                    amount: parseFloat(amount),
+                },
             },
         })
     }

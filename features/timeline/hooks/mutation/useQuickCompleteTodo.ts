@@ -9,8 +9,8 @@ export default function useQuickCompleteTodo(props: {
 }) {
     const [completeTodo, state] = useMutation(
         gql`
-            mutation CompleteOccurrenceTodoQuick($todoId: ID!, $isCompleted: Boolean!) {
-                completeOccurrenceTodo(id: $todoId, isCompleted: $isCompleted) {
+            mutation CompleteOccurrenceTodoQuick($input: CompleteOccurrenceTodoInput!) {
+                completeOccurrenceTodo(input: $input) {
                     isCompleted
                     id
                     title
@@ -63,7 +63,7 @@ export default function useQuickCompleteTodo(props: {
         (isCompleted?: boolean) => {
             const newCompletedState = isCompleted ?? !props.currentlyCompleted
             return completeTodo({
-                variables: { todoId: props.todoId, isCompleted: newCompletedState },
+                variables: { input: { id: props.todoId, isCompleted: newCompletedState } },
             })
         },
         state,

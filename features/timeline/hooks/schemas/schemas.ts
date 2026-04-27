@@ -42,38 +42,8 @@ export const OCCURRENCE_FIELDS = gql`
 // ─── Mutations ───────────────────────────────────────────────────────────────
 
 export const CREATE_EVENT = gql`
-    mutation CreateEvent(
-        $title: String!
-        $desc: String!
-        $date: String
-        $begin: String!
-        $end: String!
-        $tags: String!
-        $priority: Int
-        $repeatCount: Int
-        $repeatOn: String
-        $repeatEveryNth: Int
-        $startDate: String
-        $todos: [String!]
-    ) {
-        createEvent(
-            input: {
-                title: $title
-                description: $desc
-                date: $date
-                beginTime: $begin
-                endTime: $end
-                tags: $tags
-                priority: $priority
-                todos: $todos
-            }
-            repeat: {
-                repeatCount: $repeatCount
-                repeatOn: $repeatOn
-                repeatEveryNth: $repeatEveryNth
-                startDate: $startDate
-            }
-        ) {
+    mutation CreateEvent($input: CreateEventWithRepeatInput!) {
+        createEvent(input: $input) {
             ...OccurrenceFields
         }
     }
@@ -81,8 +51,8 @@ export const CREATE_EVENT = gql`
 `
 
 export const COPY_OCCURRENCE = gql`
-    mutation CopyOccurrence($occurrenceId: ID!, $newDate: String) {
-        copyOccurrence(occurrenceId: $occurrenceId, input: { newDate: $newDate }) {
+    mutation CopyOccurrence($input: CopyOccurrenceArgsInput!) {
+        copyOccurrence(input: $input) {
             ...OccurrenceFields
         }
     }

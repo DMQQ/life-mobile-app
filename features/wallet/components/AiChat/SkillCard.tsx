@@ -224,20 +224,26 @@ function TaskCard({ task }: { task: ResolvedTask }) {
         try {
             await createEvent({
                 variables: {
-                    title: task.title,
-                    desc: task.desc,
-                    begin: task.begin,
-                    end: task.end,
-                    date: task.date,
-                    tags: "UNTAGGED",
-                    todos: task.todos,
-                    ...(task.isRepeat &&
-                        task.repeatFrequency && {
-                            repeatOn: task.repeatFrequency,
-                            repeatEveryNth: task.repeatEveryNth ?? 1,
-                            repeatCount: task.repeatCount ?? 1,
-                            startDate: task.date,
-                        }),
+                    input: {
+                        input: {
+                            title: task.title,
+                            description: task.desc,
+                            beginTime: task.begin,
+                            endTime: task.end,
+                            date: task.date,
+                            tags: "UNTAGGED",
+                            todos: task.todos,
+                        },
+                        ...(task.isRepeat &&
+                            task.repeatFrequency && {
+                                repeat: {
+                                    repeatOn: task.repeatFrequency,
+                                    repeatEveryNth: task.repeatEveryNth ?? 1,
+                                    repeatCount: task.repeatCount ?? 1,
+                                    startDate: task.date,
+                                },
+                            }),
+                    },
                 },
                 refetchQueries: [
                     { query: GET_OCCURRENCES_QUERY, variables: { date: task.date } },
@@ -328,14 +334,8 @@ const tw = StyleSheet.create({
 })
 
 const CREATE_EXPENSE_MUTATION = gql`
-    mutation CreateExpenseForm(
-        $amount: Float!
-        $description: String!
-        $type: String!
-        $category: String!
-        $date: String!
-    ) {
-        createExpense(amount: $amount, description: $description, type: $type, category: $category, date: $date) {
+    mutation CreateExpenseForm($input: CreateExpenseInput!) {
+        createExpense(input: $input) {
             id
             amount
             description
@@ -347,34 +347,16 @@ const CREATE_EXPENSE_MUTATION = gql`
 `
 
 const EDIT_EXPENSE_MUTATION = gql`
-    mutation EditExpenseForm(
-        $expenseId: ID!
-        $amount: Float!
-        $description: String!
-        $type: String!
-        $category: String!
-        $date: String!
-    ) {
-        editExpense(
-            expenseId: $expenseId
-            amount: $amount
-            description: $description
-            type: $type
-            category: $category
-            date: $date
-        ) {
+    mutation EditExpenseForm($input: EditExpenseInput!) {
+        editExpense(input: $input) {
             id
         }
     }
 `
 
 const EDIT_OCCURRENCE_MUTATION = gql`
-    mutation EditOccurrenceForm($id: ID!, $title: String, $desc: String, $date: String, $begin: String, $end: String) {
-        editOccurrence(
-            id: $id
-            input: { title: $title, description: $desc, date: $date, beginTime: $begin, endTime: $end }
-            scope: "THIS_ONLY"
-        ) {
+    mutation EditOccurrenceForm($input: EditOccurrenceArgsInput!) {
+        editOccurrence(input: $input) {
             id
             title
             date
@@ -453,11 +435,13 @@ function FormExpenseNew({ data, onNavigate }: { data: any; onNavigate?: () => vo
         try {
             await createExpense({
                 variables: {
-                    amount: data.amount,
-                    description: data.description,
-                    date: data.date,
-                    type: data.type ?? "expense",
-                    category: data.category ?? "OTHER",
+                    input: {
+                        amount: data.amount,
+                        description: data.description,
+                        date: data.date,
+                        type: data.type ?? "expense",
+                        category: data.category ?? "OTHER",
+                    },
                 },
             })
             setStatus("done")
@@ -498,12 +482,14 @@ function FormExpenseEdit({ data, onNavigate }: { data: any; onNavigate?: () => v
         try {
             await editExpense({
                 variables: {
-                    expenseId: data.id,
-                    amount: data.amount,
-                    description: data.description,
-                    date: data.date,
-                    type: data.type ?? "expense",
-                    category: data.category ?? "OTHER",
+                    input: {
+                        expenseId: data.id,
+                        amount: data.amount,
+                        description: data.description,
+                        date: data.date,
+                        type: data.type ?? "expense",
+                        category: data.category ?? "OTHER",
+                    },
                 },
             })
             setStatus("done")
@@ -556,13 +542,17 @@ function FormEventNew({ data, onNavigate }: { data: any; onNavigate?: () => void
         try {
             await createEvent({
                 variables: {
-                    title: data.title,
-                    desc: data.description ?? "",
-                    begin,
-                    end,
-                    date: data.date,
-                    tags: data.tags ?? "UNTAGGED",
-                    todos: [],
+                    input: {
+                        input: {
+                            title: data.title,
+                            description: data.description ?? "",
+                            beginTime: begin,
+                            endTime: end,
+                            date: data.date,
+                            tags: data.tags ?? "UNTAGGED",
+                            todos: [],
+                        },
+                    },
                 },
                 refetchQueries: [
                     { query: GET_OCCURRENCES_QUERY, variables: { date: data.date } },
@@ -626,12 +616,17 @@ function FormEventEdit({ data, onNavigate }: { data: any; onNavigate?: () => voi
         try {
             await editOccurrence({
                 variables: {
-                    id: data.id,
-                    ...(data.title && { title: data.title }),
-                    ...(data.description && { desc: data.description }),
-                    ...(data.date && { date: data.date }),
-                    ...(data.beginTime && { begin: data.beginTime }),
-                    ...(data.endTime && { end: data.endTime }),
+                    input: {
+                        id: data.id,
+                        input: {
+                            ...(data.title && { title: data.title }),
+                            ...(data.description && { description: data.description }),
+                            ...(data.date && { date: data.date }),
+                            ...(data.beginTime && { beginTime: data.beginTime }),
+                            ...(data.endTime && { endTime: data.endTime }),
+                        },
+                        scope: "THIS_ONLY",
+                    },
                 },
             })
             setStatus("done")

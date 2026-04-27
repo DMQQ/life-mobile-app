@@ -28,8 +28,8 @@ const COMPLETE_ACTIVITY = gql`
 `
 
 const SET_PUSH_TO_START_TOKEN = gql`
-    mutation setPushToStartToken($pushToStartToken: String!) {
-        setPushToStartToken(pushToStartToken: $pushToStartToken)
+    mutation setPushToStartToken($input: SetPushToStartTokenInput!) {
+        setPushToStartToken(input: $input)
     }
 `
 
@@ -98,7 +98,7 @@ export const useActivityServer = () => {
     const registerPushToStartToken = async (pushToStartToken: string): Promise<boolean> => {
         try {
             const { data } = await setPushToStartTokenMutation({
-                variables: { pushToStartToken },
+                variables: { input: { pushToStartToken } },
             })
 
             return data?.setPushToStartToken || false

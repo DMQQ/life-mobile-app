@@ -70,6 +70,7 @@ export default function useGetWallet(options?: {
     const fetchingRef = useRef(false)
     const generationRef = useRef(0)
     const isFirstMount = useRef(true)
+    const isFilterResetRef = useRef(false)
     const [endReached, setEndReached] = useState(false)
     const [paginatedMonths, setPaginatedMonths] = useState<MonthlyExpenses[]>([])
 
@@ -148,7 +149,7 @@ export default function useGetWallet(options?: {
 
     useEffect(() => {
         const months = st.data?.wallet?.expenses2
-        if (!months) return
+        if (!months || isFilterResetRef.current) return
         setPaginatedMonths((prev) => {
             if (prev.length === 0) return months
             const map = new Map(prev.map((m) => [m.month, m]))
@@ -205,7 +206,7 @@ export default function useGetWallet(options?: {
             skipRef.current = 0
             fetchingRef.current = false
             setEndReached(false)
-            setPaginatedMonths([])
+            isFilterResetRef.current = true
 
             const result = await st.refetch({
                 skip: 0,
@@ -215,6 +216,7 @@ export default function useGetWallet(options?: {
             })
 
             if (gen === generationRef.current) {
+                isFilterResetRef.current = false
                 setPaginatedMonths(result.data?.wallet?.expenses2 ?? [])
             }
         }, 1000)

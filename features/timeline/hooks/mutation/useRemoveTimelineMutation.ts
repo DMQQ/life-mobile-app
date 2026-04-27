@@ -4,16 +4,15 @@ import { GET_MONTHLY_OCCURRENCES } from "../general/useTimeline"
 import { GET_OCCURRENCES_QUERY } from "../query/useGetOccurrencesQuery"
 
 const DELETE_OCCURRENCE = gql`
-    mutation DeleteOccurrence($id: ID!, $scope: String) {
-        deleteOccurrence(id: $id, scope: $scope)
+    mutation DeleteOccurrence($input: DeleteOccurrenceInput!) {
+        deleteOccurrence(input: $input)
     }
 `
 
 export default function useRemoveTimelineMutation(timeline: { id: string; date: string }, onCompleted?: () => any) {
     const [remove, { loading }] = useMutation(DELETE_OCCURRENCE, {
         variables: {
-            id: timeline.id,
-            scope: "THIS_ONLY",
+            input: { id: timeline.id, scope: "THIS_ONLY" },
         },
         refetchQueries: () => [
             {

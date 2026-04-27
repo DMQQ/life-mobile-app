@@ -102,15 +102,12 @@ export default function TimelineDetails({
                     onPress: onFabPress,
                 },
                 {
-                    icon: data?.isCompleted ? (
-                        <FontAwesome name="check-circle" size={20} color="#fff" />
-                    ) : (
-                        <AntDesign name={"check"} color={"#fff"} size={20} />
-                    ),
+                    icon: data?.isCompleted ? "checkmark.circle.fill" : "circle",
                     standalone: true,
                     position: "right",
-                    onPress: () => completeOccurrence({ variables: { id: data?.id, isCompleted: !data?.isCompleted } }),
-                    tintColor: !data?.isCompleted ? Colors.secondary : "green",
+                    onPress: () =>
+                        completeOccurrence({ variables: { input: { id: data?.id, isCompleted: !data?.isCompleted } } }),
+                    tintColor: !data?.isCompleted ? undefined : Colors.secondary,
                 },
             ] as HeaderItem[],
         [data?.isCompleted, data, isPending],

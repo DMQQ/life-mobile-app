@@ -19,7 +19,6 @@ import { useSetSearchMenu } from "@/hooks/useSetSearchMenu"
 import { Icons, CategoryUtils } from "../components/Expense/ExpenseIcon"
 import dayjs from "dayjs"
 import type { SearchMenuItem } from "@/contexts/SearchMenuContext"
-import { SFSymbol } from "expo-symbols"
 import Background from "@/components/ui/Background"
 
 const styles = StyleSheet.create({

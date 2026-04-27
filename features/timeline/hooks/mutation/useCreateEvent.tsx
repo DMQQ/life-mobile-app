@@ -46,21 +46,26 @@ export default function useCreateEvent(props: { selectedDate: string }) {
     const handleSubmit = async (input: typeof initialValues) => {
         await createEvent({
             variables: {
-                title: input.title,
-                desc: input.desc,
-                begin: input.begin,
-                end: input.end,
-                tags: input.tags,
-                date: props.selectedDate,
-                priority: input.priority,
-                todos: input.todos ?? [],
-
-                ...(hasRepeat(input) && {
-                    repeatCount: parseInt(input.repeatCount),
-                    repeatOn: input.repeatOn,
-                    repeatEveryNth: parseInt(input.repeatEveryNth),
-                    startDate: props.selectedDate,
-                }),
+                input: {
+                    input: {
+                        title: input.title,
+                        description: input.desc,
+                        beginTime: input.begin,
+                        endTime: input.end,
+                        tags: input.tags,
+                        date: props.selectedDate,
+                        priority: input.priority,
+                        todos: input.todos ?? [],
+                    },
+                    ...(hasRepeat(input) && {
+                        repeat: {
+                            repeatCount: parseInt(input.repeatCount),
+                            repeatOn: input.repeatOn,
+                            repeatEveryNth: parseInt(input.repeatEveryNth),
+                            startDate: props.selectedDate,
+                        },
+                    }),
+                },
             },
 
             refetchQueries: [

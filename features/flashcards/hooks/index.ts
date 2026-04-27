@@ -163,7 +163,7 @@ const GET_GROUP = gql`
 
 const CREATE_GROUP = gql`
     mutation CreateGroup($input: CreateGroupInput!) {
-        createGroup(createGroupInput: $input) {
+        createGroup(input: $input) {
             ...GroupFields
         }
     }
@@ -172,7 +172,7 @@ const CREATE_GROUP = gql`
 
 const UPDATE_GROUP = gql`
     mutation UpdateGroup($input: UpdateGroupInput!) {
-        updateGroup(updateGroupInput: $input) {
+        updateGroup(input: $input) {
             ...GroupFields
         }
     }

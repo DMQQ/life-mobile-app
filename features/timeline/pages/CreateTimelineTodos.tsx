@@ -10,6 +10,7 @@ import Feedback from "react-native-haptic-feedback"
 import { SafeAreaView } from "react-native-safe-area-context"
 import useTodos, { TodoInput as ITodoInput } from "../hooks/general/useTodos"
 import type { TimelineScreenProps } from "../types"
+import GlassView from "@/components/ui/GlassView"
 
 const styles = StyleSheet.create({
     container: {
@@ -20,8 +21,8 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
-        paddingHorizontal: 25,
-        paddingVertical: 25,
+        paddingHorizontal: 20,
+        paddingVertical: 20,
     },
     headerBtn: {
         minWidth: 60,
@@ -37,9 +38,7 @@ const styles = StyleSheet.create({
     },
     headerSave: {
         fontSize: 16,
-        fontWeight: "600",
-        color: Colors.secondary,
-        textAlign: "right",
+        color: "#fff",
     },
     headerSaveDisabled: {
         opacity: 0.35,
@@ -71,8 +70,8 @@ const styles = StyleSheet.create({
     },
     input: {
         flex: 1,
-        paddingVertical: 14,
-        fontSize: 16,
+        paddingVertical: 15,
+        fontSize: 17,
         color: Colors.text_light,
         fontFamily: "System",
     },
@@ -87,6 +86,11 @@ const styles = StyleSheet.create({
 export default function CreateTimelineTodos({ route, navigation }: TimelineScreenProps<"CreateTimelineTodos">) {
     const mode = route.params?.mode || "create"
 
+    const [keyboardHeight, setKeyboardHeight] = useState(0)
+    const inputRef = useRef<TextInput>(null)
+    const textRef = useRef<string>("")
+    const [inputText, setInputText] = useState("")
+
     const { dispatch, loading, onSaveTodos, state } = useTodos(route.params?.timelineId || "", () => {
         Keyboard.dismiss()
         navigation.goBack()
@@ -98,7 +102,6 @@ export default function CreateTimelineTodos({ route, navigation }: TimelineScree
         }
     }, [route.params?.todos])
 
-    const [keyboardHeight, setKeyboardHeight] = useState(0)
     useEffect(() => {
         const show = Keyboard.addListener("keyboardWillShow", (e) => setKeyboardHeight(e.endCoordinates.height))
         const hide = Keyboard.addListener("keyboardWillHide", () => setKeyboardHeight(0))
@@ -107,10 +110,6 @@ export default function CreateTimelineTodos({ route, navigation }: TimelineScree
             hide.remove()
         }
     }, [])
-
-    const inputRef = useRef<TextInput>(null)
-    const textRef = useRef<string>("")
-    const [inputText, setInputText] = useState("")
 
     const addCurrentInput = (): boolean => {
         const text = textRef.current.trim()
@@ -149,26 +148,30 @@ export default function CreateTimelineTodos({ route, navigation }: TimelineScree
         <SafeAreaView style={[styles.container, { paddingBottom: keyboardHeight }]}>
             {/* Header */}
             <View style={styles.header}>
-                <Pressable onPress={() => navigation.goBack()} hitSlop={12} style={styles.headerBtn}>
-                    <Text style={styles.headerCancel}>Cancel</Text>
-                </Pressable>
+                <GlassView style={{ borderRadius: 100, padding: 10 }}>
+                    <Pressable onPress={() => navigation.goBack()} hitSlop={12}>
+                        <Text style={styles.headerCancel}>Cancel</Text>
+                    </Pressable>
+                </GlassView>
 
                 <Text style={styles.headerTitle}>{title}</Text>
 
-                <Pressable onPress={handleSave} disabled={!hasContent || loading} hitSlop={12} style={styles.headerBtn}>
-                    {loading ? (
-                        <ActivityIndicator size="small" color={Colors.secondary} />
-                    ) : (
-                        <Text style={[styles.headerSave, (!hasContent || loading) && styles.headerSaveDisabled]}>
-                            Save
-                        </Text>
-                    )}
-                </Pressable>
+                <GlassView
+                    tintColor={Colors.secondary}
+                    style={[{ borderRadius: 100, padding: 10 }, (!hasContent || loading) && styles.headerSaveDisabled]}
+                >
+                    <Pressable onPress={handleSave} disabled={!hasContent || loading} hitSlop={12}>
+                        {loading ? (
+                            <ActivityIndicator size="small" color={Colors.secondary} />
+                        ) : (
+                            <Text style={[styles.headerSave]}>Save</Text>
+                        )}
+                    </Pressable>
+                </GlassView>
             </View>
 
             <View style={styles.divider} />
 
-            {/* Input row */}
             <View style={styles.inputRow}>
                 <TextInput
                     ref={inputRef}
@@ -182,7 +185,6 @@ export default function CreateTimelineTodos({ route, navigation }: TimelineScree
                     enablesReturnKeyAutomatically
                     autoFocus
                     multiline={false}
-                    blurOnSubmit={false}
                 />
                 {inputText.trim().length > 0 && (
                     <IconButton
@@ -195,7 +197,6 @@ export default function CreateTimelineTodos({ route, navigation }: TimelineScree
 
             {todoCount > 0 && <View style={styles.todoDivider} />}
 
-            {/* Todos list */}
             <FlatList
                 style={{ flex: 1 }}
                 contentContainerStyle={styles.listContent}

@@ -115,7 +115,17 @@ function ToolbarButton({
         <View style={styles.toolbarItem}>
             <View>
                 <IconButton
-                    icon={icon}
+                    icon={
+                        loading ? (
+                            <ActivityIndicator
+                                size={26}
+                                color={Colors.secondary}
+                                style={{ marginTop: 3, height: 13 }}
+                            />
+                        ) : (
+                            icon
+                        )
+                    }
                     onPress={onPress ?? (() => {})}
                     disabled={disabled}
                     size={26}
@@ -123,11 +133,8 @@ function ToolbarButton({
                 />
                 {hasBadge && <View style={styles.badge} />}
             </View>
-            {loading ? (
-                <ActivityIndicator size="small" color={Colors.secondary} style={{ marginTop: 3, height: 13 }} />
-            ) : (
-                <Text style={[styles.btnLabel, (dimmed || disabled) && { opacity: 0.35 }]}>{label}</Text>
-            )}
+
+            <Text style={[styles.btnLabel, (dimmed || disabled) && { opacity: 0.35 }]}>{label}</Text>
         </View>
     )
 }

@@ -92,8 +92,8 @@ export const DELETE_GOALS = gql`
 `
 
 export const UPSERT_GOAL_STATS = gql`
-    mutation UpsertGoalStats($goalsId: ID!, $value: Float!, $date: DateTime) {
-        upsertGoalStats(goalsId: $goalsId, value: $value, date: $date) {
+    mutation UpsertGoalStats($input: UpsertGoalStatsInput!) {
+        upsertGoalStats(input: $input) {
             id
             value
             date

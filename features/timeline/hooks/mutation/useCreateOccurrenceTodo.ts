@@ -3,8 +3,8 @@ import useUser from "@/utils/hooks/useUser"
 import { GET_OCCURRENCE_BY_ID } from "../query/useGetOccurrenceById"
 
 const CREATE_OCCURRENCE_TODO = gql`
-    mutation CreateOccurrenceTodo($occurrenceId: ID!, $title: String!) {
-        createOccurrenceTodo(occurrenceId: $occurrenceId, title: $title) {
+    mutation CreateOccurrenceTodo($input: CreateOccurrenceTodoInput!) {
+        createOccurrenceTodo(input: $input) {
             id
             title
             isCompleted
@@ -54,8 +54,9 @@ const useCreateOccurrenceTodo = (occurrenceId: string) => {
         },
 
         variables: {
-            occurrenceId,
+            input: { occurrenceId, title: "" },
         },
+
 
         onError(err) {
             console.log("useCreateOccurrenceTodo:", err)

@@ -17,13 +17,12 @@ export default function EditNote({ expense }: { expense: ExpenseType }) {
         try {
             await mutation({
                 variables: {
-                    expenseId: expense.id,
-                    note: newNote,
+                    input: { expenseId: expense.id, note: newNote },
                 },
                 refetchQueries: [
                     {
                         query: GET_EXPENSE,
-                        variables: { expenseId: expense.id },
+                        variables: { id: expense.id },
                     },
                 ],
             })

@@ -30,7 +30,7 @@ export const GET_EXPENSE = gql`
             ...ExpenseDetails
         }
 
-        similarExpenses(expenseId: $id, limit: 20) {
+        expenseSimilar(expenseId: $id, limit: 20) {
             ...ExpenseDetails
         }
 
@@ -135,8 +135,7 @@ export default function Expense({ route: { params }, navigation }: any) {
         try {
             const result = await subscription.assignExpenseToSubscription({
                 variables: {
-                    expenseId: selected.id,
-                    subscriptionId,
+                    input: { expenseId: selected.id, subscriptionId },
                 },
             })
 
@@ -365,7 +364,7 @@ export default function Expense({ route: { params }, navigation }: any) {
                 {data?.similarExpenses?.length > 1 && (
                     <SimilarExpenses
                         selected={selected}
-                        similarExpenses={data.similarExpenses.filter((e: any) => e.id !== selected.id)}
+                        similarExpenses={data.expenseSimilar.filter((e: any) => e.id !== selected.id)}
                     />
                 )}
 
@@ -391,5 +390,3 @@ export default function Expense({ route: { params }, navigation }: any) {
         </View>
     )
 }
-
-const styles = StyleSheet.create({})

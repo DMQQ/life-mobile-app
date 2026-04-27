@@ -2,8 +2,8 @@ import { gql, useMutation } from "@apollo/client"
 import { GET_OCCURRENCE_BY_ID } from "../query/useGetOccurrenceById"
 
 const COMPLETE_OCCURRENCE = gql`
-    mutation CompleteOccurrence($id: ID!, $isCompleted: Boolean!) {
-        completeOccurrence(id: $id, isCompleted: $isCompleted) {
+    mutation CompleteOccurrence($input: CompleteOccurrenceInput!) {
+        completeOccurrence(input: $input) {
             id
             isCompleted
         }
@@ -12,7 +12,7 @@ const COMPLETE_OCCURRENCE = gql`
 
 export default function useCompleteOccurrence(occurrenceId: string) {
     return useMutation(COMPLETE_OCCURRENCE, {
-        variables: { id: occurrenceId, isCompleted: true },
+        variables: { input: { id: occurrenceId, isCompleted: true } },
 
         update(cache, { data: { completeOccurrence } }) {
             const existing = cache.readQuery({
