@@ -22,7 +22,7 @@ import { useCreateExpenseContext } from "@/features/wallet/context/CreateExpense
 
 const styles = StyleSheet.create({
     expense_item: {
-        height: 60,
+        height: 50,
         borderRadius: 20,
         padding: 5,
         paddingRight: 10,
@@ -338,6 +338,8 @@ export default function PredictionView() {
                         <CategoryIcon
                             type={item.type as "income" | "expense" | "refunded"}
                             category={item.category as any}
+                            size={16}
+                            containerStyle={{ width: 30, height: 30, borderRadius: 10 }}
                         />
 
                         <View style={{ height: "100%", justifyContent: "center", flex: 3 }}>

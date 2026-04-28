@@ -653,6 +653,7 @@ export const CategoryIcon = (props: {
     clear?: boolean
     size?: number
     style?: StyleProp<ViewStyle>
+    containerStyle?: StyleProp<ViewStyle>
 }) => {
     const category = getCategory(props)
 
@@ -668,6 +669,7 @@ export const CategoryIcon = (props: {
                         borderWidth: !props.clear ? 1 : 0,
                         borderColor: !props.clear ? lowOpacity(backgroundColor, 20) : undefined,
                     },
+                    props.containerStyle,
                 ]}
             >
                 {Icons[category]?.icon &&

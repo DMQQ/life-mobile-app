@@ -78,6 +78,7 @@ const categoryIconMap: Record<string, string> = {
 
 export default function WalletScreen({ navigation, route }: WalletScreens<"Wallet">) {
     const { data, loading, refetch, onEndReached, error } = useGetWallet()
+    const [activeView, setActiveView] = useState<"expenses" | "subscriptions">("expenses")
     const [scrollY, onScroll] = useTrackScroll({ screenName: "WalletScreens" })
 
     useEffect(() => {
@@ -90,14 +91,16 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
         }
     }, [route.params?.expenseId])
 
+    useEffect(() => {
+        scrollY.value = 0
+    }, [activeView])
+
     const balance = loading && data?.wallet?.balance === undefined ? " ..." : (data?.wallet?.balance || 0).toFixed(2)
 
     const handleShowEditSheet = useCallback(() => {
         Haptic.trigger("impactMedium")
         navigation.navigate("EditBalance")
     }, [])
-
-    const [activeView, setActiveView] = useState<"expenses" | "subscriptions">("expenses")
 
     const buttons = useMemo(
         () =>

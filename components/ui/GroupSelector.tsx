@@ -1,6 +1,7 @@
 import { useRef } from "react"
 import { Animated, Pressable, StyleSheet, Text, View } from "react-native"
 import theme from "@/constants/Colors"
+import { SymbolView } from "expo-symbols"
 
 interface GroupSelectorProps<T extends string> {
     options: [T] | [T, T] | [T, T, T]
@@ -25,15 +26,10 @@ export default function GroupSelector<T extends string>({ options, value, onChan
             {options.map((option, i) => {
                 const selected = option === value
                 return (
-                    <Animated.View key={option} style={{ flex: 1, transform: [{ scale: anims[i] }] }}>
+                    <Animated.View key={option} style={[styles.segmentWrapper, { transform: [{ scale: anims[i] }] }]}>
                         <Pressable
                             onPress={() => handlePress(option, i)}
-                            style={[
-                                styles.segment,
-                                i === 0 && styles.first,
-                                i === options.length - 1 && styles.last,
-                                selected && styles.selected,
-                            ]}
+                            style={[styles.segment, selected && styles.selected]}
                         >
                             <Text style={[styles.label, selected && styles.labelSelected]}>{option}</Text>
                         </Pressable>
@@ -47,33 +43,29 @@ export default function GroupSelector<T extends string>({ options, value, onChan
 const styles = StyleSheet.create({
     container: {
         flexDirection: "row",
-        backgroundColor: theme.primary_light,
-        borderRadius: 10,
-        padding: 2,
-        gap: 2,
+        backgroundColor: theme.primary_lighter,
+        borderRadius: 15,
+        padding: 7.5,
+        gap: 5,
+        height: 55,
+    },
+    segmentWrapper: {
+        flex: 1,
     },
     segment: {
         flex: 1,
-        paddingVertical: 7,
         alignItems: "center",
         justifyContent: "center",
-        borderRadius: 8,
-    },
-    first: {
-        borderTopLeftRadius: 8,
-        borderBottomLeftRadius: 8,
-    },
-    last: {
-        borderTopRightRadius: 8,
-        borderBottomRightRadius: 8,
+        borderRadius: 9,
     },
     selected: {
         backgroundColor: theme.secondary,
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.18,
-        shadowRadius: 2,
+        shadowOpacity: 0.2,
+        shadowRadius: 3,
         elevation: 2,
+        borderRadius: 10,
     },
     label: {
         fontSize: 13,

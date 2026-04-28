@@ -1,28 +1,16 @@
-import DatePicker from "@/components/DatePicker"
 import GlassView from "@/components/ui/GlassView"
 import IconButton from "@/components/ui/IconButton/IconButton"
 import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
-import Layout from "@/constants/Layout"
-import NumberPad from "@/components/ui/NumberPad"
-import lowOpacity from "@/utils/functions/lowOpacity"
+import CompactNumberPad from "@/components/ui/CompactNumberPad"
+import Button from "@/components/ui/Button/Button2"
 import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons"
-import Color from "color"
 import dayjs from "dayjs"
 import moment from "moment"
 import { useCallback, useState } from "react"
-import { Pressable, ScrollView, StyleSheet, View } from "react-native"
-import { LiquidGlassView } from "@callstack/liquid-glass"
-import Animated, {
-    cancelAnimation,
-    FadeIn,
-    interpolate,
-    useAnimatedStyle,
-    useSharedValue,
-    withSpring,
-    withTiming,
-} from "react-native-reanimated"
-import { useSafeAreaInsets } from "react-native-safe-area-context"
+import { Pressable, StyleSheet, View } from "react-native"
+import Animated, { FadeIn } from "react-native-reanimated"
+import { Calendar } from "react-native-calendars"
 import { useGoal } from "../hooks/hooks"
 
 const quickActions: Record<string, { label: string; value: number }[]> = {
@@ -233,6 +221,24 @@ const quickActions: Record<string, { label: string; value: number }[]> = {
     ],
 }
 
+const calendarTheme = {
+    backgroundColor: "transparent",
+    calendarBackground: "transparent",
+    dayTextColor: "#FFFFFF",
+    textDisabledColor: "#666666",
+    monthTextColor: "#FFFFFF",
+    textMonthFontSize: 16,
+    textMonthFontWeight: "600" as const,
+    selectedDayBackgroundColor: Colors.secondary,
+    selectedDayTextColor: "#FFFFFF",
+    todayTextColor: Colors.secondary,
+    arrowColor: "#FFFFFF",
+    textDayFontSize: 14,
+    textDayHeaderFontSize: 12,
+    textDayHeaderFontWeight: "500" as const,
+    textSectionTitleColor: "#999999",
+}
+
 function parseAmount(v: string): number {
     if (v.endsWith(".")) return +v.slice(0, -1)
     if (v.includes(".")) {
@@ -242,34 +248,15 @@ function parseAmount(v: string): number {
     return +v
 }
 
-export default function AddGoalEntry({ route, navigation }: any) {
+export default function UpdateGoalEntry({ route, navigation }: any) {
     const { id } = route.params
     const { goals, upsertStats } = useGoal()
     const goal = goals.find((g: any) => g.id === id)
 
     const [amount, setAmount] = useState("0")
     const [dates, setDates] = useState({ start: new Date(), end: new Date() })
-    const [selectedQuickValue, setSelectedQuickValue] = useState<number | null>(null)
     const [loading, setLoading] = useState(false)
-
-    const insets = useSafeAreaInsets()
-    const transformX = useSharedValue(0)
-    const isAnimating = useSharedValue(false)
-
-    const shake = () => {
-        if (isAnimating.value) return
-        isAnimating.value = true
-        cancelAnimation(transformX)
-        transformX.value = withSpring(15, { damping: 2, stiffness: 200, mass: 0.5 })
-        setTimeout(() => {
-            transformX.value = withSpring(-15, { damping: 2, stiffness: 200, mass: 0.5 })
-            setTimeout(() => {
-                transformX.value = withSpring(0, { damping: 2, stiffness: 200, mass: 0.5 }, (finished) => {
-                    if (finished) isAnimating.value = false
-                })
-            }, 50)
-        }, 50)
-    }
+    const [expanded, setExpanded] = useState<"date" | "quick" | null>(null)
 
     const handleAmountChange = useCallback((value: string) => {
         setAmount((prev) => {
@@ -277,15 +264,9 @@ export default function AddGoalEntry({ route, navigation }: any) {
                 const val = prev.slice(0, -1)
                 return val.length === 0 ? "0" : val
             }
-            if (typeof +value === "number" && prev.includes(".") && prev.split(".")[1].length === 2) {
-                shake()
-                return prev
-            }
+            if (typeof +value === "number" && prev.includes(".") && prev.split(".")[1].length === 2) return prev
             if (prev.length === 1 && prev === "0" && value !== ".") return value
-            if (prev.includes(".") && value === ".") {
-                shake()
-                return prev
-            }
+            if (prev.includes(".") && value === ".") return prev
             if (prev.length === 0 && value === ".") return "0."
             return prev + value
         })
@@ -320,140 +301,183 @@ export default function AddGoalEntry({ route, navigation }: any) {
         }
     }
 
-    const animatedAmount = useAnimatedStyle(
-        () => ({
-            transform: [{ translateX: transformX.value }],
-            fontSize: withTiming(interpolate(amount.length, [0, 10, 15], [80, 55, 35], "clamp"), { duration: 100 }),
-        }),
-        [amount],
-    )
-
     const quickValues = goal?.icon ? (quickActions[goal.icon] ?? []) : []
-
     const isMultiDay = !dayjs(dates.start).isSame(dayjs(dates.end), "day")
     const numDays = dayjs(dates.end).diff(dayjs(dates.start), "day") + 1
 
+    const dateMarked: Record<string, any> = {}
+    const dateStr = dayjs(dates.start).format("YYYY-MM-DD")
+    dateMarked[dateStr] = { selected: true, selectedColor: Colors.secondary }
+    if (!dayjs(dates.start).isSame(dates.end, "day")) {
+        const endStr = dayjs(dates.end).format("YYYY-MM-DD")
+        dateMarked[endStr] = { selected: true, selectedColor: Colors.secondary }
+    }
+
     return (
-        <View style={{ flex: 1 }}>
-            <View style={{ flex: 1 }}>
-                <View style={{ flex: 1 }}>
-                    <View style={styles.container}>
-                        <GlassView style={styles.closeButton}>
-                            <IconButton
-                                onPress={() => navigation.goBack()}
-                                icon={<AntDesign name="close" size={20} color="#fff" />}
-                            />
-                        </GlassView>
+        <View style={styles.root}>
+            <GlassView style={styles.closeBtn}>
+                <IconButton
+                    onPress={() => navigation.goBack()}
+                    icon={<AntDesign name="close" size={20} color="#fff" />}
+                />
+            </GlassView>
 
-                        <View style={styles.amountDisplay}>
-                            <Animated.Text style={[styles.amountText, animatedAmount]}>
-                                {amount}
-                                <Text variant="body" style={{ color: "rgba(255,255,255,0.4)", fontSize: 22 }}>
-                                    {" "}
-                                    {goal?.unit}
-                                </Text>
-                            </Animated.Text>
+            <GlassView
+                tintColor={Colors.secondary}
+                style={[
+                    styles.saveButton,
+                    {
+                        opacity: amount === "0" || loading ? 0.5 : 1,
+                    },
+                ]}
+            >
+                <IconButton
+                    disabled={amount === "0" || loading}
+                    onPress={handleSubmit}
+                    icon={<AntDesign name="check" size={20} color="#fff" />}
+                />
+            </GlassView>
 
-                            <View style={styles.goalLabel}>
-                                <MaterialCommunityIcons
-                                    name={goal?.icon || "progress-check"}
-                                    size={16}
-                                    color={Colors.secondary}
-                                />
-                                <Text variant="body" style={{ color: "rgba(255,255,255,0.55)" }}>
-                                    {goal?.name}
-                                </Text>
-                                {isMultiDay && (
-                                    <View style={styles.multiDayBadge}>
-                                        <Text style={styles.multiDayText}>
-                                            ÷ {numDays} days = {(parseAmount(amount) / numDays).toFixed(2)}
-                                            {goal?.unit}/day
-                                        </Text>
-                                    </View>
-                                )}
-                            </View>
+            <View style={styles.amountDisplay}>
+                <Text variant="title" style={styles.amountText}>
+                    {amount}
+                    <Text variant="body" style={styles.amountUnit}>
+                        {" "}
+                        {goal?.unit}
+                    </Text>
+                </Text>
+                <View style={styles.goalLabel}>
+                    <MaterialCommunityIcons name={goal?.icon || "progress-check"} size={16} color={Colors.secondary} />
+                    <Text variant="body" style={styles.goalLabelText}>
+                        {goal?.name}
+                    </Text>
+                    {isMultiDay && (
+                        <View style={styles.multiDayBadge}>
+                            <Text style={styles.multiDayText}>
+                                / {numDays} days = {(parseAmount(amount) / numDays).toFixed(2)} {goal?.unit}/day
+                            </Text>
                         </View>
-
-                        <View style={styles.contentContainer}>
-                            <Animated.View entering={FadeIn} style={styles.chipsRow}>
-                                <ScrollView
-                                    horizontal
-                                    showsHorizontalScrollIndicator={false}
-                                    contentContainerStyle={{ gap: 10, alignItems: "center" }}
-                                    style={{ flex: 1 }}
-                                >
-                                    <DatePicker
-                                        mode="period"
-                                        dates={dates}
-                                        setDates={setDates}
-                                        buttonComponent={({ start, end }) => (
-                                            <Pressable
-                                                style={({ pressed }) => [styles.chip, pressed && { opacity: 0.7 }]}
-                                            >
-                                                <AntDesign name="calendar" size={14} color="rgba(255,255,255,0.7)" />
-                                                <Text style={styles.chipText}>
-                                                    {dayjs(start).isSame(dayjs(end), "day")
-                                                        ? moment(start).format("DD.MM.YYYY")
-                                                        : `${moment(start).format("DD.MM")} – ${moment(end).format("DD.MM")}`}
-                                                </Text>
-                                            </Pressable>
-                                        )}
-                                    />
-
-                                    {quickValues.map((item, index) => {
-                                        const active = selectedQuickValue === item.value
-                                        return (
-                                            <Pressable
-                                                key={`${item.label}-${index}`}
-                                                style={({ pressed }) => [
-                                                    styles.chip,
-                                                    active && styles.chipActive,
-                                                    pressed && { opacity: 0.7 },
-                                                ]}
-                                                onPress={() => {
-                                                    setAmount(item.value.toString())
-                                                    setSelectedQuickValue(item.value)
-                                                }}
-                                            >
-                                                <Text style={[styles.chipText, active && styles.chipTextActive]}>
-                                                    {item.label}
-                                                </Text>
-                                            </Pressable>
-                                        )
-                                    })}
-                                </ScrollView>
-
-                                <LiquidGlassView
-                                    interactive
-                                    tintColor={amount === "0" ? Colors.primary_light : Colors.secondary}
-                                    style={[styles.saveGlass, { opacity: loading ? 0.5 : 1 }]}
-                                >
-                                    <Pressable
-                                        onPress={handleSubmit}
-                                        disabled={amount === "0" || loading}
-                                        style={({ pressed }) => [styles.saveGlassInner, pressed && { opacity: 0.7 }]}
-                                    >
-                                        <AntDesign name="check" size={18} color={"#fff"} />
-                                    </Pressable>
-                                </LiquidGlassView>
-                            </Animated.View>
-
-                            <NumberPad onKeyPress={handleAmountChange} onBackPress={amount === "0" ? () => navigation.goBack() : undefined} />
-                        </View>
-                    </View>
+                    )}
                 </View>
+            </View>
+
+            <View style={styles.card}>
+                <View style={styles.optionsContainer}>
+                    <Pressable
+                        style={({ pressed }) => [
+                            styles.optionRow,
+                            expanded !== "date" && styles.optionRowBorder,
+                            pressed && { opacity: 0.7 },
+                        ]}
+                        onPress={() => setExpanded((prev) => (prev === "date" ? null : "date"))}
+                    >
+                        <AntDesign name="calendar" size={16} color="rgba(255,255,255,0.6)" />
+                        <Text variant="body" style={styles.optionLabel}>
+                            Date
+                        </Text>
+                        <Text variant="body" style={styles.optionValue} numberOfLines={1}>
+                            {isMultiDay
+                                ? `${moment(dates.start).format("MMM D")} - ${moment(dates.end).format("MMM D")}`
+                                : moment(dates.start).format("MMM D, YYYY")}
+                        </Text>
+                        <AntDesign
+                            name="arrow-up"
+                            size={12}
+                            color="rgba(255,255,255,0.3)"
+                            style={{ transform: [{ rotate: expanded === "date" ? "180deg" : "0deg" }] }}
+                        />
+                    </Pressable>
+                    {expanded === "date" && (
+                        <Animated.View entering={FadeIn} style={styles.expandedSection}>
+                            <Calendar
+                                onDayPress={(day) => {
+                                    const d = dayjs(day.dateString)
+                                    setDates({ start: d.toDate(), end: d.toDate() })
+                                }}
+                                markedDates={dateMarked}
+                                theme={calendarTheme}
+                                markingType="period"
+                                style={{ borderRadius: 15 }}
+                            />
+                        </Animated.View>
+                    )}
+
+                    {quickValues.length > 0 && (
+                        <>
+                            <Pressable
+                                style={({ pressed }) => [
+                                    styles.optionRow,
+                                    expanded !== "quick" && styles.optionRowBorder,
+                                    pressed && { opacity: 0.7 },
+                                ]}
+                                onPress={() => setExpanded((prev) => (prev === "quick" ? null : "quick"))}
+                            >
+                                <MaterialCommunityIcons name="lightning-bolt" size={16} color="rgba(255,255,255,0.6)" />
+                                <Text variant="body" style={styles.optionLabel}>
+                                    Quick value
+                                </Text>
+                                <Text variant="body" style={styles.optionValue}>
+                                    {amount !== "0" ? amount : "Select"}
+                                </Text>
+                                <AntDesign
+                                    name="arrow-up"
+                                    size={12}
+                                    color="rgba(255,255,255,0.3)"
+                                    style={{ transform: [{ rotate: expanded === "quick" ? "180deg" : "0deg" }] }}
+                                />
+                            </Pressable>
+                            {expanded === "quick" && (
+                                <Animated.View entering={FadeIn} style={styles.quickExpanded}>
+                                    <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+                                        {quickValues.map((item, index) => {
+                                            const active = amount === item.value.toString()
+                                            return (
+                                                <Pressable
+                                                    key={`${item.label}-${index}`}
+                                                    style={({ pressed }) => [
+                                                        styles.quickChip,
+                                                        active && styles.quickChipActive,
+                                                        pressed && { opacity: 0.7 },
+                                                    ]}
+                                                    onPress={() => {
+                                                        setAmount(item.value.toString())
+                                                        setExpanded(null)
+                                                    }}
+                                                >
+                                                    <Text
+                                                        style={[
+                                                            styles.quickChipText,
+                                                            active && styles.quickChipTextActive,
+                                                        ]}
+                                                    >
+                                                        {item.label}
+                                                    </Text>
+                                                </Pressable>
+                                            )
+                                        })}
+                                    </View>
+                                </Animated.View>
+                            )}
+                        </>
+                    )}
+                </View>
+
+                <CompactNumberPad
+                    onKeyPress={handleAmountChange}
+                    backgroundColor={Colors.primary_lighter}
+                    fontVariant="body"
+                    fontWeight="bold"
+                />
             </View>
         </View>
     )
 }
 
 const styles = StyleSheet.create({
-    container: {
+    root: {
         flex: 1,
-        gap: 15,
-        justifyContent: "space-between",
     },
-    closeButton: {
+    closeBtn: {
         position: "absolute",
         top: 15,
         left: 15,
@@ -461,16 +485,27 @@ const styles = StyleSheet.create({
         padding: 10,
         borderRadius: 100,
     },
+    saveButton: {
+        position: "absolute",
+        top: 15,
+        right: 15,
+        zIndex: 100,
+        padding: 10,
+        borderRadius: 100,
+    },
     amountDisplay: {
-        height: 250,
-        justifyContent: "center",
+        paddingTop: 120,
         alignItems: "center",
-        paddingTop: 45,
+        paddingHorizontal: 30,
     },
     amountText: {
         color: Colors.foreground,
         fontWeight: "bold",
-        textAlign: "center",
+        fontSize: 90,
+    },
+    amountUnit: {
+        color: "rgba(255,255,255,0.4)",
+        fontSize: 20,
     },
     goalLabel: {
         flexDirection: "row",
@@ -479,70 +514,94 @@ const styles = StyleSheet.create({
         marginTop: 8,
         flexWrap: "wrap",
         justifyContent: "center",
-        paddingHorizontal: 20,
+    },
+    goalLabelText: {
+        color: "rgba(255,255,255,0.55)",
     },
     multiDayBadge: {
-        backgroundColor: lowOpacity(Colors.secondary, 0.15),
+        backgroundColor: "rgba(255,255,255,0.08)",
         borderRadius: 8,
         paddingHorizontal: 8,
         paddingVertical: 3,
-        borderWidth: 1,
-        borderColor: lowOpacity(Colors.secondary, 0.3),
     },
     multiDayText: {
         color: Colors.secondary,
         fontSize: 12,
         fontWeight: "600",
     },
-    contentContainer: {
-        paddingTop: 12,
-        paddingHorizontal: 12,
-        flex: 1,
-        gap: 10,
+    card: {
+        padding: 12,
+        gap: 8,
         backgroundColor: Colors.primary_light,
         borderTopRightRadius: 30,
         borderTopLeftRadius: 30,
-        maxHeight: Layout.screen.height / 1.8,
+        paddingBottom: 24,
+        marginTop: 10,
+        height: "50%",
+        position: "absolute",
+        bottom: 0,
+        left: 0,
+        right: 0,
     },
-    chipsRow: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 10,
-    },
-    chip: {
-        paddingVertical: 10,
-        paddingHorizontal: 16,
-        borderRadius: 15,
+    optionsContainer: {
         backgroundColor: Colors.primary_lighter,
-        borderWidth: 2,
-        borderColor: Color(Colors.primary_lighter).lighten(0.25).hex(),
+        borderRadius: 18,
+        overflow: "hidden",
+    },
+    optionRow: {
         flexDirection: "row",
         alignItems: "center",
-        gap: 8,
-        height: 45,
+        paddingHorizontal: 16,
+        paddingVertical: 18,
+        gap: 12,
     },
-    chipActive: {
-        backgroundColor: lowOpacity(Colors.secondary, 0.2),
-        borderColor: Color(Colors.secondary).alpha(0.5).string(),
+    optionRowBorder: {
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        borderBottomColor: "rgba(255,255,255,0.07)",
     },
-    chipText: {
+    optionLabel: {
+        flex: 1,
+        color: "rgba(255,255,255,0.75)",
+        fontWeight: "500",
+    },
+    optionValue: {
+        color: "rgba(255,255,255,0.45)",
+        maxWidth: 160,
+        textAlign: "right",
+    },
+    expandedSection: {
+        borderTopWidth: StyleSheet.hairlineWidth,
+        borderTopColor: "rgba(255,255,255,0.07)",
+        paddingHorizontal: 12,
+        paddingVertical: 12,
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        borderBottomColor: "rgba(255,255,255,0.07)",
+        height: 350,
+    },
+    quickExpanded: {
+        borderTopWidth: StyleSheet.hairlineWidth,
+        borderTopColor: "rgba(255,255,255,0.07)",
+        paddingHorizontal: 12,
+        paddingVertical: 12,
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        borderBottomColor: "rgba(255,255,255,0.07)",
+    },
+    quickChip: {
+        paddingVertical: 8,
+        paddingHorizontal: 14,
+        borderRadius: 10,
+        backgroundColor: Colors.primary_lighter,
+    },
+    quickChipActive: {
+        backgroundColor: Colors.secondary,
+    },
+    quickChipText: {
         color: "rgba(255,255,255,0.7)",
         fontSize: 13,
         fontWeight: "500",
     },
-    chipTextActive: {
-        color: Colors.secondary,
+    quickChipTextActive: {
+        color: Colors.foreground,
         fontWeight: "700",
-    },
-    saveGlass: {
-        borderRadius: 15,
-        overflow: "hidden",
-        height: 45,
-        width: 52,
-    },
-    saveGlassInner: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
     },
 })

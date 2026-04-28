@@ -1,10 +1,9 @@
 import Colors from "@/constants/Colors"
 import lowOpacity from "@/utils/functions/lowOpacity"
 import Color from "color"
-import { StyleSheet, Text, View } from "react-native"
+import { ScrollView, StyleSheet, Text, View } from "react-native"
 import Feedback from "react-native-haptic-feedback"
 import Ripple from "react-native-material-ripple"
-import Animated, { FadeIn } from "react-native-reanimated"
 import { useCreateExpenseContext } from "@/features/wallet/context/CreateExpenseContext"
 
 const spontaneousOptions = [
@@ -77,65 +76,58 @@ export const SpontaneousRateChip = ({ value, onPress }) => {
     )
 }
 
-export const SpontaneousRateSelector = () => {
+export const SpontaneousRateSelector = ({ onDismiss }: { onDismiss?: () => void } = {}) => {
     const { state, methods } = useCreateExpenseContext()
     const value = state.spontaneousRate
     const setValue = methods.setSpontaneousRate
-    const dismiss = () => methods.setView("main")
+    const dismiss = onDismiss ?? (() => methods.setView("main"))
 
     return (
-        <Animated.View entering={FadeIn} style={styles.selectorContainer}>
-            <View style={styles.header}>
-                <Text style={styles.title}>Spontaneous Rate</Text>
-                <Text style={styles.subtitle}>How planned was this purchase?</Text>
-            </View>
-
-            <View style={styles.optionsGrid}>
-                {spontaneousOptions.map((option) => (
-                    <Ripple
-                        key={option.value}
+        <ScrollView style={styles.selectorContainer} showsVerticalScrollIndicator={false} bounces={false}>
+            {spontaneousOptions.map((option) => (
+                <Ripple
+                    key={option.value}
+                    style={[
+                        styles.optionButton,
+                        {
+                            backgroundColor:
+                                option.value === value
+                                    ? lowOpacity(getRateColor(option.value), 0.25)
+                                    : Colors.primary_lighter,
+                        },
+                    ]}
+                    onPress={() => {
+                        Feedback.trigger("impactLight")
+                        setValue(option.value)
+                        setTimeout(() => dismiss(), 300)
+                    }}
+                >
+                    <Text style={styles.optionIcon}>{option.icon}</Text>
+                    <Text
                         style={[
-                            styles.optionButton,
+                            styles.optionLabel,
                             {
-                                backgroundColor:
-                                    option.value === value
-                                        ? lowOpacity(getRateColor(option.value), 0.25)
-                                        : Colors.primary_lighter,
+                                color:
+                                    option.value === value ? getRateColor(option.value) : "rgba(255,255,255,0.85)",
                             },
                         ]}
-                        onPress={() => {
-                            Feedback.trigger("impactLight")
-                            setValue(option.value)
-                            setTimeout(() => dismiss(), 300)
-                        }}
                     >
-                        <Text style={styles.optionIcon}>{option.icon}</Text>
-                        <Text
-                            style={[
-                                styles.optionLabel,
-                                {
-                                    color:
-                                        option.value === value ? getRateColor(option.value) : "rgba(255,255,255,0.9)",
-                                },
-                            ]}
-                        >
-                            {option.label}
-                        </Text>
-                        <View
-                            style={[
-                                styles.rateIndicator,
-                                {
-                                    backgroundColor: getRateColor(option.value),
-                                    opacity: option.value === value ? 1 : 0.3,
-                                },
-                            ]}
-                        >
-                            <Text style={styles.rateValue}>{option.value}%</Text>
-                        </View>
-                    </Ripple>
-                ))}
-            </View>
-        </Animated.View>
+                        {option.label}
+                    </Text>
+                    <View
+                        style={[
+                            styles.rateIndicator,
+                            {
+                                backgroundColor: getRateColor(option.value),
+                                opacity: option.value === value ? 1 : 0.3,
+                            },
+                        ]}
+                    >
+                        <Text style={styles.rateValue}>{option.value}%</Text>
+                    </View>
+                </Ripple>
+            ))}
+        </ScrollView>
     )
 }
 
@@ -153,59 +145,31 @@ const styles = StyleSheet.create({
     selectorContainer: {
         flex: 1,
     },
-    header: {
-        marginBottom: 20,
-    },
-    title: {
-        fontSize: 18,
-        fontWeight: "600",
-        color: Colors.foreground,
-        marginBottom: 5,
-    },
-    subtitle: {
-        fontSize: 16,
-        color: "rgba(255,255,255,0.7)",
-    },
-    optionsGrid: {
-        flex: 1,
-        gap: 15,
-    },
     optionButton: {
         flexDirection: "row",
-        padding: 15,
-        borderRadius: 10,
         alignItems: "center",
+        paddingHorizontal: 15,
+        paddingVertical: 12,
+        borderRadius: 10,
+        gap: 12,
+        marginBottom: 8,
     },
     optionIcon: {
-        fontSize: 24,
-        marginRight: 15,
+        fontSize: 18,
     },
     optionLabel: {
         flex: 1,
-        fontSize: 16,
-        fontWeight: "600",
+        fontSize: 14,
+        fontWeight: "500",
     },
     rateIndicator: {
-        paddingHorizontal: 10,
-        paddingVertical: 6,
+        paddingHorizontal: 8,
+        paddingVertical: 4,
         borderRadius: 20,
     },
     rateValue: {
         color: Colors.foreground,
         fontWeight: "bold",
-        fontSize: 14,
-    },
-    cancelButton: {
-        padding: 15,
-        borderRadius: 10,
-        alignItems: "center",
-        marginTop: 10,
-        borderWidth: 1,
-        borderColor: "rgba(255,255,255,0.3)",
-    },
-    cancelButtonText: {
-        color: "rgba(255,255,255,0.7)",
-        fontSize: 16,
-        fontWeight: "600",
+        fontSize: 12,
     },
 })

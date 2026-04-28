@@ -583,8 +583,14 @@ export default function ExpenseAIMaker({ initialOpen }: { initialOpen?: boolean 
     return (
         <>
             <GlassView
-                tintColor={Colors.secondary}
-                style={{ position: "absolute", top: 15, right: 15, zIndex: 100, padding: 10, borderRadius: 100 }}
+                style={{
+                    padding: 10,
+                    borderRadius: 100,
+                    width: 55,
+                    height: 55,
+
+                    justifyContent: "center",
+                }}
             >
                 <IconButton
                     onPress={handleImagePick}

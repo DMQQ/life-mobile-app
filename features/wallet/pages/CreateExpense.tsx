@@ -1,25 +1,36 @@
 import IconButton from "@/components/ui/IconButton/IconButton"
+import GroupSelector from "@/components/ui/GroupSelector"
 import Colors from "@/constants/Colors"
-import Layout from "@/constants/Layout"
 import useCreateExpensePage from "@/features/wallet/hooks/useCreateExpensePage"
 import { AntDesign } from "@expo/vector-icons"
 import moment from "moment"
-import { useRef, useState } from "react"
-import { StyleSheet, View } from "react-native"
+import { useEffect, useRef, useState } from "react"
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native"
 import DateTimePicker from "react-native-modal-datetime-picker"
-import Animated, { FadeIn } from "react-native-reanimated"
 import AmountDisplay from "../components/CreateExpense/AmountDisplay"
-import CategorySelector from "../components/CreateExpense/CategorySelectorView"
 import ExpenseAIMaker from "../components/CreateExpense/ExpenseAIMaker"
 import NameInput from "../components/CreateExpense/NameInput"
-import ExpenseNumberPad from "../components/CreateExpense/ExpenseNumberPad"
 import OptionsPicker from "../components/CreateExpense/OptionsPicker"
 import PredictionView from "../components/CreateExpense/PredictionView"
-import { SpontaneousRateSelector } from "../components/CreateExpense/SpontaneousRate"
 import SubExpenseSheet from "../components/CreateExpense/SubexpenseSheet"
 import GlassView from "@/components/ui/GlassView"
 import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/types"
-import { CreateExpenseProvider, CreateExpenseContextType } from "../context/CreateExpenseContext"
+import {
+    CreateExpenseProvider,
+    CreateExpenseContextType,
+    useCreateExpenseContext,
+} from "../context/CreateExpenseContext"
+import CompactNumberPad from "@/components/ui/CompactNumberPad"
+import Button from "@/components/ui/Button/Button2"
+import { useSafeAreaInsets } from "react-native-safe-area-context"
+import { Icons } from "../components/Expense/ExpenseIcon"
+
+const TYPE_OPTIONS: ["Expense", "Income", "Refund"] = ["Expense", "Income", "Refund"]
+
+const labelToType = (label: string) => (label === "Expense" ? "expense" : label === "Income" ? "income" : "refunded")
+
+const typeToLabel = (type: string | null): "Expense" | "Income" | "Refund" =>
+    type === "income" ? "Income" : type === "refunded" ? "Refund" : "Expense"
 
 export default function CreateExpenseModal({ navigation, route: { params } }: any) {
     const hookData = useCreateExpensePage(params)
@@ -35,47 +46,50 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
 
     const { state, methods } = hookData
 
+    useEffect(() => {
+        if (!state.type) methods.setType("expense")
+    }, [])
+
     return (
         <CreateExpenseProvider value={contextValue}>
-            <View style={{ flex: 1 }}>
-                <View style={styles.container}>
-                    {state.prediction && <PredictionView />}
+            <View style={[styles.root]}>
+                {state.prediction && <PredictionView />}
 
-                    <GlassView style={styles.cameraIcon}>
-                        <IconButton
-                            onPress={() => navigation.goBack()}
-                            icon={<AntDesign name="close" size={20} color="#fff" />}
-                        />
-                    </GlassView>
+                <GlassView style={styles.closeBtn}>
+                    <IconButton
+                        onPress={() => navigation.goBack()}
+                        icon={<AntDesign name="close" size={20} color="#fff" />}
+                    />
+                </GlassView>
 
-                    <ExpenseAIMaker initialOpen={params?.shouldOpenPhotoPicker || false} />
+                <SaveButton />
 
-                    <AmountDisplay />
+                <AmountDisplay />
 
-                    <View style={styles.contentContainer}>
-                        <View style={{ borderRadius: 35, flex: 1 }}>
-                            {state.view === "main" && (
-                                <>
-                                    <Animated.View entering={FadeIn} style={{ gap: 5 }}>
-                                        <View
-                                            style={{
-                                                flexDirection: "row",
-                                                width: "100%",
-                                                alignItems: "center",
-                                                zIndex: 1000,
-                                            }}
-                                        >
-                                            <NameInput isEditing={params?.isEditing} />
-                                        </View>
-                                        <OptionsPicker />
-                                    </Animated.View>
-                                    <ExpenseNumberPad />
-                                </>
-                            )}
+                <View style={styles.card}>
+                    <View>
+                        <View style={{ flexDirection: "row", gap: 10, marginBottom: 10 }}>
+                            <ExpenseAIMaker initialOpen={params?.shouldOpenPhotoPicker || false} />
+                            <NameInput isEditing={params?.isEditing} />
+                        </View>
 
-                            {state.view === "category" && <CategorySelector />}
+                        <View style={{ marginBottom: 10 }}>
+                            <GroupSelector
+                                options={TYPE_OPTIONS}
+                                value={typeToLabel(state.type)}
+                                onChange={(label) => methods.setType(labelToType(label) as any)}
+                            />
+                        </View>
 
-                            {state.view === "spontaneous" && <SpontaneousRateSelector />}
+                        <OptionsPicker />
+
+                        <View style={{ marginTop: 10 }}>
+                            <CompactNumberPad
+                                onKeyPress={methods.handleAmountChange}
+                                backgroundColor={Colors.primary_lighter}
+                                fontVariant="body"
+                                fontWeight="bold"
+                            />
                         </View>
                     </View>
                 </View>
@@ -92,34 +106,68 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
     )
 }
 
+const SaveButton = () => {
+    const { state, methods } = useCreateExpenseContext()
+    const { isValid, prediction, canPredict, loading } = state
+    const { applyPrediction, handleSubmit } = methods
+    const disabled = !isValid && !prediction && !canPredict
+
+    const tintColor =
+        !isValid && prediction
+            ? Icons[prediction.category as keyof typeof Icons]?.backgroundColor
+            : !isValid
+              ? Colors.primary
+              : Colors.secondary
+
+    return (
+        <GlassView key={tintColor} tintColor={tintColor} style={styles.saveButton}>
+            <IconButton
+                disabled={disabled || loading}
+                onPress={!isValid && prediction ? applyPrediction : handleSubmit}
+                icon={
+                    loading ? (
+                        <ActivityIndicator size={20} color="#fff" />
+                    ) : (
+                        <AntDesign name="check" size={20} color="#fff" />
+                    )
+                }
+            />
+        </GlassView>
+    )
+}
+
 const styles = StyleSheet.create({
-    container: { flex: 1, gap: 15, justifyContent: "space-between" },
-
-    numberPadNumberButton: {
-        justifyContent: "center",
-        alignItems: "center",
-        width: "100%",
-        height: "100%",
-    },
-    categoryButton: {
-        paddingVertical: 15,
-        paddingHorizontal: 5.5,
-        flexDirection: "row",
-        gap: 15,
-        alignItems: "center",
+    root: {
         flex: 1,
     },
-
-    contentContainer: {
+    card: {
         padding: 15,
-        flex: 1,
-        gap: 15,
-        maxHeight: Layout.screen.height / 1.65,
+        gap: 10,
         backgroundColor: Colors.primary_light,
         borderTopRightRadius: 30,
         borderTopLeftRadius: 30,
         paddingBottom: 30,
-    },
+        maxHeight: "75%",
+        position: "absolute",
+        bottom: 0,
 
-    cameraIcon: { position: "absolute", top: 15, left: 15, zIndex: 100, padding: 10, borderRadius: 100 },
+        left: 0,
+        right: 0,
+    },
+    closeBtn: {
+        position: "absolute",
+        top: 15,
+        left: 15,
+        zIndex: 100,
+        padding: 10,
+        borderRadius: 100,
+    },
+    saveButton: {
+        position: "absolute",
+        top: 15,
+        right: 15,
+        zIndex: 100,
+        padding: 10,
+        borderRadius: 100,
+    },
 })

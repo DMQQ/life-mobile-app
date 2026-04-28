@@ -1,10 +1,9 @@
-import Animated, { FadeIn, LinearTransition } from "react-native-reanimated"
-import { CategoryIcon, CategoryUtils, Icons } from "../Expense/ExpenseIcon"
-import { useEffect, useRef, useState } from "react"
+import { CategoryUtils, Icons } from "../Expense/ExpenseIcon"
+import { cloneElement, useState } from "react"
 import Input from "@/components/ui/TextInput/TextInput"
 import Colors from "@/constants/Colors"
 import lowOpacity from "@/utils/functions/lowOpacity"
-import { Text, View, StyleSheet, FlatList } from "react-native"
+import { Text, View, StyleSheet, ScrollView } from "react-native"
 import Ripple from "react-native-material-ripple"
 import IconButton from "@/components/ui/IconButton/IconButton"
 import { AntDesign } from "@expo/vector-icons"
@@ -17,139 +16,119 @@ const CategorySelector = (props?: { current?: string; onPress?: (item: string) =
     const ctx = useContext(CreateExpenseContext)
 
     const current = props?.current ?? ctx?.state.category ?? "none"
-    const dismiss = props?.dismiss ?? (() => {
-        ctx?.methods.setView("main")
-        ctx?.methods.setCategory("none")
-    })
-    const onPress = props?.onPress ?? ((item: string) => {
-        ctx?.methods.setIsSubscription(item === "subscription")
-        ctx?.methods.setType("expense")
-        ctx?.methods.setCategory(item as keyof typeof Icons)
-        ctx?.methods.setView("main")
-    })
+    const dismiss =
+        props?.dismiss ??
+        (() => {
+            ctx?.methods.setView("main")
+            ctx?.methods.setCategory("none")
+        })
+    const onPress =
+        props?.onPress ??
+        ((item: string) => {
+            ctx?.methods.setIsSubscription(item === "subscription")
+            ctx?.methods.setType("expense")
+            ctx?.methods.setCategory(item as keyof typeof Icons)
+            ctx?.methods.setView("main")
+        })
 
-    const data = Object.entries(Icons)
     const [query, setQuery] = useState("")
 
-    const filteredData = data.filter(
-        (item) =>
-            !["edit", "none", "income", "refunded", "bell"].includes(item[0]) &&
-            item[0].toLowerCase().includes(query.toLowerCase()),
-    )
+    const data = Object.entries(Icons).filter(([key]) => !["edit", "none", "income", "refunded", "bell"].includes(key))
 
-    const listRef = useRef<FlatList>(null)
+    const filtered = query ? data.filter(([key]) => key.toLowerCase().includes(query.toLowerCase())) : data
 
-    useEffect(() => {
-        if (listRef.current && query.length > 0) {
-            listRef.current.scrollToOffset({ animated: true, offset: 0 })
-        } else if (current) {
-            const currentIndex = filteredData.find((item) => item[0] === current)
-            listRef.current?.scrollToItem({ item: currentIndex, animated: false })
-        }
-    }, [query, current])
+    const [expandSearch, setExpandSearch] = useState(false)
 
     return (
-        <Animated.View entering={FadeIn} style={styles.selectorContainer}>
-            <Input
-                placeholder="Search for category"
-                placeholderTextColor={"rgba(255,255,255,0.5)"}
-                value={query}
-                onChangeText={setQuery}
-                containerStyle={styles.searchContainer}
-                style={styles.searchInput}
-                right={
-                    <IconButton
-                        onPress={dismiss}
-                        icon={<AntDesign name="close" size={20} color={"rgba(255,255,255,0.7)"} />}
-                        style={styles.closeButton}
+        <View style={styles.selectorContainer}>
+            <View>
+                {expandSearch ? (
+                    <Input
+                        placeholder="Search for category"
+                        placeholderTextColor={"rgba(255,255,255,0.5)"}
+                        value={query}
+                        onChangeText={setQuery}
+                        containerStyle={styles.searchContainer}
+                        style={styles.searchInput}
+                        right={
+                            <IconButton
+                                onPress={dismiss}
+                                icon={<AntDesign name="close" size={20} color={"rgba(255,255,255,0.7)"} />}
+                                style={styles.closeButton}
+                            />
+                        }
                     />
-                }
-            />
+                ) : (
+                    <Ripple
+                        onPress={() => {
+                            Feedback.trigger("impactLight")
+                            setExpandSearch(true)
+                        }}
+                    >
+                        <Text style={styles.searchPlaceholder}>Search for category</Text>
+                    </Ripple>
+                )}
+            </View>
 
-            <Animated.FlatList
-                initialNumToRender={10}
-                getItemLayout={(_, index) => ({ length: 60, offset: 70 * index, index })}
-                ref={listRef}
-                layout={LinearTransition}
-                style={styles.optionsGrid}
-                data={filteredData}
-                keyExtractor={(item) => item[0]}
-                keyboardDismissMode={"on-drag"}
-                renderItem={({ item }) => (
-                    <Animated.View style={{ marginBottom: 15, height: 60 }}>
-                        <Ripple
-                            onPress={() => {
-                                Feedback.trigger("impactLight")
-                                onPress(item[0])
-                            }}
+            <ScrollView
+                style={styles.list}
+                showsVerticalScrollIndicator={false}
+                bounces={false}
+                keyboardDismissMode="on-drag"
+            >
+                {filtered.map(([key, meta]) => (
+                    <Ripple
+                        key={key}
+                        onPress={() => {
+                            Feedback.trigger("impactLight")
+                            onPress(key)
+                        }}
+                        style={[
+                            styles.option,
+                            {
+                                backgroundColor:
+                                    key === current ? lowOpacity(meta.backgroundColor, 0.25) : Colors.primary_lighter,
+                            },
+                        ]}
+                    >
+                        {Icons[key as keyof typeof Icons]?.icon &&
+                            cloneElement(
+                                Icons[key as keyof typeof Icons].icon as React.ReactElement<{
+                                    size: number
+                                    color: string
+                                }>,
+                                { size: 18, color: meta.backgroundColor },
+                            )}
+                        <Text
                             style={[
-                                styles.optionButton,
+                                styles.optionLabel,
                                 {
-                                    backgroundColor:
-                                        item[0] === current
-                                            ? lowOpacity(item[1].backgroundColor, 0.25)
-                                            : Colors.primary_lighter,
+                                    color:
+                                        key === current
+                                            ? Color(meta.backgroundColor).lighten(0.5).hex()
+                                            : "rgba(255,255,255,0.85)",
                                 },
                             ]}
+                            numberOfLines={1}
                         >
-                            <CategoryIcon category={item[0] as keyof typeof Icons} type="expense" />
-
-                            {item[0]?.includes(":") ? (
-                                <View style={{ flex: 1, justifyContent: "center", gap: 5 }}>
-                                    <Text
-                                        style={{
-                                            color: lowOpacity(Colors.foreground, 0.75),
-                                            textTransform: "capitalize",
-                                            fontSize: 10,
-                                        }}
-                                    >
-                                        {CategoryUtils.getCategoryParent(item[0])}
-                                    </Text>
-                                    <Text
-                                        style={[
-                                            styles.optionLabel,
-                                            {
-                                                color:
-                                                    item[0] === current
-                                                        ? Color(item[1].backgroundColor).lighten(0.5).hex()
-                                                        : "rgba(255,255,255,0.9)",
-                                            },
-                                        ]}
-                                    >
-                                        {CategoryUtils.getCategoryName(item[0])}
-                                    </Text>
-                                </View>
-                            ) : (
-                                <Text
-                                    style={[
-                                        styles.optionLabel,
-                                        {
-                                            color:
-                                                item[0] === current
-                                                    ? Color(item[1].backgroundColor).lighten(0.5).hex()
-                                                    : "rgba(255,255,255,0.9)",
-                                        },
-                                    ]}
-                                >
-                                    {CategoryUtils.getCategoryName(item[0])}
-                                </Text>
-                            )}
-
-                            {item[0] === current && (
-                                <View style={[styles.selectedIndicator, { backgroundColor: item[1].backgroundColor }]}>
-                                    <Text style={styles.indicatorText}>✓</Text>
-                                </View>
-                            )}
-                        </Ripple>
-                    </Animated.View>
-                )}
-                ListEmptyComponent={
-                    <View style={styles.emptyContainer}>
+                            {key.includes(":")
+                                ? `${CategoryUtils.getCategoryParent(key)} - ${CategoryUtils.getCategoryName(key)}`
+                                : CategoryUtils.getCategoryName(key)}
+                        </Text>
+                        {key === current && (
+                            <View style={[styles.check, { backgroundColor: meta.backgroundColor }]}>
+                                <Text style={styles.checkText}>✓</Text>
+                            </View>
+                        )}
+                    </Ripple>
+                ))}
+                {filtered.length === 0 && (
+                    <View style={styles.empty}>
                         <Text style={styles.emptyText}>No categories found</Text>
                     </View>
-                }
-            />
-        </Animated.View>
+                )}
+            </ScrollView>
+        </View>
     )
 }
 
@@ -157,74 +136,60 @@ const styles = StyleSheet.create({
     selectorContainer: {
         flex: 1,
     },
-    header: {
-        marginBottom: 20,
-    },
-    title: {
-        fontSize: 18,
-        fontWeight: "600",
-        color: Colors.foreground,
-        marginBottom: 5,
-    },
-    subtitle: {
-        fontSize: 16,
-        color: "rgba(255,255,255,0.7)",
-    },
     searchContainer: {
         backgroundColor: Colors.primary_lighter,
         borderRadius: 10,
         padding: 5,
+        marginBottom: 10,
     },
     searchInput: {
-        padding: 15,
-        fontSize: 16,
+        fontSize: 14,
     },
     closeButton: {
         padding: 0,
     },
-    optionsGrid: {
+    list: {
         flex: 1,
     },
-    optionButton: {
+    option: {
         flexDirection: "row",
-        padding: 10,
+        alignItems: "center",
         paddingHorizontal: 15,
+        paddingVertical: 12,
         borderRadius: 10,
-        alignItems: "center",
-    },
-    iconContainer: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        justifyContent: "center",
-        alignItems: "center",
-        marginRight: 15,
+        gap: 12,
+        marginBottom: 8,
     },
     optionLabel: {
         flex: 1,
-        fontSize: 16,
-        fontWeight: "600",
+        fontSize: 14,
+        fontWeight: "500",
         textTransform: "capitalize",
     },
-    selectedIndicator: {
-        width: 30,
-        height: 30,
-        borderRadius: 15,
+    check: {
+        width: 24,
+        height: 24,
+        borderRadius: 12,
         justifyContent: "center",
         alignItems: "center",
     },
-    indicatorText: {
+    checkText: {
         color: Colors.foreground,
-        fontSize: 16,
+        fontSize: 13,
         fontWeight: "bold",
     },
-    emptyContainer: {
+    empty: {
         padding: 20,
         alignItems: "center",
     },
     emptyText: {
         color: "rgba(255,255,255,0.5)",
-        fontSize: 16,
+        fontSize: 14,
+    },
+    searchPlaceholder: {
+        color: "rgba(255,255,255,0.5)",
+        fontSize: 14,
+        padding: 10,
     },
 })
 

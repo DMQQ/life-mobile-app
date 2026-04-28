@@ -22,9 +22,13 @@ export default function AmountDisplay() {
     return (
         <View style={styles.container}>
             <View>
-                <Animated.Text style={[{ color: Colors.foreground, fontWeight: "bold", textAlign: "center" }, animatedAmount]}>
+                <Animated.Text
+                    style={[{ color: Colors.foreground, fontWeight: "bold", textAlign: "center" }, animatedAmount]}
+                >
                     {amount}
-                    <Text variant="body" style={{ fontSize: 20 }}>zł</Text>
+                    <Text variant="body" style={{ fontSize: 20 }}>
+                        zł
+                    </Text>
                 </Animated.Text>
 
                 {SubExpenses.length > 0 && (
@@ -36,7 +40,9 @@ export default function AmountDisplay() {
 
             {moment(date).isAfter(moment()) && type && amount != "0" && (
                 <View style={styles.scheduledContainer}>
-                    <Text variant="caption" style={styles.scheduledText}>scheduled for {moment(date).format("DD MMMM YYYY")}</Text>
+                    <Text variant="caption" style={styles.scheduledText}>
+                        scheduled for {moment(date).format("DD MMMM YYYY")}
+                    </Text>
                 </View>
             )}
         </View>
@@ -45,7 +51,7 @@ export default function AmountDisplay() {
 
 const styles = StyleSheet.create({
     container: {
-        height: 250,
+        height: 225,
         justifyContent: "center",
         width: "100%",
         alignItems: "center",

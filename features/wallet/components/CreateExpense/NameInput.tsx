@@ -9,11 +9,11 @@ import { Icons } from "../Expense/ExpenseIcon"
 import { AntDesign } from "@expo/vector-icons"
 import { gql, useQuery } from "@apollo/client"
 import Color from "color"
-import { cloneElement, useEffect, useState } from "react"
-import { ActivityIndicator, StyleSheet, TouchableOpacity, View } from "react-native"
+import { useEffect, useState } from "react"
+import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native"
 import Feedback from "react-native-haptic-feedback"
 import Ripple from "react-native-material-ripple"
-import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated"
+import Animated, { FadeIn, FadeOut } from "react-native-reanimated"
 import { useCreateExpenseContext } from "@/features/wallet/context/CreateExpenseContext"
 
 const GET_EXPENSE_SUGGESTIONS = gql`
@@ -31,8 +31,6 @@ const GET_EXPENSE_SUGGESTIONS = gql`
     }
 `
 
-const ITEM_HEIGHT = 36
-
 interface Suggestion {
     id: string
     description: string
@@ -43,7 +41,7 @@ interface Suggestion {
 export default function NameInput({ isEditing }: { isEditing?: boolean }) {
     const { state, methods, isInputFocused, setIsInputFocused, subexpenseSheetRef } = useCreateExpenseContext()
     const { name, isValid, prediction, canPredict, loading, isSubExpenseMode, SubExpenses } = state
-    const { setName, setAmount, setCategory, handleToggleSubExpenseMode, applyPrediction, handleSubmit } = methods
+    const { setName, handleToggleSubExpenseMode, applyPrediction, handleSubmit } = methods
 
     const [debouncedQuery, setDebouncedQuery] = useState(name)
     const [suppressed, setSuppressed] = useState(false)
@@ -60,6 +58,7 @@ export default function NameInput({ isEditing }: { isEditing?: boolean }) {
 
     const expenses: Suggestion[] = data?.wallet?.expenses2?.flatMap((m: any) => m.expenses) ?? []
     const seen = new Set<string>()
+    const queryLower = name.toLowerCase()
     const suggestions = expenses
         .filter((e) => {
             const key = e.description.toLowerCase()
@@ -67,20 +66,11 @@ export default function NameInput({ isEditing }: { isEditing?: boolean }) {
             seen.add(key)
             return true
         })
+        .filter((e) => e.description.toLowerCase().startsWith(queryLower) && e.description.toLowerCase() !== queryLower)
         .slice(0, 4)
 
-    const showSuggestions = isInputFocused && suggestions.length > 0 && !suppressed
-
-    const heightAnim = useSharedValue(0)
-
-    useEffect(() => {
-        heightAnim.value = withTiming(showSuggestions ? suggestions.length * ITEM_HEIGHT : 0, { duration: 100 })
-    }, [showSuggestions, suggestions.length])
-
-    const dropdownStyle = useAnimatedStyle(() => ({
-        height: heightAnim.value,
-        overflow: "hidden",
-    }))
+    const topSuggestion = suggestions[0]
+    const showSuggestion = isInputFocused && topSuggestion && !suppressed
 
     const bg = isInputFocused ? Color(Colors.primary_light).lighten(0.25).hex() : Colors.primary_lighter
 
@@ -96,140 +86,128 @@ export default function NameInput({ isEditing }: { isEditing?: boolean }) {
               : Colors.secondary
 
     return (
-        <View style={styles.wrapper}>
-            <Animated.View
-                style={[
-                    styles.dropdown,
-                    { backgroundColor: bg, borderColor },
-                    dropdownStyle,
-                    {
-                        borderWidth: showSuggestions ? 2 : 0,
-                    },
-                ]}
-            >
-                {suggestions.map((item, index) => {
-                    const icon = Icons[item.category as keyof typeof Icons]?.icon
-                    const isLast = index === suggestions.length - 1
-                    return (
-                        <TouchableOpacity
-                            key={item.id}
-                            style={[styles.item, !isLast && styles.itemBorder]}
+        <View>
+            {showSuggestion && (
+                <Animated.View entering={FadeIn} exiting={FadeOut} style={styles.suggestionPill}>
+                    <GlassView style={styles.suggestionGlass}>
+                        <Pressable
                             onPress={() => {
+                                Feedback.trigger("impactLight")
                                 setSuppressed(true)
-                                setName(item.description)
+                                setName(topSuggestion.description)
                             }}
-                            activeOpacity={0.9}
+                            style={styles.suggestionPressable}
                         >
-                            <View style={styles.iconWrap}>{icon && cloneElement(icon, { size: 13 })}</View>
-                            <Text variant="body" style={styles.itemDescription} numberOfLines={1}>
-                                {item.description}
+                            <Text variant="caption" style={styles.suggestionLabel} numberOfLines={1}>
+                                Apply
                             </Text>
-                        </TouchableOpacity>
-                    )
-                })}
-            </Animated.View>
-
-            <Input
-                containerStyle={{
-                    borderRadius: 20,
-                    backgroundColor: bg,
-                    borderColor,
-                }}
-                placeholder={isSubExpenseMode ? "Add sub-expense" : "What are you spending on?"}
-                style={styles.input}
-                placeholderTextColor={"rgba(255,255,255,0.3)"}
-                value={name}
-                onChangeText={(text) => {
-                    setSuppressed(false)
-                    setName(text)
-                }}
-                onBlur={() => setIsInputFocused(false)}
-                onFocus={() => setIsInputFocused(true)}
-                left={
-                    <IconButton
-                        onLongPress={() => {
-                            Feedback.trigger("impactLight")
-                            subexpenseSheetRef.current?.expand()
-                        }}
-                        icon={
-                            isSubExpenseMode ? (
-                                <Text
-                                    variant="body"
-                                    style={{
-                                        width: 18,
-                                        height: 18,
-                                        textAlign: "center",
-                                        color: Colors.foreground,
-                                        fontWeight: "900",
-                                    }}
-                                >
-                                    {SubExpenses.length}
-                                </Text>
-                            ) : (
-                                <AntDesign name="switcher" size={18} color="rgba(255,255,255,0.7)" />
-                            )
-                        }
-                        onPress={handleToggleSubExpenseMode}
-                        style={{
-                            backgroundColor: !isSubExpenseMode ? Colors.primary : Colors.secondary,
-                            padding: 10,
-                        }}
-                    />
-                }
-                right={
-                    <GlassView key={tintColor} style={{ borderRadius: 100 }} tintColor={tintColor}>
-                        <Ripple
-                            onPress={!isValid && prediction ? applyPrediction : handleSubmit}
-                            style={styles.save}
-                            disabled={!isValid && !prediction && !canPredict}
-                        >
-                            {loading && <ActivityIndicator size={14} color={Colors.foreground} />}
-                            <Text
-                                variant="caption"
-                                style={{
-                                    color:
-                                        isValid || (!isValid && prediction)
-                                            ? Colors.foreground
-                                            : lowOpacity(Colors.secondary_light_1, 0.5),
-                                    fontWeight: "500",
-                                    lineHeight: 20,
-                                }}
-                            >
-                                {isSubExpenseMode
-                                    ? "Add"
-                                    : isEditing
-                                      ? "Edit"
-                                      : !isValid && prediction
-                                        ? "Use"
-                                        : "Done"}
-                            </Text>
-                        </Ripple>
+                        </Pressable>
                     </GlassView>
-                }
-            />
+                </Animated.View>
+            )}
+
+            <View>
+                <View>
+                    {showSuggestion && (
+                        <Text style={styles.floatingSuggestion} numberOfLines={1}>
+                            <Text style={{ color: "transparent" }}>{name}</Text>
+                            {topSuggestion.description}
+                        </Text>
+                    )}
+                    <Input
+                        containerStyle={{
+                            borderRadius: 20,
+                            backgroundColor: bg,
+                            borderColor,
+                            marginBottom: 0,
+                        }}
+                        placeholder={isSubExpenseMode ? "Add sub-expense" : "What are you spending on?"}
+                        style={styles.input}
+                        placeholderTextColor={"rgba(255,255,255,0.3)"}
+                        value={name}
+                        onChangeText={(text) => {
+                            setSuppressed(false)
+                            setName(text)
+                        }}
+                        onBlur={() => setIsInputFocused(false)}
+                        onFocus={() => setIsInputFocused(true)}
+                        left={
+                            <IconButton
+                                onLongPress={() => {
+                                    Feedback.trigger("impactLight")
+                                    subexpenseSheetRef.current?.expand()
+                                }}
+                                icon={
+                                    isSubExpenseMode ? (
+                                        <Text
+                                            variant="body"
+                                            style={{
+                                                width: 18,
+                                                height: 18,
+                                                textAlign: "center",
+                                                color: Colors.foreground,
+                                                fontWeight: "900",
+                                            }}
+                                        >
+                                            {SubExpenses.length}
+                                        </Text>
+                                    ) : (
+                                        <AntDesign name="switcher" size={18} color="rgba(255,255,255,0.7)" />
+                                    )
+                                }
+                                onPress={handleToggleSubExpenseMode}
+                                style={{
+                                    backgroundColor: !isSubExpenseMode ? Colors.primary : Colors.secondary,
+                                    padding: 10,
+                                }}
+                            />
+                        }
+                    />
+                </View>
+            </View>
         </View>
     )
 }
 
 const styles = StyleSheet.create({
-    wrapper: {
-        flex: 1,
-    },
-    dropdown: {
+    suggestionPill: {
         position: "absolute",
         bottom: "100%",
-        left: 0,
-        right: 0,
-        marginBottom: 6,
-        borderRadius: 20,
-        borderWidth: 1,
+        alignSelf: "center",
+        marginBottom: 8,
         zIndex: 10,
+    },
+    suggestionGlass: {
+        borderRadius: 100,
+    },
+    suggestionPressable: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 8,
+        paddingHorizontal: 14,
+        paddingVertical: 8,
+    },
+    suggestionLabel: {
+        color: Colors.foreground,
+        fontWeight: "600",
+        maxWidth: 200,
+    },
+    floatingSuggestion: {
+        position: "absolute",
+        top: 16,
+        left: 14,
+        right: 80,
+        bottom: 0,
+        textAlignVertical: "center",
+        color: "rgba(255,255,255,0.25)",
+        fontSize: 18,
+        zIndex: 12,
     },
     input: {
         color: "rgba(255,255,255,0.7)",
         fontSize: 18,
         flex: 1,
-        width: Layout.screen.width - 30,
+        width: Layout.screen.width - 90,
         borderRadius: 100,
         zIndex: 11,
     },
@@ -241,34 +219,5 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
         gap: 7.5,
-    },
-    item: {
-        flexDirection: "row",
-        alignItems: "center",
-        paddingHorizontal: 14,
-        height: ITEM_HEIGHT,
-        gap: 10,
-    },
-    itemBorder: {
-        borderBottomWidth: 0.5,
-        borderBottomColor: Color(Colors.primary).lighten(1.2).hex(),
-    },
-    iconWrap: {
-        width: 20,
-        height: 20,
-        alignItems: "center",
-        justifyContent: "center",
-        flexShrink: 0,
-    },
-    itemDescription: {
-        flex: 1,
-        color: Colors.foreground,
-        fontSize: 14,
-    },
-    itemAmount: {
-        color: "rgba(255,255,255,0.65)",
-        fontSize: 13,
-        fontWeight: "500",
-        flexShrink: 0,
     },
 })

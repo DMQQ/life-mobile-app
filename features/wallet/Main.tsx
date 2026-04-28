@@ -1,7 +1,7 @@
 import Colors from "@/constants/Colors"
 import { StackScreenProps } from "@/types"
 import { ParamListBase } from "@react-navigation/native"
-import { createNativeStackNavigator } from "@react-navigation/native-stack"
+import { createNativeStackNavigator, NativeStackNavigationOptions } from "@react-navigation/native-stack"
 import { useEffect } from "react"
 import WalletContextProvider from "./components/WalletContext"
 import CreateExpenseModal from "./pages/CreateExpense"
@@ -57,7 +57,7 @@ export type WalletScreens<Screen extends keyof WalletRootStack> = StackScreenPro
 
 const Stack = createNativeStackNavigator<WalletRootStack>()
 
-const MODAL_OPTIONS = {
+const MODAL_OPTIONS: NativeStackNavigationOptions = {
     presentation: "modal",
     headerShown: false,
 } as const
