@@ -36,6 +36,7 @@ export default function useCreateExpensePage(
 
     const [spontaneousRate, setSpontaneousRate] = useState(params?.spontaneousRate || 0)
     const [subAccountId, setSubAccountId] = useState<string | null>(params?.subAccountId || null)
+    const [optionsCollapsed, setOptionsCollapsed] = useState(true)
 
     const [isSubExpenseMode, setIsSubExpenseMode] = useState(false)
 
@@ -212,6 +213,7 @@ export default function useCreateExpensePage(
 
     const isAnimating = useSharedValue(false)
     const transformX = useSharedValue(0)
+    const optionsProgress = useSharedValue(0)
 
     const [regularModeState, setRegularModeState] = useState({
         amount: params?.amount?.toString() || "0",
@@ -301,6 +303,10 @@ export default function useCreateExpensePage(
         setCategory(prediction.category as keyof typeof Icons)
     }, [prediction, amount])
 
+    useEffect(() => {
+        optionsProgress.value = withSpring(optionsCollapsed ? 0 : 1, { damping: 20, stiffness: 150 })
+    }, [optionsCollapsed])
+
     const canPredict = !isValid && prediction
 
     const setExpense = (expense: Expense) => {
@@ -330,6 +336,7 @@ export default function useCreateExpensePage(
             view,
             spontaneousRate,
             subAccountId,
+            optionsCollapsed,
         },
         methods: {
             setAmount,
@@ -350,9 +357,11 @@ export default function useCreateExpensePage(
             setCategory,
             setIsSubscription,
             setSubAccountId,
+            setOptionsCollapsed,
         },
         animated: {
             transformX,
+            optionsProgress,
         },
     }
 }

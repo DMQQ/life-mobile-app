@@ -31,6 +31,7 @@ export interface CreateExpenseContextType {
         view: ViewType
         spontaneousRate: number
         subAccountId: string | null
+        optionsCollapsed: boolean
     }
     methods: {
         setAmount: (amount: string) => void
@@ -51,9 +52,11 @@ export interface CreateExpenseContextType {
         setCategory: (category: keyof typeof Icons) => void
         setIsSubscription: (isSubscription: boolean) => void
         setSubAccountId: (id: string | null) => void
+        setOptionsCollapsed: (collapsed: boolean) => void
     }
     animated: {
         transformX: SharedValue<number>
+        optionsProgress: SharedValue<number>
     }
     isInputFocused: boolean
     setIsInputFocused: (focused: boolean) => void

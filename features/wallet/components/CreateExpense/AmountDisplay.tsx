@@ -8,19 +8,23 @@ import { useCreateExpenseContext } from "@/features/wallet/context/CreateExpense
 export default function AmountDisplay() {
     const { state, methods, animated } = useCreateExpenseContext()
     const { amount, SubExpenses, date, type } = state
-    const { transformX } = animated
+    const { transformX, optionsProgress } = animated
 
     const animatedAmount = useAnimatedStyle(
         () => ({
             transform: [{ translateX: transformX.value }],
-
             fontSize: interpolate(amount.length, [0, 10, 15], [90, 60, 35], "clamp"),
         }),
         [amount],
     )
 
+    const animatedContainer = useAnimatedStyle(() => ({
+        height: 225,
+        paddingTop: interpolate(optionsProgress.value, [0, 1], [110, 45], "clamp"),
+    }))
+
     return (
-        <View style={styles.container}>
+        <Animated.View style={[styles.container, animatedContainer]}>
             <View>
                 <Animated.Text
                     style={[{ color: Colors.foreground, fontWeight: "bold", textAlign: "center" }, animatedAmount]}
@@ -45,7 +49,7 @@ export default function AmountDisplay() {
                     </Text>
                 </View>
             )}
-        </View>
+        </Animated.View>
     )
 }
 
