@@ -3,6 +3,7 @@ import Colors from "@/constants/Colors"
 import Layout from "@/constants/Layout"
 import { SpontaneousRateChip } from "@/features/wallet/components/CreateExpense/SpontaneousRate"
 import { CategoryUtils, Icons } from "@/features/wallet/components/Expense/ExpenseIcon"
+import { useCreateExpenseContext } from "@/features/wallet/context/CreateExpenseContext"
 import lowOpacity from "@/utils/functions/lowOpacity"
 import { AntDesign, Entypo, MaterialCommunityIcons } from "@expo/vector-icons"
 import Color from "color"
@@ -14,34 +15,11 @@ import Ripple from "react-native-material-ripple"
 import Animated, { LinearTransition } from "react-native-reanimated"
 import { useSubAccounts } from "../../hooks/useSubAccounts"
 
-type Type = "expense" | "income" | null
+export default function OptionsPicker() {
+    const { state, methods } = useCreateExpenseContext()
+    const { type, category, spontaneousRate, date, subAccountId } = state
+    const { setType, setView, setDate, setSubAccountId } = methods
 
-interface OptionsPickerProps {
-    type: Type
-    setType: React.Dispatch<React.SetStateAction<Type>>
-    category: keyof typeof Icons
-    setCategory: React.Dispatch<React.SetStateAction<keyof typeof Icons>>
-    setChangeView: React.Dispatch<React.SetStateAction<boolean>>
-    setSpontaneousView: React.Dispatch<React.SetStateAction<boolean>>
-    spontaneousRate: number
-    setDate: React.Dispatch<React.SetStateAction<string | null>>
-    date: string | null
-    subAccountId: string | null
-    setSubAccountId: (id: string | null) => void
-}
-
-export default function OptionsPicker({
-    type,
-    setType,
-    setChangeView,
-    setSpontaneousView,
-    setDate,
-    category,
-    spontaneousRate,
-    date,
-    subAccountId,
-    setSubAccountId,
-}: OptionsPickerProps) {
     const { data: subAccountsData } = useSubAccounts()
     const subAccounts = subAccountsData?.wallet.subAccounts ?? []
     const selectedAccount = subAccounts.find((a) => a.id === subAccountId) ?? null
@@ -139,7 +117,7 @@ export default function OptionsPicker({
 
             {type !== "income" && (
                 <Ripple
-                    onPress={onPressWithFeedback(() => setChangeView((p) => !p))}
+                    onPress={onPressWithFeedback(() => setView("category"))}
                     style={[
                         styles.chip,
                         {
@@ -171,8 +149,7 @@ export default function OptionsPicker({
             <SpontaneousRateChip
                 value={spontaneousRate}
                 onPress={onPressWithFeedback(() => {
-                    setChangeView(false)
-                    setSpontaneousView(true)
+                    setView("spontaneous")
                 })}
             />
 

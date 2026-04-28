@@ -19,7 +19,7 @@ import type { DateData, MarkedDates } from "react-native-calendars/src/types"
 import Feedback from "react-native-haptic-feedback"
 import Ripple from "react-native-material-ripple"
 import Animated, { FadeIn, interpolate, useAnimatedStyle, useSharedValue } from "react-native-reanimated"
-import NumbersPad from "../components/CreateExpense/NumberPad"
+import NumberPad from "@/components/ui/NumberPad"
 import useSubscription from "../hooks/useSubscription"
 
 type BillingCycle = "daily" | "weekly" | "monthly" | "yearly" | "custom"
@@ -389,9 +389,9 @@ export default function EditSubscription({ route, navigation }: Props) {
                                     </ScrollView>
                                 </Animated.View>
 
-                                <NumbersPad
-                                    handleAmountChange={handleAmountChangeWrapper}
-                                    rotateBackButton={formik.values.amount === "0"}
+                                <NumberPad
+                                    onKeyPress={handleAmountChangeWrapper}
+                                    onBackPress={formik.values.amount === "0" ? () => navigation.goBack() : undefined}
                                 />
                             </View>
                         </View>

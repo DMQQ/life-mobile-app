@@ -14,6 +14,7 @@ import { ActivityIndicator, StyleSheet, TouchableOpacity, View } from "react-nat
 import Feedback from "react-native-haptic-feedback"
 import Ripple from "react-native-material-ripple"
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated"
+import { useCreateExpenseContext } from "@/features/wallet/context/CreateExpenseContext"
 
 const GET_EXPENSE_SUGGESTIONS = gql`
     query GetExpenseSuggestions($filters: GetWalletFilters, $take: Int) {
@@ -39,45 +40,11 @@ interface Suggestion {
     category: string
 }
 
-interface NameInputProps {
-    isInputFocused: boolean
-    setIsInputFocused: (focused: boolean) => void
-    name: string
-    setName: (name: string) => void
-    setAmount: (amount: string) => void
-    setCategory: (category: keyof typeof Icons) => void
-    isSubExpenseMode: boolean
-    handleToggleSubExpenseMode: () => void
-    subexpenseSheetRef: React.RefObject<any>
-    loading: boolean
-    isValid: boolean
-    prediction?: any
-    canPredict?: boolean
-    applyPrediction: () => void
-    handleSubmit: () => void
-    params?: { isEditing?: boolean }
-    subExpensesLength: number
-}
+export default function NameInput({ isEditing }: { isEditing?: boolean }) {
+    const { state, methods, isInputFocused, setIsInputFocused, subexpenseSheetRef } = useCreateExpenseContext()
+    const { name, isValid, prediction, canPredict, loading, isSubExpenseMode, SubExpenses } = state
+    const { setName, setAmount, setCategory, handleToggleSubExpenseMode, applyPrediction, handleSubmit } = methods
 
-export default function NameInput({
-    isInputFocused,
-    setIsInputFocused,
-    name,
-    setName,
-    setAmount,
-    setCategory,
-    isSubExpenseMode,
-    handleToggleSubExpenseMode,
-    subexpenseSheetRef,
-    loading,
-    isValid,
-    prediction,
-    canPredict,
-    applyPrediction,
-    handleSubmit,
-    params,
-    subExpensesLength = 0,
-}: NameInputProps) {
     const [debouncedQuery, setDebouncedQuery] = useState(name)
     const [suppressed, setSuppressed] = useState(false)
 
@@ -196,7 +163,7 @@ export default function NameInput({
                                         fontWeight: "900",
                                     }}
                                 >
-                                    {subExpensesLength}
+                                    {SubExpenses.length}
                                 </Text>
                             ) : (
                                 <AntDesign name="switcher" size={18} color="rgba(255,255,255,0.7)" />
@@ -230,7 +197,7 @@ export default function NameInput({
                             >
                                 {isSubExpenseMode
                                     ? "Add"
-                                    : params?.isEditing
+                                    : isEditing
                                       ? "Edit"
                                       : !isValid && prediction
                                         ? "Use"

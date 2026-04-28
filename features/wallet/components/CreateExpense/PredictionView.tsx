@@ -13,12 +13,12 @@ import Animated, {
     withSpring,
 } from "react-native-reanimated"
 import { useEffect, useMemo } from "react"
-import { ExpensePrediction } from "../../hooks/usePredictCategory"
 import { CategoryIcon, CategoryUtils, Icons } from "../Expense/ExpenseIcon"
 import Layout from "@/constants/Layout"
 import { LinearGradient } from "expo-linear-gradient"
 import Color from "color"
 import GlassView from "@/components/ui/GlassView"
+import { useCreateExpenseContext } from "@/features/wallet/context/CreateExpenseContext"
 
 const styles = StyleSheet.create({
     expense_item: {
@@ -145,9 +145,9 @@ const slideOutDownWithScale = () => {
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable)
 
-export default function PredictionView(
-    item: ExpensePrediction & { applyPrediction: () => void; currentEntryText: string },
-) {
+export default function PredictionView() {
+    const { state, methods } = useCreateExpenseContext()
+    const item = { ...state.prediction, applyPrediction: methods.applyPrediction, currentEntryText: state.name }
     const price = item.type === "expense" ? (item.amount * -1).toFixed(2) : item.amount.toFixed(2)
     const isBalanceEdit = item.description.includes("Balance edited") || item.amount === 0
 

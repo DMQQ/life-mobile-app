@@ -10,8 +10,24 @@ import IconButton from "@/components/ui/IconButton/IconButton"
 import { AntDesign } from "@expo/vector-icons"
 import Feedback from "react-native-haptic-feedback"
 import Color from "color"
+import { CreateExpenseContext } from "@/features/wallet/context/CreateExpenseContext"
+import { useContext } from "react"
 
-const CategorySelector = (props: { current: string; onPress: (item: string) => void; dismiss: VoidFunction }) => {
+const CategorySelector = (props?: { current?: string; onPress?: (item: string) => void; dismiss?: VoidFunction }) => {
+    const ctx = useContext(CreateExpenseContext)
+
+    const current = props?.current ?? ctx?.state.category ?? "none"
+    const dismiss = props?.dismiss ?? (() => {
+        ctx?.methods.setView("main")
+        ctx?.methods.setCategory("none")
+    })
+    const onPress = props?.onPress ?? ((item: string) => {
+        ctx?.methods.setIsSubscription(item === "subscription")
+        ctx?.methods.setType("expense")
+        ctx?.methods.setCategory(item as keyof typeof Icons)
+        ctx?.methods.setView("main")
+    })
+
     const data = Object.entries(Icons)
     const [query, setQuery] = useState("")
 
@@ -26,11 +42,11 @@ const CategorySelector = (props: { current: string; onPress: (item: string) => v
     useEffect(() => {
         if (listRef.current && query.length > 0) {
             listRef.current.scrollToOffset({ animated: true, offset: 0 })
-        } else if (props.current) {
-            const currentIndex = filteredData.find((item) => item[0] === props.current)
+        } else if (current) {
+            const currentIndex = filteredData.find((item) => item[0] === current)
             listRef.current?.scrollToItem({ item: currentIndex, animated: false })
         }
-    }, [query, props.current])
+    }, [query, current])
 
     return (
         <Animated.View entering={FadeIn} style={styles.selectorContainer}>
@@ -43,7 +59,7 @@ const CategorySelector = (props: { current: string; onPress: (item: string) => v
                 style={styles.searchInput}
                 right={
                     <IconButton
-                        onPress={() => props.dismiss()}
+                        onPress={dismiss}
                         icon={<AntDesign name="close" size={20} color={"rgba(255,255,255,0.7)"} />}
                         style={styles.closeButton}
                     />
@@ -64,13 +80,13 @@ const CategorySelector = (props: { current: string; onPress: (item: string) => v
                         <Ripple
                             onPress={() => {
                                 Feedback.trigger("impactLight")
-                                props.onPress(item[0])
+                                onPress(item[0])
                             }}
                             style={[
                                 styles.optionButton,
                                 {
                                     backgroundColor:
-                                        item[0] === props.current
+                                        item[0] === current
                                             ? lowOpacity(item[1].backgroundColor, 0.25)
                                             : Colors.primary_lighter,
                                 },
@@ -94,7 +110,7 @@ const CategorySelector = (props: { current: string; onPress: (item: string) => v
                                             styles.optionLabel,
                                             {
                                                 color:
-                                                    item[0] === props.current
+                                                    item[0] === current
                                                         ? Color(item[1].backgroundColor).lighten(0.5).hex()
                                                         : "rgba(255,255,255,0.9)",
                                             },
@@ -109,7 +125,7 @@ const CategorySelector = (props: { current: string; onPress: (item: string) => v
                                         styles.optionLabel,
                                         {
                                             color:
-                                                item[0] === props.current
+                                                item[0] === current
                                                     ? Color(item[1].backgroundColor).lighten(0.5).hex()
                                                     : "rgba(255,255,255,0.9)",
                                         },
@@ -119,7 +135,7 @@ const CategorySelector = (props: { current: string; onPress: (item: string) => v
                                 </Text>
                             )}
 
-                            {item[0] === props.current && (
+                            {item[0] === current && (
                                 <View style={[styles.selectedIndicator, { backgroundColor: item[1].backgroundColor }]}>
                                     <Text style={styles.indicatorText}>✓</Text>
                                 </View>

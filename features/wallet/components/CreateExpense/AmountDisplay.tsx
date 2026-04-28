@@ -1,30 +1,15 @@
 import moment from "moment"
 import { StyleSheet, View } from "react-native"
-import Animated, { interpolate, SharedValue, useAnimatedStyle } from "react-native-reanimated"
+import Animated, { interpolate, useAnimatedStyle } from "react-native-reanimated"
 import Colors from "@/constants/Colors"
 import Text from "@/components/ui/Text/Text"
+import { useCreateExpenseContext } from "@/features/wallet/context/CreateExpenseContext"
 
-interface AmountDisplayProps {
-    amount: string
-    subExpensesLength: number
+export default function AmountDisplay() {
+    const { state, methods, animated } = useCreateExpenseContext()
+    const { amount, SubExpenses, date, type } = state
+    const { transformX } = animated
 
-    date: string
-
-    calculateSubExpensesTotal: () => number
-
-    transformX: SharedValue<number>
-
-    type: string
-}
-
-export default function AmountDisplay({
-    amount,
-    subExpensesLength,
-    date,
-    calculateSubExpensesTotal,
-    transformX,
-    type,
-}: AmountDisplayProps) {
     const animatedAmount = useAnimatedStyle(
         () => ({
             transform: [{ translateX: transformX.value }],
@@ -42,9 +27,9 @@ export default function AmountDisplay({
                     <Text variant="body" style={{ fontSize: 20 }}>zł</Text>
                 </Animated.Text>
 
-                {subExpensesLength > 0 && (
+                {SubExpenses.length > 0 && (
                     <Text variant="body" style={{ color: "rgba(255,255,255,0.7)", textAlign: "center" }}>
-                        {subExpensesLength} item for ~{calculateSubExpensesTotal().toFixed(2)}zł
+                        {SubExpenses.length} item for ~{methods.calculateSubExpensesTotal().toFixed(2)}zł
                     </Text>
                 )}
             </View>

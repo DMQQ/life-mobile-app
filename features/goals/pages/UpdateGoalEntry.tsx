@@ -4,7 +4,7 @@ import IconButton from "@/components/ui/IconButton/IconButton"
 import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
 import Layout from "@/constants/Layout"
-import NumbersPad from "@/features/wallet/components/CreateExpense/NumberPad"
+import NumberPad from "@/components/ui/NumberPad"
 import lowOpacity from "@/utils/functions/lowOpacity"
 import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons"
 import Color from "color"
@@ -438,7 +438,7 @@ export default function AddGoalEntry({ route, navigation }: any) {
                                 </LiquidGlassView>
                             </Animated.View>
 
-                            <NumbersPad rotateBackButton={amount === "0"} handleAmountChange={handleAmountChange} />
+                            <NumberPad onKeyPress={handleAmountChange} onBackPress={amount === "0" ? () => navigation.goBack() : undefined} />
                         </View>
                     </View>
                 </View>

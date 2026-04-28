@@ -1,8 +1,7 @@
-import { Alert, StyleSheet, Text, View } from "react-native"
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import moment from "moment"
-import { Subscription } from "@/types"
 import Colors from "@/constants/Colors"
-import Select from "@/components/ui/Select/Select"
+import ContextMenu from "react-native-context-menu-view"
 
 interface SubscriptionSectionProps {
     hasSubscription: boolean
@@ -55,9 +54,7 @@ export default function SubscriptionSection({
             {hasSubscription && (
                 <View style={styles.cardDates}>
                     <View style={styles.dateRow}>
-                        <Text style={styles.dateLabel}>
-                            {isSubscriptionActive ? "Next payment" : "Last payment"}
-                        </Text>
+                        <Text style={styles.dateLabel}>{isSubscriptionActive ? "Next payment" : "Last payment"}</Text>
                         <Text style={styles.dateValue}>
                             {selected.subscription?.nextBillingDate
                                 ? moment(+selected.subscription.nextBillingDate).format("MMM D, YYYY")
@@ -65,9 +62,7 @@ export default function SubscriptionSection({
                         </Text>
                     </View>
                     <View style={styles.dateRow}>
-                        <Text style={styles.dateLabel}>
-                            {isSubscriptionActive ? "Active since" : "Created on"}
-                        </Text>
+                        <Text style={styles.dateLabel}>{isSubscriptionActive ? "Active since" : "Created on"}</Text>
                         <Text style={styles.dateValue}>
                             {moment(+selected.subscription.dateStart).format("MMM D, YYYY")}
                         </Text>
@@ -78,25 +73,23 @@ export default function SubscriptionSection({
             <View style={{ marginTop: 12 }}>
                 <Text style={styles.dateLabel}>Assign to subscription</Text>
                 <View style={{ marginTop: 8 }}>
-                    <Select
-                        options={subscriptionOptions.map((s) => s.description)}
-                        selected={
-                            selected?.subscription?.id
-                                ? [
-                                      subscriptionOptions.find((s) => s.id === selected?.subscription?.id)
-                                          ?.description || "None",
-                                  ]
-                                : ["None"]
-                        }
-                        setSelected={(selectedItems) => {
-                            const selectedSub = subscriptionOptions.find(
-                                (s) => s.description === selectedItems[0],
-                            )
+                    <ContextMenu
+                        actions={subscriptionOptions.map((s) => ({ title: s.description }))}
+                        onPress={(e) => {
+                            const selectedSub = subscriptionOptions[e.nativeEvent.index]
                             if (selectedSub) onAssignSubscription(selectedSub.id)
                         }}
-                        closeOnSelect
-                        placeholderText="Select subscription"
-                    />
+                        dropdownMenuMode
+                    >
+                        <TouchableOpacity style={styles.contextMenuTrigger}>
+                            <Text style={styles.contextMenuTriggerText}>
+                                {selected?.subscription?.id
+                                    ? subscriptionOptions.find((s) => s.id === selected?.subscription?.id)
+                                          ?.description ?? "None"
+                                    : "None"}
+                            </Text>
+                        </TouchableOpacity>
+                    </ContextMenu>
                 </View>
             </View>
         </View>
@@ -155,6 +148,20 @@ const styles = StyleSheet.create({
     dateValue: {
         color: Colors.foreground_secondary,
         fontSize: 13,
+        fontWeight: "500",
+    },
+    contextMenuTrigger: {
+        backgroundColor: Colors.primary,
+        borderRadius: 10,
+        paddingHorizontal: 14,
+        paddingVertical: 10,
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+    },
+    contextMenuTriggerText: {
+        color: Colors.foreground,
+        fontSize: 14,
         fontWeight: "500",
     },
 })

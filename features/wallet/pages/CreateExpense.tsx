@@ -1,11 +1,10 @@
 import IconButton from "@/components/ui/IconButton/IconButton"
 import Colors from "@/constants/Colors"
 import Layout from "@/constants/Layout"
-import OptionsPicker from "@/features/wallet/components/CreateExpense/OptionsPicker"
 import useCreateExpensePage from "@/features/wallet/hooks/useCreateExpensePage"
 import { AntDesign } from "@expo/vector-icons"
 import moment from "moment"
-import { useCallback, useRef, useState } from "react"
+import { useRef, useState } from "react"
 import { StyleSheet, View } from "react-native"
 import DateTimePicker from "react-native-modal-datetime-picker"
 import Animated, { FadeIn } from "react-native-reanimated"
@@ -13,133 +12,83 @@ import AmountDisplay from "../components/CreateExpense/AmountDisplay"
 import CategorySelector from "../components/CreateExpense/CategorySelectorView"
 import ExpenseAIMaker from "../components/CreateExpense/ExpenseAIMaker"
 import NameInput from "../components/CreateExpense/NameInput"
-import NumbersPad from "../components/CreateExpense/NumberPad"
+import ExpenseNumberPad from "../components/CreateExpense/ExpenseNumberPad"
+import OptionsPicker from "../components/CreateExpense/OptionsPicker"
 import PredictionView from "../components/CreateExpense/PredictionView"
 import { SpontaneousRateSelector } from "../components/CreateExpense/SpontaneousRate"
 import SubExpenseSheet from "../components/CreateExpense/SubexpenseSheet"
-import { Icons } from "../components/Wallet/WalletItem"
 import GlassView from "@/components/ui/GlassView"
 import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/types"
+import { CreateExpenseProvider, CreateExpenseContextType } from "../context/CreateExpenseContext"
 
 export default function CreateExpenseModal({ navigation, route: { params } }: any) {
-    const { state, methods, animated } = useCreateExpensePage(params)
-    const [spontaneousView, setSpontaneousView] = useState(false)
+    const hookData = useCreateExpensePage(params)
     const [isInputFocused, setIsInputFocused] = useState(false)
     const subexpenseSheetRef = useRef<BottomSheetModalMethods>(null)
 
-    const onPressCategorySelector = useCallback((item: string) => {
-        methods.setIsSubscription(item === "subscription")
-        methods.setType("expense")
-        methods.setCategory(item as keyof typeof Icons)
-        methods.setChangeView(false)
-    }, [])
+    const contextValue: CreateExpenseContextType = {
+        ...hookData,
+        isInputFocused,
+        setIsInputFocused,
+        subexpenseSheetRef,
+    }
+
+    const { state, methods } = hookData
 
     return (
-        <View style={{ flex: 1 }}>
-            <View style={styles.container}>
-                {state.prediction && (
-                    <PredictionView
-                        currentEntryText={state.name}
-                        applyPrediction={methods.applyPrediction}
-                        {...state.prediction}
-                    />
-                )}
+        <CreateExpenseProvider value={contextValue}>
+            <View style={{ flex: 1 }}>
+                <View style={styles.container}>
+                    {state.prediction && <PredictionView />}
 
-                <GlassView style={styles.cameraIcon}>
-                    <IconButton
-                        onPress={() => navigation.goBack()}
-                        icon={<AntDesign name="close" size={20} color="#fff" />}
-                    />
-                </GlassView>
+                    <GlassView style={styles.cameraIcon}>
+                        <IconButton
+                            onPress={() => navigation.goBack()}
+                            icon={<AntDesign name="close" size={20} color="#fff" />}
+                        />
+                    </GlassView>
 
-                <ExpenseAIMaker setExpense={methods.setExpense} initialOpen={params?.shouldOpenPhotoPicker || false} />
+                    <ExpenseAIMaker initialOpen={params?.shouldOpenPhotoPicker || false} />
 
-                <AmountDisplay
-                    type={state.type || ""}
-                    amount={state.amount}
-                    subExpensesLength={state.SubExpenses.length}
-                    date={state.date || ""}
-                    calculateSubExpensesTotal={methods.calculateSubExpensesTotal}
-                    transformX={animated.transformX}
-                />
+                    <AmountDisplay />
 
-                <View style={styles.contentContainer}>
-                    <View
-                        style={{
-                            borderRadius: 35,
-                            flex: 1,
-                        }}
-                    >
-                        {!state.changeView && !spontaneousView && (
-                            <Animated.View entering={FadeIn} style={{ gap: 5 }}>
-                                <View
-                                    style={{
-                                        flexDirection: "row",
-                                        width: "100%",
-                                        alignItems: "center",
-                                        zIndex: 1000,
-                                    }}
-                                >
-                                    <NameInput
-                                        {...state}
-                                        {...methods}
-                                        subExpensesLength={state.SubExpenses.length}
-                                        canPredict={!!state.canPredict}
-                                        isInputFocused={isInputFocused}
-                                        setIsInputFocused={setIsInputFocused}
-                                        subexpenseSheetRef={subexpenseSheetRef}
-                                        params={params}
-                                        loading={state.loading}
-                                    />
-                                </View>
-                                <OptionsPicker {...state} {...methods} setSpontaneousView={setSpontaneousView} />
-                            </Animated.View>
-                        )}
+                    <View style={styles.contentContainer}>
+                        <View style={{ borderRadius: 35, flex: 1 }}>
+                            {state.view === "main" && (
+                                <>
+                                    <Animated.View entering={FadeIn} style={{ gap: 5 }}>
+                                        <View
+                                            style={{
+                                                flexDirection: "row",
+                                                width: "100%",
+                                                alignItems: "center",
+                                                zIndex: 1000,
+                                            }}
+                                        >
+                                            <NameInput isEditing={params?.isEditing} />
+                                        </View>
+                                        <OptionsPicker />
+                                    </Animated.View>
+                                    <ExpenseNumberPad />
+                                </>
+                            )}
 
-                        {state.changeView && !spontaneousView && (
-                            <CategorySelector
-                                dismiss={() => {
-                                    methods.setChangeView(false)
-                                    methods.setCategory("none")
-                                }}
-                                current={state.category}
-                                onPress={onPressCategorySelector}
-                            />
-                        )}
+                            {state.view === "category" && <CategorySelector />}
 
-                        {spontaneousView && (
-                            <SpontaneousRateSelector
-                                value={state.spontaneousRate}
-                                setValue={methods.setSpontaneousRate}
-                                dismiss={() => setSpontaneousView(false)}
-                            />
-                        )}
-
-                        {!state.changeView && !spontaneousView && (
-                            <NumbersPad
-                                rotateBackButton={state.amount === "0" && state.SubExpenses.length === 0}
-                                handleAmountChange={methods.handleAmountChange}
-                            />
-                        )}
+                            {state.view === "spontaneous" && <SpontaneousRateSelector />}
+                        </View>
                     </View>
                 </View>
-            </View>
-            <DateTimePicker
-                isVisible={typeof state.date !== "string"}
-                onConfirm={(date) => {
-                    methods.setDate(moment(date).format("YYYY-MM-DD"))
-                }}
-                onCancel={() => methods.setDate(moment().format("YYYY-MM-DD"))}
-            />
 
-            <SubExpenseSheet
-                ref={subexpenseSheetRef}
-                setSubExpenses={methods.setSubExpenses}
-                SubExpenses={state.SubExpenses}
-                setIsSubExpenseMode={methods.setIsSubExpenseMode}
-                date={state.date}
-            />
-        </View>
+                <DateTimePicker
+                    isVisible={typeof state.date !== "string"}
+                    onConfirm={(date) => methods.setDate(moment(date).format("YYYY-MM-DD"))}
+                    onCancel={() => methods.setDate(moment().format("YYYY-MM-DD"))}
+                />
+
+                <SubExpenseSheet />
+            </View>
+        </CreateExpenseProvider>
     )
 }
 

@@ -2,10 +2,11 @@ import Colors from "@/constants/Colors"
 import { MaterialCommunityIcons } from "@expo/vector-icons"
 import { LinearGradient } from "expo-linear-gradient"
 import Color from "color"
-import { FlatList, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native"
+import { FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import { useSubAccounts, useDeleteSubAccount } from "../../hooks/useSubAccounts"
 import { useWalletContext } from "../WalletContext"
 import { useNavigation } from "@react-navigation/native"
+import Layout from "@/constants/Layout"
 
 interface SubAccount {
     id: string
@@ -15,10 +16,12 @@ interface SubAccount {
     icon: string
     balance: number
     isDefault: boolean
+    income?: number
+    expense?: number
 }
 
-const CARD_W = 260
-const CARD_H = 155
+const CARD_W = Layout.screen.width * 0.8
+const CARD_H = CARD_W * 0.6
 
 export default function SubAccountCards() {
     const { data } = useSubAccounts()
@@ -77,15 +80,18 @@ function AccountCard({
     const base = Color(account.color).darken(0.45).string()
     const mid = Color(account.color).darken(0.28).string()
     const accent = account.color
-    const dimAccent = Color(accent).alpha(0.18).string()
-    const dimAccent2 = Color(accent).alpha(0.08).string()
+    const dimAccent = Color(accent).alpha(0.32).string()
+    const dimAccent2 = Color(accent).alpha(0.16).string()
 
     const oposite = (Color(accent).isLight() ? Color(accent).darken(0.8) : Color(accent).lighten(0.8)).string()
 
+    const activeMid = active ? mid : Color(mid).darken(0.3).string()
+    const activeBase = active ? base : Color(base).darken(0.3).string()
+
     return (
-        <TouchableOpacity activeOpacity={0.85} onPress={onPress} style={{ opacity: active ? 1 : 0.55 }}>
+        <TouchableOpacity activeOpacity={0.85} onPress={onPress}>
             <LinearGradient
-                colors={[mid, base, Color(base).darken(0.15).string()]}
+                colors={[activeMid, activeBase, Color(activeBase).darken(0.15).string()]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={styles.card}
@@ -96,8 +102,17 @@ function AccountCard({
                 <View style={[styles.texCircle3, { backgroundColor: dimAccent }]} />
 
                 {/* stripe lines */}
-                <View style={[styles.stripe, { backgroundColor: Color(accent).alpha(0.06).string(), top: 38 }]} />
-                <View style={[styles.stripe, { backgroundColor: Color(accent).alpha(0.04).string(), top: 50 }]} />
+                <View style={[styles.stripe, { backgroundColor: Color(accent).alpha(0.12).string(), top: 38 }]} />
+                <View style={[styles.stripe, { backgroundColor: Color(accent).alpha(0.07).string(), top: 50 }]} />
+
+                {/* dark top-to-bottom overlay */}
+                <LinearGradient
+                    colors={["transparent", "rgba(0,0,0,0.5)"]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 0, y: 1 }}
+                    style={StyleSheet.absoluteFillObject}
+                    pointerEvents="none"
+                />
 
                 {/* top row */}
                 <View style={styles.topRow}>
@@ -137,25 +152,37 @@ function AccountCard({
                     </View>
                 </View>
 
-                {/* name */}
-                <Text style={styles.cardName} numberOfLines={1}>
-                    {account.name}
-                </Text>
-                {account.description ? (
-                    <Text style={styles.cardDesc} numberOfLines={1}>
-                        {account.description}
+                {/* name + balance */}
+                <View>
+                    <Text style={styles.cardName} numberOfLines={1}>
+                        {account.name}
                     </Text>
-                ) : null}
-
-                {/* chip + balance row */}
-                <View style={styles.bottomRow}>
-                    <View style={styles.chipGroup}>
-                        <View style={[styles.chip1, { borderColor: Color(accent).alpha(0.5).string() }]} />
-                        <View style={[styles.chip2, { backgroundColor: Color(accent).alpha(0.25).string() }]} />
-                    </View>
                     <View style={styles.balanceBlock}>
                         <Text style={[styles.balanceAmount, { color: "#fff" }]}>{account.balance.toFixed(2)}</Text>
                         <Text style={[styles.balanceCurrency, { color: Color(accent).alpha(0.7).string() }]}>zł</Text>
+                    </View>
+                </View>
+
+                {/* income / expense row */}
+                <View style={[styles.separator, { backgroundColor: Color(accent).alpha(0.18).string() }]} />
+                <View style={styles.bottomRow}>
+                    <View style={styles.statBlock}>
+                        <Text style={[styles.statLabel, { color: Color(accent).alpha(0.85).string() }]}>
+                            Monthly Income
+                        </Text>
+                        <View style={styles.statRow}>
+                            <Text style={styles.statAmount}>{account.income ? account.income.toFixed(2) : "0.00"}</Text>
+                            <MaterialCommunityIcons name="trending-up" size={13} color="#4ade80" />
+                        </View>
+                    </View>
+                    <View style={[styles.statBlock, { alignItems: "flex-end" }]}>
+                        <Text style={[styles.statLabel, { color: "#f87171" }]}>Monthly Expense</Text>
+                        <View style={styles.statRow}>
+                            <Text style={styles.statAmount}>
+                                {account.expense ? account.expense.toFixed(2) : "0.00"}
+                            </Text>
+                            <MaterialCommunityIcons name="trending-down" size={13} color="#f87171" />
+                        </View>
                     </View>
                 </View>
             </LinearGradient>
@@ -178,6 +205,7 @@ const styles = StyleSheet.create({
         marginBottom: 25,
         paddingHorizontal: 2,
     },
+
     card: {
         width: CARD_W,
         height: CARD_H,
@@ -257,41 +285,50 @@ const styles = StyleSheet.create({
         fontSize: 11,
         marginTop: 1,
     },
+    separator: {
+        height: StyleSheet.hairlineWidth,
+        marginBottom: 8,
+    },
     bottomRow: {
         flexDirection: "row",
         alignItems: "flex-end",
         justifyContent: "space-between",
     },
-    chipGroup: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 3,
-    },
-    chip1: {
-        width: 28,
-        height: 20,
-        borderRadius: 5,
-        borderWidth: 1.5,
-    },
-    chip2: {
-        width: 18,
-        height: 20,
-        borderRadius: 5,
-    },
     balanceBlock: {
         flexDirection: "row",
         alignItems: "flex-end",
         gap: 3,
+        marginTop: 2,
     },
     balanceAmount: {
-        fontSize: 22,
+        fontSize: 24,
         fontWeight: "800",
         letterSpacing: 0.5,
+        color: "#fff",
     },
     balanceCurrency: {
         fontSize: 13,
         fontWeight: "500",
-        marginBottom: 2,
+        marginBottom: 3,
+    },
+    statBlock: {
+        gap: 1,
+    },
+    statLabel: {
+        fontSize: 9,
+        fontWeight: "500",
+        textTransform: "uppercase",
+        letterSpacing: 0.4,
+    },
+    statRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 3,
+    },
+    statAmount: {
+        fontSize: 13,
+        fontWeight: "700",
+        color: "#fff",
     },
     actions: {
         flexDirection: "row",

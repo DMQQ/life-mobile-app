@@ -8,37 +8,19 @@ import BottomSheetModal, {
     BottomSheetFlatList,
     BottomSheetView,
 } from "@gorhom/bottom-sheet"
-import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/types"
 import moment from "moment"
 import React, { useCallback } from "react"
 import { Alert, StyleProp, Text, View, ViewStyle } from "react-native"
 import WalletItem from "../Wallet/WalletItem"
 import Color from "color"
 import { MaterialIcons } from "@expo/vector-icons"
+import { useCreateExpenseContext, SubExpense } from "@/features/wallet/context/CreateExpenseContext"
 
-interface SubExpense {
-    id: string
-    amount: number
-    description: string
-    category: keyof typeof Icons
-}
+const SubExpenseSheet = () => {
+    const { state, methods, subexpenseSheetRef } = useCreateExpenseContext()
+    const { SubExpenses, date } = state
+    const { setIsSubExpenseMode, setSubExpenses } = methods
 
-interface SubExpenseSheetProps {
-    setIsSubExpenseMode: React.Dispatch<React.SetStateAction<boolean>>
-    setSubExpenses: React.Dispatch<React.SetStateAction<SubExpense[]>>
-    SubExpenses: SubExpense[]
-    date: string | null
-
-    ref: React.RefObject<BottomSheetModalMethods>
-}
-
-const SubExpenseSheet = ({
-    setIsSubExpenseMode,
-    setSubExpenses,
-    SubExpenses,
-    date,
-    ref: subexpenseSheetRef,
-}: SubExpenseSheetProps) => {
     const backdropComponent = useCallback(
         (props: BottomSheetBackdropProps) => (
             <BottomSheetBackdrop {...props} appearsOnIndex={0} disappearsOnIndex={-1} pressBehavior={"close"} />

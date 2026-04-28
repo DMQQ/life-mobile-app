@@ -5,6 +5,7 @@ import { StyleSheet, Text, View } from "react-native"
 import Feedback from "react-native-haptic-feedback"
 import Ripple from "react-native-material-ripple"
 import Animated, { FadeIn } from "react-native-reanimated"
+import { useCreateExpenseContext } from "@/features/wallet/context/CreateExpenseContext"
 
 const spontaneousOptions = [
     {
@@ -39,16 +40,13 @@ const spontaneousOptions = [
     },
 ]
 
-// Utility function for getting color based on spontaneity rate
 export const getRateColor = (rate) => {
-    if (rate <= 20) return "#66E875" // Green for planned
-    if (rate <= 60) return "#FFA726" // Orange for middle range
-    return "#F07070" // Red for impulsive
+    if (rate <= 20) return "#66E875"
+    if (rate <= 60) return "#FFA726"
+    return "#F07070"
 }
 
-// Standalone SpontaneousRate chip component for the scrollview
 export const SpontaneousRateChip = ({ value, onPress }) => {
-    // Find the selected option for display
     const selectedOption = spontaneousOptions.find((option) => option.value === value) || spontaneousOptions[0]
     const color = getRateColor(value)
 
@@ -58,7 +56,7 @@ export const SpontaneousRateChip = ({ value, onPress }) => {
             style={[
                 styles.chip,
                 {
-                    backgroundColor: value === 0 ? Colors.primary_lighter : `${color}30`, // Add 30 (hex) for transparency
+                    backgroundColor: value === 0 ? Colors.primary_lighter : `${color}30`,
                     borderColor: value === 0 ? Color(Colors.primary_lighter).lighten(0.25).hex() : `${color}30`,
                     borderWidth: 2,
                     borderRadius: 15,
@@ -79,8 +77,12 @@ export const SpontaneousRateChip = ({ value, onPress }) => {
     )
 }
 
-// Full SpontaneousRate selector for the changeView area
-export const SpontaneousRateSelector = ({ value, setValue, dismiss }) => {
+export const SpontaneousRateSelector = () => {
+    const { state, methods } = useCreateExpenseContext()
+    const value = state.spontaneousRate
+    const setValue = methods.setSpontaneousRate
+    const dismiss = () => methods.setView("main")
+
     return (
         <Animated.View entering={FadeIn} style={styles.selectorContainer}>
             <View style={styles.header}>

@@ -12,6 +12,9 @@ const SUB_ACCOUNTS_QUERY = gql`
                 icon
                 balance
                 isDefault
+
+                income
+                expense
             }
         }
     }
@@ -53,6 +56,10 @@ interface SubAccountsQueryResult {
             icon: string
             balance: number
             isDefault: boolean
+
+            income: number
+
+            expense: number
         }[]
     }
 }

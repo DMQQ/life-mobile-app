@@ -464,14 +464,11 @@ import Ripple from "react-native-material-ripple"
 import useDeleteActivity from "../../hooks/useDeleteActivity"
 import WalletItem from "../Wallet/WalletItem"
 import GlassView from "@/components/ui/GlassView"
+import { useCreateExpenseContext } from "@/features/wallet/context/CreateExpenseContext"
 
-export default function ExpenseAIMaker({
-    initialOpen,
-    setExpense,
-}: {
-    initialOpen?: boolean
-    setExpense?: (expense: Expense) => void
-}) {
+export default function ExpenseAIMaker({ initialOpen }: { initialOpen?: boolean }) {
+    const { methods } = useCreateExpenseContext()
+    const setExpense = methods.setExpense
     const navigation = useNavigation<any>()
     const [processingStep, setProcessingStep] = useState(-1)
     const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null)
@@ -611,7 +608,7 @@ export default function ExpenseAIMaker({
                 }}
                 handleEdit={(id: string) => {
                     handleRemovePredicted(id)
-                    setExpense?.(state.data?.createExpenseFromImage as Expense)
+                    setExpense(state.data?.createExpenseFromImage as Expense)
                 }}
             />
         </>

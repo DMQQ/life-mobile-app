@@ -1,282 +1,232 @@
-import { View, TouchableOpacity, ListRenderItem, StyleProp, ViewStyle, Pressable, LayoutChangeEvent, StyleSheet } from "react-native";
-import Text from "@/components/ui/Text/Text";
-import Layout from "../../../constants/Layout";
-import Colors from "../../../constants/Colors";
-import Color from "color";
-import { useState, useCallback, ReactNode, useLayoutEffect } from "react";
-import Ripple from "react-native-material-ripple";
-import { AntDesign, Entypo } from "@expo/vector-icons";
-import Reanimated, { FadeIn, FadeInDown, FadeInUp, FadeOut, useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
-import { FlatList } from "react-native-gesture-handler";
-import lowOpacity from "@/utils/functions/lowOpacity";
-import Animated from "react-native-reanimated";
+import {
+    View,
+    TouchableOpacity,
+    ListRenderItem,
+    StyleProp,
+    ViewStyle,
+    Pressable,
+    LayoutChangeEvent,
+} from "react-native"
+import Text from "@/components/ui/Text/Text"
+import GlassView from "@/components/ui/GlassView"
+import Layout from "../../../constants/Layout"
+import Colors from "../../../constants/Colors"
+import Color from "color"
+import { useState, useCallback, ReactNode, useLayoutEffect } from "react"
+import { AntDesign } from "@expo/vector-icons"
+import { ScrollView } from "react-native-gesture-handler"
 
-const MIN_TOP_DISTANCE = 65;
+const RADIUS = 14
 
 export interface Props<T> {
-  options: T[];
-
-  multiSelect?: boolean;
-
-  closeOnSelect?: boolean;
-
-  selected: T[];
-
-  renderDefaultItem?: boolean;
-
-  singleTileHeight?: number;
-
-  containerStyle?: StyleProp<ViewStyle>;
-
-  maxSelectHeight?: number;
-
-  onClose?: () => void;
-
-  setSelected: (selected: T[]) => void;
-
-  keyExtractor?: (item: T, index: number) => string;
-
-  transparentOverlay?: boolean;
-
-  renderItem?: (props: { item: T; index: number }) => ListRenderItem<T>;
-
-  placeholderText?: string;
-
-  renderCustomSelected?: ReactNode;
-
-  onFocusChange?: (focus: boolean) => void;
-
-  anchor?: "top" | "bottom";
+    options: T[]
+    multiSelect?: boolean
+    closeOnSelect?: boolean
+    selected: T[]
+    renderDefaultItem?: boolean
+    singleTileHeight?: number
+    containerStyle?: StyleProp<ViewStyle>
+    maxSelectHeight?: number
+    onClose?: () => void
+    setSelected: (selected: T[]) => void
+    keyExtractor?: (item: T, index: number) => string
+    transparentOverlay?: boolean
+    renderItem?: (props: { item: T; index: number }) => ListRenderItem<T>
+    placeholderText?: string
+    renderCustomSelected?: ReactNode
+    onFocusChange?: (focus: boolean) => void
+    anchor?: "top" | "bottom"
 }
 
-const backgroundColor = Color(Colors.primary).lighten(0.25).hex();
-
-const styles = StyleSheet.create({
-  list: {
-    position: "absolute",
-    width: Layout.screen.width * 0.95,
-    borderWidth: 2,
-    borderColor: Colors.secondary,
-    // borderRadius: 10,
-    borderBottomLeftRadius: 10,
-    borderBottomRightRadius: 10,
-    left: -1,
-    zIndex: 1,
-    backgroundColor,
-    padding: 5,
-  },
-  container: {
-    width: "100%",
-    backgroundColor,
-    borderWidth: 2,
-    borderRadius: 5,
-    position: "relative",
-  },
-  overlay: {
-    position: "absolute",
-    width: Layout.screen.width,
-    height: Layout.screen.height,
-    zIndex: 1,
-  },
-});
-
-const AnimatedGesturedFlatList = Reanimated.createAnimatedComponent(FlatList);
-
 export default function Select({
-  options = [],
-  multiSelect = false,
-  selected,
-  setSelected,
-  keyExtractor,
-  renderItem,
-  renderDefaultItem = true,
-  singleTileHeight = 50,
-  onClose,
-  containerStyle,
-  maxSelectHeight,
-  transparentOverlay = true,
-  placeholderText = "Select option",
-  closeOnSelect = false,
-  ...rest
+    options = [],
+    multiSelect = false,
+    selected,
+    setSelected,
+    keyExtractor,
+    renderItem,
+    renderDefaultItem = true,
+    singleTileHeight = 50,
+    onClose,
+    containerStyle,
+    maxSelectHeight,
+    transparentOverlay = true,
+    placeholderText = "Select option",
+    closeOnSelect = false,
+    ...rest
 }: Props<any>) {
-  const [isFocused, setIsFocused] = useState(false);
+    const [isFocused, setIsFocused] = useState(false)
+    const [btnHeight, setBtnHeight] = useState(0)
+    const [btnWidth, setBtnWidth] = useState(0)
 
-  const SINGLE_TILE_HEIGHT = singleTileHeight;
-
-  const addSelectedItem = (item: (typeof options)[0]) => {
-    if (multiSelect) {
-      if (selected.includes(item)) {
-        setSelected(selected.filter((i) => i !== item));
-      } else {
-        setSelected([...selected, item]);
-      }
-
-      if (closeOnSelect) setIsFocused(false);
-
-      return;
-    }
-    setSelected([item]);
-    if (closeOnSelect) {
-      setIsFocused(false);
-    }
-  };
-
-  const ABS_LIST_HEIGHT = SINGLE_TILE_HEIGHT * options.length;
-
-  const DefaultRenderItem = useCallback(
-    ({ item, index }: { item: string; index: number }) => {
-      const isSelected = selected.includes(item);
-      return (
-        <Ripple
-          onPress={() => addSelectedItem(item)}
-          style={{
-            height: ABS_LIST_HEIGHT / options.length,
-            paddingHorizontal: 15,
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
-            borderBottomColor: options.length - 1 === index ? "transparent" : Colors.secondary,
-            backgroundColor: isSelected ? lowOpacity(Colors.secondary, 20) : undefined,
-          }}
-        >
-          <Text
-            variant="body"
-            style={{
-              color: isSelected ? Colors.foreground : Colors.secondary,
-            }}
-          >
-            {item}
-          </Text>
-          {selected.includes(item) && <AntDesign name="check" size={25} color={Colors.secondary} />}
-        </Ripple>
-      ) as any;
-    },
-    [selected, addSelectedItem]
-  );
-
-  const buttonHeight = useSharedValue<number>(0);
-  const buttonWidth = useSharedValue<number>(0);
-
-  const flatListTransformStyle = useAnimatedStyle(() => ({
-    transform: [
-      {
-        translateY: withTiming(buttonHeight.value, {
-          duration: 100,
-        }),
-      },
-    ],
-    width: buttonWidth.value + styles.container.borderWidth * 2,
-  }));
-
-  const onLayout = ({ nativeEvent }: LayoutChangeEvent) => {
-    buttonHeight.value = nativeEvent.layout.height;
-    buttonWidth.value = nativeEvent.layout.width;
-  };
-
-  const overlayColor = transparentOverlay ? "transparent" : "rgba(0,0,0,0.8)";
-
-  useLayoutEffect(() => {
-    rest.onFocusChange?.(isFocused);
-  }, [isFocused]);
-
-  const handleDismiss = () => {
-    setIsFocused(false);
-    onClose?.();
-  };
-
-  return (
-    <>
-      {isFocused && (
-        <Pressable
-          onPress={handleDismiss}
-          style={[
-            styles.overlay,
-            {
-              backgroundColor: overlayColor,
-            },
-          ]}
-        />
-      )}
-      <Animated.View
-        style={[
-          styles.container,
-          {
-            zIndex: isFocused ? 1101 : 1,
-            borderColor: isFocused ? Colors.secondary : Color(Colors.primary_light).lighten(0.5).hex(),
-            backgroundColor: isFocused ? Colors.primary_lighter : backgroundColor,
-            borderBottomRightRadius: isFocused ? 0 : 10,
-            borderBottomLeftRadius: isFocused ? 0 : 10,
-            borderBottomColor: isFocused ? Colors.secondary : Color(Colors.primary_light).lighten(0.5).hex(),
-          },
-          containerStyle,
-        ]}
-      >
-        <TouchableOpacity
-          onLayout={onLayout}
-          activeOpacity={0.9}
-          onPress={() => setIsFocused(!isFocused)}
-          style={{
-            padding: !!rest.renderCustomSelected ? 0 : 15,
-            flexDirection: "row",
-            justifyContent: "space-between",
-          }}
-        >
-          <View style={{ flex: 15, justifyContent: "center", flexDirection: "row" }}>
-            <View>
-              <Entypo
-                name="chevron-down"
-                color={isFocused ? Colors.secondary : Colors.foreground}
-                size={25}
-                style={{
-                  transform: [{ rotate: isFocused ? "180deg" : "0deg" }],
-                }}
-              />
-            </View>
-            {!!rest.renderCustomSelected ? (
-              rest.renderCustomSelected
-            ) : (
-              <Text
-                variant="body"
-                numberOfLines={1}
-                style={{
-                  color: isFocused ? Colors.secondary : selected.some((v) => v.trim().length > 0) ? Colors.foreground : "gray",
-                  flex: 1,
-                  paddingHorizontal: 20,
-                }}
-              >
-                {selected.length > 0 && selected.some((v) => v.trim().length > 0) ? selected.join(", ") : placeholderText}
-              </Text>
-            )}
-          </View>
-        </TouchableOpacity>
-
-        {isFocused && (
-          <AnimatedGesturedFlatList
-            entering={FadeIn.duration(150)}
-            exiting={FadeOut.duration(150)}
-            style={[
-              styles.list,
-              {
-                height: maxSelectHeight || ABS_LIST_HEIGHT,
-                left: -2,
-                top: rest.anchor === "top" ? -1 * buttonHeight.value - (maxSelectHeight || ABS_LIST_HEIGHT) : 0,
-              },
-              flatListTransformStyle,
-            ]}
-            contentContainerStyle={{
-              justifyContent: "center",
-            }}
-            data={options as any}
-            keyExtractor={keyExtractor || ((item, index) => index.toString())}
-            //@ts-ignore
-            renderItem={
-              renderDefaultItem
-                ? DefaultRenderItem
-                : (props) => <Ripple onPress={() => addSelectedItem(props.item)}>{renderItem?.(props)}</Ripple>
+    const addSelectedItem = (item: (typeof options)[0]) => {
+        if (multiSelect) {
+            if (selected.includes(item)) {
+                setSelected(selected.filter((i) => i !== item))
+            } else {
+                setSelected([...selected, item])
             }
-          />
-        )}
-      </Animated.View>
-    </>
-  );
+            if (closeOnSelect) setIsFocused(false)
+            return
+        }
+        setSelected([item])
+        if (closeOnSelect) setIsFocused(false)
+    }
+
+    const listHeight = maxSelectHeight || singleTileHeight * options.length
+
+    const separatorColor = Color(Colors.foreground).alpha(0.08).toString()
+    const selectedBg = Color(Colors.secondary).alpha(0.15).toString()
+
+    const DefaultRenderItem = useCallback(
+        ({ item, index }: { item: string; index: number }) => {
+            const isSelected = selected.includes(item)
+            const isLast = index === options.length - 1
+            return (
+                <TouchableOpacity
+                    onPress={() => addSelectedItem(item)}
+                    activeOpacity={0.6}
+                    style={{
+                        height: singleTileHeight,
+                        paddingHorizontal: 16,
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        borderBottomWidth: isLast ? 0 : 1,
+                        borderBottomColor: separatorColor,
+                        backgroundColor: isSelected ? selectedBg : "transparent",
+                    }}
+                >
+                    <Text
+                        variant="body"
+                        style={{
+                            color: isSelected ? Colors.secondary : Colors.foreground,
+                            fontWeight: isSelected ? "600" : "400",
+                        }}
+                    >
+                        {item}
+                    </Text>
+                    {isSelected && <AntDesign name="check" size={18} color={Colors.secondary} />}
+                </TouchableOpacity>
+            )
+        },
+        [selected, addSelectedItem, options.length, singleTileHeight],
+    )
+
+    const onLayout = ({ nativeEvent }: LayoutChangeEvent) => {
+        setBtnHeight(nativeEvent.layout.height)
+        setBtnWidth(nativeEvent.layout.width)
+    }
+
+    useLayoutEffect(() => {
+        rest.onFocusChange?.(isFocused)
+    }, [isFocused])
+
+    const handleDismiss = () => {
+        setIsFocused(false)
+        onClose?.()
+    }
+
+    const hasSelection =
+        selected.length > 0 && selected.some((v) => (typeof v === "string" ? v.trim().length > 0 : true))
+
+    const dropdownPosition = rest.anchor === "top" ? { bottom: btnHeight } : { top: btnHeight }
+
+    return (
+        <>
+            {isFocused && (
+                <Pressable
+                    onPress={handleDismiss}
+                    style={{
+                        position: "absolute",
+                        width: Layout.screen.width,
+                        height: Layout.screen.height,
+                        top: -100,
+                        left: -20,
+                        zIndex: 10,
+                        backgroundColor: transparentOverlay ? "transparent" : "rgba(0,0,0,0.5)",
+                    }}
+                />
+            )}
+            <View style={[{ zIndex: isFocused ? 100 : 1 }, containerStyle]}>
+                <GlassView style={{ borderRadius: RADIUS, overflow: "hidden" }}>
+                    <TouchableOpacity
+                        onLayout={onLayout}
+                        activeOpacity={0.8}
+                        onPress={() => setIsFocused(!isFocused)}
+                        style={{
+                            padding: rest.renderCustomSelected ? 0 : 14,
+                            paddingRight: 14,
+                            flexDirection: "row",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                        }}
+                    >
+                        {rest.renderCustomSelected ? (
+                            rest.renderCustomSelected
+                        ) : (
+                            <Text
+                                variant="body"
+                                numberOfLines={1}
+                                style={{
+                                    color: hasSelection ? Colors.foreground : Colors.foreground_disabled,
+                                    flex: 1,
+                                }}
+                            >
+                                {hasSelection ? selected.join(", ") : placeholderText}
+                            </Text>
+                        )}
+                        <AntDesign
+                            name={isFocused ? "up" : "down"}
+                            size={16}
+                            color={isFocused ? Colors.secondary : Colors.foreground_secondary}
+                            style={{ marginLeft: 8 }}
+                        />
+                    </TouchableOpacity>
+                </GlassView>
+
+                {isFocused && (
+                    <View
+                        style={[
+                            {
+                                position: "absolute",
+                                left: 0,
+                                zIndex: -1,
+                                borderRadius: RADIUS,
+                                overflow: "hidden",
+                                width: btnWidth,
+                            },
+                            dropdownPosition,
+                        ]}
+                    >
+                        <GlassView tintColor={Color(Colors.primary_light).alpha(0.9).toString()}>
+                            <ScrollView
+                                style={{ maxHeight: listHeight }}
+                                showsVerticalScrollIndicator={false}
+                                bounces={false}
+                            >
+                                {options.map((item: any, index: number) =>
+                                    renderDefaultItem ? (
+                                        <DefaultRenderItem
+                                            key={keyExtractor?.(item, index) ?? index.toString()}
+                                            item={item}
+                                            index={index}
+                                        />
+                                    ) : (
+                                        <TouchableOpacity
+                                            key={keyExtractor?.(item, index) ?? index.toString()}
+                                            activeOpacity={0.6}
+                                            onPress={() => addSelectedItem(item)}
+                                        >
+                                            {renderItem?.({ item, index })}
+                                        </TouchableOpacity>
+                                    ),
+                                )}
+                            </ScrollView>
+                        </GlassView>
+                    </View>
+                )}
+            </View>
+        </>
+    )
 }

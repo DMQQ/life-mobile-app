@@ -9,14 +9,7 @@ import { useNavigation } from "@react-navigation/native"
 import moment from "moment/moment"
 import { useCallback, useEffect, useState, useTransition } from "react"
 import { cancelAnimation, useSharedValue, withSpring } from "react-native-reanimated"
-
-interface SubExpense {
-    id: string
-    description: string
-    amount: number
-
-    category: keyof typeof Icons
-}
+import { ViewType, SubExpense } from "@/features/wallet/context/CreateExpenseContext"
 
 export default function useCreateExpensePage(
     params: Expense & {
@@ -35,7 +28,7 @@ export default function useCreateExpensePage(
     const [date, setDate] = useState<null | string>(
         params?.date ? moment(params.date).format("YYYY-MM-DD") : moment().format("YYYY-MM-DD"),
     )
-    const [changeView, setChangeView] = useState(false)
+    const [view, setView] = useState<ViewType>("main")
     const [category, setCategory] = useState<keyof typeof Icons>(params.category || "none")
     const [name, setName] = useState(params?.description || "")
     const [type, setType] = useState<"expense" | "income" | null>(params?.type || null)
@@ -276,7 +269,7 @@ export default function useCreateExpensePage(
     const restorePreviousState = () => {
         setAmount(params?.amount.toString() || "0")
         setDate(params?.date ? moment(params.date).format("YYYY-MM-DD") : moment().format("YYYY-MM-DD"))
-        setChangeView(false)
+        setView("main")
         setCategory(params.category || "none")
         setName(params?.description || "")
         setType(params?.type || null)
@@ -334,7 +327,7 @@ export default function useCreateExpensePage(
             isValid,
             loading: isPending,
             category,
-            changeView,
+            view,
             spontaneousRate,
             subAccountId,
         },
@@ -351,8 +344,7 @@ export default function useCreateExpensePage(
             setDate,
             setType,
             setIsSubExpenseMode,
-            setChangeView,
-            spontaneousRate,
+            setView,
             setSpontaneousRate,
             setSubExpenses,
             setCategory,
