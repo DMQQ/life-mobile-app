@@ -133,6 +133,8 @@ export interface Expense {
 
     spontaneousRate: number
 
+    subAccountId?: string | null
+
     subscription: Subscription | null
 
     location: { id: string; kind: string; name: string; latitude: number; longitude: number } | null

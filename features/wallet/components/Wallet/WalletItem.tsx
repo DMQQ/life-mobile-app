@@ -1,3 +1,4 @@
+import moment from "moment"
 import { Card } from "@/components"
 import Colors from "@/constants/Colors"
 import { Expense } from "@/types"
@@ -87,12 +88,13 @@ const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "
 
 export function parseDateToText(date: string) {
     if (!date) return ""
-    const dateStr = date?.slice(0, 10)
-    const today = new Date().toISOString().slice(0, 10)
+    const m = moment(date)
+    const dateStr = m.format("YYYY-MM-DD")
+    const today = moment().format("YYYY-MM-DD")
 
     if (dateStr === today) return "Today"
 
-    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10)
+    const yesterday = moment().subtract(1, "day").format("YYYY-MM-DD")
     if (dateStr === yesterday) return "Yesterday"
 
     const [year, month, day] = dateStr.split("-")
@@ -101,12 +103,13 @@ export function parseDateToText(date: string) {
 
 function dateFormatter(date: string) {
     if (!date) return ""
-    const dateStr = date.slice(0, 10)
-    const today = new Date().toISOString().slice(0, 10)
+    const m = moment(date)
+    const dateStr = m.format("YYYY-MM-DD")
+    const today = moment().format("YYYY-MM-DD")
 
     if (dateStr === today) return "Today"
 
-    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10)
+    const yesterday = moment().subtract(1, "day").format("YYYY-MM-DD")
     if (dateStr === yesterday) return "Yesterday"
 
     const [year, month, day] = dateStr.split("-")

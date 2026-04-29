@@ -32,6 +32,8 @@ export const GET_WALLET = gql`
                     description
                     type
                     category
+                    spontaneousRate
+                    subAccountId
 
                     subscription @include(if: $includeSubscription) {
                         id

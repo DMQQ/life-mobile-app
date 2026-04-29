@@ -1,5 +1,5 @@
 import { Expense as ExpenseType } from "@/types"
-import { AntDesign, MaterialIcons } from "@expo/vector-icons"
+import { AntDesign, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons"
 import { useNavigation } from "@react-navigation/native"
 import { ReactNode } from "react"
 import { StyleSheet, Text, View } from "react-native"
@@ -7,6 +7,8 @@ import Ripple from "react-native-material-ripple"
 import Colors from "@/constants/Colors"
 import { CategoryIcon, CategoryUtils } from "./ExpenseIcon"
 import EditNote from "./EditNote"
+import { useSubAccounts } from "../../hooks/useSubAccounts"
+import { getRateColor } from "../CreateExpense/SpontaneousRate"
 
 const capitalize = (s = "") => s.charAt(0).toUpperCase() + s.slice(1)
 
@@ -25,6 +27,8 @@ const Txt = (props: { children: ReactNode; size: number; color?: any }) => (
 
 export default function ExpenseDetails({ expense }: { expense: ExpenseType }) {
     const navigation = useNavigation<any>()
+    const { data: subAccountsData } = useSubAccounts()
+    const subAccount = subAccountsData?.wallet.subAccounts.find((a) => a.id === expense.subAccountId) ?? null
 
     return (
         <View
@@ -91,6 +95,32 @@ export default function ExpenseDetails({ expense }: { expense: ExpenseType }) {
                     Balance before: {expense?.balanceBeforeInteraction} zł
                 </Text>
             </View>
+
+            {expense.spontaneousRate != null && expense.spontaneousRate > 0 && (
+                <View style={styles.row}>
+                    <MaterialIcons
+                        name="psychology"
+                        size={24}
+                        color={Colors.ternary}
+                        style={{ paddingHorizontal: 7.5, padding: 2.5 }}
+                    />
+                    <Text style={{ color: getRateColor(expense.spontaneousRate), fontSize: 18 }}>
+                        Spontaneous {expense.spontaneousRate}%
+                    </Text>
+                </View>
+            )}
+
+            {subAccount && (
+                <View style={styles.row}>
+                    <MaterialCommunityIcons
+                        name={subAccount.icon as any}
+                        size={24}
+                        color={subAccount.color}
+                        style={{ paddingHorizontal: 7.5, padding: 2.5 }}
+                    />
+                    <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>{subAccount.name}</Text>
+                </View>
+            )}
 
             <EditNote expense={expense} />
         </View>

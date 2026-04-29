@@ -107,7 +107,7 @@ export default function useCreateExpensePage(
 
                 try {
                     await client?.refetchQueries({
-                        include: ["GetWallet", "Limits", "StatisticsDayOfWeek", "GetZeroSpendings"],
+                        include: ["GetWallet", "Limits", "StatisticsDayOfWeek", "GetZeroSpendings", "SubAccounts"],
                     })
                 } catch (error) {
                     console.log("Error refetching queries:", error)
@@ -152,17 +152,18 @@ export default function useCreateExpensePage(
             }
 
             await client?.refetchQueries({
-                include: ["GetWallet", "Limits", "StatisticsDayOfWeek", "GetZeroSpendings"],
+                include: ["GetWallet", "Limits", "StatisticsDayOfWeek", "GetZeroSpendings", "SubAccounts"],
             })
 
             navigation.goBack()
         })
     }
 
-    useEffect(() => {
-        if (type === "income") setCategory("income")
-        else if (type === "expense" && category === "income") setCategory("none")
-    }, [type, category])
+    const handleSetType = (newType: "expense" | "income" | "refunded" | null) => {
+        setType(newType)
+        if (newType === "income") setCategory("income")
+        else if (category === "income") setCategory("none")
+    }
 
     const handleAddSubexpense = () => {
         if (amount === "0") return shake()
@@ -241,7 +242,7 @@ export default function useCreateExpensePage(
     }
 
     const handleToggleSubExpenseMode = () => {
-        setType("expense")
+        handleSetType("expense")
         if (!isSubExpenseMode) {
             setRegularModeState({
                 amount: amount === "0" ? calculateSubExpensesTotal().toString() : amount,
@@ -314,7 +315,7 @@ export default function useCreateExpensePage(
         setName(expense.description)
         setType(expense.type as "expense" | "income")
         setCategory(expense.category as keyof typeof Icons)
-        setDate(moment(expense.date).format("YYYY-MM-DD"))
+        setDate(moment.utc(expense.date).format("YYYY-MM-DD"))
         setSpontaneousRate(expense.spontaneousRate || 0)
         setIsSubscription(false)
         setSubExpenses((expense.subexpenses as any) || [])
@@ -349,7 +350,7 @@ export default function useCreateExpensePage(
             calculateSubExpensesTotal,
             setName,
             setDate,
-            setType,
+            setType: handleSetType,
             setIsSubExpenseMode,
             setView,
             setSpontaneousRate,

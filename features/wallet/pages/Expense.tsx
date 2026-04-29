@@ -48,6 +48,8 @@ export const GET_EXPENSE = gql`
         type
         category
         balanceBeforeInteraction
+        spontaneousRate
+        subAccountId
         note
 
         subscription {

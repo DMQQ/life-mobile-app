@@ -120,7 +120,7 @@ const MonthItem = ({
     const groupedByDay = useMemo(() => {
         const map = new Map<string, Expense[]>()
         monthData.expenses.forEach((expense) => {
-            const day = expense.date.slice(0, 10)
+            const day = moment(expense.date).format("YYYY-MM-DD")
             if (!map.has(day)) map.set(day, [])
             map.get(day)!.push(expense)
         })

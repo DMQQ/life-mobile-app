@@ -12,6 +12,7 @@ import { SafeAreaView } from "react-native-safe-area-context"
 import { useSubAccounts, useTransferBetweenSubAccounts } from "../hooks/useSubAccounts"
 import { WalletScreens } from "../Main"
 import GlassView from "@/components/ui/GlassView"
+import GroupSelector from "@/components/ui/GroupSelector"
 
 export default function TransferSubAccount({ navigation, route }: WalletScreens<"TransferSubAccount">) {
     const { data } = useSubAccounts()
@@ -177,6 +178,19 @@ export default function TransferSubAccount({ navigation, route }: WalletScreens<
                         {fromAccount && (
                             <Text style={styles.balanceHint}>Available: ${fromAccount.balance.toFixed(2)}</Text>
                         )}
+
+                        <View>
+                            <GroupSelector
+                                options={["500", "50%", "100%"]}
+                                value={amount}
+                                onChange={(value) => {
+                                    const numericValue = value.endsWith("%")
+                                        ? (((fromAccount?.balance ?? 0) * parseFloat(value)) / 100).toFixed(2)
+                                        : value
+                                    setAmount(numericValue)
+                                }}
+                            />
+                        </View>
                     </View>
                 )}
             </ScrollView>

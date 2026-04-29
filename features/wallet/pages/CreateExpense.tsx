@@ -21,8 +21,6 @@ import {
     useCreateExpenseContext,
 } from "../context/CreateExpenseContext"
 import CompactNumberPad from "@/components/ui/CompactNumberPad"
-import Button from "@/components/ui/Button/Button2"
-import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { Icons } from "../components/Expense/ExpenseIcon"
 
 const TYPE_OPTIONS: ["Expense", "Income", "Refund"] = ["Expense", "Income", "Refund"]
