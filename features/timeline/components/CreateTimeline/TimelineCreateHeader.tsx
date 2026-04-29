@@ -1,37 +1,30 @@
-import { Header, IconButton } from "@/components"
-import DatePicker from "@/components/DatePicker"
-import Text from "@/components/ui/Text/Text"
+import { Header } from "@/components"
 import { AntDesign } from "@expo/vector-icons"
-import dayjs from "dayjs"
 import { useMemo } from "react"
+import Colors from "@/constants/Colors"
 
-export default function TimelineCreateHeader(props: {
+interface TimelineCreateHeaderProps {
     selectedDate: string
     handleChangeDate: (...rest: any) => void
-}) {
+
+    submitDisabled?: boolean
+
+    onSubmit?: () => void
+}
+
+export default function TimelineCreateHeader(props: TimelineCreateHeaderProps) {
     const buttons = useMemo(
         () => [
             {
-                icon: "",
-                onPress() {},
-                children: props.selectedDate.split(";").length === 1 && (
-                    <DatePicker
-                        mode="single"
-                        setDates={({ start }) => props.handleChangeDate(start)}
-                        dates={{
-                            start: dayjs(props.selectedDate).toDate(),
-                            end: dayjs(props.selectedDate).toDate(),
-                        }}
-                        buttonComponent={({ start }) => (
-                            <Text style={{ color: "#fff", paddingHorizontal: 5 }}>
-                                {dayjs(start).format("MMMM D, YYYY")}
-                            </Text>
-                        )}
-                    />
-                ),
+                position: "right",
+                standalone: true,
+                icon: <AntDesign name="check" size={20} color="#fff" />,
+                onPress: props.onSubmit,
+                disabled: props.submitDisabled,
+                tintColor: Colors.secondary + (props.submitDisabled ? "80" : ""),
             },
         ],
-        [props.selectedDate, props.handleChangeDate],
+        [props.selectedDate, props.handleChangeDate, props.submitDisabled, props.onSubmit],
     )
 
     return (

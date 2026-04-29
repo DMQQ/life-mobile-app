@@ -27,6 +27,23 @@ const getItemCount = (arr: any) => arr.length
 const DateList = memo(({ selectedDate, setSelected, dayEvents }: DateListProps) => {
     const [dates, setDates] = useState<string[]>(() => createDates(moment()))
     const listRef = useRef<VirtualizedList<string>>(null)
+    const previousDate = useRef(selectedDate)
+
+    useEffect(() => {
+        if (moment(selectedDate).isSame(previousDate.current, "month")) return
+
+        setDates(createDates(moment(selectedDate)))
+        previousDate.current = selectedDate
+
+        let timeout = setTimeout(() => {
+            listRef.current?.scrollToItem({
+                item: selectedDate,
+                animated: false,
+            })
+        }, 100)
+
+        return () => clearTimeout(timeout)
+    }, [selectedDate])
 
     useEffect(() => {
         listRef.current?.scrollToItem({

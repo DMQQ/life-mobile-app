@@ -114,7 +114,7 @@ const SaveButton = () => {
         !isValid && prediction
             ? Icons[prediction.category as keyof typeof Icons]?.backgroundColor
             : !isValid
-              ? Colors.primary
+              ? Colors.secondary + "80"
               : Colors.secondary
 
     return (

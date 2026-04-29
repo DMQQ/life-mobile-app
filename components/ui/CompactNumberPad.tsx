@@ -1,6 +1,7 @@
 import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
 import { Entypo } from "@expo/vector-icons"
+import Color from "color"
 import { useRef } from "react"
 import { Pressable, View } from "react-native"
 import Feedback from "react-native-haptic-feedback"
@@ -89,6 +90,9 @@ const NumberKey = ({
                     interval.current = null
                 }
             }}
+            onPressIn={() => {
+                Feedback.trigger("impactLight")
+            }}
             style={({ pressed }) => ({
                 justifyContent: "center",
                 alignItems: "center",
@@ -98,6 +102,8 @@ const NumberKey = ({
                 backgroundColor,
                 opacity: pressed ? 0.5 : 1,
                 transform: [{ scale: pressed ? 0.88 : 1 }, { rotate: isBack ? "-90deg" : "0deg" }],
+                borderWidth: 1,
+                borderColor: Color(Colors.primary_lighter).lighten(0.25).string(),
             })}
         >
             {isBack ? (

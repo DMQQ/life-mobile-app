@@ -139,6 +139,7 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
                         onPress: () => timeline.createTimeline(),
                     },
                 ]}
+                initialTitleFontSize={55}
                 // shadow={false}
                 shadow
             >
@@ -213,7 +214,13 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
                         renderItem={renderItem}
                     />
                 ) : (
-                    <PagerView ref={pagerRef} style={{ flex: 1 }} initialPage={1} onPageSelected={handlePageSelected}>
+                    <PagerView
+                        offscreenPageLimit={3}
+                        ref={pagerRef}
+                        style={{ flex: 1 }}
+                        initialPage={1}
+                        onPageSelected={handlePageSelected}
+                    >
                         {visibleDates.map((date) => (
                             <View key={date} style={{ flex: 1 }}>
                                 <TimelineDayPage

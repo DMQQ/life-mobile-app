@@ -4,23 +4,21 @@ import ValidatedInput from "@/components/ui/ValidatedInput"
 import Colors from "@/constants/Colors"
 import useKeyboard from "@/utils/hooks/useKeyboard"
 import { AntDesign, Ionicons } from "@expo/vector-icons"
-import Color from "color"
 import moment from "moment"
 import { useRef, useState } from "react"
-import { ActivityIndicator, Platform, Pressable, ScrollView, StyleSheet, View } from "react-native"
+import { Platform, Pressable, ScrollView, StyleSheet, View } from "react-native"
 import Ripple from "react-native-material-ripple"
 import DateTimePicker from "react-native-modal-datetime-picker"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import CreateRepeatableTimeline from "../components/CreateTimeline/CreateRepeatableTimeline"
 import EditScopeSheet from "../components/EditScopeSheet"
 import TimelineCreateHeader from "../components/CreateTimeline/TimelineCreateHeader"
-import timelineStyles from "../components/timeline.styles"
 import useCreateTimeline from "../hooks/general/useCreateTimeline"
 import type { TimelineScreenProps } from "../types"
-import Button2 from "@/components/ui/Button/Button2"
 import { Todo } from "./CreateTimelineTodos"
 import GlassView from "@/components/ui/GlassView"
-import { SegmentedButtons } from "@/components"
+import DatePicker from "@/components/DatePicker"
+import dayjs from "dayjs"
 
 const styles = StyleSheet.create({
     timeContainer: {
@@ -37,6 +35,13 @@ const styles = StyleSheet.create({
     timeText: {
         color: Colors.secondary,
         textAlign: "center",
+    },
+    button: {
+        borderRadius: 100,
+        gap: 10,
+        padding: 10,
+        alignItems: "center",
+        justifyContent: "center",
     },
 })
 
@@ -66,6 +71,8 @@ export default function CreateTimeLineEventModal({ route, navigation }: Timeline
                         })
                     }}
                     selectedDate={route.params.selectedDate}
+                    onSubmit={f.handleSubmit}
+                    submitDisabled={!(f.isValid && !f.isSubmitting && f.dirty)}
                 />
 
                 <ScrollView
@@ -89,7 +96,7 @@ export default function CreateTimeLineEventModal({ route, navigation }: Timeline
                         }
                         style={{
                             ...(Platform.OS === "ios" && {
-                                minHeight: (numberOfLines <= 5 ? 5 : numberOfLines) * 20,
+                                minHeight: (numberOfLines <= 5 ? 5 : numberOfLines) * 30,
                             }),
                         }}
                         multiline
@@ -227,43 +234,38 @@ interface SubmitButtonProps {
 }
 
 const SubmitButton = (props: SubmitButtonProps) => (
-    <View style={{ flexDirection: "row", paddingHorizontal: 15, gap: 10 }}>
-        <GlassView
-            style={{
-                borderRadius: 100,
-                width: 50,
-                height: 50,
-                justifyContent: "center",
-                alignItems: "center",
-            }}
-        >
+    <View
+        style={{
+            position: "absolute",
+            bottom: 20,
+            left: 20,
+            right: 20,
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 10,
+            justifyContent: "space-between",
+        }}
+    >
+        <GlassView style={styles.button}>
             <IconButton
                 onPress={props.openSheet}
                 icon={<AntDesign name="calendar" color={Colors.foreground} size={20} />}
             />
         </GlassView>
 
-        <Button2
-            icon={
-                props.isLoading ? (
-                    <ActivityIndicator style={{ marginRight: 5 }} size={18} color={Colors.foreground} />
-                ) : null
-            }
-            disabled={!(props.f.isValid && !props.f.isSubmitting && props.f.dirty)}
-            type="contained"
-            callback={() => props.f.handleSubmit()}
-            style={[
-                timelineStyles.submitButton,
-                {
-                    backgroundColor: !(props.f.isValid && !props.f.isSubmitting && props.f.dirty)
-                        ? Color(Colors.secondary).alpha(0.1).string()
-                        : Colors.secondary,
-                },
-            ]}
-            fontStyle={{ fontSize: 16 }}
-        >
-            {props.isEditing ? "Save changes" : "Create new event"}
-        </Button2>
+        <GlassView style={styles.button}>
+            <DatePicker
+                mode="single"
+                setDates={({ start }) => props.f.setFieldValue("date", start)}
+                dates={{
+                    start: dayjs(props.f.values.selectedDate).toDate(),
+                    end: dayjs(props.f.values.selectedDate).toDate(),
+                }}
+                buttonComponent={({ start }) => (
+                    <Text style={{ color: "#fff", paddingHorizontal: 5 }}>{dayjs(start).format("MMMM D, YYYY")}</Text>
+                )}
+            />
+        </GlassView>
     </View>
 )
 
