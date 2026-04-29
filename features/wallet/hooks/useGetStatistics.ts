@@ -1,49 +1,32 @@
-import { gql, useQuery } from "@apollo/client";
-import { useEffect } from "react";
+import { graphql } from "@/gql/gql"
+import { useQuery } from "@apollo/client"
+import { useEffect } from "react"
 
-export interface WalletStatisticsResponse {
-  statistics: {
-    total: number;
-    average: number;
-    max: number;
-    min: number;
-    count: number;
-    theMostCommonCategory: string;
-    theLeastCommonCategory: string;
-    lastBalance: number;
-    income: number;
-    expense: number;
-  };
-}
+const WALLET_STATISTICS = graphql(`
+    query WalletStatistics($range: [String!]!) {
+        statistics: getStatistics(range: $range) {
+            total
+            average
+            max
+            min
+            count
+            theMostCommonCategory
+            theLeastCommonCategory
+            lastBalance
+            income
+            expense
+        }
+    }
+`)
+
+export type WalletStatisticsResponse = NonNullable<ReturnType<typeof useGetStatistics>["data"]>
 
 export default function useGetStatistics(range: [any, any]) {
-  const query = useQuery<WalletStatisticsResponse>(
-    gql`
-      query WalletStatistics($range: [String!]!) {
-        statistics: getStatistics(range: $range) {
-          ...Stats
-        }
-      }
+    const query = useQuery(WALLET_STATISTICS, { variables: { range } })
 
-      fragment Stats on WalletStatisticsRange {
-        total
-        average
-        max
-        min
-        count
-        theMostCommonCategory
-        theLeastCommonCategory
-        lastBalance
-        income
-        expense
-      }
-    `,
-    { variables: { range } }
-  );
+    useEffect(() => {
+        query.refetch({ range })
+    }, range)
 
-  useEffect(() => {
-    query.refetch({ range });
-  }, range);
-
-  return query;
+    return query
 }

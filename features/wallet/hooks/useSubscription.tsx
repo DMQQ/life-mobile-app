@@ -1,6 +1,7 @@
-import { gql, useMutation } from "@apollo/client"
+import { graphql } from "@/gql/gql"
+import { useMutation } from "@apollo/client"
 
-const MODIFY_SUBSCRIPTION_MUTATION = gql`
+const MODIFY_SUBSCRIPTION_MUTATION = graphql(`
     mutation modifySubscription($input: UpdateSubscriptionInput!) {
         modifySubscription(input: $input) {
             id
@@ -16,9 +17,9 @@ const MODIFY_SUBSCRIPTION_MUTATION = gql`
             reminderDaysBeforehand
         }
     }
-`
+`)
 
-const CANCEL_SUBSCRIPTION_MUTATION = gql`
+const CANCEL_SUBSCRIPTION_MUTATION = graphql(`
     mutation cancelSubscription($subscriptionId: ID!) {
         cancelSubscription(subscriptionId: $subscriptionId) {
             id
@@ -37,9 +38,9 @@ const CANCEL_SUBSCRIPTION_MUTATION = gql`
             }
         }
     }
-`
+`)
 
-const CREATE_SUBSCRIPTION_MUTATION = gql`
+const CREATE_SUBSCRIPTION_MUTATION = graphql(`
     mutation createSubscription($expenseId: ID!) {
         createSubscription(expenseId: $expenseId) {
             id
@@ -58,9 +59,9 @@ const CREATE_SUBSCRIPTION_MUTATION = gql`
             }
         }
     }
-`
+`)
 
-const CREATE_SUBSCRIPTION_INPUT_MUTATION = gql`
+const CREATE_SUBSCRIPTION_INPUT_MUTATION = graphql(`
     mutation createSubscriptionFromInput($input: CreateSubscriptionInput!) {
         create(input: $input) {
             id
@@ -76,9 +77,9 @@ const CREATE_SUBSCRIPTION_INPUT_MUTATION = gql`
             reminderDaysBeforehand
         }
     }
-`
+`)
 
-const RENEW_SUBSCRIPTION_MUTATION = gql`
+const RENEW_SUBSCRIPTION_MUTATION = graphql(`
     mutation renewSubscription($subscriptionId: ID!) {
         renewSubscription(subscriptionId: $subscriptionId) {
             id
@@ -97,9 +98,9 @@ const RENEW_SUBSCRIPTION_MUTATION = gql`
             }
         }
     }
-`
+`)
 
-const ASSIGN_EXPENSE_TO_SUBSCRIPTION_MUTATION = gql`
+const ASSIGN_EXPENSE_TO_SUBSCRIPTION_MUTATION = graphql(`
     mutation assignExpenseToSubscription($input: AssignExpenseToSubscriptionInput!) {
         assignExpenseToSubscription(input: $input) {
             id
@@ -118,7 +119,7 @@ const ASSIGN_EXPENSE_TO_SUBSCRIPTION_MUTATION = gql`
             }
         }
     }
-`
+`)
 
 export default function useSubscription() {
     const [cancelSubscription, cancelSubscriptionState] = useMutation(CANCEL_SUBSCRIPTION_MUTATION, {
@@ -148,7 +149,6 @@ export default function useSubscription() {
         CREATE_SUBSCRIPTION_INPUT_MUTATION,
         {
             refetchQueries: ["GetWallet", "Subscriptions"],
-
             onError(error) {
                 console.log("Error creating subscription:", JSON.stringify(error, null, 2))
             },

@@ -134,7 +134,7 @@ export default function useCreateExpensePage(
                 },
             })
 
-            const id = data.createExpense.id
+            const id = data?.createExpense?.id
 
             if (SubExpenses.length > 0) {
                 await uploadSubexpenses({
@@ -160,7 +160,7 @@ export default function useCreateExpensePage(
     }
 
     const handleSetType = (newType: "expense" | "income" | "refunded" | null) => {
-        setType(newType)
+        setType(newType as "expense" | "income" | null)
         if (newType === "income") setCategory("income")
         else if (category === "income") setCategory("none")
     }

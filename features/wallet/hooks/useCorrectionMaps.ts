@@ -1,4 +1,5 @@
-import { gql, useMutation, useQuery } from "@apollo/client"
+import { graphql } from "@/gql/gql"
+import { useMutation, useQuery } from "@apollo/client"
 
 export interface CorrectionMap {
     id: string
@@ -14,52 +15,68 @@ export interface CorrectionMap {
     createdAt: string
 }
 
-const CORRECTION_MAPS_FIELDS = `
-    id
-    matchShop
-    matchDescription
-    matchCategory
-    matchAmountMin
-    matchAmountMax
-    overrideShop
-    overrideCategory
-    overrideDescription
-    isActive
-    createdAt
-`
-
-const GET_CORRECTION_MAPS = gql`
+const GET_CORRECTION_MAPS = graphql(`
     query CorrectionMaps {
         correctionMaps {
-            ${CORRECTION_MAPS_FIELDS}
+            id
+            matchShop
+            matchDescription
+            matchCategory
+            matchAmountMin
+            matchAmountMax
+            overrideShop
+            overrideCategory
+            overrideDescription
+            isActive
+            createdAt
         }
     }
-`
+`)
 
-const CREATE_CORRECTION_MAP = gql`
+const CREATE_CORRECTION_MAP = graphql(`
     mutation CreateCorrectionMap($input: CreateCorrectionMapDto!) {
         createCorrectionMap(input: $input) {
-            ${CORRECTION_MAPS_FIELDS}
+            id
+            matchShop
+            matchDescription
+            matchCategory
+            matchAmountMin
+            matchAmountMax
+            overrideShop
+            overrideCategory
+            overrideDescription
+            isActive
+            createdAt
         }
     }
-`
+`)
 
-const UPDATE_CORRECTION_MAP = gql`
+const UPDATE_CORRECTION_MAP = graphql(`
     mutation UpdateCorrectionMap($id: ID!, $input: UpdateCorrectionMapDto!) {
         updateCorrectionMap(id: $id, input: $input) {
-            ${CORRECTION_MAPS_FIELDS}
+            id
+            matchShop
+            matchDescription
+            matchCategory
+            matchAmountMin
+            matchAmountMax
+            overrideShop
+            overrideCategory
+            overrideDescription
+            isActive
+            createdAt
         }
     }
-`
+`)
 
-const DELETE_CORRECTION_MAP = gql`
+const DELETE_CORRECTION_MAP = graphql(`
     mutation DeleteCorrectionMap($id: ID!) {
         deleteCorrectionMap(id: $id)
     }
-`
+`)
 
 export function useCorrectionMaps() {
-    const { data, loading, refetch } = useQuery<{ correctionMaps: CorrectionMap[] }>(GET_CORRECTION_MAPS)
+    const { data, loading, refetch } = useQuery(GET_CORRECTION_MAPS)
 
     const [createCorrectionMap, { loading: creating }] = useMutation(CREATE_CORRECTION_MAP, {
         refetchQueries: ["CorrectionMaps"],
@@ -74,7 +91,7 @@ export function useCorrectionMaps() {
     })
 
     return {
-        maps: data?.correctionMaps ?? [],
+        maps: (data?.correctionMaps ?? []) as CorrectionMap[],
         loading,
         creating,
         refetch,

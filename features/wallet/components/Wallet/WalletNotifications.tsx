@@ -1,7 +1,8 @@
 import CollapsibleStack from "@/components/ui/CollapsableStack"
 import Colors from "@/constants/Colors"
 import lowOpacity from "@/utils/functions/lowOpacity"
-import { gql, useMutation, useQuery } from "@apollo/client"
+import { graphql } from "@/gql/gql"
+import { useMutation, useQuery } from "@apollo/client"
 import { BlurView } from "expo-blur"
 import { LinearGradient } from "expo-linear-gradient"
 import * as Notifications from "expo-notifications"
@@ -192,7 +193,7 @@ const formatTimeAgo = (dateString: string) => {
     return date.toLocaleDateString()
 }
 
-export const NOTIFICATIONS_QUERY = gql`
+export const NOTIFICATIONS_QUERY = graphql(`
     query WalletNotifications($skip: Int!, $take: Int!) {
         notifications(skip: $skip, take: $take) {
             id
@@ -201,7 +202,7 @@ export const NOTIFICATIONS_QUERY = gql`
             read
         }
     }
-`
+`)
 
 export function useGetNotifications() {
     const [unreadCount, setUnreadCount] = useState(0)
@@ -225,11 +226,11 @@ export function useGetNotifications() {
 
 const useReadNotification = (notification: Notification, onDismiss: (id: string) => any) => {
     const [readNotification] = useMutation(
-        gql`
+        graphql(`
             mutation ReadNotification($id: ID!) {
                 readNotification(id: $id)
             }
-        `,
+        `),
         {
             variables: { id: notification.id },
             awaitRefetchQueries: true,

@@ -1,10 +1,11 @@
-import { gql, useMutation } from "@apollo/client"
+import { graphql } from "@/gql/gql"
+import { useMutation } from "@apollo/client"
 
-const DELETE_ACTIVITY = gql`
+const DELETE_ACTIVITY = graphql(`
     mutation DeleteActivity($id: ID!) {
         deleteExpense(id: $id)
     }
-`
+`)
 
 export default function useDeleteActivity() {
     const [deleteActivity, { data, loading, error }] = useMutation(DELETE_ACTIVITY, {

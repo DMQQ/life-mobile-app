@@ -1,9 +1,10 @@
-import { MonthlyExpenses, Wallet } from "@/types"
-import { gql, useQuery } from "@apollo/client"
+import { MonthlyExpenses } from "@/types"
+import { useQuery } from "@apollo/client"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { init, useWalletContext } from "../components/WalletContext"
+import { graphql } from "@/gql/gql"
 
-export const GET_WALLET = gql`
+export const GET_WALLET = graphql(`
     query GetWallet(
         $filters: GetWalletFilters
         $skip: Int
@@ -57,7 +58,7 @@ export const GET_WALLET = gql`
             }
         }
     }
-`
+`)
 
 const PAGINATION_TAKE = 3 // months
 
@@ -137,7 +138,7 @@ export default function useGetWallet(options?: {
         [effectiveFilters],
     )
 
-    const st = useQuery<{ wallet: Wallet }>(GET_WALLET, {
+    const st = useQuery(GET_WALLET, {
         variables: {
             filters: baseFilters,
             skip: 0,
@@ -153,9 +154,9 @@ export default function useGetWallet(options?: {
         const months = st.data?.wallet?.expenses2
         if (!months || isFilterResetRef.current) return
         setPaginatedMonths((prev) => {
-            if (prev.length === 0) return months
+            if (prev.length === 0) return months as unknown as MonthlyExpenses[]
             const map = new Map(prev.map((m) => [m.month, m]))
-            for (const m of months) map.set(m.month, m)
+            for (const m of months) map.set(m.month, m as unknown as MonthlyExpenses)
             return Array.from(map.values())
         })
     }, [st.data?.wallet?.expenses2])
@@ -179,7 +180,7 @@ export default function useGetWallet(options?: {
 
             if (gen !== generationRef.current) return
 
-            const newMonths: MonthlyExpenses[] = result.data?.wallet?.expenses2 ?? []
+            const newMonths: MonthlyExpenses[] = (result.data?.wallet?.expenses2 ?? []) as unknown as MonthlyExpenses[]
             if (newMonths.length < PAGINATION_TAKE) setEndReached(true)
             if (newMonths.length === 0) return
 
@@ -219,7 +220,7 @@ export default function useGetWallet(options?: {
 
             if (gen === generationRef.current) {
                 isFilterResetRef.current = false
-                setPaginatedMonths(result.data?.wallet?.expenses2 ?? [])
+                setPaginatedMonths((result.data?.wallet?.expenses2 ?? []) as unknown as MonthlyExpenses[])
             }
         }, 1000)
 

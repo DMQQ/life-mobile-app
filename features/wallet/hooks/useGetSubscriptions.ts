@@ -1,30 +1,33 @@
-import { useQuery, gql } from "@apollo/client"
+import { graphql } from "@/gql/gql"
+import { useQuery } from "@apollo/client"
 
-export default function useGetSubscriptions() {
-    return useQuery(gql`
-        query Subscriptions {
-            subscriptions {
+const SUBSCRIPTIONS = graphql(`
+    query Subscriptions {
+        subscriptions {
+            id
+            amount
+            dateStart
+            dateEnd
+            description
+            isActive
+            nextBillingDate
+            billingCycle
+            billingDay
+            customBillingMonths
+            reminderDaysBeforehand
+            totalSpent
+            totalAmount
+            totalDuration
+            expenses {
                 id
                 amount
-                dateStart
-                dateEnd
+                date
                 description
-                isActive
-                nextBillingDate
-                billingCycle
-                billingDay
-                customBillingMonths
-                reminderDaysBeforehand
-                totalSpent
-                totalAmount
-                totalDuration
-                expenses {
-                    id
-                    amount
-                    date
-                    description
-                }
             }
         }
-    `)
+    }
+`)
+
+export default function useGetSubscriptions() {
+    return useQuery(SUBSCRIPTIONS)
 }

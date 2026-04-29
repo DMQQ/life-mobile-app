@@ -1,8 +1,9 @@
 import { invalidateGetMainScreen } from "@/utils/schemas/GET_MAIN_SCREEN"
-import { gql, useMutation } from "@apollo/client"
+import { graphql } from "@/gql/gql"
+import { useMutation } from "@apollo/client"
 import { Platform, ToastAndroid } from "react-native"
 
-const CREATE_EXPENSE = gql`
+const CREATE_EXPENSE = graphql(`
     mutation CreateExpense($input: CreateExpenseInput!) {
         createExpense(input: $input) {
             id
@@ -33,7 +34,7 @@ const CREATE_EXPENSE = gql`
             }
         }
     }
-`
+`)
 
 export default function useCreateActivity(props: { onCompleted?: () => void }) {
     const [createExpense, { data, loading, error, called, reset }] = useMutation(CREATE_EXPENSE, {

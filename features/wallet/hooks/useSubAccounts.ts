@@ -1,7 +1,8 @@
-import { gql, useMutation, useQuery } from "@apollo/client"
+import { graphql } from "@/gql/gql"
+import { useMutation, useQuery } from "@apollo/client"
 import { GET_WALLET } from "./useGetWallet"
 
-const SUB_ACCOUNTS_QUERY = gql`
+const SUB_ACCOUNTS_QUERY = graphql(`
     query SubAccounts {
         wallet {
             subAccounts {
@@ -12,15 +13,14 @@ const SUB_ACCOUNTS_QUERY = gql`
                 icon
                 balance
                 isDefault
-
                 income
                 expense
             }
         }
     }
-`
+`)
 
-const CREATE_SUB_ACCOUNT = gql`
+const CREATE_SUB_ACCOUNT = graphql(`
     mutation CreateSubAccount($input: CreateSubAccountInput!) {
         createSubAccount(input: $input) {
             id
@@ -28,9 +28,9 @@ const CREATE_SUB_ACCOUNT = gql`
             balance
         }
     }
-`
+`)
 
-const UPDATE_SUB_ACCOUNT = gql`
+const UPDATE_SUB_ACCOUNT = graphql(`
     mutation UpdateSubAccount($id: ID!, $input: UpdateSubAccountInput!) {
         updateSubAccount(id: $id, input: $input) {
             id
@@ -38,34 +38,25 @@ const UPDATE_SUB_ACCOUNT = gql`
             balance
         }
     }
-`
+`)
 
-const DELETE_SUB_ACCOUNT = gql`
+const DELETE_SUB_ACCOUNT = graphql(`
     mutation DeleteSubAccount($id: ID!) {
         deleteSubAccount(id: $id)
     }
-`
+`)
 
-interface SubAccountsQueryResult {
-    wallet: {
-        subAccounts: {
-            id: string
-            name: string
-            description: string | null
-            color: string
-            icon: string
-            balance: number
-            isDefault: boolean
-
-            income: number
-
-            expense: number
-        }[]
+const TRANSFER_BETWEEN_SUB_ACCOUNTS = graphql(`
+    mutation TransferBetweenSubAccounts($input: TransferBetweenSubAccountsInput!) {
+        transferBetweenSubAccounts(input: $input) {
+            from
+            to
+        }
     }
-}
+`)
 
 export function useSubAccounts() {
-    return useQuery<SubAccountsQueryResult>(SUB_ACCOUNTS_QUERY, {
+    return useQuery(SUB_ACCOUNTS_QUERY, {
         fetchPolicy: "cache-first",
     })
 }
@@ -90,15 +81,6 @@ export function useDeleteSubAccount(onCompleted?: () => void) {
         refetchQueries: [{ query: SUB_ACCOUNTS_QUERY }],
     })
 }
-
-const TRANSFER_BETWEEN_SUB_ACCOUNTS = gql`
-    mutation TransferBetweenSubAccounts($input: TransferBetweenSubAccountsInput!) {
-        transferBetweenSubAccounts(input: $input) {
-            from
-            to
-        }
-    }
-`
 
 export function useTransferBetweenSubAccounts(onCompleted?: () => void) {
     return useMutation(TRANSFER_BETWEEN_SUB_ACCOUNTS, {
