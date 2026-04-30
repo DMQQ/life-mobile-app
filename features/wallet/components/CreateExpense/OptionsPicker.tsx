@@ -226,7 +226,7 @@ export default function OptionsPicker() {
     }
 
     return (
-        <View style={{ minHeight: 220 }}>
+        <View style={{ minHeight: 250 }}>
             <View style={styles.container}>
                 <Row
                     icon={<AntDesign name="calendar" size={16} color="rgba(255,255,255,0.6)" />}

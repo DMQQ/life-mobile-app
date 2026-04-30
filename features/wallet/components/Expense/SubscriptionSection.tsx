@@ -2,6 +2,8 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import moment from "moment"
 import Colors from "@/constants/Colors"
 import ContextMenu from "react-native-context-menu-view"
+import GlassView from "@/components/ui/GlassView"
+import { AntDesign } from "@expo/vector-icons"
 
 interface SubscriptionSectionProps {
     hasSubscription: boolean
@@ -70,9 +72,8 @@ export default function SubscriptionSection({
                 </View>
             )}
 
-            <View style={{ marginTop: 12 }}>
-                <Text style={styles.dateLabel}>Assign to subscription</Text>
-                <View style={{ marginTop: 8 }}>
+            <View style={{ marginTop: 5 }}>
+                <View>
                     <ContextMenu
                         actions={subscriptionOptions.map((s) => ({ title: s.description }))}
                         onPress={(e) => {
@@ -81,14 +82,17 @@ export default function SubscriptionSection({
                         }}
                         dropdownMenuMode
                     >
-                        <TouchableOpacity style={styles.contextMenuTrigger}>
-                            <Text style={styles.contextMenuTriggerText}>
-                                {selected?.subscription?.id
-                                    ? subscriptionOptions.find((s) => s.id === selected?.subscription?.id)
-                                          ?.description ?? "None"
-                                    : "None"}
-                            </Text>
-                        </TouchableOpacity>
+                        <GlassView style={{ borderRadius: 15 }}>
+                            <TouchableOpacity style={styles.contextMenuTrigger}>
+                                <Text style={styles.contextMenuTriggerText}>
+                                    {selected?.subscription?.id
+                                        ? (subscriptionOptions.find((s) => s.id === selected?.subscription?.id)
+                                              ?.description ?? "None")
+                                        : "None"}
+                                </Text>
+                                <AntDesign name="down" size={12} color={Colors.foreground_secondary} />
+                            </TouchableOpacity>
+                        </GlassView>
                     </ContextMenu>
                 </View>
             </View>
@@ -151,13 +155,12 @@ const styles = StyleSheet.create({
         fontWeight: "500",
     },
     contextMenuTrigger: {
-        backgroundColor: Colors.primary,
         borderRadius: 10,
-        paddingHorizontal: 14,
-        paddingVertical: 10,
+        padding: 15,
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
+        width: "100%",
     },
     contextMenuTriggerText: {
         color: Colors.foreground,

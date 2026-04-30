@@ -36,7 +36,7 @@ export default function useCreateExpensePage(
 
     const [spontaneousRate, setSpontaneousRate] = useState(params?.spontaneousRate || 0)
     const [subAccountId, setSubAccountId] = useState<string | null>(params?.subAccountId || null)
-    const [optionsCollapsed, setOptionsCollapsed] = useState(true)
+    const [optionsCollapsed, setOptionsCollapsed] = useState(false)
 
     const [isSubExpenseMode, setIsSubExpenseMode] = useState(false)
 

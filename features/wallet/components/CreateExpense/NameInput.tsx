@@ -40,8 +40,8 @@ interface Suggestion {
 
 export default function NameInput({ isEditing }: { isEditing?: boolean }) {
     const { state, methods, isInputFocused, setIsInputFocused, subexpenseSheetRef } = useCreateExpenseContext()
-    const { name, isValid, prediction, canPredict, loading, isSubExpenseMode, SubExpenses } = state
-    const { setName, handleToggleSubExpenseMode, applyPrediction, handleSubmit } = methods
+    const { name, isValid, prediction, isSubExpenseMode, SubExpenses } = state
+    const { setName, handleToggleSubExpenseMode } = methods
 
     const [debouncedQuery, setDebouncedQuery] = useState(name)
     const [suppressed, setSuppressed] = useState(false)
@@ -107,7 +107,7 @@ export default function NameInput({ isEditing }: { isEditing?: boolean }) {
             )}
 
             <View>
-                <View>
+                <View style={{ position: "relative" }}>
                     {showSuggestion && (
                         <Text style={styles.floatingSuggestion} numberOfLines={1}>
                             <Text style={{ color: "transparent" }}>{name}</Text>

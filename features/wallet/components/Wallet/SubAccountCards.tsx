@@ -7,6 +7,7 @@ import { useSubAccounts, useDeleteSubAccount } from "../../hooks/useSubAccounts"
 import { useWalletContext } from "../WalletContext"
 import { useNavigation } from "@react-navigation/native"
 import Layout from "@/constants/Layout"
+import { useMemo } from "react"
 
 interface SubAccount {
     id: string
@@ -38,13 +39,21 @@ export default function SubAccountCards() {
         }
     }
 
+    const sortedAccounts = useMemo(() => {
+        return [...accounts].sort((a, b) => {
+            if (a.isDefault) return -1
+
+            return a.balance > b.balance ? -1 : 1
+        })
+    }, [accounts])
+
     return (
         <FlatList
             initialNumToRender={2}
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.scroll}
-            data={accounts}
+            data={sortedAccounts}
             keyExtractor={(a) => a.id}
             ListFooterComponent={<AddCard onPress={() => navigation.navigate("CreateSubAccount")} />}
             renderItem={({ item: a }) => (
@@ -201,9 +210,7 @@ function AddCard({ onPress }: { onPress: () => void }) {
 
 const styles = StyleSheet.create({
     scroll: {
-        gap: 14,
-        marginBottom: 25,
-        paddingHorizontal: 2,
+        gap: 15,
     },
 
     card: {

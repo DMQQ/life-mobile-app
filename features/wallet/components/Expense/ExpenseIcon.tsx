@@ -51,7 +51,7 @@ export const Icons = {
         backgroundColor: "#5733FF",
     },
     debt: {
-        icon: <AntDesign name="creditcard" size={20} color={"#ff5733"} />,
+        icon: <AntDesign name="credit-card" size={20} color={"#ff5733"} />,
         backgroundColor: "#FF5733",
     },
     education: {

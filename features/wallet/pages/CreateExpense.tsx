@@ -51,14 +51,22 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
     return (
         <CreateExpenseProvider value={contextValue}>
             <View style={[styles.root]}>
-                {state.prediction && <PredictionView />}
-
                 <GlassView style={styles.closeBtn}>
                     <IconButton
                         onPress={() => navigation.goBack()}
                         icon={<AntDesign name="close" size={20} color="#fff" />}
                     />
                 </GlassView>
+
+                <View style={{ position: "absolute", top: 15, left: 80, right: 80, zIndex: 1000 }}>
+                    <GroupSelector
+                        options={TYPE_OPTIONS}
+                        value={typeToLabel(state.type)}
+                        onChange={(label) => methods.setType(labelToType(label) as any)}
+                    />
+                </View>
+
+                {state.prediction && !params.isEditing && <PredictionView />}
 
                 <SaveButton />
 
@@ -69,14 +77,6 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
                         <View style={{ flexDirection: "row", gap: 10, marginBottom: 10 }}>
                             <ExpenseAIMaker initialOpen={params?.shouldOpenPhotoPicker || false} />
                             <NameInput isEditing={params?.isEditing} />
-                        </View>
-
-                        <View style={{ marginBottom: 10 }}>
-                            <GroupSelector
-                                options={TYPE_OPTIONS}
-                                value={typeToLabel(state.type)}
-                                onChange={(label) => methods.setType(labelToType(label) as any)}
-                            />
                         </View>
 
                         <OptionsPicker />
@@ -145,10 +145,9 @@ const styles = StyleSheet.create({
         borderTopRightRadius: 30,
         borderTopLeftRadius: 30,
         paddingBottom: 30,
-        maxHeight: "77.5%",
         position: "absolute",
         bottom: 0,
-
+        height: "70%",
         left: 0,
         right: 0,
     },

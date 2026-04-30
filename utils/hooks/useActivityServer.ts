@@ -54,13 +54,18 @@ export const useActivityServer = () => {
 
     const registerActivity = async (config: ActivityServerConfig): Promise<boolean> => {
         try {
-            const { data } = await createActivityMutation({
+            const { data, errors } = await createActivityMutation({
                 variables: {
                     eventId: config.eventId,
                     activityToken: config.activityToken,
                     endTime: config.endTime,
                 },
             })
+
+            if (errors) {
+                console.error("GraphQL errors while registering activity:", errors)
+                return false
+            }
 
             return data?.createActivity?.success || false
         } catch (error) {
@@ -114,12 +119,13 @@ export const useActivityServer = () => {
         timelineId?: string,
     ): Promise<boolean> => {
         try {
+            console.log("Setting live activity", { activityId, updateToken, timelineId })
             const { data } = await setLiveActivityUpdateTokenMutation({
                 variables: {
                     input: {
                         activityId,
                         updateToken,
-                        // timelineId, // Send the timeline ID if available
+                        occurrenceId: timelineId,
                     },
                 },
             })

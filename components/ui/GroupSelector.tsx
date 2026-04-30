@@ -1,7 +1,7 @@
 import { useRef } from "react"
-import { Animated, Pressable, StyleSheet, Text, View } from "react-native"
+import { Animated, Pressable, StyleSheet, Text } from "react-native"
 import theme from "@/constants/Colors"
-import { SymbolView } from "expo-symbols"
+import GlassView from "./GlassView"
 
 interface GroupSelectorProps<T extends string> {
     options: [T] | [T, T] | [T, T, T]
@@ -22,21 +22,30 @@ export default function GroupSelector<T extends string>({ options, value, onChan
     }
 
     return (
-        <View style={styles.container}>
+        <GlassView style={styles.container}>
             {options.map((option, i) => {
                 const selected = option === value
                 return (
-                    <Animated.View key={option} style={[styles.segmentWrapper, { transform: [{ scale: anims[i] }] }]}>
+                    <GlassView
+                        key={option + "-" + selected}
+                        style={[styles.segmentWrapper, selected && { zIndex: 1 }]}
+                        tintColor={selected ? theme.secondary : theme.primary_lighter}
+                        interactive
+                    >
                         <Pressable
                             onPress={() => handlePress(option, i)}
-                            style={[styles.segment, selected && styles.selected]}
+                            style={({ pressed }) => [
+                                styles.segment,
+                                selected && styles.selected,
+                                pressed && { transform: [{ scale: 0.97 }] },
+                            ]}
                         >
                             <Text style={[styles.label, selected && styles.labelSelected]}>{option}</Text>
                         </Pressable>
-                    </Animated.View>
+                    </GlassView>
                 )
             })}
-        </View>
+        </GlassView>
     )
 }
 
@@ -44,13 +53,14 @@ const styles = StyleSheet.create({
     container: {
         flexDirection: "row",
         backgroundColor: theme.primary_lighter,
-        borderRadius: 15,
-        padding: 7.5,
+        borderRadius: 25,
+        padding: 10,
         gap: 5,
         height: 55,
     },
     segmentWrapper: {
         flex: 1,
+        borderRadius: 15,
     },
     segment: {
         flex: 1,
@@ -59,13 +69,11 @@ const styles = StyleSheet.create({
         borderRadius: 9,
     },
     selected: {
-        backgroundColor: theme.secondary,
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.2,
         shadowRadius: 3,
         elevation: 2,
-        borderRadius: 10,
     },
     label: {
         fontSize: 13,

@@ -3,7 +3,7 @@ import Text from "@/components/ui/Text/Text"
 import ValidatedInput from "@/components/ui/ValidatedInput"
 import Colors from "@/constants/Colors"
 import useKeyboard from "@/utils/hooks/useKeyboard"
-import { AntDesign, Ionicons } from "@expo/vector-icons"
+import { AntDesign } from "@expo/vector-icons"
 import moment from "moment"
 import { useRef, useState } from "react"
 import { Platform, Pressable, ScrollView, StyleSheet, View } from "react-native"
@@ -42,6 +42,7 @@ const styles = StyleSheet.create({
         padding: 10,
         alignItems: "center",
         justifyContent: "center",
+        position: "relative",
     },
 })
 

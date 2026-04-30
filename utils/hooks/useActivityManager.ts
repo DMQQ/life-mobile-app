@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { useActivityCore, ActivityConfig } from "./useActivityCore"
 import { useActivityServer } from "./useActivityServer"
 import ExpoLiveActivityModule from "../../modules/expo-live-activity"
@@ -24,6 +24,12 @@ export const useActivityManager = (): UseActivityManagerReturn => {
     const serverHook = useActivityServer()
     const activityCore = useActivityCore()
 
+    const serverHookRef = useRef(serverHook)
+    serverHookRef.current = serverHook
+
+    const activityCoreRef = useRef(activityCore)
+    activityCoreRef.current = activityCore
+
     useEffect(() => {
         if (!user.isAuthenticated) return
 
@@ -38,34 +44,24 @@ export const useActivityManager = (): UseActivityManagerReturn => {
         const tokenReceivedListener = ExpoLiveActivityModule.addListener("onTokenReceived", (event) => {
             const tokenKey = `${event.activityID}-${event.activityPushToken}`
 
-            console.log("Token received for activity:", event)
-
             if (processedTokens.has(tokenKey)) return
 
             setProcessedTokens((prev) => new Set(prev).add(tokenKey))
 
-            if (serverHook?.setLiveActivityUpdateToken && event.activityPushToken) {
-                const timelineId = event.activityName
-                serverHook.setLiveActivityUpdateToken(event.activityID, event.activityPushToken, timelineId)
+            if (serverHookRef.current?.setLiveActivityUpdateToken && event.activityPushToken) {
+                serverHookRef.current.setLiveActivityUpdateToken(
+                    event.activityID,
+                    event.activityPushToken,
+                    event.activityName,
+                )
             }
         })
 
         const stateChangeListener = ExpoLiveActivityModule.addListener("onStateChange", (event) => {
-            console.log("Activity state changed:", event)
-
             if (event.activityState === "ended" || event.activityState === "dismissed") {
                 setActiveActivities((prev) => prev.filter((id) => id !== event.eventId))
-                setIsInProgress(activityCore.isActivityInProgress())
+                setIsInProgress(activityCoreRef.current.isActivityInProgress())
             }
-
-            console.log(
-                "Activity state update - ID:",
-                event.activityID,
-                "EventID:",
-                event.eventId,
-                "State:",
-                event.activityState,
-            )
         })
 
         ExpoLiveActivityModule.saveAppIconToSharedStorage()
@@ -81,10 +77,10 @@ export const useActivityManager = (): UseActivityManagerReturn => {
             try {
                 const activities = await ExpoLiveActivityModule.getActivityTokens()
 
-                if (serverHook && Object.keys(activities).length > 0) {
+                if (serverHookRef.current && Object.keys(activities).length > 0) {
                     for (const [activityID, activityData] of Object.entries(activities)) {
-                        if (activityData.pushToken && serverHook.setLiveActivityUpdateToken) {
-                            serverHook.setLiveActivityUpdateToken(
+                        if (activityData.pushToken && serverHookRef.current.setLiveActivityUpdateToken) {
+                            serverHookRef.current.setLiveActivityUpdateToken(
                                 activityID,
                                 activityData.pushToken,
                                 activityData.eventId,
@@ -137,7 +133,7 @@ export const useActivityManager = (): UseActivityManagerReturn => {
     const updateActivity = useCallback(
         (_eventId: string, progress: number, isCompleted: boolean = false) => {
             try {
-                activityCore.updateActivityProgress(progress, isCompleted)
+                activityCoreRef.current.updateActivityProgress(progress, isCompleted)
             } catch (error) {
                 console.error("Error updating activity:", error)
             }
@@ -148,11 +144,11 @@ export const useActivityManager = (): UseActivityManagerReturn => {
     const completeActivity = useCallback(
         async (eventId: string) => {
             try {
-                activityCore.updateActivityProgress(1.0, true)
+                activityCoreRef.current.updateActivityProgress(1.0, true)
                 setTimeout(() => {
-                    activityCore.endActivity()
+                    activityCoreRef.current.endActivity()
                     setActiveActivities((prev) => prev.filter((id) => id !== eventId))
-                    setIsInProgress(activityCore.isActivityInProgress())
+                    setIsInProgress(activityCoreRef.current.isActivityInProgress())
                 }, 3000)
             } catch (error) {
                 console.error("Error completing activity:", error)
@@ -164,7 +160,7 @@ export const useActivityManager = (): UseActivityManagerReturn => {
     const cancelActivity = useCallback(
         async (eventId: string) => {
             try {
-                activityCore.endActivity()
+                activityCoreRef.current.endActivity()
                 setActiveActivities((prev) => prev.filter((id) => id !== eventId))
                 setIsInProgress(false)
             } catch (error) {
@@ -176,7 +172,7 @@ export const useActivityManager = (): UseActivityManagerReturn => {
 
     const cancelAllActivities = useCallback(() => {
         try {
-            activityCore.endActivity()
+            activityCoreRef.current.endActivity()
             setActiveActivities([])
             setIsInProgress(false)
         } catch (error) {

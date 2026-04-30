@@ -22,7 +22,7 @@ import { useCreateExpenseContext } from "@/features/wallet/context/CreateExpense
 
 const styles = StyleSheet.create({
     expense_item: {
-        height: 50,
+        height: 60,
         borderRadius: 20,
         padding: 5,
         paddingRight: 10,
@@ -333,6 +333,7 @@ export default function PredictionView() {
                             },
                             styles.expense_item,
                         ]}
+                        key={iconBackgroundColor}
                         tintColor={Color(iconBackgroundColor).darken(0.5).alpha(0.3).hex()}
                     >
                         <CategoryIcon

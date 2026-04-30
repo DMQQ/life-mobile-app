@@ -185,6 +185,8 @@ export default function CreateTimelineTodos({ route, navigation }: TimelineScree
                     enablesReturnKeyAutomatically
                     autoFocus
                     multiline={false}
+                    blurOnSubmit={false}
+                    submitBehavior="submit"
                 />
                 {inputText.trim().length > 0 && (
                     <IconButton

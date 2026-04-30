@@ -1,14 +1,13 @@
 import Colors from "@/constants/Colors"
 import { CategoryIcon } from "@/features/wallet/components/Expense/ExpenseIcon"
-import { AntDesign } from "@expo/vector-icons"
 import moment, { Moment } from "moment"
 import { memo, useMemo, useState } from "react"
 import { Pressable, StyleProp, StyleSheet, Text, View, ViewStyle } from "react-native"
-import Ripple from "react-native-material-ripple"
 import SubscriptionItem from "../Subscription/SubscriptionItem"
 import WalletItem from "./WalletItem"
 import { useNavigation } from "@react-navigation/native"
 import Color from "color"
+import Layout from "@/constants/Layout"
 
 interface Subscription {
     id: string
@@ -204,7 +203,7 @@ export default function SubscriptionCalendar({ subscriptions, expenses = [], sty
     const selectedSubs = selectedDay ? (billingMap.get(selectedDay) ?? []) : []
     const selectedExpenses = selectedDay ? (expenseMap.get(selectedDay) ?? []) : []
 
-    const [size, setSize] = useState({ width: 0, height: 0 })
+    const [size, setSize] = useState({ width: Layout.screen.width - 30, height: 420 })
 
     const cellSize = size.width / 7 - 4
 

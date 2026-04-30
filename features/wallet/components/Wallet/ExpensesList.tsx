@@ -24,6 +24,7 @@ import { init, useWalletContext } from "../WalletContext"
 import GlassView from "@/components/ui/GlassView"
 import SubAccountCards from "./SubAccountCards"
 import WalletItem, { parseDateToText } from "./WalletItem"
+import CategoryBreakdown from "./CategoryBreakdown"
 
 type ListItem = { type: "month"; data: MonthlyExpenses; monthIndex: number }
 
@@ -79,7 +80,13 @@ export default function ExpensesList({ wallet, onScroll, refetch, onEndReached }
                 renderItem={renderItem as any}
                 keyExtractor={keyExtractor as any}
                 onScroll={onScroll}
-                ListHeaderComponent={<SubAccountCards />}
+                ListHeaderComponent={
+                    <View style={{ flexDirection: "column", gap: 15 }}>
+                        <CategoryBreakdown />
+
+                        <SubAccountCards />
+                    </View>
+                }
                 contentContainerStyle={styles.contentContainer}
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
                 onEndReached={onEndReached}
