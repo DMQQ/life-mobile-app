@@ -16,7 +16,17 @@ import {
     TextInput,
     View,
 } from "react-native"
-import Animated, { Easing, useAnimatedStyle, useSharedValue, withRepeat, withTiming } from "react-native-reanimated"
+import MaskedView from "@react-native-masked-view/masked-view"
+import Animated, {
+    Easing,
+    runOnJS,
+    useAnimatedStyle,
+    useSharedValue,
+    withRepeat,
+    withSpring,
+    withTiming,
+} from "react-native-reanimated"
+import { Gesture, GestureDetector } from "react-native-gesture-handler"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import GlassView from "@/components/ui/GlassView"
 import { useAiChat } from "@/contexts/AiChatContext"
@@ -170,6 +180,10 @@ function AssistantBubble({
     )
 }
 
+const BUTTON_X = Layout.window.width - 45
+const BUTTON_Y = Layout.window.height - 50
+const CIRCLE_SIZE = Math.ceil(Math.sqrt(Math.pow(BUTTON_X, 2) + Math.pow(BUTTON_Y, 2))) * 2 + 60
+
 export default function GlobalAiChat() {
     const { isOpen, close } = useAiChat()
     const [messages, setMessages] = useState<ChatMessage[]>([])
@@ -183,6 +197,74 @@ export default function GlobalAiChat() {
         start: dayjs().startOf("month").toDate(),
         end: dayjs().toDate(),
     })
+    const [internalVisible, setInternalVisible] = useState(false)
+    const animProgress = useSharedValue(0)
+    const dragX = useSharedValue(0)
+    const dragY = useSharedValue(0)
+
+    useEffect(() => {
+        if (isOpen) {
+            animProgress.value = 0
+            dragX.value = 0
+            dragY.value = 0
+            setInternalVisible(true)
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    animProgress.value = withSpring(1, {
+                        damping: 22,
+                        stiffness: 150,
+                        mass: 1.2,
+                    })
+                })
+            })
+        } else {
+            dragX.value = withTiming(0, { duration: 300 })
+            dragY.value = withTiming(0, { duration: 300 })
+            animProgress.value = withTiming(0, { duration: 600, easing: Easing.in(Easing.cubic) }, (done) => {
+                if (done) runOnJS(setInternalVisible)(false)
+            })
+        }
+    }, [isOpen])
+
+    const panGesture = Gesture.Pan()
+        .onUpdate((e) => {
+            "worklet"
+            dragX.value = e.translationX
+            dragY.value = e.translationY
+        })
+        .onEnd((e) => {
+            "worklet"
+            const shouldClose = dragY.value > Layout.window.height * 0.2 || e.velocityY > 600
+
+            if (shouldClose) {
+                animProgress.value = withTiming(0, { duration: 400, easing: Easing.in(Easing.cubic) }, (done) => {
+                    if (done) {
+                        runOnJS(close)()
+                        dragX.value = 0
+                        dragY.value = 0
+                    }
+                })
+            } else {
+                dragX.value = withSpring(0, { damping: 22, stiffness: 220 })
+                dragY.value = withSpring(0, { damping: 22, stiffness: 220 })
+                animProgress.value = withSpring(1, { damping: 22, stiffness: 220 })
+            }
+        })
+
+    const revealStyle = useAnimatedStyle(() => {
+        const distance = Math.sqrt(dragX.value ** 2 + dragY.value ** 2)
+        const dragRatio = Math.min(1, distance / (Layout.window.height * 0.5))
+        const scale = 1 - dragRatio * 0.2
+        const borderRadius = dragRatio * 24
+        return {
+            transform: [{ translateX: dragX.value }, { translateY: dragY.value }, { scale }],
+            borderRadius,
+        }
+    })
+
+    const maskStyle = useAnimatedStyle(() => ({
+        transform: [{ scale: animProgress.value }],
+    }))
 
     const listRef = useRef<FlatList>(null)
     const finalTranscriptRef = useRef("")
@@ -338,188 +420,216 @@ export default function GlobalAiChat() {
         : messages
 
     return (
-        <Modal visible={isOpen} animationType="slide" presentationStyle="fullScreen" onRequestClose={close}>
-            <View style={[s.container, { paddingTop: insets.top }]}>
-                <View style={s.header}>
-                    <GlassView style={s.iconBtn}>
-                        <Pressable style={s.iconBtnInner} onPress={close}>
-                            <AntDesign name="close" size={20} color="#fff" />
-                        </Pressable>
-                    </GlassView>
-                    <View style={s.headerCenter}>
-                        <Ionicons name="sparkles" size={16} color={Colors.secondary} />
-                        <Text style={s.headerTitle}>AI Assistant</Text>
-                    </View>
-                    <View style={{ flexDirection: "row", gap: 6 }}>
-                        <GlassView style={s.iconBtn}>
-                            <DatePicker
-                                buttonComponent={() => (
-                                    <Pressable style={s.iconBtnInner}>
-                                        <Ionicons name="calendar" size={20} color={Colors.foreground_secondary} />
+        <Modal visible={internalVisible} animationType="none" transparent onRequestClose={close}>
+            <GestureDetector gesture={panGesture}>
+                <Animated.View style={[StyleSheet.absoluteFill, revealStyle, { overflow: "hidden" }]}>
+                    <MaskedView
+                        style={StyleSheet.absoluteFill}
+                        maskElement={
+                            <View style={StyleSheet.absoluteFill} pointerEvents="none">
+                                <Animated.View style={[s.maskCircle, maskStyle]} />
+                            </View>
+                        }
+                    >
+                        <View style={[StyleSheet.absoluteFill, s.contentBg, { paddingTop: insets.top }]}>
+                            <View style={s.header}>
+                                <GlassView style={s.iconBtn}>
+                                    <Pressable style={s.iconBtnInner} onPress={close}>
+                                        <AntDesign name="close" size={20} color="#fff" />
                                     </Pressable>
-                                )}
-                                dates={dates}
-                                setDates={setDates}
-                                mode="period"
-                            />
-                        </GlassView>
-                        <GlassView style={s.iconBtn} {...(showHistory && { tintColor: Colors.secondary })}>
-                            <Pressable style={s.iconBtnInner} onPress={() => setShowHistory((p) => !p)}>
-                                <Ionicons
-                                    name="time-outline"
-                                    size={20}
-                                    color={showHistory ? "#fff" : Colors.foreground_secondary}
-                                />
-                            </Pressable>
-                        </GlassView>
-                    </View>
-                </View>
-
-                <View style={s.divider} />
-
-                <FlatList
-                    ref={listRef}
-                    style={s.chat}
-                    contentContainerStyle={s.chatContent}
-                    data={displayMessages}
-                    keyExtractor={(m) => m.id}
-                    onContentSizeChange={scrollToBottom}
-                    ListEmptyComponent={
-                        <View style={s.emptyHint}>
-                            <Ionicons name="sparkles" size={32} color={Colors.secondary} style={{ marginBottom: 12 }} />
-                            <Text style={s.hintText}>Ask me anything — finances, schedule, tasks, goals.</Text>
-                        </View>
-                    }
-                    renderItem={({ item: msg, index }) => {
-                        const entering = Math.max(0, 50 * (displayMessages.length - 1 - index))
-                        if (msg.role === "user") {
-                            return (
-                                <View
-                                    style={{
-                                        alignItems: "center",
-                                        marginBottom: 10,
-                                        flexDirection: "row",
-                                        gap: 8,
-                                        justifyContent: "flex-end",
-                                    }}
-                                >
-                                    <GlassView style={{ padding: 2, borderRadius: 100 }}>
-                                        <IconButton
-                                            onPress={() => send(msg.content)}
-                                            icon={<Ionicons name="refresh" size={15} color="#fff" />}
+                                </GlassView>
+                                <View style={s.headerCenter}>
+                                    <Ionicons name="sparkles" size={16} color={Colors.secondary} />
+                                    <Text style={s.headerTitle}>AI Assistant</Text>
+                                </View>
+                                <View style={{ flexDirection: "row", gap: 6 }}>
+                                    <GlassView style={s.iconBtn}>
+                                        <DatePicker
+                                            buttonComponent={() => (
+                                                <Pressable style={s.iconBtnInner}>
+                                                    <Ionicons
+                                                        name="calendar"
+                                                        size={20}
+                                                        color={Colors.foreground_secondary}
+                                                    />
+                                                </Pressable>
+                                            )}
+                                            dates={dates}
+                                            setDates={setDates}
+                                            mode="period"
                                         />
                                     </GlassView>
-
-                                    <GlassView
-                                        tintColor={Colors.secondary}
-                                        style={[s.bubble, s.bubbleUser, { backgroundColor: undefined }]}
-                                    >
-                                        <Text style={[s.bubbleText, s.bubbleTextUser]}>{msg.content}</Text>
-                                    </GlassView>
-                                </View>
-                            )
-                        }
-                        return (
-                            <AssistantBubble
-                                entering={entering}
-                                msg={msg}
-                                startDate={dayjs(dates.start).format("YYYY-MM-DD")}
-                                endDate={dayjs(dates.end).format("YYYY-MM-DD")}
-                                onNavigate={close}
-                            />
-                        )
-                    }}
-                    ListFooterComponent={
-                        <>
-                            {inputMode === "voice" && partialText ? (
-                                <View style={{ alignItems: "flex-end", marginBottom: 8 }}>
-                                    <GlassView style={[s.bubble, s.bubbleUser, { opacity: 0.55 }]}>
-                                        <Text style={[s.bubbleText, s.bubbleTextUser]}>{partialText}</Text>
-                                    </GlassView>
-                                </View>
-                            ) : null}
-                            {busy ? <ThinkingBubble /> : null}
-                            {!!error ? (
-                                <GlassView tintColor={s.errorBox.backgroundColor} style={s.errorBox}>
-                                    <AntDesign name="exclamation-circle" size={14} color={Colors.error} />
-                                    <Text style={s.errorText}>{error}</Text>
-                                </GlassView>
-                            ) : null}
-
-                            {!busy && !partialText && displayMessages.length > 0 && (
-                                <View style={{ alignItems: "center", marginBottom: 20 }}>
-                                    <GlassView
-                                        tintColor={Colors.primary_lighter}
-                                        style={{
-                                            padding: 8,
-                                            paddingHorizontal: 16,
-                                            borderRadius: 100,
-                                        }}
-                                    >
-                                        <Pressable onPress={() => setMessages([])}>
-                                            <Text style={{ color: "#fff", fontSize: 14 }}>Clear conversation</Text>
+                                    <GlassView style={s.iconBtn} {...(showHistory && { tintColor: Colors.secondary })}>
+                                        <Pressable style={s.iconBtnInner} onPress={() => setShowHistory((p) => !p)}>
+                                            <Ionicons
+                                                name="time-outline"
+                                                size={20}
+                                                color={showHistory ? "#fff" : Colors.foreground_secondary}
+                                            />
                                         </Pressable>
                                     </GlassView>
                                 </View>
-                            )}
-                        </>
-                    }
-                />
+                            </View>
 
-                <KeyboardAvoidingView
-                    style={s.inputRow}
-                    behavior={Platform.OS === "ios" ? "padding" : "height"}
-                    keyboardVerticalOffset={80}
-                >
-                    {isRecording ? (
-                        <Animated.View style={[pulseStyle, { flex: 1 }]}>
-                            <GlassView tintColor={Colors.error} style={s.voiceActiveRow}>
-                                <Pressable style={s.voiceActiveInner} onPress={stopVoice}>
-                                    <Ionicons name="stop" size={20} color="#fff" />
-                                    <Text style={s.voiceActiveText}>{partialText || "Listening… tap to stop"}</Text>
-                                </Pressable>
-                            </GlassView>
-                        </Animated.View>
-                    ) : (
-                        <>
-                            <GlassView style={s.iconBtn}>
-                                <Pressable style={s.iconBtnInner} onPress={startVoice} disabled={busy}>
-                                    <Ionicons name="mic" size={20} color={Colors.foreground_secondary} />
-                                </Pressable>
-                            </GlassView>
-                            <GlassView style={s.textInput}>
-                                <TextInput
-                                    style={s.textInputInner}
-                                    value={inputText}
-                                    onChangeText={setInputText}
-                                    placeholder="Ask anything…"
-                                    placeholderTextColor={Colors.foreground_disabled}
-                                    onSubmitEditing={() => {
-                                        send(inputText)
-                                    }}
-                                    returnKeyType="send"
-                                    editable={!busy}
-                                    multiline
-                                />
-                            </GlassView>
-                            <GlassView
-                                tintColor={canSend ? Colors.secondary : undefined}
-                                style={[s.iconBtn, !canSend && { opacity: 0.4 }]}
+                            <View style={s.divider} />
+
+                            <FlatList
+                                ref={listRef}
+                                style={s.chat}
+                                contentContainerStyle={s.chatContent}
+                                data={displayMessages}
+                                keyExtractor={(m) => m.id}
+                                onContentSizeChange={scrollToBottom}
+                                ListEmptyComponent={
+                                    <View style={s.emptyHint}>
+                                        <Ionicons
+                                            name="sparkles"
+                                            size={32}
+                                            color={Colors.secondary}
+                                            style={{ marginBottom: 12 }}
+                                        />
+                                        <Text style={s.hintText}>
+                                            Ask me anything — finances, schedule, tasks, goals.
+                                        </Text>
+                                    </View>
+                                }
+                                renderItem={({ item: msg, index }) => {
+                                    const entering = Math.max(0, 50 * (displayMessages.length - 1 - index))
+                                    if (msg.role === "user") {
+                                        return (
+                                            <View
+                                                style={{
+                                                    alignItems: "center",
+                                                    marginBottom: 10,
+                                                    flexDirection: "row",
+                                                    gap: 8,
+                                                    justifyContent: "flex-end",
+                                                }}
+                                            >
+                                                <GlassView style={{ padding: 2, borderRadius: 100 }}>
+                                                    <IconButton
+                                                        onPress={() => send(msg.content)}
+                                                        icon={<Ionicons name="refresh" size={15} color="#fff" />}
+                                                    />
+                                                </GlassView>
+
+                                                <GlassView
+                                                    tintColor={Colors.secondary}
+                                                    style={[s.bubble, s.bubbleUser, { backgroundColor: undefined }]}
+                                                >
+                                                    <Text style={[s.bubbleText, s.bubbleTextUser]}>{msg.content}</Text>
+                                                </GlassView>
+                                            </View>
+                                        )
+                                    }
+                                    return (
+                                        <AssistantBubble
+                                            entering={entering}
+                                            msg={msg}
+                                            startDate={dayjs(dates.start).format("YYYY-MM-DD")}
+                                            endDate={dayjs(dates.end).format("YYYY-MM-DD")}
+                                            onNavigate={close}
+                                        />
+                                    )
+                                }}
+                                ListFooterComponent={
+                                    <>
+                                        {inputMode === "voice" && partialText ? (
+                                            <View style={{ alignItems: "flex-end", marginBottom: 8 }}>
+                                                <GlassView style={[s.bubble, s.bubbleUser, { opacity: 0.55 }]}>
+                                                    <Text style={[s.bubbleText, s.bubbleTextUser]}>{partialText}</Text>
+                                                </GlassView>
+                                            </View>
+                                        ) : null}
+                                        {busy ? <ThinkingBubble /> : null}
+                                        {!!error ? (
+                                            <GlassView tintColor={s.errorBox.backgroundColor} style={s.errorBox}>
+                                                <AntDesign name="exclamation-circle" size={14} color={Colors.error} />
+                                                <Text style={s.errorText}>{error}</Text>
+                                            </GlassView>
+                                        ) : null}
+
+                                        {!busy && !partialText && displayMessages.length > 0 && (
+                                            <View style={{ alignItems: "center", marginBottom: 20 }}>
+                                                <GlassView
+                                                    tintColor={Colors.primary_lighter}
+                                                    style={{
+                                                        padding: 8,
+                                                        paddingHorizontal: 16,
+                                                        borderRadius: 100,
+                                                    }}
+                                                >
+                                                    <Pressable onPress={() => setMessages([])}>
+                                                        <Text style={{ color: "#fff", fontSize: 14 }}>
+                                                            Clear conversation
+                                                        </Text>
+                                                    </Pressable>
+                                                </GlassView>
+                                            </View>
+                                        )}
+                                    </>
+                                }
+                            />
+
+                            <KeyboardAvoidingView
+                                style={s.inputRow}
+                                behavior={Platform.OS === "ios" ? "padding" : "height"}
+                                keyboardVerticalOffset={80}
                             >
-                                <Pressable
-                                    style={s.iconBtnInner}
-                                    disabled={!canSend}
-                                    onPress={() => {
-                                        send(inputText)
-                                    }}
-                                >
-                                    <Ionicons name="send" size={20} color="#fff" />
-                                </Pressable>
-                            </GlassView>
-                        </>
-                    )}
-                </KeyboardAvoidingView>
-            </View>
+                                {isRecording ? (
+                                    <Animated.View style={[pulseStyle, { flex: 1 }]}>
+                                        <GlassView tintColor={Colors.error} style={s.voiceActiveRow}>
+                                            <Pressable style={s.voiceActiveInner} onPress={stopVoice}>
+                                                <Ionicons name="stop" size={20} color="#fff" />
+                                                <Text style={s.voiceActiveText}>
+                                                    {partialText || "Listening… tap to stop"}
+                                                </Text>
+                                            </Pressable>
+                                        </GlassView>
+                                    </Animated.View>
+                                ) : (
+                                    <>
+                                        <GlassView style={s.iconBtn}>
+                                            <Pressable style={s.iconBtnInner} onPress={startVoice} disabled={busy}>
+                                                <Ionicons name="mic" size={20} color={Colors.foreground_secondary} />
+                                            </Pressable>
+                                        </GlassView>
+                                        <GlassView style={s.textInput}>
+                                            <TextInput
+                                                style={s.textInputInner}
+                                                value={inputText}
+                                                onChangeText={setInputText}
+                                                placeholder="Ask anything…"
+                                                placeholderTextColor={Colors.foreground_disabled}
+                                                onSubmitEditing={() => {
+                                                    send(inputText)
+                                                }}
+                                                returnKeyType="send"
+                                                editable={!busy}
+                                                multiline
+                                            />
+                                        </GlassView>
+                                        <GlassView
+                                            tintColor={canSend ? Colors.secondary : undefined}
+                                            style={[s.iconBtn, !canSend && { opacity: 0.4 }]}
+                                        >
+                                            <Pressable
+                                                style={s.iconBtnInner}
+                                                disabled={!canSend}
+                                                onPress={() => {
+                                                    send(inputText)
+                                                }}
+                                            >
+                                                <Ionicons name="send" size={20} color="#fff" />
+                                            </Pressable>
+                                        </GlassView>
+                                    </>
+                                )}
+                            </KeyboardAvoidingView>
+                        </View>
+                    </MaskedView>
+                </Animated.View>
+            </GestureDetector>
         </Modal>
     )
 }
@@ -545,7 +655,18 @@ const ThinkingBubble = () => {
 }
 
 const s = StyleSheet.create({
-    container: { flex: 1, backgroundColor: Colors.primary, width: Layout.window.width, height: Layout.window.height },
+    maskCircle: {
+        position: "absolute",
+        width: CIRCLE_SIZE,
+        height: CIRCLE_SIZE,
+        borderRadius: CIRCLE_SIZE / 2,
+        backgroundColor: "black",
+        left: BUTTON_X - CIRCLE_SIZE / 2,
+        top: BUTTON_Y - CIRCLE_SIZE / 2,
+    },
+    contentBg: {
+        backgroundColor: Colors.primary,
+    },
     header: {
         flexDirection: "row",
         alignItems: "center",
