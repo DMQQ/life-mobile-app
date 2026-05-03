@@ -39,7 +39,7 @@ const styles = StyleSheet.create({
     button: {
         borderRadius: 100,
         gap: 10,
-        padding: 10,
+        padding: 15,
         alignItems: "center",
         justifyContent: "center",
         position: "relative",

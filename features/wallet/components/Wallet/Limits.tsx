@@ -149,7 +149,6 @@ export default function WalletLimits({ navigation }: { navigation: any }) {
                 compactMode && { height: undefined },
                 { height: compactMode ? undefined : height },
             ]}
-            layout={LinearTransition}
             entering={FadeIn}
         >
             <View style={styles.headerContainer}>
@@ -206,7 +205,6 @@ export default function WalletLimits({ navigation }: { navigation: any }) {
                         return (
                             <Animated.View
                                 key={limit.id}
-                                layout={LinearTransition}
                                 style={[
                                     {
                                         marginRight: 15,

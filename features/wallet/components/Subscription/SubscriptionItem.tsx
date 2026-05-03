@@ -71,14 +71,7 @@ export default function SubscriptionItem({ subscription, index, onPress }: Subsc
     const nextColor = !subscription.isActive ? "#F07070" : isOverdue ? "#F07070" : secondary_candidates[0]
 
     return (
-        <Card
-            ripple
-            animated
-            layout={LinearTransition}
-            entering={FadeIn.delay((index + 1) * 50)}
-            style={styles.card}
-            onPress={onPress}
-        >
+        <Card ripple animated entering={FadeIn.delay((index + 1) * 50)} style={styles.card} onPress={onPress}>
             <View style={styles.row}>
                 <CategoryIcon type="expense" category="subscriptions" />
 

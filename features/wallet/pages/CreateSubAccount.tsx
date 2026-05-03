@@ -13,6 +13,7 @@ import * as yup from "yup"
 import { useCreateSubAccount, useUpdateSubAccount } from "../hooks/useSubAccounts"
 import { WalletScreens } from "../Main"
 import GlassView from "@/components/ui/GlassView"
+import IconSaveButton from "@/components/ui/Button/IconSaveButton"
 
 const ICONS = [
     "credit-card",
@@ -55,8 +56,6 @@ export default function CreateSubAccount({ navigation, route }: WalletScreens<"C
         Feedback.trigger("impactLight")
         navigation.goBack()
     })
-
-    console.log({ error })
 
     const loading = creating || updating
 
@@ -117,6 +116,11 @@ export default function CreateSubAccount({ navigation, route }: WalletScreens<"C
             >
                 {(f) => (
                     <>
+                        <IconSaveButton
+                            onPress={() => f.handleSubmit()}
+                            disabled={!(f.isValid && f.dirty) || loading}
+                            loading={loading}
+                        />
                         <ScrollView
                             style={styles.content}
                             contentContainerStyle={{ paddingBottom: 24 }}
@@ -206,25 +210,6 @@ export default function CreateSubAccount({ navigation, route }: WalletScreens<"C
                                 ))}
                             </View>
                         </ScrollView>
-
-                        <View style={styles.footer}>
-                            <Button
-                                disabled={!(f.isValid && f.dirty) || loading}
-                                onPress={() => f.handleSubmit()}
-                                style={styles.btn}
-                                icon={
-                                    loading && (
-                                        <ActivityIndicator
-                                            style={{ marginHorizontal: 10 }}
-                                            size="small"
-                                            color={Colors.foreground}
-                                        />
-                                    )
-                                }
-                            >
-                                {editing ? "Save changes" : "Create account"}
-                            </Button>
-                        </View>
                     </>
                 )}
             </Formik>

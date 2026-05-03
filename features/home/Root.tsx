@@ -79,7 +79,7 @@ function Root({}: ScreenProps<"Root">) {
     )
 
     return (
-        <Animated.View style={{ flex: 1 }} layout={LinearTransition.delay(100)}>
+        <Animated.View style={{ flex: 1 }}>
             <Background />
             {loading && <LoadingSkeleton />}
 

@@ -189,7 +189,7 @@ export default function TimelineDetails({
                     <LoaderSkeleton />
                 ) : (
                     <View style={styles.container}>
-                        <Text variant="body">{data?.description || "No description provided for this event."}</Text>
+                        {data?.description && <Text variant="body">{data?.description}</Text>}
                         <TimelineTodos timelineId={data?.id} sortedTodos={data?.todos || []} />
 
                         <FileList timelineId={data?.id} />

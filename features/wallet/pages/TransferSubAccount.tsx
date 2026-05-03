@@ -13,6 +13,7 @@ import { useSubAccounts, useTransferBetweenSubAccounts } from "../hooks/useSubAc
 import { WalletScreens } from "../Main"
 import GlassView from "@/components/ui/GlassView"
 import GroupSelector from "@/components/ui/GroupSelector"
+import IconSaveButton from "@/components/ui/Button/IconSaveButton"
 
 export default function TransferSubAccount({ navigation, route }: WalletScreens<"TransferSubAccount">) {
     const { data } = useSubAccounts()
@@ -78,6 +79,8 @@ export default function TransferSubAccount({ navigation, route }: WalletScreens<
                 </Text>
                 <View style={{ width: 44 }} />
             </View>
+
+            <IconSaveButton disabled={!canSubmit || loading} onPress={handleSubmit} loading={loading} />
 
             <ScrollView
                 style={styles.content}
@@ -194,25 +197,6 @@ export default function TransferSubAccount({ navigation, route }: WalletScreens<
                     </View>
                 )}
             </ScrollView>
-
-            <View style={styles.footer}>
-                <Button
-                    disabled={!canSubmit || loading}
-                    onPress={handleSubmit}
-                    style={styles.btn}
-                    icon={
-                        loading && (
-                            <ActivityIndicator
-                                style={{ marginHorizontal: 10 }}
-                                size="small"
-                                color={Colors.foreground}
-                            />
-                        )
-                    }
-                >
-                    Transfer
-                </Button>
-            </View>
         </SafeAreaView>
     )
 }

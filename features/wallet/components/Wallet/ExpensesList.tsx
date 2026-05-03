@@ -82,8 +82,6 @@ export default function ExpensesList({ wallet, onScroll, refetch, onEndReached }
                 onScroll={onScroll}
                 ListHeaderComponent={
                     <View style={{ flexDirection: "column", gap: 15 }}>
-                        <CategoryBreakdown />
-
                         <SubAccountCards />
                     </View>
                 }

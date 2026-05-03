@@ -1,46 +1,35 @@
-import IconButton from "@/components/ui/IconButton/IconButton"
-import ScreenContainer from "@/components/ui/ScreenContainer"
-import Text from "@/components/ui/Text/Text"
-import Colors from "@/constants/Colors"
 import Layout from "@/constants/Layout"
 import Url from "@/constants/Url"
-import throttle from "@/utils/functions/throttle"
-import { AntDesign } from "@expo/vector-icons"
-import { useEffect, useLayoutEffect } from "react"
-import { Image, InteractionManager, StyleSheet, TouchableOpacity, View } from "react-native"
+import { useLayoutEffect } from "react"
+import { Image, StyleSheet, View } from "react-native"
 import { Gesture, GestureDetector } from "react-native-gesture-handler"
-import Ripple from "react-native-material-ripple"
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
-import useGetOccurrenceById from "../hooks/query/useGetOccurrenceById"
 import { TimelineScreenProps } from "../types"
 import { BlurView } from "expo-blur"
+import IconBackButton from "@/components/ui/Button/IconBackButton"
 
 export default function ImagesPreview({ route, navigation }: TimelineScreenProps<"ImagesPreview">) {
-    const { data } = useGetOccurrenceById(route.params.timelineId! as string, {
-        fetchPolicy: "cache-only",
-    })
-
     const insets = useSafeAreaInsets()
 
     return (
-        <BlurView tint="dark" intensity={30} style={styles.modalContainer}>
-            <GesturedImage
-                uri={route.params.selectedImage}
-                onSingleTap={() => {
-                    navigation.canGoBack() && navigation.goBack()
-                    console.log("Back pressed")
+        <View style={{ flex: 1, position: "relative" }}>
+            <BlurView tint="dark" intensity={30} style={styles.modalContainer}>
+                <GesturedImage
+                    uri={route.params.selectedImage}
+                    onSingleTap={() => {
+                        navigation.canGoBack() && navigation.goBack()
+                    }}
+                />
+            </BlurView>
+            <IconBackButton
+                style={{
+                    top: insets.top + 10,
+                    left: 15,
+                    width: 50,
                 }}
             />
-            <IconButton
-                icon={<AntDesign name="close" size={24} color={Colors.foreground} />}
-                style={[styles.closeButton, { top: insets.top + 10 }]}
-                onPress={() => {
-                    navigation.pop()
-                    console.log("Back pressed")
-                }}
-            ></IconButton>
-        </BlurView>
+        </View>
     )
 }
 
@@ -177,12 +166,7 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         padding: 0,
-        ...StyleSheet.absoluteFillObject,
+        ...StyleSheet.absoluteFill,
     },
-    closeButton: {
-        position: "absolute",
-        left: 10,
-        zIndex: 1000,
-        padding: 5,
-    },
+    closeButton: {},
 })

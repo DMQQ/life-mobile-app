@@ -36,6 +36,7 @@ import dayjs from "dayjs"
 import Layout from "@/constants/Layout"
 import DatePicker from "@/components/DatePicker"
 import { IconButton } from "@/components"
+import IconBackButton from "@/components/ui/Button/IconBackButton"
 
 const AI_CHAT = gql`
     mutation GlobalAiChat($input: AiChatInput!) {
@@ -255,10 +256,9 @@ export default function GlobalAiChat() {
         const distance = Math.sqrt(dragX.value ** 2 + dragY.value ** 2)
         const dragRatio = Math.min(1, distance / (Layout.window.height * 0.5))
         const scale = 1 - dragRatio * 0.2
-        const borderRadius = dragRatio * 24
         return {
             transform: [{ translateX: dragX.value }, { translateY: dragY.value }, { scale }],
-            borderRadius,
+            borderRadius: 25,
         }
     })
 
@@ -433,11 +433,7 @@ export default function GlobalAiChat() {
                     >
                         <View style={[StyleSheet.absoluteFill, s.contentBg, { paddingTop: insets.top }]}>
                             <View style={s.header}>
-                                <GlassView style={s.iconBtn}>
-                                    <Pressable style={s.iconBtnInner} onPress={close}>
-                                        <AntDesign name="close" size={20} color="#fff" />
-                                    </Pressable>
-                                </GlassView>
+                                <IconBackButton onPress={close} />
                                 <View style={s.headerCenter}>
                                     <Ionicons name="sparkles" size={16} color={Colors.secondary} />
                                     <Text style={s.headerTitle}>AI Assistant</Text>

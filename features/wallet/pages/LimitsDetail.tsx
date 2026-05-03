@@ -212,123 +212,127 @@ export default function LimitsDetail({ navigation }: WalletScreens<"LimitsDetail
 
                 {isLoading ? (
                     <LimitsSkeleton />
-                ) : visibleLimits.map((limit) => {
-                    const pct = Math.min(100, (limit.current / limit.amount) * 100)
-                    const isOver = limit.current > limit.amount
-                    const color = Icons[limit.category as keyof typeof Icons]?.backgroundColor ?? Colors.secondary
-                    const expenses = expensesByCategory[limit.category] ?? []
-                    const isSelected = selectedCategory === limit.category
-                    const isExpanded = expandedCategories.has(limit.id)
+                ) : (
+                    visibleLimits.map((limit) => {
+                        const pct = Math.min(100, (limit.current / limit.amount) * 100)
+                        const isOver = limit.current > limit.amount
+                        const color = Icons[limit.category as keyof typeof Icons]?.backgroundColor ?? Colors.secondary
+                        const expenses = expensesByCategory[limit.category] ?? []
+                        const isSelected = selectedCategory === limit.category
+                        const isExpanded = expandedCategories.has(limit.id)
 
-                    return (
-                        <Animated.View
-                            key={limit.id}
-                            entering={FadeIn}
-                            layout={LinearTransition}
-                            style={[
-                                styles.section,
-                                isSelected && {
-                                    borderColor: Color(color).alpha(0.6).hexa(),
-                                    borderWidth: 1.5,
-                                },
-                            ]}
-                        >
-                            {/* Category header */}
-                            <Pressable
-                                style={({ pressed }) => [styles.catHeader, pressed && { opacity: 0.7 }]}
-                                onPress={() => {
-                                    Haptic.trigger("impactLight")
-                                    setSelectedCategory((prev) => (prev === limit.category ? null : limit.category))
-                                    setExpandedCategories((prev) => {
-                                        const next = new Set(prev)
-                                        if (next.has(limit.id)) next.delete(limit.id)
-                                        else next.add(limit.id)
-                                        return next
-                                    })
-                                }}
+                        return (
+                            <Animated.View
+                                key={limit.id}
+                                entering={FadeIn}
+                                style={[
+                                    styles.section,
+                                    isSelected && {
+                                        borderColor: Color(color).alpha(0.6).hexa(),
+                                        borderWidth: 1.5,
+                                    },
+                                ]}
                             >
-                                <CategoryIcon
-                                    category={limit.category as keyof typeof Icons}
-                                    type="expense"
-                                    size={16}
-                                    style={styles.catIcon}
-                                />
-                                <View style={styles.catInfo}>
-                                    <View style={styles.catTitleRow}>
-                                        <Text variant="body" style={styles.catName}>
-                                            {CategoryUtils.getCategoryName(limit.category)}
-                                        </Text>
-                                        <View style={styles.catTitleRight}>
-                                            <Text
-                                                variant="caption"
-                                                style={[styles.pct, { color: isOver ? "#F07070" : color }]}
-                                            >
-                                                {pct.toFixed(0)}%{isOver && "  over"}
+                                {/* Category header */}
+                                <Pressable
+                                    style={({ pressed }) => [styles.catHeader, pressed && { opacity: 0.7 }]}
+                                    onPress={() => {
+                                        Haptic.trigger("impactLight")
+                                        setSelectedCategory((prev) => (prev === limit.category ? null : limit.category))
+                                        setExpandedCategories((prev) => {
+                                            const next = new Set(prev)
+                                            if (next.has(limit.id)) next.delete(limit.id)
+                                            else next.add(limit.id)
+                                            return next
+                                        })
+                                    }}
+                                >
+                                    <CategoryIcon
+                                        category={limit.category as keyof typeof Icons}
+                                        type="expense"
+                                        size={16}
+                                        style={styles.catIcon}
+                                    />
+                                    <View style={styles.catInfo}>
+                                        <View style={styles.catTitleRow}>
+                                            <Text variant="body" style={styles.catName}>
+                                                {CategoryUtils.getCategoryName(limit.category)}
                                             </Text>
-                                            <Text variant="caption" style={styles.chevron}>
-                                                {isExpanded ? "▲" : "▼"}
-                                            </Text>
-                                        </View>
-                                    </View>
-
-                                    <View style={styles.progressBg}>
-                                        <View
-                                            style={[
-                                                styles.progressFill,
-                                                {
-                                                    width: `${pct}%` as any,
-                                                    backgroundColor: isOver ? "#F07070" : color,
-                                                },
-                                            ]}
-                                        />
-                                    </View>
-
-                                    <Text variant="caption" style={styles.amountRow}>
-                                        <Text
-                                            variant="caption"
-                                            style={{ color: isOver ? "#F07070" : "rgba(255,255,255,0.7)" }}
-                                        >
-                                            {limit.current.toFixed(2)} zł
-                                        </Text>
-                                        {"  /  "}
-                                        {limit.amount.toFixed(2)} zł
-                                    </Text>
-                                </View>
-                            </Pressable>
-
-                            {/* Expense rows — only when expanded */}
-                            {isExpanded &&
-                                (expenses.length === 0 ? (
-                                    <Text variant="caption" style={styles.empty}>
-                                        No expenses this period
-                                    </Text>
-                                ) : (
-                                    expenses.map((expense: any) => (
-                                        <Pressable
-                                            key={expense.id}
-                                            style={({ pressed }) => [styles.expenseRow, pressed && { opacity: 0.6 }]}
-                                            onPress={() => navigation.navigate("Expense", { expense })}
-                                        >
-                                            <View style={styles.expenseLeft}>
-                                                <Text variant="body" style={styles.expenseDesc} numberOfLines={1}>
-                                                    {expense.description}
+                                            <View style={styles.catTitleRight}>
+                                                <Text
+                                                    variant="caption"
+                                                    style={[styles.pct, { color: isOver ? "#F07070" : color }]}
+                                                >
+                                                    {pct.toFixed(0)}%{isOver && "  over"}
                                                 </Text>
-                                                <Text variant="caption" style={styles.expenseDate}>
-                                                    {parseDateToText(expense.date)}
+                                                <Text variant="caption" style={styles.chevron}>
+                                                    {isExpanded ? "▲" : "▼"}
                                                 </Text>
                                             </View>
-                                            <Text variant="body" style={styles.expenseAmount}>
-                                                -{expense.amount.toFixed(2)}{" "}
-                                                <Text variant="caption" style={styles.expenseAmountCurrency}>
-                                                    zł
-                                                </Text>
+                                        </View>
+
+                                        <View style={styles.progressBg}>
+                                            <View
+                                                style={[
+                                                    styles.progressFill,
+                                                    {
+                                                        width: `${pct}%` as any,
+                                                        backgroundColor: isOver ? "#F07070" : color,
+                                                    },
+                                                ]}
+                                            />
+                                        </View>
+
+                                        <Text variant="caption" style={styles.amountRow}>
+                                            <Text
+                                                variant="caption"
+                                                style={{ color: isOver ? "#F07070" : "rgba(255,255,255,0.7)" }}
+                                            >
+                                                {limit.current.toFixed(2)} zł
                                             </Text>
-                                        </Pressable>
-                                    ))
-                                ))}
-                        </Animated.View>
-                    )
-                })}
+                                            {"  /  "}
+                                            {limit.amount.toFixed(2)} zł
+                                        </Text>
+                                    </View>
+                                </Pressable>
+
+                                {/* Expense rows — only when expanded */}
+                                {isExpanded &&
+                                    (expenses.length === 0 ? (
+                                        <Text variant="caption" style={styles.empty}>
+                                            No expenses this period
+                                        </Text>
+                                    ) : (
+                                        expenses.map((expense: any) => (
+                                            <Pressable
+                                                key={expense.id}
+                                                style={({ pressed }) => [
+                                                    styles.expenseRow,
+                                                    pressed && { opacity: 0.6 },
+                                                ]}
+                                                onPress={() => navigation.navigate("Expense", { expense })}
+                                            >
+                                                <View style={styles.expenseLeft}>
+                                                    <Text variant="body" style={styles.expenseDesc} numberOfLines={1}>
+                                                        {expense.description}
+                                                    </Text>
+                                                    <Text variant="caption" style={styles.expenseDate}>
+                                                        {parseDateToText(expense.date)}
+                                                    </Text>
+                                                </View>
+                                                <Text variant="body" style={styles.expenseAmount}>
+                                                    -{expense.amount.toFixed(2)}{" "}
+                                                    <Text variant="caption" style={styles.expenseAmountCurrency}>
+                                                        zł
+                                                    </Text>
+                                                </Text>
+                                            </Pressable>
+                                        ))
+                                    ))}
+                            </Animated.View>
+                        )
+                    })
+                )}
             </ScrollView>
         </SafeAreaView>
     )
@@ -362,13 +366,25 @@ function LimitsSkeleton() {
                             <Skeleton.Item width={36} height={36} style={{ borderRadius: 10, marginTop: 0 }} />
                             <View style={{ flex: 1, gap: 8 }}>
                                 <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                                    <Skeleton.Item width={(cardWidth - 80) * 0.45} height={14} style={{ borderRadius: 7, marginTop: 0 }} />
+                                    <Skeleton.Item
+                                        width={(cardWidth - 80) * 0.45}
+                                        height={14}
+                                        style={{ borderRadius: 7, marginTop: 0 }}
+                                    />
                                     <Skeleton.Item width={40} height={14} style={{ borderRadius: 7, marginTop: 0 }} />
                                 </View>
                                 {/* Progress bar */}
-                                <Skeleton.Item width={cardWidth - 80} height={4} style={{ borderRadius: 2, marginTop: 0 }} />
+                                <Skeleton.Item
+                                    width={cardWidth - 80}
+                                    height={4}
+                                    style={{ borderRadius: 2, marginTop: 0 }}
+                                />
                                 {/* Amount row */}
-                                <Skeleton.Item width={(cardWidth - 80) * 0.55} height={11} style={{ borderRadius: 5, marginTop: 0 }} />
+                                <Skeleton.Item
+                                    width={(cardWidth - 80) * 0.55}
+                                    height={11}
+                                    style={{ borderRadius: 5, marginTop: 0 }}
+                                />
                             </View>
                         </View>
                     </View>

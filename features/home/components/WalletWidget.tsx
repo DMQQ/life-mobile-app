@@ -7,6 +7,7 @@ import moment from "moment"
 import { StyleSheet, Text, View } from "react-native"
 import Animated, { LinearTransition } from "react-native-reanimated"
 import ChartSwitcher from "./ChartSwitcher"
+import CategoryBreakdown from "@/features/wallet/components/Wallet/CategoryBreakdown"
 
 const GET_ZERO_SPENDINGS = gql`
     query HomeZeroSpendings($startDate: String!, $endDate: String!) {
@@ -77,12 +78,12 @@ const ZeroSpendingsCompact = () => {
 
 const AvailableBalanceWidget = ({ data }: Props) => {
     return (
-        <Animated.View style={styles.container} layout={LinearTransition.delay(200)}>
+        <Animated.View style={styles.container}>
             <View style={styles.card}>
                 <Text style={styles.sectionTitle}>Week overview</Text>
                 <ChartSwitcher />
             </View>
-            <ZeroSpendingsCompact />
+            <CategoryBreakdown />
         </Animated.View>
     )
 }

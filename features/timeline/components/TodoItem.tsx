@@ -3,7 +3,7 @@ import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
 import { TodoFile, Todos } from "@/types"
 import dayjs from "dayjs"
-import { StyleSheet, View, TouchableOpacity, ScrollView, Image, Pressable } from "react-native"
+import { StyleSheet, View, TouchableOpacity, Image, Pressable } from "react-native"
 import Haptic from "react-native-haptic-feedback"
 import { FadeInDown, FadeOutDown } from "react-native-reanimated"
 import useCompleteTodo from "../hooks/mutation/useCompleteTodo"
@@ -13,10 +13,8 @@ import useRemoveTodoFile from "../hooks/mutation/useRemoveTodoFile"
 import { Ionicons } from "@expo/vector-icons"
 import Url from "@/constants/Url"
 import Color from "color"
-import { useDoubleTapComplete } from "../hooks/useDoubleTapComplete"
 import { useFileUpload } from "../hooks/useFileUpload"
 import { useFileManagement } from "../hooks/useFileManagement"
-import { TodoCheckbox } from "./TodoCheckbox"
 import { UploadButton } from "./UploadButton"
 import Checkbox from "@/components/ui/Checkbox"
 
@@ -49,8 +47,7 @@ const styles = StyleSheet.create({
     },
     fileItem: {
         alignItems: "center",
-        borderRadius: 4,
-        marginRight: 8,
+        borderRadius: 10,
         backgroundColor: Color(Colors.primary_lighter).lighten(0.5).toString(),
         borderWidth: 1,
         borderColor: Color(Colors.primary_lighter).lighten(0.75).toString(),
@@ -64,7 +61,7 @@ const styles = StyleSheet.create({
     fileImage: {
         width: 50,
         height: 40,
-        borderRadius: 4,
+        borderRadius: 10,
     },
     fileIcon: {
         width: 60,
@@ -93,11 +90,6 @@ export default function TodoItem(todo: Todos & { timelineId: string; index: numb
     })
     const { loading: addFileLoading } = useAddTodoFile()
     const { loading: removeFileLoading } = useRemoveTodoFile()
-
-    // const { handleToggleComplete } = useDoubleTapComplete({
-    //     onComplete: completeTodo,
-    //     currentlyCompleted: todo.isCompleted,
-    // })
 
     const { handleUploadFile, uploadingFile } = useFileUpload({
         todoId: todo.id,
@@ -139,12 +131,6 @@ export default function TodoItem(todo: Todos & { timelineId: string; index: numb
                             {todo.title.trim()}
                         </Text>
 
-                        <FilesList
-                            files={todo.files || []}
-                            handleShowPreview={handleShowPreview}
-                            handleRemoveFile={handleRemoveFile}
-                        />
-
                         <Text
                             variant="caption"
                             color={Colors.text_dark}
@@ -154,8 +140,15 @@ export default function TodoItem(todo: Todos & { timelineId: string; index: numb
                         </Text>
                     </View>
                 </Pressable>
-
-                <UploadButton onPress={handleUploadFile} disabled={isLoading} />
+                {todo.files && todo.files.length > 0 ? (
+                    <FilesList
+                        files={todo.files || []}
+                        handleShowPreview={handleShowPreview}
+                        handleRemoveFile={handleRemoveFile}
+                    />
+                ) : (
+                    <UploadButton onPress={handleUploadFile} disabled={isLoading} />
+                )}
             </View>
         </Card>
     )
@@ -173,33 +166,31 @@ const FilesList = ({ files, handleShowPreview, handleRemoveFile }: FilesListProp
     return (
         files &&
         files.length > 0 && (
-            <View style={styles.filesContainer}>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                    {files.map((file) => (
-                        <TouchableOpacity
-                            key={file.id}
-                            style={styles.fileItem}
-                            onPress={() => {
-                                if (file.type.startsWith("image/")) {
-                                    handleShowPreview(file)
-                                }
-                            }}
-                            onLongPress={() => handleRemoveFile(file.id)}
-                        >
-                            {file.type.startsWith("image/") ? (
-                                <Image
-                                    source={{ uri: Url.API + "/upload/images/" + file.url }}
-                                    style={styles.fileImage}
-                                    resizeMode="cover"
-                                />
-                            ) : (
-                                <View style={styles.fileIcon}>
-                                    <Ionicons name={getFileIcon(file.type) as any} size={24} color={Colors.secondary} />
-                                </View>
-                            )}
-                        </TouchableOpacity>
-                    ))}
-                </ScrollView>
+            <View style={{ flexDirection: "row", gap: 5 }}>
+                {files.map((file) => (
+                    <TouchableOpacity
+                        key={file.id}
+                        style={styles.fileItem}
+                        onPress={() => {
+                            if (file.type.startsWith("image/")) {
+                                handleShowPreview(file)
+                            }
+                        }}
+                        onLongPress={() => handleRemoveFile(file.id)}
+                    >
+                        {file.type.startsWith("image/") ? (
+                            <Image
+                                source={{ uri: Url.API + "/upload/images/" + file.url }}
+                                style={styles.fileImage}
+                                resizeMode="cover"
+                            />
+                        ) : (
+                            <View style={styles.fileIcon}>
+                                <Ionicons name={getFileIcon(file.type) as any} size={24} color={Colors.secondary} />
+                            </View>
+                        )}
+                    </TouchableOpacity>
+                ))}
             </View>
         )
     )

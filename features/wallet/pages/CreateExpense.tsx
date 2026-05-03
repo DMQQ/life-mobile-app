@@ -1,11 +1,9 @@
-import IconButton from "@/components/ui/IconButton/IconButton"
 import GroupSelector from "@/components/ui/GroupSelector"
 import Colors from "@/constants/Colors"
 import useCreateExpensePage from "@/features/wallet/hooks/useCreateExpensePage"
-import { AntDesign } from "@expo/vector-icons"
 import moment from "moment"
 import { useEffect, useRef, useState } from "react"
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native"
+import { StyleSheet, View } from "react-native"
 import DateTimePicker from "react-native-modal-datetime-picker"
 import AmountDisplay from "../components/CreateExpense/AmountDisplay"
 import ExpenseAIMaker from "../components/CreateExpense/ExpenseAIMaker"
@@ -13,7 +11,6 @@ import NameInput from "../components/CreateExpense/NameInput"
 import OptionsPicker from "../components/CreateExpense/OptionsPicker"
 import PredictionView from "../components/CreateExpense/PredictionView"
 import SubExpenseSheet from "../components/CreateExpense/SubexpenseSheet"
-import GlassView from "@/components/ui/GlassView"
 import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/types"
 import {
     CreateExpenseProvider,
@@ -22,6 +19,8 @@ import {
 } from "../context/CreateExpenseContext"
 import CompactNumberPad from "@/components/ui/CompactNumberPad"
 import { Icons } from "../components/Expense/ExpenseIcon"
+import IconSaveButton from "@/components/ui/Button/IconSaveButton"
+import IconBackButton from "@/components/ui/Button/IconBackButton"
 
 const TYPE_OPTIONS: ["Expense", "Income", "Refund"] = ["Expense", "Income", "Refund"]
 
@@ -30,7 +29,7 @@ const labelToType = (label: string) => (label === "Expense" ? "expense" : label 
 const typeToLabel = (type: string | null): "Expense" | "Income" | "Refund" =>
     type === "income" ? "Income" : type === "refunded" ? "Refund" : "Expense"
 
-export default function CreateExpenseModal({ navigation, route: { params } }: any) {
+export default function CreateExpenseModal({ route: { params } }: any) {
     const hookData = useCreateExpensePage(params)
     const [isInputFocused, setIsInputFocused] = useState(false)
     const subexpenseSheetRef = useRef<BottomSheetModalMethods>(null)
@@ -51,12 +50,7 @@ export default function CreateExpenseModal({ navigation, route: { params } }: an
     return (
         <CreateExpenseProvider value={contextValue}>
             <View style={[styles.root]}>
-                <GlassView style={styles.closeBtn}>
-                    <IconButton
-                        onPress={() => navigation.goBack()}
-                        icon={<AntDesign name="close" size={20} color="#fff" />}
-                    />
-                </GlassView>
+                <IconBackButton style={styles.closeBtn} />
 
                 <View style={{ position: "absolute", top: 15, left: 80, right: 80, zIndex: 1000 }}>
                     <GroupSelector
@@ -111,26 +105,15 @@ const SaveButton = () => {
     const disabled = !isValid && !prediction && !canPredict
 
     const tintColor =
-        !isValid && prediction
-            ? Icons[prediction.category as keyof typeof Icons]?.backgroundColor
-            : !isValid
-              ? Colors.secondary + "80"
-              : Colors.secondary
+        !isValid && prediction ? Icons[prediction.category as keyof typeof Icons]?.backgroundColor : undefined
 
     return (
-        <GlassView key={tintColor} tintColor={tintColor} style={styles.saveButton}>
-            <IconButton
-                disabled={disabled || loading}
-                onPress={!isValid && prediction ? applyPrediction : handleSubmit}
-                icon={
-                    loading ? (
-                        <ActivityIndicator size={20} color="#fff" />
-                    ) : (
-                        <AntDesign name="check" size={20} color="#fff" />
-                    )
-                }
-            />
-        </GlassView>
+        <IconSaveButton
+            disabled={disabled || loading}
+            onPress={!isValid && prediction ? applyPrediction : handleSubmit}
+            loading={loading}
+            tintColor={tintColor}
+        />
     )
 }
 
@@ -156,8 +139,6 @@ const styles = StyleSheet.create({
         top: 15,
         left: 15,
         zIndex: 100,
-        padding: 10,
-        borderRadius: 100,
     },
     saveButton: {
         position: "absolute",
