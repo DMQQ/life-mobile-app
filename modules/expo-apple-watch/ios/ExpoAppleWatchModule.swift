@@ -62,20 +62,16 @@ public class ExpoAppleWatchModule: Module {
       }
 
       guard session.isReachable else {
-        // Update application context for offline sync
-        do {
-          try session.updateApplicationContext(data)
-          promise.resolve(["success": true, "method": "context"])
-        } catch {
-          promise.reject("UPDATE_ERROR", "Failed to update application context: \(error.localizedDescription)")
-        }
+        session.transferUserInfo(data)
+        promise.resolve(["success": true, "method": "userInfo"])
         return
       }
 
       session.sendMessage(data, replyHandler: { reply in
         promise.resolve(["success": true, "method": "message", "reply": reply])
-      }, errorHandler: { error in
-        promise.reject("SEND_ERROR", "Failed to send data: \(error.localizedDescription)")
+      }, errorHandler: { _ in
+        session.transferUserInfo(data)
+        promise.resolve(["success": true, "method": "userInfo"])
       })
     }
   }

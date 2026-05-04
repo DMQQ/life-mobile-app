@@ -5,8 +5,14 @@ import { WidgetTimelineData, WidgetTimelineEvent, WidgetTodo } from "../types"
 import { ExtensionStorage } from "@bacons/apple-targets"
 import { useQuery } from "@apollo/client"
 import moment from "moment"
+import { sendDataToWatch, isWatchAvailable } from "@/modules/expo-apple-watch"
 
-const transformTodoForWidget = (todo: { id: string; title: string; isCompleted: boolean; modifiedAt?: string }): WidgetTodo => ({
+const transformTodoForWidget = (todo: {
+    id: string
+    title: string
+    isCompleted: boolean
+    modifiedAt?: string
+}): WidgetTodo => ({
     id: todo.id,
     title: todo.title,
     isCompleted: todo.isCompleted,
@@ -72,8 +78,17 @@ export const useWidgetTimelineData = () => {
             lastUpdated: new Date().toISOString(),
         }
 
-        store.set("timeline_data", JSON.stringify(widgetData))
+        const serialized = JSON.stringify(widgetData)
+        store.set("timeline_data", serialized)
+
+        console.log("Widget timeline data updated:", widgetData)
         ExtensionStorage.reloadWidget()
+        console.log("[Watch] isWatchAvailable:", isWatchAvailable())
+        if (isWatchAvailable()) {
+            sendDataToWatch({ timeline_data: serialized, reload_widget: true })
+                .then((r) => console.log("[Watch] sendDataToWatch result:", r))
+                .catch((e) => console.log("[Watch] sendDataToWatch error:", e))
+        }
     }, [todayQuery.data, tomorrowQuery.data, dayAfterQuery.data])
 }
 

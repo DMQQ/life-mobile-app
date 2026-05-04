@@ -329,7 +329,7 @@ const AnimatedContent = memo(
             if (!props.scrollY || !props.animated || typeof props.scrollY.value !== "number") {
                 return {
                     transform: [{ scale: 1 }],
-                    top: insets.top * 2,
+                    top: insets.top * 1.25,
                     left: 15,
                 }
             }
@@ -396,7 +396,7 @@ const AnimatedContent = memo(
         return (
             <Animated.View
                 pointerEvents={props.onAnimatedTitlePress ? "box-none" : "none"}
-                style={[{ position: "absolute" }, props.textContainerStyle, props.animated && animatedContentStyle]}
+                style={[{ position: "absolute" }, props.textContainerStyle, animatedContentStyle]}
             >
                 {props.animatedValue !== undefined ? (
                     <AnimatedNumber

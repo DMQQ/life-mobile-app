@@ -39,6 +39,96 @@ private func shortTime(_ t: String) -> String {
     return "\(parts[0]):\(parts[1])"
 }
 
+private let pillH: CGFloat = 16
+private let laneH: CGFloat = 20
+private let bottomH: CGFloat = 14
+
+private struct TimelineLayout {
+    let rangeStart: Date
+    let rangeEnd: Date
+    let laneEvents: [LaneEventItem]
+    let nowFraction: CGFloat?
+    let totalLanes: Int
+}
+
+private struct LaneEventItem: Identifiable {
+    var id: String { "\(event.id)-\(lane)" }
+    let event: WatchTimelineEvent
+    let isNow: Bool
+    let lane: Int
+    let startFraction: CGFloat
+    let endFraction: CGFloat
+}
+
+private func buildTimeline(for date: Date) -> TimelineLayout {
+    let events = todayEvents()
+    let day = Calendar.current.startOfDay(for: date)
+
+    struct Parsed {
+        let event: WatchTimelineEvent
+        let begin: Date
+        let end: Date
+    }
+
+    var parsed: [Parsed] = []
+    for e in events {
+        guard let b = parseTime(e.beginTime, on: day),
+              let endT = parseTime(e.endTime, on: day) else { continue }
+        parsed.append(Parsed(event: e, begin: b, end: endT))
+    }
+
+    guard !parsed.isEmpty else {
+        return TimelineLayout(rangeStart: date, rangeEnd: date.addingTimeInterval(7200), laneEvents: [], nowFraction: nil, totalLanes: 0)
+    }
+
+    let rangeStart = date.addingTimeInterval(-1.5 * 3600)
+    let rangeEnd = date.addingTimeInterval(2.5 * 3600)
+    let duration = rangeEnd.timeIntervalSince(rangeStart)
+    let visible = parsed.filter { $0.end > rangeStart && $0.begin < rangeEnd }
+
+    var lanes: [Date] = []
+    var items: [LaneEventItem] = []
+
+    for p in visible.sorted(by: { $0.begin < $1.begin }) {
+        var laneIdx = -1
+        for (i, laneEnd) in lanes.enumerated() {
+            if p.begin >= laneEnd {
+                laneIdx = i
+                lanes[i] = p.end
+                break
+            }
+        }
+        if laneIdx == -1 {
+            laneIdx = lanes.count
+            lanes.append(p.end)
+        }
+
+        let startF = CGFloat(p.begin.timeIntervalSince(rangeStart) / duration)
+        let endF = CGFloat(p.end.timeIntervalSince(rangeStart) / duration)
+        let isNow = p.begin <= date && date < p.end
+
+        items.append(LaneEventItem(
+            event: p.event,
+            isNow: isNow,
+            lane: laneIdx,
+            startFraction: startF,
+            endFraction: endF
+        ))
+    }
+
+    let nowF: CGFloat? = (date >= rangeStart && date <= rangeEnd)
+        ? CGFloat(date.timeIntervalSince(rangeStart) / duration)
+        : nil
+
+    return TimelineLayout(
+        rangeStart: rangeStart,
+        rangeEnd: rangeEnd,
+        laneEvents: items,
+        nowFraction: nowF,
+        totalLanes: lanes.count
+    )
+}
+
 private func todayEvents() -> [WatchTimelineEvent] {
     guard let str = UserDefaults.appGroup?.string(forKey: "timeline_data"),
           let data = try? JSONDecoder().decode(WatchTimelineData.self, from: Data(str.utf8))
@@ -145,32 +235,129 @@ struct watchWidgetEntryView: View {
 
     @ViewBuilder
     private var rectangularView: some View {
-        let events = upcomingEvents(limit: 2)
+        let events = todayEvents()
         if events.isEmpty {
             HStack(spacing: 6) {
                 Image(systemName: "calendar.badge.checkmark").widgetAccentable()
-                Text("Nothing upcoming").font(.caption)
+                Text("Nothing upcoming").font(.caption2)
             }
         } else {
-            VStack(alignment: .leading, spacing: 3) {
-                ForEach(events, id: \.event.id) { item in
-                    HStack(spacing: 5) {
-                        Image(systemName: item.isNow ? "circle.fill" : "circle")
-                            .font(.system(size: 8))
-                            .widgetAccentable()
-                        Text(item.event.title)
-                            .font(.system(size: 12, weight: item.isNow ? .semibold : .regular))
-                            .lineLimit(1)
-                        Spacer()
-                        Text(item.isNow
-                             ? "\(shortTime(item.event.beginTime))–\(shortTime(item.event.endTime))"
-                             : shortTime(item.event.beginTime))
-                            .font(.system(size: 10, design: .rounded))
-                            .foregroundStyle(.secondary)
+            GeometryReader { geo in
+                let layout = buildTimeline(for: entry.date)
+                let ticks = generateTicks(rangeStart: layout.rangeStart, rangeEnd: layout.rangeEnd)
+                let activeEvent = layout.laneEvents.first(where: \.isNow)
+                let headerH: CGFloat = activeEvent != nil ? 12 : 0
+                let chartH = geo.size.height - headerH - bottomH
+
+                VStack(spacing: 0) {
+                    if let active = activeEvent,
+                       let remaining = remainingTime(for: entry.date, event: active.event)
+                    {
+                        HStack(spacing: 3) {
+                            Circle().fill(.red).frame(width: 4, height: 4)
+                            Text(active.event.title)
+                                .font(.system(size: 10, weight: .medium))
+                                .lineLimit(1)
+                            Text("·\(remaining)")
+                                .font(.system(size: 9))
+                                .foregroundStyle(.secondary)
+                        }
+                        .frame(height: headerH)
                     }
+
+                    ZStack(alignment: .topLeading) {
+                        ForEach(ticks.filter(\.isHour)) { tick in
+                            Rectangle()
+                                .fill(Color.primary.opacity(0.3))
+                                .frame(width: 1, height: chartH)
+                                .offset(x: tick.xFraction * geo.size.width - 0.5)
+                        }
+                        ForEach(layout.laneEvents) { item in
+                            eventPill(item, width: geo.size.width)
+                        }
+                        if let nowF = layout.nowFraction {
+                            Rectangle()
+                                .fill(.red)
+                                .frame(width: 1, height: chartH)
+                                .offset(x: nowF * geo.size.width - 0.5)
+                        }
+                    }
+                    .frame(height: chartH)
+
+                    ZStack(alignment: .topLeading) {
+                        ForEach(ticks.filter(\.isHour)) { tick in
+                            Text(tick.label)
+                                .font(.system(size: 8, design: .rounded))
+                                .foregroundStyle(.secondary)
+                                .offset(x: tick.xFraction * geo.size.width + 3)
+                        }
+                    }
+                    .frame(height: bottomH)
                 }
             }
         }
+    }
+
+    private func eventPill(_ item: LaneEventItem, width: CGFloat) -> some View {
+        let pillW = max((item.endFraction - item.startFraction) * width, 28)
+        return HStack(spacing: 2) {
+            Circle()
+                .frame(width: 4, height: 4)
+                .widgetAccentable()
+                .opacity(item.isNow ? 1 : 0.45)
+            Text(item.event.title)
+                .font(.system(size: 8, weight: item.isNow ? .semibold : .regular))
+                .lineLimit(1)
+        }
+        .padding(.horizontal, 4)
+        .frame(width: pillW, height: pillH, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: pillH / 2)
+                .fill(Color.primary.opacity(item.isNow ? 0.18 : 0.08))
+        )
+        .offset(x: item.startFraction * width, y: CGFloat(item.lane) * laneH)
+    }
+
+    private struct TickMark: Identifiable {
+        let id = UUID()
+        let xFraction: CGFloat
+        let isHour: Bool
+        let label: String
+    }
+
+    private func generateTicks(rangeStart: Date, rangeEnd: Date) -> [TickMark] {
+        let cal = Calendar.current
+        var comps = cal.dateComponents([.year, .month, .day, .hour, .minute], from: rangeStart)
+        comps.minute = (comps.minute! / 15) * 15
+        var tick = cal.date(from: comps)!
+
+        let duration = rangeEnd.timeIntervalSince(rangeStart)
+        var ticks: [TickMark] = []
+
+        while tick <= rangeEnd {
+            let xFrac = CGFloat(tick.timeIntervalSince(rangeStart) / duration)
+            let m = cal.component(.minute, from: tick)
+            let isHour = m == 0
+            let label = isHour ? "\(cal.component(.hour, from: tick))" : ""
+            ticks.append(TickMark(xFraction: xFrac, isHour: isHour, label: label))
+            tick = cal.date(byAdding: .minute, value: 15, to: tick)!
+        }
+
+        return ticks
+    }
+
+    private func remainingTime(for date: Date, event: WatchTimelineEvent) -> String? {
+        let day = Calendar.current.startOfDay(for: date)
+        guard let end = parseTime(event.endTime, on: day) else { return nil }
+        let remaining = end.timeIntervalSince(date)
+        guard remaining > 0 else { return nil }
+        let mins = Int(remaining / 60)
+        if mins == 0 { return "0m" }
+        if mins < 60 { return "\(mins)m" }
+        let h = mins / 60
+        let m = mins % 60
+        if m == 0 { return "\(h)h" }
+        return "\(h)h\(m)m"
     }
 
     @ViewBuilder
@@ -211,6 +398,7 @@ struct watchWidgetEntryView: View {
         }
         return result
     }
+
 }
 
 // MARK: - Widget

@@ -115,13 +115,7 @@ export default function DayTimelineItemWrapper({ item, style, onLongPress }: Day
                 style={{ flex: 1, borderRadius: styles.wrapper.borderRadius }}
             >
                 <Pressable
-                    style={[
-                        styles.wrapper,
-                        { flex: 1 },
-                        timeline.isCompleted && {
-                            opacity: 0.5,
-                        },
-                    ]}
+                    style={[styles.wrapper, { flex: 1 }]}
                     onLongPress={() => onLongPress?.(timeline)}
                     onPress={onPress}
                 >
@@ -134,6 +128,7 @@ export default function DayTimelineItemWrapper({ item, style, onLongPress }: Day
                         }}
                         isSmall={style.height < 100}
                         compactTodos={style.height < 80}
+                        onToggleComplete={completeTimeline}
                     />
                 </Pressable>
             </ContextMenu>
@@ -144,9 +139,9 @@ export default function DayTimelineItemWrapper({ item, style, onLongPress }: Day
 const styles = StyleSheet.create({
     wrapper: {
         backgroundColor: Color(Colors.primary_lighter).lighten(0.25).toString(),
-        borderRadius: 10,
+        borderRadius: 16,
         overflow: "hidden",
         borderWidth: 1,
-        borderColor: Color(Colors.primary).lighten(2).toString(),
+        borderColor: Color(Colors.primary).lighten(2).alpha(0.4).toString(),
     },
 })

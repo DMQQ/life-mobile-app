@@ -1,6 +1,6 @@
 import { gql, useQuery } from "@apollo/client"
 import moment from "moment"
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { TimelineScreenProps } from "../../types"
 import useGetOccurrencesQuery from "../query/useGetOccurrencesQuery"
 import dayjs from "dayjs"
@@ -25,7 +25,7 @@ const groupDates = (dates: { date: string }[]) => {
 export default function useTimeline({ route, navigation }: TimelineScreenProps<"Timeline">) {
     const { data, selected, setSelected, loading, error, setQuery, query } = useGetOccurrencesQuery()
 
-    const [switchView, setSwitchView] = useState<"date-list" | "calendar" | "timeline">("timeline")
+    const [switchView, setSwitchView] = useState<"day" | "week" | "month">("day")
 
     const { data: monthData, refetch } = useQuery(GET_MONTHLY_OCCURRENCES, {
         variables: { date: dayjs(selected).startOf("month").format("YYYY-MM-DD") },
@@ -54,10 +54,9 @@ export default function useTimeline({ route, navigation }: TimelineScreenProps<"
     )
 
     const onViewToggle = useCallback(() => {
-        const views = ["date-list", "timeline"]
         setSwitchView((prev) => {
-            const index = views.findIndex((v) => v === prev)
-            return views[(index + 1) % views.length] as "date-list" | "timeline"
+            const views: ("day" | "week" | "month")[] = ["day", "week", "month"]
+            return views[(views.indexOf(prev) + 1) % views.length]
         })
     }, [])
 

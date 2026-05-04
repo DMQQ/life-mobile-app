@@ -18,6 +18,7 @@ const EDIT_OCCURRENCE = gql`
             isAllDay
             isRepeat
             tags
+            reminderBeforeMinutes
             todos {
                 id
                 title
@@ -52,6 +53,11 @@ export default function useEditOccurrence(occurrenceId: string, isEditing: boole
         repeatCount: "0",
         repeatOn: "",
         repeatEveryNth: "",
+        repeatType: "",
+        repeatDaysOfWeek: [] as number[],
+        repeatInterval: "1",
+        repeatUntil: "",
+        reminderBeforeMinutes: data?.reminderBeforeMinutes != null ? String(data.reminderBeforeMinutes) : "",
 
         scope: "THIS_ONLY",
     }

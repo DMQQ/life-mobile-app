@@ -16,6 +16,7 @@ export const GET_OCCURRENCE_BY_ID = gql`
             isAllDay
             isRepeat
             tags
+            reminderBeforeMinutes
             todos {
                 id
                 title

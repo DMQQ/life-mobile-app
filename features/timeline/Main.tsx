@@ -64,7 +64,6 @@ export default function TimelineScreens({ route, navigation }: RootStackScreenPr
                 options={{
                     headerShown: false,
                     presentation: "modal",
-                    gestureEnabled: false,
                 }}
             />
             <Stack.Screen

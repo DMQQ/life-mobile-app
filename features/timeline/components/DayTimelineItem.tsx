@@ -1,13 +1,13 @@
-import { useNavigation } from "@react-navigation/native"
 import moment from "moment"
 import { useMemo } from "react"
 import { StyleProp, StyleSheet, View, ViewStyle } from "react-native"
 import Colors from "@/constants/Colors"
 import Text from "@/components/ui/Text/Text"
+import Checkbox from "@/components/ui/Checkbox"
 import { GetTimelineQuery } from "../hooks/query/useGetTimeLineQuery"
 import timelineStyles from "./timeline.styles"
 import TodosPreviewSection from "./TodosPreviewSection"
-import { AntDesign, Feather } from "@expo/vector-icons"
+import { Feather } from "@expo/vector-icons"
 
 function priorityColor(priority: number): string {
     if (priority >= 7) return "#FF3B30"
@@ -30,155 +30,179 @@ export default function DayTimelineItem(
         onLongPress?: () => void
         compactTodos?: boolean
         priority?: number | null
+        onToggleComplete?: () => void
     },
 ) {
     const start = moment(timeline.beginTime, "HH:mm").format("HH:mm")
-
     const end = moment(timeline.endTime, "HH:mm").format("HH:mm")
 
     const isExpired = useMemo(() => {
         const now = moment()
-
         if (!timeline?.date) return false
-
         if (moment(timeline.date).isAfter(now)) return false
-
         if (timeline.isCompleted) return false
-
-        const start = moment(timeline.beginTime, "HH:mm")
-        const end = moment(timeline.endTime, "HH:mm")
-
-        if (now.isAfter(end)) {
-            return true
-        }
-
-        if (now.isAfter(start) && now.isBefore(end)) {
-            return false
-        }
+        const s = moment(timeline.beginTime, "HH:mm")
+        const e = moment(timeline.endTime, "HH:mm")
+        if (now.isAfter(e)) return true
+        if (now.isAfter(s) && now.isBefore(e)) return false
     }, [timeline.date, timeline.beginTime, timeline.endTime, timeline.isCompleted])
 
+    const todoStats = useMemo(() => {
+        if (!timeline.todos?.length) return null
+        const done = timeline.todos.filter((t) => t.isCompleted).length
+        return { done, total: timeline.todos.length }
+    }, [timeline.todos])
+
+    const statusLabel = timeline.isCompleted ? "Done" : isExpired ? "Late" : "To do"
+    const statusColor = timeline.isCompleted ? "#34C759" : isExpired ? "#FF9500" : Colors.foreground_secondary
+    const statusBg = timeline.isCompleted ? "#34C75918" : isExpired ? "#FF950018" : Colors.primary_lighter
+
     return (
-        <View style={[timelineStyles.itemContainer, timeline.styles, { padding: 10 }]}>
-            <View style={[timelineStyles.itemContainerTitleRow]}>
+        <View style={[timelineStyles.itemContainer, timeline.styles, localStyles.container]}>
+            <View style={[timelineStyles.itemContainerTitleRow, localStyles.headerRow]}>
                 <Text
                     variant="subtitle"
                     numberOfLines={1}
-                    style={[timelineStyles.itemTitle, { ...(timeline.textColor && { color: timeline.textColor }) }]}
+                    style={[
+                        timelineStyles.itemTitle,
+                        { flex: 1 },
+                        timeline.isCompleted && localStyles.completedTitle,
+                        timeline.textColor && { color: timeline.textColor },
+                    ]}
                 >
                     {timeline.isRepeat && (
-                        <View>
-                            <Feather
-                                style={{ marginRight: 5 }}
-                                name="repeat"
-                                size={15}
-                                color={Colors.secondary_light_1}
-                            />
-                        </View>
+                        <Feather
+                            style={{ marginRight: 8 }}
+                            name="repeat"
+                            size={15}
+                            color={Colors.secondary_light_1}
+                        />
                     )}
                     {timeline.title}
                 </Text>
-                <Text
-                    variant="caption"
-                    style={[timelineStyles.itemTimeLeft, { ...(timeline.textColor && { color: timeline.textColor }) }]}
-                >
-                    {start} - {end}
-                </Text>
+                <View style={localStyles.headerRight}>
+                    <Text
+                        variant="caption"
+                        style={[
+                            timelineStyles.itemTimeLeft,
+                            timeline.textColor && { color: timeline.textColor },
+                        ]}
+                    >
+                        {start} - {end}
+                    </Text>
+                    {timeline.onToggleComplete && (
+                        <Checkbox
+                            checked={timeline.isCompleted}
+                            onPress={timeline.onToggleComplete}
+                            size={26}
+                        />
+                    )}
+                </View>
             </View>
 
             {!timeline.isSmall && (
-                <View style={styles.contentRow}>
-                    <View style={styles.contentContainer}>
-                        {!!timeline.description && (
-                            <Text
-                                variant="caption"
-                                numberOfLines={2}
-                                style={[
-                                    timelineStyles.itemDescription,
-                                    timeline.textColor && { color: timeline.textColor },
-                                ]}
-                            >
-                                {timeline.description}
-                            </Text>
-                        )}
+                <>
+                    {!!timeline.description && (
+                        <Text
+                            variant="caption"
+                            numberOfLines={2}
+                            style={[
+                                timelineStyles.itemDescription,
+                                timeline.textColor && { color: timeline.textColor },
+                            ]}
+                        >
+                            {timeline.description}
+                        </Text>
+                    )}
 
-                        <TodosPreviewSection
-                            todos={timeline.todos}
-                            timelineId={timeline.id}
-                            occurrenceDate={timeline.date}
-                            textColor={timeline.textColor}
-                            maxItems={timeline.compactTodos ? 1 : 3}
-                        />
+                    <TodosPreviewSection
+                        todos={timeline.todos}
+                        timelineId={timeline.id}
+                        occurrenceDate={timeline.date}
+                        textColor={timeline.textColor}
+                        maxItems={timeline.compactTodos ? 1 : 3}
+                    />
 
-                        {timeline.images.length > 0 && (
-                            <Text
-                                variant="caption"
-                                style={[styles.metadataText, timeline.textColor && { color: timeline.textColor }]}
-                            >
-                                {timeline.images.length} {timeline.images.length > 1 ? "images" : "image"}
-                            </Text>
-                        )}
-                    </View>
-                </View>
+                    {timeline.images.length > 0 && (
+                        <Text
+                            variant="caption"
+                            style={[localStyles.metadataText, timeline.textColor && { color: timeline.textColor }]}
+                        >
+                            {timeline.images.length} {timeline.images.length > 1 ? "images" : "image"}
+                        </Text>
+                    )}
+                </>
             )}
 
-            <View style={styles.statusContainer}>
-                {timeline.priority != null && (
-                    <View style={[styles.statusBadge, { backgroundColor: priorityColor(timeline.priority) }]}>
-                        <Text style={timelineStyles.status}>{priorityLabel(timeline.priority)}</Text>
+            <View style={localStyles.footer}>
+                {todoStats ? (
+                    <View style={[localStyles.chip, { backgroundColor: Colors.primary_lighter }]}>
+                        <Text style={[localStyles.chipText, { color: Colors.foreground_secondary }]}>
+                            {todoStats.done}/{todoStats.total}
+                        </Text>
                     </View>
+                ) : (
+                    <View />
                 )}
-                <View
-                    style={[
-                        styles.statusBadge,
-                        timeline.isCompleted && styles.statusCompleted,
-                        isExpired && styles.statusExpired,
-                    ]}
-                >
-                    <Text style={timelineStyles.status}>
-                        {timeline.isCompleted ? "Finished" : isExpired ? "Late" : "To do"}
-                    </Text>
+                <View style={localStyles.chips}>
+                    {timeline.priority != null && (
+                        <View style={[localStyles.chip, { backgroundColor: priorityColor(timeline.priority) + "18" }]}>
+                            <Text style={[localStyles.chipText, { color: priorityColor(timeline.priority) }]}>
+                                {priorityLabel(timeline.priority)}
+                            </Text>
+                        </View>
+                    )}
+                    <View style={[localStyles.chip, { backgroundColor: statusBg }]}>
+                        <Text style={[localStyles.chipText, { color: statusColor }]}>
+                            {statusLabel}
+                        </Text>
+                    </View>
                 </View>
             </View>
         </View>
     )
 }
 
-const styles = StyleSheet.create({
-    contentRow: {
+const localStyles = StyleSheet.create({
+    container: {
+        padding: 14,
+        gap: 8,
+    },
+    headerRow: {
+        marginBottom: 0,
+    },
+    headerRight: {
         flexDirection: "row",
-        flexWrap: "wrap",
         alignItems: "center",
-        justifyContent: "flex-end",
-        marginTop: 10,
         gap: 10,
     },
-    contentContainer: {
-        flex: 1,
+    completedTitle: {
+        textDecorationLine: "line-through",
+        opacity: 0.6,
     },
-    statusContainer: {
+    footer: {
         flexDirection: "row",
-        justifyContent: "flex-end",
+        justifyContent: "space-between",
         alignItems: "center",
-        marginTop: 8,
+        marginTop: 2,
     },
-    statusBadge: {
-        backgroundColor: Colors.secondary,
-        padding: 2.5,
+    chips: {
+        flexDirection: "row",
+        gap: 6,
+    },
+    chip: {
         paddingHorizontal: 10,
-        borderRadius: 100,
-        marginLeft: 2.5,
-        alignSelf: "flex-end",
+        paddingVertical: 4,
+        borderRadius: 10,
     },
-    statusCompleted: {
-        backgroundColor: "lightgreen",
-    },
-    statusExpired: {
-        backgroundColor: "#BA4343",
+    chipText: {
+        fontSize: 12,
+        fontWeight: "600",
     },
     metadataText: {
         color: Colors.foreground_secondary,
         fontSize: 13,
-        marginTop: 6,
+        marginTop: 2,
         opacity: 0.7,
     },
 })

@@ -1,5 +1,6 @@
 import Foundation
 import WatchConnectivity
+import WidgetKit
 
 // MARK: - WatchConnectivity Session Manager for watchOS
 class WatchSessionManager: NSObject, ObservableObject {
@@ -66,9 +67,12 @@ extension WatchSessionManager: WCSessionDelegate {
         replyHandler(["status": "received"])
     }
 
-    // Receive application context updates from iPhone (for offline sync)
     func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String : Any]) {
         handleReceivedData(applicationContext)
+    }
+
+    func session(_ session: WCSession, didReceiveUserInfo userInfo: [String : Any]) {
+        handleReceivedData(userInfo)
     }
 
     // Handle received data from iPhone
@@ -86,10 +90,16 @@ extension WatchSessionManager: WCSessionDelegate {
             print("Auth token updated: \(token.isEmpty ? "cleared" : "set")")
         }
 
-        // Handle expenses data if sent
         if let expensesDataString = data["expenses_data"] as? String {
             sharedDefaults?.set(expensesDataString, forKey: "expenses_data")
-            print("Expenses data updated")
+        }
+
+        if let timelineData = data["timeline_data"] as? String {
+            sharedDefaults?.set(timelineData, forKey: "timeline_data")
+        }
+
+        if data["reload_widget"] != nil {
+            WidgetCenter.shared.reloadAllTimelines()
         }
     }
 }

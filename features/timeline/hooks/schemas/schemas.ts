@@ -18,6 +18,7 @@ export const OCCURRENCE_FIELDS = gql`
         isRepeat
         tags
         priority
+        reminderBeforeMinutes
         todos {
             id
             title

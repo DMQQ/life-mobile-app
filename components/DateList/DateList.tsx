@@ -45,11 +45,14 @@ const DateList = memo(({ selectedDate, setSelected, dayEvents }: DateListProps) 
         return () => clearTimeout(timeout)
     }, [selectedDate])
 
+    const mounted = useRef(false)
+
     useEffect(() => {
         listRef.current?.scrollToItem({
             item: dates.find((d) => d === selectedDate)!,
-            animated: true,
+            animated: mounted.current,
         })
+        mounted.current = true
     }, [selectedDate])
 
     const snapInterval = 60 + Padding.xs * 2

@@ -1,5 +1,5 @@
 import { lessBouncySpring } from "@/constants/Animations"
-import { ReactElement, cloneElement, forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react"
+import { ReactElement, cloneElement, useEffect, useMemo, useRef, useState } from "react"
 import { Dimensions, Modal, TouchableOpacity, View } from "react-native"
 import Animated, { useAnimatedStyle, useSharedValue, withSpring, withTiming, runOnJS } from "react-native-reanimated"
 
@@ -9,15 +9,10 @@ interface FloatingMenuProps {
     onVisibilityChange?: (visible: boolean) => void
     menuWidth?: number
     menuHeight?: number
+    controlRef?: React.MutableRefObject<{ close: () => void; open: () => void } | null>
 }
 
-interface FloatingMenuRef {
-    close: () => void
-    open: () => void
-}
-
-const FloatingMenu = forwardRef<FloatingMenuRef, FloatingMenuProps>(
-    ({ children, menuContent, onVisibilityChange, menuWidth = 300, menuHeight = 400 }, ref) => {
+const FloatingMenu = ({ children, menuContent, onVisibilityChange, menuWidth = 300, menuHeight = 400, controlRef }: FloatingMenuProps) => {
         const [isOpen, setIsOpen] = useState(false)
         const [isAnimating, setIsAnimating] = useState(false)
         const [isFinished, setIsFinished] = useState(false)
@@ -112,8 +107,6 @@ const FloatingMenu = forwardRef<FloatingMenuRef, FloatingMenuProps>(
             }
         }, [])
 
-        useImperativeHandle(ref, () => ({ close: hideMenu, open: measureAnchor }))
-
         const measureAnchor = () => {
             anchorRef.current?.measure((x, y, width, height, pageX, pageY) => {
                 const newAnchorLayout = { x: pageX, y: pageY, width, height }
@@ -166,6 +159,10 @@ const FloatingMenu = forwardRef<FloatingMenuRef, FloatingMenuProps>(
             } else {
                 measureAnchor()
             }
+        }
+
+        if (controlRef) {
+            controlRef.current = { close: hideMenu, open: measureAnchor }
         }
 
         const enhancedChildren = cloneElement(children, {
@@ -237,8 +234,6 @@ const FloatingMenu = forwardRef<FloatingMenuRef, FloatingMenuProps>(
                 </Modal>
             </View>
         )
-    },
-)
+    }
 
 export default FloatingMenu
-export type { FloatingMenuRef }

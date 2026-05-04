@@ -18,9 +18,14 @@ const initialValues = {
     tags: "UNTAGGED",
     priority: 5,
 
+    repeatType: "",
+    repeatDaysOfWeek: [] as number[],
+    repeatInterval: "1",
     repeatCount: "0",
+    repeatUntil: "",
     repeatOn: "",
     repeatEveryNth: "",
+    reminderBeforeMinutes: "" as string | number,
     todos: [] as string[],
 }
 
@@ -41,7 +46,7 @@ export default function useCreateEvent(props: { selectedDate: string }) {
     const [createEvent, state] = useMutation(CREATE_EVENT, {})
 
     const hasRepeat = (input: typeof initialValues) =>
-        !!input.repeatCount && input.repeatOn !== "" && !!input.repeatEveryNth
+        input.repeatType !== "" || (!!input.repeatCount && input.repeatOn !== "" && !!input.repeatEveryNth)
 
     const handleSubmit = async (input: typeof initialValues) => {
         await createEvent({
@@ -59,10 +64,19 @@ export default function useCreateEvent(props: { selectedDate: string }) {
                     },
                     ...(hasRepeat(input) && {
                         repeat: {
-                            repeatCount: parseInt(input.repeatCount),
-                            repeatOn: input.repeatOn,
-                            repeatEveryNth: parseInt(input.repeatEveryNth),
+                            repeatCount: parseInt(input.repeatCount) || undefined,
+                            repeatOn: input.repeatOn || undefined,
+                            repeatEveryNth: parseInt(input.repeatEveryNth) || undefined,
                             startDate: props.selectedDate,
+                            ...(input.repeatType && {
+                                repeatType: input.repeatType,
+                                repeatDaysOfWeek: input.repeatDaysOfWeek.length > 0 ? input.repeatDaysOfWeek : undefined,
+                                repeatInterval: parseInt(input.repeatInterval) || 1,
+                                repeatUntil: input.repeatUntil || undefined,
+                            }),
+                            ...(input.reminderBeforeMinutes !== "" && {
+                                reminderBeforeMinutes: parseInt(String(input.reminderBeforeMinutes)),
+                            }),
                         },
                     }),
                 },

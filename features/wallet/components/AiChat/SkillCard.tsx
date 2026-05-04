@@ -154,6 +154,11 @@ interface AiTask {
     repeatFrequency: string | null
     repeatEveryNth: number | null
     repeatCount: number | null
+    repeatType: string | null
+    repeatDaysOfWeek: number[] | null
+    repeatInterval: number | null
+    repeatUntil: string | null
+    reminderBeforeMinutes: number | null
     todos: AiTodo[] | null
 }
 
@@ -168,6 +173,11 @@ interface ResolvedTask {
     repeatFrequency: string | null
     repeatEveryNth: number | null
     repeatCount: number | null
+    repeatType: string | null
+    repeatDaysOfWeek: number[] | null
+    repeatInterval: number | null
+    repeatUntil: string | null
+    reminderBeforeMinutes: number | null
 }
 
 function resolveTask(task: AiTask): ResolvedTask {
@@ -190,6 +200,11 @@ function resolveTask(task: AiTask): ResolvedTask {
         repeatFrequency: task.repeatFrequency,
         repeatEveryNth: task.repeatEveryNth,
         repeatCount: task.repeatCount,
+        repeatType: task.repeatType,
+        repeatDaysOfWeek: task.repeatDaysOfWeek,
+        repeatInterval: task.repeatInterval,
+        repeatUntil: task.repeatUntil,
+        reminderBeforeMinutes: task.reminderBeforeMinutes,
     }
 }
 
@@ -234,13 +249,21 @@ function TaskCard({ task }: { task: ResolvedTask }) {
                             tags: "UNTAGGED",
                             todos: task.todos,
                         },
-                        ...(task.isRepeat &&
-                            task.repeatFrequency && {
+                        ...(task.isRepeat && {
                                 repeat: {
-                                    repeatOn: task.repeatFrequency,
-                                    repeatEveryNth: task.repeatEveryNth ?? 1,
-                                    repeatCount: task.repeatCount ?? 1,
+                                    repeatCount: task.repeatCount ?? undefined,
+                                    repeatOn: task.repeatFrequency ?? undefined,
+                                    repeatEveryNth: task.repeatEveryNth ?? undefined,
                                     startDate: task.date,
+                                    ...(task.repeatType && {
+                                        repeatType: task.repeatType,
+                                        repeatDaysOfWeek: task.repeatDaysOfWeek ?? undefined,
+                                        repeatInterval: task.repeatInterval ?? undefined,
+                                        repeatUntil: task.repeatUntil ?? undefined,
+                                    }),
+                                    ...(task.reminderBeforeMinutes != null && {
+                                        reminderBeforeMinutes: task.reminderBeforeMinutes,
+                                    }),
                                 },
                             }),
                     },

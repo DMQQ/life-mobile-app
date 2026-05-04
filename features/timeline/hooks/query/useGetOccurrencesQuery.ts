@@ -18,6 +18,7 @@ export interface OccurrenceItem {
     isRepeat: boolean
     tags: string
     priority: number | null
+    reminderBeforeMinutes?: number | null
     todos: {
         id: string
         title: string
@@ -29,8 +30,8 @@ export interface OccurrenceItem {
 }
 
 export const GET_OCCURRENCES_QUERY = gql`
-    query GetOccurrences($date: String, $query: String) {
-        occurrences(date: $date, query: $query) {
+    query GetOccurrences($date: String, $endDate: String, $query: String) {
+        occurrences(date: $date, endDate: $endDate, query: $query) {
             id
             seriesId
             date
@@ -42,6 +43,7 @@ export const GET_OCCURRENCES_QUERY = gql`
             isSkipped
             isRepeat
             priority
+            reminderBeforeMinutes
             todos {
                 id
                 title

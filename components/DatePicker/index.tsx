@@ -1,9 +1,9 @@
 import Colors from "@/constants/Colors"
 import moment from "moment"
-import { ReactElement, forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react"
+import { ReactElement, useCallback, useEffect, useRef, useState } from "react"
 import { Calendar } from "react-native-calendars"
 import ChipButton from "../ui/Button/ChipButton"
-import FloatingMenu, { FloatingMenuRef } from "../ui/FloatingMenu"
+import FloatingMenu from "../ui/FloatingMenu"
 import Color from "color"
 import GlassView from "../ui/GlassView"
 import { View } from "react-native"
@@ -41,25 +41,29 @@ interface DatePickerProps {
     placeholder?: string
 
     buttonComponent?: (prop: { start: Date; end: Date }) => ReactElement
+    controlRef?: React.MutableRefObject<DatePickerRef | null>
 }
 
-const DatePicker = forwardRef<DatePickerRef, DatePickerProps>(function DatePicker({
+export default function DatePicker({
     buttonComponent,
     dates,
     setDates,
     mode = "period",
     placeholder,
-}, ref) {
+    controlRef,
+}: DatePickerProps) {
     const [selectedRange, setSelectedRange] = useState<{ [key: string]: any }>({})
     const [selecting, setSelecting] = useState<"start" | "end" | null>(null)
     const [tempStartDate, setTempStartDate] = useState<Date | null>(null)
 
-    const pickerRef = useRef<FloatingMenuRef>(null)
+    const pickerRef = useRef<{ close: () => void; open: () => void } | null>(null)
 
-    useImperativeHandle(ref, () => ({
-        open: () => pickerRef.current?.open(),
-        close: () => pickerRef.current?.close(),
-    }))
+    if (controlRef) {
+        controlRef.current = {
+            open: () => pickerRef.current?.open(),
+            close: () => pickerRef.current?.close(),
+        }
+    }
 
     useEffect(() => {
         if (mode === "single") {
@@ -206,7 +210,7 @@ const DatePicker = forwardRef<DatePickerRef, DatePickerProps>(function DatePicke
     )
 
     return (
-        <FloatingMenu ref={pickerRef} menuWidth={320} menuHeight={380} menuContent={menuContent}>
+        <FloatingMenu controlRef={pickerRef} menuWidth={320} menuHeight={380} menuContent={menuContent}>
             {typeof buttonComponent === "function" ? (
                 buttonComponent({ start: dates.start, end: dates.end })
             ) : (
@@ -214,6 +218,4 @@ const DatePicker = forwardRef<DatePickerRef, DatePickerProps>(function DatePicke
             )}
         </FloatingMenu>
     )
-})
-
-export default DatePicker
+}
