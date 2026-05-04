@@ -90,6 +90,9 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
 
     const [scrollY, onScroll] = useTrackScroll()
 
+    const hasEverLoaded = useRef(false)
+    if (timeline.data) hasEverLoaded.current = true
+
     const timeoutId = useRef<number | null>(null)
     const { isSearchActive } = useScreenSearch(
         useCallback(
@@ -207,7 +210,7 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
         <View style={{ flex: 1 }}>
             <Background />
 
-            {timeline.loading && <TimelineScreenLoader />}
+            {!hasEverLoaded.current && timeline.loading && <TimelineScreenLoader />}
 
             <Header
                 animated={false}
@@ -235,7 +238,7 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
                     },
                 ]}
                 initialTitleFontSize={25}
-                shadow
+                shadow={false}
             >
                 {isSearchActive ? (
                     <DatePicker

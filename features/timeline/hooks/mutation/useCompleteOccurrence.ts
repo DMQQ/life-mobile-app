@@ -1,5 +1,4 @@
 import { gql, useMutation } from "@apollo/client"
-import { GET_OCCURRENCE_BY_ID } from "../query/useGetOccurrenceById"
 
 const COMPLETE_OCCURRENCE = gql`
     mutation CompleteOccurrence($input: CompleteOccurrenceInput!) {
@@ -12,29 +11,16 @@ const COMPLETE_OCCURRENCE = gql`
 
 export default function useCompleteOccurrence(occurrenceId: string) {
     return useMutation(COMPLETE_OCCURRENCE, {
-        variables: { input: { id: occurrenceId, isCompleted: true } },
-
-        update(cache, { data: { completeOccurrence } }) {
-            const existing = cache.readQuery({
-                query: GET_OCCURRENCE_BY_ID,
-                variables: { id: occurrenceId },
-            }) as { occurrenceById: any }
-
-            if (!existing) return
-
-            cache.writeQuery({
-                data: {
-                    occurrenceById: {
-                        ...existing.occurrenceById,
-                        isCompleted: completeOccurrence.isCompleted,
-                    },
+        update(cache, { data }) {
+            const result = data?.completeOccurrence
+            if (!result) return
+            cache.modify({
+                id: cache.identify({ __typename: "OccurrenceView", id: result.id }),
+                fields: {
+                    isCompleted: () => result.isCompleted,
                 },
-                query: GET_OCCURRENCE_BY_ID,
-                variables: { id: occurrenceId },
-                overwrite: true,
             })
         },
-
         onError(err) {
             console.log("useCompleteOccurrence:", JSON.stringify(err, null, 2))
         },

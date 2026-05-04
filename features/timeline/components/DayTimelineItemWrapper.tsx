@@ -8,6 +8,7 @@ import { useActivityUtils } from "@/utils/hooks/useActivityManager"
 import useCompleteOccurrence from "../hooks/mutation/useCompleteOccurrence"
 import DayTimelineItem from "./DayTimelineItem"
 import ContextMenu, { ContextMenuAction } from "react-native-context-menu-view"
+import Layout from "@/constants/Layout"
 
 interface DayTimelineItemWrapperProps {
     item: any
@@ -24,7 +25,7 @@ export default function DayTimelineItemWrapper({ item, style, onLongPress }: Day
     const { isPending, startActivity } = useActivityUtils(timeline?.id)
     const [completeOccurrenceMutation] = useCompleteOccurrence(timeline.id)
     const completeTimeline = () =>
-        completeOccurrenceMutation({ variables: { id: timeline.id, isCompleted: !timeline.isCompleted } })
+        completeOccurrenceMutation({ variables: { input: { id: timeline.id, isCompleted: !timeline.isCompleted } } })
 
     const handleCopyPress = useCallback(() => {
         navigation.navigate("CopyTimelineModal", {
@@ -126,8 +127,8 @@ export default function DayTimelineItemWrapper({ item, style, onLongPress }: Day
                         styles={{
                             flex: 1,
                         }}
-                        isSmall={style.height < 100}
-                        compactTodos={style.height < 80}
+                        isSmall={style.height < 100 || style.width < Layout.screen.width / 2}
+                        compactTodos={style.height < 80 || style.width < Layout.screen.width / 3}
                         onToggleComplete={completeTimeline}
                     />
                 </Pressable>

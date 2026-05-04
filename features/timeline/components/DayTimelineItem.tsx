@@ -8,6 +8,7 @@ import { GetTimelineQuery } from "../hooks/query/useGetTimeLineQuery"
 import timelineStyles from "./timeline.styles"
 import TodosPreviewSection from "./TodosPreviewSection"
 import { Feather } from "@expo/vector-icons"
+import Color from "color"
 
 function priorityColor(priority: number): string {
     if (priority >= 7) return "#FF3B30"
@@ -57,51 +58,96 @@ export default function DayTimelineItem(
     const statusColor = timeline.isCompleted ? "#34C759" : isExpired ? "#FF9500" : Colors.foreground_secondary
     const statusBg = timeline.isCompleted ? "#34C75918" : isExpired ? "#FF950018" : Colors.primary_lighter
 
-    return (
-        <View style={[timelineStyles.itemContainer, timeline.styles, localStyles.container]}>
-            <View style={[timelineStyles.itemContainerTitleRow, localStyles.headerRow]}>
-                <Text
-                    variant="subtitle"
-                    numberOfLines={1}
-                    style={[
-                        timelineStyles.itemTitle,
-                        { flex: 1 },
-                        timeline.isCompleted && localStyles.completedTitle,
-                        timeline.textColor && { color: timeline.textColor },
-                    ]}
-                >
-                    {timeline.isRepeat && (
-                        <Feather
-                            style={{ marginRight: 8 }}
-                            name="repeat"
-                            size={15}
-                            color={Colors.secondary_light_1}
-                        />
-                    )}
-                    {timeline.title}
-                </Text>
-                <View style={localStyles.headerRight}>
+    const ChipRow = (
+        <View style={localStyles.chips}>
+            {timeline.priority != null && (
+                <View style={[localStyles.chip, { backgroundColor: priorityColor(timeline.priority) + "18" }]}>
+                    <Text style={[localStyles.chipText, { color: priorityColor(timeline.priority) }]}>
+                        {priorityLabel(timeline.priority)}
+                    </Text>
+                </View>
+            )}
+            <View style={[localStyles.chip, { backgroundColor: statusBg }]}>
+                <Text style={[localStyles.chipText, { color: statusColor }]}>{statusLabel}</Text>
+            </View>
+        </View>
+    )
+
+    if (timeline.isSmall) {
+        return (
+            <View style={[timelineStyles.itemContainer, timeline.styles, localStyles.compactContainer]}>
+                <View style={localStyles.compactRow}>
+                    {timeline.isRepeat && <Feather name="repeat" size={14} color={Colors.secondary_light_1} />}
+                    <Text
+                        variant="subtitle"
+                        numberOfLines={1}
+                        style={[
+                            timelineStyles.itemTitle,
+                            { flex: 1, fontSize: 15 },
+                            timeline.isCompleted && localStyles.completedTitle,
+                            timeline.textColor && { color: timeline.textColor },
+                        ]}
+                    >
+                        {timeline.title}
+                    </Text>
                     <Text
                         variant="caption"
                         style={[
                             timelineStyles.itemTimeLeft,
+                            { fontSize: 12 },
                             timeline.textColor && { color: timeline.textColor },
                         ]}
                     >
                         {start} - {end}
                     </Text>
-                    {timeline.onToggleComplete && (
-                        <Checkbox
-                            checked={timeline.isCompleted}
-                            onPress={timeline.onToggleComplete}
-                            size={26}
-                        />
+                </View>
+                <View style={localStyles.compactFooter}>
+                    {todoStats ? (
+                        <Text style={[localStyles.chipText, { color: Colors.foreground_secondary }]}>
+                            {todoStats.done}/{todoStats.total}
+                        </Text>
+                    ) : (
+                        <View />
                     )}
+                    {ChipRow}
                 </View>
             </View>
+        )
+    }
 
-            {!timeline.isSmall && (
-                <>
+    return (
+        <View style={[timelineStyles.itemContainer, timeline.styles, localStyles.container]}>
+            <View style={localStyles.sidebar}>
+                {timeline.onToggleComplete && (
+                    <Checkbox checked={timeline.isCompleted} onPress={timeline.onToggleComplete} size={26} />
+                )}
+                {timeline.isRepeat && <Feather name="repeat" size={20} color={Colors.secondary_light_1} />}
+            </View>
+            <View style={{ flex: 1, height: "100%" }}>
+                <View style={[timelineStyles.itemContainerTitleRow, localStyles.headerRow]}>
+                    <Text
+                        variant="subtitle"
+                        numberOfLines={1}
+                        style={[
+                            timelineStyles.itemTitle,
+                            { flex: 1 },
+                            timeline.isCompleted && localStyles.completedTitle,
+                            timeline.textColor && { color: timeline.textColor },
+                        ]}
+                    >
+                        {timeline.title}
+                    </Text>
+                    <View style={localStyles.headerRight}>
+                        <Text
+                            variant="caption"
+                            style={[timelineStyles.itemTimeLeft, timeline.textColor && { color: timeline.textColor }]}
+                        >
+                            {start} - {end}
+                        </Text>
+                    </View>
+                </View>
+
+                <View style={{ flex: 1 }}>
                     {!!timeline.description && (
                         <Text
                             variant="caption"
@@ -131,31 +177,18 @@ export default function DayTimelineItem(
                             {timeline.images.length} {timeline.images.length > 1 ? "images" : "image"}
                         </Text>
                     )}
-                </>
-            )}
 
-            <View style={localStyles.footer}>
-                {todoStats ? (
-                    <View style={[localStyles.chip, { backgroundColor: Colors.primary_lighter }]}>
-                        <Text style={[localStyles.chipText, { color: Colors.foreground_secondary }]}>
-                            {todoStats.done}/{todoStats.total}
-                        </Text>
-                    </View>
-                ) : (
-                    <View />
-                )}
-                <View style={localStyles.chips}>
-                    {timeline.priority != null && (
-                        <View style={[localStyles.chip, { backgroundColor: priorityColor(timeline.priority) + "18" }]}>
-                            <Text style={[localStyles.chipText, { color: priorityColor(timeline.priority) }]}>
-                                {priorityLabel(timeline.priority)}
-                            </Text>
-                        </View>
-                    )}
-                    <View style={[localStyles.chip, { backgroundColor: statusBg }]}>
-                        <Text style={[localStyles.chipText, { color: statusColor }]}>
-                            {statusLabel}
-                        </Text>
+                    <View style={localStyles.footer}>
+                        {todoStats ? (
+                            <View style={[localStyles.chip, { backgroundColor: Colors.primary_lighter }]}>
+                                <Text style={[localStyles.chipText, { color: Colors.foreground_secondary }]}>
+                                    {todoStats.done}/{todoStats.total}
+                                </Text>
+                            </View>
+                        ) : (
+                            <View />
+                        )}
+                        {ChipRow}
                     </View>
                 </View>
             </View>
@@ -166,7 +199,34 @@ export default function DayTimelineItem(
 const localStyles = StyleSheet.create({
     container: {
         padding: 14,
-        gap: 8,
+        gap: 10,
+        flexDirection: "row",
+        alignItems: "flex-start",
+        flex: 1,
+    },
+    compactContainer: {
+        padding: 10,
+        gap: 4,
+        flex: 1,
+    },
+    compactRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 6,
+    },
+    compactFooter: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        paddingLeft: 4,
+    },
+    sidebar: {
+        alignItems: "center",
+        gap: 6,
+        paddingRight: 10,
+        borderRightWidth: 1,
+        borderRightColor: Color(Colors.primary_lighter).lighten(1.5).toString(),
+        height: "100%",
     },
     headerRow: {
         marginBottom: 0,

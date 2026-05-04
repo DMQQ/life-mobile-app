@@ -43,7 +43,7 @@ export default function Checkbox({ checked, onPress, size = 24, disabled = false
             rippleOpacity={0.3}
             rippleDuration={200}
         >
-            {checked && loading === false && <MaterialIcons name="check" size={size * 0.7} color={Colors.foreground} />}
+            {checked && !loading && <MaterialIcons name="check" size={size * 0.7} color={Colors.foreground} />}
             {loading && <ActivityIndicator size={size * 0.6} color={Colors.foreground} />}
         </Ripple>
     )

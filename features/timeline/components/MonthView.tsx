@@ -1,13 +1,12 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { StyleSheet, TouchableOpacity, View } from "react-native"
 import PagerView from "react-native-pager-view"
-import { useQuery } from "@apollo/client"
 import moment from "moment"
 import Feedback from "react-native-haptic-feedback"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import Colors from "@/constants/Colors"
 import Text from "@/components/ui/Text/Text"
-import { GET_OCCURRENCES_QUERY, OccurrenceItem } from "../hooks/query/useGetOccurrencesQuery"
+import { useRangeEvents, OccurrenceItem } from "../hooks/query/useGetOccurrencesQuery"
 import { navigationRef } from "@/navigation"
 
 const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
@@ -43,27 +42,16 @@ function getMonthWeeks(monthStart: string): string[][] {
     return weeks
 }
 
-function useWeekEvents(days: string[]) {
-    const { data } = useQuery(GET_OCCURRENCES_QUERY, {
-        variables: { date: days[0], endDate: days[6] },
-    })
-    const allEvents = (data?.occurrences ?? []) as OccurrenceItem[]
-    return days.map((date) => ({
-        date,
-        events: allEvents.filter((e) => e.date === date),
-    }))
-}
+type DayData = { date: string; events: OccurrenceItem[] }
 
 interface WeekRowProps {
-    days: string[]
+    dayData: DayData[]
     selectedDate: string
     currentMonth: string
     onDayPress: (date: string) => void
 }
 
-const WeekRow = memo(({ days, selectedDate, currentMonth, onDayPress }: WeekRowProps) => {
-    const dayData = useWeekEvents(days)
-
+const WeekRow = memo(({ dayData, selectedDate, currentMonth, onDayPress }: WeekRowProps) => {
     return (
         <View style={styles.weekRow}>
             {dayData.map(({ date, events }) => {
@@ -139,14 +127,29 @@ interface MonthPageProps {
 
 const MonthPage = memo(({ monthStart, selectedDate, onDayPress }: MonthPageProps) => {
     const currentMonth = moment(monthStart).format("YYYY-MM")
-    const weeks = getMonthWeeks(monthStart)
+    const weeks = useMemo(() => getMonthWeeks(monthStart), [monthStart])
+
+    const firstDay = weeks[0][0]
+    const lastDay = weeks[weeks.length - 1][6]
+    const allEvents = useRangeEvents(firstDay, lastDay)
+
+    const weeksWithData = useMemo(
+        () =>
+            weeks.map((week) =>
+                week.map((date) => ({
+                    date,
+                    events: allEvents.filter((e) => e.date === date),
+                })),
+            ),
+        [weeks, allEvents],
+    )
 
     return (
         <View style={{ flex: 1 }}>
-            {weeks.map((week) => (
+            {weeksWithData.map((dayData) => (
                 <WeekRow
-                    key={week[0]}
-                    days={week}
+                    key={dayData[0].date}
+                    dayData={dayData}
                     selectedDate={selectedDate}
                     currentMonth={currentMonth}
                     onDayPress={onDayPress}

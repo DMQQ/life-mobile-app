@@ -1,7 +1,6 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Dimensions, StyleSheet, TouchableOpacity, View } from "react-native"
 import PagerView from "react-native-pager-view"
-import { useQuery } from "@apollo/client"
 import moment from "moment"
 import Feedback from "react-native-haptic-feedback"
 import Animated from "react-native-reanimated"
@@ -9,7 +8,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context"
 import Colors from "@/constants/Colors"
 import Text from "@/components/ui/Text/Text"
 import { navigationRef } from "@/navigation"
-import { GET_OCCURRENCES_QUERY, OccurrenceItem } from "../hooks/query/useGetOccurrencesQuery"
+import { useWeekEvents } from "../hooks/query/useGetOccurrencesQuery"
 
 const { width } = Dimensions.get("window")
 const TIME_COL_W = 44
@@ -31,19 +30,6 @@ function pageForWeekStart(weekStart: string) {
 
 const WINDOW_SIZE = 7
 const WINDOW_CENTER = Math.floor(WINDOW_SIZE / 2)
-
-// ─── Data hook ───────────────────────────────────────────────────────────────
-
-function useWeekEvents(days: string[]) {
-    const { data } = useQuery(GET_OCCURRENCES_QUERY, {
-        variables: { date: days[0], endDate: days[6] },
-    })
-    const allEvents = (data?.occurrences ?? []) as OccurrenceItem[]
-    return days.map((date) => ({
-        date,
-        events: allEvents.filter((e) => e.date === date),
-    }))
-}
 
 // ─── Week day header ──────────────────────────────────────────────────────────
 
