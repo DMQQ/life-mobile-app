@@ -1,8 +1,7 @@
 import Header from "@/components/ui/Header/Header"
 import PulsingIndicator from "@/components/ui/PulsingIndicator"
 import Colors from "@/constants/Colors"
-import { ScreenProps } from "@/types"
-import RefreshContextProvider, { useRefresh } from "@/utils/context/RefreshContext"
+import { useRefresh } from "@/utils/context/RefreshContext"
 import useTrackScroll from "@/utils/hooks/ui/useTrackScroll"
 import useAppBackground from "@/utils/hooks/useAppBackground"
 import useRoutinePendingCompletions from "@/utils/widget/hooks/useRoutinePendingCompletions"
@@ -12,30 +11,26 @@ import { AntDesign } from "@expo/vector-icons"
 import * as SplashScreen from "expo-splash-screen"
 import { useMemo, useState } from "react"
 import { View } from "react-native"
-import Animated, { LinearTransition } from "react-native-reanimated"
+import Animated from "react-native-reanimated"
 import { FloatingNotifications, useGetNotifications } from "../wallet/components/Wallet/WalletNotifications"
 import LoadingSkeleton from "./components/LoadingSkeleton"
 import MainContent from "./components/MainContent"
-import NotificationsModal from "./components/NotificationsModal"
-import SettingsModal from "./components/SettingsModal"
 import Background from "@/components/ui/Background"
+import { HomeScreenProps } from "./Main"
 
-function Root({}: ScreenProps<"Root">) {
+export default function Root({ navigation }: HomeScreenProps<"Root">) {
     const [loading, setLoading] = useState(true)
-    const [showNotifications, setShowNotifications] = useState(false)
-    const [showSettings, setShowSettings] = useState(false)
 
     const {
         data: home,
         refetch: refetchHome,
-        error,
     } = useQuery(GET_MAIN_SCREEN, {
         variables: getMainScreenBaseVariables(),
-        onCompleted: async (data) => {
+        onCompleted: async () => {
             await SplashScreen.hideAsync()
             setTimeout(() => setLoading(false), 500)
         },
-        onError: (er) => {
+        onError: () => {
             SplashScreen.hideAsync()
             setTimeout(() => setLoading(false), 500)
         },
@@ -68,14 +63,14 @@ function Root({}: ScreenProps<"Root">) {
                         {(data?.notifications as any[])?.some((n) => !n.read) && <PulsingIndicator />}
                     </View>
                 ),
-                onPress: () => setShowNotifications(true),
+                onPress: () => navigation.navigate("HomeNotifications"),
             },
             {
                 icon: <AntDesign name="setting" size={20} color={Colors.foreground} />,
-                onPress: () => setShowSettings(true),
+                onPress: () => navigation.navigate("HomeSettings"),
             },
         ],
-        [data?.notifications],
+        [data?.notifications, navigation],
     )
 
     return (
@@ -97,18 +92,6 @@ function Root({}: ScreenProps<"Root">) {
             />
 
             <MainContent home={home} loading={loading} refreshing={refreshing} refresh={refresh} onScroll={onScroll} />
-
-            <NotificationsModal visible={showNotifications} onClose={() => setShowNotifications(false)} />
-
-            <SettingsModal visible={showSettings} onClose={() => setShowSettings(false)} />
         </Animated.View>
-    )
-}
-
-export default function RootScreen(props: ScreenProps<"Root">) {
-    return (
-        <RefreshContextProvider>
-            <Root {...props} />
-        </RefreshContextProvider>
     )
 }

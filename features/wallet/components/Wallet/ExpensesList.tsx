@@ -110,8 +110,8 @@ const MonthItem = ({
     const navigation = useNavigation<any>()
     const [isExpanded, setIsExpanded] = useState(defaultExpanded)
     const [collapsedDates, setCollapsedDates] = useState<Set<string>>(new Set())
-
     const toggleMonth = useCallback(() => setIsExpanded((prev) => !prev), [])
+    const { hasFilters } = useWalletContext()
 
     const toggleDate = useCallback((day: string) => {
         setCollapsedDates((prev) => {
@@ -149,7 +149,7 @@ const MonthItem = ({
         <View style={[styles.monthContainer, monthIndex === 0 && styles.monthContainerFirst]}>
             <MonthHeader monthData={monthData} isExpanded={isExpanded} onToggle={toggleMonth} />
 
-            {isExpanded && (
+            {(isExpanded || hasFilters) && (
                 <View style={styles.monthContent}>
                     {Array.from(groupedByDay.entries()).map(([day, dayExpenses]) => {
                         const isDateExpanded = !collapsedDates.has(day)
@@ -282,35 +282,7 @@ const ChevronIcon = ({ isExpanded }: { isExpanded: boolean }) => {
 }
 
 const ClearFiltersButton = () => {
-    const { filters, dispatch } = useWalletContext()
-
-    const [hasFilters, diffCount] = useMemo(() => {
-        let isDifferent = false
-        let diffCount = 0
-
-        const flatten = (obj: Record<string, any>, parentKey = ""): Record<string, any> => {
-            const output: Record<string, any> = {}
-            for (const key in obj) {
-                const value = obj[key]
-                const newKey = parentKey ? `${parentKey}.${key}` : key
-                if (typeof value === "object" && value !== null) Object.assign(output, flatten(value, newKey))
-                else output[newKey] = value
-            }
-            return output
-        }
-
-        const flatInit = flatten(init)
-        const flatCurrent = flatten(filters)
-
-        for (const key in flatCurrent) {
-            if (flatCurrent[key] !== flatInit[key]) {
-                isDifferent = true
-                diffCount++
-            }
-        }
-
-        return [isDifferent, diffCount]
-    }, [filters])
+    const { dispatch, hasFilters, filtersDiffCount } = useWalletContext()
 
     if (!hasFilters) return null
 
@@ -324,8 +296,8 @@ const ClearFiltersButton = () => {
             >
                 <GlassView style={styles.clearButton}>
                     <Text style={styles.clearText}>
-                        {diffCount > 0
-                            ? `Reset (${diffCount}) ${diffCount > 1 ? "filters" : "filter"}`
+                        {filtersDiffCount > 0
+                            ? `Reset (${filtersDiffCount}) ${filtersDiffCount > 1 ? "filters" : "filter"}`
                             : "Reset filters"}
                     </Text>
                     <AntDesign name="close" size={18} color={Colors.secondary_light_2} />

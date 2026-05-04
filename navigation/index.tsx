@@ -8,7 +8,7 @@ import BottomTab from "../components/BottomTab/BottomTab"
 import Colors from "../constants/Colors"
 import Authentication from "../features/authentication/Main"
 import GoalsScreens from "../features/goals/Main"
-import Root from "../features/home/Root"
+import HomeScreens from "../features/home/Main"
 import TimelineScreens from "../features/timeline/Main"
 import WalletScreens from "../features/wallet/Main"
 import { RootStackParamList } from "../types"
@@ -84,7 +84,7 @@ export default function Navigation() {
             >
                 {isAuthenticated ? (
                     <>
-                        <Tab.Screen name="Root" component={Root} />
+                        <Tab.Screen name="Root" component={HomeScreens} />
 
                         <Tab.Screen name="GoalsScreens" component={GoalsScreens} />
 

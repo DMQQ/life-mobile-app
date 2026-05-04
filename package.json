@@ -15,7 +15,7 @@
     },
     "dependencies": {
         "@apollo/client": "^3.11.2",
-        "@bacons/apple-targets": "^3.0.5",
+        "@bacons/apple-targets": "^4.0.6",
         "@callstack/liquid-glass": "^0.7.0",
         "@expo/vector-icons": "^15.0.3",
         "@gorhom/bottom-sheet": "^5.2.10",

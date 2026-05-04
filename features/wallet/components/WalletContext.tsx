@@ -1,4 +1,4 @@
-import { createContext, useContext, useReducer, useState } from "react"
+import { createContext, useContext, useMemo, useReducer, useState } from "react"
 
 export type Filters = typeof init
 
@@ -145,6 +145,9 @@ type WalletContextType = {
     filters: Filters
 
     dispatch: React.Dispatch<Action>
+
+    hasFilters: boolean
+    filtersDiffCount: number
 }
 
 const WalletContext = createContext<WalletContextType>({
@@ -156,6 +159,9 @@ const WalletContext = createContext<WalletContextType>({
     filters: init,
 
     dispatch: () => {},
+
+    hasFilters: false,
+    filtersDiffCount: 0,
 })
 
 export const useWalletContext = () => useContext(WalletContext)
@@ -165,15 +171,49 @@ export default function WalletContextProvider({ children }: { children: React.Re
 
     const [filters, dispatch] = useReducer(reducer, init)
 
-    const memoizedValue = {
-        calendar: {
-            date: selectedCalendarDate,
-            setCalendarDate: setSelectedCalendarDate,
-        },
+    const [hasFilters, diffCount] = useMemo(() => {
+        let isDifferent = false
+        let diffCount = 0
 
-        filters,
-        dispatch,
-    } as WalletContextType
+        const flatten = (obj: Record<string, any>, parentKey = ""): Record<string, any> => {
+            const output: Record<string, any> = {}
+            for (const key in obj) {
+                const value = obj[key]
+                const newKey = parentKey ? `${parentKey}.${key}` : key
+                if (typeof value === "object" && value !== null) Object.assign(output, flatten(value, newKey))
+                else output[newKey] = value
+            }
+            return output
+        }
+
+        const flatInit = flatten(init)
+        const flatCurrent = flatten(filters)
+
+        for (const key in flatCurrent) {
+            if (flatCurrent[key] !== flatInit[key]) {
+                isDifferent = true
+                diffCount++
+            }
+        }
+
+        return [isDifferent, diffCount]
+    }, [filters])
+
+    const memoizedValue = useMemo(
+        () => ({
+            calendar: {
+                date: selectedCalendarDate,
+                setCalendarDate: setSelectedCalendarDate,
+            },
+
+            filters,
+            dispatch,
+
+            hasFilters,
+            filtersDiffCount: diffCount,
+        }),
+        [selectedCalendarDate, filters, dispatch, hasFilters, diffCount],
+    )
 
     return <WalletContext.Provider value={memoizedValue}>{children}</WalletContext.Provider>
 }
