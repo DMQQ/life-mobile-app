@@ -134,7 +134,8 @@ const CalendarTimetable = ({
             style={{ flex: 1, paddingBottom: items?.length > 0 ? 100 : 0, backgroundColor: "transparent" }}
             onScroll={onScroll}
             showsVerticalScrollIndicator={false}
-            scrollEventThrottle={16}
+            overScrollMode={"never"}
+            bounces={false}
             {...listProps}
         >
             <View onLayout={(e) => setHeaderHeight(e.nativeEvent.layout.height)}>{children}</View>

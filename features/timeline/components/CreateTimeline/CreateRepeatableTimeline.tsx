@@ -1,14 +1,14 @@
 import { BottomSheetGorhom } from "@/components/ui/BottomSheet/BottomSheet"
 import SegmentedButtons from "@/components/ui/SegmentedButtons"
 import Input from "@/components/ui/TextInput/TextInput"
-import DatePicker from "@/components/DatePicker"
 import Colors from "@/constants/Colors"
 import Layout from "@/constants/Layout"
-import { AntDesign, MaterialIcons, Ionicons } from "@expo/vector-icons"
+import { AntDesign, MaterialIcons } from "@expo/vector-icons"
 import BottomSheetType, { BottomSheetView, BottomSheetBackdrop } from "@gorhom/bottom-sheet"
-import { forwardRef, memo, useCallback } from "react"
-import { StyleSheet, View, useWindowDimensions } from "react-native"
+import { forwardRef, memo, useCallback, useImperativeHandle, useRef, useState } from "react"
+import { StyleSheet, TouchableOpacity, View, useWindowDimensions } from "react-native"
 import Ripple from "react-native-material-ripple"
+import DateTimePicker from "react-native-modal-datetime-picker"
 import Text from "@/components/ui/Text/Text"
 import dayjs from "dayjs"
 
@@ -30,8 +30,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         marginBottom: 18,
     },
-    clear_button: {
-        backgroundColor: Colors.primary_lighter,
+    action_button: {
         paddingVertical: 4,
         paddingHorizontal: 12,
         borderRadius: 6,
@@ -52,6 +51,16 @@ const styles = StyleSheet.create({
 
 interface CreateRepeatableTimelineProps {
     formik: any
+}
+
+const EMPTY_LOCAL = {
+    repeatType: "",
+    repeatDaysOfWeek: [] as number[],
+    repeatInterval: "1",
+    repeatCount: "",
+    repeatUntil: "",
+    repeatOn: "",
+    repeatEveryNth: "",
 }
 
 const ArrowButton = (props: { onPress: () => void; arrow: "arrow-up" | "arrow-down"; disabled?: boolean }) => (
@@ -80,14 +89,6 @@ const DAYS_OF_WEEK = [
     { text: "S", value: 6 },
 ]
 
-const REMINDER_PRESETS = [
-    { text: "Off", value: "" },
-    { text: "5m", value: "5" },
-    { text: "15m", value: "15" },
-    { text: "30m", value: "30" },
-    { text: "1h", value: "60" },
-]
-
 const intervalLabel = (type: string) => {
     if (type === "MONTHLY") return "months"
     if (type === "WEEKLY") return "weeks"
@@ -96,52 +97,60 @@ const intervalLabel = (type: string) => {
 
 const CreateRepeatableTimeline = forwardRef<BottomSheetType, CreateRepeatableTimelineProps>(({ formik: f }, ref) => {
     const { height } = useWindowDimensions()
-
     const snapPoints = [height * 0.55]
+    const sheetRef = useRef<BottomSheetType>(null)
 
-    const onClearFields = () => {
-        f.setFieldValue("repeatType", "")
-        f.setFieldValue("repeatDaysOfWeek", [])
-        f.setFieldValue("repeatInterval", "1")
-        f.setFieldValue("repeatCount", "")
-        f.setFieldValue("repeatUntil", "")
-        f.setFieldValue("reminderBeforeMinutes", "")
-        f.setFieldValue("repeatOn", "")
-        f.setFieldValue("repeatEveryNth", "")
+    useImperativeHandle(ref, () => sheetRef.current as BottomSheetType)
+
+    const [local, setLocal] = useState({ ...EMPTY_LOCAL })
+    const [showDatePicker, setShowDatePicker] = useState(false)
+    const appliedRef = useRef(false)
+
+    const set = (key: keyof typeof EMPTY_LOCAL, value: any) =>
+        setLocal((prev) => ({ ...prev, [key]: value }))
+
+    const onExpand = useCallback(() => {
+        appliedRef.current = false
+        setLocal({
+            repeatType: f.values.repeatType || "",
+            repeatDaysOfWeek: f.values.repeatDaysOfWeek || [],
+            repeatInterval: f.values.repeatInterval || "1",
+            repeatCount: f.values.repeatCount || "",
+            repeatUntil: f.values.repeatUntil || "",
+            repeatOn: f.values.repeatOn || "",
+            repeatEveryNth: f.values.repeatEveryNth || "",
+        })
+    }, [f.values])
+
+    const onDone = () => {
+        appliedRef.current = true
+        Object.entries(local).forEach(([key, value]) => f.setFieldValue(key, value))
+        sheetRef.current?.close()
     }
 
-    const intervalButtons = new Array(7).fill(0).map((_, i) => ({
-        text: `${i + 1}`,
-        value: `${i + 1}`,
-    }))
-
-    const onArrowUpPress = () => {
-        f.setFieldValue("repeatCount", String(Number(f.values.repeatCount || 0) + 1))
+    const onCancel = () => {
+        appliedRef.current = true
+        sheetRef.current?.close()
     }
 
-    const onArrowDownPress = () => {
-        if (Number(f.values.repeatCount || 0) - 1 < 0) return
-        f.setFieldValue("repeatCount", String(Number(f.values.repeatCount || 0) - 1))
-    }
+    const onDismiss = useCallback(() => {
+        if (!appliedRef.current) {
+            Object.entries(EMPTY_LOCAL).forEach(([key, value]) => f.setFieldValue(key, value))
+        }
+        appliedRef.current = false
+    }, [f])
 
     const toggleDayOfWeek = (day: number) => {
-        const current: number[] = f.values.repeatDaysOfWeek || []
-        if (current.includes(day)) {
-            f.setFieldValue("repeatDaysOfWeek", current.filter((d) => d !== day))
-        } else {
-            f.setFieldValue("repeatDaysOfWeek", [...current, day])
-        }
+        const current: number[] = local.repeatDaysOfWeek || []
+        set(
+            "repeatDaysOfWeek",
+            current.includes(day) ? current.filter((d) => d !== day) : [...current, day],
+        )
     }
 
-    const repeatUntilDate = f.values.repeatUntil
-        ? {
-              start: dayjs(f.values.repeatUntil).toDate(),
-              end: dayjs(f.values.repeatUntil).toDate(),
-          }
-        : {
-              start: new Date(),
-              end: new Date(),
-          }
+    const intervalButtons = new Array(7).fill(0).map((_, i) => ({ text: `${i + 1}`, value: `${i + 1}` }))
+
+    const repeatUntilDate = local.repeatUntil ? dayjs(local.repeatUntil).toDate() : new Date()
 
     const renderBackdrop = useCallback(
         (props: any) => <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} />,
@@ -150,7 +159,7 @@ const CreateRepeatableTimeline = forwardRef<BottomSheetType, CreateRepeatableTim
 
     return (
         <BottomSheetGorhom
-            ref={ref}
+            ref={sheetRef}
             index={-1}
             snapPoints={snapPoints}
             enablePanDownToClose={true}
@@ -159,6 +168,10 @@ const CreateRepeatableTimeline = forwardRef<BottomSheetType, CreateRepeatableTim
             handleStyle={{ backgroundColor: Colors.primary }}
             style={{ backgroundColor: Colors.primary }}
             backgroundStyle={{ backgroundColor: Colors.primary }}
+            onChange={(index) => {
+                if (index === 0) onExpand()
+            }}
+            onDismiss={onDismiss}
         >
             <BottomSheetView style={{ flex: 1, backgroundColor: Colors.primary }}>
                 <View style={styles.modal_container}>
@@ -166,12 +179,26 @@ const CreateRepeatableTimeline = forwardRef<BottomSheetType, CreateRepeatableTim
                         <Text variant="subheading" style={{ fontWeight: "700" }}>
                             Repeat Options
                         </Text>
-                        <Ripple onPress={onClearFields} style={styles.clear_button}>
-                            <AntDesign name="close" size={14} color={Colors.secondary} />
-                            <Text variant="caption" style={{ fontWeight: "700", color: Colors.secondary }}>
-                                CLEAR
-                            </Text>
-                        </Ripple>
+                        <View style={{ flexDirection: "row", gap: 8 }}>
+                            <Ripple
+                                onPress={onCancel}
+                                style={[styles.action_button, { backgroundColor: Colors.primary_lighter }]}
+                            >
+                                <AntDesign name="close" size={14} color={Colors.foreground_secondary} />
+                                <Text variant="caption" style={{ fontWeight: "700", color: Colors.foreground_secondary }}>
+                                    CANCEL
+                                </Text>
+                            </Ripple>
+                            <Ripple
+                                onPress={onDone}
+                                style={[styles.action_button, { backgroundColor: Colors.secondary + "33" }]}
+                            >
+                                <AntDesign name="check" size={14} color={Colors.secondary} />
+                                <Text variant="caption" style={{ fontWeight: "700", color: Colors.secondary }}>
+                                    DONE
+                                </Text>
+                            </Ripple>
+                        </View>
                     </View>
 
                     <View style={styles.section}>
@@ -182,8 +209,8 @@ const CreateRepeatableTimeline = forwardRef<BottomSheetType, CreateRepeatableTim
                             </Text>
                         </View>
                         <SegmentedButtons
-                            value={f.values.repeatType}
-                            onChange={(value) => f.setFieldValue("repeatType", value)}
+                            value={local.repeatType}
+                            onChange={(value) => set("repeatType", value)}
                             buttons={REPEAT_TYPES}
                             buttonStyle={{ height: 36 }}
                             buttonTextStyle={{ fontSize: 13 }}
@@ -191,7 +218,7 @@ const CreateRepeatableTimeline = forwardRef<BottomSheetType, CreateRepeatableTim
                         />
                     </View>
 
-                    {f.values.repeatType === "WEEKLY" && (
+                    {local.repeatType === "WEEKLY" && (
                         <View style={styles.section}>
                             <View style={styles.sectionLabel}>
                                 <Ionicons name="today-outline" size={16} color={Colors.secondary} />
@@ -201,7 +228,7 @@ const CreateRepeatableTimeline = forwardRef<BottomSheetType, CreateRepeatableTim
                             </View>
                             <View style={{ flexDirection: "row", gap: 6 }}>
                                 {DAYS_OF_WEEK.map((day) => {
-                                    const isSelected = (f.values.repeatDaysOfWeek || []).includes(day.value)
+                                    const isSelected = (local.repeatDaysOfWeek || []).includes(day.value)
                                     return (
                                         <Ripple
                                             key={day.value}
@@ -235,12 +262,12 @@ const CreateRepeatableTimeline = forwardRef<BottomSheetType, CreateRepeatableTim
                         <View style={styles.sectionLabel}>
                             <MaterialIcons name="loop" size={16} color={Colors.secondary} />
                             <Text variant="body" color={Colors.secondary} style={{ fontWeight: "700" }}>
-                                Every {intervalLabel(f.values.repeatType)}
+                                Every {intervalLabel(local.repeatType)}
                             </Text>
                         </View>
                         <SegmentedButtons
-                            value={f.values.repeatInterval || "1"}
-                            onChange={(value) => f.setFieldValue("repeatInterval", value)}
+                            value={local.repeatInterval || "1"}
+                            onChange={(value) => set("repeatInterval", value)}
                             buttons={intervalButtons}
                             buttonStyle={{ height: 36 }}
                             buttonTextStyle={{ fontSize: 13 }}
@@ -258,18 +285,25 @@ const CreateRepeatableTimeline = forwardRef<BottomSheetType, CreateRepeatableTim
                         <Input
                             keyboardType="numeric"
                             style={{ flex: 1, width: Layout.screen.width - 32 }}
-                            value={f.values.repeatCount}
-                            onChangeText={(t) => f.setFieldValue("repeatCount", t)}
+                            value={local.repeatCount}
+                            onChangeText={(t) => set("repeatCount", t)}
                             placeholder="e.g. 10"
                             placeholderTextColor={Colors.foreground_secondary}
                             left={
                                 <ArrowButton
-                                    disabled={Number(f.values.repeatCount || 0) <= 0 || f.values.repeatCount === ""}
+                                    disabled={Number(local.repeatCount || 0) <= 0 || local.repeatCount === ""}
                                     arrow="arrow-down"
-                                    onPress={onArrowDownPress}
+                                    onPress={() =>
+                                        set("repeatCount", String(Math.max(0, Number(local.repeatCount || 0) - 1)))
+                                    }
                                 />
                             }
-                            right={<ArrowButton arrow="arrow-up" onPress={onArrowUpPress} />}
+                            right={
+                                <ArrowButton
+                                    arrow="arrow-up"
+                                    onPress={() => set("repeatCount", String(Number(local.repeatCount || 0) + 1))}
+                                />
+                            }
                         />
                     </View>
 
@@ -280,50 +314,36 @@ const CreateRepeatableTimeline = forwardRef<BottomSheetType, CreateRepeatableTim
                                 Repeat until
                             </Text>
                         </View>
-                        <DatePicker
-                            mode="single"
-                            dates={repeatUntilDate}
-                            setDates={({ start }) => f.setFieldValue("repeatUntil", dayjs(start).format("YYYY-MM-DD"))}
-                            buttonComponent={({ start }) => (
-                                <View
-                                    style={{
-                                        backgroundColor: Colors.primary_lighter,
-                                        borderRadius: 8,
-                                        paddingVertical: 10,
-                                        paddingHorizontal: 14,
-                                        flexDirection: "row",
-                                        alignItems: "center",
-                                        gap: 8,
-                                    }}
-                                >
-                                    <AntDesign name="calendar" size={16} color={Colors.secondary} />
-                                    <Text
-                                        variant="body"
-                                        color={f.values.repeatUntil ? Colors.foreground : Colors.foreground_secondary}
-                                    >
-                                        {f.values.repeatUntil
-                                            ? dayjs(f.values.repeatUntil).format("MMM D, YYYY")
-                                            : "Select end date"}
-                                    </Text>
-                                </View>
-                            )}
-                        />
-                    </View>
-
-                    <View style={styles.section}>
-                        <View style={styles.sectionLabel}>
-                            <Ionicons name="notifications-outline" size={16} color={Colors.secondary} />
-                            <Text variant="body" color={Colors.secondary} style={{ fontWeight: "700" }}>
-                                Reminder
+                        <TouchableOpacity
+                            onPress={() => setShowDatePicker(true)}
+                            style={{
+                                backgroundColor: Colors.primary_lighter,
+                                borderRadius: 8,
+                                paddingVertical: 10,
+                                paddingHorizontal: 14,
+                                flexDirection: "row",
+                                alignItems: "center",
+                                gap: 8,
+                            }}
+                        >
+                            <AntDesign name="calendar" size={16} color={Colors.secondary} />
+                            <Text
+                                variant="body"
+                                color={local.repeatUntil ? Colors.foreground : Colors.foreground_secondary}
+                            >
+                                {local.repeatUntil ? dayjs(local.repeatUntil).format("MMM D, YYYY") : "Select end date"}
                             </Text>
-                        </View>
-                        <SegmentedButtons
-                            value={String(f.values.reminderBeforeMinutes || "")}
-                            onChange={(value) => f.setFieldValue("reminderBeforeMinutes", value)}
-                            buttons={REMINDER_PRESETS}
-                            buttonStyle={{ height: 36 }}
-                            buttonTextStyle={{ fontSize: 13 }}
-                            containerStyle={{ borderRadius: 8 }}
+                        </TouchableOpacity>
+                        <DateTimePicker
+                            mode="date"
+                            isDarkModeEnabled
+                            isVisible={showDatePicker}
+                            date={repeatUntilDate}
+                            onConfirm={(date) => {
+                                set("repeatUntil", dayjs(date).format("YYYY-MM-DD"))
+                                setShowDatePicker(false)
+                            }}
+                            onCancel={() => setShowDatePicker(false)}
                         />
                     </View>
                 </View>

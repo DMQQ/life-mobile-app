@@ -28,7 +28,7 @@ function pageForWeekStart(weekStart: string) {
     return moment(weekStart).startOf("isoWeek").diff(EPOCH, "weeks")
 }
 
-const WINDOW_SIZE = 7
+const WINDOW_SIZE = 3
 const WINDOW_CENTER = Math.floor(WINDOW_SIZE / 2)
 
 // ─── Week day header ──────────────────────────────────────────────────────────
@@ -41,9 +41,7 @@ interface WeekDayHeaderProps {
 }
 
 const WeekDayHeader = memo(({ weekStart, selectedDate, onDayPress, paddingTop }: WeekDayHeaderProps) => {
-    const days = Array.from({ length: 7 }, (_, i) =>
-        moment(weekStart).add(i, "days").format("YYYY-MM-DD"),
-    )
+    const days = Array.from({ length: 7 }, (_, i) => moment(weekStart).add(i, "days").format("YYYY-MM-DD"))
     return (
         <View style={[styles.weekHeader, { paddingTop: paddingTop + 10 }]}>
             <View style={{ width: TIME_COL_W }} />
@@ -121,16 +119,16 @@ const WeekPage = memo(({ weekStart, selectedDate, onDayPress, onScroll, bottomPa
             scrollEventThrottle={16}
             onScroll={onScroll}
             contentContainerStyle={{ paddingBottom: bottomPad }}
+            overScrollMode={"never"}
+            bounces={false}
         >
             <View style={{ position: "relative" }}>
                 <View style={{ flexDirection: "row" }}>
                     {/* Time gutter */}
-                    <View style={{ width: TIME_COL_W }}>
+                    <View style={{ width: TIME_COL_W, backgroundColor: Colors.primary, zIndex: 100 }}>
                         {HOURS.map((h) => (
                             <View key={h} style={styles.hourGutterCell}>
-                                {h > 0 && (
-                                    <Text style={styles.timeLabel}>{`${String(h).padStart(2, "0")}:00`}</Text>
-                                )}
+                                {h > 0 && <Text style={styles.timeLabel}>{`${String(h).padStart(2, "0")}:00`}</Text>}
                             </View>
                         ))}
                     </View>
@@ -191,9 +189,7 @@ const WeekPage = memo(({ weekStart, selectedDate, onDayPress, onScroll, bottomPa
                                                 <Text numberOfLines={1} style={styles.eventTitle}>
                                                     {event.title}
                                                 </Text>
-                                                {height > 30 && (
-                                                    <Text style={styles.eventTime}>{event.beginTime}</Text>
-                                                )}
+                                                {height > 30 && <Text style={styles.eventTime}>{event.beginTime}</Text>}
                                             </TouchableOpacity>
                                         )
                                     })}
@@ -234,10 +230,7 @@ export default function WeekView({ selectedDate, setSelected, contentPaddingTop,
     const [initialLocalPage, setInitialLocalPage] = useState(WINDOW_CENTER)
     const [pagerKey, setPagerKey] = useState(0)
 
-    const pages = useMemo(
-        () => Array.from({ length: WINDOW_SIZE }, (_, i) => basePage + i),
-        [basePage],
-    )
+    const pages = useMemo(() => Array.from({ length: WINDOW_SIZE }, (_, i) => basePage + i), [basePage])
 
     useEffect(() => {
         const localPos = targetGlobalPage - basePage

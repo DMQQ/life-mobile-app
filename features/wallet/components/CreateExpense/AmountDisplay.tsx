@@ -20,7 +20,7 @@ export default function AmountDisplay() {
 
     const animatedContainer = useAnimatedStyle(() => ({
         height: 300,
-        paddingTop: interpolate(optionsProgress.value, [0, 1], [150, 45], "clamp"),
+        paddingTop: interpolate(optionsProgress.value, [0, 1], [90, 45], "clamp"),
     }))
 
     return (

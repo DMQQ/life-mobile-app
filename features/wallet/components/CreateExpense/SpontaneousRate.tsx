@@ -39,13 +39,13 @@ const spontaneousOptions = [
     },
 ]
 
-export const getRateColor = (rate) => {
+export const getRateColor = (rate: number): string => {
     if (rate <= 20) return "#66E875"
     if (rate <= 60) return "#FFA726"
     return "#F07070"
 }
 
-export const SpontaneousRateChip = ({ value, onPress }) => {
+export const SpontaneousRateChip = ({ value, onPress }: { value: number; onPress: () => void }) => {
     const selectedOption = spontaneousOptions.find((option) => option.value === value) || spontaneousOptions[0]
     const color = getRateColor(value)
 
@@ -83,50 +83,33 @@ export const SpontaneousRateSelector = ({ onDismiss }: { onDismiss?: () => void 
     const dismiss = onDismiss ?? (() => methods.setView("main"))
 
     return (
-        <ScrollView style={styles.selectorContainer} showsVerticalScrollIndicator={false} bounces={false}>
-            {spontaneousOptions.map((option) => (
-                <Ripple
-                    key={option.value}
-                    style={[
-                        styles.optionButton,
-                        {
-                            backgroundColor:
-                                option.value === value
-                                    ? lowOpacity(getRateColor(option.value), 0.25)
-                                    : Colors.primary_lighter,
-                        },
-                    ]}
-                    onPress={() => {
-                        Feedback.trigger("impactLight")
-                        setValue(option.value)
-                        setTimeout(() => dismiss(), 300)
-                    }}
-                >
-                    <Text style={styles.optionIcon}>{option.icon}</Text>
-                    <Text
+        <ScrollView showsVerticalScrollIndicator={false} bounces={false}>
+            {spontaneousOptions.map((option) => {
+                const color = getRateColor(option.value)
+                const selected = option.value === value
+                return (
+                    <Ripple
+                        key={option.value}
                         style={[
-                            styles.optionLabel,
-                            {
-                                color:
-                                    option.value === value ? getRateColor(option.value) : "rgba(255,255,255,0.85)",
-                            },
+                            styles.tile,
+                            { backgroundColor: selected ? lowOpacity(color, 0.25) : Colors.primary_lighter },
                         ]}
+                        onPress={() => {
+                            Feedback.trigger("impactLight")
+                            setValue(option.value)
+                            setTimeout(() => dismiss(), 300)
+                        }}
                     >
-                        {option.label}
-                    </Text>
-                    <View
-                        style={[
-                            styles.rateIndicator,
-                            {
-                                backgroundColor: getRateColor(option.value),
-                                opacity: option.value === value ? 1 : 0.3,
-                            },
-                        ]}
-                    >
-                        <Text style={styles.rateValue}>{option.value}%</Text>
-                    </View>
-                </Ripple>
-            ))}
+                        <Text style={styles.tileIcon}>{option.icon}</Text>
+                        <Text style={[styles.tileLabel, { color: selected ? color : "rgba(255,255,255,0.85)" }]}>
+                            {option.label}
+                        </Text>
+                        <View style={[styles.badge, { backgroundColor: color, opacity: selected ? 1 : 0.3 }]}>
+                            <Text style={styles.badgeText}>{option.value}%</Text>
+                        </View>
+                    </Ripple>
+                )
+            })}
         </ScrollView>
     )
 }
@@ -142,33 +125,32 @@ const styles = StyleSheet.create({
         gap: 15,
         flex: 1,
     },
-    selectorContainer: {
-        flex: 1,
-    },
-    optionButton: {
+    tile: {
         flexDirection: "row",
         alignItems: "center",
         paddingHorizontal: 15,
-        paddingVertical: 12,
-        borderRadius: 10,
+        paddingVertical: 16,
+        borderRadius: 14,
         gap: 12,
         marginBottom: 8,
     },
-    optionIcon: {
-        fontSize: 18,
+    tileIcon: {
+        fontSize: 20,
+        width: 24,
+        textAlign: "center",
     },
-    optionLabel: {
+    tileLabel: {
         flex: 1,
         fontSize: 14,
         fontWeight: "500",
     },
-    rateIndicator: {
-        paddingHorizontal: 8,
+    badge: {
+        paddingHorizontal: 10,
         paddingVertical: 4,
         borderRadius: 20,
     },
-    rateValue: {
-        color: Colors.foreground,
+    badgeText: {
+        color: "#fff",
         fontWeight: "bold",
         fontSize: 12,
     },

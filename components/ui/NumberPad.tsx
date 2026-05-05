@@ -4,7 +4,6 @@ import { Entypo } from "@expo/vector-icons"
 import { useRef } from "react"
 import { Pressable, View } from "react-native"
 import Feedback from "react-native-haptic-feedback"
-import Animated, { FadeInDown } from "react-native-reanimated"
 import { LiquidGlassView } from "@callstack/liquid-glass"
 
 interface NumberPadProps {
@@ -20,18 +19,34 @@ const KEYS = [
 ]
 
 const NumberPad = ({ onKeyPress, onBackPress }: NumberPadProps) => (
-    <Animated.View entering={FadeInDown} style={{ gap: 15, flex: 1, justifyContent: "center" }}>
+    <View style={{ gap: 15, flex: 1, justifyContent: "center" }}>
         {KEYS.map((row) => (
             <View style={{ flexDirection: "row", gap: 15, justifyContent: "space-around" }} key={row.join("")}>
                 {row.map((key) => (
-                    <NumberKey key={key} label={key} onPress={() => onKeyPress(key)} isBack={key === "C" && !!onBackPress} onBackPress={onBackPress} />
+                    <NumberKey
+                        key={key}
+                        label={key}
+                        onPress={() => onKeyPress(key)}
+                        isBack={key === "C" && !!onBackPress}
+                        onBackPress={onBackPress}
+                    />
                 ))}
             </View>
         ))}
-    </Animated.View>
+    </View>
 )
 
-const NumberKey = ({ label, onPress, isBack, onBackPress }: { label: string; onPress: VoidFunction; isBack: boolean; onBackPress?: () => void }) => {
+const NumberKey = ({
+    label,
+    onPress,
+    isBack,
+    onBackPress,
+}: {
+    label: string
+    onPress: VoidFunction
+    isBack: boolean
+    onBackPress?: () => void
+}) => {
     const interval = useRef<NodeJS.Timeout | null>(null)
 
     const handlePress = () => {

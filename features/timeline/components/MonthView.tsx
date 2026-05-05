@@ -6,7 +6,7 @@ import Feedback from "react-native-haptic-feedback"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import Colors from "@/constants/Colors"
 import Text from "@/components/ui/Text/Text"
-import { useRangeEvents, OccurrenceItem } from "../hooks/query/useGetOccurrencesQuery"
+import { useRangeEvents, CalendarOccurrenceItem } from "../hooks/query/useGetOccurrencesQuery"
 import { navigationRef } from "@/navigation"
 
 const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
@@ -23,7 +23,7 @@ function pageForMonthStart(monthStart: string) {
     return moment(monthStart).startOf("month").diff(EPOCH, "months")
 }
 
-const WINDOW_SIZE = 5
+const WINDOW_SIZE = 3
 const WINDOW_CENTER = Math.floor(WINDOW_SIZE / 2)
 
 function getMonthWeeks(monthStart: string): string[][] {
@@ -42,7 +42,7 @@ function getMonthWeeks(monthStart: string): string[][] {
     return weeks
 }
 
-type DayData = { date: string; events: OccurrenceItem[] }
+type DayData = { date: string; events: CalendarOccurrenceItem[] }
 
 interface WeekRowProps {
     dayData: DayData[]
@@ -177,10 +177,7 @@ export default function MonthView({ selectedDate, setSelected, contentPaddingTop
     const [initialLocalPage, setInitialLocalPage] = useState(WINDOW_CENTER)
     const [pagerKey, setPagerKey] = useState(0)
 
-    const pages = useMemo(
-        () => Array.from({ length: WINDOW_SIZE }, (_, i) => basePage + i),
-        [basePage],
-    )
+    const pages = useMemo(() => Array.from({ length: WINDOW_SIZE }, (_, i) => basePage + i), [basePage])
 
     useEffect(() => {
         const localPos = targetGlobalPage - basePage

@@ -63,7 +63,7 @@ export default function useQuickCompleteTodo(props: {
         (isCompleted?: boolean) => {
             const newCompletedState = isCompleted ?? !props.currentlyCompleted
             return completeTodo({
-                variables: { input: { id: props.todoId, isCompleted: newCompletedState } },
+                variables: { input: { id: props.todoId, isCompleted: newCompletedState, occurrenceId: props.timelineId } },
             })
         },
         state,

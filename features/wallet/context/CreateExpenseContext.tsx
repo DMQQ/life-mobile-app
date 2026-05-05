@@ -4,7 +4,7 @@ import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/typ
 import { Icons } from "@/features/wallet/components/Expense/ExpenseIcon"
 import { Expense } from "@/types"
 
-export type ViewType = "main" | "category" | "spontaneous"
+export type ViewType = "main" | "category" | "spontaneous" | "account"
 
 export interface SubExpense {
     id: string
@@ -44,7 +44,7 @@ export interface CreateExpenseContextType {
         calculateSubExpensesTotal: () => number
         setName: (name: string) => void
         setDate: (date: string | null) => void
-        setType: (type: React.SetStateAction<Type>) => void
+        setType: (type: "expense" | "income" | "refunded" | null) => void
         setIsSubExpenseMode: (mode: boolean) => void
         setView: (view: ViewType) => void
         setSpontaneousRate: (rate: number) => void

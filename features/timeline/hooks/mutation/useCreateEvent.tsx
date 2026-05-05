@@ -4,7 +4,6 @@ import { Platform, ToastAndroid } from "react-native"
 import moment from "moment"
 import * as Yup from "yup"
 
-import { GET_OCCURRENCES_QUERY } from "../query/useGetOccurrencesQuery"
 import { CREATE_EVENT } from "../schemas/schemas"
 import { GET_MONTHLY_OCCURRENCES } from "../general/useTimeline"
 import { GET_MAIN_SCREEN, getMainScreenBaseVariables } from "@/utils/schemas/GET_MAIN_SCREEN"
@@ -93,24 +92,9 @@ export default function useCreateEvent(props: { selectedDate: string }) {
                 },
             ],
 
-            update(cache, { data: { createEvent: newOccurrence } }) {
-                try {
-                    const existing = cache.readQuery({
-                        query: GET_OCCURRENCES_QUERY,
-                        variables: { date: props.selectedDate },
-                    }) as { occurrences: any[] }
-
-                    cache.writeQuery({
-                        query: GET_OCCURRENCES_QUERY,
-                        variables: { date: props.selectedDate },
-                        data: {
-                            occurrences: [{ ...newOccurrence, todos: [], images: [] }, ...(existing?.occurrences || [])],
-                        },
-                        overwrite: true,
-                    })
-                } catch {
-                    // Cache may not exist yet; refetch will handle it
-                }
+            update(cache) {
+                cache.evict({ fieldName: "occurrences" })
+                cache.gc()
             },
 
             onError: (err) => {

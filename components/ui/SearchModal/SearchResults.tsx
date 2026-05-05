@@ -34,42 +34,45 @@ export default function SearchResults<T extends SearchItem = SearchItem>({
     const { query, loading: contextLoading, setLoading } = useContext(SearchContext)
     const [results, setResults] = useState<T[]>(data)
     const [error, setError] = useState<string | null>(null)
-    
+
     const loading = externalLoading || contextLoading
-    
-    const performSearch = useCallback(async (searchQuery: string) => {
-        if (!searchFunction && !data.length) return
-        
-        try {
-            setError(null)
-            setLoading(true)
-            
-            let searchResults: T[]
-            
-            if (searchFunction) {
-                const result = await Promise.resolve(searchFunction(searchQuery))
-                searchResults = result
-            } else {
-                // Filter local data
-                searchResults = data.filter(item => {
-                    const searchText = searchQuery.toLowerCase()
-                    return (
-                        item.title.toLowerCase().includes(searchText) ||
-                        item.subtitle?.toLowerCase().includes(searchText) ||
-                        item.description?.toLowerCase().includes(searchText)
-                    )
-                })
+
+    const performSearch = useCallback(
+        async (searchQuery: string) => {
+            if (!searchFunction && !data.length) return
+
+            try {
+                setError(null)
+                setLoading(true)
+
+                let searchResults: T[]
+
+                if (searchFunction) {
+                    const result = await Promise.resolve(searchFunction(searchQuery))
+                    searchResults = result
+                } else {
+                    // Filter local data
+                    searchResults = data.filter((item) => {
+                        const searchText = searchQuery.toLowerCase()
+                        return (
+                            item.title.toLowerCase().includes(searchText) ||
+                            item.subtitle?.toLowerCase().includes(searchText) ||
+                            item.description?.toLowerCase().includes(searchText)
+                        )
+                    })
+                }
+
+                setResults(searchResults)
+            } catch (err) {
+                setError(err instanceof Error ? err.message : "Search failed")
+                setResults([])
+            } finally {
+                setLoading(false)
             }
-            
-            setResults(searchResults)
-        } catch (err) {
-            setError(err instanceof Error ? err.message : "Search failed")
-            setResults([])
-        } finally {
-            setLoading(false)
-        }
-    }, [searchFunction, data, setLoading])
-    
+        },
+        [searchFunction, data, setLoading],
+    )
+
     useEffect(() => {
         if (query.trim()) {
             performSearch(query.trim())
@@ -78,29 +81,35 @@ export default function SearchResults<T extends SearchItem = SearchItem>({
             setError(null)
         }
     }, [query, performSearch, data])
-    
-    const handleItemPress = useCallback((item: T) => {
-        Haptics.trigger("impactLight")
-        onItemPress(item)
-    }, [onItemPress])
-    
-    const renderResultItem = useCallback(({ item }: { item: T }) => {
-        const isSelected = isItemSelected(item)
-        
-        if (renderItem) {
-            return renderItem(item, isSelected, () => handleItemPress(item))
-        }
-        
-        return (
-            <SearchResultItem
-                item={item}
-                isSelected={isSelected}
-                onPress={() => handleItemPress(item)}
-                multiSelect={multiSelect}
-            />
-        )
-    }, [renderItem, isItemSelected, handleItemPress, multiSelect])
-    
+
+    const handleItemPress = useCallback(
+        (item: T) => {
+            Haptics.trigger("impactLight")
+            onItemPress(item)
+        },
+        [onItemPress],
+    )
+
+    const renderResultItem = useCallback(
+        ({ item }: { item: T }) => {
+            const isSelected = isItemSelected(item)
+
+            if (renderItem) {
+                return renderItem(item, isSelected, () => handleItemPress(item))
+            }
+
+            return (
+                <SearchResultItem
+                    item={item}
+                    isSelected={isSelected}
+                    onPress={() => handleItemPress(item)}
+                    multiSelect={multiSelect}
+                />
+            )
+        },
+        [renderItem, isItemSelected, handleItemPress, multiSelect],
+    )
+
     const renderEmptyState = () => {
         if (loading) {
             return (
@@ -110,7 +119,7 @@ export default function SearchResults<T extends SearchItem = SearchItem>({
                 </View>
             )
         }
-        
+
         if (error) {
             return (
                 <View style={styles.emptyState}>
@@ -120,33 +129,31 @@ export default function SearchResults<T extends SearchItem = SearchItem>({
                 </View>
             )
         }
-        
+
         if (query.trim() && results.length === 0) {
             return (
                 <View style={styles.emptyState}>
-                    {emptyStateIcon || <AntDesign name="search1" size={48} color={Colors.foreground_secondary} />}
+                    {emptyStateIcon || <AntDesign name="search" size={48} color={Colors.foreground_secondary} />}
                     <Text style={styles.emptyStateText}>{emptyStateMessage}</Text>
-                    <Text style={styles.emptyStateSubtext}>
-                        Try adjusting your search terms
-                    </Text>
+                    <Text style={styles.emptyStateSubtext}>Try adjusting your search terms</Text>
                 </View>
             )
         }
-        
+
         if (!query.trim()) {
             return (
                 <View style={styles.emptyState}>
-                    <AntDesign name="search1" size={48} color={Colors.foreground_secondary} />
+                    <AntDesign name="search" size={48} color={Colors.foreground_secondary} />
                     <Text style={styles.emptyStateText}>Start typing to search</Text>
                 </View>
             )
         }
-        
+
         return null
     }
-    
+
     const keyExtractor = useCallback((item: T) => item.id, [])
-    
+
     return (
         <View style={styles.container}>
             <FlatList
@@ -157,10 +164,7 @@ export default function SearchResults<T extends SearchItem = SearchItem>({
                 showsVerticalScrollIndicator={false}
                 keyboardShouldPersistTaps="handled"
                 style={styles.list}
-                contentContainerStyle={[
-                    styles.listContent,
-                    results.length === 0 && styles.emptyListContent
-                ]}
+                contentContainerStyle={[styles.listContent, results.length === 0 && styles.emptyListContent]}
             />
         </View>
     )

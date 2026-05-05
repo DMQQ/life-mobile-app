@@ -55,9 +55,32 @@ export const GET_OCCURRENCES_QUERY = gql`
     }
 `
 
+const GET_CALENDAR_OCCURRENCES_QUERY = gql`
+    query GetCalendarOccurrences($date: String, $endDate: String) {
+        occurrences(date: $date, endDate: $endDate) {
+            id
+            title
+            date
+            beginTime
+            endTime
+            isCompleted
+        }
+    }
+`
+
+export interface CalendarOccurrenceItem {
+    id: string
+    title: string
+    date: string
+    beginTime: string
+    endTime: string
+    isCompleted: boolean
+}
+
 export function useWeekEvents(days: string[]) {
-    const { data } = useQuery<{ occurrences: OccurrenceItem[] }>(GET_OCCURRENCES_QUERY, {
+    const { data } = useQuery<{ occurrences: CalendarOccurrenceItem[] }>(GET_CALENDAR_OCCURRENCES_QUERY, {
         variables: { date: days[0], endDate: days[6] },
+        fetchPolicy: "cache-and-network",
     })
     const allEvents = data?.occurrences ?? []
     return days.map((date) => ({
@@ -66,11 +89,12 @@ export function useWeekEvents(days: string[]) {
     }))
 }
 
-export function useRangeEvents(start: string, end: string): OccurrenceItem[] {
-    const { data } = useQuery<{ occurrences: OccurrenceItem[] }>(GET_OCCURRENCES_QUERY, {
+export function useRangeEvents(start: string, end: string): CalendarOccurrenceItem[] {
+    const { data } = useQuery<{ occurrences: CalendarOccurrenceItem[] }>(GET_CALENDAR_OCCURRENCES_QUERY, {
         variables: { date: start, endDate: end },
+        fetchPolicy: "cache-and-network",
     })
-    return (data?.occurrences ?? []) as OccurrenceItem[]
+    return data?.occurrences ?? []
 }
 
 export default function useGetOccurrencesQuery(date?: string) {

@@ -23,7 +23,7 @@ export default function useCompleteTodo(props: { todoId: string; timelineId: str
         (isCompleted?: boolean) => {
             const newCompletedState = isCompleted ?? !props.currentlyCompleted
             return completeTodo({
-                variables: { input: { id: props.todoId, isCompleted: newCompletedState } },
+                variables: { input: { id: props.todoId, isCompleted: newCompletedState, occurrenceId: props.timelineId } },
             })
         },
         state,

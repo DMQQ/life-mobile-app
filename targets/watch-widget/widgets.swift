@@ -39,8 +39,8 @@ private func shortTime(_ t: String) -> String {
     return "\(parts[0]):\(parts[1])"
 }
 
-private let pillH: CGFloat = 16
-private let laneH: CGFloat = 20
+private let pillH: CGFloat = 19
+private let laneH: CGFloat = 22
 private let bottomH: CGFloat = 14
 
 private struct TimelineLayout {
@@ -63,6 +63,14 @@ private struct LaneEventItem: Identifiable {
 private func buildTimeline(for date: Date) -> TimelineLayout {
     let events = todayEvents()
     let day = Calendar.current.startOfDay(for: date)
+    let cal = Calendar.current
+
+    // Snap window to current hour boundary → stable 5-hour window, ticks never drift
+    let hourComps = cal.dateComponents([.year, .month, .day, .hour], from: date)
+    let currentHour = cal.date(from: hourComps)!
+    let rangeStart = currentHour
+    let rangeEnd = currentHour.addingTimeInterval(5 * 3600)
+    let duration: TimeInterval = 5 * 3600
 
     struct Parsed {
         let event: WatchTimelineEvent
@@ -78,12 +86,9 @@ private func buildTimeline(for date: Date) -> TimelineLayout {
     }
 
     guard !parsed.isEmpty else {
-        return TimelineLayout(rangeStart: date, rangeEnd: date.addingTimeInterval(7200), laneEvents: [], nowFraction: nil, totalLanes: 0)
+        return TimelineLayout(rangeStart: rangeStart, rangeEnd: rangeEnd, laneEvents: [], nowFraction: nil, totalLanes: 0)
     }
 
-    let rangeStart = date.addingTimeInterval(-1.5 * 3600)
-    let rangeEnd = date.addingTimeInterval(2.5 * 3600)
-    let duration = rangeEnd.timeIntervalSince(rangeStart)
     let visible = parsed.filter { $0.end > rangeStart && $0.begin < rangeEnd }
 
     var lanes: [Date] = []
@@ -116,9 +121,8 @@ private func buildTimeline(for date: Date) -> TimelineLayout {
         ))
     }
 
-    let nowF: CGFloat? = (date >= rangeStart && date <= rangeEnd)
-        ? CGFloat(date.timeIntervalSince(rangeStart) / duration)
-        : nil
+    let rawNowF = CGFloat(date.timeIntervalSince(rangeStart) / duration)
+    let nowF: CGFloat? = (rawNowF >= 0 && rawNowF <= 1) ? rawNowF : nil
 
     return TimelineLayout(
         rangeStart: rangeStart,
@@ -174,7 +178,7 @@ struct Provider: TimelineProvider {
     func getTimeline(in context: Context, completion: @escaping (Timeline<SimpleEntry>) -> Void) {
         let now = Date()
         var entries: [SimpleEntry] = [makeEntry(for: now)]
-        var refresh = now.addingTimeInterval(15 * 60)
+        var refresh = now.addingTimeInterval(5 * 60)
         let day = Calendar.current.startOfDay(for: now)
         for event in todayEvents() {
             if let begin = parseTime(event.beginTime, on: day), begin > now {
@@ -266,6 +270,18 @@ struct watchWidgetEntryView: View {
                     }
 
                     ZStack(alignment: .topLeading) {
+                        ForEach(ticks.filter { !$0.isHour && !$0.isHalf }) { tick in
+                            Rectangle()
+                                .fill(Color.primary.opacity(0.12))
+                                .frame(width: 0.5, height: chartH * 0.22)
+                                .offset(x: tick.xFraction * geo.size.width - 0.25, y: chartH * 0.78)
+                        }
+                        ForEach(ticks.filter(\.isHalf)) { tick in
+                            Rectangle()
+                                .fill(Color.primary.opacity(0.22))
+                                .frame(width: 1, height: chartH * 0.45)
+                                .offset(x: tick.xFraction * geo.size.width - 0.5, y: chartH * 0.55)
+                        }
                         ForEach(ticks.filter(\.isHour)) { tick in
                             Rectangle()
                                 .fill(Color.primary.opacity(0.3))
@@ -284,12 +300,12 @@ struct watchWidgetEntryView: View {
                     }
                     .frame(height: chartH)
 
-                    ZStack(alignment: .topLeading) {
+                    ZStack {
                         ForEach(ticks.filter(\.isHour)) { tick in
                             Text(tick.label)
                                 .font(.system(size: 8, design: .rounded))
                                 .foregroundStyle(.secondary)
-                                .offset(x: tick.xFraction * geo.size.width + 3)
+                                .position(x: tick.xFraction * geo.size.width, y: bottomH / 2)
                         }
                     }
                     .frame(height: bottomH)
@@ -306,7 +322,7 @@ struct watchWidgetEntryView: View {
                 .widgetAccentable()
                 .opacity(item.isNow ? 1 : 0.45)
             Text(item.event.title)
-                .font(.system(size: 8, weight: item.isNow ? .semibold : .regular))
+                .font(.system(size: 10, weight: item.isNow ? .semibold : .regular))
                 .lineLimit(1)
         }
         .padding(.horizontal, 4)
@@ -321,25 +337,25 @@ struct watchWidgetEntryView: View {
     private struct TickMark: Identifiable {
         let id = UUID()
         let xFraction: CGFloat
-        let isHour: Bool
+        let minuteValue: Int
         let label: String
+        var isHour: Bool { minuteValue == 0 }
+        var isHalf: Bool { minuteValue == 30 }
     }
 
     private func generateTicks(rangeStart: Date, rangeEnd: Date) -> [TickMark] {
         let cal = Calendar.current
-        var comps = cal.dateComponents([.year, .month, .day, .hour, .minute], from: rangeStart)
-        comps.minute = (comps.minute! / 15) * 15
-        var tick = cal.date(from: comps)!
-
-        let duration = rangeEnd.timeIntervalSince(rangeStart)
+        // rangeStart is always on an exact hour boundary → ticks are always evenly spaced
+        let duration: TimeInterval = 5 * 3600
         var ticks: [TickMark] = []
+        var tick = rangeStart
 
         while tick <= rangeEnd {
             let xFrac = CGFloat(tick.timeIntervalSince(rangeStart) / duration)
             let m = cal.component(.minute, from: tick)
-            let isHour = m == 0
-            let label = isHour ? "\(cal.component(.hour, from: tick))" : ""
-            ticks.append(TickMark(xFraction: xFrac, isHour: isHour, label: label))
+            let h = cal.component(.hour, from: tick)
+            let label = m == 0 ? "\(h)" : ""
+            ticks.append(TickMark(xFraction: xFrac, minuteValue: m, label: label))
             tick = cal.date(byAdding: .minute, value: 15, to: tick)!
         }
 

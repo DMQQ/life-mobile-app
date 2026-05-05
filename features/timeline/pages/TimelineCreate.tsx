@@ -1,9 +1,10 @@
 import IconButton from "@/components/ui/IconButton/IconButton"
+import SegmentedButtons from "@/components/ui/SegmentedButtons"
 import Text from "@/components/ui/Text/Text"
 import ValidatedInput from "@/components/ui/ValidatedInput"
 import Colors from "@/constants/Colors"
 import useKeyboard from "@/utils/hooks/useKeyboard"
-import { AntDesign } from "@expo/vector-icons"
+import { AntDesign, Ionicons } from "@expo/vector-icons"
 import moment from "moment"
 import { useRef, useState } from "react"
 import { Platform, Pressable, ScrollView, StyleSheet, View } from "react-native"
@@ -127,6 +128,27 @@ export default function CreateTimeLineEventModal({ route, navigation }: Timeline
                             </Text>
                             <Text style={{ fontSize: 13, color: "gray", textAlign: "center" }}>To</Text>
                         </Ripple>
+                    </View>
+
+                    <View style={{ marginTop: 15 }}>
+                        <View style={{ flexDirection: "row", alignItems: "center", gap: 5, marginBottom: 6 }}>
+                            <Ionicons name="notifications-outline" size={16} color={Colors.secondary} />
+                            <ValidatedInput.Label error={false} text="Reminder" />
+                        </View>
+                        <SegmentedButtons
+                            value={String(f.values.reminderBeforeMinutes || "")}
+                            onChange={(value) => f.setFieldValue("reminderBeforeMinutes", value)}
+                            buttons={[
+                                { text: "Off", value: "" },
+                                { text: "5m", value: "5" },
+                                { text: "15m", value: "15" },
+                                { text: "30m", value: "30" },
+                                { text: "1h", value: "60" },
+                            ]}
+                            buttonStyle={{ height: 36 }}
+                            buttonTextStyle={{ fontSize: 13 }}
+                            containerStyle={{ borderRadius: 8 }}
+                        />
                     </View>
 
                     {!isEditing && (

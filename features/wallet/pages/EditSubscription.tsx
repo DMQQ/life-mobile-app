@@ -21,6 +21,7 @@ import Ripple from "react-native-material-ripple"
 import Animated, { FadeIn, interpolate, useAnimatedStyle, useSharedValue } from "react-native-reanimated"
 import NumberPad from "@/components/ui/NumberPad"
 import useSubscription from "../hooks/useSubscription"
+import { useSubAccounts } from "../hooks/useSubAccounts"
 
 type BillingCycle = "daily" | "weekly" | "monthly" | "yearly" | "custom"
 
@@ -63,8 +64,12 @@ export default function EditSubscription({ route, navigation }: Props) {
         createSubscriptionFromInputState,
     } = useSubscription()
 
+    const { data: subAccountsData } = useSubAccounts()
+    const subAccounts = subAccountsData?.wallet?.subAccounts ?? []
+
     const reminderSheetRef = useRef<any>(null)
     const customSheetRef = useRef<any>(null)
+    const accountSheetRef = useRef<any>(null)
     const transformX = useSharedValue(0)
 
     const formik = useFormik({
@@ -78,6 +83,7 @@ export default function EditSubscription({ route, navigation }: Props) {
             dateStart: subscription?.dateStart ? new Date(+subscription.dateStart) : new Date(),
             dateEnd: subscription?.dateEnd ? new Date(+subscription.dateEnd) : (null as Date | null),
             nextBillingDate: subscription?.nextBillingDate ? new Date(+subscription.nextBillingDate) : new Date(),
+            subAccountId: undefined as string | undefined,
         },
         onSubmit: async (values) => {
             Feedback.trigger("impactLight")
@@ -93,6 +99,7 @@ export default function EditSubscription({ route, navigation }: Props) {
                     billingDay: parseInt(values.billingDay) || 1,
                     customBillingMonths: values.customBillingMonths,
                 }),
+                ...(!isEdit && values.subAccountId && { subAccountId: values.subAccountId }),
             }
             const result = await (async () => {
                 if (isEdit) {
@@ -369,6 +376,35 @@ export default function EditSubscription({ route, navigation }: Props) {
                                             </Text>
                                         </Ripple>
 
+                                        {!isEdit && subAccounts.length > 0 && (
+                                            <Ripple
+                                                style={[
+                                                    styles.chip,
+                                                    formik.values.subAccountId && styles.chipActive,
+                                                ]}
+                                                onPress={() => {
+                                                    Keyboard.dismiss()
+                                                    accountSheetRef.current?.expand()
+                                                }}
+                                            >
+                                                <MaterialCommunityIcons
+                                                    name="bank-outline"
+                                                    size={15}
+                                                    color={formik.values.subAccountId ? Colors.secondary : "rgba(255,255,255,0.7)"}
+                                                />
+                                                <Text
+                                                    style={[
+                                                        styles.chipText,
+                                                        formik.values.subAccountId && styles.chipTextActive,
+                                                    ]}
+                                                >
+                                                    {formik.values.subAccountId
+                                                        ? subAccounts.find((a) => a.id === formik.values.subAccountId)?.name ?? "Account"
+                                                        : "Account"}
+                                                </Text>
+                                            </Ripple>
+                                        )}
+
                                         {formik.values.billingCycle === "custom" && (
                                             <Ripple
                                                 style={[styles.chip, styles.chipActive]}
@@ -465,6 +501,33 @@ export default function EditSubscription({ route, navigation }: Props) {
                         )
                     })}
                 </BottomSheetScrollView>
+            </BottomSheet>
+            <BottomSheet ref={accountSheetRef} snapPoints={["40%"]}>
+                <BottomSheetView style={styles.sheetContent}>
+                    <Text variant="subtitle" style={styles.sheetTitle}>
+                        Account
+                    </Text>
+                    <View style={styles.sheetGrid}>
+                        {subAccounts.map((account) => {
+                            const active = formik.values.subAccountId === account.id
+                            return (
+                                <Ripple
+                                    key={account.id}
+                                    onPress={() => {
+                                        Feedback.trigger("impactLight")
+                                        formik.setFieldValue("subAccountId", active ? undefined : account.id)
+                                        accountSheetRef.current?.close()
+                                    }}
+                                    style={[styles.sheetOption, active && styles.sheetOptionActive]}
+                                >
+                                    <Text style={[styles.sheetOptionText, active && styles.sheetOptionTextActive]}>
+                                        {account.name}
+                                    </Text>
+                                </Ripple>
+                            )
+                        })}
+                    </View>
+                </BottomSheetView>
             </BottomSheet>
         </View>
     )

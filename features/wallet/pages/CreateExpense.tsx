@@ -1,9 +1,8 @@
-import GroupSelector from "@/components/ui/GroupSelector"
 import Colors from "@/constants/Colors"
 import useCreateExpensePage from "@/features/wallet/hooks/useCreateExpensePage"
 import moment from "moment"
 import { useEffect, useRef, useState } from "react"
-import { StyleSheet, View } from "react-native"
+import { ScrollView, StyleSheet, Text, View } from "react-native"
 import DateTimePicker from "react-native-modal-datetime-picker"
 import AmountDisplay from "../components/CreateExpense/AmountDisplay"
 import ExpenseAIMaker from "../components/CreateExpense/ExpenseAIMaker"
@@ -17,14 +16,24 @@ import {
     CreateExpenseContextType,
     useCreateExpenseContext,
 } from "../context/CreateExpenseContext"
-import CompactNumberPad from "@/components/ui/CompactNumberPad"
 import { Icons } from "../components/Expense/ExpenseIcon"
 import IconSaveButton from "@/components/ui/Button/IconSaveButton"
 import IconBackButton from "@/components/ui/Button/IconBackButton"
+import NumberPad from "@/components/ui/NumberPad"
+import CategorySelector from "../components/CreateExpense/CategorySelectorView"
+import { SpontaneousRateSelector } from "../components/CreateExpense/SpontaneousRate"
+import Animated, { FadeIn } from "react-native-reanimated"
+import GroupSelector from "@/components/ui/GroupSelector"
+import { useSubAccounts } from "../hooks/useSubAccounts"
+import { MaterialCommunityIcons, AntDesign } from "@expo/vector-icons"
+import Color from "color"
+import Ripple from "react-native-material-ripple"
+import Feedback from "react-native-haptic-feedback"
 
 const TYPE_OPTIONS: ["Expense", "Income", "Refund"] = ["Expense", "Income", "Refund"]
 
-const labelToType = (label: string) => (label === "Expense" ? "expense" : label === "Income" ? "income" : "refunded")
+const labelToType = (label: string): "expense" | "income" | "refunded" =>
+    label === "Expense" ? "expense" : label === "Income" ? "income" : "refunded"
 
 const typeToLabel = (type: string | null): "Expense" | "Income" | "Refund" =>
     type === "income" ? "Income" : type === "refunded" ? "Refund" : "Expense"
@@ -32,7 +41,7 @@ const typeToLabel = (type: string | null): "Expense" | "Income" | "Refund" =>
 export default function CreateExpenseModal({ route: { params } }: any) {
     const hookData = useCreateExpensePage(params)
     const [isInputFocused, setIsInputFocused] = useState(false)
-    const subexpenseSheetRef = useRef<BottomSheetModalMethods>(null)
+    const subexpenseSheetRef = useRef<BottomSheetModalMethods | null>(null)
 
     const contextValue: CreateExpenseContextType = {
         ...hookData,
@@ -56,7 +65,7 @@ export default function CreateExpenseModal({ route: { params } }: any) {
                     <GroupSelector
                         options={TYPE_OPTIONS}
                         value={typeToLabel(state.type)}
-                        onChange={(label) => methods.setType(labelToType(label) as any)}
+                        onChange={(label) => methods.setType(labelToType(label))}
                     />
                 </View>
 
@@ -67,23 +76,7 @@ export default function CreateExpenseModal({ route: { params } }: any) {
                 <AmountDisplay />
 
                 <View style={styles.card}>
-                    <View>
-                        <View style={{ flexDirection: "row", gap: 10, marginBottom: 10 }}>
-                            <ExpenseAIMaker initialOpen={params?.shouldOpenPhotoPicker || false} />
-                            <NameInput isEditing={params?.isEditing} />
-                        </View>
-
-                        <OptionsPicker />
-
-                        <View style={{ marginTop: 10 }}>
-                            <CompactNumberPad
-                                onKeyPress={methods.handleAmountChange}
-                                backgroundColor={Colors.primary_lighter}
-                                fontVariant="body"
-                                fontWeight="bold"
-                            />
-                        </View>
-                    </View>
+                    <CardContent params={params} />
                 </View>
 
                 <DateTimePicker
@@ -95,6 +88,64 @@ export default function CreateExpenseModal({ route: { params } }: any) {
                 <SubExpenseSheet />
             </View>
         </CreateExpenseProvider>
+    )
+}
+
+function CardContent({ params }: { params: any }) {
+    const { state, methods } = useCreateExpenseContext()
+    const { view } = state
+
+    if (view === "category") {
+        return (
+            <Animated.View entering={FadeIn} style={{ flex: 1 }}>
+                <CategorySelector
+                    current={state.category}
+                    onPress={(item) => {
+                        methods.setCategory(item as keyof typeof Icons)
+                        methods.setIsSubscription(item === "subscription")
+                        methods.setType("expense")
+                        methods.setView("main")
+                    }}
+                    dismiss={() => {
+                        methods.setCategory("none")
+                        methods.setView("main")
+                    }}
+                />
+            </Animated.View>
+        )
+    }
+
+    if (view === "spontaneous") {
+        return (
+            <Animated.View entering={FadeIn} style={{ flex: 1 }}>
+                <SpontaneousRateSelector onDismiss={() => methods.setView("main")} />
+            </Animated.View>
+        )
+    }
+
+    if (view === "account") {
+        return (
+            <Animated.View entering={FadeIn} style={{ flex: 1 }}>
+                <AccountSelector />
+            </Animated.View>
+        )
+    }
+
+    return (
+        <Animated.View entering={FadeIn} style={{ flex: 1, gap: 5 }}>
+            <View style={{ flexDirection: "row", gap: 10, marginBottom: 10 }}>
+                <ExpenseAIMaker initialOpen={params?.shouldOpenPhotoPicker || false} />
+                <NameInput isEditing={params?.isEditing} />
+            </View>
+
+            <View>
+                <OptionsPicker />
+            </View>
+
+            <View style={{ marginTop: 10, flex: 1 }}>
+                <NumberPad onKeyPress={methods.handleAmountChange} />
+            </View>
+        </Animated.View>
     )
 }
 
@@ -117,6 +168,64 @@ const SaveButton = () => {
     )
 }
 
+function AccountSelector() {
+    const { state, methods } = useCreateExpenseContext()
+    const { subAccountId } = state
+    const { setSubAccountId, setView } = methods
+    const { data: subAccountsData } = useSubAccounts()
+    const subAccounts = subAccountsData?.wallet.subAccounts ?? []
+
+    const entries = [
+        { id: null, name: "Default", icon: "credit-card-outline", color: "rgba(255,255,255,0.6)" },
+        ...subAccounts,
+    ]
+
+    return (
+        <ScrollView showsVerticalScrollIndicator={false} bounces={false}>
+            {entries.map((item) => {
+                const selected = subAccountId === item.id
+                const bg = selected
+                    ? Color(item.color || Colors.primary_lighter).alpha(0.2).string()
+                    : Colors.primary_lighter
+                return (
+                    <Ripple
+                        key={item.id ?? "__default"}
+                        style={[accountStyles.tile, { backgroundColor: bg }]}
+                        onPress={() => {
+                            Feedback.trigger("impactLight")
+                            setSubAccountId(item.id)
+                            setTimeout(() => setView("main"), 200)
+                        }}
+                    >
+                        <MaterialCommunityIcons name={item.icon as any} size={20} color={item.color ?? "rgba(255,255,255,0.6)"} />
+                        <Text style={[accountStyles.tileLabel, { color: selected ? (item.color ?? "rgba(255,255,255,0.85)") : "rgba(255,255,255,0.85)" }]}>
+                            {item.name}
+                        </Text>
+                        {selected && <AntDesign name="check" size={16} color={item.color ?? "rgba(255,255,255,0.6)"} />}
+                    </Ripple>
+                )
+            })}
+        </ScrollView>
+    )
+}
+
+const accountStyles = StyleSheet.create({
+    tile: {
+        flexDirection: "row",
+        alignItems: "center",
+        paddingHorizontal: 15,
+        paddingVertical: 16,
+        borderRadius: 14,
+        gap: 12,
+        marginBottom: 8,
+    },
+    tileLabel: {
+        flex: 1,
+        fontSize: 14,
+        fontWeight: "500",
+    },
+})
+
 const styles = StyleSheet.create({
     root: {
         flex: 1,
@@ -130,7 +239,7 @@ const styles = StyleSheet.create({
         paddingBottom: 30,
         position: "absolute",
         bottom: 0,
-        height: "70%",
+        height: "65%",
         left: 0,
         right: 0,
     },
@@ -139,13 +248,5 @@ const styles = StyleSheet.create({
         top: 15,
         left: 15,
         zIndex: 100,
-    },
-    saveButton: {
-        position: "absolute",
-        top: 15,
-        right: 15,
-        zIndex: 100,
-        padding: 10,
-        borderRadius: 100,
     },
 })
