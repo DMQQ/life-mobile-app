@@ -1,6 +1,6 @@
-import { gql, useQuery } from "@apollo/client"
+import { gql, useApolloClient, useQuery } from "@apollo/client"
 import moment from "moment"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 export interface OccurrenceItem {
     id: string
@@ -95,6 +95,26 @@ export function useRangeEvents(start: string, end: string): CalendarOccurrenceIt
         fetchPolicy: "cache-and-network",
     })
     return data?.occurrences ?? []
+}
+
+export function usePrefetchMonthRange(date: string) {
+    const client = useApolloClient()
+    const monthKey = moment(date).format("YYYY-MM")
+
+    useEffect(() => {
+        Promise.all(
+            [-1, 0, 1].map((offset) => {
+                const ms = moment(date).add(offset, "months").startOf("month")
+                const start = ms.clone().startOf("week").format("YYYY-MM-DD")
+                const end = ms.clone().endOf("month").endOf("week").format("YYYY-MM-DD")
+                return client.query({
+                    query: GET_CALENDAR_OCCURRENCES_QUERY,
+                    variables: { date: start, endDate: end },
+                    fetchPolicy: "network-only",
+                })
+            }),
+        )
+    }, [monthKey])
 }
 
 export default function useGetOccurrencesQuery(date?: string) {

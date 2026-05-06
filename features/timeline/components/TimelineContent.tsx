@@ -90,7 +90,7 @@ export default function TimelineContent({
                         setSelected(date)
                         scrollY.value = withTiming(0, { duration: 250 })
                     }}
-                    contentPaddingTop={dayContentPaddingTop + 15}
+                    contentPaddingTop={200}
                     onScroll={onScroll}
                 />
             ) : switchView === "month" ? (
@@ -109,6 +109,10 @@ export default function TimelineContent({
                     setSelected={setSelected}
                     contentPaddingTop={compactContentPaddingTop}
                     onScroll={onScroll}
+                    onDayPress={(date) => {
+                        setSelected(date)
+                        setSwitchView("day")
+                    }}
                 />
             )}
         </Animated.View>

@@ -3,9 +3,11 @@ import moment from "moment"
 import { memo, useCallback, useMemo, useRef, useEffect, useState } from "react"
 import { ScrollViewProps, View } from "react-native"
 import TimeTable from "react-native-calendar-timetable"
-import Animated from "react-native-reanimated"
+import Animated, { useSharedValue } from "react-native-reanimated"
 import DayTimelineItemWrapper from "./DayTimelineItemWrapper"
 import Color from "color"
+import { Gesture, GestureDetector } from "react-native-gesture-handler"
+import { runOnJS } from "react-native-worklets"
 
 interface TimelineEvent {
     id: string
@@ -42,8 +44,9 @@ const CalendarTimetable = ({
 }: CustomTimelineProps) => {
     const scrollViewRef = useRef<Animated.ScrollView>(null)
     const [headerHeight, setHeaderHeight] = useState(0)
-
-    const HOUR_HEIGHT = 150
+    const [hourHeight, setHourHeight] = useState(60)
+    const hourHeightShared = useSharedValue(60)
+    const hourHeightBase = useSharedValue(60)
 
     const items = useMemo(
         () =>
@@ -75,13 +78,13 @@ const CalendarTimetable = ({
             const targetHour = isToday ? currentHour : minHour !== Infinity ? minHour : 8
 
             scrollViewRef.current?.scrollTo({
-                y: targetHour * HOUR_HEIGHT + headerHeight,
+                y: targetHour * hourHeight + headerHeight,
                 animated: false,
             })
         }, 0)
 
         return () => clearTimeout(timeout)
-    }, [selected, headerHeight, minHour])
+    }, [selected, headerHeight, minHour, hourHeight])
 
     const renderItem = useCallback(
         (props: any) => {
@@ -127,33 +130,49 @@ const CalendarTimetable = ({
         [],
     )
 
-    return (
-        <Animated.ScrollView
-            ref={scrollViewRef}
-            keyboardDismissMode={"on-drag"}
-            style={{ flex: 1, paddingBottom: items?.length > 0 ? 100 : 0, backgroundColor: "transparent" }}
-            onScroll={onScroll}
-            showsVerticalScrollIndicator={false}
-            overScrollMode={"never"}
-            bounces={false}
-            {...listProps}
-        >
-            <View onLayout={(e) => setHeaderHeight(e.nativeEvent.layout.height)}>{children}</View>
+    const updateHourHeight = useCallback((val: number) => {
+        hourHeightShared.value = val
+        setHourHeight(val)
+    }, [])
 
-            <TimeTable
-                date={moment(selected).toDate()}
-                stickyHours
-                style={style}
-                enableSnapping
-                items={items as any}
-                hourHeight={HOUR_HEIGHT}
-                renderItem={renderItem}
-                scrollViewProps={{
-                    horizontal: false,
-                }}
-            />
-            {items?.length > 0 && <View style={{ height: 120 }} />}
-        </Animated.ScrollView>
+    const gesture = Gesture.Pinch()
+        .onStart(() => {
+            hourHeightBase.value = hourHeightShared.value
+        })
+        .onChange((event) => {
+            const next = Math.max(60, Math.min(200, hourHeightBase.value * event.scale))
+            runOnJS(updateHourHeight)(next)
+        })
+
+    return (
+        <GestureDetector gesture={gesture}>
+            <Animated.ScrollView
+                ref={scrollViewRef}
+                keyboardDismissMode={"on-drag"}
+                style={{ flex: 1, paddingBottom: items?.length > 0 ? 100 : 0, backgroundColor: "transparent" }}
+                onScroll={onScroll}
+                showsVerticalScrollIndicator={false}
+                overScrollMode={"never"}
+                bounces={false}
+                {...listProps}
+            >
+                <View onLayout={(e) => setHeaderHeight(e.nativeEvent.layout.height)}>{children}</View>
+
+                <TimeTable
+                    date={moment(selected).toDate()}
+                    stickyHours
+                    style={style}
+                    enableSnapping
+                    items={items as any}
+                    hourHeight={hourHeight}
+                    renderItem={renderItem}
+                    scrollViewProps={{
+                        horizontal: false,
+                    }}
+                />
+                {items?.length > 0 && <View style={{ height: 120 }} />}
+            </Animated.ScrollView>
+        </GestureDetector>
     )
 }
 

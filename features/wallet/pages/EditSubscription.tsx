@@ -1,7 +1,7 @@
-import { IconButton } from "@/components"
 import DatePicker from "@/components/DatePicker"
 import BottomSheet from "@/components/ui/BottomSheet/BottomSheet"
-import GlassView from "@/components/ui/GlassView"
+import IconBackButton from "@/components/ui/Button/IconBackButton"
+import IconSaveButton from "@/components/ui/Button/IconSaveButton"
 import Text from "@/components/ui/Text/Text"
 import Input from "@/components/ui/TextInput/TextInput"
 import Colors from "@/constants/Colors"
@@ -13,7 +13,7 @@ import Color from "color"
 import { useFormik } from "formik"
 import moment from "moment"
 import { useMemo, useRef } from "react"
-import { ActivityIndicator, Keyboard, ScrollView, StyleSheet, TouchableWithoutFeedback, View } from "react-native"
+import { Keyboard, ScrollView, StyleSheet, TouchableWithoutFeedback, View } from "react-native"
 import { Calendar } from "react-native-calendars"
 import type { DateData, MarkedDates } from "react-native-calendars/src/types"
 import Feedback from "react-native-haptic-feedback"
@@ -115,6 +115,7 @@ export default function EditSubscription({ route, navigation }: Props) {
     })
 
     const loading = modifySubscriptionState.loading || createSubscriptionFromInputState.loading
+    const isValid = parseFloat(formik.values.amount) > 0
 
     const animatedAmount = useAnimatedStyle(
         () => ({
@@ -198,12 +199,12 @@ export default function EditSubscription({ route, navigation }: Props) {
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 <View style={{ flex: 1 }}>
                     <View style={styles.container}>
-                        <GlassView style={styles.closeButton}>
-                            <IconButton
-                                onPress={() => navigation.goBack()}
-                                icon={<AntDesign name="close" size={20} color="#fff" />}
-                            />
-                        </GlassView>
+                        <IconBackButton style={styles.closeButton} onPress={() => navigation.goBack()} />
+                        <IconSaveButton
+                            onPress={() => formik.handleSubmit()}
+                            disabled={!isValid || loading}
+                            loading={loading}
+                        />
 
                         <View style={styles.amountContainer}>
                             <Animated.Text style={[styles.amountText, animatedAmount]}>
@@ -231,28 +232,6 @@ export default function EditSubscription({ route, navigation }: Props) {
                                             placeholder="Description"
                                             style={{ flex: 1, width: "100%" }}
                                             containerStyle={{ flex: 1, borderRadius: 20 }}
-                                            right={
-                                                <IconButton
-                                                    onPress={() => formik.handleSubmit()}
-                                                    disabled={loading}
-                                                    icon={
-                                                        <GlassView
-                                                            tintColor={Colors.secondary}
-                                                            style={{ padding: 10, borderRadius: 100 }}
-                                                        >
-                                                            {loading ? (
-                                                                <ActivityIndicator size={20} color="#fff" />
-                                                            ) : (
-                                                                <AntDesign
-                                                                    name={isEdit ? "edit" : "plus"}
-                                                                    size={20}
-                                                                    color="rgba(255,255,255,0.7)"
-                                                                />
-                                                            )}
-                                                        </GlassView>
-                                                    }
-                                                />
-                                            }
                                         />
                                     </View>
 
@@ -342,6 +321,10 @@ export default function EditSubscription({ route, navigation }: Props) {
                                                 onPress={() => {
                                                     Feedback.trigger("impactLight")
                                                     formik.setFieldValue("billingCycle", cycle)
+                                                    if (cycle === "custom") {
+                                                        Keyboard.dismiss()
+                                                        customSheetRef.current?.expand()
+                                                    }
                                                 }}
                                                 style={[
                                                     styles.chip,
@@ -544,8 +527,6 @@ const styles = StyleSheet.create({
         top: 15,
         left: 15,
         zIndex: 100,
-        padding: 10,
-        borderRadius: 100,
     },
     amountContainer: {
         height: 250,

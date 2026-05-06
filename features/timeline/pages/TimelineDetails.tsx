@@ -7,6 +7,7 @@ import Color from "color"
 import { useCallback, useMemo, useState } from "react"
 import { StyleSheet, View } from "react-native"
 import Animated, { useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated"
+import { useSafeAreaInsets } from "react-native-safe-area-context"
 import FileList from "../components/FileList"
 import FloatingBottomToolBar from "../components/FloatingBottomToolBar"
 import LoaderSkeleton from "../components/LoaderSkeleton"
@@ -55,6 +56,8 @@ export default function TimelineDetails({
     const { data, loading } = useGetOccurrenceById(route.params.timelineId)
     const [completeOccurrence] = useCompleteOccurrence(route.params.timelineId)
 
+    const insets = useSafeAreaInsets()
+
     const scrollY = useSharedValue(0)
 
     const onScroll = useAnimatedScrollHandler({
@@ -87,6 +90,17 @@ export default function TimelineDetails({
             isCompleted: data.isCompleted,
         })
     }, [isPending, data])
+
+    const contentPaddingTop = useMemo(() => {
+        const title = data?.title ?? ""
+        const fontSize = title.length > 25 ? 40 : 50
+        const lineHeight = fontSize * 0.95
+        const charsPerLine = Math.floor((Layout.screen.width - 30) / (fontSize * 0.5))
+        const lines = title.length > 0 ? Math.ceil(title.length / charsPerLine) : 1
+        const titleTop = insets.top * 3
+        const breathingRoom = data?.description ? 30 : 15
+        return titleTop + lines * lineHeight + breathingRoom
+    }, [data?.title, data?.description, insets.top])
 
     const [selectedEventForDeletion, setSelectedEventForDeletion] = useState<any | null>(null)
 
@@ -181,7 +195,7 @@ export default function TimelineDetails({
             <Animated.ScrollView
                 keyboardDismissMode={"on-drag"}
                 style={{ padding: 15 }}
-                contentContainerStyle={{ paddingBottom: 100, paddingTop: 225 + data?.title?.length * 3 }}
+                contentContainerStyle={{ paddingBottom: 100, paddingTop: contentPaddingTop }}
                 onScroll={onScroll}
                 showsVerticalScrollIndicator={false}
             >

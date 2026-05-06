@@ -2,24 +2,24 @@ import Header from "@/components/ui/Header/Header"
 import DatePicker, { DatePickerRef } from "@/components/DatePicker"
 import DateList from "@/components/DateList/DateList"
 import Colors from "@/constants/Colors"
-import { AntDesign } from "@expo/vector-icons"
+import { AntDesign, Entypo } from "@expo/vector-icons"
 import dayjs from "dayjs"
 import moment from "moment"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { TouchableOpacity, View } from "react-native"
+import { Pressable, TouchableOpacity, View } from "react-native"
 import { useScreenSearch } from "@/utils/hooks/useScreenSearch"
 import { TimelineScreenLoader } from "../components/LoaderSkeleton"
 import TimelineContent from "../components/TimelineContent"
 import useTimeline from "../hooks/general/useTimeline"
+import { usePrefetchMonthRange } from "../hooks/query/useGetOccurrencesQuery"
 import { TimelineScreenProps } from "../types"
 import Text from "@/components/ui/Text/Text"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
-import Animated, {
-    useSharedValue,
-    withTiming,
-} from "react-native-reanimated"
+import Animated, { withTiming } from "react-native-reanimated"
 import useTrackScroll from "@/utils/hooks/ui/useTrackScroll"
 import Background from "@/components/ui/Background"
+import GlassView from "@/components/ui/GlassView"
+import Antdesign from "@expo/vector-icons/build/AntDesign"
 
 function ViewSwitcher({
     current,
@@ -68,6 +68,7 @@ function ViewSwitcher({
 
 export default function Timeline({ navigation, route }: TimelineScreenProps<"Timeline">) {
     const timeline = useTimeline({ navigation, route })
+    usePrefetchMonthRange(timeline.selected)
     const insets = useSafeAreaInsets()
     const headerHeight = insets.top + 50
     const expandedHeaderHeight = insets.top * 3 + 90
@@ -115,7 +116,7 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
                 : `${ws.format("MMM D")} – ${we.format("MMM D")}`
         }
         if (timeline.switchView === "month") {
-            return dayjs(timeline.selected).format("MMMM YYYY")
+            return dayjs(timeline.selected).format("MMMM")
         }
         return dayjs(timeline.selected).format("DD MMMM")
     }, [timeline.switchView, timeline.selected])
@@ -130,8 +131,7 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
 
             <Header
                 animated={false}
-                containerStyle={{ justifyContent: "flex-end" }}
-                animatedTitle={animatedTitle}
+                containerStyle={{ justifyContent: "space-between" }}
                 onAnimatedTitlePress={() => datePickerRef.current?.open()}
                 buttons={[
                     !isSearchActive
@@ -151,16 +151,30 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
                         standalone: true,
                     },
                 ]}
-                initialTitleFontSize={25}
-                shadow={false}
+                shadow
             >
-                <DatePicker
-                    controlRef={datePickerRef}
-                    mode="single"
-                    dates={{ start: selectedDate, end: selectedDate }}
-                    setDates={(d) => timeline.setSelected(moment(d.start).format("YYYY-MM-DD"))}
-                    buttonComponent={() => <View style={{ width: 0, height: 0 }} />}
-                />
+                <GlassView
+                    style={{
+                        padding: 7.5,
+                        paddingHorizontal: 15,
+                        borderRadius: 100,
+                    }}
+                >
+                    <DatePicker
+                        controlRef={datePickerRef}
+                        mode="single"
+                        dates={{ start: selectedDate, end: selectedDate }}
+                        setDates={(d) => timeline.setSelected(moment(d.start).format("YYYY-MM-DD"))}
+                        buttonComponent={() => (
+                            <Pressable style={{ padding: 5, flexDirection: "row", alignItems: "center", gap: 5 }}>
+                                <Text style={{ fontSize: 20, fontWeight: "bold", color: Colors.foreground }}>
+                                    {animatedTitle}
+                                </Text>
+                                <Entypo color={"#fff"} name="chevron-down" size={25} />
+                            </Pressable>
+                        )}
+                    />
+                </GlassView>
             </Header>
 
             {!isSearchActive && isDayView && (

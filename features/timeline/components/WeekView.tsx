@@ -217,9 +217,10 @@ interface WeekViewProps {
     setSelected: (date: string) => void
     contentPaddingTop: number
     onScroll?: (...args: any[]) => void
+    onDayPress?: (date: string) => void
 }
 
-export default function WeekView({ selectedDate, setSelected, contentPaddingTop, onScroll }: WeekViewProps) {
+export default function WeekView({ selectedDate, setSelected, contentPaddingTop, onScroll, onDayPress }: WeekViewProps) {
     const { bottom } = useSafeAreaInsets()
     const pagerRef = useRef<PagerView>(null)
     const currentWeekStart = moment(selectedDate).startOf("isoWeek").format("YYYY-MM-DD")
@@ -279,7 +280,7 @@ export default function WeekView({ selectedDate, setSelected, contentPaddingTop,
             <WeekDayHeader
                 weekStart={currentWeekStart}
                 selectedDate={selectedDate}
-                onDayPress={setSelected}
+                onDayPress={onDayPress ?? setSelected}
                 paddingTop={contentPaddingTop}
             />
             <PagerView
@@ -295,7 +296,7 @@ export default function WeekView({ selectedDate, setSelected, contentPaddingTop,
                         <WeekPage
                             weekStart={weekStartForPage(globalPage)}
                             selectedDate={selectedDate}
-                            onDayPress={setSelected}
+                            onDayPress={onDayPress ?? setSelected}
                             onScroll={onScroll}
                             bottomPad={bottomPad}
                         />

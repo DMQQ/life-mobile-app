@@ -1,6 +1,7 @@
 import Colors from "@/constants/Colors"
 import { useNavigation } from "@react-navigation/native"
 import { useCallback, useMemo } from "react"
+import dayjs from "dayjs"
 import { Pressable, StyleSheet, View } from "react-native"
 import Color from "color"
 import useRemoveTimelineMutation from "../hooks/mutation/useRemoveTimelineMutation"
@@ -50,18 +51,26 @@ export default function DayTimelineItemWrapper({ item, style, onLongPress }: Day
         })
     }, [isPending, timeline, startActivity])
 
+    const isExpired = useMemo(() => {
+        if (!timeline.date) return false
+        const endRef = timeline.endTime
+            ? dayjs(`${timeline.date} ${timeline.endTime}`, "YYYY-MM-DD HH:mm")
+            : dayjs(timeline.date).endOf("day")
+        return endRef.isBefore(dayjs())
+    }, [timeline.date, timeline.endTime])
+
     const items = useMemo(
         () =>
             [
-                {
+                !isExpired && {
                     systemIcon: "bell",
                     title: isPending ? "Activity pending" : "Start live activity",
                     onPress: startLiveActivityLocally,
                     disabled: isPending,
                 },
-                !timeline.isCompleted && {
-                    systemIcon: "checkmark",
-                    title: "Complete",
+                {
+                    systemIcon: timeline.isCompleted ? "arrow.uturn.backward" : "checkmark",
+                    title: timeline.isCompleted ? "Mark as incomplete" : "Complete",
                     onPress: completeTimeline,
                 },
                 {
@@ -89,7 +98,7 @@ export default function DayTimelineItemWrapper({ item, style, onLongPress }: Day
                     destructive: true,
                 },
             ].filter(Boolean),
-        [completeTimeline, handleCopyPress, isPending, navigation, remove, startLiveActivityLocally, timeline],
+        [completeTimeline, handleCopyPress, isExpired, isPending, navigation, remove, startLiveActivityLocally, timeline],
     )
 
     const onPress = () => {
