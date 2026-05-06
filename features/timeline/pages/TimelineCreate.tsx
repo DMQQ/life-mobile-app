@@ -279,10 +279,10 @@ const SubmitButton = (props: SubmitButtonProps) => (
         <GlassView style={styles.button}>
             <DatePicker
                 mode="single"
-                setDates={({ start }) => props.f.setFieldValue("date", start)}
+                setDates={({ start }) => props.f.setFieldValue("date", dayjs(start).format("YYYY-MM-DD"))}
                 dates={{
-                    start: dayjs(props.f.values.selectedDate).toDate(),
-                    end: dayjs(props.f.values.selectedDate).toDate(),
+                    start: dayjs(props.f.values.date).toDate(),
+                    end: dayjs(props.f.values.date).toDate(),
                 }}
                 buttonComponent={({ start }) => (
                     <Text style={{ color: "#fff", paddingHorizontal: 5 }}>{dayjs(start).format("MMMM D, YYYY")}</Text>

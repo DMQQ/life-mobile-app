@@ -1,6 +1,5 @@
 import * as Updates from "expo-updates"
 import { useCallback, useEffect, useState } from "react"
-import { Alert } from "react-native"
 
 interface UpdateState {
     isChecking: boolean
@@ -25,11 +24,10 @@ export const useExpoUpdates = (autoCheck = false): UseExpoUpdatesReturn => {
         error: null,
     })
 
+    const isReady = Updates.isEnabled && !!Updates.channel
+
     const checkForUpdate = useCallback(async () => {
-        if (!Updates.isEnabled) {
-            setState((prev) => ({ ...prev, error: "Updates not enabled" }))
-            return
-        }
+        if (!isReady) return
 
         setState((prev) => ({ ...prev, isChecking: true, error: null }))
 
@@ -41,20 +39,16 @@ export const useExpoUpdates = (autoCheck = false): UseExpoUpdatesReturn => {
                 isUpdateAvailable: update.isAvailable,
             }))
         } catch (error) {
-            Alert.alert("Update Check Failed", error instanceof Error ? error.message : "Unknown error")
             setState((prev) => ({
                 ...prev,
                 isChecking: false,
                 error: error instanceof Error ? error.message : "Check failed",
             }))
         }
-    }, [])
+    }, [isReady])
 
     const downloadAndRestart = useCallback(async () => {
-        if (!Updates.isEnabled) {
-            setState((prev) => ({ ...prev, error: "Updates not enabled" }))
-            return
-        }
+        if (!isReady) return
 
         setState((prev) => ({ ...prev, isDownloading: true, error: null }))
 
@@ -63,14 +57,13 @@ export const useExpoUpdates = (autoCheck = false): UseExpoUpdatesReturn => {
             setState((prev) => ({ ...prev, isDownloading: false, isUpdatePending: true }))
             await Updates.reloadAsync()
         } catch (error) {
-            Alert.alert("Update Download Failed", error instanceof Error ? error.message : "Unknown error")
             setState((prev) => ({
                 ...prev,
                 isDownloading: false,
                 error: error instanceof Error ? error.message : "Download failed",
             }))
         }
-    }, [])
+    }, [isReady])
 
     const restart = useCallback(async () => {
         try {

@@ -167,10 +167,10 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
                         setDates={(d) => timeline.setSelected(moment(d.start).format("YYYY-MM-DD"))}
                         buttonComponent={() => (
                             <Pressable style={{ padding: 5, flexDirection: "row", alignItems: "center", gap: 5 }}>
-                                <Text style={{ fontSize: 20, fontWeight: "bold", color: Colors.foreground }}>
+                                <Text style={{ fontSize: 19, fontWeight: "500", color: Colors.foreground }}>
                                     {animatedTitle}
                                 </Text>
-                                <Entypo color={"#fff"} name="chevron-down" size={25} />
+                                <Entypo color={"#fff"} name="chevron-down" size={19} />
                             </Pressable>
                         )}
                     />
