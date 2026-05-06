@@ -1,4 +1,4 @@
-import { Alert } from "react-native"
+import { useState } from "react"
 import Haptic from "react-native-haptic-feedback"
 import { useNavigation } from "@react-navigation/native"
 import useRemoveTodoFile from "./mutation/useRemoveTodoFile"
@@ -10,27 +10,20 @@ interface UseFileManagementProps {
 export const useFileManagement = ({ timelineId }: UseFileManagementProps) => {
     const navigation = useNavigation()
     const { removeTodoFile } = useRemoveTodoFile()
+    const [fileToRemove, setFileToRemove] = useState<string | null>(null)
 
-    const handleRemoveFile = (fileId: string) => {
-        Alert.alert("Remove File", "Are you sure you want to remove this file?", [
-            { text: "Cancel", style: "cancel" },
-            {
-                text: "Remove",
-                style: "destructive",
-                onPress: async () => {
-                    try {
-                        await removeTodoFile({
-                            variables: { fileId },
-                            refetchQueries: ["GetTimeline"],
-                        })
-                        Haptic.trigger("impactLight")
-                    } catch (error) {
-                        console.error("Remove file error:", error)
-                        Alert.alert("Error", "Failed to remove file")
-                    }
-                },
-            },
-        ])
+    const confirmRemoveFile = async () => {
+        if (!fileToRemove) return
+        try {
+            await removeTodoFile({
+                variables: { fileId: fileToRemove },
+                refetchQueries: ["GetTimeline"],
+            })
+            Haptic.trigger("impactLight")
+        } catch {
+        } finally {
+            setFileToRemove(null)
+        }
     }
 
     const handleShowPreview = (file: any) => {
@@ -41,7 +34,9 @@ export const useFileManagement = ({ timelineId }: UseFileManagementProps) => {
     }
 
     return {
-        handleRemoveFile,
+        fileToRemove,
+        setFileToRemove,
+        confirmRemoveFile,
         handleShowPreview,
     }
 }

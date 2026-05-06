@@ -1,5 +1,4 @@
 import { useState } from "react"
-import { Alert } from "react-native"
 import * as DocumentPicker from "expo-document-picker"
 import * as ImagePicker from "expo-image-picker"
 import axios from "axios"
@@ -17,13 +16,7 @@ export const useFileUpload = ({ todoId, timelineId }: UseFileUploadProps) => {
     const [uploadingFile, setUploadingFile] = useState(false)
     const client = useApolloClient()
 
-    const handleUploadFile = () => {
-        Alert.alert("Add File", "Choose file type", [
-            { text: "Camera", onPress: handleImageFromCamera },
-            { text: "Photo Library", onPress: handleImageFromLibrary },
-            { text: "Cancel", style: "cancel" },
-        ])
-    }
+    const handleUploadFile = handleImageFromLibrary
 
     const handleImageFromCamera = async () => {
         await ImagePicker.requestCameraPermissionsAsync()
@@ -161,7 +154,6 @@ export const useFileUpload = ({ todoId, timelineId }: UseFileUploadProps) => {
             Haptic.trigger("impactLight")
         } catch (error) {
             console.error("Upload error:", JSON.stringify(error))
-            Alert.alert("Error", "Failed to upload file")
         } finally {
             setUploadingFile(false)
         }

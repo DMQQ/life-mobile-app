@@ -1,4 +1,4 @@
-import { Card } from "@/components"
+import { Card, ConfirmDialog } from "@/components"
 import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
 import { TodoFile, Todos } from "@/types"
@@ -10,7 +10,7 @@ import useCompleteTodo from "../hooks/mutation/useCompleteTodo"
 import useRemoveTodo from "../hooks/mutation/useRemoveTodo"
 import useAddTodoFile from "../hooks/mutation/useAddTodoFile"
 import useRemoveTodoFile from "../hooks/mutation/useRemoveTodoFile"
-import { Ionicons } from "@expo/vector-icons"
+import { Feather } from "@expo/vector-icons"
 import Url from "@/constants/Url"
 import Color from "color"
 import { useFileUpload } from "../hooks/useFileUpload"
@@ -30,7 +30,6 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
         paddingHorizontal: 16,
     },
-
     todoText: {
         marginLeft: 16,
         lineHeight: 24,
@@ -73,12 +72,12 @@ const styles = StyleSheet.create({
     },
 })
 
-const getFileIcon = (type: string) => {
-    if (type.startsWith("image/")) return "image-outline"
-    if (type.includes("pdf")) return "document-text-outline"
-    if (type.includes("video")) return "videocam-outline"
-    if (type.includes("audio")) return "musical-notes-outline"
-    return "document-outline"
+const getFileIcon = (type: string): React.ComponentProps<typeof Feather>["name"] => {
+    if (type.startsWith("image/")) return "image"
+    if (type.includes("pdf")) return "file-text"
+    if (type.includes("video")) return "video"
+    if (type.includes("audio")) return "music"
+    return "file"
 }
 
 export default function TodoItem(todo: Todos & { timelineId: string; index: number }) {
@@ -96,7 +95,7 @@ export default function TodoItem(todo: Todos & { timelineId: string; index: numb
         timelineId: todo.timelineId,
     })
 
-    const { handleRemoveFile, handleShowPreview } = useFileManagement({
+    const { fileToRemove, setFileToRemove, confirmRemoveFile, handleShowPreview } = useFileManagement({
         timelineId: todo.timelineId,
     })
 
@@ -108,57 +107,66 @@ export default function TodoItem(todo: Todos & { timelineId: string; index: numb
     const isLoading = removeLoading || completeLoading || addFileLoading || removeFileLoading || uploadingFile
 
     return (
-        <Card animated entering={FadeInDown.delay(todo.index * 50)} exiting={FadeOutDown} style={{ marginBottom: 15 }}>
-            <View style={styles.todoCard}>
-                <Pressable
-                    style={{ flexDirection: "row", alignItems: "center", flex: 1 }}
-                    onLongPress={handleRemoveTodo}
-                >
-                    <Checkbox
-                        checked={todo.isCompleted}
-                        onPress={completeTodo}
-                        size={28}
-                        loading={completeLoading}
-                        disabled={isLoading}
-                    />
+        <>
+            <Card animated entering={FadeInDown.delay(todo.index * 50)} exiting={FadeOutDown} style={{ marginBottom: 15 }}>
+                <View style={styles.todoCard}>
+                    <Pressable
+                        style={{ flexDirection: "row", alignItems: "center", flex: 1 }}
+                        onLongPress={handleRemoveTodo}
+                    >
+                        <Checkbox
+                            checked={todo.isCompleted}
+                            onPress={completeTodo}
+                            size={28}
+                            loading={completeLoading}
+                            disabled={isLoading}
+                        />
 
-                    <View style={{ flex: 1, gap: 5 }}>
-                        <Text
-                            variant="subtitle"
-                            color={todo.isCompleted ? Colors.secondary_light_1 : Colors.text_light}
-                            style={[styles.todoText, todo.isCompleted && styles.completedText]}
-                        >
-                            {todo.title.trim()}
-                        </Text>
+                        <View style={{ flex: 1, gap: 5 }}>
+                            <Text
+                                variant="subtitle"
+                                color={todo.isCompleted ? Colors.secondary_light_1 : Colors.text_light}
+                                style={[styles.todoText, todo.isCompleted && styles.completedText]}
+                            >
+                                {todo.title.trim()}
+                            </Text>
 
-                        <Text
-                            variant="caption"
-                            color={Colors.text_dark}
-                            style={{ fontSize: 12, marginLeft: styles.todoText.marginLeft }}
-                        >
-                            {dayjs(todo.modifiedAt).format("HH:mm - DD/MM")}
-                        </Text>
-                    </View>
-                </Pressable>
-                {todo.files && todo.files.length > 0 ? (
-                    <FilesList
-                        files={todo.files || []}
-                        handleShowPreview={handleShowPreview}
-                        handleRemoveFile={handleRemoveFile}
-                    />
-                ) : (
-                    <UploadButton onPress={handleUploadFile} disabled={isLoading} />
-                )}
-            </View>
-        </Card>
+                            <Text
+                                variant="caption"
+                                color={Colors.text_dark}
+                                style={{ fontSize: 12, marginLeft: styles.todoText.marginLeft }}
+                            >
+                                {dayjs(todo.modifiedAt).format("HH:mm - DD/MM")}
+                            </Text>
+                        </View>
+                    </Pressable>
+                    {todo.files && todo.files.length > 0 ? (
+                        <FilesList
+                            files={todo.files || []}
+                            handleShowPreview={handleShowPreview}
+                            handleRemoveFile={setFileToRemove}
+                        />
+                    ) : (
+                        <UploadButton onPress={handleUploadFile} disabled={isLoading} />
+                    )}
+                </View>
+            </Card>
+
+            <ConfirmDialog
+                isVisible={!!fileToRemove}
+                onDismiss={() => setFileToRemove(null)}
+                onConfirm={confirmRemoveFile}
+                title="Remove File"
+                description="Are you sure you want to remove this file?"
+                destructive
+            />
+        </>
     )
 }
 
 interface FilesListProps {
     files: TodoFile[]
-
     handleShowPreview: (file: any) => void
-
     handleRemoveFile: (fileId: string) => void
 }
 
@@ -186,7 +194,7 @@ const FilesList = ({ files, handleShowPreview, handleRemoveFile }: FilesListProp
                             />
                         ) : (
                             <View style={styles.fileIcon}>
-                                <Ionicons name={getFileIcon(file.type) as any} size={24} color={Colors.secondary} />
+                                <Feather name={getFileIcon(file.type)} size={24} color={Colors.secondary} />
                             </View>
                         )}
                     </TouchableOpacity>

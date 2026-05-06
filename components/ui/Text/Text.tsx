@@ -9,63 +9,73 @@ export interface TextProps extends Omit<RNTextProps, "style"> {
     style?: StyleProp<TextStyle>
 }
 
-const getVariantStyles = (variant: TextVariant): TextStyle => {
-    switch (variant) {
-        case "heading":
-            return {
-                fontSize: 60,
-                fontWeight: "bold",
-                color: Colors.foreground,
-                letterSpacing: 1,
-            }
-        case "title":
-            return {
-                fontSize: Sizing.heading,
-                fontWeight: "600",
-                color: Colors.foreground,
-                letterSpacing: 0.5,
-            }
-        case "subheading":
-            return {
-                fontSize: Sizing.subHead,
-                fontWeight: "600",
-                color: Colors.text_light,
-            }
-        case "subtitle":
-            return {
-                fontSize: 16,
-                fontWeight: "500",
-                color: Colors.foreground_secondary,
-                opacity: 0.8,
-            }
-        case "body":
-            return {
-                fontSize: Sizing.text,
-                fontWeight: "400",
-                color: Colors.foreground,
-            }
-        case "caption":
-            return {
-                fontSize: Sizing.tooltip,
-                fontWeight: "400",
-                color: Colors.foreground_secondary,
-            }
-        default:
-            return {
-                fontSize: Sizing.text,
-                fontWeight: "400",
-                color: Colors.foreground,
-            }
-    }
+const variantStyles: Record<TextVariant, TextStyle> = {
+    heading: {
+        fontSize: 60,
+        fontWeight: "bold",
+        color: Colors.foreground,
+        letterSpacing: 1,
+    },
+    title: {
+        fontSize: Sizing.heading,
+        fontWeight: "600",
+        color: Colors.foreground,
+        letterSpacing: 0.5,
+    },
+    subheading: {
+        fontSize: Sizing.subHead,
+        fontWeight: "600",
+        color: Colors.text_light,
+    },
+    subtitle: {
+        fontSize: 16,
+        fontWeight: "500",
+        color: Colors.foreground_secondary,
+        opacity: 0.8,
+    },
+    body: {
+        fontSize: Sizing.text,
+        fontWeight: "400",
+        color: Colors.foreground,
+    },
+    caption: {
+        fontSize: Sizing.tooltip,
+        fontWeight: "400",
+        color: Colors.foreground_secondary,
+    },
 }
 
 export default function Text({ variant = "body", color, style, children, ...props }: TextProps) {
-    const variantStyles = getVariantStyles(variant)
-    const colorStyle = color ? { color } : {}
-
     return (
-        <RNText style={[variantStyles, colorStyle, style]} {...props}>
+        <RNText
+            style={[variantStyles[variant], color ? { color } : undefined, style]}
+            {...props}
+        >
             {children}
         </RNText>
     )
+}
+
+export function Heading({ style, ...props }: Omit<TextProps, "variant">) {
+    return <Text variant="heading" style={style} {...props} />
+}
+
+export function Title({ style, ...props }: Omit<TextProps, "variant">) {
+    return <Text variant="title" style={style} {...props} />
+}
+
+export function SubHeading({ style, ...props }: Omit<TextProps, "variant">) {
+    return <Text variant="subheading" style={style} {...props} />
+}
+
+export function Subtitle({ style, ...props }: Omit<TextProps, "variant">) {
+    return <Text variant="subtitle" style={style} {...props} />
+}
+
+export function Body({ style, ...props }: Omit<TextProps, "variant">) {
+    return <Text variant="body" style={style} {...props} />
+}
+
+export function Caption({ style, ...props }: Omit<TextProps, "variant">) {
+    return <Text variant="caption" style={style} {...props} />
 }

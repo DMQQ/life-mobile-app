@@ -1,15 +1,14 @@
 import Text from "@/components/ui/Text/Text"
 import { useState, useMemo } from "react"
-import { View, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator, Alert, TextInput } from "react-native"
-import { useRoute, useNavigation } from "@react-navigation/native"
+import { View, StyleSheet, TouchableOpacity, FlatList, TextInput } from "react-native"
 import useGetOccurrencesQuery, { OccurrenceItem } from "../hooks/query/useGetOccurrencesQuery"
 import useTransferTodos from "../hooks/mutation/useTransferTodos"
 import Colors from "@/constants/Colors"
-import { Ionicons } from "@expo/vector-icons"
+import { Feather } from "@expo/vector-icons"
 import moment from "moment"
 import DatePicker from "@/components/DatePicker"
 import lowOpacity from "@/utils/functions/lowOpacity"
-import { Button } from "@/components"
+import { Button, ModalHeader, LoadingOverlay, EmptyState } from "@/components"
 
 interface TodosTransferModalParams {
     todos: any[]
@@ -28,9 +27,7 @@ export default function TodosTransferModal({ route, navigation }: any) {
     const availableTimelines = useMemo(() => {
         const filtered = data?.occurrences?.filter((t) => t.id !== sourceTimelineId) || []
 
-        if (!searchQuery.trim()) {
-            return filtered
-        }
+        if (!searchQuery.trim()) return filtered
 
         return filtered.filter(
             (timeline) =>
@@ -40,22 +37,16 @@ export default function TodosTransferModal({ route, navigation }: any) {
     }, [data?.occurrences, sourceTimelineId, searchQuery])
 
     const [targetTimelineId, setTargetTimelineId] = useState<string>("")
-    const [transferTodos, transferState] = useTransferTodos(sourceTimelineId, targetTimelineId)
+    const [transferTodos] = useTransferTodos(sourceTimelineId, targetTimelineId)
 
     const handleTransfer = async () => {
         setTransferring(true)
         try {
-            try {
-                await transferTodos()
-                await new Promise((resolve) => setTimeout(resolve, 500))
-                navigation.navigate("TimelineDetails", { timelineId: targetTimelineId })
-            } catch (error) {
-                Alert.alert("Error", "Failed to transfer todos")
-            } finally {
-                setTransferring(false)
-            }
-        } catch (error) {
-            Alert.alert("Error", "Failed to transfer todos")
+            await transferTodos()
+            await new Promise((resolve) => setTimeout(resolve, 500))
+            navigation.navigate("TimelineDetails", { timelineId: targetTimelineId })
+        } catch {
+        } finally {
             setTransferring(false)
         }
     }
@@ -99,15 +90,17 @@ export default function TodosTransferModal({ route, navigation }: any) {
                     </Text>
                 </View>
             </View>
-            <Ionicons name="chevron-forward" size={20} color={Colors.text_dark} />
+            <Feather name="chevron-right" size={20} color={Colors.text_dark} />
         </TouchableOpacity>
     )
 
     return (
         <View style={styles.container}>
+            <ModalHeader title="Transfer Todos" onClose={() => navigation.goBack()} />
+
             <View style={styles.dateNavigator}>
                 <TouchableOpacity style={styles.dateButton} onPress={() => changeDate("prev")}>
-                    <Ionicons name="chevron-back" size={24} color={Colors.secondary} />
+                    <Feather name="chevron-left" size={24} color={Colors.secondary} />
                 </TouchableOpacity>
 
                 <View style={styles.datePickerContainer}>
@@ -126,13 +119,13 @@ export default function TodosTransferModal({ route, navigation }: any) {
                 </View>
 
                 <TouchableOpacity style={styles.dateButton} onPress={() => changeDate("next")}>
-                    <Ionicons name="chevron-forward" size={24} color={Colors.secondary} />
+                    <Feather name="chevron-right" size={24} color={Colors.secondary} />
                 </TouchableOpacity>
             </View>
 
             <View style={styles.searchContainer}>
                 <View style={styles.searchInputContainer}>
-                    <Ionicons name="search" size={20} color={Colors.text_dark} style={styles.searchIcon} />
+                    <Feather name="search" size={20} color={Colors.text_dark} style={styles.searchIcon} />
                     <TextInput
                         style={styles.searchInput}
                         placeholder="Search timelines..."
@@ -145,32 +138,15 @@ export default function TodosTransferModal({ route, navigation }: any) {
             </View>
 
             {loading ? (
-                <View style={styles.loadingContainer}>
-                    <ActivityIndicator size="large" color={Colors.secondary} />
-                    <Text variant="body" color={Colors.foreground_secondary} style={{ marginTop: 10 }}>
-                        Loading timelines...
-                    </Text>
-                </View>
+                <EmptyState icon="loader" title="Loading timelines..." />
             ) : error ? (
-                <View style={styles.errorContainer}>
-                    <Text variant="body" color={Colors.error}>
-                        Error loading timelines
-                    </Text>
-                </View>
+                <EmptyState icon="alert-circle" title="Error loading timelines" description="Try a different date" />
             ) : availableTimelines?.length === 0 ? (
-                <View style={styles.emptyContainer}>
-                    <Ionicons
-                        name={searchQuery ? "search-outline" : "calendar-outline"}
-                        size={48}
-                        color={Colors.text_dark}
-                    />
-                    <Text variant="body" color={Colors.foreground_secondary} style={{ marginTop: 10 }}>
-                        {searchQuery ? "No timelines match your search" : "No timelines available for this date"}
-                    </Text>
-                    <Text variant="caption" color={Colors.text_dark} style={{ marginTop: 5 }}>
-                        {searchQuery ? "Try a different search term" : "Try selecting a different date"}
-                    </Text>
-                </View>
+                <EmptyState
+                    icon={searchQuery ? "search" : "calendar"}
+                    title={searchQuery ? "No timelines match your search" : "No timelines available"}
+                    description={searchQuery ? "Try a different search term" : "Try selecting a different date"}
+                />
             ) : (
                 <FlatList
                     data={availableTimelines}
@@ -181,22 +157,15 @@ export default function TodosTransferModal({ route, navigation }: any) {
                 />
             )}
 
-            {transferring && (
-                <View style={styles.transferringOverlay}>
-                    <ActivityIndicator size="large" color={Colors.secondary} />
-                    <Text variant="body" color={Colors.foreground} style={{ marginTop: 10 }}>
-                        Transferring todos...
-                    </Text>
-                </View>
-            )}
-
             {targetTimelineId && (
-                <View style={{ padding: 15, marginBottom: 15 }}>
-                    <Button style={{ borderRadius: 100 }} onPress={handleTransfer}>
+                <View style={styles.actionContainer}>
+                    <Button style={styles.transferButton} onPress={handleTransfer}>
                         Transfer to Selected Timeline
                     </Button>
                 </View>
             )}
+
+            <LoadingOverlay visible={transferring} label="Transferring todos..." />
         </View>
     )
 }
@@ -205,18 +174,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: Colors.primary,
-    },
-    header: {
-        padding: 20,
-        paddingBottom: 10,
-        backgroundColor: Colors.primary_dark,
-    },
-    title: {
-        marginBottom: 5,
-        color: Colors.text_light,
-    },
-    subtitle: {
-        marginBottom: 0,
     },
     dateNavigator: {
         flexDirection: "row",
@@ -235,10 +192,6 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: "center",
         justifyContent: "center",
-    },
-    currentDate: {
-        textAlign: "center",
-        color: Colors.text_light,
     },
     searchContainer: {
         paddingHorizontal: 20,
@@ -263,9 +216,6 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: Colors.text_light,
         paddingVertical: 5,
-    },
-    clearButton: {
-        marginLeft: 10,
     },
     timelineList: {
         flex: 1,
@@ -295,33 +245,11 @@ const styles = StyleSheet.create({
     timelineStats: {
         marginTop: 5,
     },
-    loadingContainer: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: Colors.primary,
+    actionContainer: {
+        padding: 15,
+        marginBottom: 15,
     },
-    errorContainer: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: Colors.primary,
-    },
-    emptyContainer: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        paddingHorizontal: 40,
-        backgroundColor: Colors.primary,
-    },
-    transferringOverlay: {
-        position: "absolute",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: Colors.primary + "CC", // 80% opacity
-        justifyContent: "center",
-        alignItems: "center",
+    transferButton: {
+        borderRadius: 100,
     },
 })

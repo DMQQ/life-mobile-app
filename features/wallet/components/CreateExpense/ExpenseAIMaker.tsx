@@ -5,7 +5,7 @@ import Color from "color"
 import { BlurView } from "expo-blur"
 import { LinearGradient } from "expo-linear-gradient"
 import { useEffect } from "react"
-import { Alert, Pressable, StyleSheet, Text, View } from "react-native"
+import { Pressable, StyleSheet, Text, View } from "react-native"
 import Animated, {
     Easing,
     FadeIn,
@@ -528,12 +528,7 @@ export default function ExpenseAIMaker({ initialOpen }: { initialOpen?: boolean 
     const handleImagePick = async () => {
         const { status } = await ImagePicker.requestCameraPermissionsAsync()
 
-        if (status !== "granted") {
-            Alert.alert("Camera Permission Required", "Please allow camera access to take photos of your expenses.", [
-                { text: "OK" },
-            ])
-            return
-        }
+        if (status !== "granted") return
 
         const result = await (__DEV__
             ? ImagePicker.launchImageLibraryAsync({

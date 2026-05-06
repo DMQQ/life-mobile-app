@@ -2,11 +2,12 @@ import Colors from "@/constants/Colors"
 import { navigationRef } from "@/navigation"
 import moment from "moment"
 import { useCallback, useMemo } from "react"
-import { StyleProp, StyleSheet, Text, View, ViewStyle, Pressable } from "react-native"
+import { StyleProp, StyleSheet, View, ViewStyle, Pressable } from "react-native"
 import { OccurrenceItem } from "../hooks/query/useGetOccurrencesQuery"
 import timelineStyles from "./timeline.styles"
 import TodosPreviewSection from "./TodosPreviewSection"
-import { Card } from "@/components"
+import { Card, StatusBadge } from "@/components"
+import Text from "@/components/ui/Text/Text"
 import useRemoveTimelineMutation from "../hooks/mutation/useRemoveTimelineMutation"
 import { useActivityUtils } from "@/utils/hooks/useActivityManager"
 import useCompleteOccurrence from "../hooks/mutation/useCompleteOccurrence"
@@ -217,23 +218,18 @@ export default function TimelineItem(
                         </View>
                     </View>
 
-                    <View style={{ flexDirection: "row", justifyContent: "flex-end", alignItems: "center", gap: 5 }}>
+                    <View style={styles.badges}>
                         {timeline.priority != null && (
-                            <View style={[styles.statusBadge, { backgroundColor: priorityColor(timeline.priority) }]}>
-                                <Text style={timelineStyles.status}>{priorityLabel(timeline.priority)}</Text>
-                            </View>
+                            <StatusBadge
+                                variant={
+                                    timeline.priority >= 7 ? "high" : timeline.priority >= 4 ? "med" : "low"
+                                }
+                            />
                         )}
-                        <View
-                            style={[
-                                styles.statusBadge,
-                                timeline.isCompleted && styles.statusCompleted,
-                                isExpired && styles.statusExpired,
-                            ]}
-                        >
-                            <Text style={timelineStyles.status}>
-                                {timeline.isCompleted ? "Finished" : isExpired ? "Late" : "To do"}
-                            </Text>
-                        </View>
+                        <StatusBadge
+                            variant={timeline.isCompleted ? "done" : isExpired ? "late" : "todo"}
+                            label={timeline.isCompleted ? "Finished" : isExpired ? "Late" : "To do"}
+                        />
                     </View>
                 </Card>
             </Pressable>
@@ -262,37 +258,10 @@ const styles = StyleSheet.create({
     contentContainer: {
         flex: 1,
     },
-    statusBadge: {
-        backgroundColor: Colors.secondary,
-        padding: 2.5,
-        paddingHorizontal: 10,
-        borderRadius: 100,
-        marginLeft: 2.5,
-        alignSelf: "flex-end",
-    },
-    statusCompleted: {
-        backgroundColor: "lightgreen",
-    },
-    statusExpired: {
-        backgroundColor: "#BA4343",
-    },
-    copyButton: {
-        borderRadius: 8,
-        padding: 6,
+    badges: {
         flexDirection: "row",
+        justifyContent: "flex-end",
         alignItems: "center",
-        gap: 4,
-    },
-    copyButtonDisabled: {
-        opacity: 0.6,
-        elevation: 0,
-        shadowOpacity: 0,
-    },
-    copyIcon: {
-        fontSize: 12,
-    },
-    copyText: {
-        fontSize: 12,
-        fontWeight: "600",
+        gap: 5,
     },
 })

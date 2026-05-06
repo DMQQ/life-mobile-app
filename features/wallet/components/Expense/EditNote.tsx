@@ -1,7 +1,8 @@
 import { Expense as ExpenseType } from "@/types"
-import { AntDesign, Feather } from "@expo/vector-icons"
+import { Feather } from "@expo/vector-icons"
 import { useState } from "react"
-import { Alert, StyleSheet, Text, View } from "react-native"
+import { StyleSheet, View } from "react-native"
+import Text from "@/components/ui/Text/Text"
 import { IconButton } from "@/components"
 import Colors from "@/constants/Colors"
 import Input from "@/components/ui/TextInput/TextInput"
@@ -28,7 +29,6 @@ export default function EditNote({ expense }: { expense: ExpenseType }) {
             })
         } catch (error) {
             console.error("Error updating note:", error)
-            Alert.alert("Error", "Failed to update note. Please try again.")
         }
     }
 
@@ -49,7 +49,7 @@ export default function EditNote({ expense }: { expense: ExpenseType }) {
                     }}
                     right={
                         <IconButton
-                            icon={<AntDesign name="check" size={20} color={Colors.secondary} />}
+                            icon={<Feather name="check" size={20} color={Colors.secondary} />}
                             onPress={() => {
                                 handleUpdateNote(text)
                                 setIsEditing(false)
@@ -58,7 +58,7 @@ export default function EditNote({ expense }: { expense: ExpenseType }) {
                     }
                 />
             ) : (
-                <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>{expense.note || "-"}</Text>
+                <Text variant="body" style={{ color: Colors.secondary_light_2 }}>{expense.note || "-"}</Text>
             )}
         </View>
     )
