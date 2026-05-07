@@ -32,48 +32,31 @@ const transformEventForWidget = (event: OccurrenceItem): WidgetTimelineEvent => 
 })
 
 export const useWidgetTimelineData = () => {
-    const todayQuery = useQuery<{ occurrences: OccurrenceItem[] }>(GET_OCCURRENCES_QUERY, {
-        variables: { date: moment().format("YYYY-MM-DD") },
-    })
-
-    const tomorrowQuery = useQuery<{ occurrences: OccurrenceItem[] }>(GET_OCCURRENCES_QUERY, {
-        variables: { date: moment().add(1, "day").format("YYYY-MM-DD") },
-    })
-
-    const dayAfterQuery = useQuery<{ occurrences: OccurrenceItem[] }>(GET_OCCURRENCES_QUERY, {
-        variables: { date: moment().add(2, "days").format("YYYY-MM-DD") },
+    const { data } = useQuery<{ occurrences: OccurrenceItem[] }>(GET_OCCURRENCES_QUERY, {
+        variables: {
+            date: moment().format("YYYY-MM-DD"),
+            endDate: moment().add(2, "days").format("YYYY-MM-DD"),
+        },
     })
 
     useEffect(() => {
-        const allEvents: OccurrenceItem[] = [
-            ...(todayQuery.data?.occurrences || []),
-            ...(tomorrowQuery.data?.occurrences || []),
-            ...(dayAfterQuery.data?.occurrences || []),
-        ]
+        const allEvents: OccurrenceItem[] = data?.occurrences || []
 
         if (allEvents.length === 0) return
 
-        // Each occurrence has a unique id — no deduplication needed, but guard against duplicates
-        const seen = new Set<string>()
-        const uniqueEvents = allEvents.filter((event) => {
-            if (seen.has(event.id)) return false
-            seen.add(event.id)
-            return true
-        })
-
-        const sortedEvents = uniqueEvents.sort((a, b) => {
+        const sortedEvents = [...allEvents].sort((a, b) => {
             const dateA = moment(`${a.date} ${a.beginTime}`)
             const dateB = moment(`${b.date} ${b.beginTime}`)
             return dateA.isBefore(dateB) ? -1 : 1
         })
 
         const recentEvents = sortedEvents.slice(0, 8).map(transformEventForWidget)
-        const completedEvents = uniqueEvents.filter((event) => event.isCompleted).length
+        const completedEvents = allEvents.filter((event) => event.isCompleted).length
 
         const widgetData: WidgetTimelineData = {
             events: recentEvents,
             selectedDate: moment().format("YYYY-MM-DD"),
-            totalEvents: uniqueEvents.length,
+            totalEvents: allEvents.length,
             completedEvents,
             lastUpdated: new Date().toISOString(),
         }
@@ -81,15 +64,14 @@ export const useWidgetTimelineData = () => {
         const serialized = JSON.stringify(widgetData)
         store.set("timeline_data", serialized)
 
-        console.log("Widget timeline data updated:", widgetData)
         ExtensionStorage.reloadWidget()
-        console.log("[Watch] isWatchAvailable:", isWatchAvailable())
+
         if (isWatchAvailable()) {
             sendDataToWatch({ timeline_data: serialized, reload_widget: true })
                 .then((r) => console.log("[Watch] sendDataToWatch result:", r))
                 .catch((e) => console.log("[Watch] sendDataToWatch error:", e))
         }
-    }, [todayQuery.data, tomorrowQuery.data, dayAfterQuery.data])
+    }, [data])
 }
 
 export default useWidgetTimelineData

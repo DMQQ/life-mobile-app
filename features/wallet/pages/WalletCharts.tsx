@@ -217,21 +217,9 @@ function WalletCharts({ navigation }: any) {
                             dispatch({ type: "SET_DATE_MAX", payload: dayjs(end).format("YYYY-MM-DD") })
                             dispatch({ type: "SET_DATE_MIN", payload: dayjs(start).format("YYYY-MM-DD") })
                         }}
-                        buttonComponent={() => (
-                            <IconButton
-                                icon={<MaterialIcons name="date-range" size={20} color={Colors.foreground} />}
-                            />
-                        )}
+                        iconButton
                     />
                 ),
-            },
-            {
-                icon: <Ionicons name="sparkles" size={20} color={Colors.secondary} />,
-                onPress: () =>
-                    navigation.navigate("AiStatsChat", {
-                        startDate: filters.date.from,
-                        endDate: filters.date.to,
-                    }),
             },
         ],
         [chartType, filters.date.from, filters.date.to, navigation],

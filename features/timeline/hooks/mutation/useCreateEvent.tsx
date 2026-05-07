@@ -7,6 +7,7 @@ import * as Yup from "yup"
 import { CREATE_EVENT } from "../schemas/schemas"
 import { GET_MONTHLY_OCCURRENCES } from "../general/useTimeline"
 import { GET_MAIN_SCREEN, getMainScreenBaseVariables } from "@/utils/schemas/GET_MAIN_SCREEN"
+import { useMemo } from "react"
 
 const initialValues = {
     title: "",
@@ -57,7 +58,7 @@ export default function useCreateEvent(props: { selectedDate: string }) {
                         beginTime: input.begin,
                         endTime: input.end,
                         tags: input.tags,
-                        date: props.selectedDate,
+                        date: input.date,
                         priority: input.priority,
                         todos: input.todos ?? [],
                     },
@@ -69,7 +70,8 @@ export default function useCreateEvent(props: { selectedDate: string }) {
                             startDate: props.selectedDate,
                             ...(input.repeatType && {
                                 repeatType: input.repeatType,
-                                repeatDaysOfWeek: input.repeatDaysOfWeek.length > 0 ? input.repeatDaysOfWeek : undefined,
+                                repeatDaysOfWeek:
+                                    input.repeatDaysOfWeek.length > 0 ? input.repeatDaysOfWeek : undefined,
                                 repeatInterval: parseInt(input.repeatInterval) || 1,
                                 repeatUntil: input.repeatUntil || undefined,
                             }),
@@ -106,5 +108,13 @@ export default function useCreateEvent(props: { selectedDate: string }) {
         navigation.goBack()
     }
 
-    return { initialValues, handleSubmit, validationSchema, state }
+    const initialValuesMemo = useMemo<InitialValuesType>(
+        () => ({
+            ...initialValues,
+            date: props.selectedDate as string,
+        }),
+        [props.selectedDate],
+    )
+
+    return { initialValues: initialValuesMemo, handleSubmit, validationSchema, state }
 }

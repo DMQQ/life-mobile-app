@@ -6,9 +6,9 @@ import Layout from "@/constants/Layout"
 import { AntDesign, MaterialIcons } from "@expo/vector-icons"
 import BottomSheetType, { BottomSheetView, BottomSheetBackdrop } from "@gorhom/bottom-sheet"
 import { forwardRef, memo, useCallback, useImperativeHandle, useRef, useState } from "react"
-import { StyleSheet, TouchableOpacity, View, useWindowDimensions } from "react-native"
+import { StyleSheet, View, useWindowDimensions } from "react-native"
 import Ripple from "react-native-material-ripple"
-import DateTimePicker from "react-native-modal-datetime-picker"
+import DatePicker, { type DatePickerRef } from "@/components/DatePicker"
 import Text from "@/components/ui/Text/Text"
 import dayjs from "dayjs"
 
@@ -103,11 +103,10 @@ const CreateRepeatableTimeline = forwardRef<BottomSheetType, CreateRepeatableTim
     useImperativeHandle(ref, () => sheetRef.current as BottomSheetType)
 
     const [local, setLocal] = useState({ ...EMPTY_LOCAL })
-    const [showDatePicker, setShowDatePicker] = useState(false)
+    const datePickerRef = useRef<DatePickerRef>(null)
     const appliedRef = useRef(false)
 
-    const set = (key: keyof typeof EMPTY_LOCAL, value: any) =>
-        setLocal((prev) => ({ ...prev, [key]: value }))
+    const set = (key: keyof typeof EMPTY_LOCAL, value: any) => setLocal((prev) => ({ ...prev, [key]: value }))
 
     const onExpand = useCallback(() => {
         appliedRef.current = false
@@ -142,10 +141,7 @@ const CreateRepeatableTimeline = forwardRef<BottomSheetType, CreateRepeatableTim
 
     const toggleDayOfWeek = (day: number) => {
         const current: number[] = local.repeatDaysOfWeek || []
-        set(
-            "repeatDaysOfWeek",
-            current.includes(day) ? current.filter((d) => d !== day) : [...current, day],
-        )
+        set("repeatDaysOfWeek", current.includes(day) ? current.filter((d) => d !== day) : [...current, day])
     }
 
     const intervalButtons = new Array(7).fill(0).map((_, i) => ({ text: `${i + 1}`, value: `${i + 1}` }))
@@ -185,7 +181,10 @@ const CreateRepeatableTimeline = forwardRef<BottomSheetType, CreateRepeatableTim
                                 style={[styles.action_button, { backgroundColor: Colors.primary_lighter }]}
                             >
                                 <AntDesign name="close" size={14} color={Colors.foreground_secondary} />
-                                <Text variant="caption" style={{ fontWeight: "700", color: Colors.foreground_secondary }}>
+                                <Text
+                                    variant="caption"
+                                    style={{ fontWeight: "700", color: Colors.foreground_secondary }}
+                                >
                                     CANCEL
                                 </Text>
                             </Ripple>
@@ -314,36 +313,12 @@ const CreateRepeatableTimeline = forwardRef<BottomSheetType, CreateRepeatableTim
                                 Repeat until
                             </Text>
                         </View>
-                        <TouchableOpacity
-                            onPress={() => setShowDatePicker(true)}
-                            style={{
-                                backgroundColor: Colors.primary_lighter,
-                                borderRadius: 8,
-                                paddingVertical: 10,
-                                paddingHorizontal: 14,
-                                flexDirection: "row",
-                                alignItems: "center",
-                                gap: 8,
-                            }}
-                        >
-                            <AntDesign name="calendar" size={16} color={Colors.secondary} />
-                            <Text
-                                variant="body"
-                                color={local.repeatUntil ? Colors.foreground : Colors.foreground_secondary}
-                            >
-                                {local.repeatUntil ? dayjs(local.repeatUntil).format("MMM D, YYYY") : "Select end date"}
-                            </Text>
-                        </TouchableOpacity>
-                        <DateTimePicker
-                            mode="date"
-                            isDarkModeEnabled
-                            isVisible={showDatePicker}
-                            date={repeatUntilDate}
-                            onConfirm={(date) => {
-                                set("repeatUntil", dayjs(date).format("YYYY-MM-DD"))
-                                setShowDatePicker(false)
-                            }}
-                            onCancel={() => setShowDatePicker(false)}
+                        <DatePicker
+                            controlRef={datePickerRef}
+                            mode="single"
+                            placeholder={local.repeatUntil ? dayjs(local.repeatUntil).format("MMM D, YYYY") : "Select end date"}
+                            dates={{ start: repeatUntilDate, end: repeatUntilDate }}
+                            setDates={({ start }) => set("repeatUntil", dayjs(start).format("YYYY-MM-DD"))}
                         />
                     </View>
                 </View>

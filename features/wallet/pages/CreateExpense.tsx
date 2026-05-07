@@ -3,7 +3,7 @@ import useCreateExpensePage from "@/features/wallet/hooks/useCreateExpensePage"
 import moment from "moment"
 import { useEffect, useRef, useState } from "react"
 import { ScrollView, StyleSheet, Text, View } from "react-native"
-import DateTimePicker from "react-native-modal-datetime-picker"
+import DateTimePicker from "@react-native-community/datetimepicker"
 import AmountDisplay from "../components/CreateExpense/AmountDisplay"
 import ExpenseAIMaker from "../components/CreateExpense/ExpenseAIMaker"
 import NameInput from "../components/CreateExpense/NameInput"
@@ -79,11 +79,19 @@ export default function CreateExpenseModal({ route: { params } }: any) {
                     <CardContent params={params} />
                 </View>
 
-                <DateTimePicker
-                    isVisible={typeof state.date !== "string"}
-                    onConfirm={(date) => methods.setDate(moment(date).format("YYYY-MM-DD"))}
-                    onCancel={() => methods.setDate(moment().format("YYYY-MM-DD"))}
-                />
+                {typeof state.date !== "string" && (
+                    <DateTimePicker
+                        display="inline"
+                        mode="date"
+                        themeVariant="dark"
+                        accentColor={Colors.secondary}
+                        value={new Date()}
+                        onChange={(_, date) => {
+                            if (date) methods.setDate(moment(date).format("YYYY-MM-DD"))
+                            else methods.setDate(moment().format("YYYY-MM-DD"))
+                        }}
+                    />
+                )}
 
                 <SubExpenseSheet />
             </View>

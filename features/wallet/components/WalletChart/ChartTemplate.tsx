@@ -5,7 +5,6 @@ import Colors from "@/constants/Colors"
 import moment from "moment"
 import React from "react"
 import { StyleSheet, View } from "react-native"
-import DateTimePicker from "react-native-modal-datetime-picker"
 
 export type Types = "total" | "avg" | "median" | "count"
 
@@ -33,20 +32,6 @@ export default function ChartTemplate({
         initialStartDate ?? moment().subtract(1, "months").format("YYYY-MM-DD"),
         initialEndDate ?? moment().format("YYYY-MM-DD"),
     ])
-    const [showStartDatePicker, setShowStartDatePicker] = React.useState(false)
-    const [showEndDatePicker, setShowEndDatePicker] = React.useState(false)
-
-    const handleStartDateConfirm = (date: Date) => {
-        const formattedDate = moment(date).format("YYYY-MM-DD")
-        setDateRange([formattedDate, dateRange[1]])
-        setShowStartDatePicker(false)
-    }
-
-    const handleEndDateConfirm = (date: Date) => {
-        const formattedDate = moment(date).format("YYYY-MM-DD")
-        setDateRange([dateRange[0], formattedDate])
-        setShowEndDatePicker(false)
-    }
 
     return (
         <View style={styles.container}>
@@ -97,23 +82,6 @@ export default function ChartTemplate({
 
             <View>{children?.({ dateRange, type: type })}</View>
 
-            <DateTimePicker
-                isVisible={showStartDatePicker}
-                mode="date"
-                onConfirm={handleStartDateConfirm}
-                onCancel={() => setShowStartDatePicker(false)}
-                date={moment(dateRange[0]).toDate()}
-                maximumDate={moment(dateRange[1]).toDate()}
-            />
-
-            <DateTimePicker
-                isVisible={showEndDatePicker}
-                mode="date"
-                onConfirm={handleEndDateConfirm}
-                onCancel={() => setShowEndDatePicker(false)}
-                date={moment(dateRange[1]).toDate()}
-                minimumDate={moment(dateRange[0]).toDate()}
-            />
         </View>
     )
 }

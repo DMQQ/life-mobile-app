@@ -5,7 +5,7 @@ import Color from "color"
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated"
 import WeeklyComparisonChart from "./WalletChart"
 import BalancePredictionChart from "./BalancePredictionChart"
-import { MaterialCommunityIcons } from "@expo/vector-icons"
+import GroupSelector from "@/components/ui/GroupSelector"
 
 type ChartType = "weekly" | "prediction"
 
@@ -26,39 +26,11 @@ const ChartSwitcher = () => {
                 )}
             </View>
 
-            <View style={styles.tabContainer}>
-                <Pressable
-                    style={[styles.tab, activeChart === "weekly" && styles.activeTab]}
-                    onPress={() => setActiveChart("weekly")}
-                >
-                    <MaterialCommunityIcons
-                        name="chart-bar"
-                        size={16}
-                        color={
-                            activeChart === "weekly" ? Colors.text_light : Color(Colors.text_light).alpha(0.5).string()
-                        }
-                    />
-                    <Text style={[styles.tabText, activeChart === "weekly" && styles.activeTabText]}>Weekly</Text>
-                </Pressable>
-
-                <Pressable
-                    style={[styles.tab, activeChart === "prediction" && styles.activeTab]}
-                    onPress={() => setActiveChart("prediction")}
-                >
-                    <MaterialCommunityIcons
-                        name="chart-line"
-                        size={16}
-                        color={
-                            activeChart === "prediction"
-                                ? Colors.text_light
-                                : Color(Colors.text_light).alpha(0.5).string()
-                        }
-                    />
-                    <Text style={[styles.tabText, activeChart === "prediction" && styles.activeTabText]}>
-                        Prediction
-                    </Text>
-                </Pressable>
-            </View>
+            <GroupSelector
+                options={["weekly", "prediction"]}
+                value={activeChart}
+                onChange={(value) => setActiveChart(value as ChartType)}
+            />
         </View>
     )
 }

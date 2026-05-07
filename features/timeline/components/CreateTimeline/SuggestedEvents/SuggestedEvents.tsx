@@ -2,7 +2,6 @@ import Button from "@/components/ui/Button/Button";
 import Colors from "@/constants/Colors";
 import { ActivityIndicator, View } from "react-native";
 import Text from "@/components/ui/Text/Text";
-import Ripple from "react-native-material-ripple";
 import { StyleSheet } from "react-native";
 import useSuggestedEvents from "./useSuggestedEvents";
 import TilesList from "./TilesList";
@@ -10,7 +9,7 @@ import SubcategoryList from "./SubcategoryList";
 import useCreateTimeline from "../../../hooks/general/useCreateTimeline";
 import { useNavigation } from "@react-navigation/native";
 import { useState } from "react";
-import DateTimePicker from "react-native-modal-datetime-picker";
+import TimePicker from "@/components/TimePicker";
 
 interface SuggestedEventsProps {
   date: string;
@@ -50,7 +49,6 @@ export default function SuggestedEvents(props: SuggestedEventsProps) {
   const hasSubCategory =
     !!selected.name && (selected?.categories?.length || 0) > 0;
 
-  const [isVisible, setIsVisible] = useState(false);
 
   return (
     <View style={styles.container}>
@@ -81,33 +79,17 @@ export default function SuggestedEvents(props: SuggestedEventsProps) {
 
       {selected.name !== undefined &&
         ((selected?.categories?.length || 0) > 0 ? subCategory : true) && (
-          <Ripple
-            style={styles.time}
-            onPress={() => setIsVisible(true)}
-            onLayout={() => setIsVisible(true)}
-          >
-            <Text variant="body" style={{ color: Colors.foreground }}>Set time</Text>
-            <Text variant="body" style={{ color: Colors.foreground }}>
-              {time?.toLocaleTimeString("pl-PL", {
-                hour: "2-digit",
-                minute: "2-digit",
-                hour12: false,
-              })}
-              {" to "}
-              {endTime}
-            </Text>
-          </Ripple>
+          <TimePicker
+            label="Set time"
+            value={time ? time.toLocaleTimeString("pl-PL", { hour: "2-digit", minute: "2-digit", hour12: false }) : "00:00"}
+            onChange={(timeStr) => {
+              const [hours, minutes] = timeStr.split(":").map(Number)
+              const date = new Date()
+              date.setHours(hours, minutes, 0, 0)
+              handleSetTime(date)
+            }}
+          />
         )}
-
-      <DateTimePicker
-        mode="time"
-        isVisible={isVisible}
-        onConfirm={(date) => {
-          handleSetTime(date);
-          setIsVisible(false);
-        }}
-        onCancel={() => setIsVisible(false)}
-      />
       {canSubmit && (
         <Button
           onPress={() => handleSubmit()}

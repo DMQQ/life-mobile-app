@@ -43,8 +43,9 @@ export default function OptionsPicker() {
                 setDates={(dates) => {
                     setDate(dayjs(dates.start).format("YYYY-MM-DD"))
                 }}
-                buttonComponent={({ start }) => (
+                buttonComponent={({ start, onPress }) => (
                     <Ripple
+                        onPress={onPress}
                         style={[styles.chip, { backgroundColor: Colors.primary_lighter, flex: undefined, height: 45 }]}
                     >
                         <AntDesign name="calendar" size={15} color="rgba(255,255,255,0.7)" />

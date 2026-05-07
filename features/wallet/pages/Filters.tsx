@@ -4,7 +4,7 @@ import { View } from "react-native"
 import Text from "@/components/ui/Text/Text"
 import { useWalletContext, type Action, type Filters } from "../components/WalletContext"
 import Button from "@/components/ui/Button/Button"
-import DateTimePicker from "react-native-modal-datetime-picker"
+import DatePicker from "@/components/DatePicker"
 import { formatDate } from "@/utils/functions/parseDate"
 import CategorySelect from "../components/CreateExpense/CategorySelect"
 import Color from "color"
@@ -197,67 +197,27 @@ const Forms = (props: ExpenseFiltersProps) => {
 }
 
 const ChooseDateRange = (props: { filters: Filters; dispatch: (action: Action) => void }) => {
-    const [datePicker, setDatePicker] = useState<"from" | "to" | "">("")
+    const fromDate = props.filters.date.from ? new Date(props.filters.date.from) : new Date()
+    const toDate = props.filters.date.to ? new Date(props.filters.date.to) : new Date()
 
     return (
         <View style={{ marginTop: 15 }}>
             <Input.Label text="Date range" error={false} />
-            <View style={{ flexDirection: "row", gap: 10, marginTop: 5 }}>
-                <Button
-                    onPress={() => setDatePicker("from")}
-                    style={{
-                        flex: 1,
-                        borderWidth: 2,
-                        borderColor: Color(Colors.primary).lighten(0.5).hex(),
-                        borderRadius: 10,
-                    }}
-                    color="secondary"
-                    fontStyle={{
-                        fontSize: 16,
-                        color: !!props.filters.date.from ? Colors.foreground : "gray",
-                    }}
-                >
-                    {props.filters.date.from || "Date start"}
-                </Button>
-                <Text
-                    variant="body"
-                    style={{
-                        color: "gray",
-                        alignSelf: "center",
-                        marginHorizontal: 10,
-                    }}
-                >
-                    to
-                </Text>
-                <Button
-                    onPress={() => setDatePicker("to")}
-                    style={{
-                        flex: 1,
-                        borderWidth: 2,
-                        borderColor: Color(Colors.primary).lighten(0.5).hex(),
-                        borderRadius: 10,
-                    }}
-                    color="secondary"
-                    fontStyle={{
-                        fontSize: 16,
-                        color: !!props.filters.date.to ? Colors.foreground : "gray",
-                    }}
-                >
-                    {props.filters.date.to || "Date end"}
-                </Button>
+            <View style={{ flexDirection: "row", gap: 10, marginTop: 5, alignItems: "center" }}>
+                <DatePicker
+                    mode="single"
+                    placeholder={props.filters.date.from || "Date start"}
+                    dates={{ start: fromDate, end: fromDate }}
+                    setDates={({ start }) => props.dispatch({ type: "SET_DATE_MIN", payload: formatDate(start) })}
+                />
+                <Text variant="body" style={{ color: "gray" }}>to</Text>
+                <DatePicker
+                    mode="single"
+                    placeholder={props.filters.date.to || "Date end"}
+                    dates={{ start: toDate, end: toDate }}
+                    setDates={({ start }) => props.dispatch({ type: "SET_DATE_MAX", payload: formatDate(start) })}
+                />
             </View>
-
-            <DateTimePicker
-                isVisible={!!datePicker}
-                onCancel={() => setDatePicker("")}
-                onConfirm={(date) => {
-                    props.dispatch({
-                        type: datePicker === "from" ? "SET_DATE_MIN" : "SET_DATE_MAX",
-                        payload: formatDate(date),
-                    })
-                    setDatePicker("")
-                }}
-            />
         </View>
     )
 }

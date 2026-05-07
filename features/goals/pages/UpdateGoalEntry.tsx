@@ -1,17 +1,16 @@
-import GlassView from "@/components/ui/GlassView"
-import IconButton from "@/components/ui/IconButton/IconButton"
 import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
-import CompactNumberPad from "@/components/ui/CompactNumberPad"
-import Button from "@/components/ui/Button/Button2"
+import NumberPad from "@/components/ui/NumberPad"
 import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons"
 import dayjs from "dayjs"
 import moment from "moment"
 import { useCallback, useState } from "react"
 import { Pressable, StyleSheet, View } from "react-native"
-import Animated, { FadeIn } from "react-native-reanimated"
-import { Calendar } from "react-native-calendars"
 import { useGoal } from "../hooks/hooks"
+import IconBackButton from "@/components/ui/Button/IconBackButton"
+import IconSaveButton from "@/components/ui/Button/IconSaveButton"
+import DatePicker from "@/components/DatePicker"
+import GroupSelector from "@/components/ui/GroupSelector"
 
 const quickActions: Record<string, { label: string; value: number }[]> = {
     target: [{ label: "1 goal", value: 1 }],
@@ -221,24 +220,6 @@ const quickActions: Record<string, { label: string; value: number }[]> = {
     ],
 }
 
-const calendarTheme = {
-    backgroundColor: "transparent",
-    calendarBackground: "transparent",
-    dayTextColor: "#FFFFFF",
-    textDisabledColor: "#666666",
-    monthTextColor: "#FFFFFF",
-    textMonthFontSize: 16,
-    textMonthFontWeight: "600" as const,
-    selectedDayBackgroundColor: Colors.secondary,
-    selectedDayTextColor: "#FFFFFF",
-    todayTextColor: Colors.secondary,
-    arrowColor: "#FFFFFF",
-    textDayFontSize: 14,
-    textDayHeaderFontSize: 12,
-    textDayHeaderFontWeight: "500" as const,
-    textSectionTitleColor: "#999999",
-}
-
 function parseAmount(v: string): number {
     if (v.endsWith(".")) return +v.slice(0, -1)
     if (v.includes(".")) {
@@ -256,7 +237,6 @@ export default function UpdateGoalEntry({ route, navigation }: any) {
     const [amount, setAmount] = useState("0")
     const [dates, setDates] = useState({ start: new Date(), end: new Date() })
     const [loading, setLoading] = useState(false)
-    const [expanded, setExpanded] = useState<"date" | "quick" | null>(null)
 
     const handleAmountChange = useCallback((value: string) => {
         setAmount((prev) => {
@@ -305,38 +285,11 @@ export default function UpdateGoalEntry({ route, navigation }: any) {
     const isMultiDay = !dayjs(dates.start).isSame(dayjs(dates.end), "day")
     const numDays = dayjs(dates.end).diff(dayjs(dates.start), "day") + 1
 
-    const dateMarked: Record<string, any> = {}
-    const dateStr = dayjs(dates.start).format("YYYY-MM-DD")
-    dateMarked[dateStr] = { selected: true, selectedColor: Colors.secondary }
-    if (!dayjs(dates.start).isSame(dates.end, "day")) {
-        const endStr = dayjs(dates.end).format("YYYY-MM-DD")
-        dateMarked[endStr] = { selected: true, selectedColor: Colors.secondary }
-    }
-
     return (
         <View style={styles.root}>
-            <GlassView style={styles.closeBtn}>
-                <IconButton
-                    onPress={() => navigation.goBack()}
-                    icon={<AntDesign name="close" size={20} color="#fff" />}
-                />
-            </GlassView>
+            <IconBackButton style={styles.closeBtn} onPress={() => navigation.goBack()} />
 
-            <GlassView
-                tintColor={Colors.secondary}
-                style={[
-                    styles.saveButton,
-                    {
-                        opacity: amount === "0" || loading ? 0.5 : 1,
-                    },
-                ]}
-            >
-                <IconButton
-                    disabled={amount === "0" || loading}
-                    onPress={handleSubmit}
-                    icon={<AntDesign name="check" size={20} color="#fff" />}
-                />
-            </GlassView>
+            <IconSaveButton disabled={amount === "0" || loading} loading={loading} onPress={handleSubmit} />
 
             <View style={styles.amountDisplay}>
                 <Text variant="title" style={styles.amountText}>
@@ -363,111 +316,20 @@ export default function UpdateGoalEntry({ route, navigation }: any) {
 
             <View style={styles.card}>
                 <View style={styles.optionsContainer}>
-                    <Pressable
-                        style={({ pressed }) => [
-                            styles.optionRow,
-                            expanded !== "date" && styles.optionRowBorder,
-                            pressed && { opacity: 0.7 },
-                        ]}
-                        onPress={() => setExpanded((prev) => (prev === "date" ? null : "date"))}
-                    >
-                        <AntDesign name="calendar" size={16} color="rgba(255,255,255,0.6)" />
-                        <Text variant="body" style={styles.optionLabel}>
-                            Date
-                        </Text>
-                        <Text variant="body" style={styles.optionValue} numberOfLines={1}>
-                            {isMultiDay
-                                ? `${moment(dates.start).format("MMM D")} - ${moment(dates.end).format("MMM D")}`
-                                : moment(dates.start).format("MMM D, YYYY")}
-                        </Text>
-                        <AntDesign
-                            name="arrow-up"
-                            size={12}
-                            color="rgba(255,255,255,0.3)"
-                            style={{ transform: [{ rotate: expanded === "date" ? "180deg" : "0deg" }] }}
-                        />
-                    </Pressable>
-                    {expanded === "date" && (
-                        <Animated.View entering={FadeIn} style={styles.expandedSection}>
-                            <Calendar
-                                onDayPress={(day) => {
-                                    const d = dayjs(day.dateString)
-                                    setDates({ start: d.toDate(), end: d.toDate() })
-                                }}
-                                markedDates={dateMarked}
-                                theme={calendarTheme}
-                                markingType="period"
-                                style={{ borderRadius: 15 }}
-                            />
-                        </Animated.View>
-                    )}
+                    <DatePicker dates={dates} setDates={setDates} mode="period" />
 
-                    {quickValues.length > 0 && (
-                        <>
-                            <Pressable
-                                style={({ pressed }) => [
-                                    styles.optionRow,
-                                    expanded !== "quick" && styles.optionRowBorder,
-                                    pressed && { opacity: 0.7 },
-                                ]}
-                                onPress={() => setExpanded((prev) => (prev === "quick" ? null : "quick"))}
-                            >
-                                <MaterialCommunityIcons name="lightning-bolt" size={16} color="rgba(255,255,255,0.6)" />
-                                <Text variant="body" style={styles.optionLabel}>
-                                    Quick value
-                                </Text>
-                                <Text variant="body" style={styles.optionValue}>
-                                    {amount !== "0" ? amount : "Select"}
-                                </Text>
-                                <AntDesign
-                                    name="arrow-up"
-                                    size={12}
-                                    color="rgba(255,255,255,0.3)"
-                                    style={{ transform: [{ rotate: expanded === "quick" ? "180deg" : "0deg" }] }}
-                                />
-                            </Pressable>
-                            {expanded === "quick" && (
-                                <Animated.View entering={FadeIn} style={styles.quickExpanded}>
-                                    <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
-                                        {quickValues.map((item, index) => {
-                                            const active = amount === item.value.toString()
-                                            return (
-                                                <Pressable
-                                                    key={`${item.label}-${index}`}
-                                                    style={({ pressed }) => [
-                                                        styles.quickChip,
-                                                        active && styles.quickChipActive,
-                                                        pressed && { opacity: 0.7 },
-                                                    ]}
-                                                    onPress={() => {
-                                                        setAmount(item.value.toString())
-                                                        setExpanded(null)
-                                                    }}
-                                                >
-                                                    <Text
-                                                        style={[
-                                                            styles.quickChipText,
-                                                            active && styles.quickChipTextActive,
-                                                        ]}
-                                                    >
-                                                        {item.label}
-                                                    </Text>
-                                                </Pressable>
-                                            )
-                                        })}
-                                    </View>
-                                </Animated.View>
-                            )}
-                        </>
-                    )}
+                    <View style={{ flex: 1 }}>
+                        <GroupSelector
+                            options={quickValues.map((map) => map.label)}
+                            value={quickValues.find((v) => v.value === parseAmount(amount))?.value}
+                            onChange={(v) =>
+                                setAmount(quickValues.find((opt) => opt.label === v)?.value.toString() || amount)
+                            }
+                        />
+                    </View>
                 </View>
 
-                <CompactNumberPad
-                    onKeyPress={handleAmountChange}
-                    backgroundColor={Colors.primary_lighter}
-                    fontVariant="body"
-                    fontWeight="bold"
-                />
+                <NumberPad onKeyPress={handleAmountChange} />
             </View>
         </View>
     )
@@ -482,16 +344,6 @@ const styles = StyleSheet.create({
         top: 15,
         left: 15,
         zIndex: 100,
-        padding: 10,
-        borderRadius: 100,
-    },
-    saveButton: {
-        position: "absolute",
-        top: 15,
-        right: 15,
-        zIndex: 100,
-        padding: 10,
-        borderRadius: 100,
     },
     amountDisplay: {
         paddingTop: 120,
@@ -530,23 +382,24 @@ const styles = StyleSheet.create({
         fontWeight: "600",
     },
     card: {
-        padding: 12,
+        padding: 15,
         gap: 8,
         backgroundColor: Colors.primary_light,
         borderTopRightRadius: 30,
         borderTopLeftRadius: 30,
-        paddingBottom: 24,
-        marginTop: 10,
-        height: "50%",
+        paddingBottom: 30,
+        height: "60%",
         position: "absolute",
         bottom: 0,
         left: 0,
         right: 0,
     },
     optionsContainer: {
-        backgroundColor: Colors.primary_lighter,
         borderRadius: 18,
         overflow: "hidden",
+        flexDirection: "row",
+        gap: 15,
+        alignItems: "center",
     },
     optionRow: {
         flexDirection: "row",
@@ -569,28 +422,20 @@ const styles = StyleSheet.create({
         maxWidth: 160,
         textAlign: "right",
     },
-    expandedSection: {
-        borderTopWidth: StyleSheet.hairlineWidth,
-        borderTopColor: "rgba(255,255,255,0.07)",
+    quickRow: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        gap: 8,
         paddingHorizontal: 12,
         paddingVertical: 12,
-        borderBottomWidth: StyleSheet.hairlineWidth,
-        borderBottomColor: "rgba(255,255,255,0.07)",
-        height: 350,
-    },
-    quickExpanded: {
         borderTopWidth: StyleSheet.hairlineWidth,
         borderTopColor: "rgba(255,255,255,0.07)",
-        paddingHorizontal: 12,
-        paddingVertical: 12,
-        borderBottomWidth: StyleSheet.hairlineWidth,
-        borderBottomColor: "rgba(255,255,255,0.07)",
     },
     quickChip: {
         paddingVertical: 8,
         paddingHorizontal: 14,
         borderRadius: 10,
-        backgroundColor: Colors.primary_lighter,
+        backgroundColor: Colors.primary,
     },
     quickChipActive: {
         backgroundColor: Colors.secondary,

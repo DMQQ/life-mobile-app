@@ -116,86 +116,68 @@ const SearchButton = ({
         [isExpanded, keyboard],
     )
 
-    const handleMenuPress = (e: any, menuItems: SearchMenuItem[]) => {
-        const indexPath = e.nativeEvent.indexPath || [e.nativeEvent.index]
-
-        let currentItem: SearchMenuItem | undefined = undefined
-        let currentLevel = menuItems
-
-        for (const index of indexPath) {
-            currentItem = currentLevel[index]
-            if (!currentItem) return
-            if (currentItem.children && currentItem.children.length > 0) {
-                currentLevel = currentItem.children
-            }
-        }
-
-        if (currentItem?.onPress) {
-            currentItem.onPress()
-        }
-    }
+    const inner = (
+        <GlassView
+            key={isExpanded ? "expanded" : "collapsed"}
+            style={{ flex: 1, borderRadius: 100 }}
+            tintColor={isExpanded ? undefined : Colors.secondary}
+        >
+            <Animated.View style={[searchContainerStyle]}>
+                <Animated.View style={glassWrapper}>
+                    <View style={{ flexDirection: "row", height: "100%", borderRadius: 100 }}>
+                        {isExpanded && (
+                            <Animated.View style={[{ flex: 1, paddingHorizontal: 15 }, inputContainerStyle]}>
+                                <TextInput
+                                    value={value}
+                                    onChangeText={onChangeText}
+                                    style={{ color: Colors.foreground, fontSize: 16, height: 40, flex: 1 }}
+                                    placeholder="Search..."
+                                    placeholderTextColor={Color(Colors.foreground).alpha(0.6).string()}
+                                    autoFocus={false}
+                                    returnKeyType="search"
+                                />
+                            </Animated.View>
+                        )}
+                        <Pressable
+                            style={{
+                                width: 60,
+                                height: "100%",
+                                justifyContent: "center",
+                                alignItems: "center",
+                                position: "absolute",
+                                right: 0,
+                                top: 0,
+                            }}
+                            onPress={isExpanded ? () => onChangeText("") : openAiChat}
+                            onLongPress={isExpanded ? undefined : toggleSearch}
+                        >
+                            <SymbolView name="sparkles" size={26} tintColor={"#fff"} weight="semibold" />
+                        </Pressable>
+                    </View>
+                </Animated.View>
+            </Animated.View>
+        </GlassView>
+    )
 
     return (
         <ContextMenuView
             actions={menuItems.map((item) => convertMenuItemToAction(item))}
             onPress={(e) => {
-                handleMenuPress(e, menuItems)
+                const indexPath = e.nativeEvent.indexPath || [e.nativeEvent.index]
+                let currentItem: SearchMenuItem | undefined
+                let currentLevel = menuItems
+                for (const idx of indexPath) {
+                    currentItem = currentLevel[idx]
+                    if (!currentItem) return
+                    if (currentItem.children?.length) currentLevel = currentItem.children
+                }
+                currentItem?.onPress?.()
             }}
             disabled={!hasMenu}
             style={{ position: "absolute", right: 15, bottom: 0 }}
             previewBackgroundColor="transparent"
         >
-            <GlassView
-                key={isExpanded ? "expanded" : "collapsed"}
-                style={{ flex: 1, borderRadius: 100 }}
-                tintColor={isExpanded ? undefined : Colors.secondary}
-            >
-                <Animated.View style={[searchContainerStyle]}>
-                    <Animated.View style={glassWrapper}>
-                        <View
-                            style={{
-                                flexDirection: "row",
-                                height: "100%",
-                                borderRadius: 100,
-                            }}
-                        >
-                            {isExpanded && (
-                                <Animated.View style={[{ flex: 1, paddingHorizontal: 15 }, inputContainerStyle]}>
-                                    <TextInput
-                                        value={value}
-                                        onChangeText={onChangeText}
-                                        style={{
-                                            color: Colors.foreground,
-                                            fontSize: 16,
-                                            height: 40,
-                                            flex: 1,
-                                        }}
-                                        placeholder="Search..."
-                                        placeholderTextColor={Color(Colors.foreground).alpha(0.6).string()}
-                                        autoFocus={false}
-                                        returnKeyType="search"
-                                    />
-                                </Animated.View>
-                            )}
-                            <Pressable
-                                style={{
-                                    width: 60,
-                                    height: "100%",
-                                    justifyContent: "center",
-                                    alignItems: "center",
-                                    position: "absolute",
-                                    right: 0,
-                                    top: 0,
-                                }}
-                                onPress={isExpanded ? () => onChangeText("") : openAiChat}
-                                onLongPress={isExpanded ? undefined : toggleSearch}
-                            >
-                                <SymbolView name="sparkles" size={26} tintColor={"#fff"} weight="semibold" />
-                            </Pressable>
-                        </View>
-                    </Animated.View>
-                </Animated.View>
-            </GlassView>
+            {inner}
         </ContextMenuView>
     )
 }

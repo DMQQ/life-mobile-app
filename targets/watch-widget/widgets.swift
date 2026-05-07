@@ -302,29 +302,34 @@ private func previewItems() -> [EventItem] {
     ]
 }
 
-#Preview("Rectangular · Active") {
-    watchWidgetEntryView(entry: SimpleEntry(date: previewNow, items: previewItems()))
-        .environment(\.widgetFamily, .accessoryRectangular)
+#Preview("Rectangular · Active", as: .accessoryRectangular) {
+    watchWidget()
+} timeline: {
+    SimpleEntry(date: previewNow, items: previewItems())
 }
 
-#Preview("Rectangular · Empty") {
-    watchWidgetEntryView(entry: SimpleEntry(date: previewNow, items: []))
-        .environment(\.widgetFamily, .accessoryRectangular)
+#Preview("Rectangular · Empty", as: .accessoryRectangular) {
+    watchWidget()
+} timeline: {
+    SimpleEntry(date: previewNow, items: [])
 }
 
-#Preview("Circular · Active") {
-    watchWidgetEntryView(entry: SimpleEntry(date: previewNow, items: previewItems()))
-        .environment(\.widgetFamily, .accessoryCircular)
+#Preview("Circular · Active", as: .accessoryCircular) {
+    watchWidget()
+} timeline: {
+    SimpleEntry(date: previewNow, items: previewItems())
 }
 
-#Preview("Circular · Free") {
-    watchWidgetEntryView(entry: SimpleEntry(date: previewNow, items: []))
-        .environment(\.widgetFamily, .accessoryCircular)
+#Preview("Circular · Free", as: .accessoryCircular) {
+    watchWidget()
+} timeline: {
+    SimpleEntry(date: previewNow, items: [])
 }
 
-#Preview("Inline · Active") {
-    watchWidgetEntryView(entry: SimpleEntry(date: previewNow, items: previewItems()))
-        .environment(\.widgetFamily, .accessoryInline)
+#Preview("Inline · Active", as: .accessoryInline) {
+    watchWidget()
+} timeline: {
+    SimpleEntry(date: previewNow, items: previewItems())
 }
 #endif
 

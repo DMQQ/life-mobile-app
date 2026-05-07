@@ -10,7 +10,7 @@ import { Formik } from "formik"
 import { useState } from "react"
 import { ActivityIndicator, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native"
 import Feedback from "react-native-haptic-feedback"
-import DateTimePicker from "react-native-modal-datetime-picker"
+import DatePicker from "@/components/DatePicker"
 import * as yup from "yup"
 import useEditWallet from "../hooks/useEditWallet"
 import { WalletScreens } from "../Main"
@@ -122,7 +122,6 @@ export default function EditBalance({ navigation }: WalletScreens<"EditBalance">
         navigation.goBack()
     })
 
-    const [isDatePickerVisible, setDatePickerVisibility] = useState(false)
     const [selectedDate, setSelectedDate] = useState<Date | null>(null)
     const [paycheckOption, setPaycheckOption] = useState<"start" | "end" | "custom">("start")
 
@@ -274,11 +273,7 @@ export default function EditBalance({ navigation }: WalletScreens<"EditBalance">
                                     selectedItem={paycheckOption}
                                     onItemSelect={(item) => {
                                         setPaycheckOption(item)
-                                        if (item === "custom") {
-                                            setDatePickerVisibility(true)
-                                        } else {
-                                            setSelectedDate(null)
-                                        }
+                                        if (item !== "custom") setSelectedDate(null)
                                     }}
                                     renderItem={(item) => {
                                         const labels = {
@@ -294,53 +289,17 @@ export default function EditBalance({ navigation }: WalletScreens<"EditBalance">
                                 />
 
                                 {paycheckOption === "custom" && (
-                                    <TouchableOpacity
-                                        activeOpacity={0.9}
-                                        onPress={() => setDatePickerVisibility(true)}
-                                        style={{
-                                            borderWidth: 2,
-                                            borderColor: Color(Colors.primary).lighten(0.5).hex(),
-                                            borderRadius: 12,
-                                            paddingVertical: 15,
-                                            paddingHorizontal: 15,
-                                            flexDirection: "row",
-                                            alignItems: "center",
-                                            backgroundColor: Colors.primary_light,
-                                            marginTop: 12,
+                                    <DatePicker
+                                        mode="single"
+                                        placeholder={selectedDate ? dayjs(selectedDate).format("YYYY-MM-DD") : "Select custom date"}
+                                        dates={{ start: selectedDate ?? new Date(), end: selectedDate ?? new Date() }}
+                                        setDates={({ start }) => {
+                                            setSelectedDate(start)
+                                            formik.setFieldValue("paycheckDate", start.toISOString())
                                         }}
-                                    >
-                                        <View style={styles.calendarIcon}>
-                                            <AntDesign name="calendar" size={20} color={Colors.secondary} />
-                                        </View>
-                                        <Text
-                                            style={{
-                                                color: selectedDate ? Colors.foreground : Colors.foreground_secondary,
-                                                fontSize: 16,
-                                                marginLeft: 8,
-                                            }}
-                                        >
-                                            {selectedDate
-                                                ? dayjs(selectedDate).format("YYYY-MM-DD")
-                                                : "Select custom date"}
-                                        </Text>
-                                    </TouchableOpacity>
+                                    />
                                 )}
                             </View>
-
-                            <DateTimePicker
-                                isVisible={isDatePickerVisible}
-                                mode="date"
-                                onConfirm={(date) => {
-                                    setSelectedDate(date)
-                                    setDatePickerVisibility(false)
-                                    formik.setFieldValue("paycheckDate", date.toISOString())
-                                }}
-                                onCancel={() => setDatePickerVisibility(false)}
-                                minimumDate={new Date()}
-                                isDarkModeEnabled={true}
-                                textColor={Colors.foreground}
-                                accentColor={Colors.secondary}
-                            />
                         </ScrollView>
 
                         <View style={styles.bottomButtonContainer}>

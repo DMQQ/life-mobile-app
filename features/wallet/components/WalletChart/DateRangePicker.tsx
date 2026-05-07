@@ -1,13 +1,13 @@
 import moment, { Moment } from "moment"
 import { Action, Filters } from "../WalletContext"
 import { useEffect, useState } from "react"
-import { ScrollView, Text } from "react-native"
+import { ScrollView, Text, View } from "react-native"
 import Layout from "@/constants/Layout"
 import Button from "@/components/ui/Button/Button"
 import Colors from "@/constants/Colors"
 import lowOpacity from "@/utils/functions/lowOpacity"
 import Color from "color"
-import DateTimePicker from "react-native-modal-datetime-picker"
+import DatePicker from "@/components/DatePicker"
 
 const button = {
     padding: 10,
@@ -100,11 +100,8 @@ const CustomDatePicker = (props: {
     selected: string
     setSelected: () => void
 }) => {
-    const [showDatePicker, setShowDatePicker] = useState(false)
     const [startDate, setStartDate] = useState<Moment | null>(null)
     const [endDate, setEndDate] = useState<Moment | null>(null)
-
-    const [lastPressed, setLastPressed] = useState<"start" | "end">("start")
 
     const customDate = startDate && endDate ? [startDate, endDate] : null
 
@@ -116,7 +113,6 @@ const CustomDatePicker = (props: {
         if (props.selected !== "Custom") {
             setStartDate(null)
             setEndDate(null)
-            setLastPressed("start")
         }
     }, [props.selected])
 
@@ -128,77 +124,27 @@ const CustomDatePicker = (props: {
     }, [showDatePicker, startDate, endDate])
 
     return (
-        <>
-            <Button
-                onPress={() => {
-                    setShowDatePicker(true)
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginRight: 10 }}>
+            <DatePicker
+                mode="single"
+                placeholder={startDate ? startDate.format("DD/MM") : "From"}
+                dates={{ start: startDate?.toDate() ?? new Date(), end: startDate?.toDate() ?? new Date() }}
+                setDates={({ start }) => {
+                    setStartDate(moment(start))
                     props.setSelected()
-                    setLastPressed("start")
                 }}
-                variant="text"
-                fontStyle={{
-                    fontSize: 14,
-                    color: !!customDate ? Colors.secondary : blueText,
-                }}
-                style={[
-                    button,
-                    {
-                        borderWidth: 0.5,
-                        borderColor: Colors.primary,
-                        marginRight: 10,
-                        ...(!!customDate && {
-                            backgroundColor: lowOpacity(Colors.secondary, 0.15),
-                            borderWidth: 0.5,
-                            borderColor: lowOpacity(Colors.secondary, 0.5),
-                        }),
-
-                        ...(!isValidDate(startDate, endDate) && {
-                            backgroundColor: lowOpacity(Colors.error, 0.15),
-                            borderWidth: 0.5,
-                            borderColor: lowOpacity(Colors.error, 0.5),
-                        }),
-                    },
-                ]}
-            >
-                {startDate || endDate ? (
-                    <>
-                        <Text
-                            style={{
-                                color: lastPressed === "start" && showDatePicker ? Colors.foreground : Colors.secondary,
-                            }}
-                        >
-                            {startDate && startDate.format("DD/MM/YYYY")}
-                        </Text>
-                        <Text>{" - "}</Text>
-                        <Text
-                            style={{
-                                color: lastPressed === "end" && showDatePicker ? Colors.foreground : Colors.secondary,
-                            }}
-                        >
-                            {endDate && endDate.format("DD/MM/YYYY")}
-                        </Text>
-                    </>
-                ) : (
-                    <Text>Custom</Text>
-                )}
-            </Button>
-            <DateTimePicker
-                mode="date"
-                isVisible={showDatePicker}
-                onConfirm={(date: Date) => {
-                    const momentDate = moment(date)
-                    if (lastPressed === "start") {
-                        setStartDate(momentDate)
-                        setLastPressed("end")
-                    } else {
-                        setEndDate(momentDate)
-                        setLastPressed("start")
-                        setShowDatePicker(false)
-                    }
-                }}
-                onCancel={() => setShowDatePicker(false)}
             />
-        </>
+            <Text style={{ color: blueText }}>–</Text>
+            <DatePicker
+                mode="single"
+                placeholder={endDate ? endDate.format("DD/MM") : "To"}
+                dates={{ start: endDate?.toDate() ?? new Date(), end: endDate?.toDate() ?? new Date() }}
+                setDates={({ start }) => {
+                    setEndDate(moment(start))
+                    props.setSelected()
+                }}
+            />
+        </View>
     )
 }
 

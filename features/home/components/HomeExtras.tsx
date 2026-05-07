@@ -7,6 +7,7 @@ import { useState } from "react"
 import { Pressable, StyleSheet, Text, View } from "react-native"
 import Color from "color"
 import moment from "moment"
+import GroupSelector from "@/components/ui/GroupSelector"
 
 const GET_HOME_EXTRAS = gql`
     query HomeExtras($filters: GetWalletFilters, $take: Int) {
@@ -50,9 +51,9 @@ const GET_HOME_EXTRAS = gql`
 `
 
 export default function HomeExtras() {
-    const [active, setActive] = useState<"limits" | "calendar">("limits")
+    const [active, setActive] = useState<"limits" | "calendar">("calendar")
 
-    const { data, error } = useQuery(GET_HOME_EXTRAS, {
+    const { data } = useQuery(GET_HOME_EXTRAS, {
         variables: {
             filters: {
                 date: {
@@ -82,20 +83,7 @@ export default function HomeExtras() {
                 />
             )}
 
-            <View style={styles.tabs}>
-                <Pressable
-                    style={[styles.tab, active === "limits" && styles.activeTab]}
-                    onPress={() => setActive("limits")}
-                >
-                    <Text style={[styles.tabText, active === "limits" && styles.activeTabText]}>Limits</Text>
-                </Pressable>
-                <Pressable
-                    style={[styles.tab, active === "calendar" && styles.activeTab]}
-                    onPress={() => setActive("calendar")}
-                >
-                    <Text style={[styles.tabText, active === "calendar" && styles.activeTabText]}>Calendar</Text>
-                </Pressable>
-            </View>
+            <GroupSelector options={["calendar", "limits"]} value={active} onChange={(val) => setActive(val as any)} />
         </View>
     )
 }

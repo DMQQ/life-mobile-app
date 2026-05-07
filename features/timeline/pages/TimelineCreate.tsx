@@ -8,8 +8,6 @@ import { AntDesign, Ionicons } from "@expo/vector-icons"
 import moment from "moment"
 import { useRef, useState } from "react"
 import { Platform, Pressable, ScrollView, StyleSheet, View } from "react-native"
-import Ripple from "react-native-material-ripple"
-import DateTimePicker from "react-native-modal-datetime-picker"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import CreateRepeatableTimeline from "../components/CreateTimeline/CreateRepeatableTimeline"
 import EditScopeSheet from "../components/EditScopeSheet"
@@ -19,6 +17,7 @@ import type { TimelineScreenProps } from "../types"
 import { Todo } from "./CreateTimelineTodos"
 import GlassView from "@/components/ui/GlassView"
 import DatePicker from "@/components/DatePicker"
+import TimePicker from "@/components/TimePicker"
 import dayjs from "dayjs"
 
 const styles = StyleSheet.create({
@@ -55,7 +54,6 @@ export default function CreateTimeLineEventModal({ route, navigation }: Timeline
         navigation,
     })
 
-    const [timePicker, setTimePicker] = useState<"begin" | "end" | "">("")
     const endManuallyChanged = useRef(isEditing)
 
     const numberOfLines = f.values.desc.split("\n").length
@@ -66,7 +64,7 @@ export default function CreateTimeLineEventModal({ route, navigation }: Timeline
         <>
             <View style={{ flex: 1, paddingBottom: insets.bottom }}>
                 <TimelineCreateHeader
-                    handleChangeDate={(date) => {
+                    handleChangeDate={(date: Date) => {
                         handleChangeDate(date)
                         navigation.setParams({
                             selectedDate: moment(date).format("YYYY-MM-DD"),
@@ -111,28 +109,34 @@ export default function CreateTimeLineEventModal({ route, navigation }: Timeline
 
                     <ValidatedInput.Label error={false} text="Time range*" />
                     <View style={styles.timeContainer}>
-                        <Ripple style={{ flex: 1, padding: 5 }} onPress={() => setTimePicker("begin")}>
-                            <Text variant="title" style={styles.timeText}>
-                                {f.values.begin.split(":").slice(0, 2).join(":")}
-                            </Text>
-                            <Text style={{ fontSize: 13, color: "gray", textAlign: "center" }}>From</Text>
-                        </Ripple>
-
+                        <TimePicker
+                            label=""
+                            value={f.values.begin}
+                            onChange={(t) => {
+                                f.setFieldValue("begin", t)
+                                if (!endManuallyChanged.current) {
+                                    f.setFieldValue("end", moment(t, "HH:mm").add(1, "hours").format("HH:mm"))
+                                }
+                            }}
+                        />
                         <Text variant="body" style={{ color: "gray", padding: 5 }}>
-                            -
+                            to
                         </Text>
-
-                        <Ripple style={{ flex: 1, padding: 5 }} onPress={() => setTimePicker("end")}>
-                            <Text variant="title" style={styles.timeText}>
-                                {f.values.end.split(":").slice(0, 2).join(":")}
-                            </Text>
-                            <Text style={{ fontSize: 13, color: "gray", textAlign: "center" }}>To</Text>
-                        </Ripple>
+                        <TimePicker
+                            label=""
+                            value={f.values.end}
+                            onChange={(t) => {
+                                endManuallyChanged.current = true
+                                f.setFieldValue("end", t)
+                                if (moment(t, "HH:mm").isBefore(moment(f.values.begin, "HH:mm"))) {
+                                    f.setFieldValue("begin", moment(t, "HH:mm").subtract(1, "hours").format("HH:mm"))
+                                }
+                            }}
+                        />
                     </View>
 
                     <View style={{ marginTop: 15 }}>
                         <View style={{ flexDirection: "row", alignItems: "center", gap: 5, marginBottom: 6 }}>
-                            <Ionicons name="notifications-outline" size={16} color={Colors.secondary} />
                             <ValidatedInput.Label error={false} text="Reminder" />
                         </View>
                         <SegmentedButtons
@@ -203,34 +207,6 @@ export default function CreateTimeLineEventModal({ route, navigation }: Timeline
                             </View>
                         </View>
                     )}
-
-                    <TimePickerModal
-                        isVisible={!!timePicker}
-                        currentTime={timePicker === "begin" ? f.values.begin : f.values.end}
-                        onConfirm={(currentlySelectedTime) => {
-                            let finalDate = moment(currentlySelectedTime)
-
-                            if (timePicker === "begin") {
-                                f.setFieldValue("begin", finalDate.format("HH:mm"))
-
-                                if (!endManuallyChanged.current) {
-                                    f.setFieldValue("end", finalDate.clone().add(1, "hours").format("HH:mm"))
-                                }
-                            }
-
-                            if (timePicker === "end") {
-                                endManuallyChanged.current = true
-                                f.setFieldValue("end", finalDate.format("HH:mm"))
-
-                                if (finalDate.isBefore(moment(f.values.begin, "HH:mm"))) {
-                                    f.setFieldValue("begin", finalDate.subtract(1, "hours").format("HH:mm"))
-                                }
-                            }
-
-                            setTimePicker("")
-                        }}
-                        onCancel={() => setTimePicker("")}
-                    />
                 </ScrollView>
 
                 <SubmitButton
@@ -275,40 +251,5 @@ const SubmitButton = (props: SubmitButtonProps) => (
                 icon={<AntDesign name="calendar" color={Colors.foreground} size={20} />}
             />
         </GlassView>
-
-        <GlassView style={styles.button}>
-            <DatePicker
-                mode="single"
-                setDates={({ start }) => props.f.setFieldValue("date", dayjs(start).format("YYYY-MM-DD"))}
-                dates={{
-                    start: dayjs(props.f.values.date).toDate(),
-                    end: dayjs(props.f.values.date).toDate(),
-                }}
-                buttonComponent={({ start }) => (
-                    <Text style={{ color: "#fff", paddingHorizontal: 5 }}>{dayjs(start).format("MMMM D, YYYY")}</Text>
-                )}
-            />
-        </GlassView>
     </View>
 )
-
-const TimePickerModal = (props: {
-    isVisible: boolean
-    onConfirm: (date: Date) => void
-    onCancel: () => void
-    currentTime: string
-}) => {
-    const currentDate = moment(props.currentTime, "HH:mm").toDate()
-
-    return (
-        <DateTimePicker
-            date={currentDate}
-            mode="time"
-            isDarkModeEnabled
-            is24Hour
-            isVisible={props.isVisible}
-            onConfirm={props.onConfirm}
-            onCancel={props.onCancel}
-        />
-    )
-}

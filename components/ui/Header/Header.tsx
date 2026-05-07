@@ -7,18 +7,15 @@ import Color from "color"
 import { memo, ReactNode, useMemo } from "react"
 import { StyleProp, StyleSheet, TextStyle, TouchableOpacity, View, ViewStyle } from "react-native"
 import Haptic from "react-native-haptic-feedback"
-import Ripple from "react-native-material-ripple"
 import Animated, { Extrapolation, interpolate, SharedValue, useAnimatedStyle } from "react-native-reanimated"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import AnimatedNumber from "../AnimatedNumber"
 import IconButton from "../IconButton/IconButton"
-import { GlassContainer } from "expo-glass-effect"
 import { LinearGradient } from "expo-linear-gradient"
 import GlassView from "../GlassView"
 import { SFSymbol } from "expo-symbols"
-import ContextMenuView, { type ContextMenuAction } from "react-native-context-menu-view"
-
-const AnimatedRipple = Animated.createAnimatedComponent(Ripple)
+import { Menu, Button, Host } from "@expo/ui/swift-ui"
+import { background } from "@expo/ui/swift-ui/modifiers"
 
 const THRESHOLD = 200
 
@@ -149,7 +146,7 @@ function Header({ shadow = true, ...props }: HeaderProps) {
     }, [props.buttons])
 
     return (
-        <GlassContainer style={[styles.blurContainer]}>
+        <View style={[styles.blurContainer]}>
             {shadow && (
                 <LinearGradient
                     colors={[
@@ -241,83 +238,71 @@ function Header({ shadow = true, ...props }: HeaderProps) {
 
                 {props.renderAnimatedItem && memodRenderItem}
             </Animated.View>
-        </GlassContainer>
+        </View>
     )
 }
 
-const convertMenuItemToAction = (item: ContextMenuItem): ContextMenuAction => {
-    const action: ContextMenuAction = {
-        title: item.checked ? `✓ ${item.title}` : item.title,
-        systemIcon: item.systemImage,
-    }
-
-    if (item.destructive) {
-        action.destructive = true
-    }
-
-    if (item.children && item.children.length > 0) {
-        action.actions = item.children.map((child) => convertMenuItemToAction(child))
-    }
-
-    return action
+function renderMenuItems(items: ContextMenuItem[]): React.ReactNode {
+    return items.map((item, i) => {
+        if (item.children && item.children.length > 0) {
+            return (
+                <Menu key={i} label={item.title} systemImage={item.systemImage}>
+                    {renderMenuItems(item.children)}
+                </Menu>
+            )
+        }
+        return (
+            <Button
+                key={i}
+                label={item.checked ? `✓ ${item.title}` : item.title}
+                systemImage={item.systemImage as any}
+                role={item.destructive ? "destructive" : "default"}
+                onPress={() => {
+                    item.onPress?.()
+                    Haptic.trigger("impactLight")
+                }}
+            />
+        )
+    })
 }
 
 const HeaderIconButton = memo(({ button, index }: { button: HeaderItem; index: number }) => {
-    const handleMenuPress = (e: any) => {
-        const indexPath = e.nativeEvent.indexPath || [e.nativeEvent.index]
-        const items = button.contextMenu?.items || []
-
-        let currentItem: ContextMenuItem | undefined = undefined
-        let currentLevel = items
-
-        for (const idx of indexPath) {
-            currentItem = currentLevel[idx]
-            if (!currentItem) return
-            if (currentItem.children && currentItem.children.length > 0) {
-                currentLevel = currentItem.children
-            }
-        }
-
-        if (currentItem?.onPress) {
-            currentItem.onPress()
-            Haptic.trigger("impactLight")
-        }
-    }
-
     if (button.children) {
         return button.children
     }
 
     if (button.contextMenu) {
         return (
-            <ContextMenuView
-                actions={button.contextMenu.items.map((item) => convertMenuItemToAction(item))}
-                onPress={handleMenuPress}
-                dropdownMenuMode={true}
-            >
-                <IconButton
-                    style={button.style}
-                    onPress={throttle(() => {
-                        button.onPress()
-                        Haptic.trigger("impactLight")
-                    }, 250)}
-                    icon={button.icon}
-                />
-            </ContextMenuView>
-        )
-    } else {
-        return (
-            <IconButton
-                style={button.style}
-                key={index}
-                onPress={throttle(() => {
-                    button.onPress()
-                    Haptic.trigger("impactLight")
-                }, 250)}
-                icon={button.icon}
-            />
+            <Host modifiers={[background("clear")]}>
+                <Menu
+                    label={
+                        <IconButton
+                            style={button.style}
+                            onPress={throttle(() => {
+                                button.onPress()
+                                Haptic.trigger("impactLight")
+                            }, 250)}
+                            icon={button.icon}
+                        />
+                    }
+                >
+                    {renderMenuItems(button.contextMenu.items)}
+                </Menu>
+            </Host>
         )
     }
+
+    return (
+        <IconButton
+            style={button.style}
+            key={index}
+            onPress={throttle(() => {
+                button.onPress()
+                Haptic.trigger("impactLight")
+            }, 250)}
+            icon={button.icon}
+        />
+    )
 })
 
 const AnimatedContent = memo(
