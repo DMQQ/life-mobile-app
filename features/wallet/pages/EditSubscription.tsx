@@ -1,13 +1,12 @@
 import DatePicker from "@/components/DatePicker"
 import BottomSheet from "@/components/ui/BottomSheet/BottomSheet"
-import IconBackButton from "@/components/ui/Button/IconBackButton"
-import IconSaveButton from "@/components/ui/Button/IconSaveButton"
+import GlassIconButton from "@/components/ui/GlassIconButton"
 import Text from "@/components/ui/Text/Text"
 import Input from "@/components/ui/TextInput/TextInput"
 import Colors from "@/constants/Colors"
 import Layout from "@/constants/Layout"
 import { Subscription } from "@/types"
-import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons"
+import { Feather, MaterialCommunityIcons } from "@expo/vector-icons"
 import { BottomSheetScrollView, BottomSheetView } from "@gorhom/bottom-sheet"
 import Color from "color"
 import { useFormik } from "formik"
@@ -199,11 +198,18 @@ export default function EditSubscription({ route, navigation }: Props) {
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 <View style={{ flex: 1 }}>
                     <View style={styles.container}>
-                        <IconBackButton style={styles.closeButton} onPress={() => navigation.goBack()} />
-                        <IconSaveButton
+                        <GlassIconButton
+                            name="x"
+                            onPress={() => navigation.goBack()}
+                            positioned="top-left"
+                        />
+                        <GlassIconButton
+                            name="check"
                             onPress={() => formik.handleSubmit()}
                             disabled={!isValid || loading}
                             loading={loading}
+                            tintColor={Colors.secondary}
+                            positioned="top-right"
                         />
 
                         <View style={styles.amountContainer}>
@@ -396,7 +402,7 @@ export default function EditSubscription({ route, navigation }: Props) {
                                                     customSheetRef.current?.expand()
                                                 }}
                                             >
-                                                <AntDesign name="setting" size={15} color={Colors.secondary} />
+                                                <Feather name="settings" size={15} color={Colors.secondary} />
                                                 <Text
                                                     style={[styles.chipText, styles.chipTextActive]}
                                                     numberOfLines={1}
@@ -478,7 +484,7 @@ export default function EditSubscription({ route, navigation }: Props) {
                                     {name}
                                 </Text>
                                 <View style={[styles.monthToggle, active && styles.monthToggleActive]}>
-                                    {active && <AntDesign name="check" size={13} color={Colors.secondary} />}
+                                    {active && <Feather name="check" size={13} color={Colors.secondary} />}
                                 </View>
                             </Ripple>
                         )

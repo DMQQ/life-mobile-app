@@ -5,15 +5,14 @@ import Colors, { defaultColors } from "@/constants/Colors"
 import Layout from "@/constants/Layout"
 import useUser from "@/utils/hooks/useUser"
 import { useExpoUpdates } from "@/utils/hooks/useExpoUpdate"
-import IconCloseButton from "@/components/ui/Button/IconCloseButton"
-import { AntDesign, Feather } from "@expo/vector-icons"
+import { GlassIconButton } from "@/components"
+import { Feather } from "@expo/vector-icons"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import { reloadAppAsync } from "expo"
 import { BlurView } from "expo-blur"
 import * as SecureStore from "expo-secure-store"
 import React, { useEffect, useState } from "react"
 import {
-    Alert,
     FlatList,
     ScrollView,
     StyleSheet,
@@ -362,7 +361,7 @@ export default function SettingsScreen({ navigation }: HomeScreenProps<"HomeSett
             <View style={s.inner}>
                 <View style={s.header}>
                     <Text variant="body" style={s.headerTitle}>Settings</Text>
-                    <IconCloseButton onPress={handleClose} />
+                    <GlassIconButton name="x" onPress={handleClose} />
                 </View>
 
                 <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={s.scroll} keyboardDismissMode="on-drag">
@@ -469,7 +468,7 @@ export default function SettingsScreen({ navigation }: HomeScreenProps<"HomeSett
                                                     <Text style={{ color: Colors.text_light, fontWeight: "600", fontSize: 14 }}>{selectedPalette.name}</Text>
                                                     <Text style={{ color: Colors.foreground_secondary, fontSize: 12 }}>{selectedPalette.secondary} · {selectedPalette.ternary}</Text>
                                                 </View>
-                                                <AntDesign name="checkcircle" size={18} color={Colors.secondary} />
+                                                <Feather name="check-circle" size={18} color={Colors.secondary} />
                                             </View>
                                         )}
                                     </>
@@ -623,13 +622,11 @@ function WatchSection() {
             Feedback.trigger("impactLight")
 
             if (!token?.trim()) {
-                Alert.alert("No Auth Token", "You need to be logged in to sync to Apple Watch.")
-                setStatus({ text: "No auth token available", ok: false })
+                setStatus({ text: "No auth token — please sign in", ok: false })
                 return
             }
             if (!ExpoAppleWatch.isWatchAvailable()) {
-                Alert.alert("Apple Watch Not Available", "Make sure your Apple Watch is paired and the watch app is installed.")
-                setStatus({ text: "Watch not available", ok: false })
+                setStatus({ text: "Watch not paired or app not installed", ok: false })
                 return
             }
 
@@ -639,11 +636,9 @@ function WatchSection() {
             await ExpoAppleWatch.sendAuthToken(token)
             Feedback.trigger("notificationSuccess")
             setStatus({ text: "Synced successfully", ok: true })
-            Alert.alert("Success", "Authentication synced to Apple Watch!")
         } catch (err: any) {
             Feedback.trigger("notificationError")
-            setStatus({ text: "Sync failed", ok: false })
-            Alert.alert("Sync Failed", err?.message || "Failed to sync to Apple Watch")
+            setStatus({ text: err?.message || "Sync failed", ok: false })
         } finally {
             setIsSyncing(false)
         }

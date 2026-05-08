@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef, ReactNode, forwardRef, useImperativeHandle } from "react"
-import { View, Alert, TouchableOpacity, StyleSheet } from "react-native"
+import { View, Alert, TouchableOpacity, StyleSheet } from "react-native" // Alert.prompt retained for native text input
 import Text from "@/components/ui/Text/Text"
 import Map, { PROVIDER_DEFAULT, Marker, Callout } from "react-native-maps"
-import { AntDesign, Feather } from "@expo/vector-icons"
+import { Feather } from "@expo/vector-icons"
 import * as Location from "expo-location"
 import { useQuery, useMutation, gql, useLazyQuery } from "@apollo/client"
 import Ripple from "react-native-material-ripple"
@@ -244,10 +244,8 @@ const MapPicker = forwardRef<MapPickerHandle, Pick<ExpenseType, "location"> & { 
             })
             const newAssignedLocation = points.locations.find((loc: any) => loc.id === locationId)
             setAssignedMarker(newAssignedLocation)
-            Alert.alert("Success", "Location assigned successfully!")
         } catch (error) {
             console.error("Error assigning location:", error)
-            Alert.alert("Error", "Failed to assign location")
         }
     }
 
@@ -264,13 +262,11 @@ const MapPicker = forwardRef<MapPickerHandle, Pick<ExpenseType, "location"> & { 
                     <Ripple
                         onPress={() => {
                             Alert.prompt("Location Search", "Enter location name:", (name) => {
-                                if (name) {
-                                    setLocationQuery(name)
-                                }
+                                if (name) setLocationQuery(name)
                             })
                         }}
                     >
-                        <AntDesign name="search" size={20} color={Colors.foreground} />
+                        <Feather name="search" size={20} color={Colors.foreground} />
                     </Ripple>
                     <Ripple onPress={() => setEditMode((p) => !p)}>
                         <Feather name="edit-2" size={20} color={editMode ? Colors.secondary : Colors.foreground} />

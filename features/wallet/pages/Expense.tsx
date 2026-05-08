@@ -4,7 +4,7 @@ import { Expense as ExpenseType } from "@/types"
 import { gql, useMutation, useQuery } from "@apollo/client"
 import { Feather } from "@expo/vector-icons"
 import { useEffect, useRef, useState } from "react"
-import { Alert, StyleSheet, View } from "react-native"
+import { StyleSheet, View } from "react-native"
 import useDeleteActivity from "../hooks/useDeleteActivity"
 import useRefund from "../hooks/useRefundExpense"
 import useSubscription from "../hooks/useSubscription"
@@ -21,6 +21,7 @@ import ExpenseDetails from "../components/Expense/ExpenseDetails"
 import SimilarExpenses from "../components/Expense/SimilarExpenses"
 import FileUpload, { FileUploadHandle } from "../components/Expense/FileUpload"
 import SubscriptionSection from "../components/Expense/SubscriptionSection"
+import { ConfirmDialog } from "@/components"
 
 const capitalize = (s = "") => s.charAt(0).toUpperCase() + s.slice(1)
 
@@ -87,38 +88,18 @@ export default function Expense({ route: { params }, navigation }: any) {
     const [selected, setSelected] = useState(params?.expense)
 
     useEffect(() => {
-        if (data?.expense) {
-            setSelected(data.expense)
-        }
+        if (data?.expense) setSelected(data.expense)
     }, [data?.expense])
+
+    const [confirmDelete, setConfirmDelete] = useState(false)
+    const [confirmRefund, setConfirmRefund] = useState(false)
+    const [confirmSubExpenseId, setConfirmSubExpenseId] = useState<string | null>(null)
+    const [confirmSubscriptionAction, setConfirmSubscriptionAction] = useState(false)
 
     const [refund, { loading: refundLoading }] = useRefund((data) => {
         if (data.refundExpense.type !== "refunded") return
-
-        setSelected({
-            ...selected,
-            type: "refunded",
-        })
+        setSelected((prev: any) => ({ ...prev, type: "refunded" }))
     })
-
-    const handleRefund = () => {
-        Alert.alert("Refund Expense", "Are you sure you want to refund this expense?", [
-            {
-                onPress: async () => {
-                    try {
-                        await refund({ variables: { expenseId: selected.id } })
-                    } catch (error) {
-                        Alert.alert("Error", "Failed to refund the expense. Please try again.")
-                    }
-                },
-                text: "Yes",
-            },
-            {
-                onPress: () => {},
-                text: "Cancel",
-            },
-        ])
-    }
 
     const subscription = useSubscription()
     const { data: subscriptionsData } = useGetSubscriptions()
@@ -128,101 +109,44 @@ export default function Expense({ route: { params }, navigation }: any) {
         subscription.assignExpenseToSubscriptionState.loading
 
     const hasSubscription = !!selected?.subscription?.id
-
     const isSubscriptionActive = hasSubscription && selected?.subscription?.isActive
 
     const subscriptionOptions = [{ id: null, description: "None" }, ...(subscriptionsData?.subscriptions || [])]
 
     const handleAssignSubscription = async (subscriptionId: string | null) => {
-        try {
-            const result = await subscription.assignExpenseToSubscription({
-                variables: {
-                    input: { expenseId: selected.id, subscriptionId },
-                },
-            })
-
-            if (result.data?.assignExpenseToSubscription) {
-                setSelected(result.data.assignExpenseToSubscription)
-            }
-        } catch (error) {
-            Alert.alert("Error", "Failed to assign subscription. Please try again.")
-        }
+        const result = await subscription.assignExpenseToSubscription({
+            variables: { input: { expenseId: selected.id, subscriptionId } },
+        })
+        if (result.data?.assignExpenseToSubscription) setSelected(result.data.assignExpenseToSubscription)
     }
 
-    const handleSubscriptionAction = () => {
-        const actionTitle = hasSubscription
-            ? isSubscriptionActive
-                ? "Disable Subscription"
-                : "Enable Subscription"
-            : "Create Monthly Subscription"
-
-        Alert.alert(actionTitle, `Are you sure you want to ${actionTitle.toLowerCase()}?`, [
-            {
-                onPress: async () => {
-                    try {
-                        if (isSubscriptionActive && selected?.subscription?.id) {
-                            const result = await subscription.cancelSubscription({
-                                variables: { subscriptionId: selected.subscription.id },
-                            })
-
-                            if (result.data?.cancelSubscription) {
-                                setSelected(result.data.cancelSubscription)
-                            }
-                        } else {
-                            const result = await subscription.createSubscription({
-                                variables: { expenseId: selected.id },
-                            })
-
-                            if (result.data?.createSubscription) {
-                                setSelected(result.data.createSubscription)
-                            }
-                        }
-                    } catch (error) {
-                        Alert.alert("Error", "Failed to update subscription. Please try again.")
-                    }
-                },
-                text: "Yes",
-            },
-            {
-                onPress: () => {},
-                text: "Cancel",
-            },
-        ])
+    const handleSubscriptionConfirm = async () => {
+        if (isSubscriptionActive && selected?.subscription?.id) {
+            const result = await subscription.cancelSubscription({
+                variables: { subscriptionId: selected.subscription.id },
+            })
+            if (result.data?.cancelSubscription) setSelected(result.data.cancelSubscription)
+        } else {
+            const result = await subscription.createSubscription({ variables: { expenseId: selected.id } })
+            if (result.data?.createSubscription) setSelected(result.data.createSubscription)
+        }
+        setConfirmSubscriptionAction(false)
     }
 
     const { deleteActivity } = useDeleteActivity()
 
-    const handleDelete = async () => {
-        const onRemove = async () => {
-            if (typeof selected?.id !== "undefined")
-                await deleteActivity({
-                    variables: {
-                        id: selected?.id,
-                    },
-
-                    onCompleted() {
-                        navigation.goBack()
-                    },
-                })
-        }
-
-        Alert.alert("Delete Expense", "Are you sure you want to delete this expense?", [
-            {
-                onPress: onRemove,
-                text: "Yes",
-            },
-            {
-                onPress: () => {},
-                text: "Cancel",
-            },
-        ])
+    const handleDeleteConfirm = async () => {
+        if (!selected?.id) return
+        await deleteActivity({
+            variables: { id: selected.id },
+            onCompleted: () => navigation.goBack(),
+        })
+        setConfirmDelete(false)
     }
 
-    const handleEdit = () => {
-        navigation.navigate("CreateExpense", {
-            ...selected,
-            isEditing: true,
-        })
+    const handleRefundConfirm = async () => {
+        await refund({ variables: { expenseId: selected.id } })
+        setConfirmRefund(false)
     }
 
     const [deleteSubExpense] = useMutation(gql`
@@ -231,31 +155,14 @@ export default function Expense({ route: { params }, navigation }: any) {
         }
     `)
 
-    const handleDeleteSubExpense = async (id: string) => {
-        try {
-            Alert.alert("Delete Sub-Expense", "Are you sure you want to delete this sub-expense?", [
-                {
-                    onPress: async () => {
-                        try {
-                            await deleteSubExpense({ variables: { id } })
-                            setSelected((prev: any) => ({
-                                ...prev,
-                                subexpenses: prev.subexpenses.filter((item: any) => item.id !== id),
-                            }))
-                        } catch (error) {
-                            Alert.alert("Error", "Failed to delete sub-expense. Please try again.")
-                        }
-                    },
-                    text: "Yes",
-                },
-                {
-                    onPress: () => {},
-                    text: "Cancel",
-                },
-            ])
-        } catch (error) {
-            Alert.alert("Error", "Failed to delete sub-expense. Please try again.")
-        }
+    const handleDeleteSubExpenseConfirm = async () => {
+        if (!confirmSubExpenseId) return
+        await deleteSubExpense({ variables: { id: confirmSubExpenseId } })
+        setSelected((prev: any) => ({
+            ...prev,
+            subexpenses: prev.subexpenses.filter((item: any) => item.id !== confirmSubExpenseId),
+        }))
+        setConfirmSubExpenseId(null)
     }
 
     const fileUploadRef = useRef<FileUploadHandle>(null)
@@ -269,7 +176,7 @@ export default function Expense({ route: { params }, navigation }: any) {
                     : "Enable Subscription"
                 : "Create Monthly Subscription",
             icon: hasSubscription ? (isSubscriptionActive ? "pause.circle" : "play.circle") : "plus.circle",
-            onPress: handleSubscriptionAction,
+            onPress: () => setConfirmSubscriptionAction(true),
         },
         ...(hasSubscription
             ? [
@@ -284,11 +191,8 @@ export default function Expense({ route: { params }, navigation }: any) {
     ]
 
     const scrollY = useSharedValue(0)
-
     const onScroll = useAnimatedScrollHandler({
-        onScroll: (ev) => {
-            scrollY.value = ev.contentOffset.y
-        },
+        onScroll: (ev) => { scrollY.value = ev.contentOffset.y },
     })
 
     return (
@@ -302,11 +206,11 @@ export default function Expense({ route: { params }, navigation }: any) {
                 buttons={[
                     {
                         icon: <Feather name="trash" size={20} color={Colors.foreground} />,
-                        onPress: handleDelete,
+                        onPress: () => setConfirmDelete(true),
                     },
                     {
                         icon: <Feather name="edit-2" size={20} color={Colors.foreground} />,
-                        onPress: handleEdit,
+                        onPress: () => navigation.navigate("CreateExpense", { ...selected, isEditing: true }),
                         style: { marginLeft: 5 },
                     },
                 ]}
@@ -324,24 +228,25 @@ export default function Expense({ route: { params }, navigation }: any) {
                 }}
                 initialTitleFontSize={selected?.description?.length > 25 ? 40 : 50}
             />
+
             <Animated.ScrollView
                 onScroll={onScroll}
-                keyboardDismissMode={"on-drag"}
-                style={{
-                    flex: 1,
-                    paddingTop: getModalMarginTop(selected?.description),
-                }}
+                keyboardDismissMode="on-drag"
+                style={{ flex: 1, paddingTop: getModalMarginTop(selected?.description) }}
             >
-                <View style={{ marginBottom: 30, paddingHorizontal: 15 }}>
+                <View style={styles.scrollContent}>
                     {selected.subexpenses?.length > 0 && (
-                        <View style={{ marginTop: 15 }}>
-                            <SubexpenseStack selected={selected} handleDeleteSubExpense={handleDeleteSubExpense} />
+                        <View style={styles.section}>
+                            <SubexpenseStack
+                                selected={selected}
+                                handleDeleteSubExpense={(id) => setConfirmSubExpenseId(id)}
+                            />
                         </View>
                     )}
 
                     <ExpenseDetails expense={selected} />
 
-                    <View style={{ marginTop: 20 }}>
+                    <View style={styles.section}>
                         <CollapsibleThemedCalendar
                             date={dayjs(selected?.date).format("YYYY-MM-DD")}
                             markedDates={{ [dayjs(selected?.date).format("YYYY-MM-DD")]: { selected: true } }}
@@ -363,7 +268,7 @@ export default function Expense({ route: { params }, navigation }: any) {
                     />
                 </View>
 
-                {data?.similarExpenses?.length > 1 && (
+                {data?.expenseSimilar?.length > 1 && (
                     <SimilarExpenses
                         selected={selected}
                         similarExpenses={data.expenseSimilar.filter((e: any) => e.id !== selected.id)}
@@ -371,14 +276,13 @@ export default function Expense({ route: { params }, navigation }: any) {
                 )}
 
                 <FileUpload ref={fileUploadRef} id={selected.id} images={selected?.files} />
-
                 <MapPicker ref={mapPickerRef} location={selected.location} id={selected.id} />
 
-                <View style={{ height: 100 }} />
+                <View style={styles.bottomSpacer} />
             </Animated.ScrollView>
 
             <FloatingBottomToolBar
-                onRefund={handleRefund}
+                onRefund={() => setConfirmRefund(true)}
                 refundLoading={refundLoading}
                 isRefunded={selected?.type === "refunded"}
                 onTakePhoto={() => fileUploadRef.current?.takePhoto()}
@@ -389,6 +293,62 @@ export default function Expense({ route: { params }, navigation }: any) {
                 isSubscriptionActive={isSubscriptionActive}
                 onSetLocation={() => mapPickerRef.current?.triggerSearch()}
             />
+
+            <ConfirmDialog
+                isVisible={confirmDelete}
+                onDismiss={() => setConfirmDelete(false)}
+                onConfirm={handleDeleteConfirm}
+                title="Delete Expense"
+                description="This expense will be permanently removed."
+                destructive
+            />
+
+            <ConfirmDialog
+                isVisible={confirmRefund}
+                onDismiss={() => setConfirmRefund(false)}
+                onConfirm={handleRefundConfirm}
+                title="Refund Expense"
+                description="Mark this expense as refunded?"
+                confirmLabel="Refund"
+                loading={refundLoading}
+            />
+
+            <ConfirmDialog
+                isVisible={!!confirmSubExpenseId}
+                onDismiss={() => setConfirmSubExpenseId(null)}
+                onConfirm={handleDeleteSubExpenseConfirm}
+                title="Delete Sub-Expense"
+                description="This cannot be undone."
+                destructive
+            />
+
+            <ConfirmDialog
+                isVisible={confirmSubscriptionAction}
+                onDismiss={() => setConfirmSubscriptionAction(false)}
+                onConfirm={handleSubscriptionConfirm}
+                title={
+                    hasSubscription
+                        ? isSubscriptionActive
+                            ? "Disable Subscription"
+                            : "Enable Subscription"
+                        : "Create Subscription"
+                }
+                description="Are you sure you want to perform this action?"
+                loading={isSubscriptionLoading}
+            />
         </View>
     )
 }
+
+const styles = StyleSheet.create({
+    scrollContent: {
+        marginBottom: 30,
+        paddingHorizontal: 15,
+    },
+    section: {
+        marginTop: 20,
+    },
+    bottomSpacer: {
+        height: 100,
+    },
+})

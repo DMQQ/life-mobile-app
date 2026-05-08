@@ -1,5 +1,5 @@
-import { Button } from "@/components"
-import Colors, { Sizing } from "@/constants/Colors"
+import { Button, EmptyState, ConfirmDialog } from "@/components"
+import Colors from "@/constants/Colors"
 import Layout from "@/constants/Layout"
 import { Icons } from "@/features/wallet/components/Expense/ExpenseIcon"
 import BottomSheetModal, {
@@ -9,17 +9,17 @@ import BottomSheetModal, {
     BottomSheetView,
 } from "@gorhom/bottom-sheet"
 import moment from "moment"
-import React, { useCallback } from "react"
-import { Alert, StyleProp, Text, View, ViewStyle } from "react-native"
+import React, { useCallback, useState } from "react"
+import { StyleProp, ViewStyle } from "react-native"
 import WalletItem from "../Wallet/WalletItem"
 import Color from "color"
-import { MaterialIcons } from "@expo/vector-icons"
 import { useCreateExpenseContext, SubExpense } from "@/features/wallet/context/CreateExpenseContext"
 
 const SubExpenseSheet = () => {
     const { state, methods, subexpenseSheetRef } = useCreateExpenseContext()
     const { SubExpenses, date } = state
     const { setIsSubExpenseMode, setSubExpenses } = methods
+    const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
 
     const backdropComponent = useCallback(
         (props: BottomSheetBackdropProps) => (
@@ -27,104 +27,73 @@ const SubExpenseSheet = () => {
         ),
         [],
     )
+
     return (
-        <BottomSheetModal
-            ref={subexpenseSheetRef}
-            index={-1}
-            snapPoints={[Layout.screen.height / 2]}
-            animateOnMount={false}
-            handleIndicatorStyle={{ backgroundColor: "#fff", width: 120 }}
-            backgroundStyle={{
-                backgroundColor: Colors.primary_lighter,
-                borderWidth: 1,
-                borderColor: Color(Colors.primary_lighter).lighten(0.5).hex(),
-            }}
-            backdropComponent={backdropComponent}
-        >
-            <BottomSheetView style={{ flex: 1, padding: 15 }}>
-                <BottomSheetFlatList
-                    data={SubExpenses}
-                    showsHorizontalScrollIndicator={false}
-                    ListEmptyComponent={
-                        <View style={{ flex: 1, justifyContent: "center", paddingVertical: 40, paddingHorizontal: 20 }}>
-                            <MaterialIcons
-                                name="receipt-long"
-                                size={56}
-                                color={Colors.foreground_secondary}
-                                style={{ marginBottom: 20 }}
-                            />
-                            <Text
-                                style={{
-                                    color: Colors.text_light,
-                                    fontSize: Sizing.heading,
-                                    fontWeight: "700",
-                                    textAlign: "left",
-                                    marginBottom: 12,
-                                }}
-                            >
-                                No subexpenses yet
-                            </Text>
-                            <Text
-                                style={{
-                                    color: Colors.foreground_secondary,
-                                    fontSize: Sizing.text,
-                                    textAlign: "left",
-                                    marginBottom: 32,
-                                }}
-                            >
-                                Add subexpenses to break down your expenses
-                            </Text>
-                            <Button
-                                onPress={() => {
+        <>
+            <BottomSheetModal
+                ref={subexpenseSheetRef}
+                index={-1}
+                snapPoints={[Layout.screen.height / 2]}
+                animateOnMount={false}
+                handleIndicatorStyle={{ backgroundColor: "#fff", width: 120 }}
+                backgroundStyle={{
+                    backgroundColor: Colors.primary_lighter,
+                    borderWidth: 1,
+                    borderColor: Color(Colors.primary_lighter).lighten(0.5).hex(),
+                }}
+                backdropComponent={backdropComponent}
+            >
+                <BottomSheetView style={{ flex: 1, padding: 15 }}>
+                    <BottomSheetFlatList
+                        data={SubExpenses}
+                        showsHorizontalScrollIndicator={false}
+                        ListEmptyComponent={
+                            <EmptyState
+                                icon="file-text"
+                                title="No subexpenses yet"
+                                description="Add subexpenses to break down your expenses"
+                                actionLabel="Add Subexpense"
+                                onAction={() => {
                                     setIsSubExpenseMode(true)
                                     subexpenseSheetRef.current?.collapse()
                                 }}
-                                style={{
-                                    borderRadius: 12,
-                                    backgroundColor: Colors.secondary,
-                                    shadowOpacity: 0,
-                                    elevation: 0,
-                                }}
-                            >
-                                Add Subexpense
-                            </Button>
-                        </View>
-                    }
-                    renderItem={({ item, index }: { item: SubExpense; index: number }) => (
-                        <WalletItem
-                            handlePress={() => {
-                                Alert.alert("Delete", "Are you sure you want to delete this subexpense?", [
-                                    {
-                                        text: "Cancel",
-                                        style: "cancel",
-                                    },
-                                    {
-                                        text: "Delete",
-                                        onPress: () => {
-                                            setSubExpenses((prev) => prev.filter((i) => i.id !== item.id))
-                                        },
-                                    },
-                                ])
-                            }}
-                            id={item.id}
-                            amount={item.amount}
-                            description={item.description}
-                            date={moment(date).format("YYYY-MM-DD")}
-                            type="expense"
-                            category={item.category}
-                            balanceBeforeInteraction={0}
-                            spontaneousRate={0}
-                            subscription={null}
-                            location={null}
-                            subexpenses={[]}
-                            files={[]}
-                            animatedStyle={{} as any}
-                            containerStyle={{ backgroundColor: Colors.primary_lighter } as StyleProp<ViewStyle>}
-                        />
-                    )}
-                />
-            </BottomSheetView>
-        </BottomSheetModal>
+                            />
+                        }
+                        renderItem={({ item }: { item: SubExpense }) => (
+                            <WalletItem
+                                handlePress={() => setConfirmDeleteId(item.id)}
+                                id={item.id}
+                                amount={item.amount}
+                                description={item.description}
+                                date={moment(date).format("YYYY-MM-DD")}
+                                type="expense"
+                                category={item.category}
+                                balanceBeforeInteraction={0}
+                                spontaneousRate={0}
+                                subscription={null}
+                                location={null}
+                                subexpenses={[]}
+                                files={[]}
+                                animatedStyle={{} as any}
+                                containerStyle={{ backgroundColor: Colors.primary_lighter } as StyleProp<ViewStyle>}
+                            />
+                        )}
+                    />
+                </BottomSheetView>
+            </BottomSheetModal>
+
+            <ConfirmDialog
+                isVisible={!!confirmDeleteId}
+                onDismiss={() => setConfirmDeleteId(null)}
+                onConfirm={() => {
+                    setSubExpenses((prev) => prev.filter((i) => i.id !== confirmDeleteId))
+                    setConfirmDeleteId(null)
+                }}
+                title="Delete Subexpense"
+                description="Are you sure you want to delete this subexpense?"
+                destructive
+            />
+        </>
     )
 }
 

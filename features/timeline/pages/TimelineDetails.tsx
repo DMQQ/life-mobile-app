@@ -22,7 +22,7 @@ import { useActivityUtils } from "@/utils/hooks/useActivityManager"
 import { useApolloClient } from "@apollo/client"
 import axios from "axios"
 import * as ImagePicker from "expo-image-picker"
-import { AntDesign, Feather, FontAwesome, Ionicons } from "@expo/vector-icons"
+import { Feather } from "@expo/vector-icons"
 import { HeaderItem } from "@/components/ui/Header/Header"
 
 const styles = StyleSheet.create({

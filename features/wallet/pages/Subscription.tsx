@@ -1,9 +1,9 @@
 import Text from "@/components/ui/Text/Text"
 import { gql, useQuery } from "@apollo/client"
-import { AntDesign, Feather, MaterialIcons } from "@expo/vector-icons"
+import { Feather } from "@expo/vector-icons"
 import moment from "moment"
 import React, { useEffect, useState } from "react"
-import { ActivityIndicator, Alert, StyleSheet, View } from "react-native"
+import { ActivityIndicator, StyleSheet, View } from "react-native"
 import Ripple from "react-native-material-ripple"
 
 import Header from "@/components/ui/Header/Header"
@@ -18,10 +18,10 @@ import Animated, {
     useAnimatedStyle,
     useSharedValue,
 } from "react-native-reanimated"
-import { useSafeAreaInsets } from "react-native-safe-area-context"
 import WalletItem, { CategoryIcon } from "../components/Wallet/WalletItem"
 import useSubscription from "../hooks/useSubscription"
 import getModalMarginTop from "../utils/modalMarginTop"
+import { ConfirmDialog, EmptyState } from "@/components"
 
 interface SubscriptionDetailsProps {
     route: { params: { subscriptionId: string } }
@@ -85,6 +85,7 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
     })
 
     const [subscription, setSubscription] = useState<Subscription | null>(null)
+    const [confirmAction, setConfirmAction] = useState(false)
 
     useEffect(() => {
         if (data?.subscription) {
@@ -114,13 +115,9 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
         const months = duration.months()
         const days = duration.days()
 
-        if (years > 0) {
-            return `${years}y ${months}m`
-        } else if (months > 0) {
-            return `${months}m ${days}d`
-        } else if (days > 0) {
-            return `${days} days`
-        }
+        if (years > 0) return `${years}y ${months}m`
+        if (months > 0) return `${months}m ${days}d`
+        if (days > 0) return `${days} days`
         return "Started today"
     }
 
@@ -133,63 +130,43 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
     const sortedExpenses = [...(subscription?.expenses || [])].sort((a, b) => moment(b.date).diff(moment(a.date)))
 
     const sub = useSubscription()
-    const isSubscriptionLoading = sub.createSubscriptionState.loading || sub.cancelSubscriptionState.loading || sub.renewSubscriptionState.loading
+    const isSubscriptionLoading =
+        sub.createSubscriptionState.loading || sub.cancelSubscriptionState.loading || sub.renewSubscriptionState.loading
 
     const hasSubscription = !!subscription?.id
-
     const isSubscriptionActive = hasSubscription && subscription?.isActive
 
-    const handleSubscriptionAction = () => {
-        const actionTitle = hasSubscription
-            ? isSubscriptionActive
-                ? "Disable Subscription"
-                : "Renew Subscription"
-            : "Create Monthly Subscription"
-
-        Alert.alert(actionTitle, `Are you sure you want to ${actionTitle.toLowerCase()}?`, [
-            {
-                onPress: async () => {
-                    try {
-                        if (isSubscriptionActive && subscription?.id) {
-                            const result = await sub.cancelSubscription({
-                                variables: { subscriptionId: subscription.id },
-                            })
-
-                            if (result.data?.cancelSubscription) {
-                                setSubscription(result.data.cancelSubscription.subscription)
-                                refetch()
-                            }
-                        } else if (hasSubscription && !isSubscriptionActive) {
-                            const result = await sub.renewSubscription({
-                                variables: { subscriptionId: subscription.id },
-                            })
-
-                            if (result.data?.renewSubscription) {
-                                setSubscription(result.data.renewSubscription.subscription)
-                                refetch()
-                            }
-                        } else {
-                            const result = await sub.createSubscription({
-                                variables: { expenseId: subscription?.id },
-                            })
-
-                            if (result.data?.createSubscription) {
-                                setSubscription(result.data.createSubscription.subscription)
-                                refetch()
-                            }
-                        }
-                    } catch (error) {
-                        console.error("Subscription action error:", JSON.stringify(error, null, 2))
-                        Alert.alert("Error", "Failed to update subscription. Please try again.")
-                    }
-                },
-                text: "Yes",
-            },
-            {
-                onPress: () => {},
-                text: "Cancel",
-            },
-        ])
+    const handleSubscriptionConfirm = async () => {
+        try {
+            if (isSubscriptionActive && subscription?.id) {
+                const result = await sub.cancelSubscription({
+                    variables: { subscriptionId: subscription.id },
+                })
+                if (result.data?.cancelSubscription) {
+                    setSubscription(result.data.cancelSubscription.subscription)
+                    refetch()
+                }
+            } else if (hasSubscription && !isSubscriptionActive) {
+                const result = await sub.renewSubscription({
+                    variables: { subscriptionId: subscription!.id },
+                })
+                if (result.data?.renewSubscription) {
+                    setSubscription(result.data.renewSubscription.subscription)
+                    refetch()
+                }
+            } else {
+                const result = await sub.createSubscription({
+                    variables: { expenseId: subscription?.id },
+                })
+                if (result.data?.createSubscription) {
+                    setSubscription(result.data.createSubscription.subscription)
+                    refetch()
+                }
+            }
+        } catch {
+        } finally {
+            setConfirmAction(false)
+        }
     }
 
     const handleExpensePress = (expense: Expense) => {
@@ -197,7 +174,6 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
     }
 
     const scrollY = useSharedValue(0)
-    const insets = useSafeAreaInsets()
 
     const onScroll = useAnimatedScrollHandler({
         onScroll: (ev) => {
@@ -251,7 +227,7 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
 
                         {subscription.billingCycle === "custom" && subscription.billingDay != null && (
                             <View style={styles.row}>
-                                <AntDesign
+                                <Feather
                                     name="calendar"
                                     size={24}
                                     color={Colors.ternary}
@@ -290,14 +266,15 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
 
                         {subscription.reminderDaysBeforehand != null && (
                             <View style={styles.row}>
-                                <MaterialIcons
-                                    name="notifications-none"
+                                <Feather
+                                    name="bell"
                                     size={24}
                                     color={Colors.ternary}
                                     style={{ paddingHorizontal: 7.5, padding: 2.5 }}
                                 />
                                 <Text variant="body" style={{ color: Colors.secondary_light_2 }}>
-                                    Reminder: {subscription.reminderDaysBeforehand === 0
+                                    Reminder:{" "}
+                                    {subscription.reminderDaysBeforehand === 0
                                         ? "on billing day"
                                         : `${subscription.reminderDaysBeforehand}d before`}
                                 </Text>
@@ -305,8 +282,8 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                         )}
 
                         <View style={styles.row}>
-                            <MaterialIcons
-                                name={subscription.isActive ? "play-circle-filled" : "pause-circle-filled"}
+                            <Feather
+                                name={subscription.isActive ? "play-circle" : "pause-circle"}
                                 size={24}
                                 color={Colors.ternary}
                                 style={{ paddingHorizontal: 7.5, padding: 2.5 }}
@@ -334,7 +311,7 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                         </View>
 
                         <View style={styles.row}>
-                            <AntDesign
+                            <Feather
                                 name="calendar"
                                 size={24}
                                 color={Colors.ternary}
@@ -346,8 +323,8 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                         </View>
 
                         <View style={styles.row}>
-                            <MaterialIcons
-                                name="schedule"
+                            <Feather
+                                name="clock"
                                 size={24}
                                 color={Colors.ternary}
                                 style={{ paddingHorizontal: 7.5, padding: 2.5 }}
@@ -359,8 +336,8 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
 
                         {subscription.isActive && (
                             <View style={styles.row}>
-                                <MaterialIcons
-                                    name="event"
+                                <Feather
+                                    name="calendar"
                                     size={24}
                                     color={Colors.ternary}
                                     style={{ paddingHorizontal: 7.5, padding: 2.5 }}
@@ -380,7 +357,7 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
 
                         <View style={{ padding: 15 }}>
                             <Ripple
-                                onPress={handleSubscriptionAction}
+                                onPress={() => setConfirmAction(true)}
                                 disabled={isSubscriptionLoading}
                                 style={[
                                     styles.row,
@@ -478,15 +455,24 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                 )}
 
                 {subscription.expenses.length === 0 && (
-                    <View style={styles.emptyContainer}>
-                        <Text style={styles.emptyText}>No payments yet</Text>
-                        <Text style={styles.emptySubtext}>
-                            Payments will appear here once the subscription becomes active
-                        </Text>
-                    </View>
+                    <EmptyState
+                        icon="credit-card"
+                        title="No payments yet"
+                        description="Payments will appear here once the subscription becomes active"
+                    />
                 )}
                 <View style={{ height: 350, width: 100 }} />
             </Animated.ScrollView>
+
+            <ConfirmDialog
+                isVisible={confirmAction}
+                onDismiss={() => setConfirmAction(false)}
+                onConfirm={handleSubscriptionConfirm}
+                title={isSubscriptionActive ? "Disable Subscription" : "Renew Subscription"}
+                description={`Are you sure you want to ${isSubscriptionActive ? "disable" : "renew"} this subscription?`}
+                destructive={isSubscriptionActive}
+                loading={isSubscriptionLoading}
+            />
         </View>
     )
 }
@@ -609,21 +595,6 @@ const styles = StyleSheet.create({
     statLabel: {
         color: Colors.secondary_light_2,
         fontSize: 12,
-        textAlign: "center",
-    },
-    emptyContainer: {
-        alignItems: "center",
-        padding: 40,
-    },
-    emptyText: {
-        color: Colors.foreground,
-        fontSize: 18,
-        fontWeight: "600",
-        marginBottom: 8,
-    },
-    emptySubtext: {
-        color: "rgba(255,255,255,0.7)",
-        fontSize: 14,
         textAlign: "center",
     },
     morePaymentsContainer: {
