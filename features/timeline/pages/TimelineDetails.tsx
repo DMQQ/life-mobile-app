@@ -5,7 +5,7 @@ import Url from "@/constants/Url"
 import { StackScreenProps } from "@/types"
 import Color from "color"
 import { useCallback, useMemo, useState } from "react"
-import { StyleSheet, View } from "react-native"
+import { ActionSheetIOS, StyleSheet, View } from "react-native"
 import Animated, { useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import FileList from "../components/FileList"
@@ -16,7 +16,8 @@ import useCompleteOccurrence from "../hooks/mutation/useCompleteOccurrence"
 import useGetOccurrenceById from "../hooks/query/useGetOccurrenceById"
 
 import { Header } from "@/components"
-import DeleteTimelineEvent from "@/components/ui/Dialog/Delete/DeleteTimelineEvent"
+import useDeleteAllOccurrences from "../hooks/mutation/useDeleteAllOccurrences"
+import useRemoveTimelineMutation from "../hooks/mutation/useRemoveTimelineMutation"
 import { useActivityUtils } from "@/utils/hooks/useActivityManager"
 import { useApolloClient } from "@apollo/client"
 import axios from "axios"
@@ -102,14 +103,35 @@ export default function TimelineDetails({
         return titleTop + lines * lineHeight + breathingRoom
     }, [data?.title, data?.description, insets.top])
 
-    const [selectedEventForDeletion, setSelectedEventForDeletion] = useState<any | null>(null)
+    const { remove: removeOne } = useRemoveTimelineMutation({ id: data?.id || "", date: data?.date || "" }, () =>
+        (navigation as any).goBack(),
+    )
+    const { remove: removeAll } = useDeleteAllOccurrences({ id: data?.id || "", date: data?.date || "" }, () =>
+        (navigation as any).goBack(),
+    )
 
     const buttons = useMemo(
         () =>
             [
                 {
-                    icon: <Feather name="trash" size={20} color="#fff" />,
-                    onPress: () => setSelectedEventForDeletion(data),
+                    onPress: () => {},
+                    icon: <Feather name="trash" size={20} color={Colors.foreground} />,
+                    contextMenu: {
+                        items: [
+                            {
+                                title: "Delete this",
+                                systemImage: "trash" as any,
+                                destructive: true,
+                                onPress: () => removeOne(),
+                            },
+                            {
+                                title: "Delete All",
+                                systemImage: "trash" as any,
+                                destructive: true,
+                                onPress: () => removeAll(),
+                            },
+                        ],
+                    },
                 },
                 {
                     icon: <Feather name="edit-2" size={20} color={Colors.foreground} />,
@@ -214,20 +236,6 @@ export default function TimelineDetails({
                     </View>
                 )}
             </Animated.ScrollView>
-
-            <DeleteTimelineEvent
-                isVisible={!!selectedEventForDeletion}
-                item={
-                    selectedEventForDeletion
-                        ? {
-                              id: selectedEventForDeletion.id,
-                              name: selectedEventForDeletion.title,
-                              date: selectedEventForDeletion.date,
-                          }
-                        : undefined
-                }
-                onDismiss={() => setSelectedEventForDeletion(null)}
-            />
 
             <FloatingBottomToolBar
                 activityPending={isPending}

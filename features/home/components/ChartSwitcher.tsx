@@ -27,9 +27,9 @@ const ChartSwitcher = () => {
             </View>
 
             <GroupSelector
-                options={["weekly", "prediction"]}
+                options={[{ label: "weekly", value: "weekly" as ChartType }, { label: "prediction", value: "prediction" as ChartType }]}
                 value={activeChart}
-                onChange={(value) => setActiveChart(value as ChartType)}
+                onChange={(value) => setActiveChart(value)}
             />
         </View>
     )

@@ -11,6 +11,7 @@ import Ripple from "react-native-material-ripple"
 import DatePicker, { type DatePickerRef } from "@/components/DatePicker"
 import Text from "@/components/ui/Text/Text"
 import dayjs from "dayjs"
+import GroupSelector from "@/components/ui/GroupSelector"
 
 const styles = StyleSheet.create({
     arrow_button: {
@@ -74,19 +75,19 @@ const ArrowButton = (props: { onPress: () => void; arrow: "arrow-up" | "arrow-do
 )
 
 const REPEAT_TYPES = [
-    { text: "Daily", value: "DAILY" },
-    { text: "Weekly", value: "WEEKLY" },
-    { text: "Monthly", value: "MONTHLY" },
+    { label: "Daily", value: "DAILY" },
+    { label: "Weekly", value: "WEEKLY" },
+    { label: "Monthly", value: "MONTHLY" },
 ]
 
 const DAYS_OF_WEEK = [
-    { text: "S", value: 0 },
-    { text: "M", value: 1 },
-    { text: "T", value: 2 },
-    { text: "W", value: 3 },
-    { text: "T", value: 4 },
-    { text: "F", value: 5 },
-    { text: "S", value: 6 },
+    { label: "S", value: 0 },
+    { label: "M", value: 1 },
+    { label: "T", value: 2 },
+    { label: "W", value: 3 },
+    { label: "T", value: 4 },
+    { label: "F", value: 5 },
+    { label: "S", value: 6 },
 ]
 
 const intervalLabel = (type: string) => {
@@ -144,7 +145,7 @@ const CreateRepeatableTimeline = forwardRef<BottomSheetType, CreateRepeatableTim
         set("repeatDaysOfWeek", current.includes(day) ? current.filter((d) => d !== day) : [...current, day])
     }
 
-    const intervalButtons = new Array(7).fill(0).map((_, i) => ({ text: `${i + 1}`, value: `${i + 1}` }))
+    const intervalButtons = new Array(7).fill(0).map((_, i) => ({ label: `${i + 1}`, value: `${i + 1}` }))
 
     const repeatUntilDate = local.repeatUntil ? dayjs(local.repeatUntil).toDate() : new Date()
 
@@ -207,20 +208,16 @@ const CreateRepeatableTimeline = forwardRef<BottomSheetType, CreateRepeatableTim
                                 Repeat type
                             </Text>
                         </View>
-                        <SegmentedButtons
+                        <GroupSelector
                             value={local.repeatType}
                             onChange={(value) => set("repeatType", value)}
-                            buttons={REPEAT_TYPES}
-                            buttonStyle={{ height: 36 }}
-                            buttonTextStyle={{ fontSize: 13 }}
-                            containerStyle={{ borderRadius: 8 }}
+                            options={REPEAT_TYPES}
                         />
                     </View>
 
                     {local.repeatType === "WEEKLY" && (
                         <View style={styles.section}>
                             <View style={styles.sectionLabel}>
-                                <Ionicons name="today-outline" size={16} color={Colors.secondary} />
                                 <Text variant="body" color={Colors.secondary} style={{ fontWeight: "700" }}>
                                     Days of week
                                 </Text>
@@ -248,7 +245,7 @@ const CreateRepeatableTimeline = forwardRef<BottomSheetType, CreateRepeatableTim
                                                     fontWeight: "600",
                                                 }}
                                             >
-                                                {day.text}
+                                                {day.label}
                                             </Text>
                                         </Ripple>
                                     )
@@ -264,13 +261,10 @@ const CreateRepeatableTimeline = forwardRef<BottomSheetType, CreateRepeatableTim
                                 Every {intervalLabel(local.repeatType)}
                             </Text>
                         </View>
-                        <SegmentedButtons
+                        <GroupSelector
                             value={local.repeatInterval || "1"}
                             onChange={(value) => set("repeatInterval", value)}
-                            buttons={intervalButtons}
-                            buttonStyle={{ height: 36 }}
-                            buttonTextStyle={{ fontSize: 13 }}
-                            containerStyle={{ borderRadius: 8 }}
+                            options={intervalButtons}
                         />
                     </View>
 
@@ -316,7 +310,9 @@ const CreateRepeatableTimeline = forwardRef<BottomSheetType, CreateRepeatableTim
                         <DatePicker
                             controlRef={datePickerRef}
                             mode="single"
-                            placeholder={local.repeatUntil ? dayjs(local.repeatUntil).format("MMM D, YYYY") : "Select end date"}
+                            placeholder={
+                                local.repeatUntil ? dayjs(local.repeatUntil).format("MMM D, YYYY") : "Select end date"
+                            }
                             dates={{ start: repeatUntilDate, end: repeatUntilDate }}
                             setDates={({ start }) => set("repeatUntil", dayjs(start).format("YYYY-MM-DD"))}
                         />

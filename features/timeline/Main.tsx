@@ -10,10 +10,13 @@ import CreateTimeLineEventModal from "./pages/TimelineCreate"
 import TimelineDetails from "./pages/TimelineDetails"
 import TodosTransferModal from "./pages/TodosTransferModal"
 import CopyTimelineModal from "./pages/CopyTimelineModal"
+import MissedEventsModal from "./pages/MissedEventsModal"
 import TimelineDoScreen from "./pages/TimelineDoScreen"
 import type { TimelineRootStack as RootStackParamList } from "./types"
 import Color from "color"
 import Colors from "@/constants/Colors"
+import { IconButton } from "@/components"
+import { AntDesign } from "@expo/vector-icons"
 
 const Stack = createNativeStackNavigator<RootStackParamList>()
 
@@ -112,6 +115,28 @@ export default function TimelineScreens({ route, navigation }: RootStackScreenPr
                 }}
             />
 
+            <Stack.Screen
+                name="MissedEventsModal"
+                component={MissedEventsModal}
+                options={{
+                    headerShown: true,
+                    presentation: "modal",
+                    title: "Missed Events",
+                    headerBackButtonMenuEnabled: true,
+                    headerLeft: () => (
+                        <IconButton
+                            icon={<AntDesign name="close" size={20} color={Colors.foreground} />}
+                            onPress={() => navigation.goBack()}
+                        />
+                    ),
+                    contentStyle: {
+                        backgroundColor: Colors.primary,
+                    },
+                    headerStyle: {
+                        backgroundColor: Colors.primary,
+                    },
+                }}
+            />
             <Stack.Screen
                 name="TimelineDo"
                 component={TimelineDoScreen}

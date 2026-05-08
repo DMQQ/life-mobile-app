@@ -3,31 +3,36 @@ import { Animated, Pressable, StyleSheet, Text } from "react-native"
 import theme from "@/constants/Colors"
 import GlassView from "./GlassView"
 
-interface GroupSelectorProps<T extends string> {
-    options: [T] | [T, T] | [T, T, T]
-    value: T
-    onChange: (value: T) => void
+export interface GroupSelectorOption<V = string> {
+    label: string
+    value: V
 }
 
-export default function GroupSelector<T extends string>({ options, value, onChange }: GroupSelectorProps<T>) {
+interface GroupSelectorProps<V> {
+    options: GroupSelectorOption<V>[]
+    value: V
+    onChange: (value: V) => void
+}
+
+export default function GroupSelector<V>({ options, value, onChange }: GroupSelectorProps<V>) {
     const anims = useRef(options.map(() => new Animated.Value(1))).current
 
-    const handlePress = (option: T, index: number) => {
-        if (option === value) return
+    const handlePress = (option: GroupSelectorOption<V>, index: number) => {
+        if (option.value === value) return
         Animated.sequence([
             Animated.timing(anims[index], { toValue: 0.94, duration: 80, useNativeDriver: true }),
             Animated.timing(anims[index], { toValue: 1, duration: 80, useNativeDriver: true }),
         ]).start()
-        onChange(option)
+        onChange(option.value)
     }
 
     return (
         <GlassView style={styles.container}>
             {options.map((option, i) => {
-                const selected = option === value
+                const selected = option.value === value
                 return (
                     <GlassView
-                        key={option + "-" + selected}
+                        key={String(option.value) + "-" + selected}
                         style={[styles.segmentWrapper, selected && { zIndex: 1 }]}
                         tintColor={selected ? theme.secondary : theme.primary_lighter}
                         interactive
@@ -40,7 +45,7 @@ export default function GroupSelector<T extends string>({ options, value, onChan
                                 pressed && { transform: [{ scale: 0.97 }] },
                             ]}
                         >
-                            <Text style={[styles.label, selected && styles.labelSelected]}>{option}</Text>
+                            <Text style={[styles.label, selected && styles.labelSelected]}>{option.label}</Text>
                         </Pressable>
                     </GlassView>
                 )

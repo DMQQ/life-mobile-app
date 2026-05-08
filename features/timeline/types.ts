@@ -26,6 +26,9 @@ export type TimelineRootStack = {
         timelineTitle: string
         originalDate: string
     }
+    MissedEventsModal: {
+        eventIds: string[]
+    }
 }
 
 export type TimelineScreenProps<Key extends keyof TimelineRootStack> = StackScreenProps<TimelineRootStack, Key>

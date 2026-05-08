@@ -184,7 +184,7 @@ export default function TransferSubAccount({ navigation, route }: WalletScreens<
 
                         <View>
                             <GroupSelector
-                                options={["500", "50%", "100%"]}
+                                options={[{ label: "500", value: "500" }, { label: "50%", value: "50%" }, { label: "100%", value: "100%" }]}
                                 value={amount}
                                 onChange={(value) => {
                                     const numericValue = value.endsWith("%")

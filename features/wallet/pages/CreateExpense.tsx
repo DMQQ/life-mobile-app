@@ -30,13 +30,13 @@ import Color from "color"
 import Ripple from "react-native-material-ripple"
 import Feedback from "react-native-haptic-feedback"
 
-const TYPE_OPTIONS: ["Expense", "Income", "Refund"] = ["Expense", "Income", "Refund"]
+type ExpenseType = "expense" | "income" | "refunded"
 
-const labelToType = (label: string): "expense" | "income" | "refunded" =>
-    label === "Expense" ? "expense" : label === "Income" ? "income" : "refunded"
-
-const typeToLabel = (type: string | null): "Expense" | "Income" | "Refund" =>
-    type === "income" ? "Income" : type === "refunded" ? "Refund" : "Expense"
+const TYPE_OPTIONS: [{ label: string; value: ExpenseType }, { label: string; value: ExpenseType }, { label: string; value: ExpenseType }] = [
+    { label: "Expense", value: "expense" },
+    { label: "Income", value: "income" },
+    { label: "Refund", value: "refunded" },
+]
 
 export default function CreateExpenseModal({ route: { params } }: any) {
     const hookData = useCreateExpensePage(params)
@@ -64,8 +64,8 @@ export default function CreateExpenseModal({ route: { params } }: any) {
                 <View style={{ position: "absolute", top: 15, left: 80, right: 80, zIndex: 1000 }}>
                     <GroupSelector
                         options={TYPE_OPTIONS}
-                        value={typeToLabel(state.type)}
-                        onChange={(label) => methods.setType(labelToType(label))}
+                        value={state.type ?? "expense"}
+                        onChange={(value) => methods.setType(value)}
                     />
                 </View>
 

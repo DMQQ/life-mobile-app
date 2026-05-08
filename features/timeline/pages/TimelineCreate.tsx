@@ -19,14 +19,12 @@ import GlassView from "@/components/ui/GlassView"
 import DatePicker from "@/components/DatePicker"
 import TimePicker from "@/components/TimePicker"
 import dayjs from "dayjs"
+import GroupSelector from "@/components/ui/GroupSelector"
 
 const styles = StyleSheet.create({
     timeContainer: {
         flexDirection: "row",
         width: "100%",
-        backgroundColor: Colors.primary_light,
-        borderWidth: 2,
-        borderColor: Colors.primary_lighter,
         borderRadius: 15,
         padding: 7.5,
         alignItems: "center",
@@ -139,19 +137,16 @@ export default function CreateTimeLineEventModal({ route, navigation }: Timeline
                         <View style={{ flexDirection: "row", alignItems: "center", gap: 5, marginBottom: 6 }}>
                             <ValidatedInput.Label error={false} text="Reminder" />
                         </View>
-                        <SegmentedButtons
+                        <GroupSelector
                             value={String(f.values.reminderBeforeMinutes || "")}
                             onChange={(value) => f.setFieldValue("reminderBeforeMinutes", value)}
-                            buttons={[
-                                { text: "Off", value: "" },
-                                { text: "5m", value: "5" },
-                                { text: "15m", value: "15" },
-                                { text: "30m", value: "30" },
-                                { text: "1h", value: "60" },
+                            options={[
+                                { label: "Off", value: "" },
+                                { label: "5m", value: "5" },
+                                { label: "15m", value: "15" },
+                                { label: "30m", value: "30" },
+                                { label: "1h", value: "60" },
                             ]}
-                            buttonStyle={{ height: 36 }}
-                            buttonTextStyle={{ fontSize: 13 }}
-                            containerStyle={{ borderRadius: 8 }}
                         />
                     </View>
 

@@ -15,9 +15,10 @@ interface DayTimelineItemWrapperProps {
     item: any
     style: any
     onLongPress?: (timeline: any) => void
+    onPress?: () => void
 }
 
-export default function DayTimelineItemWrapper({ item, style, onLongPress }: DayTimelineItemWrapperProps) {
+export default function DayTimelineItemWrapper({ item, style, onLongPress, onPress }: DayTimelineItemWrapperProps) {
     const textColor = Colors.foreground
     const timeline = item.timeline
     const navigation = useNavigation<any>()
@@ -92,16 +93,24 @@ export default function DayTimelineItemWrapper({ item, style, onLongPress }: Day
                 {
                     systemIcon: "trash",
                     title: "Delete",
-                    onPress: () => {
-                        remove()
-                    },
+                    onPress: remove,
                     destructive: true,
                 },
             ].filter(Boolean),
-        [completeTimeline, handleCopyPress, isExpired, isPending, navigation, remove, startLiveActivityLocally, timeline],
+        [
+            completeTimeline,
+            handleCopyPress,
+            isExpired,
+            isPending,
+            navigation,
+            remove,
+            startLiveActivityLocally,
+            timeline,
+        ],
     )
 
-    const onPress = () => {
+    const handlePress = () => {
+        onPress?.()
         timeline.location === "root"
             ? navigation.navigate("TimelineScreens", {
                   timelineId: timeline.id,
@@ -127,7 +136,7 @@ export default function DayTimelineItemWrapper({ item, style, onLongPress }: Day
                 <Pressable
                     style={[styles.wrapper, { flex: 1 }]}
                     onLongPress={() => onLongPress?.(timeline)}
-                    onPress={onPress}
+                    onPress={handlePress}
                 >
                     <DayTimelineItem
                         {...timeline}

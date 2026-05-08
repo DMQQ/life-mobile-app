@@ -320,11 +320,9 @@ export default function UpdateGoalEntry({ route, navigation }: any) {
 
                     <View style={{ flex: 1 }}>
                         <GroupSelector
-                            options={quickValues.map((map) => map.label)}
+                            options={quickValues.map((map) => ({ label: map.label, value: map.value })) as any}
                             value={quickValues.find((v) => v.value === parseAmount(amount))?.value}
-                            onChange={(v) =>
-                                setAmount(quickValues.find((opt) => opt.label === v)?.value.toString() || amount)
-                            }
+                            onChange={(v) => setAmount(v?.toString() || amount)}
                         />
                     </View>
                 </View>

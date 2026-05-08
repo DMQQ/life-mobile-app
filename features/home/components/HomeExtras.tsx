@@ -83,7 +83,7 @@ export default function HomeExtras() {
                 />
             )}
 
-            <GroupSelector options={["calendar", "limits"]} value={active} onChange={(val) => setActive(val as any)} />
+            <GroupSelector options={[{ label: "calendar", value: "calendar" as const }, { label: "limits", value: "limits" as const }]} value={active} onChange={(val) => setActive(val)} />
         </View>
     )
 }

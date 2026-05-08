@@ -14,8 +14,8 @@ const CREATE_NOTIFICATION = gql`
 
 export default function useNotifications(navigationRef: React.RefObject<NavigationContainerRef<RootStackParamList>>) {
     const [notificationToken, setNotificationToken] = useState<string | null>(null)
-    const notificationListener = useRef<any>()
-    const responseListener = useRef<any>()
+    const notificationListener = useRef<any>(null)
+    const responseListener = useRef<any>(null)
     const lastNotification = Notifications.useLastNotificationResponse()
     const [createNotificationToken] = useMutation(CREATE_NOTIFICATION)
 
@@ -27,6 +27,11 @@ export default function useNotifications(navigationRef: React.RefObject<Navigati
                 navigationRef.current?.navigate("TimelineScreens", {
                     screen: "TimelineDetails",
                     params: { timelineId: eventId },
+                })
+            } else if (Array.isArray(eventId) && type === "timeline_missed") {
+                navigationRef.current?.navigate("TimelineScreens", {
+                    screen: "MissedEventsModal",
+                    params: { eventIds: eventId },
                 })
             } else if (type === "expenseReminder") {
                 navigationRef.current?.navigate(
@@ -96,7 +101,7 @@ export default function useNotifications(navigationRef: React.RefObject<Navigati
     }
 
     useEffect(() => {
-        let timeeout: NodeJS.Timeout
+        let timeeout: number
         notificationListener.current = Notifications.addNotificationReceivedListener((notification: any) => {
             console.log("Notification received:", notification)
         })

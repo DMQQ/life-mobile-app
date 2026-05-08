@@ -97,6 +97,40 @@ export function useRangeEvents(start: string, end: string): CalendarOccurrenceIt
     return data?.occurrences ?? []
 }
 
+const GET_MISSED_OCCURRENCES_QUERY = gql`
+    query GetMissedOccurrences($filters: OccurrenceFiltersInput) {
+        occurrences(filters: $filters) {
+            id
+            seriesId
+            date
+            title
+            description
+            beginTime
+            endTime
+            isCompleted
+            isSkipped
+            isRepeat
+            priority
+            reminderBeforeMinutes
+            todos {
+                id
+                title
+                isCompleted
+            }
+            images {
+                id
+            }
+        }
+    }
+`
+
+export function useMissedOccurrences(eventIds: string[]) {
+    return useQuery<{ occurrences: OccurrenceItem[] }>(GET_MISSED_OCCURRENCES_QUERY, {
+        variables: { filters: { eventIds, isCompleted: false } },
+        fetchPolicy: "cache-and-network",
+    })
+}
+
 export function usePrefetchMonthRange(date: string) {
     const client = useApolloClient()
     const monthKey = moment(date).format("YYYY-MM")
