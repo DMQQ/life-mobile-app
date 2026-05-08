@@ -107,7 +107,21 @@ struct UpdateGoalValueIntent: AppIntent {
     }
 
     func perform() async throws -> some IntentResult {
-        let newValue = max(0, currentValue + delta)
+        // Read fresh value from persisted data — captured currentValue may be stale
+        // if the widget hasn't re-rendered since the last tap or the RN app overwrote data
+        var persistedValue: Double = currentValue
+        if let str = UserDefaults.shared?.string(forKey: "goals_data"),
+           let raw = str.data(using: .utf8),
+           let decoded = try? JSONDecoder().decode(GoalsWidgetData.self, from: raw) {
+            let df = DateFormatter()
+            df.dateFormat = "yyyy-MM-dd"
+            let today = df.string(from: Date())
+            if let cat = decoded.categories.first(where: { $0.id == goalId }),
+               let entry = cat.entries.first(where: { $0.date == today }) {
+                persistedValue = entry.value
+            }
+        }
+        let newValue = max(0, persistedValue + delta)
 
         // Optimistic update in goals_data
         if let str = UserDefaults.shared?.string(forKey: "goals_data"),

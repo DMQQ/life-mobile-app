@@ -1532,8 +1532,14 @@ struct GoalsWidgetView: View {
 
                     HStack(alignment: .firstTextBaseline, spacing: 2) {
                         Text("\(Int(todayVal))")
-                            .font(.system(size: 12, weight: .bold, design: .rounded))
+                            .font(.system(size: 14, weight: .bold, design: .rounded))
                             .foregroundColor(todayVal >= cat.target ? goalColor : .white)
+                        Text("/")
+                            .font(.system(size: 10, weight: .medium))
+                            .foregroundColor(.white.opacity(0.3))
+                        Text("\(Int(cat.target))")
+                            .font(.system(size: 11, weight: .medium, design: .rounded))
+                            .foregroundColor(.white.opacity(0.5))
                         if let u = cat.unit, !u.isEmpty {
                             Text(u)
                                 .font(.system(size: 9))
