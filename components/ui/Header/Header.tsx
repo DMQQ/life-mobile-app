@@ -29,8 +29,8 @@ export interface ContextMenuItem {
 }
 
 export interface HeaderItem {
-    onPress: () => void
-    icon: SFSymbol | React.ReactNode
+    onPress?: () => void
+    icon?: SFSymbol | React.ReactNode
     style?: StyleProp<ViewStyle>
 
     standalone?: boolean
@@ -38,6 +38,7 @@ export interface HeaderItem {
     position?: "left" | "right"
 
     tintColor?: string
+    disabled?: boolean
     contextMenu?: {
         items: ContextMenuItem[]
     }
@@ -279,7 +280,7 @@ const HeaderIconButton = memo(({ button, index }: { button: HeaderItem; index: n
                         <IconButton
                             style={button.style}
                             onPress={throttle(() => {
-                                button.onPress()
+                                button.onPress?.()
                                 Haptic.trigger("impactLight")
                             }, 250)}
                             icon={button.icon}
@@ -297,7 +298,7 @@ const HeaderIconButton = memo(({ button, index }: { button: HeaderItem; index: n
             style={button.style}
             key={index}
             onPress={throttle(() => {
-                button.onPress()
+                button.onPress?.()
                 Haptic.trigger("impactLight")
             }, 250)}
             icon={button.icon}

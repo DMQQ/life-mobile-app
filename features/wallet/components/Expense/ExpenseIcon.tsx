@@ -1,11 +1,10 @@
 import Colors from "@/constants/Colors"
 import lowOpacity from "@/utils/functions/lowOpacity"
-import { AntDesign, Entypo, FontAwesome5, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons"
+import { AntDesign, Entypo, Feather, FontAwesome5, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons"
 import React from "react"
 import { StyleProp, StyleSheet, View, ViewStyle } from "react-native"
 
 export const Icons = {
-    // Original categories - preserved for backward compatibility
     housing: {
         icon: <AntDesign name="home" size={20} color={"#05ad21"} />,
         backgroundColor: "#05ad21",

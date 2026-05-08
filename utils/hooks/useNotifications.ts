@@ -101,7 +101,7 @@ export default function useNotifications(navigationRef: React.RefObject<Navigati
     }
 
     useEffect(() => {
-        let timeeout: number
+        let timeeout: ReturnType<typeof setTimeout>
         notificationListener.current = Notifications.addNotificationReceivedListener((notification: any) => {
             console.log("Notification received:", notification)
         })

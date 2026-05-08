@@ -479,7 +479,7 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
     const [showIndicator, setShowIndicator] = useState(false)
 
     useEffect(() => {
-        let timeout: number
+        let timeout: ReturnType<typeof setTimeout>
 
         if (!isSearchActive) {
             timeout = setTimeout(() => {

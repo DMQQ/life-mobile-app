@@ -3,6 +3,7 @@ import Text from "@/components/ui/Text/Text";
 import { CommonEvents } from "../CommonEvents.data";
 import Animated from "react-native-reanimated";
 import Colors from "@/constants/Colors";
+import { SuggestedEventType } from "./useSuggestedEvents";
 
 const styles = StyleSheet.create({
   tileContent: {
@@ -31,14 +32,12 @@ const styles = StyleSheet.create({
   },
 });
 
-type EventType = (typeof CommonEvents)[0];
-
 interface TileProps {
-  handleSelectQuickOption: (v: EventType) => void;
+  handleSelectQuickOption: (v: SuggestedEventType) => void;
 
-  item: EventType;
+  item: SuggestedEventType;
 
-  selected: Partial<EventType>;
+  selected: SuggestedEventType;
 }
 
 const Tile = ({ item, selected, ...props }: TileProps) => {
@@ -67,8 +66,8 @@ const Tile = ({ item, selected, ...props }: TileProps) => {
 };
 
 export default function TilesList(props: {
-  selected: Partial<EventType>;
-  handleSelectQuickOption: (v: EventType) => void;
+  selected: SuggestedEventType;
+  handleSelectQuickOption: (v: SuggestedEventType) => void;
 }) {
   return (
     <VirtualizedList
@@ -77,13 +76,13 @@ export default function TilesList(props: {
       showsHorizontalScrollIndicator={false}
       style={{ paddingVertical: 10 }}
       horizontal
-      data={CommonEvents}
+      data={CommonEvents as any}
       keyExtractor={(event) => event.name}
       renderItem={({ item, index }) => (
         <Tile
           selected={props.selected}
           handleSelectQuickOption={props.handleSelectQuickOption}
-          item={item}
+          item={item as any}
         />
       )}
     />

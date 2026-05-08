@@ -19,17 +19,22 @@ interface Subscription {
     id: string
     amount: number
     dateStart: string
-    dateEnd: string
+    dateEnd?: string | null
     description: string
     isActive: boolean
     nextBillingDate: string
     billingCycle: string
-    expenses: {
+    billingDay?: number | null
+    customBillingMonths?: number[] | null
+    reminderDaysBeforehand?: number | null
+    totalSpent?: number
+    totalAmount?: number
+    totalDuration?: number
+    expenses?: {
         amount: number
         id: string
         date: string
         description: string
-        category: string
     }[]
 }
 
@@ -123,7 +128,7 @@ export default function SubscriptionsList({ onScroll }: Props) {
             renderItem={renderItem as any}
             keyExtractor={keyExtractor as any}
             onScroll={onScroll}
-            ListHeaderComponent={<SubscriptionCalendar subscriptions={[...active, ...inactive]} />}
+            ListHeaderComponent={<SubscriptionCalendar subscriptions={[...active, ...inactive] as any} />}
             contentContainerStyle={styles.contentContainer}
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
             removeClippedSubviews

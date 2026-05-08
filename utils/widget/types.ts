@@ -80,6 +80,27 @@ export interface WidgetAnalyticsData {
   lastUpdated: string
 }
 
+export interface WidgetGoalEntry {
+  id: string
+  value: number
+  date: string
+}
+
+export interface WidgetGoalCategory {
+  id: string
+  name: string
+  icon: string
+  target: number
+  color: string
+  unit?: string
+  entries: WidgetGoalEntry[]
+}
+
+export interface WidgetGoalsData {
+  categories: WidgetGoalCategory[]
+  lastUpdated: string
+}
+
 export interface WidgetStore {
   wallet: WidgetWalletData | null
   timeline: WidgetTimelineData | null

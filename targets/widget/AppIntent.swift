@@ -37,6 +37,23 @@ struct ConfigurationAppIntent: WidgetConfigurationIntent {
     var favoriteEmoji: String
 }
 
+struct SelectGoalIntent: AppIntent {
+    static var title: LocalizedStringResource { "Select Goal" }
+    static var isDiscoverable: Bool { false }
+
+    @Parameter(title: "Goal Index")
+    var index: Int
+
+    init() { self.index = 0 }
+    init(index: Int) { self.index = index }
+
+    func perform() async throws -> some IntentResult {
+        UserDefaults.shared?.set(index, forKey: "goals_view_index")
+        WidgetCenter.shared.reloadTimelines(ofKind: "GoalsWidget")
+        return .result()
+    }
+}
+
 struct SwitchAnalyticsViewIntent: AppIntent {
     static var title: LocalizedStringResource { "Switch Analytics View" }
     static var isDiscoverable: Bool { false }
@@ -45,6 +62,96 @@ struct SwitchAnalyticsViewIntent: AppIntent {
         let current = UserDefaults.shared?.integer(forKey: "analytics_view_index") ?? 0
         UserDefaults.shared?.set((current + 1) % 3, forKey: "analytics_view_index")
         WidgetCenter.shared.reloadTimelines(ofKind: "AnalyticsWidget")
+        return .result()
+    }
+}
+
+struct SwitchGoalsIntent: AppIntent {
+    static var title: LocalizedStringResource { "Switch Goal" }
+    static var isDiscoverable: Bool { false }
+
+    func perform() async throws -> some IntentResult {
+        let current = UserDefaults.shared?.integer(forKey: "goals_view_index") ?? 0
+        // Get count from stored data to wrap correctly
+        var count = 1
+        if let str = UserDefaults.shared?.string(forKey: "goals_data"),
+           let raw = str.data(using: .utf8),
+           let decoded = try? JSONDecoder().decode(GoalsWidgetData.self, from: raw) {
+            count = max(1, decoded.categories.count)
+        }
+        UserDefaults.shared?.set((current + 1) % count, forKey: "goals_view_index")
+        WidgetCenter.shared.reloadTimelines(ofKind: "GoalsWidget")
+        return .result()
+    }
+}
+
+struct UpdateGoalValueIntent: AppIntent {
+    static var title: LocalizedStringResource { "Update Goal Value" }
+    static var isDiscoverable: Bool { false }
+
+    @Parameter(title: "Goal ID")
+    var goalId: String
+
+    @Parameter(title: "Date")
+    var date: String
+
+    @Parameter(title: "Current Value")
+    var currentValue: Double
+
+    @Parameter(title: "Delta")
+    var delta: Double
+
+    init() { self.goalId = ""; self.date = ""; self.currentValue = 0; self.delta = 0 }
+    init(goalId: String, date: String, currentValue: Double, delta: Double) {
+        self.goalId = goalId; self.date = date; self.currentValue = currentValue; self.delta = delta
+    }
+
+    func perform() async throws -> some IntentResult {
+        let newValue = max(0, currentValue + delta)
+
+        // Optimistic update in goals_data
+        if let str = UserDefaults.shared?.string(forKey: "goals_data"),
+           let raw = str.data(using: .utf8),
+           let decoded = try? JSONDecoder().decode(GoalsWidgetData.self, from: raw) {
+
+            let df = DateFormatter()
+            df.dateFormat = "yyyy-MM-dd"
+            let today = df.string(from: Date())
+
+            let updatedCategories = decoded.categories.map { cat -> GoalWidgetCategory in
+                guard cat.id == goalId else { return cat }
+                var entries = cat.entries
+                if let idx = entries.firstIndex(where: { $0.date == today }) {
+                    entries[idx] = GoalWidgetEntry(id: entries[idx].id, value: newValue, date: today)
+                } else {
+                    let newId = "widget_\(UUID().uuidString.prefix(8))"
+                    entries.append(GoalWidgetEntry(id: newId, value: newValue, date: today))
+                }
+                return GoalWidgetCategory(id: cat.id, name: cat.name, icon: cat.icon, target: cat.target, color: cat.color, unit: cat.unit, entries: entries)
+            }
+
+            let newData = GoalsWidgetData(categories: updatedCategories, lastUpdated: ISO8601DateFormatter().string(from: Date()))
+            if let encoded = try? JSONEncoder().encode(newData),
+               let newStr = String(data: encoded, encoding: .utf8) {
+                UserDefaults.shared?.set(newStr, forKey: "goals_data")
+            }
+        }
+
+        WidgetCenter.shared.reloadTimelines(ofKind: "GoalsWidget")
+
+        // Fire GraphQL mutation
+        let mutation = """
+        mutation UpsertGoalStats($input: UpsertGoalStatsInput!) {
+            upsertGoalStats(input: $input) {
+                id
+                value
+                date
+            }
+        }
+        """
+        let vars: [String: Any] = ["input": ["id": goalId, "value": newValue, "date": date]]
+        await graphQL(mutation, variables: vars)
+
         return .result()
     }
 }

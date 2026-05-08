@@ -17,9 +17,9 @@ interface Subscription {
     billingCycle: string
     isActive: boolean
     dateStart: string
-    dateEnd: string
-    billingDay?: number
-    customBillingMonths?: number[]
+    dateEnd?: string | null
+    billingDay?: number | null
+    customBillingMonths?: number[] | null
     expenses: { amount: number; id: string; date: string; description: string; category: string }[]
 }
 
@@ -30,6 +30,12 @@ interface Expense {
     description: string
     category: string
     type: string
+    balanceBeforeInteraction?: number | null
+    spontaneousRate?: number | null
+    subscription?: unknown
+    location?: unknown
+    subexpenses?: unknown
+    note?: string | null
 }
 
 interface Props {
@@ -283,6 +289,7 @@ export default function SubscriptionCalendar({ subscriptions, expenses = [], sty
                                 <WalletItem
                                     key={e.id}
                                     {...e}
+                                    animatedStyle={{} as any}
                                     handlePress={() => {
                                         navigation.navigate("WalletScreens", {
                                             screen: "Expense",

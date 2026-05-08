@@ -12,7 +12,7 @@ import {
 } from "react-native-calendars"
 
 function ThemedCalendar(props: CalendarProps) {
-    return <Calendar {...props} theme={styles.calendar} style={[styles.calendarContainer, props.style]} />
+    return <Calendar {...props} theme={calendarTheme as any} style={[styles.calendarContainer, props.style]} />
 }
 
 export const ExpandableThemedCalendar = memo(function ExpandableThemedCalendar(
@@ -27,7 +27,7 @@ export const ExpandableThemedCalendar = memo(function ExpandableThemedCalendar(
                 closeOnDayPress={false}
                 {...props}
                 style={[styles.expandableContainer, props.style]}
-                theme={styles.expandable}
+                theme={expandableTheme as any}
             />
         </CalendarProvider>
     )
@@ -116,7 +116,7 @@ export const CollapsibleThemedCalendar = memo(function CollapsibleThemedCalendar
                     <Calendar
                         {...props}
                         current={date}
-                        theme={styles.expandable}
+                        theme={expandableTheme as any}
                         hideArrows
                         hideExtraDays
                         disableMonthChange
@@ -190,36 +190,36 @@ const weekStyles = StyleSheet.create({
     },
 })
 
+const calendarTheme = {
+    backgroundColor: Colors.primary_light,
+    calendarBackground: Colors.primary_light,
+    dayTextColor: Colors.foreground,
+    textDisabledColor: "#5e5e5e",
+    monthTextColor: Colors.secondary,
+    textMonthFontSize: 20,
+    textMonthFontWeight: "bold",
+    selectedDayBackgroundColor: Colors.secondary,
+    arrowColor: Colors.secondary,
+}
+
+const expandableTheme = {
+    backgroundColor: Colors.primary_light,
+    calendarBackground: Colors.primary_light,
+    dayTextColor: Colors.foreground,
+    textSectionTitleColor: Colors.foreground,
+    selectedDayBackgroundColor: Colors.secondary,
+    selectedDayTextColor: "#fff",
+    monthTextColor: Colors.secondary,
+    arrowColor: Colors.secondary,
+    "stylesheet.calendar.list": {
+        container: { backgroundColor: Colors.primary_light },
+    },
+    "stylesheet.calendar.main": {
+        container: { backgroundColor: Colors.primary_light },
+    },
+}
+
 const styles = StyleSheet.create({
-    calendar: {
-        backgroundColor: Colors.primary_light,
-        calendarBackground: Colors.primary_light,
-        dayTextColor: Colors.foreground,
-        textDisabledColor: "#5e5e5e",
-        monthTextColor: Colors.secondary,
-        textMonthFontSize: 20,
-        textMonthFontWeight: "bold",
-        selectedDayBackgroundColor: Colors.secondary,
-        arrowColor: Colors.secondary,
-    },
-
-    expandable: {
-        backgroundColor: Colors.primary_light,
-        calendarBackground: Colors.primary_light,
-        dayTextColor: Colors.foreground,
-        textSectionTitleColor: Colors.foreground,
-        selectedDayBackgroundColor: Colors.secondary,
-        selectedDayTextColor: "#fff",
-        monthTextColor: Colors.secondary,
-        arrowColor: Colors.secondary,
-        "stylesheet.calendar.list": {
-            container: { backgroundColor: Colors.primary_light },
-        },
-        "stylesheet.calendar.main": {
-            container: { backgroundColor: Colors.primary_light },
-        },
-    },
-
     calendarContainer: { borderRadius: 15, paddingBottom: 5 },
     expandableContainer: { borderRadius: 15 },
     collapsibleContainer: {

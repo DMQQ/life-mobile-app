@@ -16,36 +16,6 @@ export const useFileUpload = ({ todoId, timelineId }: UseFileUploadProps) => {
     const [uploadingFile, setUploadingFile] = useState(false)
     const client = useApolloClient()
 
-    const handleUploadFile = handleImageFromLibrary
-
-    const handleImageFromCamera = async () => {
-        await ImagePicker.requestCameraPermissionsAsync()
-
-        const result = await ImagePicker.launchCameraAsync({
-            allowsEditing: true,
-            allowsMultipleSelection: false,
-            mediaTypes: "images",
-            cameraType: ImagePicker.CameraType.back,
-            quality: 1,
-            aspect: [4, 3],
-        })
-
-        if (!result.canceled && result.assets[0]) {
-            await uploadFile(result.assets[0])
-        }
-    }
-
-    const handleImageFromLibrary = async () => {
-        const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: "images",
-            quality: 0.8,
-        })
-
-        if (!result.canceled && result.assets[0]) {
-            await uploadFile(result.assets[0])
-        }
-    }
-
     const uploadFile = async (asset: any) => {
         try {
             setUploadingFile(true)
@@ -158,6 +128,36 @@ export const useFileUpload = ({ todoId, timelineId }: UseFileUploadProps) => {
             setUploadingFile(false)
         }
     }
+
+    const handleImageFromLibrary = async () => {
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: "images",
+            quality: 0.8,
+        })
+
+        if (!result.canceled && result.assets[0]) {
+            await uploadFile(result.assets[0])
+        }
+    }
+
+    const handleImageFromCamera = async () => {
+        await ImagePicker.requestCameraPermissionsAsync()
+
+        const result = await ImagePicker.launchCameraAsync({
+            allowsEditing: true,
+            allowsMultipleSelection: false,
+            mediaTypes: "images",
+            cameraType: ImagePicker.CameraType.back,
+            quality: 1,
+            aspect: [4, 3],
+        })
+
+        if (!result.canceled && result.assets[0]) {
+            await uploadFile(result.assets[0])
+        }
+    }
+
+    const handleUploadFile = handleImageFromLibrary
 
     return {
         handleUploadFile,

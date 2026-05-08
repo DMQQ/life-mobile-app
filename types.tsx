@@ -6,16 +6,16 @@
 import { ParamListBase, RouteProp } from "@react-navigation/native"
 import { NativeStackScreenProps } from "@react-navigation/native-stack"
 
-import { StackNavigationProp } from "@react-navigation/stack"
+import { NativeStackNavigationProp } from "@react-navigation/native-stack"
 import { Icons } from "./features/wallet/components/Expense/ExpenseIcon"
 
 export interface ScreenProps<Route extends keyof RootStackParamList> {
-    navigation: StackNavigationProp<RootStackParamList, Route>
+    navigation: NativeStackNavigationProp<RootStackParamList, Route>
     route: RouteProp<RootStackParamList, Route>
 }
 
 export interface StackScreenProps<T extends ParamListBase, Route extends keyof T> {
-    navigation: StackNavigationProp<T, Route>
+    navigation: NativeStackNavigationProp<T, Route>
     route: RouteProp<T, Route>
 }
 
@@ -98,8 +98,23 @@ export interface MonthlyExpenses {
 export interface Wallet {
     id: string
     balance: number
-    expenses: Expense[]
+    income?: number
+    monthlyPercentageTarget?: number
+    expenses?: Expense[]
     expenses2: MonthlyExpenses[]
+    subAccounts?: SubAccount[]
+}
+
+export interface SubAccount {
+    id: string
+    name: string
+    description?: string | null
+    color?: string | null
+    icon?: string | null
+    balance: number
+    isDefault: boolean
+    income?: number | null
+    expense?: number | null
 }
 
 export interface Subscription {
@@ -107,19 +122,21 @@ export interface Subscription {
     isActive: boolean
     nextBillingDate: string
     dateStart: string
+    dateEnd?: string | null
 
     description: string
-
-    expenses: Expense[]
-
     amount: number
 
-    category: keyof typeof Icons
-
     billingCycle: "monthly" | "yearly" | "weekly" | "daily" | "custom"
-    billingDay?: number
-    customBillingMonths?: number[]
-    reminderDaysBeforehand?: number
+    billingDay?: number | null
+    customBillingMonths?: number[] | null
+    reminderDaysBeforehand?: number | null
+
+    expenses: Expense[]
+    totalSpent?: number
+    totalAmount?: number
+    totalDuration?: number
+    walletId?: string
 }
 
 export interface Expense {
@@ -128,18 +145,18 @@ export interface Expense {
     description: string
     date: string
     type: string
-    balanceBeforeInteraction: number
-    category: keyof typeof Icons
+    balanceBeforeInteraction?: number | null
+    category?: string | null
 
-    spontaneousRate: number
+    spontaneousRate?: number | null
 
     subAccountId?: string | null
 
-    subscription: Subscription | null
+    subscription?: Subscription | null
 
-    location: { id: string; kind: string; name: string; latitude: number; longitude: number } | null
+    location?: { id: string; kind: string; name: string; latitude: number; longitude: number } | null
 
-    subexpenses: {
+    subexpenses?: {
         id: string
         amount: number
         description: string
@@ -150,13 +167,16 @@ export interface Expense {
         id: string
         url: string
         expenseId: string | undefined
-    }[]
+    }[] | null
 
-    note?: string
+    note?: string | null
 
-    tags?: string
+    tags?: string | null
 
-    shop?: string
+    shop?: string | null
+
+    walletId?: string
+    schedule?: boolean
 }
 
 export interface Timeline {

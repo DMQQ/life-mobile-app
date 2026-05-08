@@ -168,7 +168,7 @@ const CreateRepeatableTimeline = forwardRef<BottomSheetType, CreateRepeatableTim
             onChange={(index) => {
                 if (index === 0) onExpand()
             }}
-            onDismiss={onDismiss}
+            onClose={onDismiss}
         >
             <BottomSheetView style={{ flex: 1, backgroundColor: Colors.primary }}>
                 <View style={styles.modal_container}>

@@ -63,7 +63,7 @@ export default function useCreateTimeline({ route, navigation }: TimelineScreenP
                 scopeSheetRef.current?.expand()
                 return
             }
-            await editOccurrence(input, route.params.selectedDate, "THIS_ONLY")
+            await editOccurrence(input as any, route.params.selectedDate, "THIS_ONLY")
         } else {
             await handleSubmit({ ...input, todos: route.params?.todos || [], priority: 1 })
         }
@@ -78,7 +78,7 @@ export default function useCreateTimeline({ route, navigation }: TimelineScreenP
     const onScopeSelected = async (scope: "THIS_ONLY" | "ALL") => {
         if (!pendingEdit) return
         scopeSheetRef.current?.close()
-        await editOccurrence(pendingEdit.input, pendingEdit.date, scope)
+        await editOccurrence(pendingEdit.input as any, pendingEdit.date, scope)
         setPendingEdit(null)
 
         await Promise.allSettled([

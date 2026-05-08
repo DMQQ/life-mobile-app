@@ -23,6 +23,7 @@ const SUBSCRIPTIONS = graphql(`
                 amount
                 date
                 description
+                category
             }
         }
     }

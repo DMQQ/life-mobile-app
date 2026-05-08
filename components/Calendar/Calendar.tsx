@@ -29,19 +29,19 @@ interface CalendarProps {
     ) => Promise<ApolloQueryResult<any>>
 }
 
-const styles = StyleSheet.create({
-    calendar: {
-        backgroundColor: Colors.primary,
-        calendarBackground: Colors.primary,
-        dayTextColor: Colors.foreground,
-        textDisabledColor: "#5e5e5e",
-        monthTextColor: Colors.secondary,
-        textMonthFontSize: 20,
-        textMonthFontWeight: "bold",
-        selectedDayBackgroundColor: Colors.secondary,
-        arrowColor: Colors.secondary,
-    },
-})
+const calendarTheme = {
+    backgroundColor: Colors.primary,
+    calendarBackground: Colors.primary,
+    dayTextColor: Colors.foreground,
+    textDisabledColor: "#5e5e5e",
+    monthTextColor: Colors.secondary,
+    textMonthFontSize: 20,
+    textMonthFontWeight: "bold",
+    selectedDayBackgroundColor: Colors.secondary,
+    arrowColor: Colors.secondary,
+}
+
+const styles = StyleSheet.create({})
 
 export default function Calendar({ onDayPress, refetch, selected: propSelected, monthData: data }: CalendarProps) {
     const onMonthChange = async (date: { dateString: string }) =>
@@ -89,7 +89,7 @@ export default function Calendar({ onDayPress, refetch, selected: propSelected, 
                 onDayPress(event)
             }}
             renderArrow={renderArrow}
-            theme={styles.calendar as any}
+            theme={calendarTheme as any}
         />
     )
 }

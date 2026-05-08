@@ -5,7 +5,6 @@ import { Todos } from "@/types"
 import { useNavigation } from "@react-navigation/native"
 import Color from "color"
 import { StyleSheet, View } from "react-native"
-import TodoHeader from "./TodoHeader"
 import TodoItem from "./TodoItem"
 import { AntDesign } from "@expo/vector-icons"
 

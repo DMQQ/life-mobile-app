@@ -8,6 +8,7 @@ import { useQuery, useMutation, gql, useLazyQuery } from "@apollo/client"
 import Ripple from "react-native-material-ripple"
 import Layout from "@/constants/Layout"
 import Colors from "@/constants/Colors"
+import { Expense } from "@/types"
 
 const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
     const R = 6371 // Radius of the Earth in km
@@ -119,7 +120,7 @@ export const getCurrentLocation = async () => {
 
 export type MapPickerHandle = { triggerSearch: () => void }
 
-const MapPicker = forwardRef<MapPickerHandle, Pick<ExpenseType, "location"> & { id: string }>((props, ref) => {
+const MapPicker = forwardRef<MapPickerHandle, Pick<Expense, "location"> & { id: string }>((props, ref) => {
     const STREET_DELTA = { latitudeDelta: 0.003, longitudeDelta: 0.003 }
 
     const [location, setLocation] = useState({
@@ -277,9 +278,9 @@ const MapPicker = forwardRef<MapPickerHandle, Pick<ExpenseType, "location"> & { 
                 ref={map}
                 style={{ width: Layout.screen.width - 30, height: 200, borderRadius: 10, marginTop: 25 }}
                 provider={PROVIDER_DEFAULT}
-                showsPointsOfInterest
+                {...{ showsPointsOfInterest: true } as any}
                 region={location}
-                toolbarEnabled
+                {...{ toolbarEnabled: true } as any}
                 onPress={async (e) => {
                     const { latitude, longitude } = e.nativeEvent.coordinate
                     if (editMode) {

@@ -3,7 +3,7 @@ import { FlatList, Pressable } from "react-native";
 import Text from "@/components/ui/Text/Text";
 
 export default function SubcategoryList(props: {
-  selected: { categories?: string[] };
+  selected: { categories?: readonly string[] };
   subCategory: string;
   handleSelectSubCategory: (subCategory: string) => void;
 }) {

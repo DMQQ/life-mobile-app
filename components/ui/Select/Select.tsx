@@ -1,7 +1,6 @@
 import {
     View,
     TouchableOpacity,
-    ListRenderItem,
     StyleProp,
     ViewStyle,
     Pressable,
@@ -31,7 +30,7 @@ export interface Props<T> {
     setSelected: (selected: T[]) => void
     keyExtractor?: (item: T, index: number) => string
     transparentOverlay?: boolean
-    renderItem?: (props: { item: T; index: number }) => ListRenderItem<T>
+    renderItem?: (props: { item: T; index: number }) => ReactNode
     placeholderText?: string
     renderCustomSelected?: ReactNode
     onFocusChange?: (focus: boolean) => void

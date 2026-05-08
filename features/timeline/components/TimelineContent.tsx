@@ -2,7 +2,7 @@ import Colors from "@/constants/Colors"
 import { Ionicons } from "@expo/vector-icons"
 import { useCallback } from "react"
 import { RefreshControl, View, VirtualizedList } from "react-native"
-import Animated, { Keyframe, withTiming } from "react-native-reanimated"
+import Animated, { Keyframe, SharedValue, withTiming } from "react-native-reanimated"
 
 const enterAnim = new Keyframe({
     0: { opacity: 0, transform: [{ scale: 0.93 }] },
@@ -31,7 +31,7 @@ interface TimelineContentProps {
     dayContentPaddingTop: number
     compactContentPaddingTop: number
     headerHeight: number
-    scrollY: Animated.SharedValue<number>
+    scrollY: SharedValue<number>
     onScroll: (...args: any[]) => void
     onRefresh: () => Promise<void>
     refreshing: boolean

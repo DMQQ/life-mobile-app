@@ -258,7 +258,7 @@ const createFlattenedUnits = () => {
 
 const ALL_UNITS: string[] = createFlattenedUnits()
 
-export default function CreateGoal({ navigation }: CreateGoalProps): JSX.Element {
+export default function CreateGoal({ navigation }: CreateGoalProps): React.ReactElement {
     const { createGoals } = useGoal()
     const [multiplier, setMultiplier] = useState<number>(1)
     const [sliderRange, setSliderRange] = useState<[number, number]>([0, 10000])
@@ -386,7 +386,7 @@ export default function CreateGoal({ navigation }: CreateGoalProps): JSX.Element
                                     style={[styles.iconButton, f.values.icon ? styles.iconButtonSelected : {}]}
                                     onPress={() =>
                                         navigation.navigate("IconPicker", {
-                                            onSelectIcon: (icon) => {
+                                            onSelectIcon: (icon: string) => {
                                                 f.setFieldValue("icon", icon)
                                             },
                                             selectedIcon: f.values.icon,
@@ -394,7 +394,7 @@ export default function CreateGoal({ navigation }: CreateGoalProps): JSX.Element
                                     }
                                 >
                                     <MaterialCommunityIcons
-                                        name={f.values.icon || "plus-circle-outline"}
+                                        name={(f.values.icon || "plus-circle-outline") as any}
                                         size={50}
                                         color={f.values.icon ? Colors.primary : Colors.secondary}
                                     />
@@ -532,7 +532,7 @@ export default function CreateGoal({ navigation }: CreateGoalProps): JSX.Element
                                             onPress={() => handleCategoryPress(category.value)}
                                         >
                                             <MaterialCommunityIcons
-                                                name={category.icon}
+                                                name={category.icon as any}
                                                 size={20}
                                                 color={
                                                     unitCategory === category.value

@@ -40,7 +40,7 @@ interface DatePickerProps {
     mode?: "single" | "period"
     placeholder?: string
 
-    buttonComponent?: (prop: { start: Date; end: Date }) => ReactElement
+    buttonComponent?: (prop: { start: Date; end: Date; onPress?: () => void }) => ReactElement
     controlRef?: React.MutableRefObject<DatePickerRef | null>
 }
 
@@ -197,7 +197,7 @@ export default function DatePicker({
                     <Calendar
                         onDayPress={handleDayPress}
                         markedDates={selectedRange}
-                        markingType={mode === "single" ? "simple" : "period"}
+                        markingType={mode === "single" ? undefined : "period"}
                         theme={theme}
                         style={{
                             borderRadius: 15,

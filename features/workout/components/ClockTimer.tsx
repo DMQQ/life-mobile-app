@@ -39,7 +39,7 @@ const ClockTimer = (props: ClockTimerProps) => {
     const circumference = 2 * Math.PI * radius
     const progress = (timer / initialTime) * circumference
 
-    const animationRef = useRef<Animated.CompositeAnimation | null>()
+    const animationRef = useRef<Animated.CompositeAnimation | null>(null)
 
     const animatedValue = useRef(new Animated.Value(circumference)).current
 

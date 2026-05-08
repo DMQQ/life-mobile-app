@@ -29,7 +29,7 @@ const styles = StyleSheet.create({
 })
 
 export default function NotificationsScreen({ navigation }: HomeScreenProps<"HomeNotifications">) {
-    const { unreadCount, refetch: refetchNotifications, ...notification } = useGetNotifications()
+    const { unreadCount, refetch: refetchNotifications, data, error, loading } = useGetNotifications()
     const { readAllNotifications } = useReadAllNotifications()
 
     const handleClose = () => {
@@ -63,7 +63,7 @@ export default function NotificationsScreen({ navigation }: HomeScreenProps<"Hom
                     </View>
                 </View>
                 <View style={styles.body}>
-                    <WalletNotifications {...notification} />
+                    <WalletNotifications data={data} error={error} loading={loading} />
                 </View>
             </View>
         </View>

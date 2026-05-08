@@ -1,6 +1,6 @@
 import { gql, useMutation } from "@apollo/client"
 import { useNavigation } from "@react-navigation/native"
-import { GET_MONTHLY_EVENTS } from "../general/useTimeline"
+import { GET_MONTHLY_OCCURRENCES } from "../general/useTimeline"
 import useGetTimelineById, { GET_TIMELINE } from "../query/useGetTimelineById"
 import { GET_TIMELINE_QUERY } from "../query/useGetTimeLineQuery"
 
@@ -94,7 +94,7 @@ export default function useEditTimeline(timelineId: string, isEditing: boolean) 
                     variables: { date: initialFormProps?.date },
                 },
                 {
-                    query: GET_MONTHLY_EVENTS,
+                    query: GET_MONTHLY_OCCURRENCES,
                     variables: { date: result.data?.editTimeline?.date },
                 },
             ]

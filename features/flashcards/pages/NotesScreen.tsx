@@ -89,7 +89,7 @@ export default function NotesScreen({ navigation }: ScreenProps<any>) {
                     buttons={[
                         {
                             icon: <AntDesign name="plus" size={20} color={Colors.foreground} />,
-                            onPress: () => navigation.navigate("CreateFlashCardGroup"),
+                            onPress: () => (navigation.navigate as any)("CreateFlashCardGroup"),
                         },
                     ]}
                     animatedTitle="FlashCards"

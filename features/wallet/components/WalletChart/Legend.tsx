@@ -108,7 +108,7 @@ const Legend = (props: LegendProps) => {
                   alignItems: "center",
                 }}
               >
-                <CategoryIcon size={20} category={item.category} type="expense" />
+                <CategoryIcon size={20} category={item.category as any} type="expense" />
               </View>
 
               <View style={{ gap: 1.5 }}>

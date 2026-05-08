@@ -440,7 +440,7 @@ export function FloatingNotifications() {
 }
 
 interface WalletNotificationsProps {
-    data: { notifications: any[] }
+    data?: { notifications: any[] } | null
 
     error?: any
 

@@ -9,6 +9,7 @@ struct exportWidgets: WidgetBundle {
         TimelineWidget()
         DailyRoutineWidget()
         AnalyticsWidget()
+        GoalsWidget()
         WatchExpenseWidget()
 //        widgetControl()
         WidgetLiveActivity()

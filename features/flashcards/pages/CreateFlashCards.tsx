@@ -327,7 +327,7 @@ const AIGeneratedFlashCards = ({ groupId }: { groupId: string }) => {
 
     const selectAll = () => {
         if (state.data?.generateAIFlashcards) {
-            const allIndices = state.data.generateAIFlashcards.map((_, index) => index)
+            const allIndices = state.data.generateAIFlashcards.map((_: unknown, index: number) => index)
             setSelectedCards(new Set(allIndices))
         }
     }

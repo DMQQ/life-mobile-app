@@ -110,15 +110,15 @@ export default function WalletLimits({ navigation }: { navigation: any }) {
             const { income, monthlyPercentageTarget } = walletData.wallet
             const { expense } = statistics.statistics
 
-            const targetAmount = income * (monthlyPercentageTarget / 100)
-            const percentageSpent = Math.round((expense / targetAmount) * 100)
+            const targetAmount = (income ?? 0) * ((monthlyPercentageTarget ?? 0) / 100)
+            const percentageSpent = Math.round(((expense ?? 0) / (targetAmount || 1)) * 100)
 
-            const isOverTarget = expense > targetAmount
-            const isOverIncome = expense > income
+            const isOverTarget = (expense ?? 0) > (targetAmount ?? 0)
+            const isOverIncome = (expense ?? 0) > (income ?? 0)
 
             budgetStatus = {
                 text: isOverIncome
-                    ? `${percentageSpent}% over target (${Math.round((expense / income) * 100)}% of income used)`
+                    ? `${percentageSpent}% over target (${Math.round(((expense ?? 0) / (income ?? 1)) * 100)}% of income used)`
                     : isOverTarget
                       ? `${percentageSpent}% spent (${percentageSpent - 100}% over target)`
                       : `${percentageSpent}% spent (${100 - percentageSpent}% target remaining)`,

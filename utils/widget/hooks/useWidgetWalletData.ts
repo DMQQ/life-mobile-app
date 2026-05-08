@@ -14,7 +14,7 @@ const transformExpenseForWidget = (expense: Expense): WidgetExpense => ({
     description: expense.description.charAt(0).toUpperCase() + expense.description.slice(1),
     date: expense.date,
     type: expense.type,
-    category: expense.category.includes(":") ? expense.category.split(":")[1].trim() : expense.category,
+    category: expense.category?.includes(":") ? expense.category.split(":")[1].trim() : expense.category ?? "none",
 })
 
 export const useWidgetWalletData = () => {

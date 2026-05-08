@@ -117,6 +117,29 @@ struct TimelineTodo: Codable {
     let modifiedAt: String?
 }
 
+// MARK: - Goals Data Models
+
+struct GoalWidgetEntry: Codable {
+    let id: String
+    let value: Double
+    let date: String
+}
+
+struct GoalWidgetCategory: Codable {
+    let id: String
+    let name: String
+    let icon: String
+    let target: Double
+    let color: String
+    let unit: String?
+    let entries: [GoalWidgetEntry]
+}
+
+struct GoalsWidgetData: Codable {
+    let categories: [GoalWidgetCategory]
+    let lastUpdated: String
+}
+
 // MARK: - Shared Widget Components
 
 private struct WidgetLabel: View {
@@ -1341,6 +1364,273 @@ struct DailyRoutineWidgetView: View {
     }
 }
 
+// MARK: - Contribution Grid
+
+private struct ContributionGridView: View {
+    let entries: [GoalWidgetEntry]
+    let target: Double
+    let color: Color
+    let weeks: Int
+    let cellSize: CGFloat
+    let cellSpacing: CGFloat
+    let weekSpacing: CGFloat
+
+    private var gridData: (entries: [[(value: Double, goalMet: Bool)]], startDate: Date) {
+        let cal = Calendar.current
+        let today = cal.startOfDay(for: Date())
+        let weekday = cal.component(.weekday, from: today)
+        let daysFromSunday = weekday - 1
+        guard let thisSunday = cal.date(byAdding: .day, value: -daysFromSunday, to: today),
+              let startDate = cal.date(byAdding: .day, value: -(weeks - 1) * 7, to: thisSunday) else {
+            return ([], Date())
+        }
+
+        let map: [String: Double] = Dictionary(entries.map { ($0.date, $0.value) }) { _, latest in latest }
+
+        var result: [[(value: Double, goalMet: Bool)]] = []
+        var current = startDate
+        let df = DateFormatter()
+        df.dateFormat = "yyyy-MM-dd"
+
+        for _ in 0..<weeks {
+            var week: [(Double, Bool)] = []
+            for _ in 0..<7 {
+                let key = df.string(from: current)
+                let value = map[key] ?? 0
+                week.append((value, value >= target))
+                current = cal.date(byAdding: .day, value: 1, to: current)!
+            }
+            result.append(week)
+        }
+        return (result, startDate)
+    }
+
+    var body: some View {
+        HStack(spacing: weekSpacing) {
+            ForEach(0..<gridData.entries.count, id: \.self) { weekIndex in
+                let week = gridData.entries[weekIndex]
+                VStack(spacing: cellSpacing) {
+                    ForEach(0..<week.count, id: \.self) { dayIndex in
+                        let (value, goalMet) = week[dayIndex]
+                        RoundedRectangle(cornerRadius: max(1, cellSize * 0.22), style: .continuous)
+                            .fill(cellColor(value: value, goalMet: goalMet))
+                            .frame(width: cellSize, height: cellSize)
+                    }
+                }
+            }
+        }
+    }
+
+    private func cellColor(value: Double, goalMet: Bool) -> Color {
+        if value == 0 { return Color.white.opacity(0.08) }
+        if goalMet { return color }
+        return color.opacity(0.15)
+    }
+}
+
+// MARK: - Goals Widget
+
+struct GoalsWidgetView: View {
+    var entry: Provider.Entry
+    @Environment(\.widgetFamily) var family
+
+    private var data: GoalsWidgetData? {
+        guard let str = UserDefaults.shared?.string(forKey: "goals_data"),
+              let raw = str.data(using: .utf8),
+              let decoded = try? JSONDecoder().decode(GoalsWidgetData.self, from: raw) else { return nil }
+        return decoded
+    }
+
+    private var selectedIndex: Int {
+        let idx = UserDefaults.shared?.integer(forKey: "goals_view_index") ?? 0
+        guard let data else { return 0 }
+        return min(idx, max(0, data.categories.count - 1))
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            if let data, !data.categories.isEmpty {
+                goalsContent(data)
+            } else {
+                emptyState
+            }
+            Spacer(minLength: 0)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .padding(10)
+    }
+
+    private func gridParams(isLarge: Bool) -> (visibleCount: Int, gridWeeks: Int, cellSz: CGFloat, cellSp: CGFloat, weekSp: CGFloat) {
+        isLarge
+            ? (min(3, data?.categories.count ?? 1), 27, 9, 2, 3)
+            : (1, 27, 9.5, 2, 3)
+    }
+
+    @ViewBuilder
+    private func goalsContent(_ data: GoalsWidgetData) -> some View {
+        let isLarge = family == .systemLarge
+        let total = data.categories.count
+        let params = gridParams(isLarge: isLarge)
+
+        VStack(spacing: isLarge ? 6 : 0) {
+            ForEach(0..<params.visibleCount, id: \.self) { i in
+                let idx = (selectedIndex + i) % total
+                goalCard(data.categories[idx], gridWeeks: params.gridWeeks, cellSz: params.cellSz, cellSp: params.cellSp, weekSp: params.weekSp)
+            }
+        }
+
+        if isLarge, total > 3 {
+            HStack {
+                Spacer()
+                Button(intent: SwitchGoalsIntent()) {
+                    HStack(spacing: 3) {
+                        ForEach(0..<(total + 2) / 3, id: \.self) { page in
+                            Circle()
+                                .fill(page == selectedIndex / 3 ? Color.white : Color.white.opacity(0.3))
+                                .frame(width: 4, height: 4)
+                        }
+                    }
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(.top, 2)
+        }
+    }
+
+    // MARK: - Single goal card (used for both medium and large)
+
+    private func goalCard(_ cat: GoalWidgetCategory, gridWeeks: Int, cellSz: CGFloat, cellSp: CGFloat, weekSp: CGFloat) -> some View {
+        let goalColor = Color(hex: cat.color) ?? .white
+        let todayVal = todayValue(cat)
+        let today = todayDateString()
+
+        return VStack(alignment: .leading, spacing: 2) {
+            // Top row: icon + name on left, [- value +] on right
+            HStack(spacing: 0) {
+                HStack(spacing: 4) {
+                    Image(systemName: cat.icon)
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundColor(goalColor)
+                    Text(cat.name)
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundColor(.white)
+                        .lineLimit(1)
+                }
+                Spacer()
+                HStack(spacing: 6) {
+                    Button(intent: UpdateGoalValueIntent(goalId: cat.id, date: today, currentValue: todayVal, delta: -1)) {
+                        ZStack {
+                            Circle()
+                                .fill(Color.white.opacity(0.1))
+                                .frame(width: 20, height: 20)
+                            Image(systemName: "minus")
+                                .font(.system(size: 8, weight: .bold))
+                                .foregroundColor(.white.opacity(0.55))
+                        }
+                    }
+                    .buttonStyle(.plain)
+
+                    HStack(alignment: .firstTextBaseline, spacing: 2) {
+                        Text("\(Int(todayVal))")
+                            .font(.system(size: 12, weight: .bold, design: .rounded))
+                            .foregroundColor(todayVal >= cat.target ? goalColor : .white)
+                        if let u = cat.unit, !u.isEmpty {
+                            Text(u)
+                                .font(.system(size: 9))
+                                .foregroundColor(.white.opacity(0.4))
+                        }
+                    }
+
+                    Button(intent: UpdateGoalValueIntent(goalId: cat.id, date: today, currentValue: todayVal, delta: 1)) {
+                        ZStack {
+                            Circle()
+                                .fill(goalColor.opacity(0.2))
+                                .frame(width: 20, height: 20)
+                            Image(systemName: "plus")
+                                .font(.system(size: 8, weight: .bold))
+                                .foregroundColor(goalColor)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+
+            // Grid
+            ContributionGridView(
+                entries: cat.entries,
+                target: cat.target,
+                color: goalColor,
+                weeks: gridWeeks,
+                cellSize: cellSz,
+                cellSpacing: cellSp,
+                weekSpacing: weekSp
+            )
+        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 6)
+        .background(Color.white.opacity(0.08))
+        .clipShape(RoundedRectangle(cornerRadius: 11, style: .continuous))
+    }
+
+    private var emptyState: some View {
+        VStack(spacing: 6) {
+            Image(systemName: "target")
+                .font(.system(size: 22, weight: .light))
+                .foregroundColor(.white.opacity(0.35))
+            Text("No goals yet")
+                .font(.system(size: 12))
+                .foregroundColor(.white.opacity(0.4))
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private func todayDateString() -> String {
+        let df = DateFormatter()
+        df.dateFormat = "yyyy-MM-dd"
+        return df.string(from: Date())
+    }
+
+    private func todayValue(_ cat: GoalWidgetCategory) -> Double {
+        let today = todayDateString()
+        return cat.entries.first(where: { $0.date == today })?.value ?? 0
+    }
+
+    private func streakLabel(_ cat: GoalWidgetCategory) -> String {
+        let cal = Calendar.current
+        let df = DateFormatter()
+        df.dateFormat = "yyyy-MM-dd"
+        let map: [String: Double] = Dictionary(cat.entries.map { ($0.date, $0.value) }) { _, latest in latest }
+        var streak = 0
+        var day = cal.startOfDay(for: Date())
+        // Walk backwards from yesterday
+        day = cal.date(byAdding: .day, value: -1, to: day)!
+        while true {
+            let key = df.string(from: day)
+            guard let val = map[key], val >= cat.target else { break }
+            streak += 1
+            guard let prev = cal.date(byAdding: .day, value: -1, to: day) else { break }
+            day = prev
+        }
+        return "\(streak)d streak"
+    }
+}
+
+// MARK: - Color Hex Helper
+
+extension Color {
+    init?(hex: String) {
+        var str = hex.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        if str.hasPrefix("#") { str.removeFirst() }
+        guard str.count == 6,
+              let num = UInt64(str, radix: 16) else { return nil }
+        self.init(
+            red: Double((num >> 16) & 0xFF) / 255,
+            green: Double((num >> 8) & 0xFF) / 255,
+            blue: Double(num & 0xFF) / 255
+        )
+    }
+}
+
 // MARK: - Widget Configurations
 
 struct WalletWidget: Widget {
@@ -1627,6 +1917,20 @@ struct WatchExpenseWidget: Widget {
         .configurationDisplayName("Expenses")
         .description("View your spending rings")
         .supportedFamilies([.systemSmall, .systemMedium, .systemLarge, .accessoryCircular])
+    }
+}
+
+struct GoalsWidget: Widget {
+    let kind: String = "GoalsWidget"
+
+    var body: some WidgetConfiguration {
+        AppIntentConfiguration(kind: kind, intent: ConfigurationAppIntent.self, provider: Provider()) { entry in
+            GoalsWidgetView(entry: entry)
+                .containerBackground(widgetBg, for: .widget)
+        }
+        .configurationDisplayName("Goals")
+        .description("View your goal tracking grids")
+        .supportedFamilies([.systemMedium, .systemLarge])
     }
 }
 

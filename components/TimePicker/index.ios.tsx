@@ -25,6 +25,7 @@ export default function TimePicker({ value, onChange, label }: TimePickerProps) 
         <Host matchContents>
             <Popover isPresented={show} onIsPresentedChange={setShow}>
                 <Popover.Trigger>
+                    {/* @ts-ignore */}
                     <RNHostView style={{ height: 44, width: buttonWidth }}>
                         <GlassView style={{ flex: 1, borderRadius: 100 }}>
                             <Pressable

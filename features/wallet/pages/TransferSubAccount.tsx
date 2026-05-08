@@ -128,8 +128,8 @@ export default function TransferSubAccount({ navigation, route }: WalletScreens<
                                         style={[
                                             styles.accountRow,
                                             selected && {
-                                                borderColor: acc.color,
-                                                backgroundColor: Color(acc.color).alpha(0.1).string(),
+                                                borderColor: acc.color ?? Colors.secondary,
+                                                backgroundColor: Color(acc.color ?? Colors.secondary).alpha(0.1).string(),
                                             },
                                             disabled && styles.accountRowDisabled,
                                         ]}
@@ -137,20 +137,20 @@ export default function TransferSubAccount({ navigation, route }: WalletScreens<
                                         <View
                                             style={[
                                                 styles.accountIcon,
-                                                { backgroundColor: Color(acc.color).alpha(0.2).string() },
+                                                { backgroundColor: Color(acc.color ?? Colors.secondary).alpha(0.2).string() },
                                             ]}
                                         >
                                             <MaterialCommunityIcons
                                                 name={acc.icon as any}
                                                 size={20}
-                                                color={acc.color}
+                                                color={acc.color ?? Colors.foreground}
                                             />
                                         </View>
                                         <View style={styles.accountInfo}>
                                             <Text style={styles.accountName}>{acc.name}</Text>
                                             <Text style={styles.accountBalance}>${acc.balance.toFixed(2)}</Text>
                                         </View>
-                                        {selected && <AntDesign name="check" size={16} color={acc.color} />}
+                                        {selected && <AntDesign name="check" size={16} color={acc.color ?? Colors.foreground} />}
                                     </TouchableOpacity>
                                 )
                             })}
@@ -208,7 +208,7 @@ function AccountSlot({
     onPress,
 }: {
     label: string
-    account: { name: string; color: string; icon: string; balance: number } | null
+    account: { name: string; color?: string | null; icon?: string | null; balance: number } | null
     active: boolean
     onPress: () => void
 }) {
@@ -219,18 +219,18 @@ function AccountSlot({
             style={[
                 styles.slot,
                 active && styles.slotActive,
-                account && { borderColor: Color(account.color).alpha(0.5).string() },
+                account && { borderColor: Color(account.color ?? Colors.secondary).alpha(0.5).string() },
             ]}
         >
             {account ? (
                 <>
-                    <View style={[styles.slotIcon, { backgroundColor: Color(account.color).alpha(0.2).string() }]}>
-                        <MaterialCommunityIcons name={account.icon as any} size={22} color={account.color} />
+                    <View style={[styles.slotIcon, { backgroundColor: Color(account.color ?? Colors.secondary).alpha(0.2).string() }]}>
+                        <MaterialCommunityIcons name={(account.icon ?? "help-circle") as any} size={22} color={account.color ?? Colors.foreground} />
                     </View>
                     <Text style={styles.slotName} numberOfLines={1}>
                         {account.name}
                     </Text>
-                    <Text style={[styles.slotBalance, { color: account.color }]}>${account.balance.toFixed(2)}</Text>
+                    <Text style={[styles.slotBalance, { color: account.color ?? Colors.foreground }]}>${account.balance.toFixed(2)}</Text>
                 </>
             ) : (
                 <>

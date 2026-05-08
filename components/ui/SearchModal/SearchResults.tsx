@@ -1,6 +1,6 @@
 import React, { useCallback, useContext, useEffect, useState } from "react"
 import { ActivityIndicator, FlatList, StyleSheet, View } from "react-native"
-import { AntDesign } from "@expo/vector-icons"
+import { Feather } from "@expo/vector-icons"
 import Haptics from "react-native-haptic-feedback"
 import Colors from "@/constants/Colors"
 import Text from "../Text/Text"
@@ -108,7 +108,7 @@ export default function SearchResults<T extends SearchItem = SearchItem>({
             )
         },
         [renderItem, isItemSelected, handleItemPress, multiSelect],
-    )
+    ) as any
 
     const renderEmptyState = () => {
         if (loading) {
@@ -123,7 +123,7 @@ export default function SearchResults<T extends SearchItem = SearchItem>({
         if (error) {
             return (
                 <View style={styles.emptyState}>
-                    <AntDesign name="exclamationcircle" size={48} color={Colors.error} />
+                    <Feather name="alert-circle" size={48} color={Colors.error} />
                     <Text style={styles.emptyStateText}>Search Error</Text>
                     <Text style={styles.emptyStateSubtext}>{error}</Text>
                 </View>
@@ -133,7 +133,7 @@ export default function SearchResults<T extends SearchItem = SearchItem>({
         if (query.trim() && results.length === 0) {
             return (
                 <View style={styles.emptyState}>
-                    {emptyStateIcon || <AntDesign name="search" size={48} color={Colors.foreground_secondary} />}
+                    {emptyStateIcon || <Feather name="search" size={48} color={Colors.foreground_secondary} />}
                     <Text style={styles.emptyStateText}>{emptyStateMessage}</Text>
                     <Text style={styles.emptyStateSubtext}>Try adjusting your search terms</Text>
                 </View>
@@ -143,7 +143,7 @@ export default function SearchResults<T extends SearchItem = SearchItem>({
         if (!query.trim()) {
             return (
                 <View style={styles.emptyState}>
-                    <AntDesign name="search" size={48} color={Colors.foreground_secondary} />
+                    <Feather name="search" size={48} color={Colors.foreground_secondary} />
                     <Text style={styles.emptyStateText}>Start typing to search</Text>
                 </View>
             )

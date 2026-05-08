@@ -35,10 +35,10 @@ class ErrorBoundary extends Component<Props, State> {
 
     componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
         this.setState({
-            errorInfo: errorInfo.componentStack,
+            errorInfo: errorInfo.componentStack ?? null,
         })
 
-        this.props.onError?.(error, errorInfo.componentStack)
+        this.props.onError?.(error, errorInfo.componentStack ?? '')
     }
 
     handleRestart = () => {

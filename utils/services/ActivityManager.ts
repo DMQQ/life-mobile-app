@@ -65,7 +65,9 @@ export class ActivityManager {
                 config.title,
                 config.description,
                 config.endTime,
+                new Date().toISOString(),
                 config.todos || [],
+                false,
             )
 
             console.log("Received activity token:", activityToken)
@@ -163,7 +165,7 @@ export class ActivityManager {
             // Listen for push tokens
             ExpoLiveActivityModule.addListener("onActivityPushToken", (event: ActivityPushTokenEvent) => {
                 console.log("Activity push token received:", event)
-                this.activityPushTokens.set(event.activityId, event.pushToken)
+                this.activityPushTokens.set(event.activityID, event.activityPushToken)
 
                 // Send token to server
                 if (this.serverHook) {
@@ -177,11 +179,11 @@ export class ActivityManager {
             // Listen for push-to-start tokens
             ExpoLiveActivityModule.addListener("onPushToStartToken", (event: PushToStartTokenEvent) => {
                 console.log("Push-to-start token received:", event)
-                this.pushToStartToken = event.pushToStartToken
+                this.pushToStartToken = event.activityPushToStartToken
 
                 // Send token to server
                 if (this.serverHook) {
-                    this.serverHook.registerPushToStartToken(event.pushToStartToken)
+                    this.serverHook.registerPushToStartToken(event.activityPushToStartToken)
                 }
 
                 // Notify callbacks

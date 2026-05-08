@@ -63,7 +63,7 @@ export default function useDeeplinking(navigationRef: React.RefObject<Navigation
 
                 const response = Notifications.getLastNotificationResponse()
 
-                return response?.notification.request.content.data.eventId
+                return response?.notification.request.content.data?.eventId
             },
 
             subscribe(listener) {
@@ -75,7 +75,9 @@ export default function useDeeplinking(navigationRef: React.RefObject<Navigation
 
                 const pushNotificationSubscription = Notifications.addNotificationResponseReceivedListener(
                     (response) => {
-                        const url = response.notification.request.content.data.eventId
+                        const url = response.notification.request.content.data?.eventId
+
+                        if (!url) return
 
                         listener(url as string)
                     },

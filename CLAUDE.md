@@ -37,9 +37,16 @@ For architecture/codebase questions, read `graphify-out/GRAPH_REPORT.md` for god
 
 After modifying code files, run:
 
-```
-python3 -c "from graphify.watch import _rebuild_code; from pathlib import Path; _rebuild_code(Path('.'))"
-```
+python3 -c "from graphify.watch import \_rebuild_code; from pathlib import Path; \_rebuild_code(Path('.'))"
+
+---
+
+## Editing & Verification Workflow
+
+When editing files, especially shared components, you must adhere to the following safety checks before concluding your task:
+
+1. **Type Checking:** After finishing your edits, you must check for type errors in the modified files to ensure no TypeScript regressions were introduced `bunx tsc --noEmit`
+2. **Usage Verification (Grep):** Whenever you modify a component (especially altering its props, signature, or core behavior), you must `grep` the codebase for all other files that import and use this component. Immediately review and update those dependents to prevent breaking changes.
 
 ---
 
@@ -64,9 +71,7 @@ After any significant logic, architecture, or API change to a module — update 
 - Use generated types from `@/gql/gql` for all GraphQL queries/mutations.
 - Reuse `OccurrenceItem`, `Expense`, `MonthlyExpenses` etc. from existing types — never redefine.
 - After any change to a GraphQL query, mutation, or fragment — run codegen to regenerate types:
-  ```
   npm run codegen
-  ```
 
 ### Hooks
 
@@ -102,10 +107,10 @@ Always refer to `wiki/styling.md` when building UI. Key rules:
 
 Use **only these two icon sources**. Do not import from any other icon library:
 
-| Source | Import | Use for |
-|---|---|---|
-| `Feather` | `import { Feather } from "@expo/vector-icons"` | All general UI icons (cross-platform) |
-| `SymbolView` / `expo-symbols` | `import { SymbolView } from "expo-symbols"` | iOS SF Symbols in toolbars / native-feel buttons only |
+| Source                        | Import                                         | Use for                                               |
+| ----------------------------- | ---------------------------------------------- | ----------------------------------------------------- |
+| `Feather`                     | `import { Feather } from "@expo/vector-icons"` | All general UI icons (cross-platform)                 |
+| `SymbolView` / `expo-symbols` | `import { SymbolView } from "expo-symbols"`    | iOS SF Symbols in toolbars / native-feel buttons only |
 
 **Never import**: `AntDesign`, `Ionicons`, `MaterialIcons`, `MaterialCommunityIcons`, `FontAwesome`, `Entypo`, or any other icon set. Replace existing uses when touching those files.
 
@@ -115,19 +120,19 @@ Use the **system font** (no explicit `fontFamily`). Never set `fontFamily` in `S
 
 ### Components
 
-| Need | Use |
-|---|---|
-| Glass circle icon button (close, back, save, action) | `<GlassIconButton name="x" onPress={...} />` |
-| Glass text + icon CTA | `<GlassButton label="Save" icon="check" onPress={...} />` |
-| Modal top bar (close + title + save) | `<ModalHeader onClose={...} onSave={...} title="..." />` |
-| Inline info / warning / error hint | `<Hint text="..." variant="info|warning|error|success" />` |
-| Confirm or destructive dialog | `<ConfirmDialog destructive onConfirm={...} title="Delete?" />` |
-| Floating/overlay surfaces | `<GlassView>` — never solid `primary_light` |
-| Scrollable screen | `<Background />` + animated `<Header scrollY={scrollY} animated />` + `useTrackScroll()` |
-| Icon-only ripple button | `<IconButton icon={<Feather name="..." />} />` |
-| Pill secondary action | `<ChipButton>` |
-| Tab / type switcher (2–3 opts) | `<GroupSelector>` |
-| Named text shortcuts | `import { Heading, SubHeading, Title, Body, Caption } from "@/components"` |
+| Need                                                 | Use                                                                                      |
+| ---------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Glass circle icon button (close, back, save, action) | `<GlassIconButton name="x" onPress={...} />`                                             |
+| Glass text + icon CTA                                | `<GlassButton label="Save" icon="check" onPress={...} />`                                |
+| Modal top bar (close + title + save)                 | `<ModalHeader onClose={...} onSave={...} title="..." />`                                 |
+| Inline info / warning / error hint                   | `<Hint text="..." variant="info                                                          |
+| Confirm or destructive dialog                        | `<ConfirmDialog destructive onConfirm={...} title="Delete?" />`                          |
+| Floating/overlay surfaces                            | `<GlassView>` — never solid `primary_light`                                              |
+| Scrollable screen                                    | `<Background />` + animated `<Header scrollY={scrollY} animated />` + `useTrackScroll()` |
+| Icon-only ripple button                              | `<IconButton icon={<Feather name="..." />} />`                                           |
+| Pill secondary action                                | `<ChipButton>`                                                                           |
+| Tab / type switcher (2–3 opts)                       | `<GroupSelector>`                                                                        |
+| Named text shortcuts                                 | `import { Heading, SubHeading, Title, Body, Caption } from "@/components"`               |
 
 ### UX Patterns
 

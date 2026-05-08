@@ -29,7 +29,7 @@ export default function useCreateExpensePage(
         params?.date ? moment(params.date).format("YYYY-MM-DD") : moment().format("YYYY-MM-DD"),
     )
     const [view, setView] = useState<ViewType>("main")
-    const [category, setCategory] = useState<keyof typeof Icons>(params.category || "none")
+    const [category, setCategory] = useState<keyof typeof Icons>((params.category || "none") as keyof typeof Icons)
     const [name, setName] = useState(params?.description || "")
     const [type, setType] = useState<"expense" | "income" | null>(params?.type || null)
     const [isSubscription, setIsSubscription] = useState(false)
@@ -136,7 +136,7 @@ export default function useCreateExpensePage(
 
             const id = data?.createExpense?.id
 
-            if (SubExpenses.length > 0) {
+            if (SubExpenses.length > 0 && id) {
                 await uploadSubexpenses({
                     variables: {
                         input: {
@@ -261,7 +261,7 @@ export default function useCreateExpensePage(
             } else {
                 setAmount(regularModeState.amount)
                 setDate(regularModeState.date)
-                setCategory(regularModeState.category)
+                setCategory(regularModeState.category as keyof typeof Icons)
                 setName(regularModeState.name)
                 setType(regularModeState.type)
             }
@@ -273,7 +273,7 @@ export default function useCreateExpensePage(
         setAmount(params?.amount.toString() || "0")
         setDate(params?.date ? moment(params.date).format("YYYY-MM-DD") : moment().format("YYYY-MM-DD"))
         setView("main")
-        setCategory(params.category || "none")
+        setCategory((params.category || "none") as keyof typeof Icons)
         setName(params?.description || "")
         setType(params?.type || null)
     }

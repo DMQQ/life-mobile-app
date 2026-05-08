@@ -106,16 +106,19 @@ const CompactSpendingChart = () => {
     useRefresh([query.refetch, prevQuery.refetch], [dateRange, previousDateRange])
 
     const { chartData, maxValue, total, prevTotal, percentageChange } = useMemo(() => {
-        const data = (query.data?.statisticsDayOfWeek || []) as any
-        const prevData = (prevQuery.data?.statisticsDayOfWeek || []) as any
+        const data = (query.data?.statisticsDayOfWeek || []) as { day: number; total: number }[]
+        const prevData = (prevQuery.data?.statisticsDayOfWeek || []) as { day: number; total: number }[]
 
-        const prevDataMap = new Map(prevData.map((item) => [item.day, item.total]))
+        const prevDataMap = new Map<number, number>(prevData.map((item) => [item.day, item.total]))
 
-        const days = Array.from({ length: 7 }, (_, i) => {
-            const dayData = data.find((d) => d.day === i + 1)
-            const prevValue = prevDataMap.get(i + 1) || 0
-            return { label: labels[i], value: dayData?.total || 0, prevValue, day: i + 1 }
-        })
+        const days: { label: string; value: number; prevValue: number; day: number }[] = Array.from(
+            { length: 7 },
+            (_, i) => {
+                const dayData = data.find((d) => d.day === i + 1)
+                const prevValue = prevDataMap.get(i + 1) || 0
+                return { label: labels[i], value: dayData?.total || 0, prevValue, day: i + 1 }
+            },
+        )
 
         const allValues = [...days.map((d) => d.value), ...days.map((d) => d.prevValue)].filter((v) => v > 0)
         const maxVal = allValues.length > 0 ? Math.max(...allValues) * 1.2 : 100

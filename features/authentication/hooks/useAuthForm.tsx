@@ -34,7 +34,7 @@ export const validationSchema = (variant: string) =>
         .min(6, "Password must be at least 6 characters")
         .required("Password is required")
         .trim()
-        .oneOf([yup.ref("password"), null], "Passwords must match"),
+        .oneOf([yup.ref("password")], "Passwords must match"),
     }),
   });
 

@@ -5,7 +5,7 @@ import { useAppSelector } from "@/utils/redux";
 import Ripple from "react-native-material-ripple";
 import { useNavigation } from "@react-navigation/native";
 import { Padding, Rounded } from "@/constants/Layout";
-import { AntDesign } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
 
 const backgroundColor = Colors.primary_lighter;
 
@@ -87,7 +87,7 @@ export default function WorkoutWidget() {
               marginRight: 5,
             }}
           >
-            <AntDesign name="play" color={Colors.foreground} size={30} />
+            <Feather name="play-circle" color={Colors.foreground} size={30} />
           </Ripple>
         </View>
       </View>

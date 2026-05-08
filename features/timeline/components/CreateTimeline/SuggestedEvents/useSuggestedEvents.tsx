@@ -4,19 +4,24 @@ import { CommonEvents } from "../CommonEvents.data";
 import { InitialValuesType } from "../../../hooks/mutation/useCreateEvent";
 import { useNavigation } from "@react-navigation/native";
 
-type EventType = (typeof CommonEvents)[0];
+export interface SuggestedEventType {
+    name?: string
+    content?: string
+    categories?: readonly string[]
+    autoCreate?: boolean
+}
 
 export default function useSuggestedEvents(props: {
   createTimelineAsync: (input: InitialValuesType) => Promise<void>;
   initialValues: InitialValuesType;
 }) {
-  const [selected, setSelected] = useState<Partial<EventType>>({});
+  const [selected, setSelected] = useState<SuggestedEventType>({});
   const navigation = useNavigation<any>();
   const [subCategory, setSubCategory] = useState<string>("");
 
   const [time, setTime] = useState<Date>();
 
-  const handleSelectQuickOption = (item: (typeof CommonEvents)[0]) => {
+  const handleSelectQuickOption = (item: SuggestedEventType) => {
     setSelected((prev) => (prev.name === item.name ? {} : item));
     setSubCategory("");
     setTime(undefined);

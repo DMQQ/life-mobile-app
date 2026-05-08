@@ -6,7 +6,7 @@ import Input from "@/components/ui/TextInput/TextInput"
 import Colors from "@/constants/Colors"
 import Layout from "@/constants/Layout"
 import { Subscription } from "@/types"
-import { Feather, MaterialCommunityIcons } from "@expo/vector-icons"
+import { AntDesign, Feather, MaterialCommunityIcons } from "@expo/vector-icons"
 import { BottomSheetScrollView, BottomSheetView } from "@gorhom/bottom-sheet"
 import Color from "color"
 import { useFormik } from "formik"
@@ -86,7 +86,7 @@ export default function EditSubscription({ route, navigation }: Props) {
         },
         onSubmit: async (values) => {
             Feedback.trigger("impactLight")
-            const input = {
+            const input: Record<string, unknown> = {
                 description: values.description.trim() || undefined,
                 amount: parseFloat(values.amount),
                 billingCycle: values.billingCycle,
@@ -102,9 +102,9 @@ export default function EditSubscription({ route, navigation }: Props) {
             }
             const result = await (async () => {
                 if (isEdit) {
-                    return await modifySubscription({ variables: { input: { id: subscription!.id, ...input } } })
+                    return await modifySubscription({ variables: { input: { id: subscription!.id, ...input } as any } })
                 } else {
-                    return await createSubscriptionFromInput({ variables: { input } })
+                    return await createSubscriptionFromInput({ variables: { input: input as any } })
                 }
             })()
 
@@ -198,11 +198,7 @@ export default function EditSubscription({ route, navigation }: Props) {
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 <View style={{ flex: 1 }}>
                     <View style={styles.container}>
-                        <GlassIconButton
-                            name="x"
-                            onPress={() => navigation.goBack()}
-                            positioned="top-left"
-                        />
+                        <GlassIconButton name="x" onPress={() => navigation.goBack()} positioned="top-left" />
                         <GlassIconButton
                             name="check"
                             onPress={() => formik.handleSubmit()}
@@ -367,10 +363,7 @@ export default function EditSubscription({ route, navigation }: Props) {
 
                                         {!isEdit && subAccounts.length > 0 && (
                                             <Ripple
-                                                style={[
-                                                    styles.chip,
-                                                    formik.values.subAccountId && styles.chipActive,
-                                                ]}
+                                                style={[styles.chip, formik.values.subAccountId && styles.chipActive]}
                                                 onPress={() => {
                                                     Keyboard.dismiss()
                                                     accountSheetRef.current?.expand()
@@ -379,7 +372,11 @@ export default function EditSubscription({ route, navigation }: Props) {
                                                 <MaterialCommunityIcons
                                                     name="bank-outline"
                                                     size={15}
-                                                    color={formik.values.subAccountId ? Colors.secondary : "rgba(255,255,255,0.7)"}
+                                                    color={
+                                                        formik.values.subAccountId
+                                                            ? Colors.secondary
+                                                            : "rgba(255,255,255,0.7)"
+                                                    }
                                                 />
                                                 <Text
                                                     style={[
@@ -388,7 +385,8 @@ export default function EditSubscription({ route, navigation }: Props) {
                                                     ]}
                                                 >
                                                     {formik.values.subAccountId
-                                                        ? subAccounts.find((a) => a.id === formik.values.subAccountId)?.name ?? "Account"
+                                                        ? (subAccounts.find((a) => a.id === formik.values.subAccountId)
+                                                              ?.name ?? "Account")
                                                         : "Account"}
                                                 </Text>
                                             </Ripple>

@@ -115,7 +115,7 @@ export default function ExpenseDetails({ expense }: { expense: ExpenseType }) {
                     <MaterialCommunityIcons
                         name={subAccount.icon as any}
                         size={24}
-                        color={subAccount.color}
+                        color={subAccount.color ?? Colors.foreground}
                         style={{ paddingHorizontal: 7.5, padding: 2.5 }}
                     />
                     <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>{subAccount.name}</Text>

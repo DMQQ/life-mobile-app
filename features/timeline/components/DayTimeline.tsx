@@ -70,21 +70,24 @@ const CalendarTimetable = ({
 
     const minHour = Math.min(...(events.map((v) => +trimTime(v.beginTime, 1)) || []))
 
+    const scrollToCurrentHour = useCallback(() => {
+        console.log("Scrolling to current hour, minHour:", minHour)
+        const isToday = moment(selected).isSame(moment(), "day")
+
+        const currentHour = moment().hour()
+        const targetHour = isToday ? currentHour : minHour !== Infinity ? minHour : 8
+
+        scrollViewRef.current?.scrollTo({
+            y: targetHour * hourHeight + headerHeight,
+            animated: false,
+        })
+    }, [selected, headerHeight, minHour, hourHeight])
+
     useEffect(() => {
-        const timeout = setTimeout(() => {
-            const isToday = moment(selected).isSame(moment(), "day")
-
-            const currentHour = moment().hour()
-            const targetHour = isToday ? currentHour : minHour !== Infinity ? minHour : 8
-
-            scrollViewRef.current?.scrollTo({
-                y: targetHour * hourHeight + headerHeight,
-                animated: false,
-            })
-        }, 0)
+        const timeout = setTimeout(scrollToCurrentHour, 0)
 
         return () => clearTimeout(timeout)
-    }, [selected, headerHeight, minHour, hourHeight])
+    }, [scrollToCurrentHour])
 
     const renderItem = useCallback(
         (props: any) => {

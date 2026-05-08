@@ -161,7 +161,7 @@ const CollapsibleItem = React.memo(
             </Animated.View>
         )
     },
-) as <T>(props: CollapsibleItemProps<T>) => JSX.Element
+) as <T>(props: CollapsibleItemProps<T>) => React.ReactElement
 
 const CollapsibleStack = React.memo(
     <T,>({
@@ -346,7 +346,7 @@ const CollapsibleStack = React.memo(
             </View>
         )
     },
-) as <T>(props: CollapsibleStackProps<T>) => JSX.Element
+) as <T>(props: CollapsibleStackProps<T>) => React.ReactElement
 
 const defaultStyles = StyleSheet.create({
     container: {

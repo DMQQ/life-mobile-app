@@ -11,8 +11,8 @@ interface Expense {
   description: string;
   date: string;
   type: string;
-  balanceBeforeInteraction: number;
-  category: string;
+  balanceBeforeInteraction?: number | null;
+  category?: string | null;
 }
 
 interface Props {
@@ -128,7 +128,7 @@ export default function FutureProjection({ data, income, currentBalance: current
           }}
         >
           <Text style={{ fontSize: 14, color: Colors.foreground }}>Average Expenses</Text>
-          <Text style={{ fontSize: 25, fontWeight: "600", color: Colors.secondary }}>{projectionData[0]?.expenses.toLocaleString()}zł</Text>
+          <Text style={{ fontSize: 25, fontWeight: "600", color: Colors.secondary }}>{(projectionData[0] as any)?.expenses.toLocaleString() ?? '0'}zł</Text>
         </View>
 
         <View
@@ -142,7 +142,7 @@ export default function FutureProjection({ data, income, currentBalance: current
         >
           <Text style={{ fontSize: 14, color: Colors.foreground }}>Projection for (9mo)</Text>
           <Text style={{ fontSize: 25, fontWeight: "600", color: Colors.secondary }}>
-            {projectionData[projectionData.length - 1]?.value.toLocaleString()}zł
+            {projectionData[projectionData.length - 1]?.value?.toLocaleString() ?? '0'}zł
           </Text>
         </View>
       </View>

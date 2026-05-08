@@ -165,27 +165,25 @@ const FloatingMenu = ({ children, menuContent, onVisibilityChange, menuWidth = 3
             controlRef.current = { close: hideMenu, open: measureAnchor }
         }
 
-        const enhancedChildren = cloneElement(children, {
+        const enhancedChildren = cloneElement(children as any, {
             onPress: handleAnchorPress,
             pointerEvents: isAnimating ? "none" : "auto",
         })
 
         const enhancedMenuContent = useMemo(() => {
-            return cloneElement(
+            const content =
                 typeof menuContent === "function"
                     ? menuContent({
                           isFinished: isFinished,
                       })
-                    : menuContent,
-                {
-                    onPress: () => {
-                        if (isAnimating) return
-                        //@ts-ignore
-                        menuContent.props.onPress?.()
-                        hideMenu() // Use animated close
-                    },
+                    : menuContent
+            return cloneElement(content as any, {
+                onPress: () => {
+                    if (isAnimating) return
+                    ;(menuContent as any).props?.onPress?.()
+                    hideMenu()
                 },
-            )
+            })
         }, [isAnimating, isFinished, menuContent])
 
         const animatedStyle = useAnimatedStyle(() => ({

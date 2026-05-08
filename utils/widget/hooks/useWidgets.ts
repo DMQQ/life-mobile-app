@@ -1,4 +1,5 @@
 import useWidgetAnalyticsData from "./useWidgetAnalyticsData"
+import useWidgetGoalsData from "./useWidgetGoalsData"
 import useWidgetTimelineData from "./useWidgetTimelineData"
 import useWidgetWalletData from "./useWidgetWalletData"
 import useWidgetExpensesData from "./useWidgetExpensesData"
@@ -17,5 +18,6 @@ export default function useWidgets() {
     useWidgetWalletData()
     useWidgetTimelineData()
     useWidgetAnalyticsData()
+    useWidgetGoalsData()
     useWidgetExpensesData()
 }

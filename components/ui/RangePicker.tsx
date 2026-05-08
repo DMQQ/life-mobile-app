@@ -36,7 +36,7 @@ function RangeSlider({
     const fillWidth = useRef(new Animated.Value(0)).current
 
     // Import haptic feedback conditionally
-    let ReactNativeHapticFeedback
+    let ReactNativeHapticFeedback: any
     if (vibrate) {
         try {
             // Use dynamic import or require within try/catch

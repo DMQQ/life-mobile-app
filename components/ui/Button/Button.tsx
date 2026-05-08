@@ -26,6 +26,7 @@ export interface ButtonProps extends RippleProps {
     size?: keyof typeof BUTTON_SIZE
     borderRadius?: keyof typeof BUTTON_BORDER_RADIUS
     disabled?: boolean
+    loading?: boolean
     /**  Style variants of button component */
     type?: keyof typeof BUTTON_TYPES
     /** Color variants of button */

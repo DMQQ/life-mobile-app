@@ -121,7 +121,7 @@ const CustomDatePicker = (props: {
             if (startDate) props.dispatch({ type: "SET_DATE_MIN", payload: startDate.format("YYYY-MM-DD") })
             if (endDate) props.dispatch({ type: "SET_DATE_MAX", payload: endDate.format("YYYY-MM-DD") })
         }
-    }, [showDatePicker, startDate, endDate])
+    }, [startDate, endDate])
 
     return (
         <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginRight: 10 }}>

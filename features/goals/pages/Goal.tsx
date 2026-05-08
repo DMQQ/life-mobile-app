@@ -5,6 +5,7 @@ import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons"
 import Color from "color"
 import moment from "moment"
 import { useMemo } from "react"
+import type { GoalEntry } from "@/gql/graphql"
 import { StyleSheet, View } from "react-native"
 import Animated, { useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated"
 import { SafeAreaView } from "react-native-safe-area-context"
@@ -20,7 +21,7 @@ export default function Goal({ route, navigation }: any) {
     const goal = goalData?.goal || {}
 
     const data = useMemo(() => {
-        const hasTodayEntry = goal?.entries?.some((entry) => moment(entry.date).isSame(moment(), "day"))
+        const hasTodayEntry = goal?.entries?.some((entry: GoalEntry) => moment(entry.date).isSame(moment(), "day"))
 
         if (!hasTodayEntry) {
             return [
@@ -37,7 +38,7 @@ export default function Goal({ route, navigation }: any) {
     }, [goal])
 
     const contributionData = useMemo(() => {
-        return goal?.entries?.map((entry) => ({
+        return goal?.entries?.map((entry: GoalEntry) => ({
             date: entry.date,
             count: entry.value,
         }))

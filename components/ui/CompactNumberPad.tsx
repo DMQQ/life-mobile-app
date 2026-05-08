@@ -70,7 +70,7 @@ const NumberKey = ({
     fontVariant: "title" | "subtitle" | "body" | "caption"
     fontWeight: "normal" | "bold"
 }) => {
-    const interval = useRef<number | null>(null)
+    const interval = useRef<ReturnType<typeof setInterval> | null>(null)
 
     const handlePress = () => {
         Feedback.trigger("impactLight")

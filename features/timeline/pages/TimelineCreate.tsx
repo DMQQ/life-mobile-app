@@ -16,9 +16,7 @@ import useCreateTimeline from "../hooks/general/useCreateTimeline"
 import type { TimelineScreenProps } from "../types"
 import { Todo } from "./CreateTimelineTodos"
 import GlassView from "@/components/ui/GlassView"
-import DatePicker from "@/components/DatePicker"
 import TimePicker from "@/components/TimePicker"
-import dayjs from "dayjs"
 import GroupSelector from "@/components/ui/GroupSelector"
 
 const styles = StyleSheet.create({
@@ -107,30 +105,37 @@ export default function CreateTimeLineEventModal({ route, navigation }: Timeline
 
                     <ValidatedInput.Label error={false} text="Time range*" />
                     <View style={styles.timeContainer}>
-                        <TimePicker
-                            label=""
-                            value={f.values.begin}
-                            onChange={(t) => {
-                                f.setFieldValue("begin", t)
-                                if (!endManuallyChanged.current) {
-                                    f.setFieldValue("end", moment(t, "HH:mm").add(1, "hours").format("HH:mm"))
-                                }
-                            }}
-                        />
+                        <View>
+                            <TimePicker
+                                label=""
+                                value={moment(f.values.begin, "HH:mm").format("HH:mm")}
+                                onChange={(t) => {
+                                    f.setFieldValue("begin", t)
+                                    if (!endManuallyChanged.current) {
+                                        f.setFieldValue("end", moment(t, "HH:mm").add(1, "hours").format("HH:mm"))
+                                    }
+                                }}
+                            />
+                        </View>
                         <Text variant="body" style={{ color: "gray", padding: 5 }}>
                             to
                         </Text>
-                        <TimePicker
-                            label=""
-                            value={f.values.end}
-                            onChange={(t) => {
-                                endManuallyChanged.current = true
-                                f.setFieldValue("end", t)
-                                if (moment(t, "HH:mm").isBefore(moment(f.values.begin, "HH:mm"))) {
-                                    f.setFieldValue("begin", moment(t, "HH:mm").subtract(1, "hours").format("HH:mm"))
-                                }
-                            }}
-                        />
+                        <View>
+                            <TimePicker
+                                label=""
+                                value={moment(f.values.end, "HH:mm").format("HH:mm")}
+                                onChange={(t) => {
+                                    endManuallyChanged.current = true
+                                    f.setFieldValue("end", t)
+                                    if (moment(t, "HH:mm").isBefore(moment(f.values.begin, "HH:mm"))) {
+                                        f.setFieldValue(
+                                            "begin",
+                                            moment(t, "HH:mm").subtract(1, "hours").format("HH:mm"),
+                                        )
+                                    }
+                                }}
+                            />
+                        </View>
                     </View>
 
                     <View style={{ marginTop: 15 }}>

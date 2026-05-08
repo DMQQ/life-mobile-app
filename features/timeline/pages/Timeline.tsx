@@ -34,7 +34,7 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
     const hasEverLoaded = useRef(false)
     if (timeline.data) hasEverLoaded.current = true
 
-    const timeoutId = useRef<number | null>(null)
+    const timeoutId = useRef<ReturnType<typeof setTimeout> | null>(null)
     const { isSearchActive } = useScreenSearch(
         useCallback(
             (query) => {

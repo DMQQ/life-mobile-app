@@ -71,7 +71,7 @@ export default function SuggestedEvents(props: SuggestedEventsProps) {
           </Text>
           <SubcategoryList
             handleSelectSubCategory={handleSelectSubCategory}
-            selected={selected || []}
+            selected={selected}
             subCategory={subCategory}
           />
         </>

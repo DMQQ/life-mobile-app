@@ -2,7 +2,7 @@ import Header from "@/components/ui/Header/Header"
 import Text from "@/components/ui/Text/Text"
 import Colors, { secondary_candidates } from "@/constants/Colors"
 import Layout from "@/constants/Layout"
-import { Expense } from "@/types"
+import { Expense, MonthlyExpenses } from "@/types"
 import { AntDesign, Ionicons, MaterialIcons } from "@expo/vector-icons"
 import moment from "moment"
 import { useCallback, useMemo, useRef, useState } from "react"
@@ -117,10 +117,10 @@ function WalletCharts({ navigation }: any) {
         },
     })
 
-    const filteredExpenses = useMemo(() => {
+    const filteredExpenses: Expense[] = useMemo(() => {
         return (
-            data?.wallet?.expenses2
-                .flatMap((expense) => expense.expenses)
+            (data?.wallet?.expenses2 as MonthlyExpenses[] | undefined)
+                ?.flatMap((expense) => expense.expenses as Expense[])
                 ?.filter((item) => !getInvalidExpenses(item)) || []
         )
     }, [data?.wallet?.expenses2])
@@ -169,10 +169,10 @@ function WalletCharts({ navigation }: any) {
         setStep(5)
     }
 
-    const selectedCategoryData = useMemo(() => {
-        const allExpenses = data?.wallet?.expenses2?.flatMap((g) => g.expenses) || []
+    const selectedCategoryData: Expense[] = useMemo(() => {
+        const allExpenses = ((data?.wallet?.expenses2 as MonthlyExpenses[] | undefined)?.flatMap((g) => g.expenses) ?? []) as Expense[]
         if (selected.trim() === "") return allExpenses
-        return allExpenses.filter((item) => item.category.startsWith(selected) && item.type !== "refunded")
+        return allExpenses.filter((item) => (item.category ?? "").startsWith(selected) && item.type !== "refunded")
     }, [selected, data?.wallet?.expenses2])
 
     const onChartPress = (e: any) => {
@@ -217,7 +217,6 @@ function WalletCharts({ navigation }: any) {
                             dispatch({ type: "SET_DATE_MAX", payload: dayjs(end).format("YYYY-MM-DD") })
                             dispatch({ type: "SET_DATE_MIN", payload: dayjs(start).format("YYYY-MM-DD") })
                         }}
-                        iconButton
                     />
                 ),
             },

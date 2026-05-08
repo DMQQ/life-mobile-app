@@ -2,6 +2,7 @@ import React from "react"
 import { Dimensions, StyleSheet, View } from "react-native"
 import Animated, {
     interpolate,
+    SharedValue,
     useAnimatedScrollHandler,
     useAnimatedStyle,
     useSharedValue,
@@ -11,7 +12,7 @@ const { width: SCREEN_WIDTH } = Dimensions.get("window")
 
 interface CarouselItemProps {
     index: number
-    scrollX: Animated.SharedValue<number>
+    scrollX: SharedValue<number>
     children: React.ReactNode
     itemWidth: number
     gap: number

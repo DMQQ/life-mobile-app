@@ -10,11 +10,14 @@ interface SubscriptionItemProps {
         id: string
         amount: number
         dateStart: string
-        dateEnd: string
+        dateEnd?: string | null
         description: string
         isActive: boolean
         nextBillingDate: string
         billingCycle: string
+        billingDay?: number | null
+        customBillingMonths?: number[] | null
+        reminderDaysBeforehand?: number | null
         totalSpent?: number
         totalAmount?: number
         totalDuration?: number
@@ -23,7 +26,7 @@ interface SubscriptionItemProps {
             id: string
             date: string
             description: string
-            category: string
+            category?: string
         }[]
     }
     index: number

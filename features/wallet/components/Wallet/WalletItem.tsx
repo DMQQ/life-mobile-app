@@ -10,18 +10,23 @@ import ContextMenu from "react-native-context-menu-view"
 import { navigationRef } from "@/navigation"
 import useDeleteActivity from "../../hooks/useDeleteActivity"
 
-interface WalletElement extends Expense {
-    description: string
-    amount: number
-    type: string
-    date: string
+interface WalletElement {
     id: string
-
-    balanceBeforeInteraction: number
-
-    category: keyof typeof Icons
-
-    note?: string
+    amount: number
+    description: string
+    date: string
+    type: string
+    balanceBeforeInteraction?: number | null
+    category?: string | null
+    note?: string | null
+    spontaneousRate?: number | null
+    subAccountId?: string | null
+    subscription?: unknown
+    location?: unknown
+    subexpenses?: unknown
+    files?: unknown
+    tags?: string | null
+    shop?: string | null
 }
 
 export { Icons } from "../Expense/ExpenseIcon"
@@ -194,7 +199,7 @@ function WalletItem(
                     <CategoryIcon
                         style={{ padding: 0 }}
                         type={item.type as "income" | "expense" | "refunded"}
-                        category={isBalanceEdit ? "edit" : item.category}
+                        category={(isBalanceEdit ? "edit" : item.category) as keyof typeof Icons}
                     />
 
                     <View style={styles.descContainer}>
@@ -204,21 +209,21 @@ function WalletItem(
 
                         <Text style={styles.date}>
                             {dateFormatter(item.date)}
-                            {item.category && item.subscription?.isActive && " • "}
-                            {item.subscription?.isActive ? <Text>Subscription</Text> : ""}
-                            {item.files && item.files.length > 0 && (
+                            {item.category && (item.subscription as any)?.isActive && " • "}
+                            {(item.subscription as any)?.isActive ? <Text>Subscription</Text> : ""}
+                            {(item.files as any) && (item.files as any).length > 0 && (
                                 <>
                                     {" • "}
 
                                     <Text>
-                                        {item.files.length} {item.files.length > 1 ? "files" : "file"}
+                                        {(item.files as any).length} {(item.files as any).length > 1 ? "files" : "file"}
                                     </Text>
                                 </>
                             )}
-                            {item.subexpenses && item.subexpenses?.length > 0 && (
+                            {(item.subexpenses as any) && (item.subexpenses as any)?.length > 0 && (
                                 <>
                                     {" • "}
-                                    <Text>{item.subexpenses?.length} items</Text>
+                                    <Text>{(item.subexpenses as any)?.length} items</Text>
                                 </>
                             )}
                         </Text>

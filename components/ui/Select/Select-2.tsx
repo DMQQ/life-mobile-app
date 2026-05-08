@@ -1,6 +1,6 @@
 import { ReactNode, useState } from "react";
 import {
-  ListRenderItem,
+  ListRenderItemInfo,
   Pressable,
   StyleSheet,
   Text,
@@ -23,7 +23,7 @@ interface SelectProps<T> {
   multiSelect?: boolean;
   renderCustomSelected?: () => ReactNode;
 
-  renderItem?: (props: { item: T; index: number }) => ListRenderItem<T>;
+  renderItem?: (props: { item: T; index: number }) => ReactNode;
 }
 
 const PressableOverlay = ({
@@ -97,7 +97,7 @@ export default function Select<T>(props: SelectProps<T>) {
       {isFocused && (
         <Animated.FlatList
           data={props.options}
-          renderItem={({ item, index }) => props.renderItem({ item, index })}
+          renderItem={({ item, index }) => props.renderItem?.({ item, index }) as any}
           keyExtractor={(item, index) => index.toString()}
           style={{
             backgroundColor: Colors.primary_lighter,

@@ -20,6 +20,7 @@ import { Icons, CategoryUtils } from "../components/Expense/ExpenseIcon"
 import dayjs from "dayjs"
 import type { SearchMenuItem } from "@/contexts/SearchMenuContext"
 import Background from "@/components/ui/Background"
+import { Expense, MonthlyExpenses, Wallet } from "@/types"
 
 const styles = StyleSheet.create({
     container: {
@@ -83,10 +84,10 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
 
     useEffect(() => {
         if (route.params?.expenseId && data?.wallet) {
-            const expense = data.wallet.expenses2
+            const expense = (data.wallet.expenses2 as MonthlyExpenses[])
                 .flatMap((m) => m.expenses)
-                .find((expense) => expense.id === route.params?.expenseId)
-            navigation.setParams({ expenseId: null })
+                .find((expense) => expense.id === route.params?.expenseId) as Expense
+            navigation.setParams({ expenseId: undefined })
             navigation.navigate("Expense", { expense })
         }
     }, [route.params?.expenseId])
@@ -206,7 +207,7 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
             {header}
 
             {activeView === "expenses" ? (
-                <ExpensesList wallet={data?.wallet} onScroll={onScroll} refetch={refetch} onEndReached={onEndReached} />
+                <ExpensesList wallet={data?.wallet as unknown as Wallet} onScroll={onScroll} refetch={refetch} onEndReached={onEndReached} />
             ) : (
                 <SubscriptionsList onScroll={onScroll} />
             )}

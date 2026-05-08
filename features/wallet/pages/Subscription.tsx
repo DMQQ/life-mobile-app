@@ -14,6 +14,7 @@ import { parseDate } from "@/utils/functions/parseDate"
 import Animated, {
     Extrapolation,
     interpolate,
+    SharedValue,
     useAnimatedScrollHandler,
     useAnimatedStyle,
     useSharedValue,
@@ -89,7 +90,7 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
 
     useEffect(() => {
         if (data?.subscription) {
-            setSubscription(data.subscription)
+            setSubscription(data.subscription as Subscription)
         }
     }, [data?.subscription])
 
@@ -143,7 +144,7 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                     variables: { subscriptionId: subscription.id },
                 })
                 if (result.data?.cancelSubscription) {
-                    setSubscription(result.data.cancelSubscription.subscription)
+                    setSubscription(result.data.cancelSubscription.subscription as Subscription)
                     refetch()
                 }
             } else if (hasSubscription && !isSubscriptionActive) {
@@ -151,15 +152,15 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                     variables: { subscriptionId: subscription!.id },
                 })
                 if (result.data?.renewSubscription) {
-                    setSubscription(result.data.renewSubscription.subscription)
+                    setSubscription(result.data.renewSubscription.subscription as Subscription)
                     refetch()
                 }
             } else {
                 const result = await sub.createSubscription({
-                    variables: { expenseId: subscription?.id },
+                    variables: { expenseId: subscription!.id },
                 })
                 if (result.data?.createSubscription) {
-                    setSubscription(result.data.createSubscription.subscription)
+                    setSubscription(result.data.createSubscription.subscription as Subscription)
                     refetch()
                 }
             }
@@ -481,7 +482,7 @@ const AnimatedSubscriptionHeader = ({
     scrollY,
     subscription,
 }: {
-    scrollY: Animated.SharedValue<number>
+    scrollY: SharedValue<number>
     subscription: Subscription
 }) => {
     return (

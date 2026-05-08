@@ -13,12 +13,12 @@ interface SubAccount {
     id: string
     name: string
     description?: string | null
-    color: string
-    icon: string
+    color?: string | null
+    icon?: string | null
     balance: number
     isDefault: boolean
-    income?: number
-    expense?: number
+    income?: number | null
+    expense?: number | null
 }
 
 const CARD_W = Layout.screen.width * 0.8
@@ -86,9 +86,9 @@ function AccountCard({
     onDelete?: () => void
     onTransfer?: () => void
 }) {
-    const base = Color(account.color).darken(0.45).string()
-    const mid = Color(account.color).darken(0.28).string()
-    const accent = account.color
+    const accent = account.color ?? Colors.secondary
+    const base = Color(accent).darken(0.45).string()
+    const mid = Color(accent).darken(0.28).string()
     const dimAccent = Color(accent).alpha(0.32).string()
     const dimAccent2 = Color(accent).alpha(0.16).string()
 
@@ -126,7 +126,7 @@ function AccountCard({
                 {/* top row */}
                 <View style={styles.topRow}>
                     <View style={[styles.iconWrap, { backgroundColor: Color(accent).alpha(0.22).string() }]}>
-                        <MaterialCommunityIcons name={account.icon as any} size={20} color={accent} />
+                        <MaterialCommunityIcons name={(account.icon ?? "bank") as any} size={20} color={accent} />
                     </View>
                     <View style={styles.topRight}>
                         <View style={styles.actions}>

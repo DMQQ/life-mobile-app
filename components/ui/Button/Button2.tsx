@@ -63,9 +63,10 @@ export default function Button({
             .string(),
     }
 
+    const resolvedBg = (style as any)?.backgroundColor as string | undefined
     const tintColor = disabled
-        ? style?.backgroundColor
-            ? lowOpacity(style?.backgroundColor, 0.1)
+        ? resolvedBg
+            ? lowOpacity(resolvedBg, 0.1)
             : lowOpacity(mainColor, 0.5)
         : mainColor
 
