@@ -130,6 +130,7 @@ struct GoalWidgetCategory: Codable {
     let name: String
     let icon: String
     let target: Double
+    let min: Double?
     let color: String
     let unit: String?
     let entries: [GoalWidgetEntry]
@@ -1369,6 +1370,7 @@ struct DailyRoutineWidgetView: View {
 private struct ContributionGridView: View {
     let entries: [GoalWidgetEntry]
     let target: Double
+    let isLimit: Bool
     let color: Color
     let weeks: Int
     let cellSize: CGFloat
@@ -1422,6 +1424,11 @@ private struct ContributionGridView: View {
     }
 
     private func cellColor(value: Double, goalMet: Bool) -> Color {
+        if isLimit {
+            if value > target { return Color(red: 1, green: 0.35, blue: 0.35) }
+            if value > 0 { return color }
+            return Color.white.opacity(0.08)
+        }
         if value == 0 { return Color.white.opacity(0.08) }
         if goalMet { return color }
         return color.opacity(0.15)
@@ -1501,63 +1508,52 @@ struct GoalsWidgetView: View {
 
     private func goalCard(_ cat: GoalWidgetCategory, gridWeeks: Int, cellSz: CGFloat, cellSp: CGFloat, weekSp: CGFloat) -> some View {
         let goalColor = Color(hex: cat.color) ?? .white
+        let isLimit = cat.min == 1
         let todayVal = todayValue(cat)
         let today = todayDateString()
+        let valueColor: Color = isLimit
+            ? (todayVal > cat.target ? Color(red: 1, green: 0.35, blue: 0.35) : goalColor)
+            : (todayVal >= cat.target ? goalColor : .white)
 
         return VStack(alignment: .leading, spacing: 2) {
-            // Top row: icon + name on left, [- value +] on right
+            // Top row: icon + name + value on left, [+1 +5 +10] on right
             HStack(spacing: 0) {
                 HStack(spacing: 4) {
                     Image(systemName: cat.icon)
                         .font(.system(size: 10, weight: .semibold))
                         .foregroundColor(goalColor)
-                    Text(cat.name)
-                        .font(.system(size: 11, weight: .semibold))
-                        .foregroundColor(.white)
-                        .lineLimit(1)
-                }
-                Spacer()
-                HStack(spacing: 6) {
-                    Button(intent: UpdateGoalValueIntent(goalId: cat.id, date: today, currentValue: todayVal, delta: -1)) {
-                        ZStack {
-                            Circle()
-                                .fill(Color.white.opacity(0.1))
-                                .frame(width: 20, height: 20)
-                            Image(systemName: "minus")
-                                .font(.system(size: 8, weight: .bold))
-                                .foregroundColor(.white.opacity(0.55))
-                        }
-                    }
-                    .buttonStyle(.plain)
-
                     HStack(alignment: .firstTextBaseline, spacing: 2) {
                         Text("\(Int(todayVal))")
-                            .font(.system(size: 14, weight: .bold, design: .rounded))
-                            .foregroundColor(todayVal >= cat.target ? goalColor : .white)
-                        Text("/")
-                            .font(.system(size: 10, weight: .medium))
-                            .foregroundColor(.white.opacity(0.3))
-                        Text("\(Int(cat.target))")
-                            .font(.system(size: 11, weight: .medium, design: .rounded))
-                            .foregroundColor(.white.opacity(0.5))
+                            .font(.system(size: 13, weight: .bold, design: .rounded))
+                            .foregroundColor(valueColor)
+                        Text("/\(Int(cat.target))")
+                            .font(.system(size: 10, weight: .medium, design: .rounded))
+                            .foregroundColor(.white.opacity(0.35))
                         if let u = cat.unit, !u.isEmpty {
                             Text(u)
                                 .font(.system(size: 9))
-                                .foregroundColor(.white.opacity(0.4))
+                                .foregroundColor(.white.opacity(0.35))
                         }
                     }
-
-                    Button(intent: UpdateGoalValueIntent(goalId: cat.id, date: today, currentValue: todayVal, delta: 1)) {
-                        ZStack {
-                            Circle()
-                                .fill(goalColor.opacity(0.2))
-                                .frame(width: 20, height: 20)
-                            Image(systemName: "plus")
-                                .font(.system(size: 8, weight: .bold))
-                                .foregroundColor(goalColor)
+                    Text(cat.name)
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundColor(.white.opacity(0.7))
+                        .lineLimit(1)
+                }
+                Spacer()
+                HStack(spacing: 4) {
+                    ForEach([1, 5, 10], id: \.self) { step in
+                        Button(intent: UpdateGoalValueIntent(goalId: cat.id, date: today, currentValue: todayVal, delta: Double(step))) {
+                            Text("+\(step)")
+                                .font(.system(size: 9, weight: .bold, design: .rounded))
+                                .foregroundColor(step == 1 ? .white.opacity(0.7) : goalColor)
+                                .padding(.horizontal, 5)
+                                .padding(.vertical, 3)
+                                .background(step == 1 ? Color.white.opacity(0.1) : goalColor.opacity(0.18))
+                                .clipShape(Capsule())
                         }
+                        .buttonStyle(.plain)
                     }
-                    .buttonStyle(.plain)
                 }
             }
 
@@ -1565,6 +1561,7 @@ struct GoalsWidgetView: View {
             ContributionGridView(
                 entries: cat.entries,
                 target: cat.target,
+                isLimit: cat.min == 1,
                 color: goalColor,
                 weeks: gridWeeks,
                 cellSize: cellSz,
@@ -1598,7 +1595,7 @@ struct GoalsWidgetView: View {
 
     private func todayValue(_ cat: GoalWidgetCategory) -> Double {
         let today = todayDateString()
-        return cat.entries.first(where: { $0.date == today })?.value ?? 0
+        return cat.entries.filter { $0.date == today }.map { $0.value }.max() ?? 0
     }
 
     private func streakLabel(_ cat: GoalWidgetCategory) -> String {

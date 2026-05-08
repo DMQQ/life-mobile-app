@@ -34,16 +34,9 @@ export default function ModalHeader({
     const insets = useSafeAreaInsets()
 
     return (
-        <View style={[styles.container, padTop && { paddingTop: insets.top + 10 }]}>
+        <View style={[styles.container, padTop && { paddingTop: 15 }]}>
             <View style={styles.side}>
-                {onClose && (
-                    <GlassIconButton
-                        name={closeIcon}
-                        onPress={onClose}
-                        size={18}
-                        padding={12}
-                    />
-                )}
+                {onClose && <GlassIconButton name={closeIcon} onPress={onClose} size={18} padding={12} />}
             </View>
 
             {title ? (

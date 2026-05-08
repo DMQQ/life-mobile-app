@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, TextInput } from "react-native";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
 import Colors from "@/constants/Colors";
 
 interface ValuePickerProps {
@@ -71,15 +71,15 @@ const ValuePicker = ({ label, value, min, max, step, onChange }: ValuePickerProp
       <Text style={styles.pickerLabel}>{label}</Text>
       <View style={styles.pickerControls}>
         <TouchableOpacity style={[styles.pickerButton, styles.pickerButtonBig]} onPress={decrementBig} disabled={value <= min}>
-          <MaterialCommunityIcons
-            name="chevron-double-left"
+          <Feather
+            name="chevrons-left"
             size={24}
             color={value <= min ? "rgba(255,255,255,0.3)" : "rgba(255,255,255,0.9)"}
           />
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.pickerButton} onPress={decrement} disabled={value <= min}>
-          <MaterialCommunityIcons name="chevron-left" size={24} color={value <= min ? "rgba(255,255,255,0.3)" : "rgba(255,255,255,0.9)"} />
+          <Feather name="chevron-left" size={24} color={value <= min ? "rgba(255,255,255,0.3)" : "rgba(255,255,255,0.9)"} />
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.valueContainer} onPress={handleValueContainerPress} activeOpacity={0.7}>
@@ -100,12 +100,12 @@ const ValuePicker = ({ label, value, min, max, step, onChange }: ValuePickerProp
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.pickerButton} onPress={increment}>
-          <MaterialCommunityIcons name="chevron-right" size={24} color="rgba(255,255,255,0.9)" />
+          <Feather name="chevron-right" size={24} color="rgba(255,255,255,0.9)" />
         </TouchableOpacity>
 
         <TouchableOpacity style={[styles.pickerButton, styles.pickerButtonBig]} onPress={incrementBig}>
-          <MaterialCommunityIcons
-            name="chevron-double-right"
+          <Feather
+            name="chevrons-right"
             size={24}
             color="rgba(255,255,255,0.9)"
           />

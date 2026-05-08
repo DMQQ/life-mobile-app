@@ -1,684 +1,260 @@
-import Button from "@/components/ui/Button/Button"
-import ValidatedInput from "@/components/ui/ValidatedInput"
-import GlassView from "@/components/ui/GlassView"
-import { MaterialCommunityIcons, AntDesign } from "@expo/vector-icons"
+import { Feather } from "@expo/vector-icons"
 import { Formik, FormikProps } from "formik"
-import { FlatList, ScrollView, Text, View, StyleSheet, TextInput, TouchableWithoutFeedback, Keyboard, TouchableOpacity } from "react-native"
-import Colors from "@/constants/Colors"
-import { useGoal } from "../hooks/hooks"
-import Ripple from "react-native-material-ripple"
-import { useState, useEffect } from "react"
+import { useMemo } from "react"
+import { ScrollView, StyleSheet, View } from "react-native"
+import { Slider, Host, Menu, Button } from "@expo/ui/swift-ui"
 import * as yup from "yup"
-import RangePickers from "../components/RangePicker"
+import ValidatedInput from "@/components/ui/ValidatedInput"
+import ModalHeader from "@/components/ui/ModalHeader"
+import GroupSelector from "@/components/ui/GroupSelector"
+import Text from "@/components/ui/Text/Text"
+import Colors from "@/constants/Colors"
+import Ripple from "react-native-material-ripple"
+import { useGoal, useGetGoal } from "../hooks/hooks"
+import GlassView from "@/components/ui/GlassView"
 
-// Type definitions
 interface FormValues {
     name: string
     icon: string
-    description: string
-    min: number
+    goalType: "REACH" | "LIMIT"
     target: number
     unit: string
 }
 
-interface CreateGoalProps {
-    navigation: {
-        navigate: (screen: string, params?: any) => void
-        goBack: () => void
-    }
-}
-
-interface MultiplierOption {
-    label: string
-    value: number
-}
-
-interface UnitCategory {
-    label: string
-    value: UnitCategoryKey | "all"
-    icon: string
-    subcategories?: SubcategoryItem[]
-}
-
-interface SubcategoryItem {
-    label: string
-    value: string
-}
-
-interface RangePreset {
-    min: number
-    target: number
-    max: number
-    suggestedMultiplier: number
-}
-
-type UnitCategoryKey =
-    | "time"
-    | "reading"
-    | "weight"
-    | "distance"
-    | "exercise"
-    | "volume"
-    | "food"
-    | "medicine"
-    | "mood"
-    | "productivity"
-    | "finance"
-    | "habits"
-
-type UnitMap = {
-    [key in UnitCategoryKey]: {
-        [subcategory: string]: string[]
-    }
-}
-
-type UnitRangeMap = {
-    [key: string]: RangePreset
-}
-
-// Validation schema
 const validationSchema = yup.object().shape({
     name: yup.string().required("Goal name is required"),
     icon: yup.string().required("Icon is required"),
-    description: yup.string().required("Description is required"),
-    min: yup.number().required("Min is required"),
-    target: yup.number().required("Target is required"),
-    unit: yup.string().required("Unit is required"),
+    goalType: yup.string().oneOf(["REACH", "LIMIT"]).required(),
+    target: yup.number().min(1, "Must be at least 1").required("Target is required"),
+    unit: yup.string().optional(),
 })
 
-const initialValues: FormValues = {
-    name: "",
-    icon: "",
-    description: "",
-    min: 0,
-    target: 50,
-    unit: "",
+const UNIT_CONFIG: Record<string, { label: string; sliderMax: number }> = {
+    min: { label: "minutes", sliderMax: 480 },
+    hours: { label: "hours", sliderMax: 24 },
+    km: { label: "kilometers", sliderMax: 42 },
+    miles: { label: "miles", sliderMax: 26 },
+    steps: { label: "steps", sliderMax: 50000 },
+    pages: { label: "pages", sliderMax: 500 },
+    reps: { label: "reps", sliderMax: 100 },
+    sets: { label: "sets", sliderMax: 20 },
+    cups: { label: "cups", sliderMax: 12 },
+    glasses: { label: "glasses", sliderMax: 12 },
+    liters: { label: "liters", sliderMax: 5 },
+    ml: { label: "milliliters", sliderMax: 3000 },
+    kg: { label: "kilograms", sliderMax: 200 },
+    lbs: { label: "pounds", sliderMax: 440 },
+    cal: { label: "calories", sliderMax: 5000 },
+    tasks: { label: "tasks", sliderMax: 50 },
+    sessions: { label: "sessions", sliderMax: 10 },
+    times: { label: "times", sliderMax: 50 },
 }
 
-// Range presets for different unit types
-const UNIT_RANGES: UnitRangeMap = {
-    // Time ranges
-    Hours: { min: 1, target: 4, max: 8, suggestedMultiplier: 1 },
-    Minutes: { min: 15, target: 30, max: 60, suggestedMultiplier: 1 },
-    Days: { min: 1, target: 4, max: 7, suggestedMultiplier: 1 },
-    Weeks: { min: 1, target: 3, max: 4, suggestedMultiplier: 1 },
-    Months: { min: 1, target: 6, max: 12, suggestedMultiplier: 1 },
-    Years: { min: 1, target: 2, max: 5, suggestedMultiplier: 1 },
-
-    // Reading ranges
-    Pages: { min: 5, target: 20, max: 50, suggestedMultiplier: 1 },
-    Books: { min: 1, target: 3, max: 12, suggestedMultiplier: 1 },
-    Chapters: { min: 1, target: 5, max: 10, suggestedMultiplier: 1 },
-    Articles: { min: 1, target: 5, max: 10, suggestedMultiplier: 1 },
-    Blogs: { min: 1, target: 3, max: 7, suggestedMultiplier: 1 },
-
-    // Weight ranges
-    Kilograms: { min: 1, target: 5, max: 10, suggestedMultiplier: 1 },
-    Pounds: { min: 2, target: 10, max: 20, suggestedMultiplier: 1 },
-    Grams: { min: 100, target: 500, max: 1000, suggestedMultiplier: 1 },
-    Ounces: { min: 5, target: 15, max: 30, suggestedMultiplier: 1 },
-
-    // Distance ranges
-    Meters: { min: 100, target: 500, max: 1000, suggestedMultiplier: 1 },
-    Kilometers: { min: 1, target: 5, max: 10, suggestedMultiplier: 1 },
-    Miles: { min: 1, target: 3, max: 10, suggestedMultiplier: 1 },
-    Steps: { min: 1000, target: 7500, max: 10000, suggestedMultiplier: 1 },
-    Floors: { min: 5, target: 15, max: 25, suggestedMultiplier: 1 },
-
-    // Exercise ranges
-    Reps: { min: 8, target: 12, max: 20, suggestedMultiplier: 1 },
-    Sets: { min: 3, target: 4, max: 5, suggestedMultiplier: 1 },
-    Calories: { min: 100, target: 300, max: 500, suggestedMultiplier: 1 },
-    Workouts: { min: 1, target: 3, max: 5, suggestedMultiplier: 1 },
-    Sessions: { min: 1, target: 3, max: 5, suggestedMultiplier: 1 },
-
-    // Volume ranges
-    Liters: { min: 1, target: 2, max: 3, suggestedMultiplier: 1 },
-    Gallons: { min: 0.5, target: 1, max: 2, suggestedMultiplier: 1 },
-    Cups: { min: 1, target: 6, max: 8, suggestedMultiplier: 1 },
-    Glasses: { min: 1, target: 6, max: 8, suggestedMultiplier: 1 },
-    Bottles: { min: 1, target: 2, max: 4, suggestedMultiplier: 1 },
-    ML: { min: 250, target: 1000, max: 2000, suggestedMultiplier: 1 },
-
-    // Food ranges
-    Meals: { min: 2, target: 3, max: 5, suggestedMultiplier: 1 },
-    Servings: { min: 1, target: 3, max: 5, suggestedMultiplier: 1 },
-    Portions: { min: 1, target: 2, max: 3, suggestedMultiplier: 1 },
-    Plates: { min: 1, target: 2, max: 3, suggestedMultiplier: 1 },
-    Bowls: { min: 1, target: 2, max: 3, suggestedMultiplier: 1 },
-    Slices: { min: 1, target: 2, max: 4, suggestedMultiplier: 1 },
-
-    // Medicine ranges
-    Doses: { min: 1, target: 2, max: 3, suggestedMultiplier: 1 },
-    Tablets: { min: 1, target: 2, max: 3, suggestedMultiplier: 1 },
-    Capsules: { min: 1, target: 2, max: 3, suggestedMultiplier: 1 },
-    Pills: { min: 1, target: 2, max: 3, suggestedMultiplier: 1 },
-    Applications: { min: 1, target: 2, max: 3, suggestedMultiplier: 1 },
-    Injections: { min: 1, target: 1, max: 2, suggestedMultiplier: 1 },
-
-    // Mood ranges
-    "Rating (1-5)": { min: 3, target: 4, max: 5, suggestedMultiplier: 1 },
-    "Rating (1-10)": { min: 6, target: 8, max: 10, suggestedMultiplier: 1 },
-    Happiness: { min: 3, target: 4, max: 5, suggestedMultiplier: 1 },
-    Satisfaction: { min: 3, target: 4, max: 5, suggestedMultiplier: 1 },
-    Energy: { min: 3, target: 4, max: 5, suggestedMultiplier: 1 },
-    "Stress Level": { min: 1, target: 2, max: 3, suggestedMultiplier: 1 }, // Lower is better
-    "Anxiety Level": { min: 1, target: 2, max: 3, suggestedMultiplier: 1 }, // Lower is better
-    "Focus Level": { min: 3, target: 4, max: 5, suggestedMultiplier: 1 },
-
-    // Productivity ranges
-    Tasks: { min: 3, target: 7, max: 10, suggestedMultiplier: 1 },
-    Projects: { min: 1, target: 2, max: 3, suggestedMultiplier: 1 },
-    Pomodoros: { min: 4, target: 8, max: 12, suggestedMultiplier: 1 },
-    "Deep Work Sessions": { min: 1, target: 3, max: 5, suggestedMultiplier: 1 },
-    "Focus Minutes": { min: 25, target: 90, max: 120, suggestedMultiplier: 1 },
-
-    // Finance ranges
-    Dollars: { min: 10, target: 50, max: 100, suggestedMultiplier: 10 },
-    Euros: { min: 10, target: 50, max: 100, suggestedMultiplier: 10 },
-    Savings: { min: 50, target: 200, max: 500, suggestedMultiplier: 10 },
-    Investments: { min: 100, target: 500, max: 1000, suggestedMultiplier: 10 },
-    Transactions: { min: 1, target: 3, max: 5, suggestedMultiplier: 1 },
-
-    // Habit ranges
-    Streaks: { min: 3, target: 7, max: 14, suggestedMultiplier: 1 },
-    Completions: { min: 3, target: 15, max: 30, suggestedMultiplier: 1 },
-    "Consistency Score": { min: 70, target: 85, max: 100, suggestedMultiplier: 1 },
-    Attempts: { min: 5, target: 15, max: 30, suggestedMultiplier: 1 },
-    "Success Rate": { min: 70, target: 85, max: 100, suggestedMultiplier: 1 },
-
-    // Default fallback range
-    None: { min: 0, target: 50, max: 100, suggestedMultiplier: 1 },
+function getSliderMax(unit: string, goalType: "REACH" | "LIMIT"): number {
+    if (unit && UNIT_CONFIG[unit]) return UNIT_CONFIG[unit].sliderMax
+    return goalType === "LIMIT" ? 24 : 100
 }
 
-// Common units for goals categorized with subcategories
-const UNITS: UnitMap = {
-    time: {
-        "Daily Tracking": ["Hours", "Minutes"],
-        "Longer Periods": ["Days", "Weeks", "Months", "Years"],
-    },
-    reading: {
-        "Book Reading": ["Pages", "Books", "Chapters"],
-        "Online Content": ["Articles", "Blogs", "Posts"],
-    },
-    weight: {
-        Metric: ["Kilograms", "Grams"],
-        Imperial: ["Pounds", "Ounces"],
-    },
-    distance: {
-        Walking: ["Steps", "Floors"],
-        "Running/Biking": ["Meters", "Kilometers", "Miles"],
-    },
-    exercise: {
-        Strength: ["Reps", "Sets"],
-        Cardio: ["Calories", "Workouts", "Sessions"],
-    },
-    volume: {
-        Drinks: ["Cups", "Glasses", "Bottles"],
-        Measurement: ["Liters", "Gallons", "Ounces", "ML"],
-    },
-    food: {
-        "Meal Tracking": ["Meals", "Servings", "Portions"],
-        "Specific Items": ["Packets", "Plates", "Bowls", "Slices", "Pieces"],
-    },
-    medicine: {
-        Oral: ["Tablets", "Capsules", "Pills"],
-        "Other Types": ["Doses", "Applications", "Injections"],
-    },
-    mood: {
-        "Overall Rating": ["Rating (1-5)", "Rating (1-10)"],
-        "Specific Feelings": ["Happiness", "Satisfaction", "Energy"],
-        "Negative States": ["Stress Level", "Anxiety Level"],
-        "Work & Focus": ["Focus Level"],
-    },
-    productivity: {
-        "Task Management": ["Tasks", "Projects", "Items"],
-        "Time Techniques": ["Pomodoros", "Deep Work Sessions", "Focus Minutes"],
-    },
-    finance: {
-        Currencies: ["Dollars", "Euros", "Pounds"],
-        "Money Goals": ["Savings", "Investments", "Transactions"],
-    },
-    habits: {
-        "Tracking Methods": ["Streaks", "Completions", "Consistency Score"],
-        Performance: ["Attempts", "Success Rate"],
-    },
-}
+const GOAL_TYPE_OPTIONS = [
+    { label: "Reach Target", value: "REACH" as const },
+    { label: "Stay Under Limit", value: "LIMIT" as const },
+]
 
-// Create flattened units for search and display
-const createFlattenedUnits = () => {
-    const allUnits: string[] = []
-    Object.values(UNITS).forEach((categoryMap) => {
-        Object.values(categoryMap).forEach((subcategoryUnits) => {
-            allUnits.push(...subcategoryUnits)
-        })
-    })
-    return allUnits
-}
+export default function CreateGoal({ route, navigation }: any) {
+    const editId = route.params?.id as string | undefined
+    const isEdit = !!editId
 
-const ALL_UNITS: string[] = createFlattenedUnits()
+    const { createGoals, updateGoals } = useGoal()
+    const { data: editData } = useGetGoal(editId || "")
 
-export default function CreateGoal({ navigation }: CreateGoalProps): React.ReactElement {
-    const { createGoals } = useGoal()
-    const [multiplier, setMultiplier] = useState<number>(1)
-    const [sliderRange, setSliderRange] = useState<[number, number]>([0, 10000])
-    const [unitCategory, setUnitCategory] = useState<UnitCategoryKey | "all">("all")
-    const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null)
-    const [searchQuery, setSearchQuery] = useState<string>("")
-    const [filteredUnits, setFilteredUnits] = useState<string[]>(ALL_UNITS)
+    const goal = editData?.goal
 
-    // Update filtered units when category, subcategory, or search changes
-    useEffect(() => {
-        let baseUnits: string[] = []
-
-        if (unitCategory === "all") {
-            baseUnits = ALL_UNITS
-        } else if (selectedSubcategory && UNITS[unitCategory][selectedSubcategory]) {
-            baseUnits = UNITS[unitCategory][selectedSubcategory]
-        } else {
-            // Get all units in the category
-            baseUnits = Object.values(UNITS[unitCategory]).flat()
+    const initialValues = useMemo<FormValues>(() => {
+        if (isEdit && goal) {
+            return {
+                name: goal.name || "",
+                icon: goal.icon || "",
+                goalType: goal.min === 1 ? "LIMIT" : "REACH",
+                target: goal.target || 1,
+                unit: goal.unit || "",
+            }
         }
-
-        if (searchQuery.trim() === "") {
-            setFilteredUnits(baseUnits)
-        } else {
-            const query = searchQuery.toLowerCase().trim()
-            setFilteredUnits(baseUnits.filter((unit) => unit.toLowerCase().includes(query)))
+        return {
+            name: "",
+            icon: "",
+            goalType: "REACH",
+            target: 1,
+            unit: "",
         }
-    }, [unitCategory, selectedSubcategory, searchQuery])
+    }, [isEdit, goal])
 
-    const onSubmit = (values: FormValues): void => {
-        createGoals({
-            variables: {
-                input: {
-                    name: values.name,
-                    icon: values.icon,
-                    description: values.description,
-                    min: +values.min * multiplier,
-                    max: +values.target * multiplier,
-                    target: +values.target,
-                    unit: values.unit === "None" ? "" : values.unit,
+    const onSubmit = (values: FormValues) => {
+        if (isEdit && editId) {
+            updateGoals({
+                variables: {
+                    id: editId,
+                    input: {
+                        name: values.name,
+                        icon: values.icon,
+                        description: "",
+                        min: values.goalType === "LIMIT" ? 1 : 0,
+                        max: values.target * 2,
+                        target: values.target,
+                    },
                 },
-            },
-            onCompleted: () => navigation.goBack(),
-        })
-    }
-
-    const getMultiplierOptions = (): MultiplierOption[] => {
-        return [
-            { label: "x1", value: 1 },
-            { label: "x10", value: 10 },
-            { label: "x100", value: 100 },
-        ]
-    }
-
-    const getUnitCategories = (): UnitCategory[] => {
-        return [
-            { label: "All", value: "all", icon: "apps" },
-            { label: "Time", value: "time", icon: "clock-outline" },
-            { label: "Reading", value: "reading", icon: "book-open-page-variant" },
-            { label: "Weight", value: "weight", icon: "weight" },
-            { label: "Distance", value: "distance", icon: "map-marker-distance" },
-            { label: "Exercise", value: "exercise", icon: "dumbbell" },
-            { label: "Volume", value: "volume", icon: "cup-water" },
-            { label: "Food", value: "food", icon: "food-apple" },
-            { label: "Medicine", value: "medicine", icon: "pill" },
-            { label: "Mood", value: "mood", icon: "emoticon-outline" },
-            { label: "Productivity", value: "productivity", icon: "check-circle-outline" },
-            { label: "Finance", value: "finance", icon: "cash" },
-            { label: "Habits", value: "habits", icon: "workout" },
-        ]
-    }
-
-    const getSubcategories = (): SubcategoryItem[] => {
-        if (unitCategory === "all" || !UNITS[unitCategory]) {
-            return []
+                onCompleted: () => navigation.goBack(),
+            })
+        } else {
+            createGoals({
+                variables: {
+                    input: {
+                        name: values.name,
+                        icon: values.icon,
+                        description: "",
+                        min: values.goalType === "LIMIT" ? 1 : 0,
+                        max: values.target * 2,
+                        target: values.target,
+                        unit: values.unit,
+                    },
+                },
+                onCompleted: () => navigation.goBack(),
+            })
         }
-
-        return Object.keys(UNITS[unitCategory]).map((key) => ({
-            label: key,
-            value: key,
-        }))
-    }
-
-    const subcategories = getSubcategories()
-
-    const handleCategoryPress = (category: UnitCategoryKey | "all") => {
-        setUnitCategory(category)
-        setSelectedSubcategory(null)
-    }
-
-    // Function to update range values based on selected unit
-    const updateRangeValues = (unit: string, formik: FormikProps<FormValues>) => {
-        if (unit === "") return
-
-        // Get preset range values for the unit or use default
-        const preset = UNIT_RANGES[unit] || UNIT_RANGES["None"]
-
-        // Set suggested multiplier
-        setMultiplier(preset.suggestedMultiplier)
-
-        // Update slider range based on unit type with a much higher maximum
-        const baseMax = Math.max(preset.max * 10, 10000)
-        setSliderRange([0, baseMax])
-
-        // Update formik values
-        formik.setFieldValue("min", preset.min)
-        formik.setFieldValue("target", preset.target)
     }
 
     return (
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <View style={styles.container}>
-                <GlassView style={styles.closeButton}>
-                    <TouchableOpacity onPress={() => navigation.goBack()} style={styles.closeButtonInner}>
-                        <AntDesign name="close" size={20} color="rgba(255,255,255,0.7)" />
-                    </TouchableOpacity>
-                </GlassView>
-            <Formik<FormValues> validationSchema={validationSchema} onSubmit={onSubmit} initialValues={initialValues}>
-                {(f: FormikProps<FormValues>) => (
-                    <>
-                        {/* Icon Selector - Top Area */}
-                        <View style={styles.topArea}>
-                            <View style={styles.iconSelectorContainer}>
-                                <Ripple
-                                    style={[styles.iconButton, f.values.icon ? styles.iconButtonSelected : {}]}
-                                    onPress={() =>
-                                        navigation.navigate("IconPicker", {
-                                            onSelectIcon: (icon: string) => {
-                                                f.setFieldValue("icon", icon)
-                                            },
-                                            selectedIcon: f.values.icon,
-                                        })
-                                    }
-                                >
-                                    <MaterialCommunityIcons
-                                        name={(f.values.icon || "plus-circle-outline") as any}
-                                        size={50}
-                                        color={f.values.icon ? Colors.primary : Colors.secondary}
-                                    />
-                                </Ripple>
-                                <Text style={styles.iconHelperText}>
-                                    {f.values.icon ? "Tap to change icon" : "Tap to choose an icon for your goal"}
+        <Formik<FormValues>
+            validationSchema={validationSchema}
+            onSubmit={onSubmit}
+            initialValues={initialValues}
+            enableReinitialize
+        >
+            {(f: FormikProps<FormValues>) => (
+                <View style={styles.container}>
+                    <ModalHeader
+                        onClose={() => navigation.goBack()}
+                        onSave={f.handleSubmit}
+                        title={isEdit ? "Edit Goal" : "New Goal"}
+                        saveLabel="Save"
+                    />
+
+                    <ScrollView
+                        style={styles.scrollView}
+                        contentContainerStyle={styles.scrollContent}
+                        keyboardShouldPersistTaps="handled"
+                        showsVerticalScrollIndicator={false}
+                    >
+                        <View style={styles.iconSection}>
+                            <Ripple
+                                style={[styles.iconButton, f.values.icon ? styles.iconButtonSelected : {}]}
+                                onPress={() =>
+                                    navigation.navigate("IconPicker", {
+                                        onSelectIcon: (icon: string) => f.setFieldValue("icon", icon),
+                                        selectedIcon: f.values.icon,
+                                    })
+                                }
+                            >
+                                <Feather
+                                    name={(f.values.icon || "plus-circle") as any}
+                                    size={40}
+                                    color={f.values.icon ? Colors.foreground : Colors.secondary}
+                                />
+                            </Ripple>
+                            <Text variant="caption" style={styles.iconHint}>
+                                {f.values.icon ? "Tap to change icon" : "Tap to choose an icon"}
+                            </Text>
+                        </View>
+
+                        <ValidatedInput
+                            showLabel
+                            label="Name"
+                            name="name"
+                            placeholder="What do you want to track?"
+                            formik={f}
+                            containerStyle={styles.input}
+                        />
+
+                        <View style={styles.typeSection}>
+                            <Text variant="body" style={styles.label}>
+                                Goal Type
+                            </Text>
+                            <GroupSelector
+                                options={GOAL_TYPE_OPTIONS}
+                                value={f.values.goalType}
+                                onChange={(v) => f.setFieldValue("goalType", v)}
+                            />
+                            <Text variant="caption" style={styles.typeHint}>
+                                {f.values.goalType === "REACH"
+                                    ? "Green when you meet or exceed your target."
+                                    : "Green when you stay under your limit. Red if exceeded."}
+                            </Text>
+                        </View>
+
+                        <View style={styles.input}>
+                            <View
+                                style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}
+                            >
+                                <Text variant="body" style={styles.label}>
+                                    Value: {f.values.target}
+                                    {f.values.unit ? ` ${f.values.unit}` : ""}
+                                </Text>
+                                <View style={{ width: 90 }}>
+                                    <Host matchContents>
+                                        <Menu
+                                            label={
+                                                f.values.unit
+                                                    ? UNIT_CONFIG[f.values.unit]?.label || f.values.unit
+                                                    : "Select unit"
+                                            }
+                                        >
+                                            {Object.entries(UNIT_CONFIG).map(([key, { label }]) => (
+                                                <Button
+                                                    key={key}
+                                                    label={label}
+                                                    onPress={() => f.setFieldValue("unit", key)}
+                                                />
+                                            ))}
+                                        </Menu>
+                                    </Host>
+                                </View>
+                            </View>
+                            <GlassView style={{ marginTop: 10, padding: 15, borderRadius: 100 }}>
+                                <View>
+                                    <Host matchContents useViewportSizeMeasurement>
+                                        <Slider
+                                            value={f.values.target}
+                                            min={1}
+                                            max={getSliderMax(f.values.unit, f.values.goalType)}
+                                            step={1}
+                                            onValueChange={(v) => f.setFieldValue("target", v)}
+                                            modifiers={[]}
+                                        />
+                                    </Host>
+                                </View>
+                            </GlassView>
+                        </View>
+
+                        {isEdit ? (
+                            <View style={styles.input}>
+                                <Text variant="body" style={styles.label}>
+                                    Unit
+                                </Text>
+                                <View style={styles.unitReadonly}>
+                                    <Text variant="body" style={styles.unitReadonlyText}>
+                                        {f.values.unit || "(none)"}
+                                    </Text>
+                                </View>
+                                <Text variant="caption" style={styles.typeHint}>
+                                    Unit cannot be changed after creation.
                                 </Text>
                             </View>
-                        </View>
+                        ) : null}
 
-                        {/* Main Content Container */}
-                        <View style={styles.contentContainer}>
-                            <ScrollView
-                                style={styles.scrollView}
-                                contentContainerStyle={styles.scrollViewContent}
-                                keyboardDismissMode={"on-drag"}
-                                showsVerticalScrollIndicator={false}
-                            >
-                                {/* Goal Details */}
-                                <ValidatedInput
-                                    showLabel
-                                    label="Goal Name"
-                                    name="name"
-                                    placeholder="What do you want to achieve?"
-                                    formik={f}
-                                    containerStyle={styles.inputContainer}
-                                />
-
-                                <ValidatedInput
-                                    showLabel
-                                    label="Description"
-                                    name="description"
-                                    placeholder="Add some details about your goal"
-                                    formik={f}
-                                    multiline
-                                    numberOfLines={3}
-                                    containerStyle={styles.inputContainer}
-                                />
-
-                                {/* Goal Range */}
-                                <View style={styles.rangeHeader}>
-                                    <View>
-                                        <Text style={styles.rangeValueText}>
-                                            Target: {f.values.target * multiplier}
-                                            {f.values.unit !== "None" && (
-                                                <Text style={styles.subText}> {f.values.unit}</Text>
-                                            )}
-                                        </Text>
-                                    </View>
-
-                                    {/* <View style={styles.multiplierContainer}>
-                    {getMultiplierOptions().map((option: MultiplierOption) => (
-                      <Ripple
-                        key={option.value.toString()}
-                        style={[styles.multiplierButton, multiplier === option.value && styles.multiplierButtonActive]}
-                        onPress={() => setMultiplier(option.value)}
-                      >
-                        <Text style={[styles.multiplierText, multiplier === option.value && styles.multiplierTextActive]}>
-                          {option.label}
-                        </Text>
-                      </Ripple>
-                    ))}
-                  </View> */}
-                                </View>
-
-                                <View style={{ marginTop: 15 }}>
-                                    <RangePickers
-                                        minValue={f.values.min}
-                                        targetValue={f.values.target}
-                                        onMinChange={(value) => f.setFieldValue("min", value)}
-                                        onTargetChange={(value) => f.setFieldValue("target", value)}
-                                        min={0}
-                                        max={sliderRange[1]}
-                                        step={1}
-                                        unit={f.values.unit}
-                                    />
-                                </View>
-
-                                {/* Range Suggestion */}
-                                {f.values.unit && (
-                                    <View style={styles.rangeSuggestion}>
-                                        <MaterialCommunityIcons
-                                            name="lightbulb-outline"
-                                            size={18}
-                                            color={Colors.secondary}
-                                        />
-                                        <Text style={styles.rangeSuggestionText}>
-                                            Suggested range for {f.values.unit}: {UNIT_RANGES[f.values.unit]?.min || 0}{" "}
-                                            - {UNIT_RANGES[f.values.unit]?.max || 100}
-                                        </Text>
-                                    </View>
-                                )}
-
-                                {/* Units Selection */}
-                                {/* Search Bar */}
-                                <View style={styles.searchContainer}>
-                                    <MaterialCommunityIcons
-                                        name="magnify"
-                                        size={24}
-                                        color="rgba(255,255,255,0.6)"
-                                        style={styles.searchIcon}
-                                    />
-                                    <TextInput
-                                        placeholder="Search units..."
-                                        value={searchQuery}
-                                        onChangeText={setSearchQuery}
-                                        placeholderTextColor="rgba(255,255,255,0.4)"
-                                        style={styles.searchInput}
-                                    />
-                                    {searchQuery.length > 0 && (
-                                        <Ripple style={styles.clearButton} onPress={() => setSearchQuery("")}>
-                                            <MaterialCommunityIcons
-                                                name="close-circle"
-                                                size={20}
-                                                color="rgba(255,255,255,0.6)"
-                                            />
-                                        </Ripple>
-                                    )}
-                                </View>
-
-                                {/* Unit Categories */}
-                                <Text style={styles.categorySectionTitle}>Categories</Text>
-                                <ScrollView
-                                    horizontal
-                                    showsHorizontalScrollIndicator={false}
-                                    style={styles.categoryScrollView}
-                                >
-                                    {getUnitCategories().map((category: UnitCategory) => (
-                                        <Ripple
-                                            key={category.value}
-                                            style={[
-                                                styles.categoryButton,
-                                                unitCategory === category.value && styles.categoryButtonActive,
-                                            ]}
-                                            onPress={() => handleCategoryPress(category.value)}
-                                        >
-                                            <MaterialCommunityIcons
-                                                name={category.icon as any}
-                                                size={20}
-                                                color={
-                                                    unitCategory === category.value
-                                                        ? Colors.foreground
-                                                        : Colors.foreground_secondary
-                                                }
-                                                style={styles.categoryIcon}
-                                            />
-                                            <Text
-                                                style={[
-                                                    styles.categoryText,
-                                                    unitCategory === category.value && styles.categoryTextActive,
-                                                ]}
-                                            >
-                                                {category.label}
-                                            </Text>
-                                        </Ripple>
-                                    ))}
-                                </ScrollView>
-
-                                {/* Subcategories */}
-                                {subcategories.length > 0 && (
-                                    <>
-                                        <Text style={styles.categorySectionTitle}>Subcategories</Text>
-                                        <ScrollView
-                                            horizontal
-                                            showsHorizontalScrollIndicator={false}
-                                            style={styles.subcategoryScrollView}
-                                        >
-                                            <Ripple
-                                                style={[
-                                                    styles.subcategoryButton,
-                                                    selectedSubcategory === null && styles.subcategoryButtonActive,
-                                                ]}
-                                                onPress={() => setSelectedSubcategory(null)}
-                                            >
-                                                <Text
-                                                    style={[
-                                                        styles.subcategoryText,
-                                                        selectedSubcategory === null && styles.subcategoryTextActive,
-                                                    ]}
-                                                >
-                                                    All
-                                                </Text>
-                                            </Ripple>
-                                            {subcategories.map((subcat) => (
-                                                <Ripple
-                                                    key={subcat.value}
-                                                    style={[
-                                                        styles.subcategoryButton,
-                                                        selectedSubcategory === subcat.value &&
-                                                            styles.subcategoryButtonActive,
-                                                    ]}
-                                                    onPress={() => setSelectedSubcategory(subcat.value)}
-                                                >
-                                                    <Text
-                                                        style={[
-                                                            styles.subcategoryText,
-                                                            selectedSubcategory === subcat.value &&
-                                                                styles.subcategoryTextActive,
-                                                        ]}
-                                                    >
-                                                        {subcat.label}
-                                                    </Text>
-                                                </Ripple>
-                                            ))}
-                                        </ScrollView>
-                                    </>
-                                )}
-
-                                {/* Units */}
-                                {filteredUnits.length > 0 || searchQuery.length === 0 ? (
-                                    <>
-                                        <Text style={styles.categorySectionTitle}>Units</Text>
-                                        <FlatList<string>
-                                            keyExtractor={(item: string) => item}
-                                            data={["None", ...filteredUnits]}
-                                            style={styles.unitsFlatList}
-                                            numColumns={3}
-                                            contentContainerStyle={styles.unitsList}
-                                            renderItem={({ item }: { item: string }) => (
-                                                <Ripple
-                                                    onPress={() => {
-                                                        f.setFieldValue("unit", item)
-                                                        updateRangeValues(item, f)
-                                                    }}
-                                                    style={[
-                                                        styles.unitButton,
-                                                        f.values.unit === item && styles.unitButtonActive,
-                                                    ]}
-                                                >
-                                                    <Text
-                                                        style={[
-                                                            styles.unitText,
-                                                            f.values.unit === item && styles.unitTextActive,
-                                                        ]}
-                                                    >
-                                                        {item}
-                                                    </Text>
-                                                </Ripple>
-                                            )}
-                                        />
-                                    </>
-                                ) : (
-                                    <View style={styles.noResultsContainer}>
-                                        <MaterialCommunityIcons
-                                            name="file-search-outline"
-                                            size={40}
-                                            color="rgba(255,255,255,0.5)"
-                                        />
-                                        <Text style={styles.noResultsText}>No units found</Text>
-                                        <Text style={styles.noResultsSubText}>Try a different search term</Text>
-                                    </View>
-                                )}
-
-                                {/* Custom Unit Input */}
-                                <View style={styles.customUnitContainer}>
-                                    <Text style={styles.customUnitLabel}>Can't find what you need?</Text>
-                                    <TextInput
-                                        placeholder="Enter custom unit"
-                                        placeholderTextColor="rgba(255,255,255,0.4)"
-                                        style={styles.customUnitInput}
-                                        onSubmitEditing={(e) => {
-                                            const value = e.nativeEvent.text.trim()
-                                            if (value && value.length > 0) {
-                                                f.setFieldValue("unit", value)
-                                            }
-                                        }}
-                                    />
-                                    <Text style={styles.customUnitHelperText}>Press enter to use your custom unit</Text>
-                                </View>
-
-                                {/* Spacer for bottom button */}
-                                <View style={styles.bottomSpacer} />
-                            </ScrollView>
-                            <View style={styles.buttonContainer}>
-                                <Button onPress={() => f.handleSubmit()} style={styles.createButton}>
-                                    Create Goal
-                                </Button>
-                            </View>
-                        </View>
-                    </>
-                )}
-            </Formik>
-            </View>
-        </TouchableWithoutFeedback>
+                        <View style={styles.bottomSpacer} />
+                    </ScrollView>
+                </View>
+            )}
+        </Formik>
     )
 }
 
@@ -687,323 +263,69 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: Colors.primary,
     },
-    closeButton: {
-        position: "absolute",
-        top: 15,
-        left: 15,
-        zIndex: 100,
-        borderRadius: 22,
-    },
-    closeButtonInner: {
-        width: 44,
-        height: 44,
-        borderRadius: 22,
-        justifyContent: "center",
-        alignItems: "center",
-    },
-    topArea: {
-        justifyContent: "center",
-        alignItems: "center",
-        paddingTop: 80,
-        paddingBottom: 30,
-        backgroundColor: Colors.primary,
-    },
-    contentContainer: {
-        backgroundColor: Colors.primary_light,
-        borderTopLeftRadius: 30,
-        borderTopRightRadius: 30,
-        flex: 1,
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: -2,
-        },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-        elevation: 4,
-    },
     scrollView: {
         flex: 1,
     },
-    scrollViewContent: {
-        flexGrow: 1,
+    scrollContent: {
         padding: 20,
-        paddingBottom: 100,
+        paddingTop: 10,
     },
-    iconSelectorContainer: {
-        width: "100%",
-        justifyContent: "center",
+    iconSection: {
         alignItems: "center",
-        marginBottom: 10,
+        marginBottom: 20,
+        marginTop: 10,
     },
     iconButton: {
-        width: 100,
-        height: 100,
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: "rgba(255,255,255,0.08)",
-        borderRadius: 50,
-        marginBottom: 15,
+        width: 80,
+        height: 80,
+        borderRadius: 40,
+        backgroundColor: Colors.primary_light,
         borderWidth: 2,
         borderColor: "rgba(255,255,255,0.1)",
-    },
-    iconButtonSelected: {
-        borderColor: Colors.secondary,
-        backgroundColor: Colors.secondary,
-        transform: [{ scale: 1.02 }],
-    },
-    iconHelperText: {
-        color: "rgba(255,255,255,0.6)",
-        marginTop: 10,
-        fontSize: 14,
-        textAlign: "center",
-    },
-    section: {
-        marginBottom: 25,
-    },
-    sectionTitle: {
-        color: Colors.foreground,
-        fontWeight: "600",
-        fontSize: 18,
-        marginBottom: 15,
-    },
-    categorySectionTitle: {
-        color: Colors.foreground,
-        fontWeight: "600",
-        fontSize: 15,
-        marginBottom: 8,
-        marginTop: 8,
-        opacity: 0.9,
-    },
-    inputContainer: {
-        marginBottom: 12,
-    },
-    rangeHeader: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        marginBottom: 15,
-    },
-    rangeValueText: {
-        color: Colors.foreground,
-        fontSize: 20,
-        fontWeight: "600",
-    },
-    subText: {
-        color: "rgba(255,255,255,0.7)",
-        fontSize: 16,
-    },
-    multiplierContainer: {
-        flexDirection: "row",
-    },
-    multiplierButton: {
-        paddingVertical: 8,
-        paddingHorizontal: 12,
-        marginLeft: 8,
-        borderRadius: 20,
-        backgroundColor: "rgba(255,255,255,0.1)",
-    },
-    multiplierButtonActive: {
-        backgroundColor: Colors.secondary,
-    },
-    multiplierText: {
-        color: "rgba(255,255,255,0.8)",
-        fontWeight: "500",
-    },
-    multiplierTextActive: {
-        color: Colors.foreground,
-    },
-    sliderContainer: {
-        marginTop: 10,
-    },
-    sliderBar: {
-        backgroundColor: "rgba(255,255,255,0.15)",
-        borderRadius: 10,
-    },
-    sliderFill: {
-        backgroundColor: Colors.secondary,
-    },
-    sliderHandle: {
-        backgroundColor: Colors.foreground,
-        borderWidth: 2,
-        borderColor: Colors.secondary,
-    },
-    rangeSuggestion: {
-        flexDirection: "row",
-        alignItems: "center",
-        marginTop: 15,
-        padding: 15,
-        backgroundColor: "rgba(255,255,255,0.07)",
-        borderRadius: 15,
-        borderLeftWidth: 4,
-        borderLeftColor: Colors.secondary,
-    },
-    rangeSuggestionText: {
-        color: "rgba(255,255,255,0.9)",
-        marginLeft: 8,
-        fontSize: 14,
-    },
-    searchContainer: {
-        flexDirection: "row",
-        alignItems: "center",
-        backgroundColor: "rgba(255,255,255,0.05)",
-        borderRadius: 12,
-        marginBottom: 15,
-        paddingHorizontal: 12,
-        borderWidth: 1,
-        borderColor: "rgba(255,255,255,0.1)",
-        height: 44,
-    },
-    searchIcon: {
-        marginRight: 10,
-    },
-    searchInput: {
-        color: Colors.foreground,
-        flex: 1,
-        height: 50,
-        fontSize: 16,
-    },
-    clearButton: {
-        padding: 5,
-    },
-    categoryScrollView: {
-        marginBottom: 12,
-    },
-    categoryButton: {
-        paddingVertical: 12,
-        paddingHorizontal: 18,
-        marginRight: 10,
-        borderRadius: 25,
-        backgroundColor: "rgba(255,255,255,0.08)",
-        flexDirection: "row",
-        alignItems: "center",
-        borderWidth: 1,
-        borderColor: "rgba(255,255,255,0.1)",
-    },
-    categoryButtonActive: {
-        backgroundColor: Colors.secondary,
-        borderColor: Colors.secondary,
-        transform: [{ scale: 1.02 }],
-    },
-    categoryIcon: {
-        marginRight: 6,
-    },
-    categoryText: {
-        color: "rgba(255,255,255,0.8)",
-    },
-    categoryTextActive: {
-        color: Colors.foreground,
-        fontWeight: "500",
-    },
-    subcategoryScrollView: {
-        marginBottom: 12,
-    },
-    subcategoryButton: {
-        paddingVertical: 8,
-        paddingHorizontal: 15,
-        marginRight: 10,
-        borderRadius: 16,
-        backgroundColor: "rgba(255,255,255,0.07)",
-        borderWidth: 1,
-        borderColor: "rgba(255,255,255,0.1)",
-    },
-    subcategoryButtonActive: {
-        backgroundColor: "rgba(255,255,255,0.2)",
-        borderColor: Colors.secondary,
-    },
-    subcategoryText: {
-        color: "rgba(255,255,255,0.8)",
-        fontSize: 14,
-    },
-    subcategoryTextActive: {
-        color: Colors.foreground,
-        fontWeight: "500",
-    },
-    unitsFlatList: {
-        maxHeight: 200,
-    },
-    unitsList: {
-        paddingVertical: 5,
-    },
-    unitButton: {
-        borderRadius: 15,
-        borderWidth: 1,
-        borderColor: "rgba(255,255,255,0.15)",
-        backgroundColor: "rgba(255,255,255,0.05)",
-        padding: 14,
-        margin: 6,
-        flex: 1,
-        alignItems: "center",
-        minHeight: 50,
         justifyContent: "center",
-    },
-    unitButtonActive: {
-        borderColor: Colors.secondary,
-        backgroundColor: Colors.secondary,
-        transform: [{ scale: 1.02 }],
-    },
-    unitText: {
-        color: "rgba(255,255,255,0.8)",
-        textAlign: "center",
-    },
-    unitTextActive: {
-        color: Colors.primary,
-        fontWeight: "600",
-    },
-    noResultsContainer: {
         alignItems: "center",
-        justifyContent: "center",
-        padding: 30,
-    },
-    noResultsText: {
-        color: Colors.foreground,
-        fontSize: 18,
-        marginTop: 10,
-    },
-    noResultsSubText: {
-        color: "rgba(255,255,255,0.6)",
-        fontSize: 14,
-        marginTop: 5,
-    },
-    customUnitContainer: {
-        marginTop: 20,
-        paddingTop: 20,
-        borderTopWidth: 1,
-        borderTopColor: "rgba(255,255,255,0.1)",
-    },
-    customUnitLabel: {
-        color: Colors.foreground,
-        fontSize: 16,
         marginBottom: 10,
     },
-    customUnitInput: {
-        marginBottom: 8,
-        backgroundColor: "rgba(255,255,255,0.08)",
-        borderRadius: 15,
-        padding: 15,
-        color: Colors.foreground,
-        fontSize: 16,
-        borderWidth: 1,
-        borderColor: "rgba(255,255,255,0.15)",
-        minHeight: 50,
+    iconButtonSelected: {
+        backgroundColor: Colors.secondary,
+        borderColor: Colors.secondary,
     },
-    customUnitHelperText: {
-        color: "rgba(255,255,255,0.5)",
-        fontSize: 12,
+    iconHint: {
+        color: Colors.foreground_secondary,
+    },
+    input: {
+        marginBottom: 18,
+    },
+    typeSection: {
+        marginBottom: 18,
+    },
+    label: {
+        color: Colors.foreground,
+        fontWeight: "600",
+        marginBottom: 8,
+    },
+    typeHint: {
+        color: Colors.foreground_secondary,
+        marginTop: 8,
+    },
+    sliderHost: {
+        flex: 1,
+        marginTop: 4,
+    },
+    menuHost: {
+        height: 44,
+    },
+    unitReadonly: {
+        padding: 15,
+        borderRadius: 15,
+        backgroundColor: Colors.primary_lighter,
+        borderWidth: 1,
+        borderColor: "rgba(255,255,255,0.08)",
+    },
+    unitReadonlyText: {
+        color: Colors.foreground_secondary,
     },
     bottomSpacer: {
-        height: 20,
-    },
-    buttonContainer: {
-        padding: 20,
-        paddingBottom: 40,
-        backgroundColor: Colors.primary_light,
-        borderTopWidth: 1,
-        borderTopColor: "rgba(255,255,255,0.1)",
-    },
-    createButton: {
-        width: "100%",
-        borderRadius: 25,
-        paddingVertical: 16,
+        height: 60,
     },
 })

@@ -1,6 +1,6 @@
 import Colors from "@/constants/Colors"
 import Layout from "@/constants/Layout"
-import { AntDesign, Ionicons, MaterialIcons } from "@expo/vector-icons"
+import { AntDesign, Feather, Ionicons, MaterialIcons } from "@expo/vector-icons"
 import Color from "color"
 import { BlurView } from "expo-blur"
 import { LinearGradient } from "expo-linear-gradient"
@@ -425,7 +425,7 @@ export function FloatingProcessingView({
                                             handleEdit?.(expense?.id || "")
                                         }}
                                     >
-                                        <AntDesign name="edit" size={18} color="rgba(255,255,255,0.8)" />
+                                        <Feather name="edit" size={18} color="rgba(255,255,255,0.8)" />
                                         <Text style={{ color: "rgba(255,255,255,0.8)" }}>Edit</Text>
                                     </Ripple>
 

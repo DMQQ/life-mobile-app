@@ -50,6 +50,9 @@ interface GitHubActivityGridProps {
     showWeekdays?: boolean
     showMonths?: boolean
     goalThreshold?: number
+    isLimit?: boolean
+
+    size?: number
 }
 
 /**
@@ -62,6 +65,8 @@ const GitHubActivityGrid: React.FC<GitHubActivityGridProps> = ({
     startDate,
     endDate,
     goalThreshold = 1,
+    isLimit = false,
+    size = 10,
 }) => {
     const activityColor = primaryColor || secondary_candidates[0]
 
@@ -134,13 +139,30 @@ const GitHubActivityGrid: React.FC<GitHubActivityGridProps> = ({
     }, [dateRange, contributionMap, goalThreshold])
 
     const renderCell = (day: DayData, weekIndex: number, dayIndex: number) => {
-        const cellColor =
-            day.count === 0 ? Colors.primary : day.goalMet ? activityColor : lowOpacity(activityColor, 0.1)
+        const cellColor: string = isLimit
+            ? day.count > goalThreshold
+                ? "#F44336"
+                : day.count > 0
+                  ? activityColor
+                  : Colors.primary
+            : day.count === 0
+              ? Colors.primary
+              : day.goalMet
+                ? activityColor
+                : lowOpacity(activityColor, 0.1)
 
         return (
             <View
                 key={`${weekIndex}-${dayIndex}`}
-                style={[styles.cell, { backgroundColor: cellColor }, day.isCurrentMonth && styles.currentMonthCell]}
+                style={[
+                    styles.cell,
+                    {
+                        width: size,
+                        height: size,
+                    },
+                    { backgroundColor: cellColor },
+                    day.isCurrentMonth && styles.currentMonthCell,
+                ]}
             />
         )
     }
@@ -202,8 +224,6 @@ const styles = StyleSheet.create({
         gap: 3.5,
     },
     cell: {
-        width: 10,
-        height: 10,
         borderRadius: 2,
     },
     currentMonthCell: {

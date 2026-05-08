@@ -1,9 +1,12 @@
-import { Card } from "@/components"
+import { Card, GlassIconButton } from "@/components"
+import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
 import lowOpacity from "@/utils/functions/lowOpacity"
 import Color from "color"
-import moment from "moment"
-import { StyleSheet, Text, View } from "react-native"
+import { StyleSheet, View } from "react-native"
+import ContextMenu from "react-native-context-menu-view"
+import { isLimitGoal } from "../hooks/hooks"
+import dayjs from "dayjs"
 
 interface Entry {
     id: string
@@ -17,31 +20,35 @@ interface Entry {
 
 interface DayEntryProps {
     entry: Entry
-
     index: number
+    onEdit?: (entry: Entry) => void
+    onDelete?: (entryId: string) => void
+    onAdd?: (entry: Entry) => void
 }
 
-const DayEntry = ({ entry, index }: DayEntryProps) => {
-    const date = moment(entry.date)
-    const isCurrentDay = date.isSame(moment(), "day")
+const DayEntry = ({ entry, index, onEdit, onDelete, onAdd }: DayEntryProps) => {
+    const date = dayjs(entry.date)
+    const isCurrentDay = date.isSame(dayjs(), "day")
+    const isLimit = isLimitGoal(entry.min)
+    const target = entry.target || 0
 
-    const getProgressColor = () => {
-        if (!entry.min || !entry.max || !entry.target) return Colors.foreground
+    const isGoalMet = isLimit ? entry.value > 0 && entry.value <= target : entry.value >= target
+    const isOverLimit = isLimit && entry.value > target
 
-        if (entry.value < entry.min) return "#F44336" // Red
-        if (entry.value < entry.target) return "#f29232ff" // Red
-        if (entry.value >= entry.target) return "#4CAF50" // Green
+    const statusColor = isOverLimit ? "#F44336" : isGoalMet ? "#4CAF50" : isCurrentDay ? "#FFC107" : "#F44336"
 
-        const isCloserToTarget =
-            Math.abs(entry.value - entry.target) < Math.abs(entry.value - entry.min) &&
-            Math.abs(entry.value - entry.target) < Math.abs(entry.value - entry.max)
+    const progress = target > 0 ? Math.min(entry.value / target, 1) : 0
+    const progressWidth = `${Math.round(progress * 100)}%` as any
 
-        return isCloserToTarget ? "#4CAF50" : "#FFC107" // Green or Yellow
+    const actions = []
+    if (onEdit) {
+        actions.push({ title: "Edit Entry", systemIcon: "pencil" as const })
+    }
+    if (onDelete && entry.id !== "new") {
+        actions.push({ title: "Delete Entry", systemIcon: "trash" as const, destructive: true })
     }
 
-    const isGoalMet = entry.value >= (entry?.target || 0)
-
-    return (
+    const content = (
         <Card
             style={[
                 styles.dayContainer,
@@ -57,7 +64,8 @@ const DayEntry = ({ entry, index }: DayEntryProps) => {
                         backgroundColor: lowOpacity("#0ED725", 0.1),
                     },
                 index !== 0 &&
-                    !isGoalMet && {
+                    !isGoalMet &&
+                    !isCurrentDay && {
                         borderWidth: 2,
                         borderColor: lowOpacity("#FF0000", 0.1),
                         backgroundColor: lowOpacity("#FF0000", 0.1),
@@ -65,124 +73,106 @@ const DayEntry = ({ entry, index }: DayEntryProps) => {
             ]}
         >
             <View style={styles.dateSection}>
-                <Text style={[styles.day, isCurrentDay && styles.currentDay]}>{date.format("D")}</Text>
-                <Text style={styles.month}>{date.format("MMM")}</Text>
-            </View>
-
-            <View style={[styles.valueContainer, { flex: 2 }]}>
-                <View
-                    style={{
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                    }}
-                >
-                    <Text style={styles.value}>{entry.min}</Text>
-                    <Text style={{ color: "rgba(255,255,255,0.6)", fontSize: 12 }}>Min</Text>
-                </View>
-
-                <View style={styles.separator} />
-
-                <View
-                    style={{
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                    }}
-                >
-                    <Text style={styles.value}>{entry.target}</Text>
-                    <Text style={{ color: "rgba(255,255,255,0.6)", fontSize: 12 }}>Goal</Text>
-                </View>
-
-                <View style={styles.separator} />
-
-                <View
-                    style={{
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                    }}
-                >
-                    <Text style={[styles.target, { color: getProgressColor() }]}>{entry.value}</Text>
-                    <Text style={{ color: "rgba(255,255,255,0.6)", fontSize: 12 }}>You</Text>
-                </View>
-            </View>
-
-            <View style={[styles.valueContainer, { alignSelf: "center" }]}>
-                <Text
-                    style={{
-                        color: isGoalMet ? "#4CAF50" : isCurrentDay ? "#FFC107" : "#F44336",
-                        fontWeight: "bold",
-                        width: 110,
-                        textAlign: "center",
-                    }}
-                >
-                    {isGoalMet ? "🎉  Good Job!" : isCurrentDay ? "👀 Keep trying" : "You didn't meet your goal"}
+                <Text variant="subheading" style={[styles.day, isCurrentDay && styles.currentDay]}>
+                    {date.format("D")}
+                </Text>
+                <Text variant="caption" style={styles.month}>
+                    {date.format("MMM")}
                 </Text>
             </View>
+
+            <View style={styles.progressSection}>
+                <View style={styles.progressLabels}>
+                    <Text variant="caption" style={[styles.progressValue, { color: statusColor }]}>
+                        {entry.value}
+                    </Text>
+                    <Text variant="caption" style={styles.progressTarget}>
+                        / {target} {entry.unit}
+                    </Text>
+                </View>
+                <View style={styles.progressTrack}>
+                    <View style={[styles.progressFill, { width: progressWidth, backgroundColor: statusColor }]} />
+                </View>
+            </View>
+
+            <GlassIconButton name="plus" size={20} onPress={() => onAdd?.(entry)} />
         </Card>
     )
+
+    if (actions.length > 0) {
+        return (
+            <ContextMenu
+                actions={actions}
+                onPress={(e) => {
+                    if (e.nativeEvent.name === "Edit Entry") {
+                        onEdit?.(entry)
+                    }
+                    if (e.nativeEvent.name === "Delete Entry") {
+                        onDelete?.(entry.id)
+                    }
+                }}
+                previewBackgroundColor="transparent"
+            >
+                {content}
+            </ContextMenu>
+        )
+    }
+
+    return content
 }
 
 const styles = StyleSheet.create({
     dayContainer: {
         flexDirection: "row",
         alignItems: "center",
-
         borderWidth: 2,
         borderColor: Color(Colors.primary_lighter).lighten(1).hex(),
         backgroundColor: Colors.primary_lighter,
+        padding: 10,
+        height: 80,
     },
     dateSection: {
         alignItems: "center",
         minWidth: 50,
     },
     day: {
-        fontSize: 20,
         fontWeight: "600",
-        color: Colors.foreground,
     },
     currentDay: {
         color: "#2196F3",
     },
     month: {
-        fontSize: 14,
         color: "rgba(255,255,255,0.6)",
         marginTop: 2,
     },
-    valueContainer: {
-        flex: 1,
-        flexDirection: "row",
-        gap: 15,
-        alignSelf: "flex-end",
+    progressSection: {
+        flex: 2,
+        gap: 6,
+        paddingHorizontal: 15,
         justifyContent: "center",
     },
-    valueWrapper: {
+    progressLabels: {
         flexDirection: "row",
         alignItems: "baseline",
         gap: 4,
     },
-    value: {
-        fontSize: 18,
-        fontWeight: "400",
-        color: "rgba(255,255,255,0.85)",
+    progressValue: {
+        fontWeight: "700",
+        fontSize: 15,
     },
-    unit: {
-        fontSize: 14,
-        color: "#666",
-        marginLeft: 4,
-    },
-    range: {
+    progressTarget: {
+        color: "rgba(255,255,255,0.45)",
         fontSize: 12,
-        color: "#666",
     },
-    target: {
-        fontSize: 20,
-        fontWeight: "600",
-        color: "#666",
+    progressTrack: {
+        height: 6,
+        borderRadius: 100,
+        backgroundColor: "rgba(255,255,255,0.1)",
+        overflow: "hidden",
     },
-
-    separator: {
-        width: 1,
-        height: 35,
-        backgroundColor: "gray",
+    progressFill: {
+        height: "100%",
+        borderRadius: 100,
     },
 })
 

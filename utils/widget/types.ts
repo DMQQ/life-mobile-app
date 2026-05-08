@@ -91,6 +91,7 @@ export interface WidgetGoalCategory {
   name: string
   icon: string
   target: number
+  min?: number
   color: string
   unit?: string
   entries: WidgetGoalEntry[]

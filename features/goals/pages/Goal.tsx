@@ -1,44 +1,51 @@
 import Header from "@/components/ui/Header/Header"
 import Text from "@/components/ui/Text/Text"
 import Colors, { secondary_candidates } from "@/constants/Colors"
-import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons"
+import { Feather } from "@expo/vector-icons"
 import Color from "color"
 import moment from "moment"
-import { useMemo } from "react"
-import type { GoalEntry } from "@/gql/graphql"
+import { useCallback, useMemo, useState } from "react"
+import type { GoalEntry as GoalEntryType } from "@/gql/graphql"
 import { StyleSheet, View } from "react-native"
 import Animated, { useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated"
 import { SafeAreaView } from "react-native-safe-area-context"
 import DayEntry from "../components/GoalEntry"
 import GitHubActivityGrid from "../components/StatGrid"
-import { useGetGoal } from "../hooks/hooks"
+import { useGetGoal, useGoal, useDeleteGoalEntry } from "../hooks/hooks"
+import ConfirmDialog from "@/components/ui/ConfirmDialog"
+import { isLimitGoal } from "../hooks/hooks"
 
-// Updated Goal component
 export default function Goal({ route, navigation }: any) {
     const { id } = route.params
     const { data: goalData } = useGetGoal(id)
+    const { upsertStats } = useGoal()
+    const deleteGoalEntry = useDeleteGoalEntry()
 
     const goal = goalData?.goal || {}
+    const isLimit = isLimitGoal(goal.min)
+
+    const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
 
     const data = useMemo(() => {
-        const hasTodayEntry = goal?.entries?.some((entry: GoalEntry) => moment(entry.date).isSame(moment(), "day"))
+        const entries = goal?.entries || []
+        const hasTodayEntry = entries.some((entry: GoalEntryType) => moment(entry.date).isSame(moment(), "day"))
 
         if (!hasTodayEntry) {
             return [
                 {
                     id: "new",
                     date: moment().toISOString(),
-                    value: "0",
+                    value: 0,
                 },
-                ...(goal?.entries || []),
+                ...entries,
             ]
         }
 
-        return goal?.entries
-    }, [goal])
+        return entries
+    }, [goal.entries])
 
     const contributionData = useMemo(() => {
-        return goal?.entries?.map((entry: GoalEntry) => ({
+        return (goal?.entries || []).map((entry: GoalEntryType) => ({
             date: entry.date,
             count: entry.value,
         }))
@@ -51,135 +58,137 @@ export default function Goal({ route, navigation }: any) {
         },
     })
 
+    const handleEditEntry = (entry: any) => {
+        navigation.navigate("UpdateGoalEntry", {
+            id,
+            entryId: entry.id !== "new" ? entry.id : undefined,
+            entryValue: entry.value,
+            entryDate: entry.date,
+        })
+    }
+
+    const handleAddEntry = (entry: any) => {
+        navigation.navigate("UpdateGoalEntry", {
+            id,
+            entryDate: entry.date,
+        })
+    }
+
+    const handleDeleteEntry = async (entryId: string) => {
+        try {
+            await deleteGoalEntry({ variables: { id: entryId } })
+        } catch {
+            // Fallback: soft-delete via upsert with value 0
+            const entry = goal?.entries?.find((e: any) => e.id === entryId)
+            if (entry) {
+                await upsertStats({
+                    variables: {
+                        input: {
+                            goalsId: id,
+                            value: 0,
+                            date: moment(entry.date).format("YYYY-MM-DD"),
+                        },
+                    },
+                })
+            }
+        }
+        setDeleteTarget(null)
+    }
+
+    const primaryColor = secondary_candidates[0]
+
+    const getItemLayout = useCallback((_: any, index: number) => ({ length: 80, offset: 80 * index, index }), [])
+
+    const headerButtons = [
+        {
+            onPress: () => navigation.navigate("CreateGoal", { id }),
+            icon: <Feather name="edit" size={20} color={Colors.foreground} />,
+        },
+        {
+            onPress: () => navigation.navigate("UpdateGoalEntry", { id }),
+            icon: <Feather name="plus" size={20} color={Colors.foreground} />,
+        },
+    ]
+
     return (
-        <SafeAreaView style={{ flex: 1 }}>
+        <SafeAreaView style={{ flex: 1, padding: 15 }}>
+            <ConfirmDialog
+                isVisible={!!deleteTarget}
+                onDismiss={() => {
+                    setDeleteTarget(null)
+                }}
+                onConfirm={() => {
+                    if (deleteTarget) handleDeleteEntry(deleteTarget)
+                }}
+                title="Delete Entry?"
+                description="This entry will be removed permanently."
+                destructive
+            />
             <Header
+                animatedTitle={goal?.name || "Goal"}
+                animatedSubtitle={goal?.description || ""}
                 scrollY={scrollY}
-                goBack
+                goBack={false}
                 initialHeight={60}
                 animated
-                buttons={[
-                    {
-                        onPress: () => navigation.navigate("UpdateGoalEntry", { id }),
-                        icon: <AntDesign name="plus" size={20} color={Colors.foreground} />,
-                    },
-                ]}
+                buttons={headerButtons}
+                initialTitleFontSize={40}
             />
-            <View style={{ paddingHorizontal: 15, flex: 1 }}>
-                <Animated.FlatList
-                    style={{ paddingTop: 80 }}
-                    onScroll={onScroll}
-                    data={data}
-                    keyExtractor={(item) => item.id}
-                    renderItem={({ item, index }) => <DayEntry index={index} entry={{ ...item, ...goal }} />}
-                    contentContainerStyle={styles.list}
-                    showsVerticalScrollIndicator={false}
-                    ListHeaderComponent={
-                        <View>
-                            <View
-                                style={{
-                                    padding: 10,
-                                    backgroundColor: Colors.primary_lighter,
-                                    borderRadius: 10,
-                                    marginBottom: 15,
-                                }}
-                            >
-                                <GitHubActivityGrid
-                                    contributionData={contributionData}
-                                    primaryColor={secondary_candidates[0]}
-                                    goalThreshold={goal.target}
-                                />
-                            </View>
-                            <View style={{ flexDirection: "row", gap: 10, alignItems: "center", marginVertical: 15 }}>
-                                <View style={{ padding: 10, borderRadius: 100, backgroundColor: Colors.secondary }}>
-                                    <MaterialCommunityIcons
-                                        name={goal?.icon}
-                                        size={30}
-                                        color={Colors.foreground}
-                                        style={{ marginLeft: "auto" }}
-                                    />
-                                </View>
-                                <View>
-                                    <Text variant="subheading" style={{ fontWeight: "600", color: Colors.foreground }}>
-                                        {goal?.name}
-                                    </Text>
-                                    <Text variant="body" style={{ color: "rgba(255,255,255,0.9)", marginTop: 5 }}>
-                                        {goal?.description}
-                                    </Text>
-                                </View>
-                            </View>
-                        </View>
-                    }
-                    ListEmptyComponent={
-                        <Text variant="body" style={styles.emptyText}>
-                            No entries yet
-                        </Text>
-                    }
-                    ListFooterComponent={<View style={{ height: 80, width: "100%" }} />}
-                />
-            </View>
+
+            <Animated.FlatList
+                onScroll={onScroll}
+                data={data}
+                keyExtractor={(item: any) => item.id}
+                getItemLayout={getItemLayout}
+                removeClippedSubviews
+                renderItem={({ item, index }: any) => (
+                    <DayEntry
+                        index={index}
+                        entry={{ ...item, ...goal }}
+                        onEdit={handleEditEntry}
+                        onDelete={(entryId) => setDeleteTarget(entryId)}
+                        onAdd={handleAddEntry}
+                    />
+                )}
+                ListHeaderComponent={
+                    <View
+                        style={{
+                            padding: 10,
+                            backgroundColor: Colors.primary_lighter,
+                            borderRadius: 10,
+                            marginBottom: 15,
+                        }}
+                    >
+                        <GitHubActivityGrid
+                            contributionData={contributionData}
+                            primaryColor={primaryColor}
+                            goalThreshold={goal.target}
+                            isLimit={isLimit}
+                            size={20}
+                        />
+                    </View>
+                }
+                contentContainerStyle={styles.list}
+                showsVerticalScrollIndicator={false}
+                ListEmptyComponent={
+                    <Text variant="body" style={styles.emptyText}>
+                        No entries yet
+                    </Text>
+                }
+                ListFooterComponent={<View style={{ height: 80, width: "100%" }} />}
+            />
         </SafeAreaView>
     )
 }
 
 const styles = StyleSheet.create({
-    inputContainer: {
-        flexDirection: "row",
-        gap: 5,
-        marginBottom: 20,
-    },
     list: {
         gap: 12,
-    },
-    dayContainer: {
-        flexDirection: "row",
-        alignItems: "center",
-        padding: 15,
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: Color(Colors.primary_lighter).lighten(1).hex(),
-        backgroundColor: Colors.primary_lighter,
-    },
-    dateSection: {
-        alignItems: "center",
-        minWidth: 50,
-    },
-    day: {
-        fontSize: 20,
-        fontWeight: "600",
-        color: Colors.foreground,
-    },
-    currentDay: {
-        color: "#2196F3",
-    },
-    month: {
-        fontSize: 14,
-        color: "#666",
-        marginTop: 2,
-    },
-    valueContainer: {
-        flex: 1,
-        alignItems: "flex-end",
-    },
-    value: {
-        fontSize: 18,
-        fontWeight: "500",
-        color: Colors.foreground,
+        paddingTop: 200,
     },
     emptyText: {
-        color: "#666",
+        color: Colors.foreground_secondary,
         textAlign: "center",
         marginTop: 20,
-    },
-
-    iconContainer: {
-        padding: 20,
-        borderRadius: 100,
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: Colors.primary_lighter,
-        marginBottom: 20,
-        width: 130,
-        height: 130,
     },
 })

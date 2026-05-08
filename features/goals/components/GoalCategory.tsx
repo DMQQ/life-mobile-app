@@ -44,12 +44,19 @@ export const GoalCategory = ({ name, icon, description, entries = [], onPress, .
             previewBackgroundColor={"transparent"}
             actions={[
                 {
+                    title: "Edit Goal",
+                    systemIcon: "pencil",
+                },
+                {
                     title: "Delete Goal",
                     systemIcon: "trash",
                     destructive: true,
                 },
             ]}
             onPress={(e) => {
+                if (e.nativeEvent.name === "Edit Goal") {
+                    navigation.navigate("CreateGoal", { id: rest.id })
+                }
                 if (e.nativeEvent.name === "Delete Goal") {
                     removeGroup({ variables: { id: rest.id } })
                 }
@@ -72,6 +79,7 @@ export const GoalCategory = ({ name, icon, description, entries = [], onPress, .
                         contributionData={contributionData}
                         primaryColor={secondary_candidates[rest?.index % secondary_candidates.length]}
                         goalThreshold={rest.target}
+                        isLimit={rest.min === 1}
                     />
                 </View>
                 <View

@@ -2,7 +2,7 @@ import DeleteGoalsGroupDialog from "@/components/ui/Dialog/Delete/DeleteGoalsDia
 import Header from "@/components/ui/Header/Header"
 import { useScreenSearch } from "@/utils/hooks/useScreenSearch"
 import Colors from "@/constants/Colors"
-import { AntDesign } from "@expo/vector-icons"
+import { Feather } from "@expo/vector-icons"
 import { FlashList } from "@shopify/flash-list"
 import { useState } from "react"
 import { RefreshControl, View } from "react-native"
@@ -45,7 +45,7 @@ export default function Goals({ navigation }: any) {
                 buttons={[
                     {
                         onPress: () => navigation.navigate("CreateGoal"),
-                        icon: <AntDesign name="plus" size={20} color={Colors.foreground} />,
+                        icon: <Feather name="plus" size={20} color={Colors.foreground} />,
                     },
                 ]}
             />

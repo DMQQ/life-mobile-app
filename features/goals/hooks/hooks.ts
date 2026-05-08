@@ -1,23 +1,6 @@
 import { gql, useMutation, useQuery } from "@apollo/client"
 
-export interface Goal {
-    id: string
-    goals: Goals[] // This is actually categories
-}
-
-export interface Goals {
-    id: string
-    name: string
-    icon: string
-    description: string
-    stats: GoalStats[] // This is actually entries
-}
-
-export interface GoalStats {
-    id: string
-    value: number
-    date: string
-}
+export const isLimitGoal = (min?: number | null): boolean => min === 1
 
 export const GET_USER_GOAL = gql`
     query GetUserGoal($dateRange: DateRangeInput) {
@@ -81,6 +64,10 @@ export const UPDATE_GOALS = gql`
             name
             icon
             description
+            min
+            max
+            target
+            unit
         }
     }
 `
@@ -94,6 +81,22 @@ export const DELETE_GOALS = gql`
 export const UPSERT_GOAL_STATS = gql`
     mutation UpsertGoalStats($input: UpsertGoalStatsInput!) {
         upsertGoalStats(input: $input) {
+            id
+            value
+            date
+        }
+    }
+`
+
+export const DELETE_GOAL_ENTRY = gql`
+    mutation DeleteGoalEntry($id: ID!) {
+        deleteGoalEntry(id: $id)
+    }
+`
+
+export const EDIT_GOAL_ENTRY = gql`
+    mutation EditGoalEntry($id: ID!, $value: Float!) {
+        editGoalEntry(id: $id, value: $value) {
             id
             value
             date
@@ -142,6 +145,20 @@ export const useGoal = (dateRange?: { start: Date; end: Date }) => {
         upsertStats,
         refetchGoals,
     }
+}
+
+export const useDeleteGoalEntry = () => {
+    const [deleteEntry] = useMutation(DELETE_GOAL_ENTRY, {
+        refetchQueries: [GET_USER_GOAL, GET_GOALS],
+    })
+    return deleteEntry
+}
+
+export const useEditGoalEntry = () => {
+    const [editEntry] = useMutation(EDIT_GOAL_ENTRY, {
+        refetchQueries: [GET_USER_GOAL, GET_GOALS],
+    })
+    return editEntry
 }
 
 export const useGetGoal = (id: string) => {

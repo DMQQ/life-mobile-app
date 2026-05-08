@@ -22,8 +22,14 @@ private func graphQL(_ query: String, variables: [String: Any] = [:]) async -> B
     request.httpBody = bodyData
 
     do {
-        let (_, response) = try await URLSession.shared.data(for: request)
-        return (response as? HTTPURLResponse)?.statusCode == 200
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard (response as? HTTPURLResponse)?.statusCode == 200 else { return false }
+        // Check for GraphQL-level errors in the response body
+        if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+           let errors = json["errors"] as? [[String: Any]], !errors.isEmpty {
+            return false
+        }
+        return true
     } catch {
         return false
     }
@@ -107,41 +113,33 @@ struct UpdateGoalValueIntent: AppIntent {
     }
 
     func perform() async throws -> some IntentResult {
-        // Read fresh value from persisted data — captured currentValue may be stale
-        // if the widget hasn't re-rendered since the last tap or the RN app overwrote data
-        var persistedValue: Double = currentValue
+        let df = DateFormatter()
+        df.dateFormat = "yyyy-MM-dd"
+        let today = df.string(from: Date())
+
+        // Read current entry value from goals_data (ground truth from server)
+        var currentEntryValue: Double = 0
         if let str = UserDefaults.shared?.string(forKey: "goals_data"),
            let raw = str.data(using: .utf8),
-           let decoded = try? JSONDecoder().decode(GoalsWidgetData.self, from: raw) {
-            let df = DateFormatter()
-            df.dateFormat = "yyyy-MM-dd"
-            let today = df.string(from: Date())
-            if let cat = decoded.categories.first(where: { $0.id == goalId }),
-               let entry = cat.entries.first(where: { $0.date == today }) {
-                persistedValue = entry.value
-            }
+           let decoded = try? JSONDecoder().decode(GoalsWidgetData.self, from: raw),
+           let cat = decoded.categories.first(where: { $0.id == goalId }),
+           let entry = cat.entries.first(where: { $0.date == today }) {
+            currentEntryValue = entry.value
         }
-        let newValue = max(0, persistedValue + delta)
 
-        // Optimistic update in goals_data
+        let newTotal = max(0, currentEntryValue + delta)
+        let actualDelta = newTotal - currentEntryValue
+
+        // Optimistic update in goals_data so grid and display reflect new total immediately
         if let str = UserDefaults.shared?.string(forKey: "goals_data"),
            let raw = str.data(using: .utf8),
            let decoded = try? JSONDecoder().decode(GoalsWidgetData.self, from: raw) {
-
-            let df = DateFormatter()
-            df.dateFormat = "yyyy-MM-dd"
-            let today = df.string(from: Date())
 
             let updatedCategories = decoded.categories.map { cat -> GoalWidgetCategory in
                 guard cat.id == goalId else { return cat }
-                var entries = cat.entries
-                if let idx = entries.firstIndex(where: { $0.date == today }) {
-                    entries[idx] = GoalWidgetEntry(id: entries[idx].id, value: newValue, date: today)
-                } else {
-                    let newId = "widget_\(UUID().uuidString.prefix(8))"
-                    entries.append(GoalWidgetEntry(id: newId, value: newValue, date: today))
-                }
-                return GoalWidgetCategory(id: cat.id, name: cat.name, icon: cat.icon, target: cat.target, color: cat.color, unit: cat.unit, entries: entries)
+                var entries = cat.entries.filter { $0.date != today }
+                entries.append(GoalWidgetEntry(id: "widget_\(UUID().uuidString.prefix(8))", value: newTotal, date: today))
+                return GoalWidgetCategory(id: cat.id, name: cat.name, icon: cat.icon, target: cat.target, min: cat.min, color: cat.color, unit: cat.unit, entries: entries)
             }
 
             let newData = GoalsWidgetData(categories: updatedCategories, lastUpdated: ISO8601DateFormatter().string(from: Date()))
@@ -153,7 +151,9 @@ struct UpdateGoalValueIntent: AppIntent {
 
         WidgetCenter.shared.reloadTimelines(ofKind: "GoalsWidget")
 
-        // Fire GraphQL mutation
+        guard actualDelta != 0 else { return .result() }
+
+        // Send only the delta — server accumulates entries for the day
         let mutation = """
         mutation UpsertGoalStats($input: UpsertGoalStatsInput!) {
             upsertGoalStats(input: $input) {
@@ -163,7 +163,7 @@ struct UpdateGoalValueIntent: AppIntent {
             }
         }
         """
-        let vars: [String: Any] = ["input": ["id": goalId, "value": newValue, "date": date]]
+        let vars: [String: Any] = ["input": ["goalsId": goalId, "value": actualDelta, "date": date]]
         await graphQL(mutation, variables: vars)
 
         return .result()

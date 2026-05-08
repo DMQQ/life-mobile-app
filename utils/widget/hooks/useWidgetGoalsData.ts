@@ -1,5 +1,6 @@
 import { useEffect } from "react"
 import { useQuery } from "@apollo/client"
+import dayjs from "dayjs"
 import store from "../store"
 import { WidgetGoalsData, WidgetGoalCategory, WidgetGoalEntry } from "../types"
 import { ExtensionStorage } from "@bacons/apple-targets"
@@ -17,12 +18,13 @@ export const useWidgetGoalsData = () => {
             name: goal.name,
             icon: goal.icon,
             target: goal.target,
+            min: goal.min,
             unit: goal.unit,
             color: secondary_candidates[index % secondary_candidates.length],
             entries: (goal.entries || []).map((entry: any) => ({
                 id: entry.id,
                 value: entry.value,
-                date: typeof entry.date === "string" ? entry.date.split("T")[0] : entry.date,
+                date: dayjs(entry.date).format("YYYY-MM-DD"),
             })),
         }))
 
