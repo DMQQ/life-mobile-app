@@ -1,14 +1,14 @@
-import { AnimatedSelector } from "@/components"
-import DatePicker from "@/components/DatePicker"
-import Text from "@/components/ui/Text/Text"
+import GroupSelector from "@/components/ui/GroupSelector"
 import Colors from "@/constants/Colors"
-import moment from "moment"
+import { Padding } from "@/constants/Layout"
+import { Caption, Title } from "@/components"
 import React from "react"
 import { StyleSheet, View } from "react-native"
+import { useWalletContext } from "../WalletContext"
 
 export type Types = "total" | "avg" | "median" | "count"
 
-interface ChartTemplatePropsWithTypes {
+interface ChartTemplateProps {
     children: (dt: { dateRange: [string, string]; type: Types }) => React.ReactNode
     title: string
     description: string
@@ -16,8 +16,6 @@ interface ChartTemplatePropsWithTypes {
     initialStartDate?: string
     initialEndDate?: string
 }
-
-type ChartTemplateProps = ChartTemplatePropsWithTypes
 
 export default function ChartTemplate({
     children,
@@ -27,74 +25,53 @@ export default function ChartTemplate({
     initialStartDate,
     initialEndDate,
 }: ChartTemplateProps) {
-    const [type, setType] = React.useState<Types>(types ? types[0] : "total")
-    const [dateRange, setDateRange] = React.useState<[string, string]>([
-        initialStartDate ?? moment().subtract(1, "months").format("YYYY-MM-DD"),
-        initialEndDate ?? moment().format("YYYY-MM-DD"),
-    ])
+    const [type, setType] = React.useState<Types>(types?.[0] ?? "total")
+    const { filters } = useWalletContext()
 
     return (
         <View style={styles.container}>
-            <View style={{ marginBottom: 15 }}>
-                <View
-                    style={{
-                        flexDirection: "row",
-                        justifyContent: "space-between",
-                        marginBottom: 15,
-                        alignItems: "center",
-                    }}
-                >
-                    <Text variant="body" style={{ color: Colors.foreground, fontWeight: "bold", fontSize: 18 }}>
-                        {title}
-                    </Text>
-
-                    <DatePicker
-                        mode="period"
-                        dates={{
-                            start: moment(dateRange[0]).toDate(),
-                            end: moment(dateRange[1]).toDate(),
-                        }}
-                        setDates={({ start, end }) =>
-                            setDateRange([moment(start).format("YYYY-MM-DD"), moment(end).format("YYYY-MM-DD")])
-                        }
-                    />
-                </View>
-
-                <Text variant="caption" style={{ color: "gray", marginBottom: 10 }}>
-                    {description}
-                </Text>
+            <View style={styles.header}>
+                <Title style={styles.title}>{title}</Title>
+                <Caption style={styles.description}>{description}</Caption>
             </View>
 
-            {types && types.length > 0 && (
-                <View style={{ marginBottom: 15 }}>
-                    <AnimatedSelector
-                        items={types}
-                        selectedItem={type}
-                        onItemSelect={setType}
-                        hapticFeedback
-                        containerStyle={{
-                            backgroundColor: Colors.primary,
-                        }}
-                        scale={1}
+            {types.length > 0 && (
+                <View style={styles.selectorRow}>
+                    <GroupSelector
+                        options={types.map((t) => ({ label: t.toUpperCase(), value: t }))}
+                        value={type}
+                        onChange={setType}
                     />
                 </View>
             )}
 
-            <View>{children?.({ dateRange, type: type })}</View>
-
+            <View>{children({ dateRange: [filters.date.from, filters.date.to], type })}</View>
         </View>
     )
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, marginBottom: 50 },
-    dateToggleButton: {
-        backgroundColor: Colors.secondary,
-        padding: 4,
-        paddingHorizontal: 8,
-        flexDirection: "row",
-        borderRadius: 100,
-        alignItems: "center",
-        gap: 6,
+    container: {
+        marginBottom: Padding.xxl,
+    },
+    header: {
+        flexDirection: "column",
+        gap: 10,
+        marginBottom: 15,
+    },
+    headerLeft: {
+        flex: 1,
+        gap: Padding.xxs,
+    },
+    title: {
+        fontSize: 30,
+        fontWeight: "700",
+        color: Colors.foreground,
+    },
+    description: {
+        color: Colors.foreground_secondary,
+    },
+    selectorRow: {
+        marginBottom: Padding.l,
     },
 })

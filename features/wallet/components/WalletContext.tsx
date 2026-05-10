@@ -166,10 +166,16 @@ const WalletContext = createContext<WalletContextType>({
 
 export const useWalletContext = () => useContext(WalletContext)
 
-export default function WalletContextProvider({ children }: { children: React.ReactNode }) {
+export default function WalletContextProvider({
+    children,
+    initialState,
+}: {
+    children: React.ReactNode
+    initialState?: Partial<Filters>
+}) {
     const [selectedCalendarDate, setSelectedCalendarDate] = useState(new Date())
 
-    const [filters, dispatch] = useReducer(reducer, init)
+    const [filters, dispatch] = useReducer(reducer, { ...init, ...initialState })
 
     const [hasFilters, diffCount] = useMemo(() => {
         let isDifferent = false

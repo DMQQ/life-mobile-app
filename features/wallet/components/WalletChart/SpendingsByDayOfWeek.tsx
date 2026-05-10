@@ -1,18 +1,12 @@
 import Layout from "@/constants/Layout"
 import { useMemo, useState, useEffect } from "react"
-import { StyleSheet, Text, View, TouchableOpacity } from "react-native"
+import { StyleSheet, Text, View } from "react-native"
 import Colors, { secondary_candidates } from "@/constants/Colors"
 import Color from "color"
 import ChartTemplate, { Types } from "./ChartTemplate"
 import { gql, useQuery } from "@apollo/client"
-import Animated, {
-    useSharedValue,
-    useAnimatedStyle,
-    withTiming,
-    runOnJS,
-    interpolate,
-    Extrapolation,
-} from "react-native-reanimated"
+import Animated, { useSharedValue, useAnimatedStyle, withTiming, runOnJS } from "react-native-reanimated"
+import AnimatedBar from "@/components/ui/Charts/AnimatedBar"
 
 interface LegendProps {
     data: { label: string; value: number; frontColor?: string; color?: string; prevValue?: number }[]
@@ -29,130 +23,8 @@ export interface BarItem {
     day: number
 }
 
-interface AnimatedBarProps {
-    item: BarItem
-    maxValue: number
-    type: Types
-    onPress: (item: BarItem) => void
-    barWidth: number
-    chartHeight: number
-    marginRight: number
-}
-
 export const DAY_LABELS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 const labels = DAY_LABELS
-
-const AnimatedBar: React.FC<AnimatedBarProps> = ({
-    item,
-    maxValue,
-    type,
-    onPress,
-    barWidth,
-    chartHeight,
-    marginRight,
-}) => {
-    const animatedHeight = useSharedValue(0)
-    const animatedPrevHeight = useSharedValue(0)
-    const animatedOpacity = useSharedValue(0)
-    const animatedScale = useSharedValue(0.8)
-
-    const MIN_BAR_HEIGHT = 20
-
-    const getBarHeight = (value: number): number => {
-        if (!value || !maxValue) return 0
-        const proportion = value / maxValue
-        return Math.max(proportion * chartHeight, value > 0 ? MIN_BAR_HEIGHT : 0)
-    }
-
-    const targetHeight = getBarHeight(item.value)
-    const targetPrevHeight = getBarHeight(item.prevValue || 0)
-
-    useEffect(() => {
-        animatedOpacity.value = withTiming(1, { duration: 400 })
-        animatedScale.value = withTiming(1, { duration: 400 })
-        animatedHeight.value = withTiming(targetHeight, { duration: 500 })
-
-        if (targetPrevHeight > 0) {
-            animatedPrevHeight.value = withTiming(targetPrevHeight, { duration: 500 })
-        }
-    }, [targetHeight, targetPrevHeight])
-
-    const animatedBarStyle = useAnimatedStyle(() => ({
-        height: animatedHeight.value,
-        marginTop: chartHeight - animatedHeight.value,
-        opacity: animatedOpacity.value,
-        transform: [{ scale: animatedScale.value }],
-    }))
-
-    const animatedPrevBarStyle = useAnimatedStyle(() => ({
-        height: animatedPrevHeight.value,
-        marginTop: chartHeight - animatedPrevHeight.value,
-        opacity: animatedOpacity.value * 0.7,
-        transform: [{ scale: animatedScale.value }],
-    }))
-
-    const animatedContainerStyle = useAnimatedStyle(() => ({
-        opacity: animatedOpacity.value,
-        transform: [{ scale: animatedScale.value }],
-    }))
-
-    const animatedValueOpacity = useAnimatedStyle(() => ({
-        opacity: interpolate(
-            animatedHeight.value,
-            [0, MIN_BAR_HEIGHT, MIN_BAR_HEIGHT * 2],
-            [0, 0, 1],
-            Extrapolation.CLAMP,
-        ),
-    }))
-
-    const hasPrevData = item.prevValue !== undefined
-
-    return (
-        <TouchableOpacity
-            style={[styles.barContainer, { width: barWidth, marginRight }]}
-            onPress={() => onPress(item)}
-            activeOpacity={0.7}
-        >
-            <View style={styles.barsWrapper}>
-                {hasPrevData && (
-                    <Animated.View
-                        style={[
-                            styles.bar,
-                            {
-                                backgroundColor: Color(Colors.secondary).alpha(0.25).string(),
-                                position: "absolute",
-                                width: "100%",
-                                borderWidth: 1,
-                                borderColor: Color(Colors.secondary).alpha(0.4).string(),
-                            },
-                            animatedPrevBarStyle,
-                        ]}
-                    />
-                )}
-
-                <Animated.View
-                    style={[
-                        styles.bar,
-                        {
-                            backgroundColor: Colors.secondary,
-                        },
-                        animatedBarStyle,
-                    ]}
-                >
-                    {item.value > 0 && (
-                        <Animated.View style={[styles.barValueWrapper, animatedValueOpacity]}>
-                            <Text style={styles.barValueText}>{item.value.toFixed(type === "count" ? 0 : 1)}</Text>
-                        </Animated.View>
-                    )}
-                </Animated.View>
-            </View>
-
-            <Animated.Text style={[styles.dayLabel, { color: item.frontColor }, animatedContainerStyle]}>
-                {item.label}
-            </Animated.Text>
-        </TouchableOpacity>
-    )
-}
 
 function ChartLegend({ data, type }: LegendProps) {
     return (
@@ -243,13 +115,18 @@ export const CustomDayBarChart = ({ data, maxValue, type }: { data: BarItem[]; m
                     {data.map((item, index) => (
                         <AnimatedBar
                             key={index}
-                            item={item}
+                            value={item.value}
+                            prevValue={item.prevValue}
                             maxValue={maxValue}
-                            type={type}
-                            onPress={handleBarPress}
-                            barWidth={BAR_WIDTH}
                             chartHeight={CHART_HEIGHT}
+                            color={Colors.secondary}
+                            labelColor={item.frontColor}
+                            label={item.label}
+                            barWidth={BAR_WIDTH}
                             marginRight={index < data.length - 1 ? BAR_SPACING : 0}
+                            minBarHeight={20}
+                            onPress={() => handleBarPress(item)}
+                            valueLabel={item.value.toFixed(type === "count" ? 0 : 1)}
                         />
                     ))}
                 </View>
@@ -468,40 +345,6 @@ const styles = StyleSheet.create({
         alignItems: "flex-end",
         height: 320,
         paddingHorizontal: 5,
-    },
-    barContainer: {
-        alignItems: "center",
-        position: "relative",
-    },
-    barsWrapper: {
-        width: "100%",
-        height: 320,
-        position: "relative",
-    },
-    bar: {
-        width: "100%",
-        borderTopLeftRadius: 4,
-        borderTopRightRadius: 4,
-        justifyContent: "center",
-        alignItems: "center",
-    },
-    barValueWrapper: {
-        position: "absolute",
-        width: "100%",
-        height: "100%",
-        justifyContent: "center",
-        alignItems: "center",
-    },
-    barValueText: {
-        color: "#000",
-        fontSize: 12,
-        fontWeight: "700",
-        transform: [{ rotate: "-90deg" }],
-    },
-    dayLabel: {
-        fontSize: 12,
-        fontWeight: "bold",
-        marginTop: 8,
     },
     tooltip: {
         position: "absolute",

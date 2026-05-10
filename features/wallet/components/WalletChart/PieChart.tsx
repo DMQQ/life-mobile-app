@@ -40,6 +40,8 @@ export default function PieChart(props: PieChartProps) {
             showValuesAsLabels
             showValuesAsTooltipText
             showTooltip
+            strokeWidth={2}
+            strokeColor={Colors.primary}
             textColor={Colors.foreground}
             innerRadius={90}
             centerLabelComponent={() => (

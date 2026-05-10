@@ -1,23 +1,14 @@
-import { useMemo, useEffect } from "react"
+import { useMemo } from "react"
 import { StyleSheet, Text, View } from "react-native"
 import Colors from "@/constants/Colors"
 import Color from "color"
 import { gql, useQuery } from "@apollo/client"
 import { AntDesign } from "@expo/vector-icons"
 import moment from "moment"
-import Animated, { useSharedValue, useAnimatedStyle, withTiming, withDelay } from "react-native-reanimated"
 import { useRefresh } from "@/utils/context/RefreshContext"
+import AnimatedBar from "@/components/ui/Charts/AnimatedBar"
 
 const labels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
-
-interface AnimatedBarProps {
-    value: number
-    prevValue: number
-    maxValue: number
-    color: string
-    label: string
-    index: number
-}
 
 const CHART_HEIGHT = 160
 const MIN_BAR_HEIGHT = 12
@@ -26,53 +17,6 @@ const getBarHeight = (val: number, maxValue: number): number => {
     if (!val || !maxValue) return 0
     const proportion = val / maxValue
     return Math.max(proportion * CHART_HEIGHT, val > 0 ? MIN_BAR_HEIGHT : 0)
-}
-
-const AnimatedBar = ({ value, prevValue, maxValue, color, label, index }: AnimatedBarProps) => {
-    const animatedHeight = useSharedValue(0)
-    const animatedPrevHeight = useSharedValue(0)
-    const animatedOpacity = useSharedValue(0)
-
-    const targetHeight = getBarHeight(value, maxValue)
-    const targetPrevHeight = getBarHeight(prevValue, maxValue)
-
-    useEffect(() => {
-        animatedOpacity.value = withDelay(index * 100, withTiming(1, { duration: 400 }))
-        animatedHeight.value = withDelay(index * 100, withTiming(targetHeight, { duration: 600 }))
-        if (targetPrevHeight > 0) {
-            animatedPrevHeight.value = withDelay(index * 100, withTiming(targetPrevHeight, { duration: 600 }))
-        }
-    }, [targetHeight, targetPrevHeight, index])
-
-    const animatedBarStyle = useAnimatedStyle(() => ({ height: animatedHeight.value, opacity: animatedOpacity.value }))
-    const animatedPrevBarStyle = useAnimatedStyle(() => ({
-        height: animatedPrevHeight.value,
-        opacity: animatedOpacity.value * 0.6,
-    }))
-    const animatedContainerStyle = useAnimatedStyle(() => ({ opacity: animatedOpacity.value }))
-
-    return (
-        <Animated.View style={[styles.barContainer, animatedContainerStyle]}>
-            <View style={styles.barWrapper}>
-                {prevValue > 0 && (
-                    <Animated.View
-                        style={[
-                            styles.prevBar,
-                            {
-                                backgroundColor: Color(color).alpha(0.3).string(),
-                                borderColor: Color(color).alpha(0.5).string(),
-                            },
-                            animatedPrevBarStyle,
-                        ]}
-                    />
-                )}
-                {value > 0 && (
-                    <Animated.View style={[styles.currentBar, { backgroundColor: color }, animatedBarStyle]} />
-                )}
-            </View>
-            <Text style={[styles.dayLabel, { color }]}>{label}</Text>
-        </Animated.View>
-    )
 }
 
 const STATISTICS_DAY_OF_WEEK = gql`
@@ -194,9 +138,12 @@ const CompactSpendingChart = () => {
                                 value={item.value}
                                 prevValue={item.prevValue}
                                 maxValue={maxValue}
+                                chartHeight={CHART_HEIGHT}
                                 color={Colors.secondary}
                                 label={item.label}
                                 index={index}
+                                flex={1}
+                                minBarHeight={MIN_BAR_HEIGHT}
                             />
                         ))}
                     </View>
@@ -274,38 +221,6 @@ const styles = StyleSheet.create({
         height: CHART_HEIGHT,
         marginBottom: 4,
         paddingHorizontal: 8,
-    },
-    barContainer: {
-        alignItems: "center",
-        flex: 1,
-    },
-    barWrapper: {
-        width: 36,
-        height: CHART_HEIGHT,
-        justifyContent: "flex-end",
-        alignItems: "center",
-        position: "relative",
-    },
-    currentBar: {
-        width: "90%",
-        borderTopLeftRadius: 4,
-        borderTopRightRadius: 4,
-        position: "absolute",
-        bottom: 0,
-    },
-    prevBar: {
-        width: "90%",
-        borderTopLeftRadius: 3,
-        borderTopRightRadius: 3,
-        position: "absolute",
-        bottom: 0,
-        borderWidth: 1,
-    },
-    dayLabel: {
-        fontSize: 10,
-        fontWeight: "600",
-        marginTop: 4,
-        opacity: 0.7,
     },
     footer: {
         flexDirection: "row",

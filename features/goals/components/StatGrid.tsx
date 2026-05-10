@@ -1,32 +1,22 @@
-import React, { useState, useEffect, useMemo, useRef } from "react"
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from "react-native"
-import moment from "moment"
+import React, { useEffect, useMemo, useRef } from "react"
+import { View, ScrollView, StyleSheet } from "react-native"
 import Colors, { secondary_candidates } from "@/constants/Colors"
 import lowOpacity from "@/utils/functions/lowOpacity"
+import dayjs from "dayjs"
 
-// TypeScript interfaces
 interface ContributionData {
     date: string | Date
     count: number
 }
 
-interface ToolTipData {
-    date: moment.Moment
-    count: number
-    position: {
-        weekIndex: number
-        dayIndex: number
-    }
-}
-
 interface CellInfo {
-    date: moment.Moment
+    date: dayjs.Dayjs
     count: number
     dateString: string
 }
 
 interface DayData {
-    date: moment.Moment
+    date: dayjs.Dayjs
     count: number
     dateStr: string
     isCurrentMonth: boolean
@@ -70,20 +60,17 @@ const GitHubActivityGrid: React.FC<GitHubActivityGridProps> = ({
 }) => {
     const activityColor = primaryColor || secondary_candidates[0]
 
-    const defaultEndDate = moment()
-    const defaultStartDate = moment().subtract(52, "weeks").startOf("week")
-
-    const [dateRange, setDateRange] = useState({
-        start: startDate ? moment(startDate) : defaultStartDate,
-        end: endDate ? moment(endDate) : defaultEndDate,
-    })
+    const dateRange = useMemo(() => ({
+        start: startDate ? dayjs(startDate) : dayjs().subtract(52, "weeks").startOf("week"),
+        end: endDate ? dayjs(endDate) : dayjs(),
+    }), [startDate, endDate])
 
     const contributionMap = useMemo(() => {
         const map: Record<string, number> = {}
         let maxCount = 1
 
         contributionData.forEach((item) => {
-            const dateStr = moment(item.date).format("YYYY-MM-DD")
+            const dateStr = dayjs(item.date).format("YYYY-MM-DD")
             map[dateStr] = item.count || 0
             if ((item.count || 0) > maxCount) maxCount = item.count || 0
         })
@@ -92,16 +79,17 @@ const GitHubActivityGrid: React.FC<GitHubActivityGridProps> = ({
     }, [contributionData])
 
     const gridData: GridData = useMemo(() => {
-        const startWeek = moment(dateRange.start).startOf("week")
-        const endDate = moment(dateRange.end)
-
-        const totalDays = endDate.diff(startWeek, "days") + 1
+        const startWeek = dateRange.start.startOf("week")
+        const totalDays = dateRange.end.diff(startWeek, "days") + 1
         const numWeeks = Math.ceil(totalDays / 7)
 
         const weeks: DayData[][] = []
         const months: { name: string; position: number }[] = []
-        let currentDate = moment(startWeek)
+        let currentDate = startWeek
         let prevMonth: number | null = null
+        const today = dayjs()
+        const todayMonth = today.month()
+        const todayYear = today.year()
 
         for (let weekIndex = 0; weekIndex < numWeeks; weekIndex++) {
             const week: DayData[] = []
@@ -109,27 +97,22 @@ const GitHubActivityGrid: React.FC<GitHubActivityGridProps> = ({
             for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
                 const dateStr = currentDate.format("YYYY-MM-DD")
                 const count = contributionMap.map[dateStr] || 0
-
-                const goalMet = count >= goalThreshold
-
-                week.push({
-                    date: moment(currentDate),
-                    count,
-                    dateStr,
-                    isCurrentMonth: currentDate.month() === moment().month() && currentDate.year() === moment().year(),
-                    goalMet,
-                })
-
                 const currentMonth = currentDate.month()
+
                 if (prevMonth !== currentMonth) {
-                    months.push({
-                        name: currentDate.format("MMM"),
-                        position: weekIndex,
-                    })
+                    months.push({ name: currentDate.format("MMM"), position: weekIndex })
                     prevMonth = currentMonth
                 }
 
-                currentDate.add(1, "day")
+                week.push({
+                    date: currentDate,
+                    count,
+                    dateStr,
+                    isCurrentMonth: currentMonth === todayMonth && currentDate.year() === todayYear,
+                    goalMet: count >= goalThreshold,
+                })
+
+                currentDate = currentDate.add(1, "day")
             }
 
             weeks.push(week)
@@ -138,34 +121,35 @@ const GitHubActivityGrid: React.FC<GitHubActivityGridProps> = ({
         return { weeks, months }
     }, [dateRange, contributionMap, goalThreshold])
 
-    const renderCell = (day: DayData, weekIndex: number, dayIndex: number) => {
-        const cellColor: string = isLimit
-            ? day.count > goalThreshold
-                ? "#F44336"
-                : day.count > 0
-                  ? activityColor
-                  : Colors.primary
-            : day.count === 0
-              ? Colors.primary
-              : day.goalMet
-                ? activityColor
-                : lowOpacity(activityColor, 0.1)
-
-        return (
-            <View
-                key={`${weekIndex}-${dayIndex}`}
-                style={[
-                    styles.cell,
-                    {
-                        width: size,
-                        height: size,
-                    },
-                    { backgroundColor: cellColor },
-                    day.isCurrentMonth && styles.currentMonthCell,
-                ]}
-            />
-        )
-    }
+    const renderedWeeks = useMemo(() =>
+        gridData.weeks.map((week, weekIndex) => (
+            <View key={`week-${weekIndex}`} style={styles.week}>
+                {week.map((day, dayIndex) => {
+                    const cellColor = isLimit
+                        ? day.count > goalThreshold
+                            ? "#F44336"
+                            : day.count > 0
+                              ? activityColor
+                              : Colors.primary
+                        : day.count === 0
+                          ? Colors.primary
+                          : day.goalMet
+                            ? activityColor
+                            : lowOpacity(activityColor, 0.1)
+                    return (
+                        <View
+                            key={`${weekIndex}-${dayIndex}`}
+                            style={[
+                                styles.cell,
+                                { width: size, height: size, backgroundColor: cellColor },
+                                day.isCurrentMonth && styles.currentMonthCell,
+                            ]}
+                        />
+                    )
+                })}
+            </View>
+        )),
+    [gridData.weeks, activityColor, isLimit, goalThreshold, size])
 
     const scrollViewRef = useRef<ScrollView>(null)
 
@@ -191,11 +175,7 @@ const GitHubActivityGrid: React.FC<GitHubActivityGridProps> = ({
                 <View style={styles.calendarContainer}>
                     <View style={styles.gridContainer}>
                         <View style={styles.grid}>
-                            {gridData.weeks.map((week, weekIndex) => (
-                                <View key={`week-${weekIndex}`} style={styles.week}>
-                                    {week.map((day, dayIndex) => renderCell(day, weekIndex, dayIndex))}
-                                </View>
-                            ))}
+                            {renderedWeeks}
                         </View>
                     </View>
                 </View>

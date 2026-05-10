@@ -83,8 +83,18 @@ const styles = StyleSheet.create({
 })
 
 export default function WalletChartComponent(props: any) {
+    const initialState = useMemo(
+        () => ({
+            type: "expense",
+            date: {
+                from: moment().startOf("month").format("YYYY-MM-DD"),
+                to: moment().endOf("month").format("YYYY-MM-DD"),
+            },
+        }),
+        [],
+    )
     return (
-        <WalletContextProvider>
+        <WalletContextProvider initialState={initialState}>
             <WalletCharts {...props} />
         </WalletContextProvider>
     )
@@ -107,14 +117,6 @@ function WalletCharts({ navigation }: any) {
     } = useGetWallet({
         fetchAll: true,
         excludeFields: ["subscription", "location", "files"],
-
-        defaultFilters: {
-            type: "expense",
-            date: {
-                from: moment().startOf("month").format("YYYY-MM-DD"),
-                to: moment().endOf("month").format("YYYY-MM-DD"),
-            },
-        },
     })
 
     const filteredExpenses: Expense[] = useMemo(() => {
@@ -170,7 +172,8 @@ function WalletCharts({ navigation }: any) {
     }
 
     const selectedCategoryData: Expense[] = useMemo(() => {
-        const allExpenses = ((data?.wallet?.expenses2 as MonthlyExpenses[] | undefined)?.flatMap((g) => g.expenses) ?? []) as Expense[]
+        const allExpenses = ((data?.wallet?.expenses2 as MonthlyExpenses[] | undefined)?.flatMap((g) => g.expenses) ??
+            []) as Expense[]
         if (selected.trim() === "") return allExpenses
         return allExpenses.filter((item) => (item.category ?? "").startsWith(selected) && item.type !== "refunded")
     }, [selected, data?.wallet?.expenses2])
@@ -203,27 +206,6 @@ function WalletCharts({ navigation }: any) {
         [selected],
     )
 
-    const headerButtons = useMemo(
-        () => [
-            {
-                children: (
-                    <DatePicker
-                        mode="period"
-                        dates={{
-                            start: dayjs(filters.date.from).toDate(),
-                            end: dayjs(filters.date.to).toDate(),
-                        }}
-                        setDates={({ start, end }) => {
-                            dispatch({ type: "SET_DATE_MAX", payload: dayjs(end).format("YYYY-MM-DD") })
-                            dispatch({ type: "SET_DATE_MIN", payload: dayjs(start).format("YYYY-MM-DD") })
-                        }}
-                    />
-                ),
-            },
-        ],
-        [chartType, filters.date.from, filters.date.to, navigation],
-    )
-
     const [step, setStep] = useState(5)
 
     const insets = useSafeAreaInsets()
@@ -243,20 +225,53 @@ function WalletCharts({ navigation }: any) {
             {loading && (
                 <Animated.View
                     exiting={FadeOut.duration(250)}
-                    style={[StyleSheet.absoluteFillObject, styles.overlay, { paddingTop: 15 }]}
+                    style={[StyleSheet.absoluteFill, styles.overlay, { paddingTop: 15 }]}
                 >
                     <ChartLoader />
                 </Animated.View>
             )}
 
             <Header
+                animatedTitle={sumOfExpenses ? `Spent ${sumOfExpenses.toFixed(2)}zł` : "No expenses"}
+                animatedSubtitle={
+                    filters.date.from && filters.date.to
+                        ? `${filters.date.from} - ${filters.date.to}`
+                        : "Set date range"
+                }
                 scrollY={scrollY}
-                buttons={headerButtons}
-                goBack
-                backIcon={<AntDesign name="close" size={20} color={Colors.foreground} />}
-            />
+                initialTitleFontSize={45}
+                animated
+                buttons={[
+                    {
+                        children: (
+                            <DatePicker
+                                mode="period"
+                                dates={{
+                                    start: dayjs(filters.date.from).toDate(),
+                                    end: dayjs(filters.date.to).toDate(),
+                                }}
+                                setDates={({ start, end }) => {
+                                    dispatch({ type: "SET_DATE_MAX", payload: dayjs(end).format("YYYY-MM-DD") })
+                                    dispatch({ type: "SET_DATE_MIN", payload: dayjs(start).format("YYYY-MM-DD") })
+                                }}
+                                buttonComponent={({ onPress }) => (
+                                    <IconButton
+                                        icon={<AntDesign name="calendar" size={15} color="rgba(255,255,255,0.7)" />}
+                                        style={{
+                                            backgroundColor: Colors.primary_lighter,
+                                            height: 35,
+                                            paddingHorizontal: 10,
+                                        }}
+                                        onPress={onPress}
+                                    />
+                                )}
+                            />
+                        ),
+                    },
+                ]}
+            ></Header>
             <AnimatedVirtualizedList
-                style={{ paddingTop: 100 }}
+                style={{ paddingTop: 250 }}
                 onScroll={onScroll}
                 ref={listRef}
                 ListHeaderComponent={
