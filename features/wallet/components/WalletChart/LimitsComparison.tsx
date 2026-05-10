@@ -1,7 +1,7 @@
 import Layout from "@/constants/Layout"
 import React, { useMemo, useState } from "react"
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from "react-native"
-import Colors, { secondary_candidates } from "@/constants/Colors"
+import { StyleSheet, Text, View, ScrollView } from "react-native"
+import Colors from "@/constants/Colors"
 import Color from "color"
 import Button from "@/components/ui/Button/Button"
 import lowOpacity from "@/utils/functions/lowOpacity"
@@ -9,6 +9,7 @@ import { gql, useQuery } from "@apollo/client"
 import moment from "moment"
 import { CategoryUtils, Icons } from "../Expense/ExpenseIcon"
 import ChartTemplate from "./ChartTemplate"
+import AnimatedBar from "@/components/ui/Charts/AnimatedBar"
 
 const LIMITS_COMPARISON = gql`
     query LimitsComparison($startDate: String!, $endDate: String!) {
@@ -49,10 +50,8 @@ interface LimitBarItem {
     spent: number
     limit: number
     exceeded: boolean
-    color: string
     isLastInCategory: boolean
     isFirstInCategory?: boolean
-
     isMiddleInCategory?: boolean
 }
 
@@ -61,32 +60,11 @@ interface CustomLimitChartProps {
     maxValue: number
 }
 
+const BAR_WIDTH = 40
+const BAR_SPACING = 8
+const CHART_HEIGHT = 180
+
 const CustomLimitChart: React.FC<CustomLimitChartProps> = ({ data, maxValue }) => {
-    const [selectedBarInfo, setSelectedBarInfo] = useState<LimitBarItem | null>(null)
-
-    const BAR_SPACING = 6
-    const CHART_HEIGHT = 180
-    const MIN_BAR_HEIGHT = 20
-
-    const getBarHeight = (value: number): number => {
-        if (!value || !maxValue) return 0
-        const proportion = value / maxValue
-        return Math.max(proportion * CHART_HEIGHT, value > 0 ? MIN_BAR_HEIGHT : 0)
-    }
-
-    const getLimitLineHeight = (limit: number): number => {
-        if (!limit || !maxValue) return 0
-        const proportion = limit / maxValue
-        return proportion * CHART_HEIGHT
-    }
-
-    const handleBarPress = (item: LimitBarItem) => {
-        setSelectedBarInfo(item)
-        setTimeout(() => {
-            setSelectedBarInfo(null)
-        }, 3000)
-    }
-
     return (
         <View style={styles.chartWrapper}>
             <View style={[styles.yAxisLabels, { height: CHART_HEIGHT }]}>
@@ -109,82 +87,33 @@ const CustomLimitChart: React.FC<CustomLimitChartProps> = ({ data, maxValue }) =
                     showsHorizontalScrollIndicator={false}
                     contentContainerStyle={{ height: CHART_HEIGHT + 40 }}
                 >
-                    <View style={{ flexDirection: "row", paddingTop: 10, height: CHART_HEIGHT + 40, marginLeft: 15 }}>
-                        {data.map((item, index) => {
-                            const spentHeight = getBarHeight(item.spent)
-                            const limitLineHeight = getLimitLineHeight(item.limit)
-
-                            return (
-                                <TouchableOpacity
-                                    key={`bar-${index}`}
-                                    style={[
-                                        styles.barContainer,
-                                        {
-                                            marginRight: BAR_SPACING,
-                                            width: BAR_WIDTH,
-                                            height: CHART_HEIGHT,
-                                        },
-                                    ]}
-                                    onPress={() => handleBarPress(item)}
-                                    activeOpacity={0.7}
-                                >
-                                    <View
-                                        style={[
-                                            styles.bar,
-                                            {
-                                                height: spentHeight,
-                                                backgroundColor: item.exceeded ? "#ff6b6b" : item.color,
-                                                marginTop: CHART_HEIGHT - spentHeight,
-                                            },
-                                        ]}
-                                    >
-                                        {item.spent > 0 && spentHeight > 30 && (
-                                            <View style={styles.barValueLabelWrapper}>
-                                                <Text style={styles.barValueLabelInside}>{item.spent.toFixed(0)}</Text>
-                                            </View>
-                                        )}
-                                    </View>
-
-                                    {item.limit > 0 && (
-                                        <View
-                                            style={[
-                                                styles.limitLine,
-                                                {
-                                                    bottom: limitLineHeight,
-                                                    borderColor: item.exceeded ? "#ff3333" : "#4CAF50",
-                                                },
-                                            ]}
-                                        />
-                                    )}
-
-                                    <Text style={[styles.monthLabel, { color: item.color }]}>
-                                        {moment(item.month).format("MMM")}
-                                    </Text>
-                                </TouchableOpacity>
-                            )
-                        })}
+                    <View
+                        style={{ flexDirection: "row", paddingTop: 10, height: CHART_HEIGHT + 40, marginLeft: 15 }}
+                    >
+                        {data.map((item, index) => (
+                            <AnimatedBar
+                                key={`bar-${index}`}
+                                value={item.spent}
+                                prevValue={item.limit}
+                                maxValue={maxValue}
+                                chartHeight={CHART_HEIGHT}
+                                label={moment(item.month).format("MMM")}
+                                index={index}
+                                barWidth={BAR_WIDTH}
+                                marginRight={BAR_SPACING}
+                                color={item.exceeded ? Colors.error : undefined}
+                                labelColor={item.exceeded ? Colors.error : Colors.secondary}
+                                valueLabel={item.spent > 0 ? item.spent.toFixed(0) : undefined}
+                            />
+                        ))}
                     </View>
                 </ScrollView>
-
-                {selectedBarInfo && (
-                    <View style={styles.tooltip}>
-                        <Text style={styles.tooltipTitle}>{moment(selectedBarInfo.month).format("MMM YYYY")}</Text>
-                        <Text
-                            style={[styles.tooltipValue, { color: selectedBarInfo.exceeded ? "#ff6b6b" : "#4CAF50" }]}
-                        >
-                            {selectedBarInfo.spent.toFixed(2)}zł / {selectedBarInfo.limit.toFixed(2)}zł
-                        </Text>
-                        {selectedBarInfo.exceeded && <Text style={styles.tooltipExceeded}>Limit Exceeded!</Text>}
-                    </View>
-                )}
             </View>
         </View>
     )
 }
 
 const blueText = Color(Colors.primary).lighten(10).string()
-
-const BAR_WIDTH = 35
 
 interface CategoryChartData {
     category: string
@@ -265,7 +194,6 @@ const LimitsComparisonComponent = ({ dateRange }: { dateRange: [string, string] 
                     spent,
                     limit,
                     exceeded,
-                    color: secondary_candidates[monthIndex % secondary_candidates.length],
                     isLastInCategory: monthIndex === data.statisticsSpendingsLimits.length - 1,
                     isFirstInCategory: monthIndex === 0,
                     isMiddleInCategory: monthIndex === Math.floor(data.statisticsSpendingsLimits.length / 2),
@@ -274,17 +202,10 @@ const LimitsComparisonComponent = ({ dateRange }: { dateRange: [string, string] 
 
             const maxValue = values.length > 0 ? Math.max(...values) * 1.1 : 100
 
-            return {
-                category,
-                data: chartData,
-                maxValue,
-            }
+            return { category, data: chartData, maxValue }
         })
 
-        return {
-            categoryCharts: charts,
-            categories: categoriesArray,
-        }
+        return { categoryCharts: charts, categories: categoriesArray }
     }, [data, selectedCategories, showGeneral])
 
     if (loading)
@@ -369,9 +290,7 @@ const LimitsComparisonComponent = ({ dateRange }: { dateRange: [string, string] 
                     >
                         {Icons[category as keyof typeof Icons]?.icon ? (
                             <View style={{ marginRight: 5 }}>
-                                {React.cloneElement(Icons[category as keyof typeof Icons]?.icon, {
-                                    size: 15,
-                                })}
+                                {React.cloneElement(Icons[category as keyof typeof Icons]?.icon, { size: 15 })}
                             </View>
                         ) : null}
                         <Text
@@ -436,15 +355,15 @@ const LimitsComparisonComponent = ({ dateRange }: { dateRange: [string, string] 
             <View style={styles.legendContainer}>
                 <View style={styles.legendItem}>
                     <View style={[styles.legendIndicator, { backgroundColor: Colors.secondary }]} />
-                    <Text style={styles.legendText}>Within Limit</Text>
+                    <Text style={styles.legendText}>Spent</Text>
                 </View>
                 <View style={styles.legendItem}>
-                    <View style={[styles.legendIndicator, { backgroundColor: "#ff6b6b" }]} />
-                    <Text style={styles.legendText}>Exceeded Limit</Text>
+                    <View style={[styles.legendIndicator, { backgroundColor: Colors.secondary_dark_2 }]} />
+                    <Text style={styles.legendText}>Limit</Text>
                 </View>
                 <View style={styles.legendItem}>
-                    <View style={[styles.legendLine, { borderColor: "#4CAF50" }]} />
-                    <Text style={styles.legendText}>Limit Line</Text>
+                    <View style={[styles.legendIndicator, { backgroundColor: Colors.error }]} />
+                    <Text style={styles.legendText}>Exceeded</Text>
                 </View>
             </View>
         </View>
@@ -545,75 +464,6 @@ const styles = StyleSheet.create({
         height: 1,
         backgroundColor: Color(Colors.primary).lighten(0.8).string(),
     },
-    barContainer: {
-        alignItems: "center",
-        position: "relative",
-    },
-    bar: {
-        width: "100%",
-        borderTopLeftRadius: 3,
-        borderTopRightRadius: 3,
-        justifyContent: "center",
-        alignItems: "center",
-        overflow: "visible",
-    },
-    barValueLabelWrapper: {
-        position: "absolute",
-        width: "100%",
-        height: "100%",
-        justifyContent: "center",
-        alignItems: "center",
-    },
-    barValueLabelInside: {
-        color: "#000",
-        fontSize: 10,
-        textAlign: "center",
-        transform: [{ rotate: "-90deg" }],
-        width: 80,
-    },
-    limitLine: {
-        position: "absolute",
-        left: -5,
-        right: -5,
-        height: 2,
-        borderTopWidth: 1,
-    },
-    monthLabel: {
-        fontSize: 10,
-        fontWeight: "bold",
-        marginTop: 5,
-    },
-    tooltip: {
-        position: "absolute",
-        top: 50,
-        left: 50,
-        backgroundColor: Color(Colors.primary).lighten(0.5).string(),
-        padding: 10,
-        borderRadius: 5,
-        width: 180,
-        zIndex: 10,
-    },
-    tooltipTitle: {
-        color: Colors.foreground,
-        fontWeight: "bold",
-        fontSize: 14,
-    },
-    tooltipValue: {
-        fontSize: 16,
-        marginVertical: 5,
-        fontWeight: "bold",
-    },
-    tooltipCategory: {
-        color: Colors.foreground,
-        fontSize: 12,
-        opacity: 0.8,
-    },
-    tooltipExceeded: {
-        color: "#ff6b6b",
-        fontSize: 12,
-        fontWeight: "bold",
-        marginTop: 5,
-    },
     legendContainer: {
         flexDirection: "row",
         justifyContent: "space-around",
@@ -627,14 +477,7 @@ const styles = StyleSheet.create({
     legendIndicator: {
         width: 12,
         height: 12,
-        borderRadius: 2,
-        marginRight: 6,
-    },
-    legendLine: {
-        width: 20,
-        height: 2,
-        borderTopWidth: 2,
-        borderStyle: "dashed",
+        borderRadius: 6,
         marginRight: 6,
     },
     legendText: {

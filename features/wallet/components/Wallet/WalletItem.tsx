@@ -125,7 +125,7 @@ function dateFormatter(date: string) {
 function WalletItem(
     item: WalletItemProps & {
         handlePress: Function
-        animatedStyle: AnimatedStyle
+        animatedStyle?: AnimatedStyle
         containerStyle?: StyleProp<ViewStyle>
     },
 ) {

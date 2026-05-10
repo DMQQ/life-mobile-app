@@ -220,7 +220,6 @@ const styles = StyleSheet.create({
         alignItems: "flex-end",
         height: CHART_HEIGHT,
         marginBottom: 4,
-        paddingHorizontal: 8,
     },
     footer: {
         flexDirection: "row",

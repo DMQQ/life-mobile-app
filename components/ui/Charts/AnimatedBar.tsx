@@ -8,14 +8,14 @@ import Animated, {
     withDelay,
     withTiming,
 } from "react-native-reanimated"
-import Color from "color"
+import Colors from "@/constants/Colors"
 
 export interface AnimatedBarProps {
     value: number
     prevValue?: number
     maxValue: number
     chartHeight: number
-    color: string
+    color?: string
     label: string
     labelColor?: string
     index?: number
@@ -33,7 +33,6 @@ const AnimatedBar: React.FC<AnimatedBarProps> = ({
     prevValue = 0,
     maxValue,
     chartHeight,
-    color,
     label,
     labelColor,
     index,
@@ -68,18 +67,12 @@ const AnimatedBar: React.FC<AnimatedBarProps> = ({
         }
     }, [targetHeight, targetPrevHeight, delay])
 
-    const animatedBarStyle = useAnimatedStyle(() => ({
+    const animatedBarHeightOnly = useAnimatedStyle(() => ({
         height: animatedHeight.value,
-        marginTop: chartHeight - animatedHeight.value,
-        opacity: animatedOpacity.value,
-        transform: [{ scale: animatedScale.value }],
     }))
 
     const animatedPrevBarStyle = useAnimatedStyle(() => ({
         height: animatedPrevHeight.value,
-        marginTop: chartHeight - animatedPrevHeight.value,
-        opacity: animatedOpacity.value * 0.7,
-        transform: [{ scale: animatedScale.value }],
     }))
 
     const animatedContainerStyle = useAnimatedStyle(() => ({
@@ -88,17 +81,11 @@ const AnimatedBar: React.FC<AnimatedBarProps> = ({
     }))
 
     const animatedValueOpacity = useAnimatedStyle(() => ({
-        opacity: interpolate(
-            animatedHeight.value,
-            [0, minBarHeight, minBarHeight * 2],
-            [0, 0, 1],
-            Extrapolation.CLAMP,
-        ),
+        opacity: interpolate(animatedHeight.value, [0, minBarHeight, minBarHeight * 2], [0, 0, 1], Extrapolation.CLAMP),
     }))
 
-    const effectiveLabelColor = labelColor ?? color
-    const hasPrevData = prevValue > 0
-
+    const barColor = Colors.secondary
+    const effectiveLabelColor = labelColor ?? barColor
     const containerStyle = {
         ...(barWidth !== undefined && { width: barWidth }),
         ...(flex !== undefined && { flex }),
@@ -107,28 +94,18 @@ const AnimatedBar: React.FC<AnimatedBarProps> = ({
 
     const bars = (
         <View style={[styles.barsWrapper, { height: chartHeight }]}>
-            {hasPrevData && (
+            <View style={styles.sideBySideRow}>
                 <Animated.View
-                    style={[
-                        styles.bar,
-                        {
-                            backgroundColor: Color(color).alpha(0.25).string(),
-                            position: "absolute",
-                            width: "100%",
-                            borderWidth: 1,
-                            borderColor: Color(color).alpha(0.4).string(),
-                        },
-                        animatedPrevBarStyle,
-                    ]}
+                    style={[styles.sideBySideBar, { backgroundColor: Colors.secondary_dark_2 }, animatedPrevBarStyle]}
                 />
-            )}
-            <Animated.View style={[styles.bar, { backgroundColor: color }, animatedBarStyle]}>
-                {valueLabel !== undefined && value > 0 && (
-                    <Animated.View style={[styles.valueLabelWrapper, animatedValueOpacity]}>
-                        <Text style={styles.valueLabelText}>{isOutlier ? "↑" + valueLabel : valueLabel}</Text>
-                    </Animated.View>
-                )}
-            </Animated.View>
+                <Animated.View style={[styles.sideBySideBar, { backgroundColor: barColor }, animatedBarHeightOnly]}>
+                    {valueLabel !== undefined && value > 0 && (
+                        <Animated.View style={[styles.valueLabelWrapper, animatedValueOpacity]}>
+                            <Text style={styles.valueLabelText}>{isOutlier ? "↑" + valueLabel : valueLabel}</Text>
+                        </Animated.View>
+                    )}
+                </Animated.View>
+            </View>
         </View>
     )
 
@@ -146,7 +123,7 @@ const AnimatedBar: React.FC<AnimatedBarProps> = ({
     return (
         <Animated.View style={[styles.barContainer, containerStyle, animatedContainerStyle]}>
             {bars}
-            <Text style={[styles.label, { color: effectiveLabelColor }]}>{label}</Text>
+            <Text style={[styles.label, { color: "#fff" }]}>{label}</Text>
         </Animated.View>
     )
 }
@@ -159,10 +136,20 @@ const styles = StyleSheet.create({
         width: "100%",
         position: "relative",
     },
-    bar: {
-        width: "100%",
-        borderTopLeftRadius: 4,
-        borderTopRightRadius: 4,
+    sideBySideRow: {
+        position: "absolute",
+        bottom: 0,
+        left: 4,
+        right: 4,
+        top: 0,
+        flexDirection: "row",
+        alignItems: "flex-end",
+        gap: 5,
+    },
+    sideBySideBar: {
+        flex: 1,
+        borderTopLeftRadius: 10,
+        borderTopRightRadius: 10,
         justifyContent: "center",
         alignItems: "center",
         overflow: "visible",
@@ -175,9 +162,9 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     valueLabelText: {
-        color: "#000",
-        fontSize: 12,
-        fontWeight: "700",
+        color: "#fff",
+        fontSize: 11,
+        fontWeight: "400",
         textAlign: "center",
         transform: [{ rotate: "-90deg" }],
         width: 80,

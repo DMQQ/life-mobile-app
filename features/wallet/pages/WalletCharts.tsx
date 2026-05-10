@@ -3,16 +3,14 @@ import Text from "@/components/ui/Text/Text"
 import Colors, { secondary_candidates } from "@/constants/Colors"
 import Layout from "@/constants/Layout"
 import { Expense, MonthlyExpenses } from "@/types"
-import { AntDesign, Ionicons, MaterialIcons } from "@expo/vector-icons"
+import { Feather } from "@expo/vector-icons"
 import moment from "moment"
 import { useCallback, useMemo, useRef, useState } from "react"
-import { StyleSheet, View, VirtualizedList } from "react-native"
+import { ScrollView, StyleSheet, View } from "react-native"
 import Feedback from "react-native-haptic-feedback"
-import Ripple from "react-native-material-ripple"
 import Animated, { FadeOut, useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
-import { CategoryUtils } from "../components/Expense/ExpenseIcon"
-import WalletItem, { Icons } from "../components/Wallet/WalletItem"
+import { Icons } from "../components/Wallet/WalletItem"
 import ChartLoader from "../components/WalletChart/ChartLoader"
 import Charts from "../components/WalletChart/Charts"
 import FutureProjection from "../components/WalletChart/FutureProjection"
@@ -30,55 +28,19 @@ import useGetWallet, { useGetBalance } from "../hooks/useGetWallet"
 import DatePicker from "@/components/DatePicker"
 import dayjs from "dayjs"
 import { IconButton } from "@/components"
+import BottomSheet from "@gorhom/bottom-sheet"
+import CategoryExpensesSheet from "../components/WalletChart/CategoryExpensesSheet"
+import LineChart from "../components/WalletChart/LineChart"
 
-const AnimatedVirtualizedList = Animated.createAnimatedComponent(VirtualizedList)
+const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView)
 
 const styles = StyleSheet.create({
-    tilesContainer: {
-        marginTop: 15,
-        width: Layout.window.width - 30,
-        gap: 10,
-        flexDirection: "row",
-        flexWrap: "wrap",
-    },
-
-    tile: {
-        flexDirection: "column",
-        padding: 20,
-        backgroundColor: Colors.primary_light,
-        borderRadius: 15,
-        gap: 5,
-    },
-    dot: {
-        width: 10,
-        height: 10,
-        borderRadius: 10,
-        marginRight: 10,
-    },
-    tileText: {
-        flexDirection: "row",
-        alignItems: "center",
-        marginTop: 10,
-    },
-    expenseTitle: {
-        color: Colors.foreground,
-        fontSize: 24,
-        fontWeight: "bold",
-        marginBottom: 15,
-    },
-    totalText: {
-        color: Colors.foreground,
-        fontSize: 22,
-        fontWeight: "bold",
-    },
     listHeader: {
         flex: 1,
         paddingHorizontal: 15,
         alignItems: "center",
         marginBottom: 30,
     },
-    viewAll: { color: Colors.secondary, textAlign: "center", marginTop: 10 },
-
     overlay: { backgroundColor: Colors.primary, zIndex: 1000, justifyContent: "center", alignItems: "center" },
 })
 
@@ -108,6 +70,7 @@ export const getInvalidExpenses = (curr: Expense) =>
     curr.amount == 0
 
 function WalletCharts({ navigation }: any) {
+    const [view, setActiveView] = useState<"pie" | "bars">("pie")
     const {
         data = { wallet: { expenses2: [] } },
         dispatch,
@@ -128,11 +91,8 @@ function WalletCharts({ navigation }: any) {
     }, [data?.wallet?.expenses2])
 
     const [excluded, setExcluded] = useState<string[]>([])
-
-    const listRef = useRef<VirtualizedList<any> | null>(null)
     const [selected, setSelected] = useState("")
-
-    const [chartType] = useState<"pie" | "bar">("pie")
+    const sheetRef = useRef<BottomSheet>(null)
 
     const legend = useGetLegendData(
         moment().startOf("month").format("YYYY-MM-DD"),
@@ -141,7 +101,6 @@ function WalletCharts({ navigation }: any) {
 
     const barData = useMemo(() => {
         if (!legend.data?.statisticsLegend) return []
-
         return legend.data?.statisticsLegend.map((item, index: number) => ({
             value: item.total,
             label: item.category,
@@ -162,13 +121,11 @@ function WalletCharts({ navigation }: any) {
 
     const onLegendItemPress = (item: { category: string }) => {
         if (!item.category) return
-
         if (excluded.includes(item.category)) {
             setExcluded((prev) => prev.filter((cat) => cat !== item.category))
         }
-
-        setSelected((prev) => (prev === item.category ? "" : item.category))
-        setStep(5)
+        setSelected(item.category)
+        sheetRef.current?.snapToPosition("50%")
     }
 
     const selectedCategoryData: Expense[] = useMemo(() => {
@@ -181,6 +138,7 @@ function WalletCharts({ navigation }: any) {
     const onChartPress = (e: any) => {
         if (!e.label) return
         setSelected(e.label)
+        sheetRef.current?.snapToPosition("50%")
     }
 
     const currentBalance = useGetBalance()
@@ -206,12 +164,8 @@ function WalletCharts({ navigation }: any) {
         [selected],
     )
 
-    const [step, setStep] = useState(5)
-
     const insets = useSafeAreaInsets()
-
     const monthDiff = moment(filters.date.from).diff(moment(filters.date.to))
-
     const scrollY = useSharedValue(0)
 
     const onScroll = useAnimatedScrollHandler({
@@ -219,6 +173,8 @@ function WalletCharts({ navigation }: any) {
             scrollY.value = ev.contentOffset.y
         },
     })
+
+    const selectedColor = barData.find((c) => c.label === selected)?.color ?? Colors.secondary
 
     return (
         <View style={{ paddingTop: 15, paddingBottom: insets.bottom }}>
@@ -243,6 +199,12 @@ function WalletCharts({ navigation }: any) {
                 animated
                 buttons={[
                     {
+                        icon: <Feather name="repeat" color={"#fff"} size={20} />,
+                        onPress: () => {
+                            setActiveView((prev) => (prev === "pie" ? "bars" : "pie"))
+                        },
+                    },
+                    {
                         children: (
                             <DatePicker
                                 mode="period"
@@ -256,7 +218,7 @@ function WalletCharts({ navigation }: any) {
                                 }}
                                 buttonComponent={({ onPress }) => (
                                     <IconButton
-                                        icon={<AntDesign name="calendar" size={15} color="rgba(255,255,255,0.7)" />}
+                                        icon={<Feather name="calendar" size={15} color="#fff" />}
                                         style={{
                                             backgroundColor: Colors.primary_lighter,
                                             height: 35,
@@ -269,98 +231,56 @@ function WalletCharts({ navigation }: any) {
                         ),
                     },
                 ]}
-            ></Header>
-            <AnimatedVirtualizedList
+            />
+
+            <AnimatedScrollView
                 style={{ paddingTop: 250 }}
                 onScroll={onScroll}
-                ref={listRef}
-                ListHeaderComponent={
-                    <View style={styles.listHeader}>
-                        <View style={{ height: Layout.screen.height / 2.8 }}>
-                            {chartType === "pie" ? (
-                                <PieChart data={chartData} totalSum={sumOfExpenses} onPress={onChartPress} />
-                            ) : (
-                                <Charts data={chartData} onPress={onChartPress} />
-                            )}
-                        </View>
-                        <View>
-                            <Text style={{ color: Colors.foreground, fontWeight: "bold", fontSize: 12 }}>
-                                {filters.date.from} - {filters.date.to}
-                            </Text>
-                        </View>
-                        <Legend
-                            excluded={excluded}
-                            onLongPress={onLongPress}
-                            totalSum={sumOfExpenses}
-                            selected={selected}
-                            onPress={onLegendItemPress}
-                            startDate={filters.date.from}
-                            endDate={filters.date.to}
-                            detailed={legend.detailed}
-                            statisticsLegendData={legend.data || { statisticsLegend: [] }}
-                            toggleMode={legend.toggleMode}
-                        />
-
-                        {selectedCategoryData.length > 0 && (
-                            <View style={{ width: Layout.screen.width - 30, marginTop: 25 }}>
-                                <Text variant="body" style={{ color: Colors.foreground, fontWeight: "bold" }}>
-                                    Selected category:{" "}
-                                    <Text
-                                        variant="body"
-                                        style={{
-                                            color: barData.find((c) => c.label === selected)?.color,
-                                            textTransform: "capitalize",
-                                        }}
-                                    >
-                                        {CategoryUtils.getCategoryName(selected) || "All"}
-                                    </Text>
-                                </Text>
-                            </View>
+                scrollEventThrottle={16}
+                bounces
+                contentContainerStyle={{ padding: 15 }}
+                onScrollEndDrag={onEndReached}
+            >
+                <View style={styles.listHeader}>
+                    <View style={{ height: Layout.screen.height / 2.8 }}>
+                        {view === "pie" ? (
+                            <PieChart data={chartData} totalSum={sumOfExpenses} onPress={onChartPress} />
+                        ) : (
+                            <Charts data={chartData} onPress={onChartPress} />
                         )}
                     </View>
-                }
-                data={selectedCategoryData.slice(0, step)}
-                getItem={(data, index) => data[index]}
-                getItemCount={(data) => data.length}
-                keyExtractor={(item: any) => item.id}
-                contentContainerStyle={{ padding: 15 }}
-                bounces
-                removeClippedSubviews
-                initialNumToRender={5}
-                onEndReached={onEndReached}
-                renderItem={({ item }: any) => (
-                    <WalletItem
-                        handlePress={() => {
-                            navigation.navigate("Expense", {
-                                expense: item as Expense,
-                            })
-                        }}
-                        {...item}
+
+                    <Legend
+                        excluded={excluded}
+                        onLongPress={onLongPress}
+                        totalSum={sumOfExpenses}
+                        selected={selected}
+                        onPress={onLegendItemPress}
+                        startDate={filters.date.from}
+                        endDate={filters.date.to}
+                        detailed={legend.detailed}
+                        statisticsLegendData={legend.data || { statisticsLegend: [] }}
+                        toggleMode={legend.toggleMode}
                     />
+                </View>
+
+                <StatisticsSummary />
+                <SpendingsByDay />
+                {monthDiff > 28 && monthDiff < 32 && (
+                    <FutureProjection data={filteredExpenses} income={5500} currentBalance={currentBalance} />
                 )}
-                ListFooterComponent={
-                    <>
-                        {selectedCategoryData.length > step && (
-                            <Ripple onPress={() => setStep(selectedCategoryData.length)}>
-                                <Text variant="body" style={styles.viewAll}>
-                                    View all
-                                </Text>
-                            </Ripple>
-                        )}
-                        <StatisticsSummary />
-                        <SpendingsByDay />
-                        {monthDiff > 28 && monthDiff < 32 && (
-                            <FutureProjection data={filteredExpenses} income={5500} currentBalance={currentBalance} />
-                        )}
-                        <MonthlyCategoryComparison />
+                <MonthlyCategoryComparison />
+                <LimitsComparison />
+                <CalendarHeatmap />
+                <HourlySpendingsHeatMap />
+            </AnimatedScrollView>
 
-                        <LimitsComparison />
-
-                        <CalendarHeatmap />
-
-                        <HourlySpendingsHeatMap />
-                    </>
-                }
+            <CategoryExpensesSheet
+                ref={sheetRef}
+                expenses={selectedCategoryData}
+                categoryName={selected}
+                categoryColor={selectedColor}
+                onExpensePress={(expense) => navigation.navigate("Expense", { expense })}
             />
         </View>
     )

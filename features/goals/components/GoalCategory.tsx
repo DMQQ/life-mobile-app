@@ -71,31 +71,19 @@ export const GoalCategory = ({ name, icon, description, entries = [], onPress, .
                 }}
                 style={{
                     marginVertical: 7.5,
+                    gap: 15,
                 }}
                 entering={FadeIn.delay((rest.index + 1) * 50)}
             >
+                <Text style={{ color: Colors.foreground, fontSize: 14, fontWeight: "600" }}>{name}</Text>
                 <View style={{ pointerEvents: "box-none" }}>
                     <GoalActivityGrid
                         contributionData={contributionData}
                         primaryColor={secondary_candidates[rest?.index % secondary_candidates.length]}
                         goalThreshold={rest.target}
                         isLimit={rest.min === 1}
+                        size={15}
                     />
-                </View>
-                <View
-                    style={{
-                        flexDirection: "row",
-                        justifyContent: "space-between",
-                        alignItems: "flex-end",
-                        paddingBottom: 5,
-                    }}
-                >
-                    <View>
-                        <Text style={{ color: Colors.foreground, marginTop: 15, fontSize: 18, fontWeight: "600" }}>
-                            {name}
-                        </Text>
-                        <Text style={{ color: Colors.foreground, fontSize: 16, marginTop: 10 }}>{description}</Text>
-                    </View>
                 </View>
             </Card>
         </ContextMenu>

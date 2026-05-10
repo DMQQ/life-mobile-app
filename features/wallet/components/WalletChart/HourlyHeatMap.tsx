@@ -55,7 +55,6 @@ interface CustomBarChartProps {
     viewType: "avg_amount" | "count" | "max_amount" | "min_amount"
 }
 
-
 const CustomBarChart: React.FC<CustomBarChartProps> = ({ data, maxValue, viewType }) => {
     const [selectedBarInfo, setSelectedBarInfo] = useState<BarItem | null>(null)
     const tooltipOpacity = useSharedValue(0)
@@ -430,13 +429,29 @@ const styles = StyleSheet.create({
 })
 
 export default function HourlyHeatMap() {
+    const types = {
+        avg_amount: "Average",
+        count: "Count",
+        max_amount: "Max",
+        min_amount: "Min",
+    }
+
+    const getType = (value: string): Types => {
+        for (const typeKey in types) {
+            // @ts-ignore
+            if (typeKey in types && types[typeKey] === value) return typeKey as Types
+        }
+
+        throw new Error("Invalid type value: " + value)
+    }
+
     return (
         <ChartTemplate
             title="Hourly spending"
             description="See your spending patterns by hours vs previous period"
-            types={["avg_amount", "count", "max_amount", "min_amount"] as any}
+            types={Object.values(types) as Types[]}
         >
-            {({ dateRange, type }) => <HourlySpendingsBarChart type={type} dateRange={dateRange} />}
+            {({ dateRange, type }) => <HourlySpendingsBarChart type={getType(type)} dateRange={dateRange} />}
         </ChartTemplate>
     )
 }
