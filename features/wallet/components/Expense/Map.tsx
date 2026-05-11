@@ -9,6 +9,7 @@ import Ripple from "react-native-material-ripple"
 import Layout from "@/constants/Layout"
 import Colors from "@/constants/Colors"
 import { Expense } from "@/types"
+import Section from "@/components/ui/Section"
 
 const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
     const R = 6371 // Radius of the Earth in km
@@ -253,145 +254,126 @@ const MapPicker = forwardRef<MapPickerHandle, Pick<Expense, "location"> & { id: 
     if (!assignedMarker) return null
 
     return (
-        <View style={{ padding: 15, marginBottom: 40 }}>
-            <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                <Txt size={20} color={Colors.foreground}>
-                    {assignedMarker?.name || "Select location"}
-                </Txt>
+        <View style={{ paddingHorizontal: 15 }}>
+            <Section title="Map">
+                <Map
+                    ref={map}
+                    style={{ width: Layout.screen.width - 30, height: 200, borderRadius: 10, marginTop: 25 }}
+                    provider={PROVIDER_DEFAULT}
+                    {...({ showsPointsOfInterest: true } as any)}
+                    region={location}
+                    {...({ toolbarEnabled: true } as any)}
+                    onPress={async (e) => {
+                        const { latitude, longitude } = e.nativeEvent.coordinate
+                        if (editMode) {
+                            Alert.prompt("Location name", "Enter location name:", async (name) => {
+                                if (name) {
+                                    const { data } = await createMarker({
+                                        variables: {
+                                            input: { kind: "custom", name, latitude, longitude },
+                                        },
+                                    })
 
-                <View style={{ flexDirection: "row", gap: 25 }}>
-                    <Ripple
-                        onPress={() => {
-                            Alert.prompt("Location Search", "Enter location name:", (name) => {
-                                if (name) setLocationQuery(name)
-                            })
-                        }}
-                    >
-                        <Feather name="search" size={20} color={Colors.foreground} />
-                    </Ripple>
-                    <Ripple onPress={() => setEditMode((p) => !p)}>
-                        <Feather name="edit-2" size={20} color={editMode ? Colors.secondary : Colors.foreground} />
-                    </Ripple>
-                </View>
-            </View>
-            <Map
-                ref={map}
-                style={{ width: Layout.screen.width - 30, height: 200, borderRadius: 10, marginTop: 25 }}
-                provider={PROVIDER_DEFAULT}
-                {...{ showsPointsOfInterest: true } as any}
-                region={location}
-                {...{ toolbarEnabled: true } as any}
-                onPress={async (e) => {
-                    const { latitude, longitude } = e.nativeEvent.coordinate
-                    if (editMode) {
-                        Alert.prompt("Location name", "Enter location name:", async (name) => {
-                            if (name) {
-                                const { data } = await createMarker({
-                                    variables: {
-                                        input: { kind: "custom", name, latitude, longitude },
-                                    },
-                                })
+                                    const newLocation = {
+                                        id: data.createLocation.id,
+                                        name: data.createLocation.name,
+                                        kind: data.createLocation.kind,
+                                        latitude: data.createLocation.latitude,
+                                        longitude: data.createLocation.longitude,
+                                    }
 
-                                const newLocation = {
-                                    id: data.createLocation.id,
-                                    name: data.createLocation.name,
-                                    kind: data.createLocation.kind,
-                                    latitude: data.createLocation.latitude,
-                                    longitude: data.createLocation.longitude,
+                                    setAssignedMarker(newLocation)
+
+                                    await assignLocation({
+                                        variables: {
+                                            expenseId: props.id,
+                                            locationId: data.createLocation.id,
+                                        },
+                                    })
+
+                                    setEditMode(false)
                                 }
+                            })
+                        }
+                    }}
+                >
+                    {/* Display all locations from points with blue markers */}
+                    {points?.locations?.map((item: any) => (
+                        <Marker
+                            key={item.id}
+                            coordinate={{
+                                latitude: item.latitude,
+                                longitude: item.longitude,
+                            }}
+                            title={item.name}
+                            description={item.kind}
+                            pinColor="blue" // Blue markers for all fetched locations
+                            onPress={() => {
+                                setSelectedMarker(item) // Set as selected marker (red)
+                            }}
+                        >
+                            <Callout tooltip onPress={() => handleAssignLocation(item.id)}>
+                                <View style={styles.calloutContainer}>
+                                    <Text variant="body" style={styles.calloutTitle}>
+                                        {item.name}
+                                    </Text>
+                                    <Text variant="caption" style={styles.calloutDescription}>
+                                        {item.kind}
+                                    </Text>
+                                    <View style={styles.calloutButton}>
+                                        <Text variant="caption" style={styles.calloutButtonText}>
+                                            Assign Location
+                                        </Text>
+                                    </View>
+                                </View>
+                            </Callout>
+                        </Marker>
+                    ))}
 
-                                setAssignedMarker(newLocation)
-
-                                await assignLocation({
-                                    variables: {
-                                        expenseId: props.id,
-                                        locationId: data.createLocation.id,
-                                    },
-                                })
-
-                                setEditMode(false)
-                            }
-                        })
-                    }
-                }}
-            >
-                {/* Display all locations from points with blue markers */}
-                {points?.locations?.map((item: any) => (
-                    <Marker
-                        key={item.id}
-                        coordinate={{
-                            latitude: item.latitude,
-                            longitude: item.longitude,
-                        }}
-                        title={item.name}
-                        description={item.kind}
-                        pinColor="blue" // Blue markers for all fetched locations
-                        onPress={() => {
-                            setSelectedMarker(item) // Set as selected marker (red)
-                        }}
-                    >
-                        <Callout tooltip onPress={() => handleAssignLocation(item.id)}>
-                            <View style={styles.calloutContainer}>
-                                <Text variant="body" style={styles.calloutTitle}>
-                                    {item.name}
-                                </Text>
-                                <Text variant="caption" style={styles.calloutDescription}>
-                                    {item.kind}
-                                </Text>
-                                <View style={styles.calloutButton}>
-                                    <Text variant="caption" style={styles.calloutButtonText}>
-                                        Assign Location
+                    {/* Display selected marker in red */}
+                    {selectedMarker && (
+                        <Marker
+                            coordinate={{
+                                latitude: selectedMarker.latitude,
+                                longitude: selectedMarker.longitude,
+                            }}
+                            pinColor="red" // Red pin for selected marker
+                        >
+                            <Callout>
+                                <View style={styles.calloutContainer}>
+                                    <Text variant="body" style={styles.calloutTitle}>
+                                        {selectedMarker.name}
+                                    </Text>
+                                    <Text variant="caption" style={styles.calloutDescription}>
+                                        Selected Location
                                     </Text>
                                 </View>
-                            </View>
-                        </Callout>
-                    </Marker>
-                ))}
+                            </Callout>
+                        </Marker>
+                    )}
 
-                {/* Display selected marker in red */}
-                {selectedMarker && (
-                    <Marker
-                        coordinate={{
-                            latitude: selectedMarker.latitude,
-                            longitude: selectedMarker.longitude,
-                        }}
-                        pinColor="red" // Red pin for selected marker
-                    >
-                        <Callout>
-                            <View style={styles.calloutContainer}>
-                                <Text variant="body" style={styles.calloutTitle}>
-                                    {selectedMarker.name}
-                                </Text>
-                                <Text variant="caption" style={styles.calloutDescription}>
-                                    Selected Location
-                                </Text>
-                            </View>
-                        </Callout>
-                    </Marker>
-                )}
-
-                {/* Always display assigned marker (from props) in green */}
-                {assignedMarker && (
-                    <Marker
-                        coordinate={{
-                            latitude: assignedMarker.latitude,
-                            longitude: assignedMarker.longitude,
-                        }}
-                        pinColor="green" // Green pin for the assigned marker
-                    >
-                        <Callout>
-                            <View style={styles.calloutContainer}>
-                                <Text variant="body" style={styles.calloutTitle}>
-                                    {assignedMarker.name}
-                                </Text>
-                                <Text variant="caption" style={styles.calloutDescription}>
-                                    Assigned Location
-                                </Text>
-                            </View>
-                        </Callout>
-                    </Marker>
-                )}
-            </Map>
+                    {assignedMarker && (
+                        <Marker
+                            coordinate={{
+                                latitude: assignedMarker.latitude,
+                                longitude: assignedMarker.longitude,
+                            }}
+                            pinColor="green"
+                        >
+                            <Callout>
+                                <View style={styles.calloutContainer}>
+                                    <Text variant="body" style={styles.calloutTitle}>
+                                        {assignedMarker.name}
+                                    </Text>
+                                    <Text variant="caption" style={styles.calloutDescription}>
+                                        Assigned Location
+                                    </Text>
+                                </View>
+                            </Callout>
+                        </Marker>
+                    )}
+                </Map>
+            </Section>
         </View>
     )
 })

@@ -8,6 +8,7 @@ import DayTimelineItemWrapper from "./DayTimelineItemWrapper"
 import Color from "color"
 import { Gesture, GestureDetector } from "react-native-gesture-handler"
 import { runOnJS } from "react-native-worklets"
+import dayjs from "dayjs"
 
 interface TimelineEvent {
     id: string
@@ -162,7 +163,7 @@ const CalendarTimetable = ({
                 <View onLayout={(e) => setHeaderHeight(e.nativeEvent.layout.height)}>{children}</View>
 
                 <TimeTable
-                    date={moment(selected).toDate()}
+                    date={dayjs(selected).toDate()}
                     stickyHours
                     style={style}
                     enableSnapping

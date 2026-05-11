@@ -1,10 +1,8 @@
 import NotFound from "@/features/home/components/NotFound"
-import { useCallback, useState, useEffect, useRef } from "react"
+import { useCallback, useState } from "react"
 import { RefreshControl, View } from "react-native"
-import Animated from "react-native-reanimated"
 import DayTimeline from "./DayTimeline"
-import TimelineItem from "./TimelineItem"
-import useGetOccurrencesQuery, { OccurrenceItem } from "../hooks/query/useGetOccurrencesQuery"
+import useGetOccurrencesQuery from "../hooks/query/useGetOccurrencesQuery"
 
 interface TimelineDayPageProps {
     date: string
@@ -13,8 +11,8 @@ interface TimelineDayPageProps {
     onScroll?: (...args: any[]) => void
 }
 
-export default function TimelineDayPage({ date, switchView, contentPaddingTop = 0, onScroll }: TimelineDayPageProps) {
-    const { data, loading, refetch } = useGetOccurrencesQuery(date)
+export default function TimelineDayPage({ date, contentPaddingTop = 0, onScroll }: TimelineDayPageProps) {
+    const { data, refetch } = useGetOccurrencesQuery(date)
     const [refreshing, setRefreshing] = useState(false)
 
     const onRefresh = useCallback(async () => {
@@ -23,25 +21,7 @@ export default function TimelineDayPage({ date, switchView, contentPaddingTop = 
         setRefreshing(false)
     }, [refetch])
 
-    const eventsCount = data?.occurrences?.length || 0
-
-    return switchView !== "timeline" ? (
-        <Animated.FlatList
-            onScroll={onScroll}
-            scrollEventThrottle={16}
-            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-            ListEmptyComponent={<ListEmptyComponent isLoading={loading} length={eventsCount} selectedDate={date} />}
-            contentContainerStyle={{
-                paddingBottom: eventsCount > 0 ? 120 : 0,
-                padding: 15,
-                paddingTop: contentPaddingTop,
-            }}
-            data={(data?.occurrences as OccurrenceItem[]) || []}
-            initialNumToRender={3}
-            keyExtractor={(item: any) => item.id}
-            renderItem={({ item }: { item: any }) => <TimelineItem {...item} location="timeline" />}
-        />
-    ) : (
+    return (
         <DayTimeline
             selected={date}
             date={date}
@@ -50,7 +30,7 @@ export default function TimelineDayPage({ date, switchView, contentPaddingTop = 
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
             onScroll={onScroll}
             style={{ flex: 1, paddingTop: contentPaddingTop }}
-        ></DayTimeline>
+        />
     )
 }
 

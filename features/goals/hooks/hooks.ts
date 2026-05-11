@@ -147,6 +147,12 @@ export const useGoal = (dateRange?: { start: Date; end: Date }) => {
     }
 }
 
+export const useUpsertGoalEntry = () => {
+    return useMutation(UPSERT_GOAL_STATS, {
+        refetchQueries: [GET_USER_GOAL, GET_GOALS],
+    })
+}
+
 export const useDeleteGoalEntry = () => {
     const [deleteEntry] = useMutation(DELETE_GOAL_ENTRY, {
         refetchQueries: [GET_USER_GOAL, GET_GOALS],

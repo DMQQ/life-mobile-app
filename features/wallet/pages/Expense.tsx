@@ -22,6 +22,7 @@ import SimilarExpenses from "../components/Expense/SimilarExpenses"
 import FileUpload, { FileUploadHandle } from "../components/Expense/FileUpload"
 import SubscriptionSection from "../components/Expense/SubscriptionSection"
 import { ConfirmDialog } from "@/components"
+import Section from "@/components/ui/Section"
 
 const capitalize = (s = "") => s.charAt(0).toUpperCase() + s.slice(1)
 
@@ -192,7 +193,9 @@ export default function Expense({ route: { params }, navigation }: any) {
 
     const scrollY = useSharedValue(0)
     const onScroll = useAnimatedScrollHandler({
-        onScroll: (ev) => { scrollY.value = ev.contentOffset.y },
+        onScroll: (ev) => {
+            scrollY.value = ev.contentOffset.y
+        },
     })
 
     return (
@@ -204,6 +207,19 @@ export default function Expense({ route: { params }, navigation }: any) {
                 titleAnimatedStyle={{ flexWrap: "nowrap" }}
                 scrollY={scrollY}
                 buttons={[
+                    {
+                        icon: <Feather name="git-pull-request" size={20} color={Colors.foreground} />,
+                        onPress: () =>
+                            navigation.navigate("CorrectionMaps", {
+                                prefill: {
+                                    shop: selected?.shop || undefined,
+                                    description: selected?.description || undefined,
+                                    category: selected?.category || undefined,
+                                    amount: selected?.amount || undefined,
+                                },
+                            }),
+                    },
+
                     {
                         icon: <Feather name="trash" size={20} color={Colors.foreground} />,
                         onPress: () => setConfirmDelete(true),
@@ -236,36 +252,38 @@ export default function Expense({ route: { params }, navigation }: any) {
             >
                 <View style={styles.scrollContent}>
                     {selected.subexpenses?.length > 0 && (
-                        <View style={styles.section}>
+                        <Section title="Subexpenses">
                             <SubexpenseStack
                                 selected={selected}
                                 handleDeleteSubExpense={(id) => setConfirmSubExpenseId(id)}
                             />
-                        </View>
+                        </Section>
                     )}
 
                     <ExpenseDetails expense={selected} />
 
-                    <View style={styles.section}>
+                    <Section title="Calendar">
                         <CollapsibleThemedCalendar
                             date={dayjs(selected?.date).format("YYYY-MM-DD")}
                             markedDates={{ [dayjs(selected?.date).format("YYYY-MM-DD")]: { selected: true } }}
                         />
-                    </View>
+                    </Section>
 
-                    <MonthlyBreakdown
-                        expense={selected as ExpenseType}
-                        income={data?.wallet?.income || 0}
-                        monthlyPercentageTarget={data?.wallet?.monthlyPercentageTarget || 0}
-                    />
+                    <Section title="Breakdown">
+                        <MonthlyBreakdown
+                            expense={selected as ExpenseType}
+                            income={data?.wallet?.income || 0}
+                            monthlyPercentageTarget={data?.wallet?.monthlyPercentageTarget || 0}
+                        />
+                    </Section>
 
-                    <SubscriptionSection
-                        hasSubscription={hasSubscription}
-                        isSubscriptionActive={isSubscriptionActive}
-                        selected={selected}
-                        subscriptionOptions={subscriptionOptions}
-                        onAssignSubscription={handleAssignSubscription}
-                    />
+                    <Section title="Subscription">
+                        <SubscriptionSection
+                            hasSubscription={hasSubscription}
+                            isSubscriptionActive={isSubscriptionActive}
+                            selected={selected}
+                        />
+                    </Section>
                 </View>
 
                 {data?.expenseSimilar?.length > 1 && (
@@ -288,6 +306,8 @@ export default function Expense({ route: { params }, navigation }: any) {
                 onTakePhoto={() => fileUploadRef.current?.takePhoto()}
                 onPickImage={() => fileUploadRef.current?.pickImage()}
                 subscriptionMenuOptions={subscriptionMenuOptions}
+                subscriptionOptions={subscriptionOptions}
+                onAssignSubscription={handleAssignSubscription}
                 isSubscriptionLoading={isSubscriptionLoading}
                 hasSubscription={hasSubscription}
                 isSubscriptionActive={isSubscriptionActive}

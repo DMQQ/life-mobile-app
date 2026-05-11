@@ -20,11 +20,10 @@ import Ripple from "react-native-material-ripple"
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated"
 import Haptics from "react-native-haptic-feedback"
 import { getInvalidExpenses } from "../../pages/WalletCharts"
-import { init, useWalletContext } from "../WalletContext"
+import { useWalletContext } from "../WalletContext"
 import GlassView from "@/components/ui/GlassView"
 import SubAccountCards from "./SubAccountCards"
 import WalletItem, { parseDateToText } from "./WalletItem"
-import CategoryBreakdown from "./CategoryBreakdown"
 
 type ListItem = { type: "month"; data: MonthlyExpenses; monthIndex: number }
 
@@ -62,12 +61,7 @@ export default function ExpensesList({ wallet, onScroll, refetch, onEndReached }
     }, [refetch])
 
     const renderItem = useCallback(({ item }: { item: ListItem }) => {
-        if (item.type === "month") {
-            return (
-                <MonthItem monthData={item.data} monthIndex={item.monthIndex} defaultExpanded={item.monthIndex === 0} />
-            )
-        }
-        return null
+        return <MonthItem monthData={item.data} monthIndex={item.monthIndex} defaultExpanded={item.monthIndex === 0} />
     }, [])
 
     return (
@@ -145,37 +139,49 @@ const MonthItem = ({
         )
     }, [])
 
+    const items = useMemo(
+        () =>
+            Array.from(groupedByDay.entries()).map(([day, dayExpenses]) => {
+                const isDateExpanded = !collapsedDates.has(day)
+                const sum = calculateDaySum(dayExpenses)
+                return (
+                    <View key={day}>
+                        <DateHeader
+                            date={dayExpenses[0].date}
+                            sum={sum}
+                            isExpanded={isDateExpanded}
+                            onToggle={() => toggleDate(day)}
+                        />
+                        {isDateExpanded && (
+                            <View style={styles.items}>
+                                {dayExpenses.map((expense, index) => (
+                                    <WalletItem
+                                        key={expense.id}
+                                        index={index}
+                                        handlePress={() => navigation.navigate("Expense", { expense })}
+                                        {...(expense as any)}
+                                        animatedStyle={{
+                                            borderWidth: 0,
+                                            marginBottom: 0,
+                                            borderRadius: 0,
+                                            borderBottomWidth: dayExpenses.length - 1 === index ? 0 : 1,
+                                            marginTop: 0,
+                                        }}
+                                    />
+                                ))}
+                            </View>
+                        )}
+                    </View>
+                )
+            }),
+        [calculateDaySum, toggleDate, collapsedDates, groupedByDay, navigation],
+    )
+
     return (
         <View style={[styles.monthContainer, monthIndex === 0 && styles.monthContainerFirst]}>
             <MonthHeader monthData={monthData} isExpanded={isExpanded} onToggle={toggleMonth} />
 
-            {(isExpanded || hasFilters) && (
-                <View style={styles.monthContent}>
-                    {Array.from(groupedByDay.entries()).map(([day, dayExpenses]) => {
-                        const isDateExpanded = !collapsedDates.has(day)
-                        const sum = calculateDaySum(dayExpenses)
-                        return (
-                            <View key={day}>
-                                <DateHeader
-                                    date={dayExpenses[0].date}
-                                    sum={sum}
-                                    isExpanded={isDateExpanded}
-                                    onToggle={() => toggleDate(day)}
-                                />
-                                {isDateExpanded &&
-                                    dayExpenses.map((expense, index) => (
-                                        <WalletItem
-                                            key={expense.id}
-                                            index={index}
-                                            handlePress={() => navigation.navigate("Expense", { expense })}
-                                            {...(expense as any)}
-                                        />
-                                    ))}
-                            </View>
-                        )
-                    })}
-                </View>
-            )}
+            {(isExpanded || hasFilters) && <View style={styles.monthContent}>{items}</View>}
         </View>
     )
 }
@@ -276,7 +282,7 @@ const ChevronIcon = ({ isExpanded }: { isExpanded: boolean }) => {
 
     return (
         <Animated.View style={animatedStyle}>
-            <AntDesign name="down" size={14} color="rgba(255,255,255,0.5)" />
+            <AntDesign name="down" size={10} color="rgba(255,255,255,0.5)" />
         </Animated.View>
     )
 }
@@ -355,13 +361,12 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         marginTop: 20,
-        marginBottom: 8,
+        marginBottom: 4,
     },
     dateTextContainer: {
         flex: 1,
         flexDirection: "row",
         justifyContent: "space-between",
-        paddingVertical: 5,
         alignItems: "center",
     },
     dateChevron: {
@@ -371,7 +376,7 @@ const styles = StyleSheet.create({
     dateText: {
         color: "rgba(255,255,255,0.7)",
         fontWeight: "600",
-        fontSize: 15,
+        fontSize: 14,
     },
     dateSumContainer: {
         flexDirection: "row",
@@ -379,7 +384,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     amount: {
-        fontSize: 15,
+        fontSize: 14,
         fontWeight: "600",
     },
     negative: {
@@ -404,5 +409,10 @@ const styles = StyleSheet.create({
     },
     clearText: {
         color: Colors.secondary_light_2,
+    },
+    items: {
+        backgroundColor: Colors.primary_lighter,
+        borderRadius: 20,
+        overflow: "hidden",
     },
 })

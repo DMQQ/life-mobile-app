@@ -81,12 +81,19 @@ export default function DayTimelineItem(
                         <Text
                             variant="subtitle"
                             numberOfLines={1}
-                            style={[localStyles.title, { fontSize: 14 }, timeline.textColor && { color: timeline.textColor }]}
+                            style={[
+                                localStyles.title,
+                                { fontSize: 14 },
+                                timeline.textColor && { color: timeline.textColor },
+                            ]}
                         >
                             {timeline.title}
                         </Text>
                     </View>
-                    <Text variant="caption" style={[localStyles.timeText, timeline.textColor && { color: timeline.textColor }]}>
+                    <Text
+                        variant="caption"
+                        style={[localStyles.timeText, timeline.textColor && { color: timeline.textColor }]}
+                    >
                         {start} – {end}
                     </Text>
                     {todoStats && (
@@ -114,7 +121,10 @@ export default function DayTimelineItem(
                     </Text>
                 </View>
 
-                <Text variant="caption" style={[localStyles.timeText, timeline.textColor && { color: timeline.textColor }]}>
+                <Text
+                    variant="caption"
+                    style={[localStyles.timeText, timeline.textColor && { color: timeline.textColor }]}
+                >
                     {start} – {end}
                 </Text>
 
@@ -137,7 +147,10 @@ export default function DayTimelineItem(
                 />
 
                 {timeline.images.length > 0 && (
-                    <Text variant="caption" style={[localStyles.metadataText, timeline.textColor && { color: timeline.textColor }]}>
+                    <Text
+                        variant="caption"
+                        style={[localStyles.metadataText, timeline.textColor && { color: timeline.textColor }]}
+                    >
                         {timeline.images.length} {timeline.images.length > 1 ? "images" : "image"}
                     </Text>
                 )}

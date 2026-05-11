@@ -7,7 +7,7 @@ import Colors from "@/constants/Colors"
 type FeatherName = React.ComponentProps<typeof Feather>["name"]
 
 interface GlassIconButtonProps {
-    name: FeatherName
+    name?: FeatherName
     onPress?: () => void
     size?: number
     color?: string
@@ -18,6 +18,7 @@ interface GlassIconButtonProps {
     hitSlop?: number
     positioned?: "top-left" | "top-right"
     padding?: number
+    icon?: React.ReactNode
 }
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable)
@@ -34,6 +35,7 @@ export default function GlassIconButton({
     hitSlop = 8,
     positioned,
     padding = 15,
+    icon,
 }: GlassIconButtonProps) {
     const scale = useSharedValue(1)
 
@@ -50,11 +52,7 @@ export default function GlassIconButton({
     }
 
     const positionStyle: ViewStyle | undefined =
-        positioned === "top-left"
-            ? styles.topLeft
-            : positioned === "top-right"
-              ? styles.topRight
-              : undefined
+        positioned === "top-left" ? styles.topLeft : positioned === "top-right" ? styles.topRight : undefined
 
     return (
         <AnimatedPressable
@@ -65,12 +63,11 @@ export default function GlassIconButton({
             hitSlop={hitSlop}
             style={[positionStyle, animatedStyle, style]}
         >
-            <GlassView
-                tintColor={tintColor}
-                style={[styles.container, { padding }, disabled && styles.disabled]}
-            >
+            <GlassView tintColor={tintColor} style={[styles.container, { padding }, disabled && styles.disabled]}>
                 {loading ? (
                     <ActivityIndicator size={size} color={color} />
+                ) : icon ? (
+                    icon
                 ) : (
                     <Feather name={name} size={size} color={disabled ? Colors.foreground_disabled : color} />
                 )}

@@ -46,6 +46,7 @@ export default function EditNote({ expense }: { expense: ExpenseType }) {
                     containerStyle={{
                         flex: 1,
                         height: 40,
+                        backgroundColor: Colors.primary_lighter,
                     }}
                     right={
                         <IconButton
@@ -58,7 +59,9 @@ export default function EditNote({ expense }: { expense: ExpenseType }) {
                     }
                 />
             ) : (
-                <Text variant="body" style={{ color: Colors.secondary_light_2 }}>{expense.note || "-"}</Text>
+                <Text variant="body" style={{ color: Colors.secondary_light_2 }}>
+                    {expense.note || "-"}
+                </Text>
             )}
         </View>
     )

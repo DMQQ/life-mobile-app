@@ -16,9 +16,7 @@ export default StyleSheet.create({
         fontSize: 17,
         marginLeft: 10,
     },
-    itemContainer: {
-        marginBottom: 15,
-    },
+    itemContainer: {},
     itemContainerTitleRow: {
         flexDirection: "row",
         alignItems: "center",

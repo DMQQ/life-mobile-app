@@ -16,10 +16,18 @@ import { ScrollYContextProvider } from "./utils/context/ScrollYContext"
 import { STORE_KEY } from "./utils/hooks/useUser"
 import { store } from "./utils/redux"
 import { setLogVerbosity } from "@apollo/client"
+import * as Sentry from "@sentry/react-native"
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet"
 import { SearchMenuProvider } from "./contexts/SearchMenuContext"
 import { AiChatProvider } from "./contexts/AiChatContext"
 import GlobalAiChat from "./features/ai/GlobalAiChat"
+
+Sentry.init({
+    enableNative: true,
+    attachScreenshot: true,
+    enableAutoPerformanceTracing: true,
+    attachViewHierarchy: true,
+})
 
 setLogVerbosity("error")
 
@@ -77,7 +85,7 @@ const apolloClient = new ApolloClient({
     link,
 })
 
-export default function App() {
+export default Sentry.wrap(function App() {
     return (
         <SafeAreaProvider style={{ flex: 1, backgroundColor: Colors.primary }}>
             <ErrorBoundary>
@@ -89,7 +97,7 @@ export default function App() {
                                     <ApolloProvider client={apolloClient}>
                                         <Provider store={store}>
                                             <AiChatProvider>
-                                                <StatusBar backgroundColor={Colors.primary} />
+                                                <StatusBar />
                                                 <Navigation />
                                                 <GlobalAiChat />
                                             </AiChatProvider>
@@ -103,4 +111,4 @@ export default function App() {
             </ErrorBoundary>
         </SafeAreaProvider>
     )
-}
+})

@@ -9,21 +9,26 @@ interface SubscriptionSectionProps {
     hasSubscription: boolean
     isSubscriptionActive: boolean
     selected: any
-    subscriptionOptions: Array<{ id: string | null; description: string }>
-    onAssignSubscription: (subscriptionId: string | null) => Promise<void>
 }
 
 export default function SubscriptionSection({
     hasSubscription,
     isSubscriptionActive,
     selected,
-    subscriptionOptions,
-    onAssignSubscription,
 }: SubscriptionSectionProps) {
+    if (!hasSubscription) {
+        return (
+            <View style={styles.card}>
+                <Text style={{ color: Colors.text_dark, fontSize: 14, fontStyle: "italic", textAlign: "center" }}>
+                    No subscription details available for this expense.
+                </Text>
+            </View>
+        )
+    }
+
     return (
         <View style={styles.card}>
             <View style={styles.cardHeader}>
-                <Text style={styles.cardTitle}>Subscription</Text>
                 {hasSubscription && (
                     <View
                         style={[
@@ -71,39 +76,12 @@ export default function SubscriptionSection({
                     </View>
                 </View>
             )}
-
-            <View style={{ marginTop: 5 }}>
-                <View>
-                    <ContextMenu
-                        actions={subscriptionOptions.map((s) => ({ title: s.description }))}
-                        onPress={(e) => {
-                            const selectedSub = subscriptionOptions[e.nativeEvent.index]
-                            if (selectedSub) onAssignSubscription(selectedSub.id)
-                        }}
-                        dropdownMenuMode
-                    >
-                        <GlassView style={{ borderRadius: 15 }}>
-                            <TouchableOpacity style={styles.contextMenuTrigger}>
-                                <Text style={styles.contextMenuTriggerText}>
-                                    {selected?.subscription?.id
-                                        ? (subscriptionOptions.find((s) => s.id === selected?.subscription?.id)
-                                              ?.description ?? "None")
-                                        : "None"}
-                                </Text>
-                                <AntDesign name="down" size={12} color={Colors.foreground_secondary} />
-                            </TouchableOpacity>
-                        </GlassView>
-                    </ContextMenu>
-                </View>
-            </View>
         </View>
     )
 }
 
 const styles = StyleSheet.create({
     card: {
-        marginTop: 20,
-        backgroundColor: Colors.primary_light,
         borderRadius: 15,
         padding: 15,
     },

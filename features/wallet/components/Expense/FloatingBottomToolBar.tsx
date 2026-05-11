@@ -19,6 +19,8 @@ interface Props {
     onTakePhoto: () => void
     onPickImage: () => void
     subscriptionMenuOptions: ContextMenuOption[]
+    subscriptionOptions: Array<{ id: string | null; description: string }>
+    onAssignSubscription: (subscriptionId: string | null) => Promise<void>
     isSubscriptionLoading?: boolean
     hasSubscription?: boolean
     isSubscriptionActive?: boolean
@@ -32,6 +34,8 @@ export default function FloatingBottomToolBar({
     onTakePhoto,
     onPickImage,
     subscriptionMenuOptions,
+    subscriptionOptions,
+    onAssignSubscription,
     isSubscriptionLoading,
     hasSubscription,
     isSubscriptionActive,
@@ -58,12 +62,34 @@ export default function FloatingBottomToolBar({
                 <ContextMenu
                     style={{ flex: 1 }}
                     dropdownMenuMode
-                    actions={subscriptionMenuOptions.map((o) => ({
-                        title: o.label,
-                        systemIcon: o.icon,
-                        destructive: o.destructive,
-                    }))}
-                    onPress={(e) => subscriptionMenuOptions[e.nativeEvent.index]?.onPress()}
+                    actions={[
+                        ...subscriptionMenuOptions.map((o) => ({
+                            title: o.label,
+                            systemIcon: o.icon,
+                            destructive: o.destructive,
+                        })),
+                        {
+                            systemIcon: "arrow-triangle.swap",
+                            icon: "arrow.triangle.swap",
+                            title: "Assign",
+                            actions: [
+                                ...subscriptionOptions.map((o) => ({
+                                    title: o.description,
+                                    systemIcon: "arrow.triangle.swap" as string,
+                                })),
+                            ],
+                        },
+                    ]}
+                    onPress={(e) => {
+                        const index = e.nativeEvent.index
+                        const subMenuCount = subscriptionMenuOptions.length
+                        if (index < subMenuCount) {
+                            subscriptionMenuOptions[index]?.onPress()
+                        } else {
+                            const subIndex = index - subMenuCount
+                            onAssignSubscription(subscriptionOptions[subIndex]?.id)
+                        }
+                    }}
                 >
                     <ToolbarButton
                         icon={subscriptionIcon}

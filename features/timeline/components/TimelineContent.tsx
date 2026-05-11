@@ -45,7 +45,6 @@ export default function TimelineContent({
     isSearchActive,
     searchQuery,
     searchResults,
-    dayContentPaddingTop,
     compactContentPaddingTop,
     headerHeight,
     scrollY,

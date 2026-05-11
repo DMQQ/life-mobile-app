@@ -1,44 +1,22 @@
 import { Expense as ExpenseType } from "@/types"
-import { AntDesign, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons"
-import { useNavigation } from "@react-navigation/native"
-import { ReactNode } from "react"
+import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons"
 import { StyleSheet, Text, View } from "react-native"
-import Ripple from "react-native-material-ripple"
 import Colors from "@/constants/Colors"
 import { CategoryIcon, CategoryUtils } from "./ExpenseIcon"
 import EditNote from "./EditNote"
 import { useSubAccounts } from "../../hooks/useSubAccounts"
 import { getRateColor } from "../CreateExpense/SpontaneousRate"
+import Section from "@/components/ui/Section"
+import Color from "color"
 
 const capitalize = (s = "") => s.charAt(0).toUpperCase() + s.slice(1)
 
-const Txt = (props: { children: ReactNode; size: number; color?: any }) => (
-    <Text
-        style={{
-            color: props.color ?? Colors.secondary,
-            fontSize: props.size,
-            fontWeight: "bold",
-            lineHeight: props.size + 7.5,
-        }}
-    >
-        {props.children}
-    </Text>
-)
-
 export default function ExpenseDetails({ expense }: { expense: ExpenseType }) {
-    const navigation = useNavigation<any>()
     const { data: subAccountsData } = useSubAccounts()
     const subAccount = subAccountsData?.wallet.subAccounts.find((a) => a.id === expense.subAccountId) ?? null
 
     return (
-        <View
-            style={{
-                marginTop: 20,
-                paddingBottom: 20,
-                backgroundColor: Colors.primary_light,
-                borderRadius: 15,
-            }}
-        >
+        <Section title="Details">
             {expense?.category && (
                 <View style={[styles.row, { padding: 0, paddingRight: 10, paddingLeft: 7.5 }]}>
                     <CategoryIcon
@@ -50,23 +28,6 @@ export default function ExpenseDetails({ expense }: { expense: ExpenseType }) {
                     <Text style={{ color: Colors.secondary_light_2, fontSize: 18, flex: 1 }}>
                         {capitalize(CategoryUtils.getCategoryName(expense?.category || ""))}
                     </Text>
-
-                    <Ripple
-                        onPress={() =>
-                            navigation.navigate("CorrectionMaps", {
-                                prefill: {
-                                    shop: expense?.shop || undefined,
-                                    description: expense?.description || undefined,
-                                    category: expense?.category || undefined,
-                                    amount: expense?.amount || undefined,
-                                },
-                            })
-                        }
-                        style={styles.correctionBtn}
-                    >
-                        <AntDesign name="swap" size={12} color={Colors.secondary} />
-                        <Text style={styles.correctionBtnText}>Fix rule</Text>
-                    </Ripple>
                 </View>
             )}
 
@@ -78,9 +39,7 @@ export default function ExpenseDetails({ expense }: { expense: ExpenseType }) {
                     style={{ paddingHorizontal: 7.5, padding: 2.5 }}
                 />
 
-                <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>
-                    {capitalize(expense?.type)}
-                </Text>
+                <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>{capitalize(expense?.type)}</Text>
             </View>
 
             <View style={styles.row}>
@@ -92,7 +51,7 @@ export default function ExpenseDetails({ expense }: { expense: ExpenseType }) {
                 />
 
                 <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>
-                    Balance before: {expense?.balanceBeforeInteraction} zł
+                    Balance before: {expense?.balanceBeforeInteraction ?? "N/A"} zł
                 </Text>
             </View>
 
@@ -123,7 +82,7 @@ export default function ExpenseDetails({ expense }: { expense: ExpenseType }) {
             )}
 
             <EditNote expense={expense} />
-        </View>
+        </Section>
     )
 }
 
@@ -133,9 +92,8 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
         alignItems: "center",
         padding: 15,
-        borderRadius: 15,
-        backgroundColor: Colors.primary_light,
-        marginTop: 10,
+        borderBottomWidth: 1,
+        borderColor: Color(Colors.primary_lighter).lighten(0.5).hex(),
     },
     correctionBtn: {
         flexDirection: "row",

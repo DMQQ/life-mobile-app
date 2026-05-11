@@ -91,3 +91,8 @@ eas.json
 .env.*
 
 graphify-out
+.env.local
+
+.env.local
+
+.env

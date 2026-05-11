@@ -21,10 +21,7 @@ import { HomeScreenProps } from "./Main"
 export default function Root({ navigation }: HomeScreenProps<"Root">) {
     const [loading, setLoading] = useState(true)
 
-    const {
-        data: home,
-        refetch: refetchHome,
-    } = useQuery(GET_MAIN_SCREEN, {
+    const { data: home, refetch: refetchHome } = useQuery(GET_MAIN_SCREEN, {
         variables: getMainScreenBaseVariables(),
         onCompleted: async () => {
             await SplashScreen.hideAsync()

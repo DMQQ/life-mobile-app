@@ -187,7 +187,6 @@ function WalletItem(
                 }
             }}
             previewBackgroundColor="transparent"
-            style={{ height: 85 }}
         >
             <Card
                 style={[styles.container, item.animatedStyle as any, item.containerStyle]}

@@ -215,13 +215,13 @@ const styles = StyleSheet.create({
     },
     barRow: {
         flexDirection: "row",
-        height: 14,
-        borderRadius: 10,
+        height: 25,
         overflow: "hidden",
-        gap: 2,
+        gap: 5,
     },
     barSegment: {
         height: "100%",
+        borderRadius: 10,
     },
     barFirst: {
         borderTopLeftRadius: 10,

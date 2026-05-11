@@ -21,10 +21,6 @@ const MonthlyBreakdown = ({ expense, income }: MonthlyBreakdownProps) => {
 
     return (
         <View style={styles.card}>
-            <View style={styles.cardHeader}>
-                <Text style={styles.cardTitle}>Expense Breakdown</Text>
-            </View>
-
             <View style={styles.contentContainer}>
                 {/* Working Days Row */}
                 <View style={styles.statItem}>
@@ -48,21 +44,7 @@ const MonthlyBreakdown = ({ expense, income }: MonthlyBreakdownProps) => {
 
 const styles = StyleSheet.create({
     card: {
-        marginTop: 20,
-        backgroundColor: Colors.primary_light,
-        borderRadius: 15,
         padding: 15,
-    },
-    cardHeader: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-        marginBottom: 4,
-    },
-    cardTitle: {
-        color: Colors.foreground,
-        fontSize: 16,
-        fontWeight: "600",
     },
     contentContainer: {
         gap: 10,

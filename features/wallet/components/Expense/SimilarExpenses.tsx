@@ -7,6 +7,7 @@ import Colors from "@/constants/Colors"
 import { IconButton } from "@/components"
 import WalletItem from "../Wallet/WalletItem"
 import SimilarExpensesChart from "./SimilarExpensesChart"
+import Section from "@/components/ui/Section"
 
 const Txt = (props: { children: ReactNode; size: number; color?: any }) => (
     <Text
@@ -32,33 +33,47 @@ export default function SimilarExpenses({
     const [isExpanded, setIsExpanded] = useState(false)
 
     return (
-        <View style={{ paddingHorizontal: 15, marginBottom: 25 }}>
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 7.5 }}>
-                <IconButton
-                    icon={<AntDesign name="down" size={16} color={Colors.foreground} />}
-                    onPress={() => setIsExpanded(!isExpanded)}
-                />
-                <Txt size={20} color={Colors.foreground}>
-                    Similar expenses
-                </Txt>
-            </View>
-            <SimilarExpensesChart expenses={similarExpenses} currentExpenseId={selected?.id} />
+        <View style={{ paddingHorizontal: 15 }}>
+            <Section
+                title="Similar"
+                headerRight={
+                    <IconButton
+                        icon={<AntDesign name="down" size={11} color={Colors.text_dark} />}
+                        onPress={() => setIsExpanded(!isExpanded)}
+                    />
+                }
+            >
+                <SimilarExpensesChart expenses={similarExpenses} currentExpenseId={selected?.id} />
 
-            {isExpanded && (
-                <View style={{ marginTop: 20 }}>
-                    {similarExpenses.map((item: any) => (
-                        <WalletItem
-                            key={item.id}
-                            {...item}
-                            handlePress={() => {
-                                navigation.push("Expense", {
-                                    expense: item,
-                                })
-                            }}
-                        />
-                    ))}
-                </View>
-            )}
+                {isExpanded && (
+                    <View
+                        style={{
+                            backgroundColor: Colors.primary_lighter,
+                            borderRadius: 20,
+                            overflow: "hidden",
+                        }}
+                    >
+                        {similarExpenses.map((item: any) => (
+                            <WalletItem
+                                key={item.id}
+                                {...item}
+                                handlePress={() => {
+                                    navigation.push("Expense", {
+                                        expense: item,
+                                    })
+                                }}
+                                animatedStyle={{
+                                    borderWidth: 0,
+                                    marginBottom: 0,
+                                    borderRadius: 0,
+                                    borderBottomWidth: 1,
+                                    marginTop: 0,
+                                }}
+                            />
+                        ))}
+                    </View>
+                )}
+            </Section>
         </View>
     )
 }

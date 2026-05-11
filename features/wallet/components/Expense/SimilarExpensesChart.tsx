@@ -49,7 +49,12 @@ function Bar({
     const barStyle = useAnimatedStyle(() => ({ height: animHeight.value }))
 
     const valueOpacity = useAnimatedStyle(() => ({
-        opacity: interpolate(animHeight.value, [0, MIN_BAR_HEIGHT, MIN_BAR_HEIGHT * 2.5], [0, 0, 1], Extrapolation.CLAMP),
+        opacity: interpolate(
+            animHeight.value,
+            [0, MIN_BAR_HEIGHT, MIN_BAR_HEIGHT * 2.5],
+            [0, 0, 1],
+            Extrapolation.CLAMP,
+        ),
     }))
 
     const containerStyle = useAnimatedStyle(() => ({ opacity: animOpacity.value }))
@@ -61,7 +66,11 @@ function Bar({
         <Animated.View style={[styles.barColumn, containerStyle]}>
             <View style={styles.barSlot}>
                 <Animated.View
-                    style={[styles.bar, { backgroundColor: barColor, borderColor, borderWidth: isCurrent ? 1.5 : 0 }, barStyle]}
+                    style={[
+                        styles.bar,
+                        { backgroundColor: barColor, borderColor, borderWidth: isCurrent ? 1.5 : 0 },
+                        barStyle,
+                    ]}
                 >
                     <Animated.View style={[styles.valueWrapper, valueOpacity]}>
                         <Text style={[styles.barValue, { color: isCurrent ? "#000" : Colors.foreground }]}>
@@ -70,8 +79,11 @@ function Bar({
                     </Animated.View>
                 </Animated.View>
             </View>
-            <Text style={[styles.dateLabel, { color: isCurrent ? Colors.secondary : Colors.text_dark }]} numberOfLines={1}>
-                {dayjs(date).format("MMM D")}
+            <Text
+                style={[styles.dateLabel, { color: isCurrent ? Colors.secondary : Colors.text_dark }]}
+                numberOfLines={1}
+            >
+                {dayjs(date).format("DD")}
             </Text>
         </Animated.View>
     )
@@ -118,7 +130,7 @@ export default function SimilarExpensesChart({ expenses, currentExpenseId }: Sim
                 {/* Average line */}
                 <View style={[styles.avgLine, { bottom: avgLineBottom + 28 }]} pointerEvents="none">
                     <View style={styles.avgLineDash} />
-                    <Text style={styles.avgLineLabel}>avg</Text>
+                    <Text style={styles.avgLineLabel}>{avgAmount.toFixed(2)}zł avg</Text>
                 </View>
 
                 {/* Bars */}
@@ -141,7 +153,9 @@ export default function SimilarExpensesChart({ expenses, currentExpenseId }: Sim
                     <Text style={styles.legendText}>This expense</Text>
                 </View>
                 <View style={styles.legendItem}>
-                    <View style={[styles.legendSwatch, { backgroundColor: Color(Colors.secondary).alpha(0.3).string() }]} />
+                    <View
+                        style={[styles.legendSwatch, { backgroundColor: Color(Colors.secondary).alpha(0.3).string() }]}
+                    />
                     <Text style={styles.legendText}>Previous</Text>
                 </View>
                 <View style={styles.legendItem}>
@@ -155,8 +169,7 @@ export default function SimilarExpensesChart({ expenses, currentExpenseId }: Sim
 
 const styles = StyleSheet.create({
     container: {
-        marginTop: 15,
-        backgroundColor: Colors.primary_light,
+        backgroundColor: Colors.primary_lighter,
         borderRadius: 15,
         padding: 15,
         paddingBottom: 12,
@@ -247,7 +260,7 @@ const styles = StyleSheet.create({
         backgroundColor: Color(Colors.text_dark).alpha(0.45).string(),
     },
     avgLineLabel: {
-        color: Colors.text_dark,
+        color: Colors.text_light,
         fontSize: 9,
         fontWeight: "600",
     },
