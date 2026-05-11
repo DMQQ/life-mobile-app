@@ -59,6 +59,8 @@ const theme = {
 
     foreground_secondary: Color(foreground).alpha(0.7).string(), // 70% opacity
     foreground_disabled: Color(foreground).alpha(0.4).string(),
+
+    borderColor: Color(Color(primary).lighten(0.4).string()).lighten(0.5).hex(),
 } as const
 
 export const defaultColors = {

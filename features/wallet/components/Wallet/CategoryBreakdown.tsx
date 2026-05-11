@@ -7,6 +7,7 @@ import Text from "@/components/ui/Text/Text"
 import { Ionicons } from "@expo/vector-icons"
 import useGetWallet from "../../hooks/useGetWallet"
 import { CategoryIcon, CategoryUtils, Icons } from "../Expense/ExpenseIcon"
+import Section from "@/components/ui/Section"
 
 const EXCLUDED = new Set(["income", "edit", "none"])
 
@@ -131,11 +132,20 @@ export default function CategoryBreakdown() {
             </TouchableOpacity>
 
             {showLegend && (
-                <View style={styles.legendGrid}>
+                <Section title="Categories" noGap>
                     {categories.map((c) => (
-                        <View key={c.category} style={styles.legendItem}>
+                        <View
+                            key={c.category}
+                            style={[
+                                styles.legendItem,
+                                {
+                                    borderBottomWidth:
+                                        categories[categories.length - 1].category === c.category ? 0 : 1,
+                                },
+                            ]}
+                        >
                             <CategoryIcon
-                                category={c.category as any}
+                                category={c.category === "others" ? "none" : (c.category as any)}
                                 type="expense"
                                 size={16}
                                 containerStyle={styles.iconContainer}
@@ -163,7 +173,7 @@ export default function CategoryBreakdown() {
                             </View>
                         </View>
                     ))}
-                </View>
+                </Section>
             )}
         </View>
     )
@@ -261,9 +271,9 @@ const styles = StyleSheet.create({
         alignItems: "center",
         gap: 10,
         backgroundColor: Colors.primary_lighter,
-        borderRadius: 14,
-        paddingRight: 14,
-        paddingVertical: 4,
+        padding: 10,
+        borderBottomWidth: 1,
+        borderColor: Colors.borderColor,
     },
     iconContainer: {
         width: 36,

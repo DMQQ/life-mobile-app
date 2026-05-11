@@ -32,9 +32,11 @@ interface SectionProps {
     headerRight?: React.ReactNode
     children?: React.ReactNode
     noGap?: boolean
+
+    cardStyle?: any
 }
 
-export default function Section({ title, headerRight, children, noGap }: SectionProps) {
+export default function Section({ title, headerRight, children, noGap, cardStyle }: SectionProps) {
     return (
         <View style={!noGap && s.sectionGap}>
             {headerRight ? (
@@ -45,7 +47,7 @@ export default function Section({ title, headerRight, children, noGap }: Section
             ) : (
                 <Text style={s.sectionLabel}>{title}</Text>
             )}
-            <View style={s.card}>{children}</View>
+            <View style={[s.card, cardStyle]}>{children}</View>
         </View>
     )
 }
