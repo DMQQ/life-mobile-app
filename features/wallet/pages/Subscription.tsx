@@ -4,7 +4,6 @@ import { Feather } from "@expo/vector-icons"
 import moment from "moment"
 import React, { useEffect, useState } from "react"
 import { ActivityIndicator, StyleSheet, View } from "react-native"
-import Ripple from "react-native-material-ripple"
 
 import Header from "@/components/ui/Header/Header"
 import Colors from "@/constants/Colors"
@@ -19,37 +18,21 @@ import Animated, {
     useAnimatedStyle,
     useSharedValue,
 } from "react-native-reanimated"
-import WalletItem, { CategoryIcon } from "../components/Wallet/WalletItem"
+import WalletItem from "../components/Wallet/WalletItem"
 import useSubscription from "../hooks/useSubscription"
 import getModalMarginTop from "../utils/modalMarginTop"
 import { ConfirmDialog, EmptyState } from "@/components"
+import Section from "@/components/ui/Section"
+import { CollapsibleThemedCalendar } from "@/components/ui/ThemedCalendar/ThemedCalendar"
+import dayjs from "dayjs"
+import { Toggle, Host } from "@expo/ui/swift-ui"
+import { background } from "@expo/ui/swift-ui/modifiers"
+import Color from "color"
 
 interface SubscriptionDetailsProps {
     route: { params: { subscriptionId: string } }
     navigation: any
 }
-
-const Txt = ({
-    children,
-    size,
-    color = Colors.secondary,
-}: {
-    children: React.ReactNode
-    size: number
-    color?: string
-}) => (
-    <Text
-        variant={size >= 24 ? "subheading" : size >= 20 ? "subtitle" : "body"}
-        style={{
-            color,
-            fontSize: size,
-            fontWeight: "bold",
-            lineHeight: size + 7.5,
-        }}
-    >
-        {children}
-    </Text>
-)
 
 const SUBSCRIPTION_QUERY = gql`
     query Subscription($id: String!) {
@@ -87,6 +70,7 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
 
     const [subscription, setSubscription] = useState<Subscription | null>(null)
     const [confirmAction, setConfirmAction] = useState(false)
+    const [pendingToggle, setPendingToggle] = useState<boolean | null>(null)
 
     useEffect(() => {
         if (data?.subscription) {
@@ -137,36 +121,44 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
     const hasSubscription = !!subscription?.id
     const isSubscriptionActive = hasSubscription && subscription?.isActive
 
+    const handleToggleChange = (isOn: boolean) => {
+        setPendingToggle(isOn)
+        setConfirmAction(true)
+    }
+
     const handleSubscriptionConfirm = async () => {
         try {
-            if (isSubscriptionActive && subscription?.id) {
+            if (pendingToggle) {
+                if (hasSubscription && !isSubscriptionActive) {
+                    const result = await sub.renewSubscription({
+                        variables: { subscriptionId: subscription!.id },
+                    })
+                    if (result.data?.renewSubscription) {
+                        setSubscription(result.data.renewSubscription.subscription as Subscription)
+                        refetch()
+                    }
+                } else {
+                    const result = await sub.createSubscription({
+                        variables: { expenseId: subscription!.id },
+                    })
+                    if (result.data?.createSubscription) {
+                        setSubscription(result.data.createSubscription.subscription as Subscription)
+                        refetch()
+                    }
+                }
+            } else {
                 const result = await sub.cancelSubscription({
-                    variables: { subscriptionId: subscription.id },
+                    variables: { subscriptionId: subscription!.id },
                 })
                 if (result.data?.cancelSubscription) {
                     setSubscription(result.data.cancelSubscription.subscription as Subscription)
-                    refetch()
-                }
-            } else if (hasSubscription && !isSubscriptionActive) {
-                const result = await sub.renewSubscription({
-                    variables: { subscriptionId: subscription!.id },
-                })
-                if (result.data?.renewSubscription) {
-                    setSubscription(result.data.renewSubscription.subscription as Subscription)
-                    refetch()
-                }
-            } else {
-                const result = await sub.createSubscription({
-                    variables: { expenseId: subscription!.id },
-                })
-                if (result.data?.createSubscription) {
-                    setSubscription(result.data.createSubscription.subscription as Subscription)
                     refetch()
                 }
             }
         } catch {
         } finally {
             setConfirmAction(false)
+            setPendingToggle(null)
         }
     }
 
@@ -190,6 +182,21 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
         )
     }
 
+    const nextBillingDayjs = dayjs(parseInt(subscription.nextBillingDate || "0"))
+    const calendarDate = nextBillingDayjs.isValid()
+        ? nextBillingDayjs.format("YYYY-MM-DD")
+        : dayjs().format("YYYY-MM-DD")
+
+    const confirmTitle = pendingToggle
+        ? hasSubscription && !isSubscriptionActive
+            ? "Renew Subscription"
+            : "Create Subscription"
+        : "Disable Subscription"
+
+    const confirmDescription = pendingToggle
+        ? "Are you sure you want to enable this subscription?"
+        : "Are you sure you want to disable this subscription?"
+
     return (
         <View style={{ flex: 1 }}>
             <Header
@@ -206,7 +213,7 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                 ]}
                 initialTitleFontSize={subscription?.description?.length > 25 ? 40 : 50}
                 animatedSubtitle={`Amount: ${subscription.amount.toFixed(2)}zł`}
-                subtitleStyles={{ fontSize: 25, color: Colors.secondary_light_2, marginTop: 10, fontWeight: "600" }}
+                subtitleStyles={{ fontSize: 25, color: Colors.secondary_light_2, marginTop: 10, fontWeight: "400" }}
                 renderAnimatedItem={({ scrollY }) => (
                     <AnimatedSubscriptionHeader scrollY={scrollY!} subscription={subscription} />
                 )}
@@ -217,63 +224,62 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                 onScroll={onScroll}
                 style={{ flex: 1, paddingTop: getModalMarginTop(subscription.description) }}
             >
-                <View style={{ marginBottom: 30, paddingHorizontal: 15 }}>
-                    <View style={{ borderRadius: 15, backgroundColor: Colors.primary_light }}>
-                        <View style={[styles.row, { paddingVertical: 0, paddingLeft: 5 }]}>
-                            <CategoryIcon type="expense" category="subscriptions" />
-                            <Text variant="body" style={{ color: Colors.secondary_light_2 }}>
+                <View style={{ paddingHorizontal: 15 }}>
+                    <Section title="Details">
+                        <View style={styles.detailRow}>
+                            <Feather
+                                name="refresh-cw"
+                                size={24}
+                                color={Colors.ternary}
+                                style={{ paddingHorizontal: 7.5, padding: 2.5 }}
+                            />
+                            <Text style={styles.detailText}>
                                 {formatBillingCycle(subscription.billingCycle)} Subscription
                             </Text>
                         </View>
 
                         {subscription.billingCycle === "custom" && subscription.billingDay != null && (
-                            <View style={styles.row}>
+                            <View style={styles.detailRow}>
                                 <Feather
                                     name="calendar"
                                     size={24}
                                     color={Colors.ternary}
                                     style={{ paddingHorizontal: 7.5, padding: 2.5 }}
                                 />
-                                <Text variant="body" style={{ color: Colors.secondary_light_2 }}>
-                                    Billing day: {subscription.billingDay}
-                                </Text>
+                                <Text style={styles.detailText}>Billing day: {subscription.billingDay}</Text>
                             </View>
                         )}
 
-                        {subscription.billingCycle === "custom" && (subscription.customBillingMonths?.length ?? 0) > 0 && (
-                            <View style={[styles.row, { flexDirection: "column", alignItems: "flex-start", gap: 8 }]}>
-                                <Text variant="body" style={{ color: Colors.secondary_light_2 }}>
-                                    Active months:
-                                </Text>
-                                <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
-                                    {subscription.customBillingMonths!.map((m) => (
-                                        <View
-                                            key={m}
-                                            style={{
-                                                paddingHorizontal: 10,
-                                                paddingVertical: 4,
-                                                borderRadius: 20,
-                                                backgroundColor: Colors.secondary + "33",
-                                            }}
-                                        >
-                                            <Text variant="body" style={{ color: Colors.secondary, fontSize: 12 }}>
-                                                {MONTH_NAMES[m - 1]}
-                                            </Text>
-                                        </View>
-                                    ))}
+                        {subscription.billingCycle === "custom" &&
+                            (subscription.customBillingMonths?.length ?? 0) > 0 && (
+                                <View
+                                    style={[
+                                        styles.detailRow,
+                                        { flexDirection: "column", alignItems: "flex-start", gap: 8 },
+                                    ]}
+                                >
+                                    <Text style={styles.detailText}>Active months:</Text>
+                                    <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
+                                        {subscription.customBillingMonths!.map((m) => (
+                                            <View key={m} style={styles.monthChip}>
+                                                <Text variant="caption" style={{ color: Colors.secondary }}>
+                                                    {MONTH_NAMES[m - 1]}
+                                                </Text>
+                                            </View>
+                                        ))}
+                                    </View>
                                 </View>
-                            </View>
-                        )}
+                            )}
 
                         {subscription.reminderDaysBeforehand != null && (
-                            <View style={styles.row}>
+                            <View style={styles.detailRow}>
                                 <Feather
                                     name="bell"
                                     size={24}
                                     color={Colors.ternary}
                                     style={{ paddingHorizontal: 7.5, padding: 2.5 }}
                                 />
-                                <Text variant="body" style={{ color: Colors.secondary_light_2 }}>
+                                <Text style={styles.detailText}>
                                     Reminder:{" "}
                                     {subscription.reminderDaysBeforehand === 0
                                         ? "on billing day"
@@ -282,61 +288,28 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                             </View>
                         )}
 
-                        <View style={styles.row}>
-                            <Feather
-                                name={subscription.isActive ? "play-circle" : "pause-circle"}
-                                size={24}
-                                color={Colors.ternary}
-                                style={{ paddingHorizontal: 7.5, padding: 2.5 }}
-                            />
-                            <Text variant="body" style={{ color: Colors.secondary_light_2 }}>
-                                Status:{" "}
-                                <View
-                                    style={{
-                                        padding: 2.5,
-                                        paddingHorizontal: 7.5,
-                                        backgroundColor: subscription.isActive ? "green" : Colors.error,
-                                        borderRadius: 10,
-                                        marginTop: -3.5,
-                                        alignItems: "center",
-                                    }}
-                                >
-                                    <Text
-                                        variant="body"
-                                        style={{ color: Colors.foreground, textTransform: "uppercase" }}
-                                    >
-                                        {subscription.isActive ? " Active" : " Inactive"}
-                                    </Text>
-                                </View>
-                            </Text>
-                        </View>
-
-                        <View style={styles.row}>
+                        <View style={styles.detailRow}>
                             <Feather
                                 name="calendar"
                                 size={24}
                                 color={Colors.ternary}
                                 style={{ paddingHorizontal: 7.5, padding: 2.5 }}
                             />
-                            <Text variant="body" style={{ color: Colors.secondary_light_2 }}>
-                                Started: {parseDate(+subscription.dateStart)}
-                            </Text>
+                            <Text style={styles.detailText}>Started: {parseDate(+subscription.dateStart)}</Text>
                         </View>
 
-                        <View style={styles.row}>
+                        <View style={styles.detailRow}>
                             <Feather
                                 name="clock"
                                 size={24}
                                 color={Colors.ternary}
                                 style={{ paddingHorizontal: 7.5, padding: 2.5 }}
                             />
-                            <Text variant="body" style={{ color: Colors.secondary_light_2 }}>
-                                Running for: {getSubscriptionDuration()}
-                            </Text>
+                            <Text style={styles.detailText}>Running for: {getSubscriptionDuration()}</Text>
                         </View>
 
                         {subscription.isActive && (
-                            <View style={styles.row}>
+                            <View style={styles.detailRow}>
                                 <Feather
                                     name="calendar"
                                     size={24}
@@ -344,10 +317,10 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                                     style={{ paddingHorizontal: 7.5, padding: 2.5 }}
                                 />
                                 <Text
-                                    variant="body"
-                                    style={{
-                                        color: isOverdue ? "#F07070" : Colors.secondary_light_2,
-                                    }}
+                                    style={[
+                                        styles.detailText,
+                                        { color: isOverdue ? "#F07070" : Colors.secondary_light_2 },
+                                    ]}
                                 >
                                     {isOverdue
                                         ? "Overdue"
@@ -356,79 +329,86 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                             </View>
                         )}
 
-                        <View style={{ padding: 15 }}>
-                            <Ripple
-                                onPress={() => setConfirmAction(true)}
-                                disabled={isSubscriptionLoading}
-                                style={[
-                                    styles.row,
-                                    {
-                                        marginTop: 10,
-                                        justifyContent: "center",
-                                        backgroundColor: subscription.isActive
-                                            ? "rgba(255,59,48,0.2)"
-                                            : "rgba(52,199,89,0.2)",
-                                        borderRadius: 10,
-                                        paddingVertical: 10,
-                                        paddingHorizontal: 15,
-                                        borderWidth: 1,
-                                        borderColor: subscription.isActive
-                                            ? "rgba(255,59,48,0.5)"
-                                            : "rgba(52,199,89,0.5)",
-                                    },
-                                ]}
-                            >
-                                {isSubscriptionLoading ? (
-                                    <ActivityIndicator size="small" color={Colors.foreground} />
-                                ) : (
-                                    <Text
-                                        variant="body"
-                                        style={{
-                                            color: subscription.isActive
-                                                ? "rgba(255,59,48,0.9)"
-                                                : "rgba(52,199,89,0.9)",
-                                            fontWeight: "bold",
-                                        }}
-                                    >
-                                        {subscription.isActive ? "Disable Subscription" : "Renew Subscription"}
-                                    </Text>
-                                )}
-                            </Ripple>
+                        <View style={[styles.detailRow, { borderBottomWidth: 0 }]}>
+                            <View style={styles.statusChip}>
+                                <View
+                                    style={[
+                                        styles.statusDot,
+                                        { backgroundColor: subscription.isActive ? "#66E875" : Colors.text_dark },
+                                    ]}
+                                />
+                                <Text
+                                    variant="caption"
+                                    style={{
+                                        color: subscription.isActive ? "#66E875" : Colors.text_dark,
+                                        fontWeight: "600",
+                                    }}
+                                >
+                                    {subscription.isActive ? "Active" : "Inactive"}
+                                </Text>
+                            </View>
+
+                            <View style={{ width: 150 }}>
+                                <Host modifiers={[background("clear")]}>
+                                    <Toggle
+                                        isOn={subscription.isActive}
+                                        onIsOnChange={handleToggleChange}
+                                        label={subscription.isActive ? "Enabled" : "Disabled"}
+                                    />
+                                </Host>
+                            </View>
                         </View>
-                    </View>
+                    </Section>
                 </View>
+
+                {subscription.isActive && (
+                    <View style={{ paddingHorizontal: 15 }}>
+                        <Section title="Next Billing">
+                            <CollapsibleThemedCalendar
+                                date={calendarDate}
+                                markedDates={{ [calendarDate]: { selected: true } }}
+                            />
+                        </Section>
+                    </View>
+                )}
 
                 {subscription.expenses.length > 0 && (
                     <>
-                        <View style={{ paddingHorizontal: 15, marginBottom: 25 }}>
-                            <Txt size={20} color={Colors.text_light}>
-                                Statistics
-                            </Txt>
+                        <View style={{ paddingHorizontal: 15 }}>
+                            <Section title="Statistics">
+                                <View style={styles.statsContainer}>
+                                    <View style={styles.statItem}>
+                                        <Text variant="subheading" style={styles.statValue}>
+                                            {subscription.expenses.length}
+                                        </Text>
+                                        <Text variant="caption" style={styles.statLabel}>
+                                            Total Payments
+                                        </Text>
+                                    </View>
 
-                            <View style={[styles.statsContainer, { marginTop: 15 }]}>
-                                <View style={styles.statItem}>
-                                    <Text style={styles.statValue}>{subscription.expenses.length}</Text>
-                                    <Text style={styles.statLabel}>Total Payments</Text>
-                                </View>
+                                    <View style={styles.statItem}>
+                                        <Text variant="subheading" style={styles.statValue}>
+                                            {totalSpent.toFixed(2)}zł
+                                        </Text>
+                                        <Text variant="caption" style={styles.statLabel}>
+                                            Total Spent
+                                        </Text>
+                                    </View>
 
-                                <View style={styles.statItem}>
-                                    <Text style={styles.statValue}>{totalSpent.toFixed(2)}zł</Text>
-                                    <Text style={styles.statLabel}>Total Spent</Text>
+                                    <View style={styles.statItem}>
+                                        <Text variant="subheading" style={styles.statValue}>
+                                            {avgMonthlySpend.toFixed(2)}zł
+                                        </Text>
+                                        <Text variant="caption" style={styles.statLabel}>
+                                            Avg Payment
+                                        </Text>
+                                    </View>
                                 </View>
-
-                                <View style={styles.statItem}>
-                                    <Text style={styles.statValue}>{avgMonthlySpend.toFixed(2)}zł</Text>
-                                    <Text style={styles.statLabel}>Avg Payment</Text>
-                                </View>
-                            </View>
+                            </Section>
                         </View>
 
-                        <View style={{ paddingHorizontal: 15, marginBottom: 25 }}>
-                            <Txt size={20} color={Colors.text_light}>
-                                Payment History
-                            </Txt>
-
-                            <View style={{ marginTop: 15 }}>
+                        <View style={{ paddingHorizontal: 15 }}>
+                            <Section title="Payment History">
                                 {sortedExpenses.slice(0, 10).map((expense: any) => (
                                     <WalletItem
                                         key={expense.id}
@@ -440,17 +420,22 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                                             })
                                         }
                                         type="expense"
+                                        animatedStyle={{
+                                            marginBottom: 0,
+                                            borderWidth: 0,
+                                            borderBottomWidth: 1,
+                                        }}
                                     />
                                 ))}
 
                                 {subscription.expenses.length > 10 && (
                                     <View style={styles.morePaymentsContainer}>
-                                        <Text style={styles.morePaymentsText}>
+                                        <Text variant="caption" style={styles.morePaymentsText}>
                                             +{subscription.expenses.length - 10} more payments
                                         </Text>
                                     </View>
                                 )}
-                            </View>
+                            </Section>
                         </View>
                     </>
                 )}
@@ -462,16 +447,19 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                         description="Payments will appear here once the subscription becomes active"
                     />
                 )}
-                <View style={{ height: 350, width: 100 }} />
+                <View style={{ height: 100 }} />
             </Animated.ScrollView>
 
             <ConfirmDialog
                 isVisible={confirmAction}
-                onDismiss={() => setConfirmAction(false)}
+                onDismiss={() => {
+                    setConfirmAction(false)
+                    setPendingToggle(null)
+                }}
                 onConfirm={handleSubscriptionConfirm}
-                title={isSubscriptionActive ? "Disable Subscription" : "Renew Subscription"}
-                description={`Are you sure you want to ${isSubscriptionActive ? "disable" : "renew"} this subscription?`}
-                destructive={isSubscriptionActive}
+                title={confirmTitle}
+                description={confirmDescription}
+                destructive={!pendingToggle}
                 loading={isSubscriptionLoading}
             />
         </View>
@@ -524,10 +512,9 @@ const AnimatedSubscriptionHeader = ({
                         }}
                     >
                         <Text
+                            variant="body"
                             style={{
                                 color: subscription.isActive ? Colors.secondary : Colors.error,
-                                fontSize: 16,
-                                letterSpacing: 0.5,
                                 fontWeight: "600",
                             }}
                         >
@@ -550,7 +537,7 @@ const AnimatedSubscriptionHeader = ({
                     style={{
                         color: "#F07070",
                         fontSize: 18,
-                        fontWeight: 600,
+                        fontWeight: "600",
                     }}
                 >
                     -{subscription?.amount.toFixed(2)}zł
@@ -567,20 +554,42 @@ const styles = StyleSheet.create({
         alignItems: "center",
         backgroundColor: Colors.primary,
     },
-    row: {
+    detailRow: {
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
         padding: 15,
-        borderRadius: 15,
-        backgroundColor: Colors.primary_light,
-        marginTop: 10,
+        borderBottomWidth: 1,
+        borderColor: Color(Colors.primary_lighter).lighten(0.5).hex(),
+    },
+    detailText: {
+        color: Colors.secondary_light_2,
+        fontSize: 18,
+    },
+    monthChip: {
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        borderRadius: 100,
+        backgroundColor: Colors.secondary + "33",
+    },
+    statusChip: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 6,
+        paddingHorizontal: 12,
+        paddingVertical: 5,
+        borderRadius: 100,
+        backgroundColor: "rgba(255,255,255,0.07)",
+    },
+    statusDot: {
+        width: 7,
+        height: 7,
+        borderRadius: 4,
     },
     statsContainer: {
         flexDirection: "row",
         justifyContent: "space-between",
-        backgroundColor: Colors.primary_light,
-        borderRadius: 15,
+        borderRadius: 20,
         padding: 20,
     },
     statItem: {
@@ -589,13 +598,11 @@ const styles = StyleSheet.create({
     },
     statValue: {
         color: Colors.foreground,
-        fontSize: 18,
         fontWeight: "bold",
         marginBottom: 5,
     },
     statLabel: {
         color: Colors.secondary_light_2,
-        fontSize: 12,
         textAlign: "center",
     },
     morePaymentsContainer: {
@@ -604,7 +611,6 @@ const styles = StyleSheet.create({
     },
     morePaymentsText: {
         color: "rgba(255,255,255,0.6)",
-        fontSize: 14,
         fontStyle: "italic",
     },
 })

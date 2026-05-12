@@ -102,7 +102,7 @@ export default function Goal({ route, navigation }: any) {
     const headerButtons = [
         {
             onPress: () => navigation.navigate("CreateGoal", { id }),
-            icon: <Feather name="edit" size={20} color={Colors.foreground} />,
+            icon: <Feather name="edit-2" size={20} color={Colors.foreground} />,
         },
         {
             onPress: () => navigation.navigate("UpdateGoalEntry", { id }),

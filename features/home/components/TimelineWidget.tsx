@@ -14,6 +14,8 @@ export default function TimelineWidget() {
 
     const events = data?.occurrences ?? []
 
+    if (!events || events.length === 0) return null
+
     return (
         <Section title="Today">
             <View style={styles.card}>

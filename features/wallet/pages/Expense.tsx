@@ -277,13 +277,15 @@ export default function Expense({ route: { params }, navigation }: any) {
                         />
                     </Section>
 
-                    <Section title="Subscription">
-                        <SubscriptionSection
-                            hasSubscription={hasSubscription}
-                            isSubscriptionActive={isSubscriptionActive}
-                            selected={selected}
-                        />
-                    </Section>
+                    {hasSubscription && (
+                        <Section title="Subscription">
+                            <SubscriptionSection
+                                hasSubscription={hasSubscription}
+                                isSubscriptionActive={isSubscriptionActive}
+                                selected={selected}
+                            />
+                        </Section>
+                    )}
                 </View>
 
                 {data?.expenseSimilar?.length > 1 && (
@@ -362,7 +364,6 @@ export default function Expense({ route: { params }, navigation }: any) {
 
 const styles = StyleSheet.create({
     scrollContent: {
-        marginBottom: 30,
         paddingHorizontal: 15,
     },
     section: {
