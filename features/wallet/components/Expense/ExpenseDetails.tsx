@@ -25,7 +25,7 @@ export default function ExpenseDetails({ expense }: { expense: ExpenseType }) {
                         clear
                     />
 
-                    <Text style={{ color: Colors.secondary_light_2, fontSize: 18, flex: 1 }}>
+                    <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>
                         {capitalize(CategoryUtils.getCategoryName(expense?.category || ""))}
                     </Text>
                 </View>

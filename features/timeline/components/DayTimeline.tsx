@@ -72,14 +72,8 @@ const CalendarTimetable = ({
     const minHour = Math.min(...(events.map((v) => +trimTime(v.beginTime, 1)) || []))
 
     const scrollToCurrentHour = useCallback(() => {
-        console.log("Scrolling to current hour, minHour:", minHour)
-        const isToday = moment(selected).isSame(moment(), "day")
-
-        const currentHour = moment().hour()
-        const targetHour = isToday ? currentHour : minHour !== Infinity ? minHour : 8
-
         scrollViewRef.current?.scrollTo({
-            y: targetHour * hourHeight + headerHeight,
+            y: moment().hour() * hourHeight + headerHeight,
             animated: false,
         })
     }, [selected, headerHeight, minHour, hourHeight])
@@ -115,7 +109,7 @@ const CalendarTimetable = ({
                 fontSize: 16,
             },
             timeContainer: {
-                backgroundColor: Colors.primary_dark,
+                backgroundColor: Colors.primary,
                 zIndex: 100,
             },
             lines: {
@@ -153,7 +147,7 @@ const CalendarTimetable = ({
             <Animated.ScrollView
                 ref={scrollViewRef}
                 keyboardDismissMode={"on-drag"}
-                style={{ flex: 1, paddingBottom: items?.length > 0 ? 100 : 0, backgroundColor: "transparent" }}
+                style={{ flex: 1, backgroundColor: "transparent" }}
                 onScroll={onScroll}
                 showsVerticalScrollIndicator={false}
                 overScrollMode={"never"}
@@ -174,7 +168,7 @@ const CalendarTimetable = ({
                         horizontal: false,
                     }}
                 />
-                {items?.length > 0 && <View style={{ height: 120 }} />}
+                <View style={{ height: 100 }} />
             </Animated.ScrollView>
         </GestureDetector>
     )

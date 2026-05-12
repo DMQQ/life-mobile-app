@@ -1,8 +1,8 @@
 import { Card } from "@/components"
 import Colors, { secondary_candidates } from "@/constants/Colors"
 import moment from "moment"
-import { StyleSheet, Text, View } from "react-native"
-import { FadeIn, LinearTransition } from "react-native-reanimated"
+import { StyleProp, StyleSheet, Text, View, ViewStyle } from "react-native"
+import { FadeIn } from "react-native-reanimated"
 import { CategoryIcon } from "../Expense/ExpenseIcon"
 
 interface SubscriptionItemProps {
@@ -61,7 +61,12 @@ function formatDuration(days: number) {
     return "Today"
 }
 
-export default function SubscriptionItem({ subscription, index, onPress }: SubscriptionItemProps) {
+export default function SubscriptionItem({
+    subscription,
+    index,
+    onPress,
+    style,
+}: SubscriptionItemProps & { style?: StyleProp<ViewStyle> }) {
     const daysUntilNext = moment(parseInt(subscription.nextBillingDate)).diff(moment(), "days")
     const isOverdue = daysUntilNext < 0
 
@@ -74,7 +79,7 @@ export default function SubscriptionItem({ subscription, index, onPress }: Subsc
     const nextColor = !subscription.isActive ? "#F07070" : isOverdue ? "#F07070" : secondary_candidates[0]
 
     return (
-        <Card ripple animated entering={FadeIn.delay((index + 1) * 50)} style={styles.card} onPress={onPress}>
+        <Card ripple animated entering={FadeIn.delay((index + 1) * 50)} style={[styles.card, style]} onPress={onPress}>
             <View style={styles.row}>
                 <CategoryIcon type="expense" category="subscriptions" />
 

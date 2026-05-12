@@ -1,11 +1,12 @@
 import { useState } from "react"
-import { StyleSheet, Text, View, Pressable } from "react-native"
+import { StyleSheet, View } from "react-native"
 import Colors from "@/constants/Colors"
 import Color from "color"
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated"
 import WeeklyComparisonChart from "./WalletChart"
 import BalancePredictionChart from "./BalancePredictionChart"
 import GroupSelector from "@/components/ui/GroupSelector"
+import Section from "@/components/ui/Section"
 
 type ChartType = "weekly" | "prediction"
 
@@ -13,31 +14,37 @@ const ChartSwitcher = () => {
     const [activeChart, setActiveChart] = useState<ChartType>("weekly")
 
     return (
-        <View style={styles.container}>
-            <View style={styles.chartContent}>
-                {activeChart === "weekly" ? (
-                    <Animated.View entering={FadeIn} exiting={FadeOut} key="weekly">
-                        <WeeklyComparisonChart />
-                    </Animated.View>
-                ) : (
-                    <Animated.View entering={FadeIn} exiting={FadeOut} key="prediction">
-                        <BalancePredictionChart />
-                    </Animated.View>
-                )}
-            </View>
+        <Section title="Overview">
+            <View style={styles.container}>
+                <View style={styles.chartContent}>
+                    {activeChart === "weekly" ? (
+                        <Animated.View entering={FadeIn} exiting={FadeOut} key="weekly">
+                            <WeeklyComparisonChart />
+                        </Animated.View>
+                    ) : (
+                        <Animated.View entering={FadeIn} exiting={FadeOut} key="prediction">
+                            <BalancePredictionChart />
+                        </Animated.View>
+                    )}
+                </View>
 
-            <GroupSelector
-                options={[{ label: "weekly", value: "weekly" as ChartType }, { label: "prediction", value: "prediction" as ChartType }]}
-                value={activeChart}
-                onChange={(value) => setActiveChart(value)}
-            />
-        </View>
+                <GroupSelector
+                    options={[
+                        { label: "weekly", value: "weekly" as ChartType },
+                        { label: "prediction", value: "prediction" as ChartType },
+                    ]}
+                    value={activeChart}
+                    onChange={(value) => setActiveChart(value)}
+                />
+            </View>
+        </Section>
     )
 }
 
 const styles = StyleSheet.create({
     container: {
         gap: 12,
+        padding: 15,
     },
     tabContainer: {
         flexDirection: "row",

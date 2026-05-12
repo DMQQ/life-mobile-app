@@ -19,6 +19,11 @@ import { UploadButton } from "./UploadButton"
 import Checkbox from "@/components/ui/Checkbox"
 
 const styles = StyleSheet.create({
+    container: {
+        borderWidth: 0,
+        margin: 0,
+        borderBottomWidth: 1,
+    },
     todoCard: {
         flexDirection: "row",
         alignItems: "flex-start",
@@ -108,7 +113,12 @@ export default function TodoItem(todo: Todos & { timelineId: string; index: numb
 
     return (
         <>
-            <Card animated entering={FadeInDown.delay(todo.index * 50)} exiting={FadeOutDown} style={{ marginBottom: 15 }}>
+            <Card
+                animated
+                entering={FadeInDown.delay(todo.index * 50)}
+                exiting={FadeOutDown}
+                style={[styles.container]}
+            >
                 <View style={styles.todoCard}>
                     <Pressable
                         style={{ flexDirection: "row", alignItems: "center", flex: 1 }}

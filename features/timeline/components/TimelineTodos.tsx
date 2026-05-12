@@ -1,4 +1,4 @@
-import { Card } from "@/components"
+import { Card, IconButton } from "@/components"
 import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
 import { Todos } from "@/types"
@@ -7,6 +7,7 @@ import Color from "color"
 import { StyleSheet, View } from "react-native"
 import TodoItem from "./TodoItem"
 import { AntDesign } from "@expo/vector-icons"
+import Section from "@/components/ui/Section"
 
 export default function TimelineTodos(props: {
     sortedTodos: Todos[]
@@ -21,27 +22,32 @@ export default function TimelineTodos(props: {
         })
     }
 
-    const allCompleted = props.sortedTodos.length > 0 && props.sortedTodos.every((t) => t.isCompleted)
-
     return (
         <View style={styles.container}>
-            <Text variant="subheading" onLongPress={handleLongPress} style={{ marginBottom: 12 }}>
-                Todos
-            </Text>
-            {props.sortedTodos.length === 0 ? (
-                <Card style={styles.emptyState}>
-                    <Text variant="subheading" style={styles.emptyTitle}>
-                        No todos yet
-                    </Text>
-                    <Text variant="caption" style={styles.emptySubtitle}>
-                        Add tasks to stay on track
-                    </Text>
-                </Card>
-            ) : (
-                props.sortedTodos.map((todo, index) => (
-                    <TodoItem key={todo.id} index={index} timelineId={props.timelineId} {...todo} />
-                ))
-            )}
+            <Section
+                title="Timeline todos"
+                headerRight={
+                    <IconButton
+                        icon={<AntDesign name="plus" size={12} color={Colors.text_dark} />}
+                        onPress={handleLongPress}
+                    />
+                }
+            >
+                {props.sortedTodos.length === 0 ? (
+                    <Card style={styles.emptyState}>
+                        <Text variant="subheading" style={styles.emptyTitle}>
+                            No todos yet
+                        </Text>
+                        <Text variant="caption" style={styles.emptySubtitle}>
+                            Add tasks to stay on track
+                        </Text>
+                    </Card>
+                ) : (
+                    props.sortedTodos.map((todo, index) => (
+                        <TodoItem key={todo.id} index={index} timelineId={props.timelineId} {...todo} />
+                    ))
+                )}
+            </Section>
         </View>
     )
 }
@@ -53,10 +59,6 @@ const styles = StyleSheet.create({
     emptyState: {
         paddingVertical: 28,
         paddingHorizontal: 20,
-        backgroundColor: Color(Colors.primary_lighter).lighten(0.05).hex(),
-        borderWidth: 1,
-        borderStyle: "dashed",
-        borderColor: Color(Colors.primary_light).lighten(0.2).hex(),
         borderRadius: 20,
         gap: 4,
     },

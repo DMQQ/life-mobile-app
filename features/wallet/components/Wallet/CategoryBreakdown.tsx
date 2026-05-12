@@ -86,104 +86,109 @@ export default function CategoryBreakdown() {
     const remainingFlex = targetBudget && remaining ? remaining / targetBudget : 0
 
     return (
-        <View style={styles.container}>
-            <View style={styles.topRow}>
-                <Text style={styles.monthLabel}>{moment().format("MMMM YYYY")}</Text>
+        <Section title="Category breakdown">
+            <View style={styles.container}>
+                <View style={styles.topRow}>
+                    <Text style={styles.monthLabel}>{moment().format("MMMM YYYY")}</Text>
 
-                <View style={styles.rightBlock}>
-                    <Text style={styles.totalAmount}>{total.toFixed(2)} zł</Text>
-                    {targetPct !== null && income > 0 && (
-                        <Text style={[styles.targetInfo, reachedTarget ? styles.textOver : styles.textMuted]}>
-                            {reachedTarget
-                                ? "Target reached"
-                                : `${(targetPct - spentPct).toFixed(0)}% left of ${targetPct}% target`}
-                        </Text>
-                    )}
+                    <View style={styles.rightBlock}>
+                        <Text style={styles.totalAmount}>{total.toFixed(2)} zł</Text>
+                        {targetPct !== null && income > 0 && (
+                            <Text style={[styles.targetInfo, reachedTarget ? styles.textOver : styles.textMuted]}>
+                                {reachedTarget
+                                    ? "Target reached"
+                                    : `${(targetPct - spentPct).toFixed(0)}% left of ${targetPct}% target`}
+                            </Text>
+                        )}
+                    </View>
                 </View>
-            </View>
 
-            <View style={styles.barRow}>
-                {categories.map((c, i) => (
-                    <View
-                        key={c.category}
-                        style={[
-                            styles.barSegment,
-                            { flex: c.flex, backgroundColor: c.color },
-                            i === 0 && styles.barFirst,
-                            remaining === null && i === categories.length - 1 && styles.barLast,
-                        ]}
-                    />
-                ))}
-                {remaining !== null && remaining > 0 && (
-                    <View style={[styles.barSegment, styles.barLast, styles.barEmpty, { flex: remainingFlex }]} />
-                )}
-            </View>
-
-            <TouchableOpacity style={styles.toggleRow} onPress={() => setShowLegend((v) => !v)} activeOpacity={0.6}>
-                <View style={styles.toggleDivider} />
-                <View style={styles.toggleChip}>
-                    <Ionicons
-                        name={showLegend ? "chevron-up" : "chevron-down"}
-                        size={13}
-                        color={Colors.foreground_secondary}
-                    />
-                </View>
-                <View style={styles.toggleDivider} />
-            </TouchableOpacity>
-
-            {showLegend && (
-                <Section title="Categories" noGap>
-                    {categories.map((c) => (
+                <View style={styles.barRow}>
+                    {categories.map((c, i) => (
                         <View
                             key={c.category}
                             style={[
-                                styles.legendItem,
-                                {
-                                    borderBottomWidth:
-                                        categories[categories.length - 1].category === c.category ? 0 : 1,
-                                },
+                                styles.barSegment,
+                                { flex: c.flex, backgroundColor: c.color },
+                                i === 0 && styles.barFirst,
+                                remaining === null && i === categories.length - 1 && styles.barLast,
                             ]}
-                        >
-                            <CategoryIcon
-                                category={c.category === "others" ? "none" : (c.category as any)}
-                                type="expense"
-                                size={16}
-                                containerStyle={styles.iconContainer}
-                            />
-                            <View style={styles.legendMid}>
-                                <Text style={styles.catName}>
-                                    {c.category === "others"
-                                        ? "Others"
-                                        : CategoryUtils.getCategoryName(c.category).replace(/\b\w/g, (l) =>
-                                              l.toUpperCase(),
-                                          )}
-                                </Text>
-                                <View style={[styles.catBar, { backgroundColor: Color(c.color).alpha(0.15).string() }]}>
+                        />
+                    ))}
+                    {remaining !== null && remaining > 0 && (
+                        <View style={[styles.barSegment, styles.barLast, styles.barEmpty, { flex: remainingFlex }]} />
+                    )}
+                </View>
+
+                <TouchableOpacity style={styles.toggleRow} onPress={() => setShowLegend((v) => !v)} activeOpacity={0.6}>
+                    <View style={styles.toggleDivider} />
+                    <View style={styles.toggleChip}>
+                        <Ionicons
+                            name={showLegend ? "chevron-up" : "chevron-down"}
+                            size={13}
+                            color={Colors.foreground_secondary}
+                        />
+                    </View>
+                    <View style={styles.toggleDivider} />
+                </TouchableOpacity>
+
+                {showLegend && (
+                    <Section title="Categories" noGap>
+                        {categories.map((c) => (
+                            <View
+                                key={c.category}
+                                style={[
+                                    styles.legendItem,
+                                    {
+                                        borderBottomWidth:
+                                            categories[categories.length - 1].category === c.category ? 0 : 1,
+                                    },
+                                ]}
+                            >
+                                <CategoryIcon
+                                    category={c.category === "others" ? "none" : (c.category as any)}
+                                    type="expense"
+                                    size={16}
+                                    containerStyle={styles.iconContainer}
+                                />
+                                <View style={styles.legendMid}>
+                                    <Text style={styles.catName}>
+                                        {c.category === "others"
+                                            ? "Others"
+                                            : CategoryUtils.getCategoryName(c.category).replace(/\b\w/g, (l) =>
+                                                  l.toUpperCase(),
+                                              )}
+                                    </Text>
                                     <View
                                         style={[
-                                            styles.catBarFill,
-                                            { width: `${c.pct}%` as any, backgroundColor: c.color },
+                                            styles.catBar,
+                                            { backgroundColor: Color(c.color).alpha(0.15).string() },
                                         ]}
-                                    />
+                                    >
+                                        <View
+                                            style={[
+                                                styles.catBarFill,
+                                                { width: `${c.pct}%` as any, backgroundColor: c.color },
+                                            ]}
+                                        />
+                                    </View>
+                                </View>
+                                <View style={styles.legendRight}>
+                                    <Text style={[styles.catAmount, { color: c.color }]}>{c.amount.toFixed(0)} zł</Text>
+                                    <Text style={styles.catPct}>{c.pct.toFixed(0)}%</Text>
                                 </View>
                             </View>
-                            <View style={styles.legendRight}>
-                                <Text style={[styles.catAmount, { color: c.color }]}>{c.amount.toFixed(0)} zł</Text>
-                                <Text style={styles.catPct}>{c.pct.toFixed(0)}%</Text>
-                            </View>
-                        </View>
-                    ))}
-                </Section>
-            )}
-        </View>
+                        ))}
+                    </Section>
+                )}
+            </View>
+        </Section>
     )
 }
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: Colors.primary_light,
-        borderRadius: 20,
-        padding: 16,
+        padding: 15,
         gap: 14,
     },
     topRow: {

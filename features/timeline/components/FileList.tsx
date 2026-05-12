@@ -1,5 +1,4 @@
 import ChipButton from "@/components/ui/Button/ChipButton"
-import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
 import Layout from "@/constants/Layout"
 import Url from "@/constants/Url"
@@ -14,6 +13,7 @@ import { ActivityIndicator, FlatList, StyleSheet, ToastAndroid, View } from "rea
 import Ripple from "react-native-material-ripple"
 import Animated from "react-native-reanimated"
 import useGetOccurrenceById from "../hooks/query/useGetOccurrenceById"
+import Section from "@/components/ui/Section"
 
 const styles = StyleSheet.create({
     available: {
@@ -118,26 +118,14 @@ export default function FileList({ timelineId }: FileListProps) {
             timelineId,
         })
 
-    const [toggleView, setToggleView] = useState(false)
+    if (data?.images.length === 0) {
+        return null
+    }
 
     return (
-        <View style={{ marginTop: 25 }}>
-            <View
-                style={{
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    marginBottom: 10,
-                    alignItems: "center",
-                }}
-            >
-                <Ripple onPress={() => setToggleView((p) => !p)}>
-                    <Text style={styles.available}>Available files ({data?.images.length})</Text>
-                </Ripple>
-                <UploadFileButton refetch={refetch} timelineId={timelineId} />
-            </View>
-
+        <Section title="Files">
             <GridImageView data={data} onRemovePhoto={removePhoto} onShowPreview={handleShowPreview} />
-        </View>
+        </Section>
     )
 }
 

@@ -1,3 +1,4 @@
+import Section from "@/components/ui/Section"
 import Colors from "@/constants/Colors"
 import { useNavigation } from "@react-navigation/native"
 import { useCallback, useMemo, useState } from "react"
@@ -38,17 +39,11 @@ interface Subscription {
     }[]
 }
 
-type ListItem =
-    | { type: "header"; title: string; count: number; color: string }
-    | { type: "subscription"; data: Subscription; index: number }
+type ListItem = { type: "section"; title: string; subscriptions: Subscription[] }
 
 const getItem = (data: ListItem[], index: number) => data[index]
 const getItemCount = (data: ListItem[]) => data.length
-const keyExtractor = (item: ListItem, index: number) => {
-    if (item.type === "header") return `header-${item.title}`
-    if (item.type === "subscription") return `sub-${item.data.id}`
-    return `item-${index}`
-}
+const keyExtractor = (item: ListItem) => item.title
 
 const AnimatedList = Animated.createAnimatedComponent(VirtualizedList<ListItem>)
 
@@ -72,14 +67,10 @@ export default function SubscriptionsList({ onScroll }: Props) {
     const items: ListItem[] = useMemo(() => {
         const list: ListItem[] = []
         if (active.length > 0) {
-            list.push({ type: "header", title: "Active", count: active.length, color: "#fff" })
-            active.forEach((sub, index) => list.push({ type: "subscription", data: sub, index }))
+            list.push({ type: "section", title: "Active", subscriptions: active })
         }
         if (inactive.length > 0) {
-            list.push({ type: "header", title: "Inactive", count: inactive.length, color: "#F07070" })
-            inactive.forEach((sub, index) =>
-                list.push({ type: "subscription", data: sub, index: index + active.length }),
-            )
+            list.push({ type: "section", title: "Inactive", subscriptions: inactive })
         }
         return list
     }, [active, inactive])
@@ -91,22 +82,22 @@ export default function SubscriptionsList({ onScroll }: Props) {
     }, [refetch])
 
     const renderItem = useCallback(
-        ({ item }: { item: ListItem }) => {
-            if (item.type === "header") {
-                return (
-                    <Text style={[styles.sectionTitle, { color: item.color }]}>
-                        {item.title} ({item.count})
-                    </Text>
-                )
-            }
-            return (
-                <SubscriptionItem
-                    subscription={item.data}
-                    index={item.index}
-                    onPress={() => navigation.navigate("Subscription", { subscriptionId: item.data.id })}
-                />
-            )
-        },
+        ({ item }: { item: ListItem }) => (
+            <Section title={item.title}>
+                {item.subscriptions.map((sub, index) => (
+                    <SubscriptionItem
+                        key={sub.id}
+                        subscription={sub}
+                        index={index}
+                        style={{
+                            borderWidth: 0,
+                            borderBottomWidth: item.subscriptions.length - 1 === index ? 0 : 1,
+                        }}
+                        onPress={() => navigation.navigate("Subscription", { subscriptionId: sub.id })}
+                    />
+                ))}
+            </Section>
+        ),
         [navigation],
     )
 
@@ -143,12 +134,6 @@ const styles = StyleSheet.create({
         padding: 15,
         paddingTop: 230,
         paddingBottom: 120,
-    },
-    sectionTitle: {
-        fontSize: 25,
-        fontWeight: "700",
-        marginTop: 30,
-        marginBottom: 15,
     },
     emptyContainer: {
         flex: 1,

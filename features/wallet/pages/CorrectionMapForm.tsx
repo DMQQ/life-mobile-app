@@ -20,6 +20,9 @@ import Color from "color"
 import CategorySelect from "../components/CreateExpense/CategorySelect"
 import { useCorrectionMaps, type CorrectionMap } from "../hooks/useCorrectionMaps"
 import { WalletScreens } from "../Main"
+import GlassView from "@/components/ui/GlassView"
+import GroupSelector from "@/components/ui/GroupSelector"
+import Section from "@/components/ui/Section"
 
 type MatchType = "shop" | "description" | "category" | "amount"
 type OverrideType = "shop" | "category" | "description"
@@ -114,10 +117,10 @@ function mapToState(map: CorrectionMap): FormState {
 }
 
 const MATCH_BUTTONS = [
-    { value: "shop", text: "Shop" },
-    { value: "description", text: "Desc" },
-    { value: "category", text: "Category" },
-    { value: "amount", text: "Amount" },
+    { value: "shop", label: "Shop" },
+    { value: "description", label: "Desc" },
+    { value: "category", label: "Category" },
+    { value: "amount", label: "Amount" },
 ]
 
 const OVERRIDE_OPTIONS: { key: OverrideType; label: string }[] = [
@@ -195,21 +198,25 @@ export default function CorrectionMapForm({ navigation, route }: WalletScreens<"
         <SafeAreaView style={styles.container}>
             {/* Header */}
             <View style={styles.header}>
-                <Pressable onPress={() => navigation.goBack()} hitSlop={12} style={styles.headerBtn}>
-                    <Text style={styles.headerCancel}>Cancel</Text>
-                </Pressable>
+                <GlassView style={{ padding: 10, borderRadius: 100 }}>
+                    <Pressable onPress={() => navigation.goBack()} hitSlop={12}>
+                        <Text style={styles.headerCancel}>Cancel</Text>
+                    </Pressable>
+                </GlassView>
 
                 <Text style={styles.headerTitle}>{editingItem ? "Edit Rule" : "New Rule"}</Text>
 
-                <Pressable onPress={handleSubmit} disabled={!valid || creating} hitSlop={12} style={styles.headerBtn}>
-                    {creating ? (
-                        <ActivityIndicator size="small" color={Colors.secondary} />
-                    ) : (
-                        <Text style={[styles.headerSave, !valid && styles.headerSaveDisabled]}>
-                            {editingItem ? "Save" : "Add"}
-                        </Text>
-                    )}
-                </Pressable>
+                <GlassView style={{ padding: 10, borderRadius: 100 }}>
+                    <Pressable onPress={handleSubmit} disabled={!valid || creating} hitSlop={12}>
+                        {creating ? (
+                            <ActivityIndicator size="small" color={Colors.secondary} />
+                        ) : (
+                            <Text style={[styles.headerSave, !valid && styles.headerSaveDisabled]}>
+                                {editingItem ? "Save" : "Add"}
+                            </Text>
+                        )}
+                    </Pressable>
+                </GlassView>
             </View>
 
             <View style={styles.divider} />
@@ -222,16 +229,12 @@ export default function CorrectionMapForm({ navigation, route }: WalletScreens<"
                     showsVerticalScrollIndicator={false}
                 >
                     {/* Match section */}
-                    <View style={styles.section}>
-                        <Text style={styles.sectionLabel}>Match when</Text>
-                        <View style={styles.sectionCard}>
-                            <SegmentedButtons
-                                buttons={MATCH_BUTTONS}
+                    <Section title="Match when">
+                        <View style={[styles.sectionCard, { padding: 15 }]}>
+                            <GroupSelector
+                                options={MATCH_BUTTONS}
                                 value={state.matchType}
-                                onChange={setMatchType}
-                                containerStyle={styles.segmented}
-                                buttonStyle={{ height: 40 }}
-                                buttonTextStyle={{ fontSize: 13, fontWeight: "600" }}
+                                onChange={(value) => setMatchType(value as string)}
                             />
 
                             {state.matchType === "shop" && (
@@ -246,7 +249,9 @@ export default function CorrectionMapForm({ navigation, route }: WalletScreens<"
                                         autoFocus
                                     />
                                     <Text style={styles.patternHint}>
-                                        Substring by default · use <Text style={styles.patternHintMono}>*</Text> / <Text style={styles.patternHintMono}>?</Text> wildcards or <Text style={styles.patternHintMono}>/regex/flags</Text>
+                                        Substring by default · use <Text style={styles.patternHintMono}>*</Text> /{" "}
+                                        <Text style={styles.patternHintMono}>?</Text> wildcards or{" "}
+                                        <Text style={styles.patternHintMono}>/regex/flags</Text>
                                     </Text>
                                 </>
                             )}
@@ -263,7 +268,9 @@ export default function CorrectionMapForm({ navigation, route }: WalletScreens<"
                                         autoFocus
                                     />
                                     <Text style={styles.patternHint}>
-                                        Substring by default · use <Text style={styles.patternHintMono}>*</Text> / <Text style={styles.patternHintMono}>?</Text> wildcards or <Text style={styles.patternHintMono}>/regex/flags</Text>
+                                        Substring by default · use <Text style={styles.patternHintMono}>*</Text> /{" "}
+                                        <Text style={styles.patternHintMono}>?</Text> wildcards or{" "}
+                                        <Text style={styles.patternHintMono}>/regex/flags</Text>
                                     </Text>
                                 </>
                             )}
@@ -307,70 +314,73 @@ export default function CorrectionMapForm({ navigation, route }: WalletScreens<"
                                 </View>
                             )}
                         </View>
-                    </View>
+                    </Section>
 
                     {/* Override section */}
-                    <View style={styles.section}>
-                        <Text style={styles.sectionLabel}>Then change</Text>
-                        <View style={styles.sectionCard}>
-                            <View style={styles.overrideRow}>
-                                {OVERRIDE_OPTIONS.map(({ key, label }) => {
-                                    const active = state.overrideTypes.includes(key)
-                                    return (
-                                        <Ripple
-                                            key={key}
-                                            onPress={() => toggleOverride(key)}
-                                            style={[styles.overrideChip, active && styles.overrideChipActive]}
-                                        >
-                                            <Text
-                                                style={[
-                                                    styles.overrideChipText,
-                                                    active && styles.overrideChipTextActive,
-                                                ]}
+                    <Section title="Then change">
+                        <View style={{ padding: 15 }}>
+                            <View style={styles.sectionCard}>
+                                <View style={styles.overrideRow}>
+                                    {OVERRIDE_OPTIONS.map(({ key, label }) => {
+                                        const active = state.overrideTypes.includes(key)
+                                        return (
+                                            <Ripple
+                                                key={key}
+                                                onPress={() => toggleOverride(key)}
+                                                style={[styles.overrideChip, active && styles.overrideChipActive]}
                                             >
-                                                {label}
-                                            </Text>
-                                        </Ripple>
-                                    )
-                                })}
-                            </View>
+                                                <Text
+                                                    style={[
+                                                        styles.overrideChipText,
+                                                        active && styles.overrideChipTextActive,
+                                                    ]}
+                                                >
+                                                    {label}
+                                                </Text>
+                                            </Ripple>
+                                        )
+                                    })}
+                                </View>
 
-                            {state.overrideTypes.includes("shop") && (
-                                <Input
-                                    label="New shop name"
-                                    value={state.values.overrideShop}
-                                    onChangeText={(v) => setVal("overrideShop", v)}
-                                    placeholder="e.g. Lewiatan"
-                                    autoCapitalize="words"
-                                    returnKeyType="next"
-                                />
-                            )}
-
-                            {state.overrideTypes.includes("category") && (
-                                <>
-                                    <Input.Label text="New category" error={false} labelStyle={styles.inputLabel} />
-                                    <CategorySelect
-                                        selected={state.values.overrideCategory ? [state.values.overrideCategory] : []}
-                                        setSelected={(sel) => setVal("overrideCategory", sel[0] ?? "")}
-                                        isActive={(c) => c === state.values.overrideCategory}
-                                        maxSelectHeight={220}
-                                        closeOnSelect
+                                {state.overrideTypes.includes("shop") && (
+                                    <Input
+                                        label="New shop name"
+                                        value={state.values.overrideShop}
+                                        onChangeText={(v) => setVal("overrideShop", v)}
+                                        placeholder="e.g. Lewiatan"
+                                        autoCapitalize="words"
+                                        returnKeyType="next"
                                     />
-                                </>
-                            )}
+                                )}
 
-                            {state.overrideTypes.includes("description") && (
-                                <Input
-                                    label="New description"
-                                    value={state.values.overrideDescription}
-                                    onChangeText={(v) => setVal("overrideDescription", v)}
-                                    placeholder="Optional rename"
-                                    autoCapitalize="sentences"
-                                    returnKeyType="done"
-                                />
-                            )}
+                                {state.overrideTypes.includes("category") && (
+                                    <>
+                                        <Input.Label text="New category" error={false} labelStyle={styles.inputLabel} />
+                                        <CategorySelect
+                                            selected={
+                                                state.values.overrideCategory ? [state.values.overrideCategory] : []
+                                            }
+                                            setSelected={(sel) => setVal("overrideCategory", sel[0] ?? "")}
+                                            isActive={(c) => c === state.values.overrideCategory}
+                                            maxSelectHeight={220}
+                                            closeOnSelect
+                                        />
+                                    </>
+                                )}
+
+                                {state.overrideTypes.includes("description") && (
+                                    <Input
+                                        label="New description"
+                                        value={state.values.overrideDescription}
+                                        onChangeText={(v) => setVal("overrideDescription", v)}
+                                        placeholder="Optional rename"
+                                        autoCapitalize="sentences"
+                                        returnKeyType="done"
+                                    />
+                                )}
+                            </View>
                         </View>
-                    </View>
+                    </Section>
                 </ScrollView>
             </KeyboardAvoidingView>
         </SafeAreaView>
@@ -390,7 +400,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "space-between",
         paddingHorizontal: 25,
-        paddingVertical: 25,
+        paddingVertical: 15,
     },
     headerBtn: {
         minWidth: 60,

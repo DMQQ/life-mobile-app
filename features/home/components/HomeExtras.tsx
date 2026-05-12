@@ -8,6 +8,7 @@ import { Pressable, StyleSheet, Text, View } from "react-native"
 import Color from "color"
 import moment from "moment"
 import GroupSelector from "@/components/ui/GroupSelector"
+import Section from "@/components/ui/Section"
 
 const GET_HOME_EXTRAS = gql`
     query HomeExtras($filters: GetWalletFilters, $take: Int) {
@@ -69,22 +70,27 @@ export default function HomeExtras() {
     const allExpenses = (data?.wallet?.expenses2 ?? []).flatMap((m: any) => m.expenses ?? [])
 
     return (
-        <View style={styles.card}>
-            <Text style={styles.sectionTitle}>{active === "limits" ? "Monthly Limits" : "Recent activity"}</Text>
+        <Section title={active === "limits" ? "Monthly Limits" : "Recent activity"}>
+            <View style={styles.card}>
+                {active === "limits" ? (
+                    <LimitsContent limits={limits} />
+                ) : (
+                    <SubscriptionCalendar
+                        style={{ padding: 0, backgroundColor: Colors.primary_lighter }}
+                        expenses={allExpenses}
+                    />
+                )}
 
-            {active === "limits" ? (
-                <LimitsContent limits={limits} />
-            ) : (
-                <SubscriptionCalendar
-                    style={{ padding: 0, backgroundColor: Colors.primary_lighter }}
-                    // subscriptions={activeSubscriptions}
-                    subscriptions={[]}
-                    expenses={allExpenses}
+                <GroupSelector
+                    options={[
+                        { label: "calendar", value: "calendar" as const },
+                        { label: "limits", value: "limits" as const },
+                    ]}
+                    value={active}
+                    onChange={(val) => setActive(val)}
                 />
-            )}
-
-            <GroupSelector options={[{ label: "calendar", value: "calendar" as const }, { label: "limits", value: "limits" as const }]} value={active} onChange={(val) => setActive(val)} />
-        </View>
+            </View>
+        </Section>
     )
 }
 
@@ -125,11 +131,7 @@ function LimitsContent({ limits }: { limits: any[] }) {
 const styles = StyleSheet.create({
     card: {
         width: Layout.screen.width - 30,
-        alignSelf: "center",
-        backgroundColor: Colors.primary_lighter,
-        borderRadius: 14,
-        padding: 14,
-        gap: 12,
+        padding: 15,
     },
     sectionTitle: {
         fontSize: 11,

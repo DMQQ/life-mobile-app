@@ -9,6 +9,7 @@ import Colors from "@/constants/Colors"
 import Text from "@/components/ui/Text/Text"
 import { navigationRef } from "@/navigation"
 import { useWeekEvents } from "../hooks/query/useGetOccurrencesQuery"
+import { useNavigation } from "@react-navigation/native"
 
 const { width } = Dimensions.get("window")
 const TIME_COL_W = 44
@@ -93,6 +94,7 @@ interface WeekPageProps {
 }
 
 const WeekPage = memo(({ weekStart, selectedDate, onDayPress, onScroll, bottomPad }: WeekPageProps) => {
+    const navigation = useNavigation<any>()
     const days = useMemo(
         () => Array.from({ length: 7 }, (_, i) => moment(weekStart).add(i, "days").format("YYYY-MM-DD")),
         [weekStart],
@@ -143,6 +145,11 @@ const WeekPage = memo(({ weekStart, selectedDate, onDayPress, onScroll, bottomPa
                                 activeOpacity={1}
                                 onPress={() => onDayPress(date)}
                                 style={{ width: DAY_COL_W }}
+                                onLongPress={() =>
+                                    navigation.navigate("TimelineCreate", {
+                                        selectedDate: date,
+                                    })
+                                }
                             >
                                 <View style={styles.dayColumnContent}>
                                     {HOURS.map((h) => (
@@ -220,7 +227,13 @@ interface WeekViewProps {
     onDayPress?: (date: string) => void
 }
 
-export default function WeekView({ selectedDate, setSelected, contentPaddingTop, onScroll, onDayPress }: WeekViewProps) {
+export default function WeekView({
+    selectedDate,
+    setSelected,
+    contentPaddingTop,
+    onScroll,
+    onDayPress,
+}: WeekViewProps) {
     const { bottom } = useSafeAreaInsets()
     const pagerRef = useRef<PagerView>(null)
     const currentWeekStart = moment(selectedDate).startOf("isoWeek").format("YYYY-MM-DD")

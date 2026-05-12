@@ -8,6 +8,7 @@ import Colors from "@/constants/Colors"
 import Text from "@/components/ui/Text/Text"
 import { useRangeEvents, CalendarOccurrenceItem } from "../hooks/query/useGetOccurrencesQuery"
 import { navigationRef } from "@/navigation"
+import { useNavigation } from "@react-navigation/native"
 
 const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
 const TODAY = moment().format("YYYY-MM-DD")
@@ -52,6 +53,8 @@ interface WeekRowProps {
 }
 
 const WeekRow = memo(({ dayData, selectedDate, currentMonth, onDayPress }: WeekRowProps) => {
+    const navigation = useNavigation<any>()
+
     return (
         <View style={styles.weekRow}>
             {dayData.map(({ date, events }) => {
@@ -63,6 +66,11 @@ const WeekRow = memo(({ dayData, selectedDate, currentMonth, onDayPress }: WeekR
                     <TouchableOpacity
                         key={date}
                         onPress={() => onDayPress(date)}
+                        onLongPress={() =>
+                            navigation.navigate("TimelineCreate", {
+                                selectedDate: date,
+                            })
+                        }
                         activeOpacity={0.7}
                         style={[
                             styles.dayCell,

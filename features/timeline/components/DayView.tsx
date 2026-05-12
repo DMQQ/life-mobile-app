@@ -24,12 +24,7 @@ interface DayPageProps {
 }
 
 const DayPage = memo(({ date, contentPaddingTop, onScroll }: DayPageProps) => (
-    <TimelineDayPage
-        date={date}
-        switchView="timeline"
-        contentPaddingTop={contentPaddingTop}
-        onScroll={onScroll}
-    />
+    <TimelineDayPage date={date} contentPaddingTop={contentPaddingTop} onScroll={onScroll} />
 ))
 
 interface DayViewProps {
@@ -48,10 +43,7 @@ export default function DayView({ selectedDate, setSelected, contentPaddingTop, 
     const [initialLocalPage, setInitialLocalPage] = useState(WINDOW_CENTER)
     const [pagerKey, setPagerKey] = useState(0)
 
-    const pages = useMemo(
-        () => Array.from({ length: WINDOW_SIZE }, (_, i) => basePage + i),
-        [basePage],
-    )
+    const pages = useMemo(() => Array.from({ length: WINDOW_SIZE }, (_, i) => basePage + i), [basePage])
 
     useEffect(() => {
         const localPos = targetGlobalPage - basePage
@@ -102,11 +94,7 @@ export default function DayView({ selectedDate, setSelected, contentPaddingTop, 
         >
             {pages.map((globalPage) => (
                 <View key={`d${globalPage}`} style={{ flex: 1 }}>
-                    <DayPage
-                        date={dayForPage(globalPage)}
-                        contentPaddingTop={contentPaddingTop}
-                        onScroll={onScroll}
-                    />
+                    <DayPage date={dayForPage(globalPage)} contentPaddingTop={contentPaddingTop} onScroll={onScroll} />
                 </View>
             ))}
         </PagerView>

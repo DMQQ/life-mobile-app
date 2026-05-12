@@ -21,6 +21,7 @@ import { BottomSheetModalProvider } from "@gorhom/bottom-sheet"
 import { SearchMenuProvider } from "./contexts/SearchMenuContext"
 import { AiChatProvider } from "./contexts/AiChatContext"
 import GlobalAiChat from "./features/ai/GlobalAiChat"
+import { KeyboardProvider } from "react-native-keyboard-controller"
 
 Sentry.init({
     enableNative: true,
@@ -89,25 +90,27 @@ export default Sentry.wrap(function App() {
     return (
         <SafeAreaProvider style={{ flex: 1, backgroundColor: Colors.primary }}>
             <ErrorBoundary>
-                <GestureHandlerRootView style={{ flex: 1 }}>
-                    <BottomSheetModalProvider>
-                        <ThemeContextProvider>
-                            <ScrollYContextProvider>
-                                <SearchMenuProvider>
-                                    <ApolloProvider client={apolloClient}>
-                                        <Provider store={store}>
-                                            <AiChatProvider>
-                                                <StatusBar />
-                                                <Navigation />
-                                                <GlobalAiChat />
-                                            </AiChatProvider>
-                                        </Provider>
-                                    </ApolloProvider>
-                                </SearchMenuProvider>
-                            </ScrollYContextProvider>
-                        </ThemeContextProvider>
-                    </BottomSheetModalProvider>
-                </GestureHandlerRootView>
+                <KeyboardProvider>
+                    <GestureHandlerRootView style={{ flex: 1 }}>
+                        <BottomSheetModalProvider>
+                            <ThemeContextProvider>
+                                <ScrollYContextProvider>
+                                    <SearchMenuProvider>
+                                        <ApolloProvider client={apolloClient}>
+                                            <Provider store={store}>
+                                                <AiChatProvider>
+                                                    <StatusBar />
+                                                    <Navigation />
+                                                    <GlobalAiChat />
+                                                </AiChatProvider>
+                                            </Provider>
+                                        </ApolloProvider>
+                                    </SearchMenuProvider>
+                                </ScrollYContextProvider>
+                            </ThemeContextProvider>
+                        </BottomSheetModalProvider>
+                    </GestureHandlerRootView>
+                </KeyboardProvider>
             </ErrorBoundary>
         </SafeAreaProvider>
     )

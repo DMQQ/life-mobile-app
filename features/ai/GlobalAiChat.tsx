@@ -5,17 +5,8 @@ import { gql, useMutation, useQuery } from "@apollo/client"
 import Color from "color"
 import { ExpoSpeechRecognitionModule, useSpeechRecognitionEvent } from "expo-speech-recognition"
 import { useCallback, useEffect, useRef, useState } from "react"
-import {
-    ActivityIndicator,
-    FlatList,
-    KeyboardAvoidingView,
-    Modal,
-    Platform,
-    Pressable,
-    StyleSheet,
-    TextInput,
-    View,
-} from "react-native"
+import { ActivityIndicator, FlatList, Modal, Pressable, StyleSheet, TextInput, View } from "react-native"
+import { KeyboardProvider, useReanimatedKeyboardAnimation } from "react-native-keyboard-controller"
 import MaskedView from "@react-native-masked-view/masked-view"
 import Animated, {
     Easing,
@@ -185,7 +176,7 @@ const BUTTON_X = Layout.window.width - 45
 const BUTTON_Y = Layout.window.height - 50
 const CIRCLE_SIZE = Math.ceil(Math.sqrt(Math.pow(BUTTON_X, 2) + Math.pow(BUTTON_Y, 2))) * 2 + 60
 
-export default function GlobalAiChat() {
+function GlobalAiChatInner() {
     const { isOpen, close } = useAiChat()
     const [messages, setMessages] = useState<ChatMessage[]>([])
     const [inputText, setInputText] = useState("")
@@ -202,6 +193,7 @@ export default function GlobalAiChat() {
     const animProgress = useSharedValue(0)
     const dragX = useSharedValue(0)
     const dragY = useSharedValue(0)
+    const { height: keyboardHeight } = useReanimatedKeyboardAnimation()
 
     useEffect(() => {
         if (isOpen) {
@@ -246,9 +238,9 @@ export default function GlobalAiChat() {
                     }
                 })
             } else {
-                dragX.value = withSpring(0, { damping: 22, stiffness: 220 })
-                dragY.value = withSpring(0, { damping: 22, stiffness: 220 })
-                animProgress.value = withSpring(1, { damping: 22, stiffness: 220 })
+                dragX.value = withTiming(0)
+                dragY.value = withTiming(0)
+                animProgress.value = withTiming(1)
             }
         })
 
@@ -280,6 +272,9 @@ export default function GlobalAiChat() {
                 : withTiming(1, { duration: 200 })
     }, [inputMode, busy])
     const pulseStyle = useAnimatedStyle(() => ({ transform: [{ scale: pulse.value }] }))
+    const inputRowAnimatedStyle = useAnimatedStyle(() => ({
+        transform: [{ translateY: keyboardHeight.value }],
+    }))
 
     const scrollToBottom = useCallback(() => {
         setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 80)
@@ -567,67 +562,73 @@ export default function GlobalAiChat() {
                                 }
                             />
 
-                            <KeyboardAvoidingView
-                                style={s.inputRow}
-                                behavior={Platform.OS === "ios" ? "padding" : "height"}
-                                keyboardVerticalOffset={80}
-                            >
-                                {isRecording ? (
-                                    <Animated.View style={[pulseStyle, { flex: 1 }]}>
-                                        <GlassView tintColor={Colors.error} style={s.voiceActiveRow}>
-                                            <Pressable style={s.voiceActiveInner} onPress={stopVoice}>
-                                                <Ionicons name="stop" size={20} color="#fff" />
-                                                <Text style={s.voiceActiveText}>
-                                                    {partialText || "Listening… tap to stop"}
-                                                </Text>
-                                            </Pressable>
-                                        </GlassView>
-                                    </Animated.View>
-                                ) : (
-                                    <>
-                                        <GlassView style={s.iconBtn}>
-                                            <Pressable style={s.iconBtnInner} onPress={startVoice} disabled={busy}>
-                                                <Ionicons name="mic" size={20} color={Colors.foreground_secondary} />
-                                            </Pressable>
-                                        </GlassView>
-                                        <GlassView style={s.textInput}>
-                                            <TextInput
-                                                style={s.textInputInner}
-                                                value={inputText}
-                                                onChangeText={setInputText}
-                                                placeholder="Ask anything…"
-                                                placeholderTextColor={Colors.foreground_disabled}
-                                                onSubmitEditing={() => {
-                                                    send(inputText)
-                                                }}
-                                                returnKeyType="send"
-                                                editable={!busy}
-                                                multiline
-                                            />
-                                        </GlassView>
-                                        <GlassView
-                                            tintColor={canSend ? Colors.secondary : undefined}
-                                            style={[s.iconBtn, !canSend && { opacity: 0.4 }]}
-                                        >
-                                            <Pressable
-                                                style={s.iconBtnInner}
-                                                disabled={!canSend}
-                                                onPress={() => {
-                                                    send(inputText)
-                                                }}
+                            <Animated.View style={[s.inputRow, inputRowAnimatedStyle]}>
+                                <GlassView style={s.inputInner}>
+                                    {isRecording ? (
+                                        <Animated.View style={[pulseStyle, { flex: 1 }]}>
+                                            <GlassView tintColor={Colors.error} style={s.voiceActiveRow}>
+                                                <Pressable style={s.voiceActiveInner} onPress={stopVoice}>
+                                                    <Ionicons name="stop" size={20} color="#fff" />
+                                                    <Text style={s.voiceActiveText}>
+                                                        {partialText || "Listening… tap to stop"}
+                                                    </Text>
+                                                </Pressable>
+                                            </GlassView>
+                                        </Animated.View>
+                                    ) : (
+                                        <>
+                                            <GlassView style={s.iconBtn}>
+                                                <Pressable style={s.iconBtnInner} onPress={startVoice} disabled={busy}>
+                                                    <Ionicons
+                                                        name="mic"
+                                                        size={20}
+                                                        color={Colors.foreground_secondary}
+                                                    />
+                                                </Pressable>
+                                            </GlassView>
+                                            <GlassView style={s.textInput}>
+                                                <TextInput
+                                                    style={s.textInputInner}
+                                                    value={inputText}
+                                                    onChangeText={setInputText}
+                                                    placeholder="Ask anything…"
+                                                    placeholderTextColor={Colors.foreground_disabled}
+                                                    onSubmitEditing={() => {
+                                                        send(inputText)
+                                                    }}
+                                                    returnKeyType="send"
+                                                    editable={!busy}
+                                                    multiline
+                                                />
+                                            </GlassView>
+                                            <GlassView
+                                                tintColor={canSend ? Colors.secondary : undefined}
+                                                style={[s.iconBtn, !canSend && { opacity: 0.4 }]}
                                             >
-                                                <Ionicons name="send" size={20} color="#fff" />
-                                            </Pressable>
-                                        </GlassView>
-                                    </>
-                                )}
-                            </KeyboardAvoidingView>
+                                                <Pressable
+                                                    style={s.iconBtnInner}
+                                                    disabled={!canSend}
+                                                    onPress={() => {
+                                                        send(inputText)
+                                                    }}
+                                                >
+                                                    <Ionicons name="send" size={20} color="#fff" />
+                                                </Pressable>
+                                            </GlassView>
+                                        </>
+                                    )}
+                                </GlassView>
+                            </Animated.View>
                         </View>
                     </MaskedView>
                 </Animated.View>
             </GestureDetector>
         </Modal>
     )
+}
+
+export default function GlobalAiChat() {
+    return <GlobalAiChatInner />
 }
 
 const ThinkingBubble = () => {
@@ -725,14 +726,17 @@ const s = StyleSheet.create({
     },
     errorText: { color: Colors.error, fontSize: 13, flex: 1 },
     inputRow: {
+        position: "absolute",
+        bottom: 15,
+        left: 15,
+        right: 15,
+    },
+    inputInner: {
+        borderRadius: 30,
         flexDirection: "row",
         alignItems: "flex-start",
-        paddingHorizontal: 16,
-        paddingVertical: 12,
+        padding: 15,
         gap: 8,
-        backgroundColor: Colors.primary_lighter,
-        borderTopWidth: StyleSheet.hairlineWidth,
-        borderTopColor: Color(Colors.primary_lighter).lighten(2.5).string(),
         height: 90,
     },
     textInput: { flex: 1, borderRadius: 100 },

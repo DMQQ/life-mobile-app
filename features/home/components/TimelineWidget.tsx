@@ -1,20 +1,11 @@
 import Colors from "@/constants/Colors"
-import Layout from "@/constants/Layout"
 import { GET_OCCURRENCES_QUERY } from "@/features/timeline/hooks/query/useGetOccurrencesQuery"
-import { navigationRef } from "@/navigation"
 import { useQuery } from "@apollo/client"
-import { Feather } from "@expo/vector-icons"
 import moment from "moment"
-import { Pressable, StyleSheet, Text, View } from "react-native"
+import { StyleSheet, Text, View } from "react-native"
 import Color from "color"
-import Ripple from "react-native-material-ripple"
 import TimelineItem from "@/features/timeline/components/TimelineItem"
-
-function priorityColor(p: number) {
-    if (p >= 7) return "#FF3B30"
-    if (p >= 4) return "#007AFF"
-    return "#34C759"
-}
+import Section from "@/components/ui/Section"
 
 export default function TimelineWidget() {
     const { data } = useQuery(GET_OCCURRENCES_QUERY, {
@@ -24,37 +15,23 @@ export default function TimelineWidget() {
     const events = data?.occurrences ?? []
 
     return (
-        <View style={styles.card}>
-            <View style={styles.header}>
-                <Text style={styles.sectionTitle}>Today</Text>
-                <Ripple
-                    style={styles.viewAll}
-                    onPress={() => navigationRef.current?.navigate("TimelineScreens" as any)}
-                >
-                    <Text style={styles.viewAllText}>View all</Text>
-                    <Feather name="chevron-right" size={12} color={Colors.secondary} />
-                </Ripple>
+        <Section title="Today">
+            <View style={styles.card}>
+                {events.length === 0 ? (
+                    <Text style={styles.empty}>No events today</Text>
+                ) : (
+                    events.slice(0, 5).map((event: any) => {
+                        return <TimelineItem key={event.id} {...event} />
+                    })
+                )}
             </View>
-
-            {events.length === 0 ? (
-                <Text style={styles.empty}>No events today</Text>
-            ) : (
-                events.slice(0, 5).map((event: any) => {
-                    return <TimelineItem key={event.id} {...event} />
-                })
-            )}
-        </View>
+        </Section>
     )
 }
 
 const styles = StyleSheet.create({
     card: {
-        width: Layout.screen.width - 30,
-        alignSelf: "center",
-        backgroundColor: Colors.primary_lighter,
-        borderRadius: 14,
-        padding: 14,
-        gap: 10,
+        padding: 15,
     },
     header: {
         flexDirection: "row",

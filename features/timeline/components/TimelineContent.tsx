@@ -56,6 +56,11 @@ export default function TimelineContent({
 
     const activeKey = isSearchActive ? "search" : switchView
 
+    const onDayPress = useCallback((date: string) => {
+        setSelected(date)
+        setSwitchView("day")
+    }, [])
+
     return (
         <Animated.View key={activeKey} entering={enterAnim} exiting={exitAnim} style={{ flex: 1 }}>
             {isSearchActive ? (
@@ -97,10 +102,7 @@ export default function TimelineContent({
                     selectedDate={selectedDate}
                     setSelected={setSelected}
                     contentPaddingTop={compactContentPaddingTop}
-                    onDayPress={(date) => {
-                        setSelected(date)
-                        setSwitchView("day")
-                    }}
+                    onDayPress={onDayPress}
                 />
             ) : (
                 <WeekView
@@ -108,10 +110,7 @@ export default function TimelineContent({
                     setSelected={setSelected}
                     contentPaddingTop={compactContentPaddingTop}
                     onScroll={onScroll}
-                    onDayPress={(date) => {
-                        setSelected(date)
-                        setSwitchView("day")
-                    }}
+                    onDayPress={onDayPress}
                 />
             )}
         </Animated.View>

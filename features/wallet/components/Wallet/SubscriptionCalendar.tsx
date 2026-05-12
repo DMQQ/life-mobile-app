@@ -8,6 +8,7 @@ import WalletItem from "./WalletItem"
 import { useNavigation } from "@react-navigation/native"
 import Color from "color"
 import Layout from "@/constants/Layout"
+import Section from "@/components/ui/Section"
 
 interface Subscription {
     id: string
@@ -39,7 +40,7 @@ interface Expense {
 }
 
 interface Props {
-    subscriptions: Subscription[]
+    subscriptions?: Subscription[]
     expenses?: Expense[]
 
     style?: StyleProp<ViewStyle>
@@ -166,8 +167,8 @@ const DayCell = memo(
     },
 )
 
-export default function SubscriptionCalendar({ subscriptions, expenses = [], style }: Props) {
-    const [currentMonth, setCurrentMonth] = useState(moment().startOf("month"))
+export default function SubscriptionCalendar({ subscriptions = [], expenses = [], style }: Props) {
+    const currentMonth = moment().startOf("month")
     const [selectedDay, setSelectedDay] = useState<string | null>(null)
     const navigation = useNavigation<any>()
 
@@ -244,16 +245,7 @@ export default function SubscriptionCalendar({ subscriptions, expenses = [], sty
             <View style={[styles.calendarCard, style]}>
                 <View style={styles.headerCenter}>
                     <View style={styles.monthNav}>
-                        {/* <Ripple
-                            onPress={() => setCurrentMonth((m) => m.clone().subtract(1, "month"))}
-                            style={styles.navBtn}
-                        >
-                            <AntDesign name="left" size={13} color="rgba(255,255,255,0.5)" />
-                        </Ripple> */}
                         <Text style={styles.monthTitle}>{currentMonth.format("MMMM YYYY")}</Text>
-                        {/* <Ripple onPress={() => setCurrentMonth((m) => m.clone().add(1, "month"))} style={styles.navBtn}>
-                            <AntDesign name="right" size={13} color="rgba(255,255,255,0.5)" />
-                        </Ripple> */}
                     </View>
                 </View>
 
@@ -281,33 +273,50 @@ export default function SubscriptionCalendar({ subscriptions, expenses = [], sty
 
             {selectedDay && (selectedSubs.length > 0 || selectedExpenses.length > 0) && (
                 <View style={styles.detail}>
-                    <Text style={styles.detailDate}>{moment(selectedDay).format("dddd, MMM D")}</Text>
+                    <Section title={moment(selectedDay).format("dddd, MMM D")}>
+                        {selectedExpenses.length > 0 && (
+                            <View style={styles.detailSection}>
+                                {selectedExpenses.map((e, index) => (
+                                    <WalletItem
+                                        key={e.id}
+                                        {...e}
+                                        animatedStyle={{
+                                            borderWidth: 0,
+                                            marginBottom: 0,
+                                            borderRadius: 0,
+                                            borderBottomWidth: selectedExpenses.length - 1 === index ? 0 : 1,
+                                            marginTop: 0,
+                                        }}
+                                        handlePress={() => {
+                                            navigation.navigate("WalletScreens", {
+                                                screen: "Expense",
+                                                params: { expense: e },
+                                            })
+                                        }}
+                                    />
+                                ))}
+                            </View>
+                        )}
 
-                    {selectedExpenses.length > 0 && (
-                        <View style={styles.detailSection}>
-                            {selectedExpenses.map((e) => (
-                                <WalletItem
-                                    key={e.id}
-                                    {...e}
-                                    animatedStyle={{} as any}
-                                    handlePress={() => {
-                                        navigation.navigate("WalletScreens", {
-                                            screen: "Expense",
-                                            params: { expense: e },
-                                        })
-                                    }}
-                                />
-                            ))}
-                        </View>
-                    )}
-
-                    {selectedSubs.length > 0 && (
-                        <View style={styles.detailSection}>
-                            {selectedSubs.map((s, i) => (
-                                <SubscriptionItem key={s.id} subscription={s} index={i} onPress={() => {}} />
-                            ))}
-                        </View>
-                    )}
+                        {selectedSubs.length > 0 && (
+                            <View style={styles.detailSection}>
+                                {selectedSubs.map((s, i) => (
+                                    <SubscriptionItem
+                                        key={s.id}
+                                        subscription={s}
+                                        index={i}
+                                        onPress={() => {}}
+                                        style={{
+                                            borderWidth: 0,
+                                            marginBottom: 0,
+                                            borderRadius: 0,
+                                            borderBottomWidth: selectedSubs.length - 1 === i ? 0 : 1,
+                                        }}
+                                    />
+                                ))}
+                            </View>
+                        )}
+                    </Section>
                 </View>
             )}
         </View>
@@ -460,9 +469,7 @@ const styles = StyleSheet.create({
         letterSpacing: 0.5,
         marginBottom: 15,
     },
-    detailSection: {
-        gap: 8,
-    },
+    detailSection: {},
     expenseRow: {
         flexDirection: "row",
         alignItems: "center",
