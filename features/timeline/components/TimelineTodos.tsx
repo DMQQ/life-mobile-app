@@ -28,7 +28,7 @@ export default function TimelineTodos(props: {
                 title="Timeline todos"
                 headerRight={
                     <IconButton
-                        icon={<AntDesign name="plus" size={12} color={Colors.text_dark} />}
+                        icon={<AntDesign name="pull-request" size={12} color={Colors.text_dark} />}
                         onPress={handleLongPress}
                     />
                 }

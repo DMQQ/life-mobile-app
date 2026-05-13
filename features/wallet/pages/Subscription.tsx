@@ -2,7 +2,7 @@ import Text from "@/components/ui/Text/Text"
 import { gql, useQuery } from "@apollo/client"
 import { Feather } from "@expo/vector-icons"
 import moment from "moment"
-import React, { useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { ActivityIndicator, StyleSheet, View } from "react-native"
 
 import Header from "@/components/ui/Header/Header"
@@ -216,9 +216,6 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                 initialTitleFontSize={subscription?.description?.length > 25 ? 40 : 50}
                 animatedSubtitle={`Amount: ${subscription.amount.toFixed(2)}zł`}
                 subtitleStyles={{ fontSize: 25, color: muted, marginTop: 10, fontWeight: "400" }}
-                renderAnimatedItem={({ scrollY }) => (
-                    <AnimatedSubscriptionHeader scrollY={scrollY!} subscription={subscription} />
-                )}
             />
 
             <Animated.ScrollView
@@ -426,87 +423,6 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                 loading={isSubscriptionLoading}
             />
         </View>
-    )
-}
-
-const AnimatedSubscriptionHeader = ({
-    scrollY,
-    subscription,
-}: {
-    scrollY: SharedValue<number>
-    subscription: Subscription
-}) => {
-    return (
-        <Animated.View
-            style={[
-                useAnimatedStyle(() => {
-                    const scrollValue = scrollY?.value ?? 0
-
-                    return {
-                        opacity: interpolate(scrollValue, [0, 130, 150, 160], [0, 0, 0.75, 1], Extrapolation.CLAMP),
-                        transform: [
-                            {
-                                translateY: interpolate(scrollValue, [0, 160], [-25, 0], Extrapolation.CLAMP),
-                            },
-                            { scale: interpolate(scrollValue, [0, 160], [0.5, 1], Extrapolation.CLAMP) },
-                        ],
-                    }
-                }, [scrollY]),
-                { paddingHorizontal: 15, paddingLeft: 10 },
-            ]}
-        >
-            <View
-                style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    paddingBottom: 15,
-                    paddingHorizontal: 5,
-                }}
-            >
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-                    <View
-                        style={{
-                            backgroundColor: lowOpacity(subscription.isActive ? Colors.secondary : Colors.error, 0.2),
-                            paddingHorizontal: 15,
-                            paddingVertical: 5,
-                            borderRadius: 100,
-                            flexDirection: "row",
-                        }}
-                    >
-                        <Text
-                            variant="body"
-                            style={{
-                                color: subscription.isActive ? Colors.secondary : Colors.error,
-                                fontWeight: "600",
-                            }}
-                        >
-                            {subscription.isActive ? "Active" : "Inactive"}
-                        </Text>
-                    </View>
-                    <Text
-                        style={{
-                            color: Colors.foreground_disabled,
-                            fontSize: 16,
-                        }}
-                    >
-                        Due on{" "}
-                        {moment(parseInt(subscription.nextBillingDate || "0")).diff(moment(), "days") < 0
-                            ? "Overdue"
-                            : moment(parseInt(subscription.nextBillingDate || "0")).format("DD.MM.YYYY")}
-                    </Text>
-                </View>
-                <Text
-                    style={{
-                        color: "#F07070",
-                        fontSize: 18,
-                        fontWeight: "600",
-                    }}
-                >
-                    -{subscription?.amount.toFixed(2)}zł
-                </Text>
-            </View>
-        </Animated.View>
     )
 }
 

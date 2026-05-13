@@ -1,10 +1,10 @@
 import { StyleSheet, View } from "react-native"
-import { useSafeAreaInsets } from "react-native-safe-area-context"
 import GlassIconButton from "./GlassIconButton"
 import GlassButton from "./GlassButton"
 import Text from "./Text/Text"
 import Colors from "@/constants/Colors"
 import { Feather } from "@expo/vector-icons"
+import Antdesign from "@expo/vector-icons/build/AntDesign"
 
 type FeatherName = React.ComponentProps<typeof Feather>["name"]
 
@@ -22,7 +22,6 @@ interface ModalHeaderProps {
 
 export default function ModalHeader({
     onClose,
-    closeIcon = "x",
     onSave,
     saveLabel = "Save",
     saveIcon,
@@ -31,12 +30,16 @@ export default function ModalHeader({
     title,
     padTop = true,
 }: ModalHeaderProps) {
-    const insets = useSafeAreaInsets()
-
     return (
         <View style={[styles.container, padTop && { paddingTop: 15 }]}>
             <View style={styles.side}>
-                {onClose && <GlassIconButton name={closeIcon} onPress={onClose} size={18} padding={12} />}
+                {onClose && (
+                    <GlassIconButton
+                        icon={<Antdesign name="close" size={20} color={Colors.foreground} />}
+                        padding={15}
+                        onPress={onClose}
+                    />
+                )}
             </View>
 
             {title ? (
@@ -83,7 +86,7 @@ const styles = StyleSheet.create({
         flex: 2,
         textAlign: "center",
         fontWeight: "600",
-        color: Colors.foreground,
+        color: Colors.text_light,
         fontSize: 15,
     },
     titlePlaceholder: {

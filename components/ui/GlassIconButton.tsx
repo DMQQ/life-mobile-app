@@ -63,7 +63,10 @@ export default function GlassIconButton({
             hitSlop={hitSlop}
             style={[positionStyle, animatedStyle, style]}
         >
-            <GlassView tintColor={tintColor} style={[styles.container, { padding }, disabled && styles.disabled]}>
+            <GlassView
+                {...(tintColor && { tintColor })}
+                style={[styles.container, { padding }, disabled && styles.disabled]}
+            >
                 {loading ? (
                     <ActivityIndicator size={size} color={color} />
                 ) : icon ? (

@@ -1,4 +1,4 @@
-import { Button } from "@/components"
+import { Button, ModalHeader } from "@/components"
 import IconCloseButton from "@/components/ui/Button/IconCloseButton"
 import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
@@ -44,10 +44,11 @@ export default function NotificationsScreen({ navigation }: HomeScreenProps<"Hom
 
     return (
         <View style={styles.container}>
-            <BlurView intensity={20} tint="dark" style={styles.blur} />
             <View style={styles.content}>
-                <View style={styles.header}>
-                    <Text variant="body" style={styles.title}>Notifications</Text>
+                {/* <View style={styles.header}>
+                    <Text variant="body" style={styles.title}>
+                        Notifications
+                    </Text>
                     <View style={styles.headerLeft}>
                         {unreadCount > 0 && (
                             <Button
@@ -61,7 +62,16 @@ export default function NotificationsScreen({ navigation }: HomeScreenProps<"Hom
                         )}
                         <IconCloseButton onPress={handleClose} />
                     </View>
-                </View>
+                </View> */}
+
+                <ModalHeader
+                    onClose={handleClose}
+                    onSave={handleClearAll}
+                    saveLabel="Clear all"
+                    saveDisabled={unreadCount === 0}
+                    saveLoading={loading}
+                    title={`Notifications${unreadCount > 0 ? ` (${unreadCount})` : ""}`}
+                />
                 <View style={styles.body}>
                     <WalletNotifications data={data} error={error} loading={loading} />
                 </View>

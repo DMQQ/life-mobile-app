@@ -15,7 +15,7 @@ import * as yup from "yup"
 import useEditWallet from "../hooks/useEditWallet"
 import { WalletScreens } from "../Main"
 import { SafeAreaView } from "react-native-safe-area-context"
-import { Button } from "@/components"
+import { Button, ModalHeader } from "@/components"
 import AnimatedSelector from "@/components/ui/AnimatedSelector"
 
 const validationSchema = yup.object().shape({
@@ -140,16 +140,7 @@ export default function EditBalance({ navigation }: WalletScreens<"EditBalance">
 
     return (
         <SafeAreaView style={styles.container}>
-            <View style={styles.topBar}>
-                <IconButton
-                    icon={<AntDesign name="close" size={24} color={Colors.foreground} />}
-                    onPress={() => navigation.goBack()}
-                />
-                <Text variant="title" style={styles.modalTitle}>
-                    Edit balance
-                </Text>
-                <View style={{ width: 44 }} />
-            </View>
+            <ModalHeader title="Edit balance" onClose={() => navigation.goBack()} />
 
             <Formik
                 validationSchema={validationSchema}
@@ -159,7 +150,8 @@ export default function EditBalance({ navigation }: WalletScreens<"EditBalance">
                     await editBalance({
                         variables: {
                             input: {
-                                amount: values.balance && values.balance.trim() !== "" ? parseInt(values.balance) : null,
+                                amount:
+                                    values.balance && values.balance.trim() !== "" ? parseInt(values.balance) : null,
                                 paycheck:
                                     values.monthlySalary && values.monthlySalary.trim() !== ""
                                         ? parseFloat(values.monthlySalary)
@@ -291,7 +283,11 @@ export default function EditBalance({ navigation }: WalletScreens<"EditBalance">
                                 {paycheckOption === "custom" && (
                                     <DatePicker
                                         mode="single"
-                                        placeholder={selectedDate ? dayjs(selectedDate).format("YYYY-MM-DD") : "Select custom date"}
+                                        placeholder={
+                                            selectedDate
+                                                ? dayjs(selectedDate).format("YYYY-MM-DD")
+                                                : "Select custom date"
+                                        }
                                         dates={{ start: selectedDate ?? new Date(), end: selectedDate ?? new Date() }}
                                         setDates={({ start }) => {
                                             setSelectedDate(start)

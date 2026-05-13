@@ -42,7 +42,7 @@ export default function GroupSelector<V>({ options, value, onChange }: GroupSele
                 translateX.value = selectedIndex * step
                 isFirstLayout.current = false
             } else {
-                translateX.value = withTiming(selectedIndex * step)
+                translateX.value = withTiming(selectedIndex * step, { duration: 150 })
             }
         }
     }, [selectedIndex, step, segmentWidth])

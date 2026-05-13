@@ -1,4 +1,4 @@
-import { AnimatedSelector } from "@/components"
+import { AnimatedSelector, ModalHeader } from "@/components"
 import Button from "@/components/ui/Button/Button"
 import Text from "@/components/ui/Text/Text"
 import Colors, { defaultColors } from "@/constants/Colors"
@@ -12,14 +12,7 @@ import { reloadAppAsync } from "expo"
 import { BlurView } from "expo-blur"
 import * as SecureStore from "expo-secure-store"
 import React, { useEffect, useState } from "react"
-import {
-    FlatList,
-    ScrollView,
-    StyleSheet,
-    Switch,
-    TouchableOpacity,
-    View,
-} from "react-native"
+import { FlatList, ScrollView, StyleSheet, Switch, TouchableOpacity, View } from "react-native"
 import Feedback from "react-native-haptic-feedback"
 import Ripple from "react-native-material-ripple"
 import * as ExpoAppleWatch from "@/modules/expo-apple-watch"
@@ -39,19 +32,110 @@ interface ColorPalette {
 }
 
 const colorPalettes: ColorPalette[] = [
-    { name: "Deep dark", primary: "#000", secondary: defaultColors.secondary, ternary: "#333", foreground: "#fff", category: "Finance" },
-    { name: "24.12.2025", primary: "#111111", secondary: "#334af1", ternary: "#f13c3c", foreground: "#f5f5f5", category: "Finance" },
-    { name: "Default", primary: defaultColors.primary, secondary: defaultColors.secondary, ternary: defaultColors.ternary, foreground: defaultColors.foreground, category: "Finance" },
-    { name: "DMQ dark", primary: "#111111", secondary: "#00a97f", ternary: "#8685ef", foreground: "#faf8ff", category: "Finance" },
-    { name: "DMQ2 dark", primary: "#00001E", secondary: "#7985ff", ternary: "#128583", foreground: "#faf8ff", category: "Finance" },
-    { name: "Charcoal Mint", primary: "#0D1B1E", secondary: "#00FFB3", ternary: "#F7C948", foreground: "#E6FFF9", category: "Finance" },
-    { name: "Noir Emerald", primary: "#101415", secondary: "#50FA7B", ternary: "#FF79C6", foreground: "#F8FFF8", category: "Finance" },
-    { name: "Graphite Mint", primary: "#1A1C1D", secondary: "#A3FFD6", ternary: "#FFD580", foreground: "#F1FFF8", category: "Finance" },
-    { name: "Velvet Night", primary: "#140D1C", secondary: "#C084FC", ternary: "#FFD6A5", foreground: "#FAF5FF", category: "Finance" },
-    { name: "Deep Jade", primary: "#0E1A17", secondary: "#00DFA2", ternary: "#FF9B85", foreground: "#E6FFF6", category: "Finance" },
-    { name: "Midnight Raven", primary: "#08090A", secondary: "#FF4C61", ternary: "#3DDC97", foreground: "#E1E1E1", category: "Finance" },
-    { name: "Abyssal Blue", primary: "#001526", secondary: "#005F8A", ternary: "#00B4EF", foreground: "#E8F9FD", category: "Finance" },
-    { name: "Neptune Depths", primary: "#001F3F", secondary: "#0074D9", ternary: "#7FDBFF", foreground: "#ECF7FF", category: "Finance" },
+    {
+        name: "Deep dark",
+        primary: "#000",
+        secondary: defaultColors.secondary,
+        ternary: "#333",
+        foreground: "#fff",
+        category: "Finance",
+    },
+    {
+        name: "24.12.2025",
+        primary: "#111111",
+        secondary: "#334af1",
+        ternary: "#f13c3c",
+        foreground: "#f5f5f5",
+        category: "Finance",
+    },
+    {
+        name: "Default",
+        primary: defaultColors.primary,
+        secondary: defaultColors.secondary,
+        ternary: defaultColors.ternary,
+        foreground: defaultColors.foreground,
+        category: "Finance",
+    },
+    {
+        name: "DMQ dark",
+        primary: "#111111",
+        secondary: "#00a97f",
+        ternary: "#8685ef",
+        foreground: "#faf8ff",
+        category: "Finance",
+    },
+    {
+        name: "DMQ2 dark",
+        primary: "#00001E",
+        secondary: "#7985ff",
+        ternary: "#128583",
+        foreground: "#faf8ff",
+        category: "Finance",
+    },
+    {
+        name: "Charcoal Mint",
+        primary: "#0D1B1E",
+        secondary: "#00FFB3",
+        ternary: "#F7C948",
+        foreground: "#E6FFF9",
+        category: "Finance",
+    },
+    {
+        name: "Noir Emerald",
+        primary: "#101415",
+        secondary: "#50FA7B",
+        ternary: "#FF79C6",
+        foreground: "#F8FFF8",
+        category: "Finance",
+    },
+    {
+        name: "Graphite Mint",
+        primary: "#1A1C1D",
+        secondary: "#A3FFD6",
+        ternary: "#FFD580",
+        foreground: "#F1FFF8",
+        category: "Finance",
+    },
+    {
+        name: "Velvet Night",
+        primary: "#140D1C",
+        secondary: "#C084FC",
+        ternary: "#FFD6A5",
+        foreground: "#FAF5FF",
+        category: "Finance",
+    },
+    {
+        name: "Deep Jade",
+        primary: "#0E1A17",
+        secondary: "#00DFA2",
+        ternary: "#FF9B85",
+        foreground: "#E6FFF6",
+        category: "Finance",
+    },
+    {
+        name: "Midnight Raven",
+        primary: "#08090A",
+        secondary: "#FF4C61",
+        ternary: "#3DDC97",
+        foreground: "#E1E1E1",
+        category: "Finance",
+    },
+    {
+        name: "Abyssal Blue",
+        primary: "#001526",
+        secondary: "#005F8A",
+        ternary: "#00B4EF",
+        foreground: "#E8F9FD",
+        category: "Finance",
+    },
+    {
+        name: "Neptune Depths",
+        primary: "#001F3F",
+        secondary: "#0074D9",
+        ternary: "#7FDBFF",
+        foreground: "#ECF7FF",
+        category: "Finance",
+    },
 ]
 
 const GET_NOTIFICATION_SETTINGS = gql`
@@ -93,7 +177,7 @@ const ICON_SIZE = 32
 const s = StyleSheet.create({
     container: { flex: 1 },
     blur: { position: "absolute", top: 0, left: 0, right: 0, bottom: 0 },
-    inner: { flex: 1, backgroundColor: "rgba(0,0,0,0.25)" },
+    inner: { flex: 1 },
     header: {
         flexDirection: "row",
         justifyContent: "space-between",
@@ -241,13 +325,11 @@ function SettingsRow({
     isLast?: boolean
 }) {
     return (
-        <TouchableOpacity
-            onPress={onPress}
-            activeOpacity={onPress ? 0.65 : 1}
-            style={[s.row, !isLast && s.rowBorder]}
-        >
+        <TouchableOpacity onPress={onPress} activeOpacity={onPress ? 0.65 : 1} style={[s.row, !isLast && s.rowBorder]}>
             {icon}
-            <Text variant="body" style={s.rowLabel}>{label}</Text>
+            <Text variant="body" style={s.rowLabel}>
+                {label}
+            </Text>
             {right && <View style={s.rowRight}>{right}</View>}
         </TouchableOpacity>
     )
@@ -307,7 +389,9 @@ export default function SettingsScreen({ navigation }: HomeScreenProps<"HomeSett
         ternary: "#FFA726",
         foreground: "#FFFFFF",
     })
-    const [activeColorType, setActiveColorType] = useState<"primary" | "secondary" | "ternary" | "foreground">("primary")
+    const [activeColorType, setActiveColorType] = useState<"primary" | "secondary" | "ternary" | "foreground">(
+        "primary",
+    )
 
     const toggleSection = (key: string) => {
         Feedback.trigger("selection")
@@ -346,40 +430,41 @@ export default function SettingsScreen({ navigation }: HomeScreenProps<"HomeSett
 
     const activeColors = isCustomMode
         ? customColors
-        : selectedPalette ?? { secondary: Colors.secondary, ternary: Colors.ternary, foreground: Colors.foreground }
+        : (selectedPalette ?? { secondary: Colors.secondary, ternary: Colors.ternary, foreground: Colors.foreground })
 
     const canApply = isCustomMode || selectedPalette !== null
 
-    const groupedPalettes = colorPalettes.reduce(
-        (acc, p) => { if (!acc[p.category]) acc[p.category] = []; acc[p.category].push(p); return acc },
-        {} as Record<string, ColorPalette[]>,
-    )
-
     return (
         <View style={s.container}>
-            <BlurView intensity={40} tint="dark" style={s.blur} />
+            <ModalHeader title="Settings" onClose={handleClose} />
             <View style={s.inner}>
-                <View style={s.header}>
-                    <Text variant="body" style={s.headerTitle}>Settings</Text>
-                    <GlassIconButton name="x" onPress={handleClose} />
-                </View>
-
-                <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={s.scroll} keyboardDismissMode="on-drag">
-
+                <ScrollView
+                    showsVerticalScrollIndicator={false}
+                    contentContainerStyle={s.scroll}
+                    keyboardDismissMode="on-drag"
+                >
                     <View style={s.profileCard}>
                         <View style={s.avatar}>
                             <Text style={s.avatarText}>{user?.email?.[0]?.toUpperCase() ?? "U"}</Text>
                         </View>
                         <View>
-                            <Text variant="body" style={s.profileEmail}>{user?.email}</Text>
-                            <Text variant="caption" style={s.profileSub}>Personal account</Text>
+                            <Text variant="body" style={s.profileEmail}>
+                                {user?.email}
+                            </Text>
+                            <Text variant="caption" style={s.profileSub}>
+                                Personal account
+                            </Text>
                         </View>
                     </View>
 
                     <SectionLabel title="Preferences" />
                     <Card>
                         <SettingsRow
-                            icon={<IconBox bg={Colors.secondary}><Feather name="bell" size={16} color="#fff" /></IconBox>}
+                            icon={
+                                <IconBox bg={Colors.secondary}>
+                                    <Feather name="bell" size={16} color="#fff" />
+                                </IconBox>
+                            }
                             label="Notifications"
                             onPress={() => toggleSection("notifications")}
                             right={<Chevron open={expandedSection === "notifications"} />}
@@ -390,7 +475,11 @@ export default function SettingsScreen({ navigation }: HomeScreenProps<"HomeSett
                             </View>
                         )}
                         <SettingsRow
-                            icon={<IconBox bg="#3A3A3C"><Feather name="watch" size={16} color="#fff" /></IconBox>}
+                            icon={
+                                <IconBox bg="#3A3A3C">
+                                    <Feather name="watch" size={16} color="#fff" />
+                                </IconBox>
+                            }
                             label="Apple Watch"
                             isLast
                             onPress={() => toggleSection("watch")}
@@ -407,7 +496,11 @@ export default function SettingsScreen({ navigation }: HomeScreenProps<"HomeSett
                     <SectionLabel title="Appearance" />
                     <Card>
                         <SettingsRow
-                            icon={<IconBox bg={Colors.ternary}><Feather name="sliders" size={16} color="#fff" /></IconBox>}
+                            icon={
+                                <IconBox bg={Colors.ternary}>
+                                    <Feather name="sliders" size={16} color="#fff" />
+                                </IconBox>
+                            }
                             label="Color Theme"
                             isLast
                             onPress={() => toggleSection("theme")}
@@ -432,7 +525,11 @@ export default function SettingsScreen({ navigation }: HomeScreenProps<"HomeSett
                                         setIsCustomMode(item === "Custom")
                                         if (item === "Custom") setSelectedPalette(null)
                                     }}
-                                    containerStyle={{ width: Layout.screen.width - 68, backgroundColor: "transparent", marginBottom: 16 }}
+                                    containerStyle={{
+                                        width: Layout.screen.width - 68,
+                                        backgroundColor: "transparent",
+                                        marginBottom: 16,
+                                    }}
                                     buttonWidth={(Layout.screen.width - 78) / 2}
                                     buttonStyle={{ backgroundColor: undefined }}
                                 />
@@ -447,26 +544,67 @@ export default function SettingsScreen({ navigation }: HomeScreenProps<"HomeSett
                                             contentContainerStyle={{ paddingBottom: 4 }}
                                             renderItem={({ item }) => (
                                                 <Ripple
-                                                    onPress={() => { Feedback.trigger("selection"); setSelectedPalette(item) }}
-                                                    style={[s.paletteItem, selectedPalette?.name === item.name && s.paletteSelected, { backgroundColor: item.primary }]}
+                                                    onPress={() => {
+                                                        Feedback.trigger("selection")
+                                                        setSelectedPalette(item)
+                                                    }}
+                                                    style={[
+                                                        s.paletteItem,
+                                                        selectedPalette?.name === item.name && s.paletteSelected,
+                                                        { backgroundColor: item.primary },
+                                                    ]}
                                                 >
                                                     <View style={s.paletteContent}>
-                                                        <Text style={s.paletteName} numberOfLines={2}>{item.name}</Text>
+                                                        <Text style={s.paletteName} numberOfLines={2}>
+                                                            {item.name}
+                                                        </Text>
                                                         <View style={s.swatchCircles}>
-                                                            {[item.secondary, item.ternary, item.foreground].map((c, i) => (
-                                                                <View key={i} style={[s.swatchCircle, { backgroundColor: c }]} />
-                                                            ))}
+                                                            {[item.secondary, item.ternary, item.foreground].map(
+                                                                (c, i) => (
+                                                                    <View
+                                                                        key={i}
+                                                                        style={[s.swatchCircle, { backgroundColor: c }]}
+                                                                    />
+                                                                ),
+                                                            )}
                                                         </View>
                                                     </View>
                                                 </Ripple>
                                             )}
                                         />
                                         {selectedPalette && (
-                                            <View style={{ flexDirection: "row", gap: 8, alignItems: "center", marginTop: 14, paddingHorizontal: 2 }}>
-                                                <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: selectedPalette.primary, borderWidth: 1.5, borderColor: "rgba(255,255,255,0.15)" }} />
+                                            <View
+                                                style={{
+                                                    flexDirection: "row",
+                                                    gap: 8,
+                                                    alignItems: "center",
+                                                    marginTop: 14,
+                                                    paddingHorizontal: 2,
+                                                }}
+                                            >
+                                                <View
+                                                    style={{
+                                                        width: 36,
+                                                        height: 36,
+                                                        borderRadius: 18,
+                                                        backgroundColor: selectedPalette.primary,
+                                                        borderWidth: 1.5,
+                                                        borderColor: "rgba(255,255,255,0.15)",
+                                                    }}
+                                                />
                                                 <View style={{ flex: 1 }}>
-                                                    <Text style={{ color: Colors.text_light, fontWeight: "600", fontSize: 14 }}>{selectedPalette.name}</Text>
-                                                    <Text style={{ color: Colors.foreground_secondary, fontSize: 12 }}>{selectedPalette.secondary} · {selectedPalette.ternary}</Text>
+                                                    <Text
+                                                        style={{
+                                                            color: Colors.text_light,
+                                                            fontWeight: "600",
+                                                            fontSize: 14,
+                                                        }}
+                                                    >
+                                                        {selectedPalette.name}
+                                                    </Text>
+                                                    <Text style={{ color: Colors.foreground_secondary, fontSize: 12 }}>
+                                                        {selectedPalette.secondary} · {selectedPalette.ternary}
+                                                    </Text>
                                                 </View>
                                                 <Feather name="check-circle" size={18} color={Colors.secondary} />
                                             </View>
@@ -474,7 +612,13 @@ export default function SettingsScreen({ navigation }: HomeScreenProps<"HomeSett
                                     </>
                                 ) : (
                                     <>
-                                        <View style={{ flexDirection: "row", justifyContent: "space-around", marginBottom: 18 }}>
+                                        <View
+                                            style={{
+                                                flexDirection: "row",
+                                                justifyContent: "space-around",
+                                                marginBottom: 18,
+                                            }}
+                                        >
                                             {(["primary", "secondary", "ternary", "foreground"] as const).map((key) => (
                                                 <TouchableOpacity
                                                     key={key}
@@ -482,21 +626,39 @@ export default function SettingsScreen({ navigation }: HomeScreenProps<"HomeSett
                                                     style={{ alignItems: "center", gap: 6 }}
                                                     activeOpacity={0.7}
                                                 >
-                                                    <View style={{
-                                                        width: 48,
-                                                        height: 48,
-                                                        borderRadius: 24,
-                                                        backgroundColor: customColors[key],
-                                                        borderWidth: activeColorType === key ? 3 : 1.5,
-                                                        borderColor: activeColorType === key ? Colors.secondary : "rgba(255,255,255,0.2)",
-                                                    }} />
-                                                    <Text style={{ color: activeColorType === key ? Colors.secondary : Colors.text_dark, fontSize: 10, textTransform: "capitalize" }}>{key}</Text>
+                                                    <View
+                                                        style={{
+                                                            width: 48,
+                                                            height: 48,
+                                                            borderRadius: 24,
+                                                            backgroundColor: customColors[key],
+                                                            borderWidth: activeColorType === key ? 3 : 1.5,
+                                                            borderColor:
+                                                                activeColorType === key
+                                                                    ? Colors.secondary
+                                                                    : "rgba(255,255,255,0.2)",
+                                                        }}
+                                                    />
+                                                    <Text
+                                                        style={{
+                                                            color:
+                                                                activeColorType === key
+                                                                    ? Colors.secondary
+                                                                    : Colors.text_dark,
+                                                            fontSize: 10,
+                                                            textTransform: "capitalize",
+                                                        }}
+                                                    >
+                                                        {key}
+                                                    </Text>
                                                 </TouchableOpacity>
                                             ))}
                                         </View>
                                         <ColorPicker
                                             value={customColors[activeColorType]}
-                                            onCompleteJS={(c) => setCustomColors((prev) => ({ ...prev, [activeColorType]: c.hex }))}
+                                            onCompleteJS={(c) =>
+                                                setCustomColors((prev) => ({ ...prev, [activeColorType]: c.hex }))
+                                            }
                                             style={{ width: "100%", marginBottom: 4 }}
                                         >
                                             <Preview style={{ marginBottom: 16, height: 56, borderRadius: 20 }} />
@@ -507,7 +669,11 @@ export default function SettingsScreen({ navigation }: HomeScreenProps<"HomeSett
                                     </>
                                 )}
 
-                                <Button onPress={handleApply} disabled={!canApply} style={{ marginTop: 16, borderRadius: 16 }}>
+                                <Button
+                                    onPress={handleApply}
+                                    disabled={!canApply}
+                                    style={{ marginTop: 16, borderRadius: 16 }}
+                                >
                                     {isCustomMode ? "Apply Custom Colors" : "Apply Selected Palette"}
                                 </Button>
                             </View>
@@ -524,11 +690,14 @@ export default function SettingsScreen({ navigation }: HomeScreenProps<"HomeSett
                     <SectionLabel title="Account" />
                     <Card>
                         <TouchableOpacity onPress={handleSignout} activeOpacity={0.65} style={s.row}>
-                            <IconBox bg={Colors.error}><Feather name="log-out" size={16} color="#fff" /></IconBox>
-                            <Text variant="body" style={[s.rowLabel, { color: Colors.error }]}>Sign Out</Text>
+                            <IconBox bg={Colors.error}>
+                                <Feather name="log-out" size={16} color="#fff" />
+                            </IconBox>
+                            <Text variant="body" style={[s.rowLabel, { color: Colors.error }]}>
+                                Sign Out
+                            </Text>
                         </TouchableOpacity>
                     </Card>
-
                 </ScrollView>
             </View>
         </View>
@@ -539,27 +708,29 @@ function NotificationsSection() {
     const [settings, setSettings] = useState({ isEnable: true, enabledNotifications: {} as Record<string, boolean> })
     const [hasChanges, setHasChanges] = useState(false)
 
-    const { data } = useQuery<{ getNotificationSettings: { id: string; isEnable: boolean; enabledNotifications: Record<string, boolean> | null } }>(
-        GET_NOTIFICATION_SETTINGS,
-        {
-            onCompleted: (d) => {
-                if (d?.getNotificationSettings) {
-                    setSettings({
-                        isEnable: d.getNotificationSettings.isEnable,
-                        enabledNotifications: d.getNotificationSettings.enabledNotifications || {},
-                    })
-                }
-            },
-            errorPolicy: "all",
+    const { data } = useQuery<{
+        getNotificationSettings: { id: string; isEnable: boolean; enabledNotifications: Record<string, boolean> | null }
+    }>(GET_NOTIFICATION_SETTINGS, {
+        onCompleted: (d) => {
+            if (d?.getNotificationSettings) {
+                setSettings({
+                    isEnable: d.getNotificationSettings.isEnable,
+                    enabledNotifications: d.getNotificationSettings.enabledNotifications || {},
+                })
+            }
         },
-    )
+        errorPolicy: "all",
+    })
 
-    const { data: typesData } = useQuery<{ getAvailableNotificationTypes: { key: string; title: string; description: string }[] }>(
-        GET_AVAILABLE_NOTIFICATION_TYPES,
-    )
+    const { data: typesData } = useQuery<{
+        getAvailableNotificationTypes: { key: string; title: string; description: string }[]
+    }>(GET_AVAILABLE_NOTIFICATION_TYPES)
 
     const [save, { loading: saving }] = useMutation(TOGGLE_ENABLED_NOTIFICATIONS, {
-        onCompleted: () => { setHasChanges(false); Feedback.trigger("notificationSuccess") },
+        onCompleted: () => {
+            setHasChanges(false)
+            Feedback.trigger("notificationSuccess")
+        },
         onError: () => Feedback.trigger("notificationError"),
     })
 
@@ -567,7 +738,9 @@ function NotificationsSection() {
         if (data?.getNotificationSettings?.enabledNotifications && typesData?.getAvailableNotificationTypes) {
             const current = data.getNotificationSettings.enabledNotifications
             const defaults: Record<string, boolean> = {}
-            typesData.getAvailableNotificationTypes.forEach((t) => { defaults[t.key] = current[t.key] !== false })
+            typesData.getAvailableNotificationTypes.forEach((t) => {
+                defaults[t.key] = current[t.key] !== false
+            })
             setSettings((prev) => ({ ...prev, enabledNotifications: defaults }))
         }
     }, [data, typesData])
@@ -581,7 +754,10 @@ function NotificationsSection() {
                     label="Allow Notifications"
                     subtitle="Master toggle for all push alerts"
                     value={settings.isEnable}
-                    onChange={(v) => { setSettings((p) => ({ ...p, isEnable: v })); setHasChanges(true) }}
+                    onChange={(v) => {
+                        setSettings((p) => ({ ...p, isEnable: v }))
+                        setHasChanges(true)
+                    }}
                     isLast
                 />
             </View>
@@ -593,7 +769,10 @@ function NotificationsSection() {
                         label={n.title}
                         value={settings.enabledNotifications[n.key] !== false && settings.isEnable}
                         onChange={(v) => {
-                            setSettings((p) => ({ ...p, enabledNotifications: { ...p.enabledNotifications, [n.key]: v } }))
+                            setSettings((p) => ({
+                                ...p,
+                                enabledNotifications: { ...p.enabledNotifications, [n.key]: v },
+                            }))
                             setHasChanges(true)
                         }}
                         disabled={!settings.isEnable}
@@ -603,7 +782,10 @@ function NotificationsSection() {
             </View>
 
             <View style={s.saveBtn}>
-                <Button onPress={() => save({ variables: { input: settings.enabledNotifications } })} disabled={!hasChanges || saving}>
+                <Button
+                    onPress={() => save({ variables: { input: settings.enabledNotifications } })}
+                    disabled={!hasChanges || saving}
+                >
                     {saving ? "Saving…" : "Save Changes"}
                 </Button>
             </View>
@@ -666,11 +848,17 @@ function WatchSection() {
 function UpdateRow() {
     const { isDownloading, checkForUpdate, downloadAndRestart } = useExpoUpdates()
 
-    useEffect(() => { checkForUpdate() }, [])
+    useEffect(() => {
+        checkForUpdate()
+    }, [])
 
     return (
         <SettingsRow
-            icon={<IconBox bg={Color(Colors.secondary).darken(0.3).string()}><Feather name="download" size={16} color="#fff" /></IconBox>}
+            icon={
+                <IconBox bg={Color(Colors.secondary).darken(0.3).string()}>
+                    <Feather name="download" size={16} color="#fff" />
+                </IconBox>
+            }
             label={isDownloading ? "Updating…" : "Update App"}
             isLast
             onPress={downloadAndRestart}

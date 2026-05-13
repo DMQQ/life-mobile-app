@@ -3,19 +3,18 @@ import { useEffect, useMemo, useState } from "react"
 import { View } from "react-native"
 import Text from "@/components/ui/Text/Text"
 import { useWalletContext, type Action, type Filters } from "../components/WalletContext"
-import Button from "@/components/ui/Button/Button"
 import DatePicker from "@/components/DatePicker"
 import { formatDate } from "@/utils/functions/parseDate"
 import CategorySelect from "../components/CreateExpense/CategorySelect"
-import Color from "color"
 import Colors from "@/constants/Colors"
 import { useNavigation } from "@react-navigation/native"
 import Header from "@/components/ui/Header/Header"
 import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons"
 import { CategoryUtils } from "../components/Expense/ExpenseIcon"
-import { AnimatedSelector } from "@/components"
+import { AnimatedSelector, ModalHeader } from "@/components"
 import dayjs from "dayjs"
 import Animated, { useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated"
+import GroupSelector from "@/components/ui/GroupSelector"
 
 interface ExpenseFiltersProps {
     filters: Filters
@@ -60,26 +59,14 @@ const Forms = (props: ExpenseFiltersProps) => {
 
     return (
         <View style={{ flex: 1, height: "100%" }}>
-            <Header
-                shadow={false}
-                containerStyle={{
-                    height: 60,
-                    paddingTop: 15,
+            <ModalHeader
+                title="Filters"
+                onClose={navigation.goBack}
+                saveLabel="Clear"
+                onSave={() => {
+                    props.dispatch({ type: "RESET" })
+                    navigation.goBack()
                 }}
-                initialHeight={60}
-                scrollY={scrollY}
-                goBack
-                backIcon={<AntDesign name="close" size={20} color={Colors.foreground} />}
-                buttons={[
-                    {
-                        tintColor: Colors.error,
-                        icon: <MaterialCommunityIcons size={20} name="trash-can-outline" color={Colors.foreground} />,
-                        onPress: () => {
-                            props.dispatch({ type: "RESET" })
-                            navigation.goBack()
-                        },
-                    },
-                ]}
             />
             <Animated.ScrollView
                 keyboardDismissMode={"on-drag"}
@@ -87,7 +74,6 @@ const Forms = (props: ExpenseFiltersProps) => {
                 style={{
                     flex: 1,
                     padding: 15,
-                    paddingTop: 90,
                 }}
             >
                 <Input
@@ -163,18 +149,21 @@ const Forms = (props: ExpenseFiltersProps) => {
 
                 <Input.Label text="Type" error={false} labelStyle={{ marginTop: 15 }} />
 
-                <AnimatedSelector
-                    items={["all", "income", "expense", "refunded"] as string[]}
-                    onItemSelect={(value: any) => {
+                <GroupSelector
+                    options={[
+                        { label: "All", value: undefined },
+                        { label: "Income", value: "income" },
+                        { label: "Expense", value: "expense" },
+                        { label: "Refunded", value: "refunded" },
+                    ]}
+                    onChange={(value) => {
                         if (value === "all") {
                             props.dispatch({ type: "SET_TYPE", payload: undefined })
                             return
                         }
                         props.dispatch({ type: "SET_TYPE", payload: value })
                     }}
-                    containerStyle={{ backgroundColor: Colors.primary, marginTop: 5, marginBottom: 15 }}
-                    selectedItem={props.filters.type || "all"}
-                    scale={1}
+                    value={props.filters.type || "all"}
                 />
 
                 <Input.Label text="Category" error={false} labelStyle={{ marginBottom: 10 }} />
@@ -203,14 +192,24 @@ const ChooseDateRange = (props: { filters: Filters; dispatch: (action: Action) =
     return (
         <View style={{ marginTop: 15 }}>
             <Input.Label text="Date range" error={false} />
-            <View style={{ flexDirection: "row", gap: 10, marginTop: 5, alignItems: "center" }}>
+            <View
+                style={{
+                    flexDirection: "row",
+                    gap: 10,
+                    marginTop: 5,
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                }}
+            >
                 <DatePicker
                     mode="single"
                     placeholder={props.filters.date.from || "Date start"}
                     dates={{ start: fromDate, end: fromDate }}
                     setDates={({ start }) => props.dispatch({ type: "SET_DATE_MIN", payload: formatDate(start) })}
                 />
-                <Text variant="body" style={{ color: "gray" }}>to</Text>
+                <Text variant="body" style={{ color: "gray" }}>
+                    to
+                </Text>
                 <DatePicker
                     mode="single"
                     placeholder={props.filters.date.to || "Date end"}
