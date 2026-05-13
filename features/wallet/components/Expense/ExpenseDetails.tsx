@@ -1,6 +1,7 @@
 import { Expense as ExpenseType } from "@/types"
-import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons"
-import { StyleSheet, Text, View } from "react-native"
+import { Feather } from "@expo/vector-icons"
+import { StyleSheet, View } from "react-native"
+import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
 import { CategoryIcon, CategoryUtils } from "./ExpenseIcon"
 import EditNote from "./EditNote"
@@ -11,6 +12,8 @@ import Color from "color"
 
 const capitalize = (s = "") => s.charAt(0).toUpperCase() + s.slice(1)
 
+const muted = Colors.foreground_secondary
+
 export default function ExpenseDetails({ expense }: { expense: ExpenseType }) {
     const { data: subAccountsData } = useSubAccounts()
     const subAccount = subAccountsData?.wallet.subAccounts.find((a) => a.id === expense.subAccountId) ?? null
@@ -18,52 +21,37 @@ export default function ExpenseDetails({ expense }: { expense: ExpenseType }) {
     return (
         <Section title="Details">
             {expense?.category && (
-                <View style={[styles.row, { padding: 0, paddingRight: 10, paddingLeft: 7.5 }]}>
+                <View style={[styles.row, { padding: 0, paddingRight: 10, paddingLeft: 5 }]}>
                     <CategoryIcon
                         type={expense?.type as "expense" | "income"}
                         category={(expense?.category || "none") as any}
                         clear
+                        color={muted as any}
                     />
-
-                    <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>
+                    <Text variant="body" style={{ color: muted, fontSize: 16 }}>
                         {capitalize(CategoryUtils.getCategoryName(expense?.category || ""))}
                     </Text>
                 </View>
             )}
 
             <View style={styles.row}>
-                <MaterialIcons
-                    name="money"
-                    size={24}
-                    color={Colors.ternary}
-                    style={{ paddingHorizontal: 7.5, padding: 2.5 }}
-                />
-
-                <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>{capitalize(expense?.type)}</Text>
+                <Feather name="tag" size={20} color={muted} style={styles.icon} />
+                <Text variant="body" style={{ color: muted, fontSize: 16 }}>
+                    {capitalize(expense?.type)}
+                </Text>
             </View>
 
             <View style={styles.row}>
-                <MaterialIcons
-                    name="money"
-                    size={24}
-                    color={Colors.ternary}
-                    style={{ paddingHorizontal: 7.5, padding: 2.5 }}
-                />
-
-                <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>
+                <Feather name="clock" size={20} color={muted} style={styles.icon} />
+                <Text variant="body" style={{ color: muted, fontSize: 16 }}>
                     Balance before: {expense?.balanceBeforeInteraction ?? "N/A"} zł
                 </Text>
             </View>
 
             {expense.spontaneousRate != null && expense.spontaneousRate > 0 && (
                 <View style={styles.row}>
-                    <MaterialIcons
-                        name="psychology"
-                        size={24}
-                        color={Colors.ternary}
-                        style={{ paddingHorizontal: 7.5, padding: 2.5 }}
-                    />
-                    <Text style={{ color: getRateColor(expense.spontaneousRate), fontSize: 18 }}>
+                    <Feather name="percent" size={20} color={muted} style={styles.icon} />
+                    <Text variant="body" style={{ color: getRateColor(expense.spontaneousRate), fontSize: 16 }}>
                         Spontaneous {expense.spontaneousRate}%
                     </Text>
                 </View>
@@ -71,13 +59,10 @@ export default function ExpenseDetails({ expense }: { expense: ExpenseType }) {
 
             {subAccount && (
                 <View style={styles.row}>
-                    <MaterialCommunityIcons
-                        name={subAccount.icon as any}
-                        size={24}
-                        color={subAccount.color ?? Colors.foreground}
-                        style={{ paddingHorizontal: 7.5, padding: 2.5 }}
-                    />
-                    <Text style={{ color: Colors.secondary_light_2, fontSize: 18 }}>{subAccount.name}</Text>
+                    <Feather name="layers" size={20} color={muted} style={styles.icon} />
+                    <Text variant="body" style={{ color: muted, fontSize: 16 }}>
+                        {subAccount.name}
+                    </Text>
                 </View>
             )}
 
@@ -95,20 +80,8 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderColor: Color(Colors.primary_lighter).lighten(0.5).hex(),
     },
-    correctionBtn: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 4,
-        paddingHorizontal: 10,
-        paddingVertical: 5,
-        borderRadius: 100,
-        backgroundColor: "rgba(255,255,255,0.06)",
-        borderWidth: 1,
-        borderColor: "rgba(255,255,255,0.12)",
-    },
-    correctionBtnText: {
-        color: Colors.secondary,
-        fontSize: 12,
-        fontWeight: "500",
+    icon: {
+        paddingHorizontal: 7.5,
+        padding: 2.5,
     },
 })

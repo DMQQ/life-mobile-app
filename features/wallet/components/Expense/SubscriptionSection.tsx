@@ -1,9 +1,7 @@
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native"
+import { StyleSheet, Text, View } from "react-native"
 import moment from "moment"
 import Colors from "@/constants/Colors"
-import ContextMenu from "react-native-context-menu-view"
-import GlassView from "@/components/ui/GlassView"
-import { AntDesign } from "@expo/vector-icons"
+import SubscriptionItem from "../Subscription/SubscriptionItem"
 
 interface SubscriptionSectionProps {
     hasSubscription: boolean
@@ -28,53 +26,69 @@ export default function SubscriptionSection({
 
     return (
         <View style={styles.card}>
-            <View style={styles.cardHeader}>
-                {hasSubscription && (
-                    <View
-                        style={[
-                            styles.statusPill,
-                            {
-                                backgroundColor: isSubscriptionActive
-                                    ? "rgba(102,232,117,0.15)"
-                                    : "rgba(255,255,255,0.07)",
-                            },
-                        ]}
-                    >
+            {hasSubscription && (
+                <>
+                    <View style={styles.cardHeader}>
+                        <Text style={styles.dateLabel}>Status</Text>
                         <View
                             style={[
-                                styles.statusDot,
-                                { backgroundColor: isSubscriptionActive ? "#66E875" : Colors.text_dark },
-                            ]}
-                        />
-                        <Text
-                            style={[
-                                styles.statusPillText,
-                                { color: isSubscriptionActive ? "#66E875" : Colors.text_dark },
+                                styles.statusPill,
+                                {
+                                    backgroundColor: isSubscriptionActive
+                                        ? "rgba(102,232,117,0.15)"
+                                        : "rgba(255,255,255,0.07)",
+                                },
                             ]}
                         >
-                            {isSubscriptionActive ? "Active" : "Inactive"}
-                        </Text>
+                            <View
+                                style={[
+                                    styles.statusDot,
+                                    { backgroundColor: isSubscriptionActive ? "#66E875" : Colors.text_dark },
+                                ]}
+                            />
+                            <Text
+                                style={[
+                                    styles.statusPillText,
+                                    { color: isSubscriptionActive ? "#66E875" : Colors.text_dark },
+                                ]}
+                            >
+                                {isSubscriptionActive ? "Active" : "Inactive"}
+                            </Text>
+                        </View>
                     </View>
-                )}
-            </View>
 
-            {hasSubscription && (
-                <View style={styles.cardDates}>
-                    <View style={styles.dateRow}>
-                        <Text style={styles.dateLabel}>{isSubscriptionActive ? "Next payment" : "Last payment"}</Text>
-                        <Text style={styles.dateValue}>
-                            {selected.subscription?.nextBillingDate
-                                ? moment(+selected.subscription.nextBillingDate).format("MMM D, YYYY")
-                                : "—"}
-                        </Text>
+                    <View style={styles.cardDates}>
+                        <View style={styles.dateRow}>
+                            <Text style={styles.dateLabel}>
+                                {isSubscriptionActive ? "Next payment" : "Last payment"}
+                            </Text>
+                            <Text style={styles.dateValue}>
+                                {selected.subscription?.nextBillingDate
+                                    ? moment(+selected.subscription.nextBillingDate).format("MMM D, YYYY")
+                                    : "—"}
+                            </Text>
+                        </View>
+                        <View style={styles.dateRow}>
+                            <Text style={styles.dateLabel}>{isSubscriptionActive ? "Active since" : "Created on"}</Text>
+                            <Text style={styles.dateValue}>
+                                {moment(+selected.subscription.dateStart).format("MMM D, YYYY")}
+                            </Text>
+                        </View>
                     </View>
-                    <View style={styles.dateRow}>
-                        <Text style={styles.dateLabel}>{isSubscriptionActive ? "Active since" : "Created on"}</Text>
-                        <Text style={styles.dateValue}>
-                            {moment(+selected.subscription.dateStart).format("MMM D, YYYY")}
-                        </Text>
-                    </View>
-                </View>
+
+                    {selected?.subscription && selected?.subscription?.amount && (
+                        <SubscriptionItem
+                            style={{
+                                backgroundColor: Colors.primary_light,
+                                marginBottom: 0,
+                                borderRadius: 15,
+                            }}
+                            index={0}
+                            onPress={() => {}}
+                            subscription={selected?.subscription}
+                        />
+                    )}
+                </>
             )}
         </View>
     )
@@ -89,7 +103,6 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
-        marginBottom: 4,
     },
     cardTitle: {
         color: Colors.foreground,
@@ -115,7 +128,8 @@ const styles = StyleSheet.create({
     },
     cardDates: {
         marginTop: 12,
-        gap: 8,
+        gap: 15,
+        marginBottom: 15,
     },
     dateRow: {
         flexDirection: "row",

@@ -29,6 +29,8 @@ import { Toggle, Host } from "@expo/ui/swift-ui"
 import { background } from "@expo/ui/swift-ui/modifiers"
 import Color from "color"
 
+const muted = Colors.foreground_secondary
+
 interface SubscriptionDetailsProps {
     route: { params: { subscriptionId: string } }
     navigation: any
@@ -213,7 +215,7 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                 ]}
                 initialTitleFontSize={subscription?.description?.length > 25 ? 40 : 50}
                 animatedSubtitle={`Amount: ${subscription.amount.toFixed(2)}zł`}
-                subtitleStyles={{ fontSize: 25, color: Colors.secondary_light_2, marginTop: 10, fontWeight: "400" }}
+                subtitleStyles={{ fontSize: 25, color: muted, marginTop: 10, fontWeight: "400" }}
                 renderAnimatedItem={({ scrollY }) => (
                     <AnimatedSubscriptionHeader scrollY={scrollY!} subscription={subscription} />
                 )}
@@ -227,12 +229,7 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                 <View style={{ paddingHorizontal: 15 }}>
                     <Section title="Details">
                         <View style={styles.detailRow}>
-                            <Feather
-                                name="refresh-cw"
-                                size={24}
-                                color={Colors.ternary}
-                                style={{ paddingHorizontal: 7.5, padding: 2.5 }}
-                            />
+                            <Feather name="refresh-cw" size={20} color={muted} style={styles.icon} />
                             <Text style={styles.detailText}>
                                 {formatBillingCycle(subscription.billingCycle)} Subscription
                             </Text>
@@ -240,12 +237,7 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
 
                         {subscription.billingCycle === "custom" && subscription.billingDay != null && (
                             <View style={styles.detailRow}>
-                                <Feather
-                                    name="calendar"
-                                    size={24}
-                                    color={Colors.ternary}
-                                    style={{ paddingHorizontal: 7.5, padding: 2.5 }}
-                                />
+                                <Feather name="calendar" size={20} color={muted} style={styles.icon} />
                                 <Text style={styles.detailText}>Billing day: {subscription.billingDay}</Text>
                             </View>
                         )}
@@ -273,12 +265,7 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
 
                         {subscription.reminderDaysBeforehand != null && (
                             <View style={styles.detailRow}>
-                                <Feather
-                                    name="bell"
-                                    size={24}
-                                    color={Colors.ternary}
-                                    style={{ paddingHorizontal: 7.5, padding: 2.5 }}
-                                />
+                                <Feather name="bell" size={20} color={muted} style={styles.icon} />
                                 <Text style={styles.detailText}>
                                     Reminder:{" "}
                                     {subscription.reminderDaysBeforehand === 0
@@ -289,39 +276,19 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                         )}
 
                         <View style={styles.detailRow}>
-                            <Feather
-                                name="calendar"
-                                size={24}
-                                color={Colors.ternary}
-                                style={{ paddingHorizontal: 7.5, padding: 2.5 }}
-                            />
+                            <Feather name="calendar" size={20} color={muted} style={styles.icon} />
                             <Text style={styles.detailText}>Started: {parseDate(+subscription.dateStart)}</Text>
                         </View>
 
                         <View style={styles.detailRow}>
-                            <Feather
-                                name="clock"
-                                size={24}
-                                color={Colors.ternary}
-                                style={{ paddingHorizontal: 7.5, padding: 2.5 }}
-                            />
+                            <Feather name="clock" size={20} color={muted} style={styles.icon} />
                             <Text style={styles.detailText}>Running for: {getSubscriptionDuration()}</Text>
                         </View>
 
                         {subscription.isActive && (
                             <View style={styles.detailRow}>
-                                <Feather
-                                    name="calendar"
-                                    size={24}
-                                    color={Colors.ternary}
-                                    style={{ paddingHorizontal: 7.5, padding: 2.5 }}
-                                />
-                                <Text
-                                    style={[
-                                        styles.detailText,
-                                        { color: isOverdue ? "#F07070" : Colors.secondary_light_2 },
-                                    ]}
-                                >
+                                <Feather name="calendar" size={20} color={muted} style={styles.icon} />
+                                <Text style={[styles.detailText, { color: isOverdue ? "#F07070" : muted }]}>
                                     {isOverdue
                                         ? "Overdue"
                                         : `Next billing: ${parseDate(+subscription.nextBillingDate)}`}
@@ -350,11 +317,7 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
 
                             <View style={{ width: 150 }}>
                                 <Host modifiers={[background("clear")]}>
-                                    <Toggle
-                                        isOn={subscription.isActive}
-                                        onIsOnChange={handleToggleChange}
-                                        label={subscription.isActive ? "Enabled" : "Disabled"}
-                                    />
+                                    <Toggle isOn={subscription.isActive} onIsOnChange={handleToggleChange} />
                                 </Host>
                             </View>
                         </View>
@@ -562,9 +525,13 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderColor: Color(Colors.primary_lighter).lighten(0.5).hex(),
     },
+    icon: {
+        paddingHorizontal: 7.5,
+        padding: 2.5,
+    },
     detailText: {
-        color: Colors.secondary_light_2,
-        fontSize: 18,
+        color: muted,
+        fontSize: 16,
     },
     monthChip: {
         paddingHorizontal: 10,
@@ -602,7 +569,7 @@ const styles = StyleSheet.create({
         marginBottom: 5,
     },
     statLabel: {
-        color: Colors.secondary_light_2,
+        color: muted,
         textAlign: "center",
     },
     morePaymentsContainer: {
@@ -610,7 +577,7 @@ const styles = StyleSheet.create({
         paddingVertical: 15,
     },
     morePaymentsText: {
-        color: "rgba(255,255,255,0.6)",
+        color: muted,
         fontStyle: "italic",
     },
 })

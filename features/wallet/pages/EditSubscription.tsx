@@ -6,13 +6,13 @@ import Input from "@/components/ui/TextInput/TextInput"
 import Colors from "@/constants/Colors"
 import Layout from "@/constants/Layout"
 import { Subscription } from "@/types"
-import { AntDesign, Feather, MaterialCommunityIcons } from "@expo/vector-icons"
+import { Feather } from "@expo/vector-icons"
 import { BottomSheetScrollView, BottomSheetView } from "@gorhom/bottom-sheet"
 import Color from "color"
 import { useFormik } from "formik"
 import moment from "moment"
 import { useMemo, useRef } from "react"
-import { Keyboard, ScrollView, StyleSheet, TouchableWithoutFeedback, View } from "react-native"
+import { Keyboard, ScrollView, StyleSheet, View } from "react-native"
 import { Calendar } from "react-native-calendars"
 import type { DateData, MarkedDates } from "react-native-calendars/src/types"
 import Feedback from "react-native-haptic-feedback"
@@ -125,20 +125,6 @@ export default function EditSubscription({ route, navigation }: Props) {
     )
 
     const handleAmountChange = (value: string) => {
-        formik.setFieldValue("amount", (prev: string) => {
-            if (value === "C") {
-                const val = prev.slice(0, -1)
-                return val.length === 0 ? "0" : val
-            }
-            if (prev.includes(".") && prev.split(".")[1].length === 2 && value !== "C") return prev
-            if (prev.length === 1 && prev === "0" && value !== ".") return value
-            if (prev.includes(".") && value === ".") return prev
-            if (prev.length === 0 && value === ".") return "0."
-            return prev + value
-        })
-    }
-
-    const handleAmountChangeWrapper = (value: string) => {
         const prev = formik.values.amount
         let next = prev
         if (value === "C") {
@@ -195,232 +181,228 @@ export default function EditSubscription({ route, navigation }: Props) {
 
     return (
         <View style={{ flex: 1 }}>
-            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                <View style={{ flex: 1 }}>
-                    <View style={styles.container}>
-                        <GlassIconButton name="x" onPress={() => navigation.goBack()} positioned="top-left" />
-                        <GlassIconButton
-                            name="check"
-                            onPress={() => formik.handleSubmit()}
-                            disabled={!isValid || loading}
-                            loading={loading}
-                            tintColor={Colors.secondary}
-                            positioned="top-right"
-                        />
+            <View style={styles.container}>
+                <GlassIconButton name="x" onPress={() => navigation.goBack()} positioned="top-left" />
+                <GlassIconButton
+                    name="check"
+                    onPress={() => formik.handleSubmit()}
+                    disabled={!isValid || loading}
+                    loading={loading}
+                    tintColor={Colors.secondary}
+                    positioned="top-right"
+                />
 
-                        <View style={styles.amountContainer}>
-                            <Animated.Text style={[styles.amountText, animatedAmount]}>
-                                {formik.values.amount}
-                                <Text variant="body" style={{ fontSize: 20 }}>
-                                    zł
-                                </Text>
-                            </Animated.Text>
-                        </View>
+                <View style={styles.amountContainer}>
+                    <Animated.Text style={[styles.amountText, animatedAmount]}>
+                        {formik.values.amount}
+                        <Text variant="body" style={{ fontSize: 20 }}>
+                            zł
+                        </Text>
+                    </Animated.Text>
+                </View>
 
-                        <View style={styles.contentContainer}>
-                            <View style={{ borderRadius: 35, flex: 1 }}>
-                                <Animated.View entering={FadeIn} style={{ gap: 5 }}>
-                                    <View
-                                        style={{
-                                            flexDirection: "row",
-                                            width: "100%",
-                                            alignItems: "center",
-                                            zIndex: 1000,
-                                        }}
-                                    >
-                                        <Input
-                                            value={formik.values.description}
-                                            onChangeText={(v) => formik.setFieldValue("description", v)}
-                                            placeholder="Description"
-                                            style={{ flex: 1, width: "100%" }}
-                                            containerStyle={{ flex: 1, borderRadius: 20 }}
-                                        />
-                                    </View>
-
-                                    <ScrollView
-                                        horizontal
-                                        showsHorizontalScrollIndicator={false}
-                                        keyboardDismissMode="on-drag"
-                                        contentContainerStyle={{ gap: 10 }}
-                                    >
-                                        <DatePicker
-                                            mode="single"
-                                            dates={{ start: formik.values.dateStart, end: formik.values.dateStart }}
-                                            setDates={({ start }) => formik.setFieldValue("dateStart", start)}
-                                            buttonComponent={({ start }) => (
-                                                <Ripple style={styles.chip}>
-                                                    <AntDesign
-                                                        name="calendar"
-                                                        size={15}
-                                                        color="rgba(255,255,255,0.7)"
-                                                    />
-                                                    <Text style={styles.chipText}>
-                                                        Start {moment(start).format("DD.MM.YY")}
-                                                    </Text>
-                                                </Ripple>
-                                            )}
-                                        />
-
-                                        <DatePicker
-                                            mode="single"
-                                            dates={{
-                                                start: formik.values.nextBillingDate,
-                                                end: formik.values.nextBillingDate,
-                                            }}
-                                            setDates={({ start }) => formik.setFieldValue("nextBillingDate", start)}
-                                            buttonComponent={({ start }) => (
-                                                <Ripple style={styles.chip}>
-                                                    <AntDesign
-                                                        name="calendar"
-                                                        size={15}
-                                                        color="rgba(255,255,255,0.7)"
-                                                    />
-                                                    <Text style={styles.chipText}>
-                                                        Next {moment(start).format("DD.MM.YY")}
-                                                    </Text>
-                                                </Ripple>
-                                            )}
-                                        />
-
-                                        <DatePicker
-                                            mode="single"
-                                            dates={{
-                                                start: formik.values.dateEnd ?? new Date(),
-                                                end: formik.values.dateEnd ?? new Date(),
-                                            }}
-                                            setDates={({ start }) => formik.setFieldValue("dateEnd", start)}
-                                            buttonComponent={({ start }) => (
-                                                <Ripple
-                                                    style={[styles.chip, formik.values.dateEnd && styles.chipActive]}
-                                                    onLongPress={() => formik.setFieldValue("dateEnd", null)}
-                                                >
-                                                    <AntDesign
-                                                        name="calendar"
-                                                        size={15}
-                                                        color={
-                                                            formik.values.dateEnd
-                                                                ? Colors.secondary
-                                                                : "rgba(255,255,255,0.7)"
-                                                        }
-                                                    />
-                                                    <Text
-                                                        style={[
-                                                            styles.chipText,
-                                                            formik.values.dateEnd && styles.chipTextActive,
-                                                        ]}
-                                                    >
-                                                        {formik.values.dateEnd
-                                                            ? `End ${moment(start).format("DD.MM.YY")}`
-                                                            : "No end"}
-                                                    </Text>
-                                                </Ripple>
-                                            )}
-                                        />
-
-                                        {BILLING_CYCLES.map((cycle) => (
-                                            <Ripple
-                                                key={cycle}
-                                                onPress={() => {
-                                                    Feedback.trigger("impactLight")
-                                                    formik.setFieldValue("billingCycle", cycle)
-                                                    if (cycle === "custom") {
-                                                        Keyboard.dismiss()
-                                                        customSheetRef.current?.expand()
-                                                    }
-                                                }}
-                                                style={[
-                                                    styles.chip,
-                                                    formik.values.billingCycle === cycle && styles.chipActive,
-                                                ]}
-                                            >
-                                                <Text
-                                                    style={[
-                                                        styles.chipText,
-                                                        formik.values.billingCycle === cycle && styles.chipTextActive,
-                                                    ]}
-                                                >
-                                                    {cycle.charAt(0).toUpperCase() + cycle.slice(1)}
-                                                </Text>
-                                            </Ripple>
-                                        ))}
-
-                                        <Ripple
-                                            style={[styles.chip, styles.chipActive]}
-                                            onPress={() => {
-                                                Keyboard.dismiss()
-                                                reminderSheetRef.current?.expand()
-                                            }}
-                                        >
-                                            <MaterialCommunityIcons
-                                                name="bell-outline"
-                                                size={15}
-                                                color={Colors.secondary}
-                                            />
-                                            <Text style={[styles.chipText, styles.chipTextActive]}>
-                                                {reminderLabel}
-                                            </Text>
-                                        </Ripple>
-
-                                        {!isEdit && subAccounts.length > 0 && (
-                                            <Ripple
-                                                style={[styles.chip, formik.values.subAccountId && styles.chipActive]}
-                                                onPress={() => {
-                                                    Keyboard.dismiss()
-                                                    accountSheetRef.current?.expand()
-                                                }}
-                                            >
-                                                <MaterialCommunityIcons
-                                                    name="bank-outline"
-                                                    size={15}
-                                                    color={
-                                                        formik.values.subAccountId
-                                                            ? Colors.secondary
-                                                            : "rgba(255,255,255,0.7)"
-                                                    }
-                                                />
-                                                <Text
-                                                    style={[
-                                                        styles.chipText,
-                                                        formik.values.subAccountId && styles.chipTextActive,
-                                                    ]}
-                                                >
-                                                    {formik.values.subAccountId
-                                                        ? (subAccounts.find((a) => a.id === formik.values.subAccountId)
-                                                              ?.name ?? "Account")
-                                                        : "Account"}
-                                                </Text>
-                                            </Ripple>
-                                        )}
-
-                                        {formik.values.billingCycle === "custom" && (
-                                            <Ripple
-                                                style={[styles.chip, styles.chipActive]}
-                                                onPress={() => {
-                                                    Keyboard.dismiss()
-                                                    customSheetRef.current?.expand()
-                                                }}
-                                            >
-                                                <Feather name="settings" size={15} color={Colors.secondary} />
-                                                <Text
-                                                    style={[styles.chipText, styles.chipTextActive]}
-                                                    numberOfLines={1}
-                                                >
-                                                    {customLabel}
-                                                </Text>
-                                            </Ripple>
-                                        )}
-                                    </ScrollView>
-                                </Animated.View>
-
-                                <NumberPad
-                                    onKeyPress={handleAmountChangeWrapper}
-                                    onBackPress={formik.values.amount === "0" ? () => navigation.goBack() : undefined}
+                <View style={styles.contentContainer}>
+                    <View style={{ borderRadius: 35, flex: 1 }}>
+                        <Animated.View entering={FadeIn} style={{ gap: 5 }}>
+                            <View
+                                style={{
+                                    flexDirection: "row",
+                                    width: "100%",
+                                    alignItems: "center",
+                                    zIndex: 1000,
+                                }}
+                            >
+                                <Input
+                                    value={formik.values.description}
+                                    onChangeText={(v) => formik.setFieldValue("description", v)}
+                                    placeholder="Description"
+                                    style={{ flex: 1, width: "100%" }}
+                                    containerStyle={{ flex: 1, borderRadius: 20 }}
                                 />
                             </View>
-                        </View>
+
+                            <ScrollView
+                                horizontal
+                                showsHorizontalScrollIndicator={false}
+                                keyboardDismissMode="on-drag"
+                                contentContainerStyle={{ gap: 10 }}
+                            >
+                                <DatePicker
+                                    mode="single"
+                                    dates={{ start: formik.values.dateStart, end: formik.values.dateStart }}
+                                    setDates={({ start }) => formik.setFieldValue("dateStart", start)}
+                                    buttonComponent={({ start }) => (
+                                        <Ripple style={styles.chip}>
+                                            <Feather
+                                                name="calendar"
+                                                size={15}
+                                                color="rgba(255,255,255,0.7)"
+                                            />
+                                            <Text style={styles.chipText}>
+                                                Start {moment(start).format("DD.MM.YY")}
+                                            </Text>
+                                        </Ripple>
+                                    )}
+                                />
+
+                                <DatePicker
+                                    mode="single"
+                                    dates={{
+                                        start: formik.values.nextBillingDate,
+                                        end: formik.values.nextBillingDate,
+                                    }}
+                                    setDates={({ start }) => formik.setFieldValue("nextBillingDate", start)}
+                                    buttonComponent={({ start }) => (
+                                        <Ripple style={styles.chip}>
+                                            <Feather
+                                                name="calendar"
+                                                size={15}
+                                                color="rgba(255,255,255,0.7)"
+                                            />
+                                            <Text style={styles.chipText}>
+                                                Next {moment(start).format("DD.MM.YY")}
+                                            </Text>
+                                        </Ripple>
+                                    )}
+                                />
+
+                                <DatePicker
+                                    mode="single"
+                                    dates={{
+                                        start: formik.values.dateEnd ?? new Date(),
+                                        end: formik.values.dateEnd ?? new Date(),
+                                    }}
+                                    setDates={({ start }) => formik.setFieldValue("dateEnd", start)}
+                                    buttonComponent={({ start }) => (
+                                        <Ripple
+                                            style={[styles.chip, formik.values.dateEnd && styles.chipActive]}
+                                            onLongPress={() => formik.setFieldValue("dateEnd", null)}
+                                        >
+                                            <Feather
+                                                name="calendar"
+                                                size={15}
+                                                color={
+                                                    formik.values.dateEnd
+                                                        ? Colors.secondary
+                                                        : "rgba(255,255,255,0.7)"
+                                                }
+                                            />
+                                            <Text
+                                                style={[
+                                                    styles.chipText,
+                                                    formik.values.dateEnd && styles.chipTextActive,
+                                                ]}
+                                            >
+                                                {formik.values.dateEnd
+                                                    ? `End ${moment(start).format("DD.MM.YY")}`
+                                                    : "No end"}
+                                            </Text>
+                                        </Ripple>
+                                    )}
+                                />
+
+                                {BILLING_CYCLES.map((cycle) => (
+                                    <Ripple
+                                        key={cycle}
+                                        onPress={() => {
+                                            Feedback.trigger("impactLight")
+                                            formik.setFieldValue("billingCycle", cycle)
+                                            if (cycle === "custom") {
+                                                Keyboard.dismiss()
+                                                customSheetRef.current?.expand()
+                                            }
+                                        }}
+                                        style={[
+                                            styles.chip,
+                                            formik.values.billingCycle === cycle && styles.chipActive,
+                                        ]}
+                                    >
+                                        <Text
+                                            style={[
+                                                styles.chipText,
+                                                formik.values.billingCycle === cycle && styles.chipTextActive,
+                                            ]}
+                                        >
+                                            {cycle.charAt(0).toUpperCase() + cycle.slice(1)}
+                                        </Text>
+                                    </Ripple>
+                                ))}
+
+                                <Ripple
+                                    style={[styles.chip, styles.chipActive]}
+                                    onPress={() => {
+                                        Keyboard.dismiss()
+                                        reminderSheetRef.current?.expand()
+                                    }}
+                                >
+                                    <Feather
+                                        name="bell"
+                                        size={15}
+                                        color={Colors.secondary}
+                                    />
+                                    <Text style={[styles.chipText, styles.chipTextActive]}>
+                                        {reminderLabel}
+                                    </Text>
+                                </Ripple>
+
+                                {!isEdit && subAccounts.length > 0 && (
+                                    <Ripple
+                                        style={[styles.chip, formik.values.subAccountId && styles.chipActive]}
+                                        onPress={() => {
+                                            Keyboard.dismiss()
+                                            accountSheetRef.current?.expand()
+                                        }}
+                                    >
+                                        <Feather
+                                            name="credit-card"
+                                            size={15}
+                                            color={
+                                                formik.values.subAccountId
+                                                    ? Colors.secondary
+                                                    : "rgba(255,255,255,0.7)"
+                                            }
+                                        />
+                                        <Text
+                                            style={[
+                                                styles.chipText,
+                                                formik.values.subAccountId && styles.chipTextActive,
+                                            ]}
+                                        >
+                                            {formik.values.subAccountId
+                                                ? (subAccounts.find((a) => a.id === formik.values.subAccountId)
+                                                      ?.name ?? "Account")
+                                                : "Account"}
+                                        </Text>
+                                    </Ripple>
+                                )}
+
+                                {formik.values.billingCycle === "custom" && (
+                                    <Ripple
+                                        style={[styles.chip, styles.chipActive]}
+                                        onPress={() => {
+                                            Keyboard.dismiss()
+                                            customSheetRef.current?.expand()
+                                        }}
+                                    >
+                                        <Feather name="settings" size={15} color={Colors.secondary} />
+                                        <Text
+                                            style={[styles.chipText, styles.chipTextActive]}
+                                            numberOfLines={1}
+                                        >
+                                            {customLabel}
+                                        </Text>
+                                    </Ripple>
+                                )}
+                            </ScrollView>
+                        </Animated.View>
+
+                        <NumberPad
+                            onKeyPress={handleAmountChange}
+                            onBackPress={formik.values.amount === "0" ? () => navigation.goBack() : undefined}
+                        />
                     </View>
                 </View>
-            </TouchableWithoutFeedback>
+            </View>
 
             <BottomSheet ref={reminderSheetRef} snapPoints={["40%"]}>
                 <BottomSheetView style={styles.sheetContent}>
@@ -525,12 +507,6 @@ const styles = StyleSheet.create({
         flex: 1,
         gap: 15,
         justifyContent: "space-between",
-    },
-    closeButton: {
-        position: "absolute",
-        top: 15,
-        left: 15,
-        zIndex: 100,
     },
     amountContainer: {
         height: 250,

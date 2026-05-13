@@ -23,7 +23,20 @@ export default function TimelineWidget() {
                     <Text style={styles.empty}>No events today</Text>
                 ) : (
                     events.slice(0, 5).map((event: any) => {
-                        return <TimelineItem key={event.id} {...event} />
+                        return (
+                            <TimelineItem
+                                styles={{
+                                    borderWidth: 0,
+                                    padding: 0,
+                                    paddingHorizontal: 0,
+                                    borderRadius: 0,
+                                    paddingBottom: 10,
+                                    borderBottomWidth: 1,
+                                }}
+                                key={event.id}
+                                {...event}
+                            />
+                        )
                     })
                 )}
             </View>

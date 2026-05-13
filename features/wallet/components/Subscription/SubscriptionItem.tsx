@@ -67,13 +67,13 @@ export default function SubscriptionItem({
     onPress,
     style,
 }: SubscriptionItemProps & { style?: StyleProp<ViewStyle> }) {
-    const daysUntilNext = moment(parseInt(subscription.nextBillingDate)).diff(moment(), "days")
+    const daysUntilNext = moment(parseInt(subscription?.nextBillingDate || "0")).diff(moment(), "days")
     const isOverdue = daysUntilNext < 0
 
     const nextLabel = subscription.isActive
         ? isOverdue
             ? "Overdue"
-            : parseDateToText(subscription.nextBillingDate)
+            : parseDateToText(subscription?.nextBillingDate)
         : "Inactive"
 
     const nextColor = !subscription.isActive ? "#F07070" : isOverdue ? "#F07070" : secondary_candidates[0]
@@ -86,10 +86,10 @@ export default function SubscriptionItem({
                 <View style={styles.body}>
                     <View style={styles.topRow}>
                         <Text style={styles.name} numberOfLines={1}>
-                            {subscription.description}
+                            {subscription?.description}
                         </Text>
                         <Text style={styles.amount}>
-                            -{subscription.amount.toFixed(2)}
+                            -{subscription?.amount?.toFixed(2)}
                             <Text style={styles.currency}> zł</Text>
                         </Text>
                     </View>

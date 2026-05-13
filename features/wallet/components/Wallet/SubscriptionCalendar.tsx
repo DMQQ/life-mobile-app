@@ -305,7 +305,11 @@ export default function SubscriptionCalendar({ subscriptions = [], expenses = []
                                         key={s.id}
                                         subscription={s}
                                         index={i}
-                                        onPress={() => {}}
+                                        onPress={() =>
+                                            navigation.navigate("Subscription", {
+                                                subscriptionId: s.id,
+                                            })
+                                        }
                                         style={{
                                             borderWidth: 0,
                                             marginBottom: 0,

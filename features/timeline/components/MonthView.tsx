@@ -75,7 +75,11 @@ const WeekRow = memo(({ dayData, selectedDate, currentMonth, onDayPress }: WeekR
                         style={[
                             styles.dayCell,
                             !isCurrentMonth && { backgroundColor: Colors.primary_dark },
-                            isSelected && { backgroundColor: Colors.primary_lighter },
+                            isSelected && {
+                                backgroundColor: Colors.primary_lighter,
+                                borderWidth: 1,
+                                borderColor: Colors.borderColor,
+                            },
                         ]}
                     >
                         <View
@@ -286,12 +290,13 @@ const styles = StyleSheet.create({
     dayCell: {
         flex: 1,
         borderRightWidth: StyleSheet.hairlineWidth,
-        borderColor: "rgba(255,255,255,0.07)",
+        borderColor: "transparent",
         overflow: "hidden",
         alignItems: "center",
         paddingVertical: 5,
         padding: 2,
         borderRadius: 10,
+        borderWidth: 1,
     },
     dayNumberWrap: {
         width: 30,

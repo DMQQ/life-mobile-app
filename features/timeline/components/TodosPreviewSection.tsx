@@ -1,5 +1,5 @@
 import Colors from "@/constants/Colors"
-import { Pressable, StyleSheet, Text, View } from "react-native"
+import { StyleSheet, Text, View } from "react-native"
 import TodoPreviewCard from "./TodoPreviewCard"
 
 interface TodosPreviewSectionProps {

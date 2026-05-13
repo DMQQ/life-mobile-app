@@ -1,11 +1,10 @@
 import { Expense as ExpenseType } from "@/types"
 import { Feather } from "@expo/vector-icons"
 import { useState } from "react"
-import { StyleSheet, View } from "react-native"
+import { StyleSheet, View, TextInput } from "react-native"
 import Text from "@/components/ui/Text/Text"
 import { IconButton } from "@/components"
 import Colors from "@/constants/Colors"
-import Input from "@/components/ui/TextInput/TextInput"
 import { useEditExpenseNote } from "../../hooks/useEditExpense"
 import { GET_EXPENSE } from "../../pages/Expense"
 
@@ -35,31 +34,31 @@ export default function EditNote({ expense }: { expense: ExpenseType }) {
     return (
         <View style={[styles.row, { height: 60, gap: 15, alignItems: "center", paddingLeft: 20 }]}>
             <IconButton
-                icon={<Feather name="edit-2" size={20} color={Colors.ternary} />}
+                icon={<Feather name="edit-2" size={20} color={Colors.foreground_secondary} />}
                 onPress={() => setIsEditing(!isEditing)}
             />
             {isEditing ? (
-                <Input
-                    placeholder="enter note text"
-                    value={text}
-                    onChangeText={setText}
-                    containerStyle={{
-                        flex: 1,
-                        height: 40,
-                        backgroundColor: Colors.primary_lighter,
-                    }}
-                    right={
-                        <IconButton
-                            icon={<Feather name="check" size={20} color={Colors.secondary} />}
-                            onPress={() => {
-                                handleUpdateNote(text)
-                                setIsEditing(false)
-                            }}
-                        />
-                    }
-                />
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 10, flex: 1 }}>
+                    <TextInput
+                        placeholder="enter note text"
+                        value={text}
+                        onChangeText={setText}
+                        textAlign="right"
+                        style={{
+                            flex: 1,
+                            color: Colors.foreground_secondary,
+                        }}
+                    />
+                    <IconButton
+                        icon={<Feather name="check" size={20} color={Colors.secondary} />}
+                        onPress={() => {
+                            handleUpdateNote(text)
+                            setIsEditing(false)
+                        }}
+                    />
+                </View>
             ) : (
-                <Text variant="body" style={{ color: Colors.secondary_light_2 }}>
+                <Text variant="body" style={{ color: Colors.foreground_secondary }}>
                     {expense.note || "-"}
                 </Text>
             )}
@@ -72,9 +71,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
-        padding: 15,
+        paddingHorizontal: 15,
         borderRadius: 15,
-        backgroundColor: Colors.primary_light,
-        marginTop: 10,
     },
 })

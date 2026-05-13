@@ -56,9 +56,19 @@ export const GET_EXPENSE = gql`
 
         subscription {
             id
+            amount
+            dateStart
+            dateEnd
+            description
             isActive
             nextBillingDate
-            dateStart
+            billingCycle
+            billingDay
+            customBillingMonths
+            reminderDaysBeforehand
+            totalSpent
+            totalAmount
+            totalDuration
         }
 
         location {
@@ -269,13 +279,15 @@ export default function Expense({ route: { params }, navigation }: any) {
                         />
                     </Section>
 
-                    <Section title="Breakdown">
-                        <MonthlyBreakdown
-                            expense={selected as ExpenseType}
-                            income={data?.wallet?.income || 0}
-                            monthlyPercentageTarget={data?.wallet?.monthlyPercentageTarget || 0}
-                        />
-                    </Section>
+                    {selected?.type === "expense" && (
+                        <Section title="Breakdown">
+                            <MonthlyBreakdown
+                                expense={selected as ExpenseType}
+                                income={data?.wallet?.income || 0}
+                                monthlyPercentageTarget={data?.wallet?.monthlyPercentageTarget || 0}
+                            />
+                        </Section>
+                    )}
 
                     {hasSubscription && (
                         <Section title="Subscription">

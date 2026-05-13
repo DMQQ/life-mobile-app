@@ -196,19 +196,15 @@ const MapPicker = forwardRef<MapPickerHandle, Pick<Expense, "location"> & { id: 
 
                     const points = data.locations
 
-                    // Find the closest point to current location
                     if (points && points.length > 0) {
                         const closestPoint = findClosestPoint(points, location)
-
-                        // Animate map to the closest point
-                        map.current?.animateToRegion(
-                            {
-                                latitude: closestPoint!.latitude,
-                                longitude: closestPoint!.longitude,
-                                ...STREET_DELTA,
-                            },
-                            1000,
-                        )
+                        const region = {
+                            latitude: closestPoint!.latitude,
+                            longitude: closestPoint!.longitude,
+                            ...STREET_DELTA,
+                        }
+                        setLocation(region)
+                        map.current?.animateToRegion(region, 1000)
                     }
                 })()
             }, 750)
@@ -258,7 +254,7 @@ const MapPicker = forwardRef<MapPickerHandle, Pick<Expense, "location"> & { id: 
             <Section title="Map">
                 <Map
                     ref={map}
-                    style={{ width: Layout.screen.width - 30, height: 200, borderRadius: 10, marginTop: 25 }}
+                    style={{ width: Layout.screen.width - 30, height: 200, borderRadius: 10 }}
                     provider={PROVIDER_DEFAULT}
                     {...({ showsPointsOfInterest: true } as any)}
                     region={location}

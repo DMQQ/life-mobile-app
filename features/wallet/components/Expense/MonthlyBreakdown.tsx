@@ -17,8 +17,6 @@ const MonthlyBreakdown = ({ expense, income }: MonthlyBreakdownProps) => {
     const hoursToAfford = expense.amount / hourlyIncome
     const workingDaysToAfford = hoursToAfford / 8
 
-    if (expense?.type !== "expense") return null
-
     return (
         <View style={styles.card}>
             <View style={styles.contentContainer}>

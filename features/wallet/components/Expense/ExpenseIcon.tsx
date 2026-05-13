@@ -651,6 +651,7 @@ export const CategoryIcon = (props: {
     type: "income" | "expense" | "refunded"
     clear?: boolean
     size?: number
+    color?: string
     style?: StyleProp<ViewStyle>
     containerStyle?: StyleProp<ViewStyle>
 }) => {
@@ -674,7 +675,11 @@ export const CategoryIcon = (props: {
                 {Icons[category]?.icon &&
                     React.cloneElement(Icons[category]?.icon, {
                         size: props.size || 20,
-                        style: [styles.clonedIcon, { shadowColor: backgroundColor ?? "#000" }],
+                        ...(props.color ? { color: props.color } : {}),
+                        style: [
+                            styles.clonedIcon,
+                            { shadowColor: props.color ? props.color : (backgroundColor ?? "#000") },
+                        ],
                     })}
             </View>
         </View>

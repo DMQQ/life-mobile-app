@@ -18,31 +18,7 @@ type CardProps<T extends boolean = false> = {
 } & (T extends true ? AnimatedProps<ViewProps> : ViewProps)
 
 const Clickable = (props: PressableProps) => {
-    const scale = useSharedValue(1)
-
-    const animatedStyle = useAnimatedStyle(() => ({
-        transform: [{ scale: scale.value }],
-    }))
-
-    const timeout = useRef<NodeJS.Timeout | null>(null)
-
-    const onPress = useCallback(
-        (ev: any) => {
-            if (timeout.current) {
-                clearTimeout(timeout.current)
-            }
-            scale.value = withTiming(0.97, { duration: 100 })
-
-            props.onPress && props.onPress(ev)
-
-            timeout.current = setTimeout(() => {
-                scale.value = withTiming(1, { duration: 100 })
-            }, 100)
-        },
-        [props.onPress],
-    )
-
-    return <AnimatedPressable {...props} onPress={onPress} style={[animatedStyle, props.style]} />
+    return <AnimatedPressable {...props} onPress={props.onPress} style={[props.style]} />
 }
 
 export default function Card<T extends boolean = false>({
