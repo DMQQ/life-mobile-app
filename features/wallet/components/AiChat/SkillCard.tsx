@@ -250,22 +250,22 @@ function TaskCard({ task }: { task: ResolvedTask }) {
                             todos: task.todos,
                         },
                         ...(task.isRepeat && {
-                                repeat: {
-                                    repeatCount: task.repeatCount ?? undefined,
-                                    repeatOn: task.repeatFrequency ?? undefined,
-                                    repeatEveryNth: task.repeatEveryNth ?? undefined,
-                                    startDate: task.date,
-                                    ...(task.repeatType && {
-                                        repeatType: task.repeatType,
-                                        repeatDaysOfWeek: task.repeatDaysOfWeek ?? undefined,
-                                        repeatInterval: task.repeatInterval ?? undefined,
-                                        repeatUntil: task.repeatUntil ?? undefined,
-                                    }),
-                                    ...(task.reminderBeforeMinutes != null && {
-                                        reminderBeforeMinutes: task.reminderBeforeMinutes,
-                                    }),
-                                },
-                            }),
+                            repeat: {
+                                repeatCount: task.repeatCount ?? undefined,
+                                repeatOn: task.repeatFrequency ?? undefined,
+                                repeatEveryNth: task.repeatEveryNth ?? undefined,
+                                startDate: task.date,
+                                ...(task.repeatType && {
+                                    repeatType: task.repeatType,
+                                    repeatDaysOfWeek: task.repeatDaysOfWeek ?? undefined,
+                                    repeatInterval: task.repeatInterval ?? undefined,
+                                    repeatUntil: task.repeatUntil ?? undefined,
+                                }),
+                                ...(task.reminderBeforeMinutes != null && {
+                                    reminderBeforeMinutes: task.reminderBeforeMinutes,
+                                }),
+                            },
+                        }),
                     },
                 },
                 refetchQueries: [

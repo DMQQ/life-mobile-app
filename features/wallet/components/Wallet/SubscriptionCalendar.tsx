@@ -9,35 +9,7 @@ import { useNavigation } from "@react-navigation/native"
 import Color from "color"
 import Layout from "@/constants/Layout"
 import Section from "@/components/ui/Section"
-
-interface Subscription {
-    id: string
-    amount: number
-    nextBillingDate: string
-    description: string
-    billingCycle: string
-    isActive: boolean
-    dateStart: string
-    dateEnd?: string | null
-    billingDay?: number | null
-    customBillingMonths?: number[] | null
-    expenses: { amount: number; id: string; date: string; description: string; category: string }[]
-}
-
-interface Expense {
-    id: string
-    amount: number
-    date: string
-    description: string
-    category: string
-    type: string
-    balanceBeforeInteraction?: number | null
-    spontaneousRate?: number | null
-    subscription?: unknown
-    location?: unknown
-    subexpenses?: unknown
-    note?: string | null
-}
+import { Expense, Subscription } from "@/types"
 
 interface Props {
     subscriptions?: Subscription[]
@@ -210,7 +182,7 @@ export default function SubscriptionCalendar({ subscriptions = [], expenses = []
     const selectedSubs = selectedDay ? (billingMap.get(selectedDay) ?? []) : []
     const selectedExpenses = selectedDay ? (expenseMap.get(selectedDay) ?? []) : []
 
-    const [size, setSize] = useState({ width: Layout.screen.width - 30, height: 420 })
+    const [size, setSize] = useState({ width: Layout.screen.width, height: 420 })
 
     const cellSize = size.width / 7 - 4
 
@@ -258,17 +230,6 @@ export default function SubscriptionCalendar({ subscriptions = [], expenses = []
                 </View>
 
                 <View style={styles.grid}>{gridCells}</View>
-
-                <View style={styles.legend}>
-                    <View style={styles.legendItem}>
-                        <View style={[styles.dot, { backgroundColor: Colors.secondary }]} />
-                        <Text style={styles.legendText}>Subscription</Text>
-                    </View>
-                    <View style={styles.legendItem}>
-                        <View style={[styles.dot, { backgroundColor: "#F6B161" }]} />
-                        <Text style={styles.legendText}>Expense</Text>
-                    </View>
-                </View>
             </View>
 
             {selectedDay && (selectedSubs.length > 0 || selectedExpenses.length > 0) && (
