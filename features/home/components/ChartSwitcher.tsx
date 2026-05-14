@@ -14,7 +14,22 @@ const ChartSwitcher = () => {
     const [activeChart, setActiveChart] = useState<ChartType>("weekly")
 
     return (
-        <Section title="Overview">
+        <Section
+            title="Overview"
+            headerRight={
+                <View style={{ width: 150 }}>
+                    <GroupSelector
+                        size="xs"
+                        options={[
+                            { label: "Weekly", value: "weekly" as ChartType },
+                            { label: "Prediction", value: "prediction" as ChartType },
+                        ]}
+                        value={activeChart}
+                        onChange={(value) => setActiveChart(value)}
+                    />
+                </View>
+            }
+        >
             <View style={styles.container}>
                 <View style={styles.chartContent}>
                     {activeChart === "weekly" ? (
@@ -27,15 +42,6 @@ const ChartSwitcher = () => {
                         </Animated.View>
                     )}
                 </View>
-
-                <GroupSelector
-                    options={[
-                        { label: "Weekly", value: "weekly" as ChartType },
-                        { label: "Prediction", value: "prediction" as ChartType },
-                    ]}
-                    value={activeChart}
-                    onChange={(value) => setActiveChart(value)}
-                />
             </View>
         </Section>
     )

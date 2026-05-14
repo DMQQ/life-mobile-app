@@ -1,8 +1,7 @@
 import Colors from "@/constants/Colors"
 import Text from "@/components/ui/Text/Text"
 import Input from "@/components/ui/TextInput/TextInput"
-import SegmentedButtons from "@/components/ui/SegmentedButtons"
-import { useCallback, useState } from "react"
+import { useCallback, useLayoutEffect, useState } from "react"
 import {
     ActivityIndicator,
     Keyboard,
@@ -17,9 +16,9 @@ import { SafeAreaView } from "react-native-safe-area-context"
 import Feedback from "react-native-haptic-feedback"
 import Ripple from "react-native-material-ripple"
 import Color from "color"
-import CategorySelect from "../components/CreateExpense/CategorySelect"
-import { useCorrectionMaps, type CorrectionMap } from "../hooks/useCorrectionMaps"
-import { WalletScreens } from "../Main"
+import CategorySelect from "../../components/CreateExpense/CategorySelect"
+import { useCorrectionMaps, type CorrectionMap } from "../../hooks/useCorrectionMaps"
+import { WalletScreens } from "../../Main"
 import GlassView from "@/components/ui/GlassView"
 import GroupSelector from "@/components/ui/GroupSelector"
 import Section from "@/components/ui/Section"
@@ -129,7 +128,7 @@ const OVERRIDE_OPTIONS: { key: OverrideType; label: string }[] = [
     { key: "description", label: "Description" },
 ]
 
-export default function CorrectionMapForm({ navigation, route }: WalletScreens<"CorrectionMapForm">) {
+export default function CorrectionMapForm({ navigation, route }: any) {
     const { prefill, editingItem } = (route as any).params ?? {}
     const { creating, createCorrectionMap, updateCorrectionMap } = useCorrectionMaps()
 
@@ -194,31 +193,25 @@ export default function CorrectionMapForm({ navigation, route }: WalletScreens<"
 
     const valid = isValid(state)
 
+    useLayoutEffect(() => {
+        navigation.setOptions({
+            headerRight: () => (
+                <Pressable style={{ width: 60 }} onPress={handleSubmit} disabled={!valid || creating} hitSlop={12}>
+                    {creating ? (
+                        <ActivityIndicator size={20} color={Colors.secondary} />
+                    ) : (
+                        <Text style={[styles.headerSave, !valid && styles.headerSaveDisabled]}>
+                            {editingItem ? "Save" : "Add"}
+                        </Text>
+                    )}
+                </Pressable>
+            ),
+            title: editingItem ? "Edit Rule" : "New Rule",
+        })
+    }, [editingItem, valid, creating, handleSubmit])
+
     return (
         <SafeAreaView style={styles.container}>
-            {/* Header */}
-            <View style={styles.header}>
-                <GlassView style={{ padding: 10, borderRadius: 100 }}>
-                    <Pressable onPress={() => navigation.goBack()} hitSlop={12}>
-                        <Text style={styles.headerCancel}>Cancel</Text>
-                    </Pressable>
-                </GlassView>
-
-                <Text style={styles.headerTitle}>{editingItem ? "Edit Rule" : "New Rule"}</Text>
-
-                <GlassView style={{ padding: 10, borderRadius: 100 }}>
-                    <Pressable onPress={handleSubmit} disabled={!valid || creating} hitSlop={12}>
-                        {creating ? (
-                            <ActivityIndicator size="small" color={Colors.secondary} />
-                        ) : (
-                            <Text style={[styles.headerSave, !valid && styles.headerSaveDisabled]}>
-                                {editingItem ? "Save" : "Add"}
-                            </Text>
-                        )}
-                    </Pressable>
-                </GlassView>
-            </View>
-
             <View style={styles.divider} />
 
             <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
@@ -418,7 +411,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: "600",
         color: Colors.secondary,
-        textAlign: "right",
+        textAlign: "center",
     },
     headerSaveDisabled: {
         opacity: 0.35,

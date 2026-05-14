@@ -119,7 +119,13 @@ export default function SubscriptionsList({ onScroll }: Props) {
             renderItem={renderItem as any}
             keyExtractor={keyExtractor as any}
             onScroll={onScroll}
-            ListHeaderComponent={<SubscriptionCalendar subscriptions={[...active, ...inactive] as any} />}
+            ListHeaderComponent={
+                <Section title="Calendar">
+                    <View style={{ padding: 15 }}>
+                        <SubscriptionCalendar subscriptions={[...active, ...inactive] as any} />
+                    </View>
+                </Section>
+            }
             contentContainerStyle={styles.contentContainer}
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
             removeClippedSubviews

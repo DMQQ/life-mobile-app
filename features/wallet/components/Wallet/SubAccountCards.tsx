@@ -8,6 +8,7 @@ import { useWalletContext } from "../WalletContext"
 import { useNavigation } from "@react-navigation/native"
 import Layout from "@/constants/Layout"
 import { useMemo } from "react"
+import Animated, { FadeIn } from "react-native-reanimated"
 
 interface SubAccount {
     id: string
@@ -48,26 +49,28 @@ export default function SubAccountCards() {
     }, [accounts])
 
     return (
-        <FlatList
-            initialNumToRender={2}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.scroll}
-            data={sortedAccounts}
-            keyExtractor={(a) => a.id}
-            ListFooterComponent={<AddCard onPress={() => navigation.navigate("CreateSubAccount")} />}
-            renderItem={({ item: a }) => (
-                <AccountCard
-                    key={a.id}
-                    account={a}
-                    active={filters?.accountId === a.id || (!filters.accountId && a.isDefault)}
-                    onPress={() => onPress(a)}
-                    onEdit={() => navigation.navigate("CreateSubAccount", { editSubAccount: a })}
-                    onDelete={() => deleteSubAccount({ variables: { id: a.id } })}
-                    onTransfer={() => navigation.navigate("TransferSubAccount", { from: a.id })}
-                />
-            )}
-        />
+        <Animated.View entering={FadeIn}>
+            <FlatList
+                initialNumToRender={2}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.scroll}
+                data={sortedAccounts}
+                keyExtractor={(a) => a.id}
+                ListFooterComponent={<AddCard onPress={() => navigation.navigate("CreateSubAccount")} />}
+                renderItem={({ item: a }) => (
+                    <AccountCard
+                        key={a.id}
+                        account={a}
+                        active={filters?.accountId === a.id || (!filters.accountId && a.isDefault)}
+                        onPress={() => onPress(a)}
+                        onEdit={() => navigation.navigate("CreateSubAccount", { editSubAccount: a })}
+                        onDelete={() => deleteSubAccount({ variables: { id: a.id } })}
+                        onTransfer={() => navigation.navigate("TransferSubAccount", { from: a.id })}
+                    />
+                )}
+            />
+        </Animated.View>
     )
 }
 

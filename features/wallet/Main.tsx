@@ -5,10 +5,7 @@ import { createNativeStackNavigator, NativeStackNavigationOptions } from "@react
 import { useEffect } from "react"
 import WalletContextProvider from "./components/WalletContext"
 import CreateExpenseModal from "./pages/CreateExpense"
-import CreateLimits from "./pages/CreateLimits"
-import LimitsDetail from "./pages/LimitsDetail"
-import CorrectionMaps from "./pages/CorrectionMaps"
-import CorrectionMapForm from "./pages/CorrectionMapForm"
+import SpendingLimits from "./pages/SpendingLimits/Main"
 import EditBalance from "./pages/EditBalance"
 import CreateSubAccount from "./pages/CreateSubAccount"
 import TransferSubAccount from "./pages/TransferSubAccount"
@@ -18,6 +15,7 @@ import SubscriptionScreen from "./pages/Subscription"
 import EditSubscription from "./pages/EditSubscription"
 import Wallet from "./pages/Wallet"
 import WalletCharts from "./pages/WalletCharts"
+import CorrectionMaps from "./pages/CorrectionMaps/Main"
 
 interface WalletRootStack extends ParamListBase {
     Wallet: {
@@ -26,8 +24,7 @@ interface WalletRootStack extends ParamListBase {
     Watchlist: undefined
     Charts: undefined
     EditBalance: undefined
-    CreateLimits: undefined
-    LimitsDetail: undefined
+    SpendingLimits: undefined
     CorrectionMaps:
         | { prefill?: { shop?: string; description?: string; category?: string; amount?: number } }
         | undefined
@@ -122,15 +119,21 @@ export default function WalletScreens({ navigation, route }: WalletScreens<"Wall
 
                 <Stack.Screen name="EditSubscription" component={EditSubscription as any} options={MODAL_OPTIONS} />
 
-                <Stack.Screen name="EditBalance" component={EditBalance} options={MODAL_OPTIONS} />
+                <Stack.Screen
+                    name="EditBalance"
+                    component={EditBalance}
+                    options={{
+                        presentation: "modal",
+                        headerStyle: { backgroundColor: Colors.primary },
+                        headerTintColor: Colors.foreground,
+                        title: "Edit balance",
+                        headerShown: true,
+                    }}
+                />
 
-                <Stack.Screen name="CreateLimits" component={CreateLimits} options={MODAL_OPTIONS} />
-
-                <Stack.Screen name="LimitsDetail" component={LimitsDetail} options={{ headerShown: false }} />
+                <Stack.Screen name="SpendingLimits" component={SpendingLimits} options={MODAL_OPTIONS} />
 
                 <Stack.Screen name="CorrectionMaps" component={CorrectionMaps} options={MODAL_OPTIONS} />
-
-                <Stack.Screen name="CorrectionMapForm" component={CorrectionMapForm} options={MODAL_OPTIONS} />
 
                 <Stack.Screen name="CreateSubAccount" component={CreateSubAccount} options={MODAL_OPTIONS} />
 

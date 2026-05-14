@@ -18,7 +18,7 @@ interface Props {
     style?: StyleProp<ViewStyle>
 }
 
-const DAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]
+const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
 
 function projectBillingDate(sub: Subscription, month: Moment): string | null {
     const anchor = moment(parseInt(sub.nextBillingDate))
@@ -97,16 +97,24 @@ const DayCell = memo(
                     styles.dayCell,
                     { width: cellSize, height: cellSize * 1.15 },
                     !isCurrentMonth && styles.cellFaded,
+                    isSelected && styles.daySelected,
+                    isToday && !isSelected && styles.dayToday,
                 ]}
                 onPress={onPress}
             >
-                <View
-                    style={[
-                        styles.dayInner,
-                        isSelected && styles.daySelected,
-                        isToday && !isSelected && styles.dayToday,
-                    ]}
-                >
+                <View style={{ width: "100%", alignItems: "center", paddingTop: 10 }}>
+                    <Text
+                        style={[
+                            styles.dayNumber,
+                            !isCurrentMonth && styles.dayFaded,
+                            isToday && styles.dayTodayText,
+                            isSelected && styles.daySelectedText,
+                        ]}
+                    >
+                        {day.date()}
+                    </Text>
+                </View>
+                <View style={[styles.dayInner]}>
                     {icons.length > 0 && (
                         <View style={styles.cellIcons}>
                             {icons.map((ic, idx) => (
@@ -121,18 +129,6 @@ const DayCell = memo(
                             ))}
                         </View>
                     )}
-                </View>
-                <View style={styles.cellBottom}>
-                    <Text
-                        style={[
-                            styles.dayNumber,
-                            !isCurrentMonth && styles.dayFaded,
-                            isToday && styles.dayTodayText,
-                            isSelected && styles.daySelectedText,
-                        ]}
-                    >
-                        {day.date()}
-                    </Text>
                 </View>
             </Pressable>
         )
@@ -338,7 +334,7 @@ const styles = StyleSheet.create({
         gap: 4,
     },
     dayCell: {
-        backgroundColor: Colors.primary_light,
+        backgroundColor: Colors.primary,
         borderRadius: 7.5,
     },
     cellBottom: {
@@ -357,10 +353,10 @@ const styles = StyleSheet.create({
         gap: 2,
     },
     dayToday: {
-        backgroundColor: "rgba(255,255,255,0.05)",
+        backgroundColor: Colors.secondary + "20",
     },
     daySelected: {
-        backgroundColor: "rgba(255,255,255,0.1)",
+        backgroundColor: Colors.secondary + "80",
     },
     dayNumber: {
         fontSize: 11,
@@ -371,14 +367,14 @@ const styles = StyleSheet.create({
         color: "rgba(255,255,255,0.18)",
     },
     cellFaded: {
-        backgroundColor: Colors.primary,
+        backgroundColor: Colors.primary_lighter,
     },
     dayTodayText: {
         color: Colors.text_light,
         fontWeight: "700",
     },
     daySelectedText: {
-        color: Colors.foreground,
+        color: Colors.secondary,
         fontWeight: "700",
     },
     cellIcons: {

@@ -70,7 +70,22 @@ export default function HomeExtras() {
     const allExpenses = (data?.wallet?.expenses2 ?? []).flatMap((m: any) => m.expenses ?? [])
 
     return (
-        <Section title={active === "limits" ? "Monthly Limits" : "Recent activity"}>
+        <Section
+            title={active === "limits" ? "Monthly Limits" : "Recent activity"}
+            headerRight={
+                <View style={{ width: 140 }}>
+                    <GroupSelector
+                        size="xs"
+                        options={[
+                            { label: "Calendar", value: "calendar" as const },
+                            { label: "Limits", value: "limits" as const },
+                        ]}
+                        value={active}
+                        onChange={(val) => setActive(val)}
+                    />
+                </View>
+            }
+        >
             <View style={styles.card}>
                 {active === "limits" ? (
                     <LimitsContent limits={limits} />
@@ -80,17 +95,6 @@ export default function HomeExtras() {
                         expenses={allExpenses}
                     />
                 )}
-
-                <View style={{ marginTop: 15 }}>
-                    <GroupSelector
-                        options={[
-                            { label: "Calendar", value: "calendar" as const },
-                            { label: "Limits", value: "limits" as const },
-                        ]}
-                        value={active}
-                        onChange={(val) => setActive(val)}
-                    />
-                </View>
             </View>
         </Section>
     )

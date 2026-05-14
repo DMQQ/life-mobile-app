@@ -14,14 +14,24 @@ interface GroupSelectorProps<V> {
     options: GroupSelectorOption<V>[]
     value: V
     onChange: (value: V) => void
+
+    size?: "xs" | "small" | "medium" | "large"
 }
 
-const PADDING = 10
 const GAP = 5
 const SNAP_SPRING = { damping: 20, stiffness: 300 }
 const LIQUID_SPRING = { damping: 10, stiffness: 150, mass: 0.5 }
 
-export default function GroupSelector<V>({ options, value, onChange }: GroupSelectorProps<V>) {
+const SIZE_CONFIG = {
+    xs: { height: 24, padding: 2.5, fontSize: 10, pillRadius: 10, containerRadius: 14 },
+    small: { height: 36, padding: 6, fontSize: 11, pillRadius: 10, containerRadius: 18 },
+    medium: { height: 45, padding: 8, fontSize: 12, pillRadius: 12, containerRadius: 22 },
+    large: { height: 55, padding: 10, fontSize: 13, pillRadius: 15, containerRadius: 25 },
+}
+
+export default function GroupSelector<V>({ options, value, onChange, size = "large" }: GroupSelectorProps<V>) {
+    const { height, padding, fontSize, pillRadius, containerRadius } = SIZE_CONFIG[size]
+    const PADDING = padding
     const [containerWidth, setContainerWidth] = useState(0)
     const isFirstLayout = useRef(true)
 
@@ -92,10 +102,16 @@ export default function GroupSelector<V>({ options, value, onChange }: GroupSele
         setContainerWidth(e.nativeEvent.layout.width)
     }
 
+    const dynamicStyles = {
+        container: { borderRadius: containerRadius, padding: PADDING, height },
+        pill: { top: PADDING, left: PADDING, height: height - PADDING * 2, borderRadius: pillRadius },
+        label: { fontSize },
+    }
+
     return (
-        <GlassView style={styles.container} onLayout={onLayout}>
+        <GlassView style={[styles.container, dynamicStyles.container]} onLayout={onLayout}>
             {segmentWidth > 0 && (
-                <Animated.View style={[styles.pill, pillStyle]}>
+                <Animated.View style={[styles.pill, dynamicStyles.pill, pillStyle]}>
                     <GlassView interactive style={StyleSheet.absoluteFill} tintColor={theme.secondary} />
                 </Animated.View>
             )}
@@ -110,7 +126,9 @@ export default function GroupSelector<V>({ options, value, onChange }: GroupSele
                                     onPress={() => onChange(option.value)}
                                     style={styles.segment}
                                 >
-                                    <Text style={[styles.label, selected && styles.labelSelected]}>{option.label}</Text>
+                                    <Text style={[styles.label, dynamicStyles.label, selected && styles.labelSelected]}>
+                                        {option.label}
+                                    </Text>
                                 </Pressable>
                             )
                         })}
@@ -124,16 +142,9 @@ export default function GroupSelector<V>({ options, value, onChange }: GroupSele
 const styles = StyleSheet.create({
     container: {
         backgroundColor: theme.primary_lighter,
-        borderRadius: 25,
-        padding: PADDING,
-        height: 55,
     },
     pill: {
         position: "absolute",
-        top: PADDING,
-        left: PADDING,
-        height: 55 - PADDING * 2,
-        borderRadius: 15,
         overflow: "hidden",
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 1 },
@@ -153,7 +164,6 @@ const styles = StyleSheet.create({
         borderRadius: 9,
     },
     label: {
-        fontSize: 13,
         fontWeight: "500",
         color: theme.foreground_secondary,
         letterSpacing: -0.1,

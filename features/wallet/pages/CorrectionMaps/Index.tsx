@@ -2,15 +2,15 @@ import Colors from "@/constants/Colors"
 import Text from "@/components/ui/Text/Text"
 import IconButton from "@/components/ui/IconButton/IconButton"
 import { AntDesign } from "@expo/vector-icons"
-import { useCallback, useEffect } from "react"
+import { useCallback, useEffect, useLayoutEffect } from "react"
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 import Feedback from "react-native-haptic-feedback"
 import lowOpacity from "@/utils/functions/lowOpacity"
 import GlassView from "@/components/ui/GlassView"
-import CorrectionMapItem from "../components/CorrectionMap/CorrectionMapItem"
-import { useCorrectionMaps, type CorrectionMap } from "../hooks/useCorrectionMaps"
-import { WalletScreens } from "../Main"
+import CorrectionMapItem from "../../components/CorrectionMap/CorrectionMapItem"
+import { useCorrectionMaps, type CorrectionMap } from "../../hooks/useCorrectionMaps"
+import { WalletScreens } from "../../Main"
 
 export type CorrectionMapsParams = {
     prefill?: {
@@ -21,19 +21,19 @@ export type CorrectionMapsParams = {
     }
 }
 
-export default function CorrectionMapsScreen({ navigation, route }: WalletScreens<"CorrectionMaps">) {
+export default function CorrectionMapsScreen({ navigation, route }: any) {
     const { maps, loading, deleteCorrectionMap, toggleActive } = useCorrectionMaps()
 
     const prefill = (route as any)?.params?.prefill as CorrectionMapsParams["prefill"] | undefined
 
     const openAdd = useCallback(() => {
         Feedback.trigger("impactLight")
-        navigation.navigate("CorrectionMapForm", { prefill })
+        navigation.navigate("Create", { prefill })
     }, [prefill])
 
     const openEdit = useCallback((item: CorrectionMap) => {
         Feedback.trigger("impactLight")
-        navigation.navigate("CorrectionMapForm", { editingItem: item })
+        navigation.navigate("Create", { editingItem: item })
     }, [])
 
     const handleDelete = useCallback(async (id: string) => {
@@ -47,9 +47,24 @@ export default function CorrectionMapsScreen({ navigation, route }: WalletScreen
         }
     }, [prefill, openAdd])
 
+    useLayoutEffect(() => {
+        navigation.setOptions({
+            headerLeft: () => (
+                <IconButton
+                    icon={<AntDesign name="close" size={20} color={Colors.foreground} />}
+                    onPress={() => navigation.goBack()}
+                />
+            ),
+
+            headerRight: () => (
+                <IconButton icon={<AntDesign name="plus" size={20} color={Colors.secondary} />} onPress={openAdd} />
+            ),
+        })
+    }, [])
+
     return (
         <SafeAreaView style={styles.container}>
-            <View style={styles.topBar}>
+            {/*<View style={styles.topBar}>
                 <GlassView style={{ borderRadius: 100, padding: 7.5 }}>
                     <IconButton
                         icon={<AntDesign name="close" size={22} color={Colors.foreground} />}
@@ -62,7 +77,7 @@ export default function CorrectionMapsScreen({ navigation, route }: WalletScreen
                 <GlassView style={{ borderRadius: 100, padding: 7.5 }}>
                     <IconButton icon={<AntDesign name="plus" size={22} color={Colors.secondary} />} onPress={openAdd} />
                 </GlassView>
-            </View>
+            </View>*/}
 
             <ScrollView
                 style={styles.scroll}
@@ -70,7 +85,8 @@ export default function CorrectionMapsScreen({ navigation, route }: WalletScreen
                 showsVerticalScrollIndicator={false}
             >
                 <Text style={styles.subtitle}>
-                    Auto-correct shop names and categories on card-tap expenses. First matching rule wins. Supports substrings, wildcards (*/?), and /regex/flags.
+                    Auto-correct shop names and categories on card-tap expenses. First matching rule wins. Supports
+                    substrings, wildcards (*/?), and /regex/flags.
                 </Text>
 
                 {loading ? (

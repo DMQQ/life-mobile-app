@@ -15,7 +15,8 @@ export interface AnimatedBarProps {
     prevValue?: number
     maxValue: number
     chartHeight: number
-    color?: string
+    // color?: string
+    barColor?: string
     label: string
     labelColor?: string
     index?: number
@@ -26,6 +27,7 @@ export interface AnimatedBarProps {
     onPress?: () => void
     valueLabel?: string
     isOutlier?: boolean
+    noPrevValue?: boolean
 }
 
 const AnimatedBar: React.FC<AnimatedBarProps> = ({
@@ -43,6 +45,8 @@ const AnimatedBar: React.FC<AnimatedBarProps> = ({
     onPress,
     valueLabel,
     isOutlier,
+    noPrevValue = false,
+    barColor = Colors.secondary,
 }) => {
     const animatedHeight = useSharedValue(0)
     const animatedPrevHeight = useSharedValue(0)
@@ -84,7 +88,6 @@ const AnimatedBar: React.FC<AnimatedBarProps> = ({
         opacity: interpolate(animatedHeight.value, [0, minBarHeight, minBarHeight * 2], [0, 0, 1], Extrapolation.CLAMP),
     }))
 
-    const barColor = Colors.secondary
     const effectiveLabelColor = labelColor ?? barColor
     const containerStyle = {
         ...(barWidth !== undefined && { width: barWidth }),
@@ -94,18 +97,32 @@ const AnimatedBar: React.FC<AnimatedBarProps> = ({
 
     const bars = (
         <View style={[styles.barsWrapper, { height: chartHeight }]}>
-            <View style={styles.sideBySideRow}>
-                <Animated.View
-                    style={[styles.sideBySideBar, { backgroundColor: Colors.secondary_dark_2 }, animatedPrevBarStyle]}
-                />
-                <Animated.View style={[styles.sideBySideBar, { backgroundColor: barColor }, animatedBarHeightOnly]}>
+            {noPrevValue ? (
+                <Animated.View style={[styles.singleBar, { backgroundColor: barColor }, animatedBarHeightOnly]}>
                     {valueLabel !== undefined && value > 0 && (
                         <Animated.View style={[styles.valueLabelWrapper, animatedValueOpacity]}>
                             <Text style={styles.valueLabelText}>{isOutlier ? "↑" + valueLabel : valueLabel}</Text>
                         </Animated.View>
                     )}
                 </Animated.View>
-            </View>
+            ) : (
+                <View style={styles.sideBySideRow}>
+                    <Animated.View
+                        style={[
+                            styles.sideBySideBar,
+                            { backgroundColor: Colors.secondary_dark_2 },
+                            animatedPrevBarStyle,
+                        ]}
+                    />
+                    <Animated.View style={[styles.sideBySideBar, { backgroundColor: barColor }, animatedBarHeightOnly]}>
+                        {valueLabel !== undefined && value > 0 && (
+                            <Animated.View style={[styles.valueLabelWrapper, animatedValueOpacity]}>
+                                <Text style={styles.valueLabelText}>{isOutlier ? "↑" + valueLabel : valueLabel}</Text>
+                            </Animated.View>
+                        )}
+                    </Animated.View>
+                </View>
+            )}
         </View>
     )
 
@@ -135,6 +152,17 @@ const styles = StyleSheet.create({
     barsWrapper: {
         width: "100%",
         position: "relative",
+    },
+    singleBar: {
+        position: "absolute",
+        bottom: 0,
+        left: 4,
+        right: 4,
+        borderTopLeftRadius: 10,
+        borderTopRightRadius: 10,
+        justifyContent: "center",
+        alignItems: "center",
+        overflow: "visible",
     },
     sideBySideRow: {
         position: "absolute",

@@ -115,7 +115,7 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
                                 title: "Limits",
                                 systemImage: "gauge",
                                 onPress: () => {
-                                    navigation.navigate("LimitsDetail")
+                                    navigation.navigate("SpendingLimits")
                                 },
                             },
                             {

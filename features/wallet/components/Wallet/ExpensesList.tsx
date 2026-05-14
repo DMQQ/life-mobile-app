@@ -5,7 +5,7 @@ import { gql, useQuery } from "@apollo/client"
 import { AntDesign } from "@expo/vector-icons"
 import { useNavigation } from "@react-navigation/native"
 import moment from "moment"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { memo, useCallback, useEffect, useMemo, useState } from "react"
 import {
     NativeScrollEvent,
     NativeSyntheticEvent,
@@ -24,6 +24,10 @@ import { useWalletContext } from "../WalletContext"
 import GlassView from "@/components/ui/GlassView"
 import SubAccountCards from "./SubAccountCards"
 import WalletItem, { parseDateToText } from "./WalletItem"
+import GroupSelector from "@/components/ui/GroupSelector"
+import YearlySpendingsChart from "./YearlySpendingsChart"
+import Section from "@/components/ui/Section"
+import dayjs from "dayjs"
 
 type ListItem = { type: "month"; data: MonthlyExpenses; monthIndex: number }
 
@@ -74,11 +78,7 @@ export default function ExpensesList({ wallet, onScroll, refetch, onEndReached }
                 renderItem={renderItem as any}
                 keyExtractor={keyExtractor as any}
                 onScroll={onScroll}
-                ListHeaderComponent={
-                    <View style={{ flexDirection: "column", gap: 15 }}>
-                        <SubAccountCards />
-                    </View>
-                }
+                ListHeaderComponent={<ListHeader />}
                 contentContainerStyle={styles.contentContainer}
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
                 onEndReached={onEndReached}
@@ -91,6 +91,62 @@ export default function ExpensesList({ wallet, onScroll, refetch, onEndReached }
         </>
     )
 }
+
+const tabs = [
+    {
+        label: "Accounts",
+        value: "accounts",
+    },
+    {
+        label: "Spendings",
+        value: "spendings",
+    },
+]
+const ListHeader = memo(() => {
+    const [tab, setTab] = useState("accounts")
+    const title = tabs.find((t) => t.value === tab)?.label
+    const { dispatch, filters } = useWalletContext()
+
+    const selectedMonth = dayjs(filters.date.from).get("month")
+
+    return (
+        <View style={{ flexDirection: "column", gap: 15, marginBottom: 30 }}>
+            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+                <Text
+                    style={{
+                        fontWeight: "600",
+                        fontSize: 22.5,
+                        color: "#fff",
+                    }}
+                >
+                    {title}
+                </Text>
+                <View style={{ width: "50%" }}>
+                    <GroupSelector size="small" options={tabs} value={tab} onChange={setTab} />
+                </View>
+            </View>
+            <View>
+                {tab === "accounts" ? (
+                    <SubAccountCards />
+                ) : (
+                    <YearlySpendingsChart
+                        selectedBar={selectedMonth}
+                        onBarPress={(monthIndex) => {
+                            if (monthIndex === selectedMonth) {
+                                dispatch({ type: "RESET" })
+
+                                return
+                            }
+                            const month = dayjs().set("month", monthIndex)
+                            dispatch({ type: "SET_DATE_MIN", payload: month.startOf("month").format("YYYY-MM-DD") })
+                            dispatch({ type: "SET_DATE_MAX", payload: month.endOf("month").format("YYYY-MM-DD") })
+                        }}
+                    />
+                )}
+            </View>
+        </View>
+    )
+})
 
 const MonthItem = ({
     monthData,

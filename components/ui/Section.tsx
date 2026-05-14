@@ -7,10 +7,9 @@ const s = StyleSheet.create({
     sectionGap: { marginTop: 30 },
     sectionLabel: {
         color: Colors.text_dark,
-        fontSize: 11.5,
+        fontSize: 12,
         letterSpacing: 0.6,
         textTransform: "uppercase",
-        marginBottom: 7,
         marginLeft: 4,
     },
     headerRow: {
@@ -18,7 +17,7 @@ const s = StyleSheet.create({
         justifyContent: "space-between",
         alignItems: "center",
         marginBottom: 7,
-        marginLeft: 4,
+        marginLeft: 10,
     },
     card: {
         backgroundColor: Colors.primary_lighter,
@@ -39,14 +38,11 @@ interface SectionProps {
 export default function Section({ title, headerRight, children, noGap, cardStyle }: SectionProps) {
     return (
         <View style={!noGap && s.sectionGap}>
-            {headerRight ? (
-                <View style={s.headerRow}>
-                    <Text style={s.sectionLabel}>{title}</Text>
-                    {headerRight}
-                </View>
-            ) : (
+            <View style={s.headerRow}>
                 <Text style={s.sectionLabel}>{title}</Text>
-            )}
+                {headerRight}
+            </View>
+
             <View style={[s.card, cardStyle]}>{children}</View>
         </View>
     )
