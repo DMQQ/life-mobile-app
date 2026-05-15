@@ -16,6 +16,8 @@ import EditSubscription from "./pages/EditSubscription"
 import Wallet from "./pages/Wallet"
 import WalletCharts from "./pages/WalletCharts"
 import CorrectionMaps from "./pages/CorrectionMaps/Main"
+import ExpensesListScreen from "./pages/ExpensesListScreen"
+import SubscriptionsListScreen from "./pages/SubscriptionsListScreen"
 
 interface WalletRootStack extends ParamListBase {
     Wallet: {
@@ -48,6 +50,8 @@ interface WalletRootStack extends ParamListBase {
           }
         | undefined
     TransferSubAccount: { fromId?: string } | undefined
+    ExpensesList: undefined
+    SubscriptionsList: undefined
 }
 
 export type WalletScreens<Screen extends keyof WalletRootStack> = StackScreenProps<WalletRootStack, Screen>
@@ -138,6 +142,10 @@ export default function WalletScreens({ navigation, route }: WalletScreens<"Wall
                 <Stack.Screen name="CreateSubAccount" component={CreateSubAccount} options={MODAL_OPTIONS} />
 
                 <Stack.Screen name="TransferSubAccount" component={TransferSubAccount} options={MODAL_OPTIONS} />
+
+                <Stack.Screen name="ExpensesList" component={ExpensesListScreen} />
+
+                <Stack.Screen name="SubscriptionsList" component={SubscriptionsListScreen} />
             </Stack.Navigator>
         </WalletContextProvider>
     )

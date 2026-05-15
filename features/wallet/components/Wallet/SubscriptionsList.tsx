@@ -1,7 +1,7 @@
 import Section from "@/components/ui/Section"
 import Colors from "@/constants/Colors"
 import { useNavigation } from "@react-navigation/native"
-import { useCallback, useMemo, useState } from "react"
+import { ReactNode, useCallback, useMemo, useState } from "react"
 import {
     NativeScrollEvent,
     NativeSyntheticEvent,
@@ -49,9 +49,10 @@ const AnimatedList = Animated.createAnimatedComponent(VirtualizedList<ListItem>)
 
 interface Props {
     onScroll?: (event: NativeSyntheticEvent<NativeScrollEvent>) => void
+    listHeader?: ReactNode
 }
 
-export default function SubscriptionsList({ onScroll }: Props) {
+export default function SubscriptionsList({ onScroll, listHeader }: Props) {
     const navigation = useNavigation<any>()
     const { data, refetch } = useGetSubscriptions()
     const [refreshing, setRefreshing] = useState(false)
@@ -120,12 +121,16 @@ export default function SubscriptionsList({ onScroll }: Props) {
             keyExtractor={keyExtractor as any}
             onScroll={onScroll}
             ListHeaderComponent={
-                <Section title="Calendar">
-                    <View style={{ padding: 15 }}>
-                        <SubscriptionCalendar subscriptions={[...active, ...inactive] as any} />
-                    </View>
-                </Section>
+                <>
+                    {listHeader}
+                    <Section title="Calendar">
+                        <View style={{ padding: 15 }}>
+                            <SubscriptionCalendar subscriptions={[...active, ...inactive] as any} />
+                        </View>
+                    </Section>
+                </>
             }
+            stickyHeaderIndices={listHeader ? [0] : undefined}
             contentContainerStyle={styles.contentContainer}
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
             removeClippedSubviews

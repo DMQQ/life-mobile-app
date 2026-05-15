@@ -32,10 +32,9 @@ import Feedback from "react-native-haptic-feedback"
 
 type ExpenseType = "expense" | "income" | "refunded"
 
-const TYPE_OPTIONS: [{ label: string; value: ExpenseType }, { label: string; value: ExpenseType }, { label: string; value: ExpenseType }] = [
+const TYPE_OPTIONS: [{ label: string; value: ExpenseType }, { label: string; value: ExpenseType }] = [
     { label: "Expense", value: "expense" },
     { label: "Income", value: "income" },
-    { label: "Refund", value: "refunded" },
 ]
 
 export default function CreateExpenseModal({ route: { params } }: any) {
@@ -142,8 +141,8 @@ function CardContent({ params }: { params: any }) {
     return (
         <Animated.View entering={FadeIn} style={{ flex: 1, gap: 5 }}>
             <View style={{ flexDirection: "row", gap: 10, marginBottom: 10 }}>
-                <ExpenseAIMaker initialOpen={params?.shouldOpenPhotoPicker || false} />
                 <NameInput isEditing={params?.isEditing} />
+                <ExpenseAIMaker initialOpen={params?.shouldOpenPhotoPicker || false} />
             </View>
 
             <View>
@@ -193,7 +192,9 @@ function AccountSelector() {
             {entries.map((item) => {
                 const selected = subAccountId === item.id
                 const bg = selected
-                    ? Color(item.color || Colors.primary_lighter).alpha(0.2).string()
+                    ? Color(item.color || Colors.primary_lighter)
+                          .alpha(0.2)
+                          .string()
                     : Colors.primary_lighter
                 return (
                     <Ripple
@@ -205,8 +206,21 @@ function AccountSelector() {
                             setTimeout(() => setView("main"), 200)
                         }}
                     >
-                        <MaterialCommunityIcons name={item.icon as any} size={20} color={item.color ?? "rgba(255,255,255,0.6)"} />
-                        <Text style={[accountStyles.tileLabel, { color: selected ? (item.color ?? "rgba(255,255,255,0.85)") : "rgba(255,255,255,0.85)" }]}>
+                        <MaterialCommunityIcons
+                            name={item.icon as any}
+                            size={20}
+                            color={item.color ?? "rgba(255,255,255,0.6)"}
+                        />
+                        <Text
+                            style={[
+                                accountStyles.tileLabel,
+                                {
+                                    color: selected
+                                        ? (item.color ?? "rgba(255,255,255,0.85)")
+                                        : "rgba(255,255,255,0.85)",
+                                },
+                            ]}
+                        >
                             {item.name}
                         </Text>
                         {selected && <AntDesign name="check" size={16} color={item.color ?? "rgba(255,255,255,0.6)"} />}

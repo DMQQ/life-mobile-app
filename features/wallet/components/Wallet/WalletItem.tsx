@@ -9,6 +9,7 @@ import { CategoryIcon, Icons } from "../Expense/ExpenseIcon"
 import ContextMenu from "react-native-context-menu-view"
 import { navigationRef } from "@/navigation"
 import useDeleteActivity from "../../hooks/useDeleteActivity"
+import dayjs from "dayjs"
 
 interface WalletElement {
     id: string
@@ -108,18 +109,18 @@ export function parseDateToText(date: string) {
 
 function dateFormatter(date: string) {
     if (!date) return ""
-    const m = moment(date)
-    const dateStr = m.format("YYYY-MM-DD")
-    const today = moment().format("YYYY-MM-DD")
+    const d = dayjs(date)
+    const dateStr = d.format("YYYY-MM-DD")
+    const today = dayjs().format("YYYY-MM-DD")
 
-    if (dateStr === today) return "Today"
+    if (dateStr === today) return `Today at ${d.format("HH:mm")}`
 
-    const yesterday = moment().subtract(1, "day").format("YYYY-MM-DD")
-    if (dateStr === yesterday) return "Yesterday"
+    const yesterday = dayjs().subtract(1, "day").format("YYYY-MM-DD")
+    if (dateStr === yesterday) return `Yesterday at ${d.format("HH:mm")}`
 
     const [year, month, day] = dateStr.split("-")
 
-    return `${day} ${months[parseInt(month) - 1]} ${year}`
+    return `${day} ${months[parseInt(month) - 1]} ${year}, ${d.format("HH:mm")}`
 }
 
 function WalletItem(

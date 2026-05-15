@@ -1,100 +1,51 @@
 import Header, { HeaderItem } from "@/components/ui/Header/Header"
 import Colors from "@/constants/Colors"
+import Color from "color"
 import useTrackScroll from "@/utils/hooks/ui/useTrackScroll"
-import { AntDesign, Entypo, Feather, Ionicons } from "@expo/vector-icons"
+import { Feather } from "@expo/vector-icons"
 import { useCallback, useEffect, useMemo, useState } from "react"
-import { StyleSheet } from "react-native"
+import { Pressable, StyleSheet, View } from "react-native"
 import Haptic from "react-native-haptic-feedback"
 import Animated, { FadeOut } from "react-native-reanimated"
 import InitializeWallet from "../components/Wallet/InitializeWallet"
-import { useScreenSearch } from "@/utils/hooks/useScreenSearch"
-import ExpensesList from "../components/Wallet/ExpensesList"
-import SubscriptionsList from "../components/Wallet/SubscriptionsList"
 import WalletLoader from "../components/Wallet/WalletLoader"
 import { useWalletContext } from "../components/WalletContext"
-import useGetWallet from "../hooks/useGetWallet"
+import useWalletOverview from "../hooks/useWalletOverview"
 import { WalletScreens } from "../Main"
 import { SafeAreaView } from "react-native-safe-area-context"
-import { useSetSearchMenu } from "@/hooks/useSetSearchMenu"
-import { Icons, CategoryUtils } from "../components/Expense/ExpenseIcon"
-import dayjs from "dayjs"
-import type { SearchMenuItem } from "@/contexts/SearchMenuContext"
+import { Expense, MonthlyExpenses, Subscription } from "@/types"
+import SubscriptionItem from "../components/Subscription/SubscriptionItem"
 import Background from "@/components/ui/Background"
-import { Expense, MonthlyExpenses, Wallet } from "@/types"
+import CategoryBreakdown from "../components/Wallet/CategoryBreakdown"
+import SubAccountCards from "../components/Wallet/SubAccountCards"
+import YearlySpendingsChart from "../components/Wallet/YearlySpendingsChart"
+import WalletItem from "../components/Wallet/WalletItem"
+import GroupSelector from "@/components/ui/GroupSelector"
+import Section from "@/components/ui/Section"
+import Text from "@/components/ui/Text/Text"
+import dayjs from "dayjs"
+import GlassView from "@/components/ui/GlassView"
 
-const styles = StyleSheet.create({
-    container: {
-        padding: 10,
-        justifyContent: "center",
-    },
-
-    title: {
-        fontSize: 60,
-        fontWeight: "bold",
-        textAlign: "center",
-        color: Colors.foreground,
-        letterSpacing: 1,
-    },
-    expense_item: {
-        height: 80,
-        borderRadius: 5,
-        padding: 5,
-        flexDirection: "row",
-    },
-    recentText: {
-        color: "#7f7f7f",
-        fontSize: 25,
-        fontWeight: "bold",
-        marginTop: 10,
-    },
-    overlay: {
-        backgroundColor: Colors.primary,
-        zIndex: 1000,
-        justifyContent: "center",
-        alignItems: "center",
-        paddingTop: 125,
-    },
-    balance: { color: "rgba(255,255,255,0.6)", fontSize: 16, textAlign: "center", opacity: 0.8 },
-})
-
-const categoryIconMap: Record<string, string> = {
-    housing: "house.fill",
-    transportation: "car.fill",
-    food: "fork.knife",
-    drinks: "mug.fill",
-    shopping: "cart.fill",
-    addictions: "smoke.fill",
-    work: "briefcase.fill",
-    clothes: "tshirt.fill",
-    health: "pills.fill",
-    entertainment: "play.rectangle.fill",
-    utilities: "bolt.fill",
-    debt: "creditcard.fill",
-    education: "book.fill",
-    savings: "banknote.fill",
-    travel: "airplane",
-    animals: "pawprint.fill",
-    gifts: "gift.fill",
-}
+const TABS = [
+    { label: "Accounts", value: "accounts" as string },
+    { label: "Spendings", value: "spendings" as string },
+]
 
 export default function WalletScreen({ navigation, route }: WalletScreens<"Wallet">) {
-    const { data, loading, refetch, onEndReached, error } = useGetWallet()
-    const [activeView, setActiveView] = useState<"expenses" | "subscriptions">("expenses")
+    const { data, loading, error } = useWalletOverview()
+    const { dispatch, filters } = useWalletContext()
     const [scrollY, onScroll] = useTrackScroll({ screenName: "WalletScreens" })
+    const [tab, setTab] = useState("accounts")
 
     useEffect(() => {
         if (route.params?.expenseId && data?.wallet) {
-            const expense = (data.wallet.expenses2 as MonthlyExpenses[])
+            const found = (data.wallet.expenses2 as MonthlyExpenses[])
                 .flatMap((m) => m.expenses)
-                .find((expense) => expense.id === route.params?.expenseId) as Expense
+                .find((e) => (e as Expense).id === route.params?.expenseId) as Expense
             navigation.setParams({ expenseId: undefined })
-            navigation.navigate("Expense", { expense })
+            navigation.navigate("Expense", { expense: found })
         }
     }, [route.params?.expenseId])
-
-    useEffect(() => {
-        scrollY.value = 0
-    }, [activeView])
 
     const balance = loading && data?.wallet?.balance === undefined ? " ..." : (data?.wallet?.balance || 0).toFixed(2)
 
@@ -103,20 +54,37 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
         navigation.navigate("EditBalance")
     }, [])
 
+    const recentExpenses = useMemo(
+        () => (data?.wallet?.expenses2 ?? []).flatMap((m) => m.expenses as unknown as Expense[]).slice(0, 6),
+        [data?.wallet?.expenses2],
+    )
+
+    const upcomingSubscriptions = useMemo(() => {
+        const now = dayjs()
+        const weekFromNow = now.add(7, "day")
+        return ((data?.subscriptions ?? []) as Subscription[])
+            .filter((s) => {
+                if (!s.isActive) return false
+                const billingDate = dayjs(parseInt(s.nextBillingDate))
+                return billingDate.isAfter(now) && billingDate.isBefore(weekFromNow)
+            })
+            .sort((a, b) => parseInt(a.nextBillingDate) - parseInt(b.nextBillingDate))
+    }, [data?.subscriptions])
+
+    const selectedMonth = dayjs(filters.date.from).get("month")
+
     const buttons = useMemo(
         () =>
             [
                 {
-                    icon: <Entypo name="dots-three-vertical" size={20} color={Colors.foreground} />,
+                    icon: <Feather name="more-vertical" size={20} color={Colors.foreground} />,
                     onPress: () => {},
                     contextMenu: {
                         items: [
                             {
                                 title: "Limits",
                                 systemImage: "gauge",
-                                onPress: () => {
-                                    navigation.navigate("SpendingLimits")
-                                },
+                                onPress: () => navigation.navigate("SpendingLimits"),
                             },
                             {
                                 title: "Edit Balance",
@@ -126,47 +94,45 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
                             {
                                 title: "Filters",
                                 systemImage: "camera.filters",
-                                onPress: () => {
-                                    navigation.navigate("Filters")
-                                },
+                                onPress: () => navigation.navigate("Filters"),
                             },
-
                             {
                                 title: "Correction Rules",
                                 systemImage: "arrow.left.arrow.right",
-                                onPress: () => {
-                                    navigation.navigate("CorrectionMaps")
-                                },
+                                onPress: () => navigation.navigate("CorrectionMaps"),
                             },
                         ],
                     },
                 },
                 {
-                    icon: <Feather name="repeat" color={"#fff"} size={20} />,
-                    onPress: () => {
-                        setActiveView((prev) => (prev === "expenses" ? "subscriptions" : "expenses"))
-                        Haptic.trigger("impactLight")
-                    },
-                },
-                {
                     onPress: () => navigation.navigate("Charts"),
-                    icon: <Ionicons name="stats-chart" size={20} color={Colors.foreground} />,
+                    icon: <Feather name="bar-chart-2" size={20} color={Colors.foreground} />,
                 },
                 {
                     position: "right",
                     standalone: true,
-                    onPress: () =>
-                        activeView === "subscriptions"
-                            ? navigation.navigate("EditSubscription")
-                            : navigation.navigate("CreateExpense"),
-                    icon: <AntDesign name="plus" size={20} color={Colors.foreground} />,
+                    icon: <Feather name="plus" size={20} color={Colors.foreground} />,
+                    contextMenu: {
+                        items: [
+                            {
+                                title: "Add Expense",
+                                systemImage: "arrow.up.right",
+                                onPress: () => navigation.navigate("CreateExpense"),
+                            },
+                            {
+                                title: "Add Subscription",
+                                systemImage: "repeat",
+                                onPress: () => navigation.navigate("EditSubscription"),
+                            },
+                        ],
+                    },
                 },
             ] as HeaderItem[],
-        [activeView, handleShowEditSheet],
+        [handleShowEditSheet, navigation],
     )
 
-    const header = useMemo(() => {
-        return (
+    const header = useMemo(
+        () => (
             <Header
                 scrollY={scrollY}
                 animated={true}
@@ -178,8 +144,9 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
                 animatedSubtitle="Total balance across all accounts"
                 onAnimatedTitleLongPress={handleShowEditSheet}
             />
-        )
-    }, [balance, loading, buttons])
+        ),
+        [balance, loading, buttons],
+    )
 
     if (
         (Array.isArray(error?.cause?.extensions)
@@ -198,153 +165,202 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
             {loading && (
                 <Animated.View
                     exiting={FadeOut.duration(250).delay(250)}
-                    style={[StyleSheet.absoluteFillObject, styles.overlay]}
+                    style={[StyleSheet.absoluteFill, styles.overlay]}
                 >
                     <WalletLoader />
                 </Animated.View>
             )}
-
             {header}
+            <Animated.ScrollView
+                onScroll={onScroll}
+                scrollEventThrottle={16}
+                contentContainerStyle={styles.contentContainer}
+            >
+                <View style={styles.tabSection}>
+                    <View style={styles.tabRow}>
+                        <Text style={styles.tabTitle}>{tab === "accounts" ? "Accounts" : "Spendings"}</Text>
+                        <View style={styles.tabSelectorWrap}>
+                            <GroupSelector size="small" options={TABS} value={tab} onChange={setTab} />
+                        </View>
+                    </View>
+                    {tab === "accounts" ? (
+                        <SubAccountCards />
+                    ) : (
+                        <YearlySpendingsChart
+                            selectedBar={selectedMonth}
+                            onBarPress={(monthIndex) => {
+                                if (monthIndex === selectedMonth) {
+                                    dispatch({ type: "RESET" })
+                                    return
+                                }
+                                const month = dayjs().set("month", monthIndex)
+                                dispatch({
+                                    type: "SET_DATE_MIN",
+                                    payload: month.startOf("month").format("YYYY-MM-DD"),
+                                })
+                                dispatch({
+                                    type: "SET_DATE_MAX",
+                                    payload: month.endOf("month").format("YYYY-MM-DD"),
+                                })
+                            }}
+                        />
+                    )}
+                </View>
 
-            {activeView === "expenses" ? (
-                <ExpensesList wallet={data?.wallet as unknown as Wallet} onScroll={onScroll} refetch={refetch} onEndReached={onEndReached} />
-            ) : (
-                <SubscriptionsList onScroll={onScroll} />
-            )}
+                <View style={styles.quickNav}>
+                    <GlassView style={styles.quickNavCard}>
+                        <Pressable
+                            onPress={() => {
+                                Haptic.trigger("impactLight")
+                                navigation.navigate("ExpensesList")
+                            }}
+                        >
+                            <View style={styles.quickNavIconWrap}>
+                                <Feather name="list" size={20} color={Colors.secondary} />
+                            </View>
+                            <Text style={styles.quickNavTitle}>Expenses</Text>
+                            <Text style={styles.quickNavSub}>All transactions</Text>
+                        </Pressable>
+                    </GlassView>
+                    <GlassView style={styles.quickNavCard}>
+                        <Pressable
+                            onPress={() => {
+                                Haptic.trigger("impactLight")
+                                navigation.navigate("SubscriptionsList")
+                            }}
+                        >
+                            <View style={styles.quickNavIconWrap}>
+                                <Feather name="repeat" size={20} color={Colors.secondary} />
+                            </View>
+                            <Text style={styles.quickNavTitle}>Subscriptions</Text>
+                            <Text style={styles.quickNavSub}>Recurring payments</Text>
+                        </Pressable>
+                    </GlassView>
+                </View>
 
-            <WalletSearchContext navigation={navigation} />
+                {upcomingSubscriptions.length > 0 && (
+                    <Section
+                        title="Upcoming"
+                        headerRight={
+                            <Pressable onPress={() => navigation.navigate("SubscriptionsList")} hitSlop={8}>
+                                <Text style={styles.seeAll}>See all</Text>
+                            </Pressable>
+                        }
+                    >
+                        {upcomingSubscriptions.map((sub, index) => (
+                            <SubscriptionItem
+                                key={sub.id}
+                                subscription={sub as any}
+                                index={index}
+                                onPress={() => navigation.navigate("Subscription", { subscriptionId: sub.id })}
+                                style={{
+                                    borderWidth: 0,
+                                    marginBottom: 0,
+                                    borderRadius: 0,
+                                    borderBottomWidth: upcomingSubscriptions.length - 1 === index ? 0 : 1,
+                                    marginTop: 0,
+                                }}
+                            />
+                        ))}
+                    </Section>
+                )}
+
+                {recentExpenses.length > 0 && (
+                    <Section
+                        title="Recent"
+                        headerRight={
+                            <Pressable onPress={() => navigation.navigate("ExpensesList")} hitSlop={8}>
+                                <Text style={styles.seeAll}>See all</Text>
+                            </Pressable>
+                        }
+                    >
+                        {recentExpenses.map((expense, index) => (
+                            <WalletItem
+                                key={expense.id}
+                                index={index}
+                                handlePress={() => navigation.navigate("Expense", { expense })}
+                                {...(expense as any)}
+                                animatedStyle={{
+                                    borderWidth: 0,
+                                    marginBottom: 0,
+                                    borderRadius: 0,
+                                    borderBottomWidth: recentExpenses.length - 1 === index ? 0 : 1,
+                                    marginTop: 0,
+                                }}
+                            />
+                        ))}
+                    </Section>
+                )}
+            </Animated.ScrollView>
         </SafeAreaView>
     )
 }
 
-const WalletSearchContext = ({ navigation }: Omit<WalletScreens<"Wallet">, "route">) => {
-    const wallet = useWalletContext()
-
-    useScreenSearch(
-        useCallback((value) => {
-            wallet.dispatch({ type: "SET_QUERY", payload: value.trim() })
-        }, []),
-    )
-
-    const searchMenuItems = useMemo(() => {
-        const categories = Object.keys(Icons).filter(
-            (key) => !["edit", "income"].includes(key),
-        ) as (keyof typeof Icons)[]
-
-        const categoryMenuItems: SearchMenuItem[] = categories.map((category) => ({
-            title: CategoryUtils.getCategoryName(category),
-            systemImage: categoryIconMap[category],
-            checked: wallet.filters.category.includes(category),
-            onPress: () => {
-                wallet.dispatch({ type: "TOGGLE_CATEGORY", payload: category })
-            },
-        }))
-
-        const typeMenuItems: SearchMenuItem[] = [
-            {
-                title: "All",
-                checked: wallet.filters.type === undefined,
-                onPress: () => wallet.dispatch({ type: "SET_TYPE", payload: undefined }),
-            },
-            {
-                title: "Income",
-                systemImage: "arrow.down.circle",
-                checked: wallet.filters.type === "income",
-                onPress: () => wallet.dispatch({ type: "SET_TYPE", payload: "income" }),
-            },
-            {
-                title: "Expense",
-                systemImage: "arrow.up.circle",
-                checked: wallet.filters.type === "expense",
-                onPress: () => wallet.dispatch({ type: "SET_TYPE", payload: "expense" }),
-            },
-            {
-                title: "Refunded",
-                systemImage: "arrow.uturn.backward.circle",
-                checked: wallet.filters.type === "refunded",
-                onPress: () => wallet.dispatch({ type: "SET_TYPE", payload: "refunded" }),
-            },
-        ]
-
-        const dateMenuItems: SearchMenuItem[] = [
-            {
-                title: "Today",
-                systemImage: "calendar.badge.clock",
-                checked:
-                    wallet.filters.date.from === dayjs().format("YYYY-MM-DD") &&
-                    wallet.filters.date.to === dayjs().format("YYYY-MM-DD"),
-                onPress: () => {
-                    const today = dayjs().format("YYYY-MM-DD")
-                    wallet.dispatch({ type: "SET_DATE_MIN", payload: today })
-                    wallet.dispatch({ type: "SET_DATE_MAX", payload: today })
-                },
-            },
-            {
-                title: "This Week",
-                systemImage: "calendar.badge.plus",
-                checked:
-                    wallet.filters.date.from === dayjs().startOf("week").format("YYYY-MM-DD") &&
-                    wallet.filters.date.to === dayjs().endOf("week").format("YYYY-MM-DD"),
-                onPress: () => {
-                    wallet.dispatch({ type: "SET_DATE_MIN", payload: dayjs().startOf("week").format("YYYY-MM-DD") })
-                    wallet.dispatch({ type: "SET_DATE_MAX", payload: dayjs().endOf("week").format("YYYY-MM-DD") })
-                },
-            },
-            {
-                title: "This Month",
-                systemImage: "calendar",
-                checked:
-                    wallet.filters.date.from === dayjs().startOf("month").format("YYYY-MM-DD") &&
-                    wallet.filters.date.to === dayjs().endOf("month").format("YYYY-MM-DD"),
-                onPress: () => {
-                    wallet.dispatch({
-                        type: "SET_DATE_MIN",
-                        payload: dayjs().startOf("month").format("YYYY-MM-DD"),
-                    })
-                    wallet.dispatch({ type: "SET_DATE_MAX", payload: dayjs().endOf("month").format("YYYY-MM-DD") })
-                },
-            },
-            {
-                title: "Clear Date Filter",
-                systemImage: "xmark.circle",
-                onPress: () => {
-                    wallet.dispatch({ type: "SET_DATE_MIN", payload: "" })
-                    wallet.dispatch({ type: "SET_DATE_MAX", payload: "" })
-                },
-            },
-        ]
-
-        return [
-            {
-                title: "Type",
-                systemImage: "tag",
-                children: typeMenuItems,
-            },
-            {
-                title: "Date Range",
-                systemImage: "calendar",
-                children: dateMenuItems,
-            },
-            {
-                title: "Categories",
-                systemImage: "square.grid.2x2",
-                children: categoryMenuItems,
-            },
-            {
-                title: "Clear All Filters",
-                systemImage: "xmark.circle.fill",
-                destructive: true,
-                onPress: () => wallet.dispatch({ type: "RESET" }),
-            },
-            {
-                title: "Advanced Filters",
-                systemImage: "slider.horizontal.3",
-                onPress: () => navigation.navigate("Filters"),
-            },
-        ]
-    }, [wallet.filters])
-
-    useSetSearchMenu(searchMenuItems)
-
-    return null
-}
+const styles = StyleSheet.create({
+    overlay: {
+        backgroundColor: Colors.primary,
+        zIndex: 1000,
+        justifyContent: "center",
+        alignItems: "center",
+        paddingTop: 125,
+    },
+    contentContainer: {
+        padding: 15,
+        paddingTop: 230,
+        paddingBottom: 60,
+    },
+    tabSection: {
+        gap: 15,
+    },
+    tabRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+    },
+    tabTitle: {
+        fontWeight: "600",
+        fontSize: 22.5,
+        color: Colors.foreground,
+    },
+    tabSelectorWrap: {
+        width: "50%",
+    },
+    seeAll: {
+        fontSize: 13,
+        color: Colors.secondary,
+        fontWeight: "600",
+        marginRight: 10,
+    },
+    quickNav: {
+        flexDirection: "row",
+        gap: 15,
+        marginTop: 25,
+    },
+    quickNavCard: {
+        width: "48%",
+        borderRadius: 20,
+        padding: 15,
+        gap: 15,
+    },
+    quickNavIconWrap: {
+        width: 40,
+        height: 40,
+        borderRadius: 12,
+        backgroundColor: Color(Colors.secondary).alpha(0.12).string(),
+        alignItems: "center",
+        justifyContent: "center",
+        marginBottom: 4,
+    },
+    quickNavTitle: {
+        fontSize: 15,
+        fontWeight: "700",
+        color: Colors.foreground,
+        marginTop: 5,
+    },
+    quickNavSub: {
+        fontSize: 12,
+        color: Colors.foreground_secondary,
+        fontWeight: "500",
+        marginTop: 5,
+    },
+})

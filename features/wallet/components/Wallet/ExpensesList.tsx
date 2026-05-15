@@ -2,10 +2,10 @@ import Colors from "@/constants/Colors"
 import Layout from "@/constants/Layout"
 import { Expense, MonthlyExpenses, Wallet } from "@/types"
 import { gql, useQuery } from "@apollo/client"
-import { AntDesign } from "@expo/vector-icons"
+import { Feather } from "@expo/vector-icons"
 import { useNavigation } from "@react-navigation/native"
 import moment from "moment"
-import { memo, useCallback, useEffect, useMemo, useState } from "react"
+import { memo, ReactNode, useCallback, useEffect, useMemo, useState } from "react"
 import {
     NativeScrollEvent,
     NativeSyntheticEvent,
@@ -22,12 +22,7 @@ import Haptics from "react-native-haptic-feedback"
 import { getInvalidExpenses } from "../../pages/WalletCharts"
 import { useWalletContext } from "../WalletContext"
 import GlassView from "@/components/ui/GlassView"
-import SubAccountCards from "./SubAccountCards"
 import WalletItem, { parseDateToText } from "./WalletItem"
-import GroupSelector from "@/components/ui/GroupSelector"
-import YearlySpendingsChart from "./YearlySpendingsChart"
-import Section from "@/components/ui/Section"
-import dayjs from "dayjs"
 
 type ListItem = { type: "month"; data: MonthlyExpenses; monthIndex: number }
 
@@ -43,9 +38,10 @@ interface Props {
     onScroll?: (event: NativeSyntheticEvent<NativeScrollEvent>) => void
     refetch?: () => void
     onEndReached?: () => void
+    listHeader?: ReactNode
 }
 
-export default function ExpensesList({ wallet, onScroll, refetch, onEndReached }: Props) {
+export default function ExpensesList({ wallet, onScroll, refetch, onEndReached, listHeader }: Props) {
     const [refreshing, setRefreshing] = useState(false)
 
     const items: ListItem[] = useMemo(
@@ -78,7 +74,8 @@ export default function ExpensesList({ wallet, onScroll, refetch, onEndReached }
                 renderItem={renderItem as any}
                 keyExtractor={keyExtractor as any}
                 onScroll={onScroll}
-                ListHeaderComponent={<ListHeader />}
+                ListHeaderComponent={listHeader ? <>{listHeader}</> : undefined}
+                stickyHeaderIndices={listHeader ? [0] : undefined}
                 contentContainerStyle={styles.contentContainer}
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
                 onEndReached={onEndReached}
@@ -91,62 +88,6 @@ export default function ExpensesList({ wallet, onScroll, refetch, onEndReached }
         </>
     )
 }
-
-const tabs = [
-    {
-        label: "Accounts",
-        value: "accounts",
-    },
-    {
-        label: "Spendings",
-        value: "spendings",
-    },
-]
-const ListHeader = memo(() => {
-    const [tab, setTab] = useState("accounts")
-    const title = tabs.find((t) => t.value === tab)?.label
-    const { dispatch, filters } = useWalletContext()
-
-    const selectedMonth = dayjs(filters.date.from).get("month")
-
-    return (
-        <View style={{ flexDirection: "column", gap: 15, marginBottom: 30 }}>
-            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-                <Text
-                    style={{
-                        fontWeight: "600",
-                        fontSize: 22.5,
-                        color: "#fff",
-                    }}
-                >
-                    {title}
-                </Text>
-                <View style={{ width: "50%" }}>
-                    <GroupSelector size="small" options={tabs} value={tab} onChange={setTab} />
-                </View>
-            </View>
-            <View>
-                {tab === "accounts" ? (
-                    <SubAccountCards />
-                ) : (
-                    <YearlySpendingsChart
-                        selectedBar={selectedMonth}
-                        onBarPress={(monthIndex) => {
-                            if (monthIndex === selectedMonth) {
-                                dispatch({ type: "RESET" })
-
-                                return
-                            }
-                            const month = dayjs().set("month", monthIndex)
-                            dispatch({ type: "SET_DATE_MIN", payload: month.startOf("month").format("YYYY-MM-DD") })
-                            dispatch({ type: "SET_DATE_MAX", payload: month.endOf("month").format("YYYY-MM-DD") })
-                        }}
-                    />
-                )}
-            </View>
-        </View>
-    )
-})
 
 const MonthItem = ({
     monthData,
@@ -338,7 +279,7 @@ const ChevronIcon = ({ isExpanded }: { isExpanded: boolean }) => {
 
     return (
         <Animated.View style={animatedStyle}>
-            <AntDesign name="down" size={10} color="rgba(255,255,255,0.5)" />
+            <Feather name="chevron-down" size={12} color="rgba(255,255,255,0.5)" />
         </Animated.View>
     )
 }
@@ -362,7 +303,7 @@ const ClearFiltersButton = () => {
                             ? `Reset (${filtersDiffCount}) ${filtersDiffCount > 1 ? "filters" : "filter"}`
                             : "Reset filters"}
                     </Text>
-                    <AntDesign name="close" size={18} color={Colors.secondary_light_2} />
+                    <Feather name="x" size={16} color={Colors.secondary_light_2} />
                 </GlassView>
             </Pressable>
         </Animated.View>
@@ -373,7 +314,7 @@ const styles = StyleSheet.create({
     contentContainer: {
         padding: 15,
         paddingTop: 230,
-        paddingBottom: 120,
+        paddingBottom: 200,
     },
     monthContainer: {
         marginTop: 30,
