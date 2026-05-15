@@ -1,7 +1,7 @@
 import { Card } from "@/components"
 import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
-import { useNavigation } from "@react-navigation/native"
+import { useNavigation } from "expo-router"
 import moment from "moment"
 import { View } from "react-native"
 import Animated, { FadeIn } from "react-native-reanimated"
@@ -53,7 +53,7 @@ const FlashCardGroup = (group: Group & { index: number; length: number; onLongPr
             <Card
                 ripple
                 animated
-                onPress={() => navigation.navigate("FlashCard", { groupId: group.id })}
+                onPress={() => navigation.navigate("[id]", { groupId: group.id })}
                 onLongPress={group.onLongPress}
                 style={{
                     marginVertical: 7.5,

@@ -1,5 +1,5 @@
 import Colors from "@/constants/Colors"
-import { useNavigation } from "@react-navigation/native"
+import { useNavigation, router } from "expo-router"
 import { useCallback, useMemo } from "react"
 import dayjs from "dayjs"
 import { Pressable, StyleSheet, View } from "react-native"
@@ -30,7 +30,7 @@ export default function DayTimelineItemWrapper({ item, style, onLongPress, onPre
         completeOccurrenceMutation({ variables: { input: { id: timeline.id, isCompleted: !timeline.isCompleted } } })
 
     const handleCopyPress = useCallback(() => {
-        navigation.navigate("CopyTimelineModal", {
+        navigation.navigate("copy-timeline", {
             timelineId: timeline.id,
             timelineTitle: timeline.title,
             originalDate: timeline.date,
@@ -83,7 +83,7 @@ export default function DayTimelineItemWrapper({ item, style, onLongPress, onPre
                     systemIcon: "pencil",
                     title: "Edit",
                     onPress: () => {
-                        navigation.navigate("TimelineCreate", {
+                        navigation.navigate("create", {
                             mode: "edit",
                             selectedDate: timeline?.date,
                             timelineId: timeline?.id,
@@ -112,10 +112,11 @@ export default function DayTimelineItemWrapper({ item, style, onLongPress, onPre
     const handlePress = () => {
         onPress?.()
         timeline.location === "root"
-            ? navigation.navigate("TimelineScreens", {
-                  timelineId: timeline.id,
+            ? router.push({
+                  pathname: "/(tabs)/timeline",
+                  params: { timelineId: timeline.id },
               })
-            : navigation.navigate("TimelineDetails", {
+            : navigation.navigate("[id]", {
                   timelineId: timeline.id,
               })
     }

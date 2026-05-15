@@ -2,7 +2,7 @@ import { Pressable, StyleProp, StyleSheet, ViewStyle } from "react-native"
 import GlassView from "../GlassView"
 import { AntDesign } from "@expo/vector-icons"
 import { useCallback } from "react"
-import { navigationRef } from "@/navigation"
+import { router } from "expo-router"
 
 interface IconBackButtonProps {
     disabled?: boolean
@@ -17,8 +17,8 @@ export default function IconBackButton({ disabled = false, onPress, style }: Ico
             return
         }
 
-        if (navigationRef.current?.canGoBack()) {
-            navigationRef.current.goBack()
+        if (router.canGoBack()) {
+            router.back()
         }
     }, [onPress])
 

@@ -4,19 +4,18 @@ import { FlatList, StyleSheet, View } from "react-native"
 import Text from "@/components/ui/Text/Text"
 import { useMissedOccurrences } from "../hooks/query/useGetOccurrencesQuery"
 import DayTimelineItemWrapper from "../components/DayTimelineItemWrapper"
-import { TimelineScreenProps } from "../types"
-import { useNavigation } from "@react-navigation/native"
+
+import { router, useLocalSearchParams } from "expo-router"
 
 const ITEM_STYLE = {
     height: 120,
     width: Layout.screen.width - 32,
 }
 
-export default function MissedEventsModal({ route }: TimelineScreenProps<"MissedEventsModal">) {
-    const { eventIds } = route.params
+export default function MissedEventsModal() {
+    const { eventIds } = useLocalSearchParams<{ eventIds: string[] }>()
     const { data, loading } = useMissedOccurrences(eventIds)
     const occurrences = data?.occurrences ?? []
-    const navigation = useNavigation()
 
     return (
         <View style={styles.container}>
@@ -37,7 +36,7 @@ export default function MissedEventsModal({ route }: TimelineScreenProps<"Missed
                         <DayTimelineItemWrapper
                             item={{ timeline: item }}
                             style={ITEM_STYLE}
-                            onPress={() => navigation.goBack()}
+                            onPress={() => router.back()}
                         />
                     )}
                 />

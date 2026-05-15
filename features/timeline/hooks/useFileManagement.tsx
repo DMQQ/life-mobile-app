@@ -1,6 +1,6 @@
 import { useState } from "react"
 import Haptic from "react-native-haptic-feedback"
-import { useNavigation } from "@react-navigation/native"
+import { useNavigation } from "expo-router"
 import useRemoveTodoFile from "./mutation/useRemoveTodoFile"
 
 interface UseFileManagementProps {
@@ -27,7 +27,7 @@ export const useFileManagement = ({ timelineId }: UseFileManagementProps) => {
     }
 
     const handleShowPreview = (file: any) => {
-        ;(navigation as any).navigate("ImagesPreview", {
+        ;(navigation as any).navigate("images-preview", {
             selectedImage: file.url,
             timelineId: timelineId,
         })

@@ -5,7 +5,7 @@ import Colors from "@/constants/Colors"
 import Ripple from "react-native-material-ripple"
 import Button from "@/components/ui/Button/Button"
 import { AntDesign } from "@expo/vector-icons"
-import { useIsFocused } from "@react-navigation/native"
+import { useIsFocused } from "expo-router"
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle)
 

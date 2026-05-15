@@ -23,12 +23,12 @@ const Stack = createNativeStackNavigator<RootStackParamList>()
 export default function TimelineScreens({ route, navigation }: RootStackScreenProps<"TimelineScreens">) {
     useEffect(() => {
         if (!!route.params?.timelineId) {
-            ;(navigation as any).navigate("TimelineDetails", {
+            ;(navigation as any).navigate("[id]", {
                 ...route.params,
                 timelineId: route.params.timelineId,
             })
         } else if (route.params?.selectedDate !== undefined) {
-            ;(navigation as any).navigate("TimelineCreate", {
+            ;(navigation as any).navigate("create", {
                 ...route.params,
             })
         }

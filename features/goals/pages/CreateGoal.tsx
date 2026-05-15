@@ -4,6 +4,7 @@ import { useMemo } from "react"
 import { ScrollView, StyleSheet, View } from "react-native"
 import { Slider, Host, Menu, Button } from "@expo/ui/swift-ui"
 import * as yup from "yup"
+import { router, useLocalSearchParams } from "expo-router"
 import ValidatedInput from "@/components/ui/ValidatedInput"
 import ModalHeader from "@/components/ui/ModalHeader"
 import GroupSelector from "@/components/ui/GroupSelector"
@@ -60,8 +61,8 @@ const GOAL_TYPE_OPTIONS = [
     { label: "Stay Under Limit", value: "LIMIT" as const },
 ]
 
-export default function CreateGoal({ route, navigation }: any) {
-    const editId = route.params?.id as string | undefined
+export default function CreateGoal() {
+    const { id: editId } = useLocalSearchParams<{ id?: string }>()
     const isEdit = !!editId
 
     const { createGoals, updateGoals } = useGoal()
@@ -102,7 +103,7 @@ export default function CreateGoal({ route, navigation }: any) {
                         target: values.target,
                     },
                 },
-                onCompleted: () => navigation.goBack(),
+                onCompleted: () => router.back(),
             })
         } else {
             createGoals({
@@ -117,7 +118,7 @@ export default function CreateGoal({ route, navigation }: any) {
                         unit: values.unit,
                     },
                 },
-                onCompleted: () => navigation.goBack(),
+                onCompleted: () => router.back(),
             })
         }
     }
@@ -132,7 +133,7 @@ export default function CreateGoal({ route, navigation }: any) {
             {(f: FormikProps<FormValues>) => (
                 <View style={styles.container}>
                     <ModalHeader
-                        onClose={() => navigation.goBack()}
+                        onClose={() => router.back()}
                         onSave={f.handleSubmit}
                         title={isEdit ? "Edit Goal" : "New Goal"}
                         saveLabel="Save"
@@ -147,12 +148,13 @@ export default function CreateGoal({ route, navigation }: any) {
                         <View style={styles.iconSection}>
                             <Ripple
                                 style={[styles.iconButton, f.values.icon ? styles.iconButtonSelected : {}]}
-                                onPress={() =>
-                                    navigation.navigate("IconPicker", {
-                                        onSelectIcon: (icon: string) => f.setFieldValue("icon", icon),
+                                onPress={() => {
+                                    const iconCallback = (icon: string) => f.setFieldValue("icon", icon)
+                                    router.push({ pathname: "/(tabs)/goals/icon-picker", params: {
+                                        onSelectIcon: iconCallback,
                                         selectedIcon: f.values.icon,
-                                    })
-                                }
+                                    }})
+                                }}
                             >
                                 <Feather
                                     name={(f.values.icon || "plus-circle") as any}

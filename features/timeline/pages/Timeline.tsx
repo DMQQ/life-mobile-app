@@ -7,20 +7,21 @@ import dayjs from "dayjs"
 import moment from "moment"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { View } from "react-native"
+import { router, useLocalSearchParams } from "expo-router"
 import { useScreenSearch } from "@/utils/hooks/useScreenSearch"
 import { TimelineScreenLoader } from "../components/LoaderSkeleton"
 import TimelineContent from "../components/TimelineContent"
 import useTimeline from "../hooks/general/useTimeline"
 import { usePrefetchMonthRange } from "../hooks/query/useGetOccurrencesQuery"
-import { TimelineScreenProps } from "../types"
+
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import Animated, { withTiming } from "react-native-reanimated"
 import useTrackScroll from "@/utils/hooks/ui/useTrackScroll"
 import Background from "@/components/ui/Background"
 
 
-export default function Timeline({ navigation, route }: TimelineScreenProps<"Timeline">) {
-    const timeline = useTimeline({ navigation, route })
+export default function Timeline() {
+    const timeline = useTimeline()
     usePrefetchMonthRange(timeline.selected)
     const insets = useSafeAreaInsets()
     const headerHeight = insets.top + 50

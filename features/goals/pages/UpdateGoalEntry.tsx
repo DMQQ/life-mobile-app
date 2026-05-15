@@ -5,6 +5,7 @@ import { Feather } from "@expo/vector-icons"
 import dayjs from "dayjs"
 import { useCallback, useState } from "react"
 import { StyleSheet, View } from "react-native"
+import { router, useLocalSearchParams } from "expo-router"
 import { useGoal, useEditGoalEntry } from "../hooks/hooks"
 import IconBackButton from "@/components/ui/Button/IconBackButton"
 import IconSaveButton from "@/components/ui/Button/IconSaveButton"
@@ -92,8 +93,8 @@ function parseAmount(v: string): number {
     return +v
 }
 
-export default function UpdateGoalEntry({ route, navigation }: any) {
-    const { id, entryId, entryValue, entryDate } = route.params
+export default function UpdateGoalEntry() {
+    const { id, entryId, entryValue, entryDate } = useLocalSearchParams<{ id: string; entryId?: string; entryValue?: string; entryDate?: string }>()
     const isEditing = !!entryId
     const { goals, upsertStats } = useGoal()
     const editGoalEntry = useEditGoalEntry()
@@ -149,7 +150,7 @@ export default function UpdateGoalEntry({ route, navigation }: any) {
                     ),
                 )
             }
-            navigation.goBack()
+            router.back()
         } catch (e) {
             console.error(JSON.stringify(e, null, 2))
         } finally {
@@ -163,7 +164,7 @@ export default function UpdateGoalEntry({ route, navigation }: any) {
 
     return (
         <View style={styles.root}>
-            <IconBackButton style={styles.closeBtn} onPress={() => navigation.goBack()} />
+            <IconBackButton style={styles.closeBtn} onPress={() => router.back()} />
 
             <IconSaveButton disabled={amount === "0" || loading} loading={loading} onPress={handleSubmit} />
 

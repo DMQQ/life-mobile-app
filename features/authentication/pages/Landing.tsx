@@ -38,11 +38,11 @@ export default function Landing({ navigation }: any) {
           gap: 15,
         }}
       >
-        <Button type="text" fontStyle={{ fontSize: 16 }} onPress={() => navigation.navigate("Register")}>
+        <Button type="text" fontStyle={{ fontSize: 16 }} onPress={() => navigation.navigate("register")}>
           CREATE ACCOUNT
         </Button>
 
-        <Button type="contained" onPress={() => navigation.navigate("Login")} fontStyle={{ fontSize: 16 }}>
+        <Button type="contained" onPress={() => navigation.navigate("login")} fontStyle={{ fontSize: 16 }}>
           LOGIN
         </Button>
       </View>

@@ -2,10 +2,11 @@ import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
 import Layout from "@/constants/Layout"
 import Url from "@/constants/Url"
-import { StackScreenProps } from "@/types"
+
 import Color from "color"
 import { useCallback, useMemo, useState } from "react"
 import { ActionSheetIOS, StyleSheet, View } from "react-native"
+import { router, useLocalSearchParams } from "expo-router"
 import Animated, { useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import FileList from "../components/FileList"
@@ -50,12 +51,10 @@ const capitalize = (text: string | undefined) => {
     return text.charAt(0).toUpperCase() + text.slice(1)
 }
 
-export default function TimelineDetails({
-    route,
-    navigation,
-}: StackScreenProps<{ TimelineDetails: { timelineId: string } }, "TimelineDetails">) {
-    const { data, loading } = useGetOccurrenceById(route.params.timelineId)
-    const [completeOccurrence] = useCompleteOccurrence(route.params.timelineId)
+export default function TimelineDetails() {
+    const { timelineId } = useLocalSearchParams<{ timelineId: string }>()
+    const { data, loading } = useGetOccurrenceById(timelineId)
+    const [completeOccurrence] = useCompleteOccurrence(timelineId)
 
     const insets = useSafeAreaInsets()
 
@@ -68,11 +67,11 @@ export default function TimelineDetails({
     })
 
     const onFabPress = () => {
-        ;(navigation as any).navigate("TimelineCreate", {
+        router.push({ pathname: "/(tabs)/timeline/create", params: {
             mode: "edit",
             selectedDate: data?.date,
             timelineId: data?.id,
-        })
+        }})
     }
 
     const { isPending, startActivity } = useActivityUtils(data?.id)
@@ -104,10 +103,10 @@ export default function TimelineDetails({
     }, [data?.title, data?.description, insets.top])
 
     const { remove: removeOne } = useRemoveTimelineMutation({ id: data?.id || "", date: data?.date || "" }, () =>
-        (navigation as any).goBack(),
+        router.back(),
     )
     const { remove: removeAll } = useDeleteAllOccurrences({ id: data?.id || "", date: data?.date || "" }, () =>
-        (navigation as any).goBack(),
+        router.back(),
     )
 
     const buttons = useMemo(
@@ -150,9 +149,9 @@ export default function TimelineDetails({
     )
 
     const handleCreateTodo = useCallback(() => {
-        ;(navigation as any).navigate("CreateTimelineTodos", {
+        router.push({ pathname: "/(tabs)/timeline/create-todos", params: {
             timelineId: data?.id,
-        })
+        }})
     }, [data?.id])
 
     const client = useApolloClient()
@@ -245,7 +244,7 @@ export default function TimelineDetails({
                 onTakePhoto={handleTakePhoto}
                 uploadLoading={uploadLoading}
                 isCompleted={data?.isCompleted}
-                onDo={() => (navigation as any).navigate("TimelineDo", { timelineId: data?.id })}
+                onDo={() => router.push({ pathname: "/(tabs)/timeline/[id]/do", params: { timelineId: data?.id } })}
             />
         </View>
     )

@@ -6,6 +6,7 @@ import Input from "@/components/ui/TextInput/TextInput"
 import Colors from "@/constants/Colors"
 import Layout from "@/constants/Layout"
 import { Subscription } from "@/types"
+import { router, useLocalSearchParams } from "expo-router"
 import { Feather } from "@expo/vector-icons"
 import { BottomSheetScrollView, BottomSheetView } from "@gorhom/bottom-sheet"
 import Color from "color"
@@ -24,10 +25,6 @@ import { useSubAccounts } from "../hooks/useSubAccounts"
 
 type BillingCycle = "daily" | "weekly" | "monthly" | "yearly" | "custom"
 
-interface Props {
-    route: { params: { subscription?: Subscription } }
-    navigation: any
-}
 
 const BILLING_CYCLES: BillingCycle[] = ["daily", "weekly", "monthly", "yearly", "custom"]
 const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
@@ -53,8 +50,8 @@ const CALENDAR_THEME = {
     },
 }
 
-export default function EditSubscription({ route, navigation }: Props) {
-    const subscription = route.params?.subscription
+export default function EditSubscription() {
+    const { subscription, id: subId } = useLocalSearchParams<{ subscription?: any; id?: string }>()
     const isEdit = !!subscription
     const {
         modifySubscription,
@@ -109,7 +106,7 @@ export default function EditSubscription({ route, navigation }: Props) {
             })()
 
             console.log({ input, result })
-            navigation.goBack()
+            router.back()
         },
     })
 
@@ -182,7 +179,7 @@ export default function EditSubscription({ route, navigation }: Props) {
     return (
         <View style={{ flex: 1 }}>
             <View style={styles.container}>
-                <GlassIconButton name="x" onPress={() => navigation.goBack()} positioned="top-left" />
+                <GlassIconButton name="x" onPress={() => router.back()} positioned="top-left" />
                 <GlassIconButton
                     name="check"
                     onPress={() => formik.handleSubmit()}
@@ -398,7 +395,7 @@ export default function EditSubscription({ route, navigation }: Props) {
 
                         <NumberPad
                             onKeyPress={handleAmountChange}
-                            onBackPress={formik.values.amount === "0" ? () => navigation.goBack() : undefined}
+                            onBackPress={formik.values.amount === "0" ? () => router.back() : undefined}
                         />
                     </View>
                 </View>

@@ -1,5 +1,5 @@
 import { Padding } from "@/constants/Values"
-import { useNavigation } from "@react-navigation/native"
+import { useNavigation } from "expo-router"
 import moment from "moment"
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { View, VirtualizedList } from "react-native"
@@ -68,7 +68,7 @@ const DateList = memo(({ selectedDate, setSelected, dayEvents }: DateListProps) 
                 onPress={() => setSelected(item)}
                 onLongPress={() => {
                     setSelected(item)
-                    navigation.navigate("TimelineCreate", { selectedDate: item })
+                    navigation.navigate("create", { selectedDate: item })
                 }}
             />
         ),

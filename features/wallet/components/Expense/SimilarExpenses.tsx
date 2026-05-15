@@ -1,6 +1,6 @@
 import { Expense as ExpenseType } from "@/types"
 import { AntDesign } from "@expo/vector-icons"
-import { useNavigation } from "@react-navigation/native"
+import { useNavigation } from "expo-router"
 import { ReactNode, useState } from "react"
 import { Text, View } from "react-native"
 import Colors from "@/constants/Colors"

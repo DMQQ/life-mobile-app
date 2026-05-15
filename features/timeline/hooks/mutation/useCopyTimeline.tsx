@@ -1,5 +1,5 @@
 import { useMutation } from "@apollo/client"
-import { useNavigation } from "@react-navigation/native"
+import { useNavigation } from "expo-router"
 import { Platform, ToastAndroid } from "react-native"
 import moment from "moment"
 

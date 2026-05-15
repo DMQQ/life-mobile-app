@@ -1,3 +1,4 @@
+import { router, useNavigation } from "expo-router"
 import { AnimatedSelector, IconButton } from "@/components"
 import DatePicker from "@/components/DatePicker"
 import Skeleton from "@/components/SkeletonLoader/Skeleton"
@@ -59,7 +60,8 @@ function getDateRange(range: string) {
     }
 }
 
-export default function SpendingLimitsIndex({ navigation }: any) {
+export default function SpendingLimitsIndex() {
+    const navigation = useNavigation()
     const [range, setRange] = useState("monthly")
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
     const [customDateRange, setCustomDateRange] = useState<{ from: string; to: string } | null>(null)
@@ -150,13 +152,13 @@ export default function SpendingLimitsIndex({ navigation }: any) {
     useLayoutEffect(() => {
         navigation.setOptions({
             headerLeft: () => (
-                <IconButton icon={<AntDesign name="close" size={20} color="#fff" />} onPress={navigation.goBack} />
+                <IconButton icon={<AntDesign name="close" size={20} color="#fff" />} onPress={router.back} />
             ),
             headerRight: () => (
                 <Pressable
                     onPress={() => {
                         Haptic.trigger("impactLight")
-                        navigation.navigate("Create")
+                        router.push("/(tabs)/wallet/spending-limits/create")
                     }}
                     hitSlop={12}
                 >
@@ -314,7 +316,7 @@ export default function SpendingLimitsIndex({ navigation }: any) {
                                                     styles.expenseRow,
                                                     pressed && { opacity: 0.6 },
                                                 ]}
-                                                onPress={() => navigation.navigate("Expense", { expense })}
+                                                onPress={() => router.push({ pathname: "/(tabs)/wallet/expense/[id]", params: { id: expense.id, expense } })}
                                             >
                                                 <View style={styles.expenseLeft}>
                                                     <Text variant="body" style={styles.expenseDesc} numberOfLines={1}>

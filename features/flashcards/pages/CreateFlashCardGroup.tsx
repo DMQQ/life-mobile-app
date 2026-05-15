@@ -3,6 +3,7 @@ import ValidatedInput from "@/components/ui/ValidatedInput";
 import { useFormik } from "formik";
 import { KeyboardAvoidingView, View } from "react-native";
 import * as yup from "yup";
+import { router } from "expo-router";
 
 import { useGroups } from "../hooks";
 
@@ -11,7 +12,7 @@ const validationSchema = yup.object().shape({
   description: yup.string().required("Description is required"),
 });
 
-export default function CreateFlashCards({ navigation }: any) {
+export default function CreateFlashCards() {
   const { createGroup } = useGroups();
   const f = useFormik({
     initialValues: {
@@ -25,7 +26,7 @@ export default function CreateFlashCards({ navigation }: any) {
           description: values.description,
         });
 
-        navigation.replace("CreateFlashCards", { groupId: group.id });
+        router.replace({ pathname: "/(tabs)/flashcards/create", params: { groupId: group.id }});
       } catch (error) {
         console.error(error);
         console.error(JSON.stringify(error, null, 2));

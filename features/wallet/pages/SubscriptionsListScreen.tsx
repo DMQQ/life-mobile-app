@@ -6,9 +6,9 @@ import { useMemo } from "react"
 import Background from "@/components/ui/Background"
 import { SafeAreaView } from "react-native-safe-area-context"
 import SubscriptionsList from "../components/Wallet/SubscriptionsList"
-import { WalletScreens } from "../Main"
+import { router } from "expo-router"
 
-export default function SubscriptionsListScreen({ navigation }: WalletScreens<"SubscriptionsList">) {
+export default function SubscriptionsListScreen() {
     const [scrollY, onScroll] = useTrackScroll({ screenName: "SubscriptionsListScreen" })
 
     const buttons = useMemo(
@@ -17,7 +17,7 @@ export default function SubscriptionsListScreen({ navigation }: WalletScreens<"S
                 {
                     position: "right",
                     standalone: true,
-                    onPress: () => navigation.navigate("EditSubscription"),
+                    onPress: () => router.push("/(tabs)/wallet/subscription/[id]/edit"),
                     icon: <Feather name="plus" size={20} color={Colors.foreground} />,
                 },
             ] as HeaderItem[],

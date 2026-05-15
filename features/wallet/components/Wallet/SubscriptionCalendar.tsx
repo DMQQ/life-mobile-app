@@ -5,7 +5,7 @@ import { memo, useMemo, useState } from "react"
 import { Pressable, StyleProp, StyleSheet, Text, View, ViewStyle } from "react-native"
 import SubscriptionItem from "../Subscription/SubscriptionItem"
 import WalletItem from "./WalletItem"
-import { useNavigation } from "@react-navigation/native"
+import { useNavigation, router } from "expo-router"
 import Color from "color"
 import Layout from "@/constants/Layout"
 import Section from "@/components/ui/Section"
@@ -245,9 +245,9 @@ export default function SubscriptionCalendar({ subscriptions = [], expenses = []
                                             marginTop: 0,
                                         }}
                                         handlePress={() => {
-                                            navigation.navigate("WalletScreens", {
-                                                screen: "Expense",
-                                                params: { expense: e },
+                                            router.push({
+                                                pathname: "/(tabs)/wallet/expense/[id]",
+                                                params: { id: e.id, expense: e },
                                             })
                                         }}
                                     />
@@ -263,7 +263,7 @@ export default function SubscriptionCalendar({ subscriptions = [], expenses = []
                                         subscription={s}
                                         index={i}
                                         onPress={() =>
-                                            navigation.navigate("Subscription", {
+                                            navigation.navigate("subscription/[id]", {
                                                 subscriptionId: s.id,
                                             })
                                         }

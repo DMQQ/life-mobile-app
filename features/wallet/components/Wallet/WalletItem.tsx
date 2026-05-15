@@ -7,7 +7,7 @@ import { StyleProp, StyleSheet, Text, View, ViewStyle } from "react-native"
 import { AnimatedStyle } from "react-native-reanimated"
 import { CategoryIcon, Icons } from "../Expense/ExpenseIcon"
 import ContextMenu from "react-native-context-menu-view"
-import { navigationRef } from "@/navigation"
+import { router } from "expo-router"
 import useDeleteActivity from "../../hooks/useDeleteActivity"
 import dayjs from "dayjs"
 
@@ -145,21 +145,20 @@ function WalletItem(
                 systemIcon: "pencil",
                 title: "Edit",
                 onPress: () => {
-                    console.log("Editing item:", item)
-                    navigationRef.current?.navigate("WalletScreens", {
-                        screen: "CreateExpense",
-                        params: { ...(item as any), isEditing: true },
-                    } as any)
+                    router.push({
+                        pathname: "/(tabs)/wallet/create-expense",
+                        params: { ...(item as any), isEditing: "true" },
+                    })
                 },
             },
             {
                 systemIcon: "clipboard",
                 title: "Duplicate",
                 onPress: () => {
-                    navigationRef.current?.navigate("WalletScreens", {
-                        screen: "CreateExpense",
-                        params: { ...(item as any), isDuplicating: true },
-                    } as any)
+                    router.push({
+                        pathname: "/(tabs)/wallet/create-expense",
+                        params: { ...(item as any), isDuplicating: "true" },
+                    })
                 },
             },
             {

@@ -8,7 +8,7 @@ import Text from "@/components/ui/Text/Text"
 import { CategoryIcon, CategoryUtils, Icons } from "../components/Expense/ExpenseIcon"
 import PieChart from "../components/WalletChart/PieChart"
 import { parseDateToText } from "../components/Wallet/WalletItem"
-import { WalletScreens } from "../Main"
+import { router } from "expo-router"
 import { gql, useQuery } from "@apollo/client"
 import Color from "color"
 import moment from "moment"
@@ -60,7 +60,7 @@ function getDateRange(range: string) {
     }
 }
 
-export default function LimitsDetail({ navigation }: WalletScreens<"LimitsDetail">) {
+export default function LimitsDetail() {
     const [range, setRange] = useState("monthly")
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
     const [customDateRange, setCustomDateRange] = useState<{ from: string; to: string } | null>(null)
@@ -156,7 +156,7 @@ export default function LimitsDetail({ navigation }: WalletScreens<"LimitsDetail
                 buttons={[
                     {
                         icon: "plus",
-                        onPress: () => navigation.navigate("CreateLimits"),
+                        onPress: () => router.push("/(tabs)/wallet/spending-limits/create"),
                         position: "right",
                     },
                 ]}
@@ -310,7 +310,7 @@ export default function LimitsDetail({ navigation }: WalletScreens<"LimitsDetail
                                                     styles.expenseRow,
                                                     pressed && { opacity: 0.6 },
                                                 ]}
-                                                onPress={() => navigation.navigate("Expense", { expense })}
+                                                onPress={() => router.push({ pathname: "/(tabs)/wallet/expense/[id]", params: { id: expense.id, expense } })}
                                             >
                                                 <View style={styles.expenseLeft}>
                                                     <Text variant="body" style={styles.expenseDesc} numberOfLines={1}>

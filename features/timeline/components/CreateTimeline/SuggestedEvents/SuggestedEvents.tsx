@@ -7,7 +7,7 @@ import useSuggestedEvents from "./useSuggestedEvents";
 import TilesList from "./TilesList";
 import SubcategoryList from "./SubcategoryList";
 import useCreateTimeline from "../../../hooks/general/useCreateTimeline";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation } from "expo-router";
 import { useState } from "react";
 import TimePicker from "@/components/TimePicker";
 

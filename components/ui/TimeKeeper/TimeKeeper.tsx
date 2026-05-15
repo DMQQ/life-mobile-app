@@ -5,7 +5,7 @@ import Colors from "../../../constants/Colors";
 import Ripple from "react-native-material-ripple";
 import { Ionicons } from "@expo/vector-icons";
 import Color from "color";
-import { useIsFocused } from "@react-navigation/native";
+import { useIsFocused } from "expo-router";
 
 function parseTime(remainingTime: number) {
   const minutes = Math.floor(remainingTime / 60);

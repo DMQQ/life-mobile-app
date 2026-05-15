@@ -17,7 +17,7 @@ import Feedback from "react-native-haptic-feedback"
 import Ripple from "react-native-material-ripple"
 import * as ExpoAppleWatch from "@/modules/expo-apple-watch"
 import ColorPicker, { HueSlider, OpacitySlider, Panel1, Preview } from "reanimated-color-picker"
-import { HomeScreenProps } from "../Main"
+import { router } from "expo-router"
 import { gql, useMutation, useQuery } from "@apollo/client"
 import Color from "color"
 import { NOTIFICATION_TYPES } from "./EnabledNotifications"
@@ -378,7 +378,7 @@ function ToggleRow({
     )
 }
 
-export default function SettingsScreen({ navigation }: HomeScreenProps<"HomeSettings">) {
+export default function SettingsScreen() {
     const { removeUser, user } = useUser()
     const [expandedSection, setExpandedSection] = useState<string | null>(null)
     const [selectedPalette, setSelectedPalette] = useState<ColorPalette | null>(null)
@@ -400,7 +400,7 @@ export default function SettingsScreen({ navigation }: HomeScreenProps<"HomeSett
 
     const handleClose = () => {
         Feedback.trigger("impactLight")
-        navigation.goBack()
+        router.back()
     }
 
     const handleSignout = async () => {
@@ -408,7 +408,7 @@ export default function SettingsScreen({ navigation }: HomeScreenProps<"HomeSett
         let keys = await AsyncStorage.getAllKeys()
         keys = keys.filter((k) => !k.startsWith("color_scheme"))
         await AsyncStorage.multiRemove(keys)
-        navigation.goBack()
+        router.back()
     }
 
     const applyTheme = async (palette: ColorPalette) => {

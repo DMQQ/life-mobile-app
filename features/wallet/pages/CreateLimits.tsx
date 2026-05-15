@@ -13,7 +13,7 @@ import Feedback from "react-native-haptic-feedback"
 import * as yup from "yup"
 import CategorySelector from "../components/CreateExpense/CategorySelectorView"
 import { CategoryIcon, Icons } from "../components/Expense/ExpenseIcon"
-import { WalletScreens } from "../Main"
+import { router } from "expo-router"
 import GlassView from "@/components/ui/GlassView"
 
 const validationSchema = yup.object().shape({
@@ -39,7 +39,7 @@ const GET_LIMITS = gql`
     }
 `
 
-export default function CreateLimits({ navigation }: WalletScreens<"CreateLimits">) {
+export default function CreateLimits() {
     const [categoryPicker, setCategoryPicker] = useState(false)
 
     const [createLimit] = useMutation(
@@ -52,7 +52,7 @@ export default function CreateLimits({ navigation }: WalletScreens<"CreateLimits
         `,
         {
             onCompleted: () => {
-                navigation.goBack()
+                router.back()
                 Feedback.trigger("impactLight")
             },
             onError: (error) => {
@@ -71,7 +71,7 @@ export default function CreateLimits({ navigation }: WalletScreens<"CreateLimits
                 <GlassView style={{ borderRadius: 100, padding: 7.5 }}>
                     <IconButton
                         icon={<AntDesign name="close" size={24} color={Colors.foreground} />}
-                        onPress={() => navigation.goBack()}
+                        onPress={() => router.back()}
                     />
                 </GlassView>
                 <Text variant="title" style={styles.modalTitle}>

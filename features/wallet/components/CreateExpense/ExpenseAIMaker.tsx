@@ -457,7 +457,7 @@ export function FloatingProcessingView({
 import { IconButton } from "@/components"
 import { Expense } from "@/types"
 import { gql, useApolloClient, useMutation } from "@apollo/client"
-import { useNavigation } from "@react-navigation/native"
+import { useNavigation } from "expo-router"
 import * as ImagePicker from "expo-image-picker"
 import { useState } from "react"
 import Ripple from "react-native-material-ripple"

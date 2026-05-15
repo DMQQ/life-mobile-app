@@ -5,27 +5,27 @@ import Colors from "@/constants/Colors";
 import ExerciseTile from "@/components/Exercise/ExerciseTile/ExerciseTile";
 import Button from "@/components/ui/Button/Button";
 import Color from "color";
-import { useMemo, memo } from "react";
+import { memo } from "react";
 import { useDispatch } from "react-redux";
 import { workoutActions } from "@/utils/redux/workout/workout";
-import { WorkoutScreenProps, WorkoutStackParamList } from "../types";
+import { router, useLocalSearchParams } from "expo-router";
 
-export default function WorkoutSummary({ navigation }: WorkoutScreenProps<"WorkoutSummary">) {
+export default function WorkoutSummary() {
   const workout = useAppSelector((s) => s.workout);
   const dispatch = useDispatch();
 
   const endWorkout = () => {
     dispatch(workoutActions.endAndClear());
-    navigation.navigate("Workout", { workoutId: workout.workoutId });
+    router.push({ pathname: "/(tabs)/workout/[id]", params: { workoutId: workout.workoutId }})
   };
 
   const handleRunSkipped = () => {
     dispatch(workoutActions.runSkipped());
-    navigation.navigate("PendingWorkout", {
+    router.push({ pathname: "/(tabs)/workout/pending/[id]", params: {
       exerciseId: workout.skipped_exercises[0].exerciseId,
       workoutId: workout.workoutId,
       delayTimerStart: 0,
-    });
+    }})
   };
 
   const RunSkippedButton = memo(() => (

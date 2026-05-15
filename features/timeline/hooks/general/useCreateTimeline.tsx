@@ -1,7 +1,7 @@
 import { useFormik } from "formik"
 import moment from "moment"
 import { useRef, useState } from "react"
-import { TimelineScreenProps } from "../../types"
+
 import useCreateEvent from "../mutation/useCreateEvent"
 import useEditOccurrence from "../mutation/useEditOccurrence"
 import useGetOccurrenceById from "../query/useGetOccurrenceById"
@@ -12,14 +12,14 @@ import BottomSheetType from "@gorhom/bottom-sheet"
 import { GET_OCCURRENCES_QUERY } from "../query/useGetOccurrencesQuery"
 import { GET_MONTHLY_OCCURRENCES } from "./useTimeline"
 
-export default function useCreateTimeline({ route, navigation }: TimelineScreenProps<"TimelineCreate">) {
+export default function useCreateTimeline(params: any) {
     const {
         handleSubmit,
         initialValues,
         validationSchema,
         state: { loading: isLoading },
     } = useCreateEvent({
-        selectedDate: route.params.selectedDate,
+        selectedDate: params.selectedDate,
     })
 
     const sheetRef = useRef<BottomSheetType>(null)
@@ -27,28 +27,28 @@ export default function useCreateTimeline({ route, navigation }: TimelineScreenP
 
     const client = useApolloClient()
 
-    const isEditing = route.params.mode === "edit"
+    const isEditing = params.mode === "edit"
 
-    const { data } = useGetOccurrenceById(route.params.timelineId || "", {
-        skip: !isEditing || route?.params?.timelineId === undefined,
+    const { data } = useGetOccurrenceById(params.timelineId || "", {
+        skip: !isEditing || params.timelineId === undefined,
     })
 
     const {
         editOccurrence,
         initialFormProps: initialEditFormValues,
         isRepeat,
-    } = useEditOccurrence(route.params.timelineId || "", isEditing)
+    } = useEditOccurrence(params.timelineId || "", isEditing)
 
     const initialFormValues =
         isEditing && data !== undefined
             ? initialEditFormValues
             : {
                   ...initialValues,
-                  date: route.params.selectedDate,
-                  begin: route.params.beginTime ?? moment().format("HH:mm:ss"),
-                  end: route.params.endTime ?? moment().add(1, "hours").format("HH:mm:ss"),
-                  title: route.params.title ?? "",
-                  desc: route.params.description ?? "",
+                  date: params.selectedDate,
+                  begin: params.beginTime ?? moment().format("HH:mm:ss"),
+                  end: params.endTime ?? moment().add(1, "hours").format("HH:mm:ss"),
+                  title: params.title ?? "",
+                  desc: params.description ?? "",
                   notification: "none",
 
                   scope: "THIS_ONLY",
@@ -59,13 +59,13 @@ export default function useCreateTimeline({ route, navigation }: TimelineScreenP
     const formikSubmitForm = async (input: typeof initialFormValues) => {
         if (isEditing) {
             if (isRepeat) {
-                setPendingEdit({ input, date: route.params.selectedDate })
+                setPendingEdit({ input, date: params.selectedDate })
                 scopeSheetRef.current?.expand()
                 return
             }
-            await editOccurrence(input as any, route.params.selectedDate, "THIS_ONLY")
+            await editOccurrence(input as any, params.selectedDate, "THIS_ONLY")
         } else {
-            await handleSubmit({ ...input, todos: route.params?.todos || [], priority: 1 })
+            await handleSubmit({ ...input, todos: params?.todos || [], priority: 1 })
         }
 
         await Promise.allSettled([

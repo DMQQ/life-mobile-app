@@ -1,6 +1,7 @@
 import Text from "@/components/ui/Text/Text"
 import { useState, useMemo } from "react"
 import { View, StyleSheet, TouchableOpacity, FlatList, TextInput } from "react-native"
+import { router, useLocalSearchParams } from "expo-router"
 import useGetOccurrencesQuery, { OccurrenceItem } from "../hooks/query/useGetOccurrencesQuery"
 import useTransferTodos from "../hooks/mutation/useTransferTodos"
 import Colors from "@/constants/Colors"
@@ -10,13 +11,8 @@ import DatePicker from "@/components/DatePicker"
 import lowOpacity from "@/utils/functions/lowOpacity"
 import { Button, ModalHeader, LoadingOverlay, EmptyState } from "@/components"
 
-interface TodosTransferModalParams {
-    todos: any[]
-    timelineId: string
-}
-
-export default function TodosTransferModal({ route, navigation }: any) {
-    const { timelineId: sourceTimelineId } = route.params as TodosTransferModalParams
+export default function TodosTransferModal() {
+    const { timelineId: sourceTimelineId } = useLocalSearchParams<{ todos: any[]; timelineId: string }>()
 
     const [selectedDate, setSelectedDate] = useState(moment().format("YYYY-MM-DD"))
     const { data, loading, error, setSelected } = useGetOccurrencesQuery(selectedDate)
@@ -44,7 +40,7 @@ export default function TodosTransferModal({ route, navigation }: any) {
         try {
             await transferTodos()
             await new Promise((resolve) => setTimeout(resolve, 500))
-            navigation.navigate("TimelineDetails", { timelineId: targetTimelineId })
+            router.push({ pathname: "/(tabs)/timeline/[id]", params: { timelineId: targetTimelineId }})
         } catch {
         } finally {
             setTransferring(false)
@@ -96,7 +92,7 @@ export default function TodosTransferModal({ route, navigation }: any) {
 
     return (
         <View style={styles.container}>
-            <ModalHeader title="Transfer Todos" onClose={() => navigation.goBack()} />
+            <ModalHeader title="Transfer Todos" onClose={() => router.back()} />
 
             <View style={styles.dateNavigator}>
                 <TouchableOpacity style={styles.dateButton} onPress={() => changeDate("prev")}>

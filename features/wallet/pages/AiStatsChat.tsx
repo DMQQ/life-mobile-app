@@ -18,7 +18,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context"
 import { Header, IconButton } from "@/components"
 import GlassView from "@/components/ui/GlassView"
-import { WalletScreens } from "../Main"
+import { router, useLocalSearchParams } from "expo-router"
 import SkillCard from "../components/AiChat/SkillCard"
 import DatePicker from "@/components/DatePicker"
 import dayjs from "dayjs"
@@ -136,8 +136,8 @@ function AssistantBubble({ msg, startDate, endDate }: { msg: ChatMessage; startD
     )
 }
 
-export default function AiStatsChat({ route, navigation }: WalletScreens<"AiStatsChat">) {
-    const { startDate, endDate } = route.params
+export default function AiStatsChat() {
+    const { startDate, endDate } = useLocalSearchParams<{ startDate: string; endDate: string }>()
     const [date, setDate] = useState({ start: dayjs(startDate).toDate(), end: dayjs(endDate).toDate() })
     const [messages, setMessages] = useState<ChatMessage[]>([])
     const [inputText, setInputText] = useState("")

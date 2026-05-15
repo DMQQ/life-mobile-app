@@ -3,25 +3,26 @@ import { setContext } from "@apollo/client/link/context"
 import * as Notifications from "expo-notifications"
 import { getItemAsync } from "expo-secure-store"
 import * as SplashScreen from "expo-splash-screen"
+import * as SystemUI from "expo-system-ui"
 import { StatusBar } from "expo-status-bar"
 import { GestureHandlerRootView } from "react-native-gesture-handler"
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context"
+import { SafeAreaProvider } from "react-native-safe-area-context"
 import { Provider } from "react-redux"
-import ErrorBoundary from "./components/ErrorBoundary"
-import Colors from "./constants/Colors"
-import Url from "./constants/Url"
-import Navigation from "./navigation"
-import ThemeContextProvider from "./utils/context/ThemeContext"
-import { ScrollYContextProvider } from "./utils/context/ScrollYContext"
-import { STORE_KEY } from "./utils/hooks/useUser"
-import { store } from "./utils/redux"
+import ErrorBoundary from "@/components/ErrorBoundary"
+import Colors from "@/constants/Colors"
+import Url from "@/constants/Url"
+import ThemeContextProvider from "@/utils/context/ThemeContext"
+import { ScrollYContextProvider } from "@/utils/context/ScrollYContext"
+import { STORE_KEY } from "@/utils/hooks/useUser"
+import { store } from "@/utils/redux"
 import { setLogVerbosity } from "@apollo/client"
 import * as Sentry from "@sentry/react-native"
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet"
-import { SearchMenuProvider } from "./contexts/SearchMenuContext"
-import { AiChatProvider } from "./contexts/AiChatContext"
-import GlobalAiChat from "./features/ai/GlobalAiChat"
+import { SearchMenuProvider } from "@/contexts/SearchMenuContext"
+import { AiChatProvider } from "@/contexts/AiChatContext"
+import GlobalAiChat from "@/features/ai/GlobalAiChat"
 import { KeyboardProvider } from "react-native-keyboard-controller"
+import { Stack } from "expo-router"
 
 Sentry.init({
     enableNative: true,
@@ -31,6 +32,8 @@ Sentry.init({
 })
 
 setLogVerbosity("error")
+
+SystemUI.setBackgroundColorAsync(Colors.primary)
 
 SplashScreen.preventAutoHideAsync()
 
@@ -55,38 +58,26 @@ const withToken = setContext(async () => {
         const stored = await getItemAsync(STORE_KEY)
         const user = stored ? JSON.parse(stored) : null
         const token = user?.token || ""
-
         return { token }
-    } catch (error) {
+    } catch {
         return { token: "" }
     }
 })
 
 const authMiddleware = new ApolloLink((op, forw) => {
     const { token } = op.getContext()
-
     op.setContext(() => ({
-        headers: {
-            authentication: token || "",
-        },
+        headers: { authentication: token || "" },
     }))
     return forw(op)
 })
 
-const httpLink = createHttpLink({
-    uri: Url.API + "/graphql",
-})
-
+const httpLink = createHttpLink({ uri: Url.API + "/graphql" })
 const link = from([withToken, authMiddleware.concat(httpLink)])
-
 const cache = new InMemoryCache()
+const apolloClient = new ApolloClient({ cache, link })
 
-const apolloClient = new ApolloClient({
-    cache,
-    link,
-})
-
-export default Sentry.wrap(function App() {
+export default Sentry.wrap(function RootLayout() {
     return (
         <SafeAreaProvider style={{ flex: 1, backgroundColor: Colors.primary }}>
             <ErrorBoundary>
@@ -99,8 +90,14 @@ export default Sentry.wrap(function App() {
                                         <ApolloProvider client={apolloClient}>
                                             <Provider store={store}>
                                                 <AiChatProvider>
-                                                    <StatusBar />
-                                                    <Navigation />
+                                                    <StatusBar style="light" />
+                                                    <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: Colors.primary } }}>
+                                                        <Stack.Screen name="index" />
+                                                        <Stack.Screen name="(tabs)" />
+                                                        <Stack.Screen name="(auth)" />
+                                                        <Stack.Screen name="workout" />
+                                                        <Stack.Screen name="flashcards" />
+                                                    </Stack>
                                                     <GlobalAiChat />
                                                 </AiChatProvider>
                                             </Provider>

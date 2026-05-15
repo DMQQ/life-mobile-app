@@ -1,6 +1,7 @@
 import Text from "@/components/ui/Text/Text"
 import ValidatedInput from "@/components/ui/ValidatedInput"
 import Colors from "@/constants/Colors"
+import { router, useNavigation } from "expo-router"
 import { Feather } from "@expo/vector-icons"
 import { gql, useMutation } from "@apollo/client"
 import { useFormik } from "formik"
@@ -36,7 +37,8 @@ const GET_LIMITS = gql`
     }
 `
 
-export default function SpendingLimitsCreate({ navigation }: any) {
+export default function SpendingLimitsCreate() {
+    const navigation = useNavigation()
     const [categoryPicker, setCategoryPicker] = useState(false)
 
     const [createLimit] = useMutation(
@@ -49,7 +51,7 @@ export default function SpendingLimitsCreate({ navigation }: any) {
         `,
         {
             onCompleted: () => {
-                navigation.goBack()
+                router.back()
                 Feedback.trigger("impactLight")
             },
             onError: (error) => {

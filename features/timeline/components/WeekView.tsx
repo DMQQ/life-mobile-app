@@ -7,9 +7,8 @@ import Animated from "react-native-reanimated"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import Colors from "@/constants/Colors"
 import Text from "@/components/ui/Text/Text"
-import { navigationRef } from "@/navigation"
+import { router, useNavigation } from "expo-router"
 import { useWeekEvents } from "../hooks/query/useGetOccurrencesQuery"
-import { useNavigation } from "@react-navigation/native"
 
 const { width } = Dimensions.get("window")
 const TIME_COL_W = 44
@@ -146,8 +145,9 @@ const WeekPage = memo(({ weekStart, selectedDate, onDayPress, onScroll, bottomPa
                                 onPress={() => onDayPress(date)}
                                 style={{ width: DAY_COL_W }}
                                 onLongPress={() =>
-                                    navigation.navigate("TimelineCreate", {
-                                        selectedDate: date,
+                                    router.push({
+                                        pathname: "/(tabs)/timeline/create",
+                                        params: { selectedDate: date, mode: "create" },
                                     })
                                 }
                             >
@@ -176,12 +176,7 @@ const WeekPage = memo(({ weekStart, selectedDate, onDayPress, onScroll, bottomPa
                                             <TouchableOpacity
                                                 key={event.id}
                                                 activeOpacity={0.8}
-                                                onPress={() =>
-                                                    navigationRef.current?.navigate("TimelineScreens", {
-                                                        screen: "TimelineDetails",
-                                                        params: { timelineId: event.id },
-                                                    } as any)
-                                                }
+                                                onPress={() => router.push(`/(tabs)/timeline/${event.id}`)}
                                                 style={[
                                                     styles.eventBlock,
                                                     {

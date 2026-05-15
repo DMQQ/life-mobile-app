@@ -1,6 +1,7 @@
 import Text from "@/components/ui/Text/Text"
 import { useState } from "react"
 import { View, StyleSheet, TouchableOpacity } from "react-native"
+import { router, useLocalSearchParams } from "expo-router"
 import Colors from "@/constants/Colors"
 import { Feather } from "@expo/vector-icons"
 import moment from "moment"
@@ -9,19 +10,8 @@ import { Button, ThemedCalendar, ModalHeader, LoadingOverlay } from "@/component
 import useCopyTimeline from "../hooks/mutation/useCopyTimeline"
 import Layout from "@/constants/Layout"
 
-interface CopyTimelineModalProps {
-    route: {
-        params: {
-            timelineId: string
-            timelineTitle: string
-            originalDate: string
-        }
-    }
-    navigation: any
-}
-
-export default function CopyTimelineModal({ route, navigation }: CopyTimelineModalProps) {
-    const { timelineId, timelineTitle, originalDate } = route.params
+export default function CopyTimelineModal() {
+    const { timelineId, timelineTitle, originalDate } = useLocalSearchParams<{ timelineId: string; timelineTitle: string; originalDate: string }>()
 
     const [selectedDate, setSelectedDate] = useState(moment().format("YYYY-MM-DD"))
     const [useOriginalDate, setUseOriginalDate] = useState(true)
@@ -36,7 +26,7 @@ export default function CopyTimelineModal({ route, navigation }: CopyTimelineMod
                 timelineId,
                 newDate: useOriginalDate ? undefined : selectedDate,
             })
-            navigation.navigate("Timeline" as any, { timelineId: response.id })
+            router.push({ pathname: "/(tabs)/timeline", params: { timelineId: response.id }})
         } catch {
         } finally {
             setCopying(false)
@@ -46,7 +36,7 @@ export default function CopyTimelineModal({ route, navigation }: CopyTimelineMod
     return (
         <View style={styles.container}>
             <ModalHeader
-                onClose={() => navigation.navigate("Timeline" as any)}
+                onClose={() => router.push({ pathname: "/(tabs)/timeline" })}
                 title="Copy Timeline"
             />
 

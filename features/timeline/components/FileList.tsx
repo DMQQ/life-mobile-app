@@ -5,7 +5,7 @@ import Url from "@/constants/Url"
 import { IFile } from "@/types"
 import lowOpacity from "@/utils/functions/lowOpacity"
 import { useApolloClient } from "@apollo/client"
-import { useNavigation } from "@react-navigation/native"
+import { useNavigation } from "expo-router"
 import axios from "axios"
 import * as ImagePicker from "expo-image-picker"
 import { memo, useState } from "react"
@@ -113,7 +113,7 @@ export default function FileList({ timelineId }: FileListProps) {
     }
 
     const handleShowPreview = (item: any) =>
-        navigation.navigate("ImagesPreview", {
+        navigation.navigate("images-preview", {
             selectedImage: item.url,
             timelineId,
         })

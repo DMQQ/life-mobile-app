@@ -11,7 +11,7 @@ import Feedback from "react-native-haptic-feedback"
 import DatePicker from "@/components/DatePicker"
 import * as yup from "yup"
 import useEditWallet from "../hooks/useEditWallet"
-import { WalletScreens } from "../Main"
+import { router, useNavigation } from "expo-router"
 import { SafeAreaView } from "react-native-safe-area-context"
 import AnimatedSelector from "@/components/ui/AnimatedSelector"
 import GroupSelector from "@/components/ui/GroupSelector"
@@ -48,9 +48,10 @@ const validationSchema = yup.object().shape({
     paycheckDate: yup.string(),
 })
 
-export default function EditBalance({ navigation }: WalletScreens<"EditBalance">) {
+export default function EditBalance() {
+    const navigation = useNavigation()
     const { editBalance, loading } = useEditWallet(() => {
-        navigation.goBack()
+        router.back()
     })
 
     const [selectedDate, setSelectedDate] = useState<Date | null>(null)
@@ -90,7 +91,7 @@ export default function EditBalance({ navigation }: WalletScreens<"EditBalance">
             headerLeft: () => (
                 <IconButton
                     icon={<Feather name="x" size={20} color={Colors.foreground} />}
-                    onPress={() => navigation.goBack()}
+                    onPress={() => router.back()}
                 />
             ),
             headerRight: () => (

@@ -11,7 +11,7 @@ import InitializeWallet from "../components/Wallet/InitializeWallet"
 import WalletLoader from "../components/Wallet/WalletLoader"
 import { useWalletContext } from "../components/WalletContext"
 import useWalletOverview from "../hooks/useWalletOverview"
-import { WalletScreens } from "../Main"
+import { router, useLocalSearchParams } from "expo-router"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { Expense, MonthlyExpenses, Subscription } from "@/types"
 import SubscriptionItem from "../components/Subscription/SubscriptionItem"
@@ -31,27 +31,31 @@ const TABS = [
     { label: "Spendings", value: "spendings" as string },
 ]
 
-export default function WalletScreen({ navigation, route }: WalletScreens<"Wallet">) {
+export default function WalletScreen() {
     const { data, loading, error } = useWalletOverview()
     const { dispatch, filters } = useWalletContext()
     const [scrollY, onScroll] = useTrackScroll({ screenName: "WalletScreens" })
     const [tab, setTab] = useState("accounts")
+    const { expenseId } = useLocalSearchParams<{ expenseId?: string }>()
 
     useEffect(() => {
-        if (route.params?.expenseId && data?.wallet) {
+        if (expenseId && data?.wallet) {
             const found = (data.wallet.expenses2 as MonthlyExpenses[])
                 .flatMap((m) => m.expenses)
-                .find((e) => (e as Expense).id === route.params?.expenseId) as Expense
-            navigation.setParams({ expenseId: undefined })
-            navigation.navigate("Expense", { expense: found })
+                .find((e) => (e as Expense).id === expenseId) as Expense
+            router.setParams({ expenseId: undefined })
+            router.push({
+                pathname: "/(tabs)/wallet/expense/[id]",
+                params: { id: expenseId, expense: found },
+            })
         }
-    }, [route.params?.expenseId])
+    }, [expenseId])
 
     const balance = loading && data?.wallet?.balance === undefined ? " ..." : (data?.wallet?.balance || 0).toFixed(2)
 
     const handleShowEditSheet = useCallback(() => {
         Haptic.trigger("impactMedium")
-        navigation.navigate("EditBalance")
+        router.push("/(tabs)/wallet/edit-balance")
     }, [])
 
     const recentExpenses = useMemo(
@@ -84,7 +88,7 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
                             {
                                 title: "Limits",
                                 systemImage: "gauge",
-                                onPress: () => navigation.navigate("SpendingLimits"),
+                                onPress: () => router.push("/(tabs)/wallet/spending-limits"),
                             },
                             {
                                 title: "Edit Balance",
@@ -94,18 +98,18 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
                             {
                                 title: "Filters",
                                 systemImage: "camera.filters",
-                                onPress: () => navigation.navigate("Filters"),
+                                onPress: () => router.push("/(tabs)/wallet/filters"),
                             },
                             {
                                 title: "Correction Rules",
                                 systemImage: "arrow.left.arrow.right",
-                                onPress: () => navigation.navigate("CorrectionMaps"),
+                                onPress: () => router.push("/(tabs)/wallet/correction-maps"),
                             },
                         ],
                     },
                 },
                 {
-                    onPress: () => navigation.navigate("Charts"),
+                    onPress: () => router.push("/(tabs)/wallet/charts"),
                     icon: <Feather name="bar-chart-2" size={20} color={Colors.foreground} />,
                 },
                 {
@@ -117,18 +121,18 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
                             {
                                 title: "Add Expense",
                                 systemImage: "arrow.up.right",
-                                onPress: () => navigation.navigate("CreateExpense"),
+                                onPress: () => router.push("/(tabs)/wallet/create-expense"),
                             },
                             {
                                 title: "Add Subscription",
                                 systemImage: "repeat",
-                                onPress: () => navigation.navigate("EditSubscription"),
+                                onPress: () => router.push("/(tabs)/wallet/subscription/[id]/edit"),
                             },
                         ],
                     },
                 },
             ] as HeaderItem[],
-        [handleShowEditSheet, navigation],
+        [handleShowEditSheet],
     )
 
     const header = useMemo(
@@ -212,7 +216,7 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
                         <Pressable
                             onPress={() => {
                                 Haptic.trigger("impactLight")
-                                navigation.navigate("ExpensesList")
+                                router.push("/(tabs)/wallet/expenses-list")
                             }}
                         >
                             <View style={styles.quickNavIconWrap}>
@@ -226,7 +230,7 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
                         <Pressable
                             onPress={() => {
                                 Haptic.trigger("impactLight")
-                                navigation.navigate("SubscriptionsList")
+                                router.push("/(tabs)/wallet/subscriptions-list")
                             }}
                         >
                             <View style={styles.quickNavIconWrap}>
@@ -242,7 +246,7 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
                     <Section
                         title="Upcoming"
                         headerRight={
-                            <Pressable onPress={() => navigation.navigate("SubscriptionsList")} hitSlop={8}>
+                            <Pressable onPress={() => router.push("/(tabs)/wallet/subscriptions-list")} hitSlop={8}>
                                 <Text style={styles.seeAll}>See all</Text>
                             </Pressable>
                         }
@@ -252,7 +256,7 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
                                 key={sub.id}
                                 subscription={sub as any}
                                 index={index}
-                                onPress={() => navigation.navigate("Subscription", { subscriptionId: sub.id })}
+                                onPress={() => router.push({ pathname: "/(tabs)/wallet/subscription/[id]", params: { id: sub.id } })}
                                 style={{
                                     borderWidth: 0,
                                     marginBottom: 0,
@@ -269,7 +273,7 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
                     <Section
                         title="Recent"
                         headerRight={
-                            <Pressable onPress={() => navigation.navigate("ExpensesList")} hitSlop={8}>
+                            <Pressable onPress={() => router.push("/(tabs)/wallet/expenses-list")} hitSlop={8}>
                                 <Text style={styles.seeAll}>See all</Text>
                             </Pressable>
                         }
@@ -278,7 +282,7 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
                             <WalletItem
                                 key={expense.id}
                                 index={index}
-                                handlePress={() => navigation.navigate("Expense", { expense })}
+                                handlePress={() => router.push({ pathname: "/(tabs)/wallet/expense/[id]", params: { id: expense.id, expense } })}
                                 {...(expense as any)}
                                 animatedStyle={{
                                     borderWidth: 0,

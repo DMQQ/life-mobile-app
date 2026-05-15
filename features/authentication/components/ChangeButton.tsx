@@ -1,7 +1,7 @@
 import Button from "@/components/ui/Button/Button";
 import Colors from "@/constants/Colors";
 import Layout from "@/constants/Layout";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation } from "expo-router";
 import Color from "color";
 import { View } from "react-native";
 

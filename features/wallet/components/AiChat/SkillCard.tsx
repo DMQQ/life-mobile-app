@@ -23,7 +23,7 @@ import { GET_MONTHLY_OCCURRENCES } from "@/features/timeline/hooks/general/useTi
 import moment from "moment"
 import GlassView from "@/components/ui/GlassView"
 import { invalidateGetMainScreen } from "@/utils/schemas/GET_MAIN_SCREEN"
-import { navigationRef } from "@/navigation"
+import { router } from "expo-router"
 
 const NOOP = () => {}
 
@@ -46,10 +46,7 @@ export default function SkillCard({ skill, startDate, endDate, onNavigate }: Ski
                     {...data}
                     handlePress={() => {
                         onNavigate?.()
-                        navigationRef.current?.navigate("WalletScreens", {
-                            screen: "Expense",
-                            params: { expense: data },
-                        } as any)
+                        router.push(`/(tabs)/wallet/expense/${data.id}`)
                     }}
                     animatedStyle={{}}
                 />
@@ -63,11 +60,7 @@ export default function SkillCard({ skill, startDate, endDate, onNavigate }: Ski
                     index={0}
                     onPress={() => {
                         onNavigate?.()
-
-                        navigationRef.current?.navigate("WalletScreens", {
-                            screen: "Subscription",
-                            params: { ...data },
-                        } as any)
+                        router.push(`/(tabs)/wallet/subscription/${data.id}`)
                     }}
                     subscription={data}
                 />
@@ -477,12 +470,12 @@ function FormExpenseNew({ data, onNavigate }: { data: any; onNavigate?: () => vo
 
     const onEdit = () => {
         onNavigate?.()
-        navigationRef.current?.navigate("WalletScreens", { screen: "Wallet" } as any)
+        router.push("/(tabs)/wallet")
         setTimeout(() => {
-            navigationRef.current?.navigate("WalletScreens", {
-                screen: "CreateExpense",
-                params: { ...preview, isEditing: false },
-            } as any)
+            router.push({
+                pathname: "/(tabs)/wallet/create-expense",
+                params: { ...preview, isEditing: "false" },
+            })
         }, 100)
     }
 
@@ -531,12 +524,12 @@ function FormExpenseEdit({ data, onNavigate }: { data: any; onNavigate?: () => v
 
     const onEdit = () => {
         onNavigate?.()
-        navigationRef.current?.navigate("WalletScreens", { screen: "Wallet" } as any)
+        router.push("/(tabs)/wallet")
         setTimeout(() => {
-            navigationRef.current?.navigate("WalletScreens", {
-                screen: "CreateExpense",
-                params: { ...preview, isEditing: true },
-            } as any)
+            router.push({
+                pathname: "/(tabs)/wallet/create-expense",
+                params: { ...preview, isEditing: "true" },
+            })
         }, 100)
     }
 
@@ -608,12 +601,12 @@ function FormEventNew({ data, onNavigate }: { data: any; onNavigate?: () => void
 
     const onEdit = () => {
         onNavigate?.()
-        navigationRef.current?.navigate("TimelineScreens", { screen: "Timeline" } as any)
+        router.push("/(tabs)/timeline")
         setTimeout(() => {
-            navigationRef.current?.navigate("TimelineScreens", {
-                screen: "TimelineCreate",
+            router.push({
+                pathname: "/(tabs)/timeline/create",
                 params: { selectedDate: preview.date, ...preview },
-            } as any)
+            })
         }, 100)
     }
 
@@ -678,12 +671,12 @@ function FormEventEdit({ data, onNavigate }: { data: any; onNavigate?: () => voi
 
     const onEdit = () => {
         onNavigate?.()
-        navigationRef.current?.navigate("TimelineScreens", { screen: "Timeline" } as any)
+        router.push("/(tabs)/timeline")
         setTimeout(() => {
-            navigationRef.current?.navigate("TimelineScreens", {
-                screen: "TimelineCreate",
+            router.push({
+                pathname: "/(tabs)/timeline/create",
                 params: { selectedDate: preview.date, ...preview },
-            } as any)
+            })
         }, 100)
     }
 

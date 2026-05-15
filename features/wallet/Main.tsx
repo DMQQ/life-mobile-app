@@ -66,7 +66,7 @@ const MODAL_OPTIONS: NativeStackNavigationOptions = {
 export default function WalletScreens({ navigation, route }: WalletScreens<"Wallet">) {
     useEffect(() => {
         if (route.params?.expenseId !== undefined && route.params?.expenseId == null) {
-            navigation.navigate("CreateExpense", {
+            navigation.navigate("create-expense", {
                 ...(route.params || {}),
             })
         }

@@ -6,6 +6,7 @@ import Colors from "@/constants/Colors"
 import Layout from "@/constants/Layout"
 import useTrackScroll from "@/utils/hooks/ui/useTrackScroll"
 import { AntDesign } from "@expo/vector-icons"
+import { router, useLocalSearchParams } from "expo-router"
 import { useCallback, useMemo, useState } from "react"
 import { View } from "react-native"
 import Feedback from "react-native-haptic-feedback"
@@ -17,8 +18,8 @@ import SuccessBar from "../components/SuccessBar"
 import { FlashCard, useFlashCards } from "../hooks"
 import { FlashList } from "@shopify/flash-list"
 
-export default function FlashCardScreen({ navigation, route }: any) {
-    const groupId = route.params?.groupId
+export default function FlashCardScreen() {
+    const { groupId } = useLocalSearchParams<{ groupId: string }>()
 
     const { flashCards, groupStats } = useFlashCards(groupId)
 
@@ -88,7 +89,7 @@ export default function FlashCardScreen({ navigation, route }: any) {
                 buttons={[
                     {
                         icon: <AntDesign name="plus" size={20} color={Colors.foreground} />,
-                        onPress: () => navigation.navigate("CreateFlashCards", { groupId }),
+                        onPress: () => router.push({ pathname: "/(tabs)/flashcards/create", params: { groupId }}),
                     },
                 ]}
                 goBack

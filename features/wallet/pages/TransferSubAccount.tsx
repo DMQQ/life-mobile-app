@@ -10,21 +10,22 @@ import { ActivityIndicator, ScrollView, StyleSheet, TouchableOpacity, View } fro
 import Feedback from "react-native-haptic-feedback"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { useSubAccounts, useTransferBetweenSubAccounts } from "../hooks/useSubAccounts"
-import { WalletScreens } from "../Main"
+import { router, useLocalSearchParams } from "expo-router"
 import GlassView from "@/components/ui/GlassView"
 import GroupSelector from "@/components/ui/GroupSelector"
 import IconSaveButton from "@/components/ui/Button/IconSaveButton"
 
-export default function TransferSubAccount({ navigation, route }: WalletScreens<"TransferSubAccount">) {
+export default function TransferSubAccount() {
     const { data } = useSubAccounts()
     const accounts = data?.wallet?.subAccounts ?? []
+    const { fromId } = useLocalSearchParams<{ fromId?: string }>()
 
     const [fromAccount, setFromAccount] = useState<(typeof accounts)[0] | null>(null)
     const [toAccount, setToAccount] = useState<(typeof accounts)[0] | null>(null)
 
     useEffect(() => {
         if (accounts.length === 0 || fromAccount !== null) return
-        const match = route.params?.fromId ? accounts.find((a) => a.id === route.params?.fromId) : null
+        const match = fromId ? accounts.find((a) => a.id === fromId) : null
         setFromAccount(match ?? accounts[0])
     }, [accounts])
     const [amount, setAmount] = useState("")
@@ -32,7 +33,7 @@ export default function TransferSubAccount({ navigation, route }: WalletScreens<
 
     const [transfer, { loading, error }] = useTransferBetweenSubAccounts(() => {
         Feedback.trigger("notificationSuccess")
-        navigation.goBack()
+        router.back()
     })
 
     console.log("Transfer error:", JSON.stringify(error, null, 2))
@@ -71,7 +72,7 @@ export default function TransferSubAccount({ navigation, route }: WalletScreens<
                 <GlassView style={{ borderRadius: 100, padding: 7.5 }}>
                     <IconButton
                         icon={<AntDesign name="close" size={20} color={Colors.foreground} />}
-                        onPress={() => navigation.goBack()}
+                        onPress={() => router.back()}
                     />
                 </GlassView>
                 <Text variant="title" style={styles.title}>

@@ -7,7 +7,7 @@ import { StyleSheet, View } from "react-native"
 import Feedback from "react-native-haptic-feedback"
 import WalletNotifications, { useGetNotifications } from "../../wallet/components/Wallet/WalletNotifications"
 import useReadAllNotifications from "../../wallet/hooks/useReadAllNotifications"
-import { HomeScreenProps } from "../Main"
+import { router } from "expo-router"
 
 const styles = StyleSheet.create({
     container: { flex: 1 },
@@ -28,13 +28,13 @@ const styles = StyleSheet.create({
     body: { flex: 1, backgroundColor: "rgba(0,0,0,0.2)" },
 })
 
-export default function NotificationsScreen({ navigation }: HomeScreenProps<"HomeNotifications">) {
+export default function NotificationsScreen() {
     const { unreadCount, refetch: refetchNotifications, data, error, loading } = useGetNotifications()
     const { readAllNotifications } = useReadAllNotifications()
 
     const handleClose = () => {
         Feedback.trigger("impactLight")
-        navigation.goBack()
+        router.back()
     }
 
     const handleClearAll = async () => {

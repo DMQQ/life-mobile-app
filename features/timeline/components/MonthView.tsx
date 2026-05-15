@@ -7,8 +7,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context"
 import Colors from "@/constants/Colors"
 import Text from "@/components/ui/Text/Text"
 import { useRangeEvents, CalendarOccurrenceItem } from "../hooks/query/useGetOccurrencesQuery"
-import { navigationRef } from "@/navigation"
-import { useNavigation } from "@react-navigation/native"
+import { router, useNavigation } from "expo-router"
 
 const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
 const TODAY = moment().format("YYYY-MM-DD")
@@ -67,8 +66,9 @@ const WeekRow = memo(({ dayData, selectedDate, currentMonth, onDayPress }: WeekR
                         key={date}
                         onPress={() => onDayPress(date)}
                         onLongPress={() =>
-                            navigation.navigate("TimelineCreate", {
-                                selectedDate: date,
+                            router.push({
+                                pathname: "/(tabs)/timeline/create",
+                                params: { selectedDate: date, mode: "create" },
                             })
                         }
                         activeOpacity={0.7}
@@ -105,12 +105,7 @@ const WeekRow = memo(({ dayData, selectedDate, currentMonth, onDayPress }: WeekR
                             {events.slice(0, 4).map((event) => (
                                 <TouchableOpacity
                                     key={event.id}
-                                    onPress={() =>
-                                        navigationRef.current?.navigate("TimelineScreens", {
-                                            screen: "TimelineDetails",
-                                            params: { timelineId: event.id },
-                                        } as any)
-                                    }
+                                    onPress={() => router.push(`/(tabs)/timeline/${event.id}`)}
                                     style={[
                                         styles.eventChip,
                                         { backgroundColor: event.isCompleted ? "#34C759" : Colors.secondary },

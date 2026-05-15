@@ -3,8 +3,7 @@ import { Platform, ToastAndroid } from "react-native"
 import { gql, useMutation } from "@apollo/client"
 import Constants from "expo-constants"
 import { useEffect, useRef, useState } from "react"
-import { NavigationContainerRef } from "@react-navigation/native"
-import { RootStackParamList } from "@/types"
+import { router } from "expo-router"
 
 const CREATE_NOTIFICATION = gql`
     mutation createNotification($input: SetNotificationsTokenInput!) {
@@ -12,7 +11,7 @@ const CREATE_NOTIFICATION = gql`
     }
 `
 
-export default function useNotifications(navigationRef: React.RefObject<NavigationContainerRef<RootStackParamList>>) {
+export default function useNotifications() {
     const [notificationToken, setNotificationToken] = useState<string | null>(null)
     const notificationListener = useRef<any>(null)
     const responseListener = useRef<any>(null)
@@ -22,36 +21,14 @@ export default function useNotifications(navigationRef: React.RefObject<Navigati
     const handleNotificationNavigation = (data: any) => {
         const { eventId, type } = data || {}
 
-        const navigate = () => {
-            if (eventId && type === "timeline") {
-                navigationRef.current?.navigate("TimelineScreens", {
-                    screen: "TimelineDetails",
-                    params: { timelineId: eventId },
-                })
-            } else if (Array.isArray(eventId) && type === "timeline_missed") {
-                navigationRef.current?.navigate("TimelineScreens", {
-                    screen: "MissedEventsModal",
-                    params: { eventIds: eventId },
-                })
-            } else if (type === "expenseReminder") {
-                navigationRef.current?.navigate(
-                    "WalletScreens" as any,
-                    {
-                        screen: "CreateExpense",
-                    } as any,
-                )
-            } else if (eventId) {
-                navigationRef.current?.navigate("TimelineScreens", {
-                    screen: "TimelineDetails",
-                    params: { timelineId: eventId },
-                })
-            }
-        }
-
-        if (navigationRef.current?.isReady()) {
-            navigate()
-        } else {
-            setTimeout(navigate, 500)
+        if (eventId && type === "timeline") {
+            router.push(`/(tabs)/timeline/${eventId}`)
+        } else if (Array.isArray(eventId) && type === "timeline_missed") {
+            router.push({ pathname: "/(tabs)/timeline/missed-events", params: { eventIds: eventId.join(",") } })
+        } else if (type === "expenseReminder") {
+            router.push("/(tabs)/wallet/create-expense")
+        } else if (eventId) {
+            router.push(`/(tabs)/timeline/${eventId}`)
         }
     }
 
@@ -102,8 +79,8 @@ export default function useNotifications(navigationRef: React.RefObject<Navigati
 
     useEffect(() => {
         let timeeout: ReturnType<typeof setTimeout>
-        notificationListener.current = Notifications.addNotificationReceivedListener((notification: any) => {
-            console.log("Notification received:", notification)
+        notificationListener.current = Notifications.addNotificationReceivedListener((_notification: any) => {
+            // Notification received in foreground
         })
 
         responseListener.current = Notifications.addNotificationResponseReceivedListener((response) => {
@@ -121,7 +98,7 @@ export default function useNotifications(navigationRef: React.RefObject<Navigati
                 clearTimeout(timeeout)
             }
         }
-    }, [navigationRef])
+    }, [])
 
     useEffect(() => {
         if (
@@ -138,7 +115,7 @@ export default function useNotifications(navigationRef: React.RefObject<Navigati
                 clearTimeout(timeout)
             }
         }
-    }, [lastNotification, navigationRef])
+    }, [lastNotification])
 
     return {
         getNotificationToken: registerForPushNotificationsAsync,

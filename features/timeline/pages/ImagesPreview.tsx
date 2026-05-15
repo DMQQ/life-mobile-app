@@ -5,20 +5,22 @@ import { Image, StyleSheet, View } from "react-native"
 import { Gesture, GestureDetector } from "react-native-gesture-handler"
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
-import { TimelineScreenProps } from "../types"
+
 import { BlurView } from "expo-blur"
+import { router, useLocalSearchParams } from "expo-router"
 import IconBackButton from "@/components/ui/Button/IconBackButton"
 
-export default function ImagesPreview({ route, navigation }: TimelineScreenProps<"ImagesPreview">) {
+export default function ImagesPreview() {
+    const { selectedImage } = useLocalSearchParams<{ selectedImage: string }>()
     const insets = useSafeAreaInsets()
 
     return (
         <View style={{ flex: 1, position: "relative" }}>
             <BlurView tint="dark" intensity={30} style={styles.modalContainer}>
                 <GesturedImage
-                    uri={route.params.selectedImage}
+                    uri={selectedImage}
                     onSingleTap={() => {
-                        navigation.canGoBack() && navigation.goBack()
+                        router.back()
                     }}
                 />
             </BlurView>

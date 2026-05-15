@@ -22,7 +22,7 @@ import Layout from "../../constants/Layout"
 import GlassView from "../ui/GlassView"
 import { useAppSelector, useAppDispatch } from "../../utils/redux"
 import { setSearchActive, setSearchValue, clearSearch } from "../../utils/redux/search/search"
-import { useNavigation } from "@react-navigation/native"
+import { useNavigation } from "expo-router"
 import { LinearGradient } from "expo-linear-gradient"
 import useKeyboard from "@/utils/hooks/useKeyboard"
 import ContextMenuView, { type ContextMenuAction } from "react-native-context-menu-view"
@@ -272,21 +272,23 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
 
     const handleLongPress = (route: string) => {
         switch (route) {
-            case "WalletScreens":
+            case "wallet":
                 navigation.navigate({
-                    name: "WalletScreens",
+                    name: "wallet",
                     params: {
-                        expenseId: null,
+                        screen: "create-expense",
+                        params: { expenseId: null },
                     },
-                })
+                } as any)
                 break
-            case "TimelineScreens":
+            case "timeline":
                 navigation.navigate({
-                    name: "TimelineScreens",
+                    name: "timeline",
                     params: {
-                        selectedDate: moment(new Date()).format("YYYY-MM-DD"),
+                        screen: "create",
+                        params: { selectedDate: moment(new Date()).format("YYYY-MM-DD"), mode: "create" },
                     },
-                })
+                } as any)
                 break
             default:
                 break
@@ -299,24 +301,24 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
     const buttons = useMemo(
         () => [
             {
-                route: "Root",
+                route: "home",
                 label: "Home",
                 iconName: "house",
             },
             {
-                route: "WalletScreens",
+                route: "wallet",
                 label: "Wallet",
                 iconName: "creditcard",
-                onLongPress: () => handleLongPress("WalletScreens"),
+                onLongPress: () => handleLongPress("wallet"),
             },
             {
-                route: "TimelineScreens",
+                route: "timeline",
                 label: "Timeline",
                 iconName: "calendar",
-                onLongPress: () => handleLongPress("TimelineScreens"),
+                onLongPress: () => handleLongPress("timeline"),
             },
             {
-                route: "GoalsScreens",
+                route: "goals",
                 label: "Training",
                 iconName: "scope",
             },

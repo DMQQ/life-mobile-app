@@ -5,7 +5,7 @@ import Colors from "@/constants/Colors"
 import lowOpacity from "@/utils/functions/lowOpacity"
 import { gql, useLazyQuery } from "@apollo/client"
 import { Ionicons } from "@expo/vector-icons"
-import { useNavigation } from "@react-navigation/native"
+import { router, useLocalSearchParams } from "expo-router"
 import * as DocumentPicker from "expo-document-picker"
 import { useFormik } from "formik"
 import { useState } from "react"
@@ -73,8 +73,8 @@ const CustomTabs = ({
     )
 }
 
-export default function CreateFlashCards({ navigation, route }: any) {
-    const groupId = route.params?.groupId
+export default function CreateFlashCards() {
+    const { groupId } = useLocalSearchParams<{ groupId: string }>()
     const [activeTab, setActiveTab] = useState("manual")
 
     const tabs = [
@@ -87,14 +87,14 @@ export default function CreateFlashCards({ navigation, route }: any) {
         <ScrollView style={{ flex: 1, padding: 15, paddingBottom: 30 }} keyboardDismissMode={"on-drag"}>
             <CustomTabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
 
-            {activeTab === "json" && <JSONImportForm groupId={groupId} navigation={navigation} />}
+            {activeTab === "json" && <JSONImportForm groupId={groupId} />}
             {activeTab === "ai" && <AIGeneratedFlashCards groupId={groupId} />}
             {activeTab === "manual" && <FlashCardForm groupId={groupId} />}
         </ScrollView>
     )
 }
 
-const JSONImportForm = ({ groupId, navigation }: { groupId: string; navigation: any }) => {
+const JSONImportForm = ({ groupId }: { groupId: string }) => {
     const [loading, setLoading] = useState(false)
     const [text, setText] = useState("")
     const { createFlashCard } = useFlashCards(groupId)
@@ -133,7 +133,7 @@ const JSONImportForm = ({ groupId, navigation }: { groupId: string; navigation: 
 
             const flashCards = fileContent.map((item: any) => createFlashCard(item))
             await Promise.all(flashCards)
-            navigation.navigate("FlashCards", { groupId })
+            router.push({ pathname: "/(tabs)/flashcards/[id]", params: { groupId }})
             setLoading(false)
         }
     }
@@ -161,7 +161,7 @@ const JSONImportForm = ({ groupId, navigation }: { groupId: string; navigation: 
             const flashCards = parsedText.map((item: any) => createFlashCard(item))
             await Promise.all(flashCards)
             setLoading(false)
-            navigation.navigate("FlashCard", { groupId })
+            router.push({ pathname: "/(tabs)/flashcards/[id]", params: { groupId }})
         } catch (error) {
             setLoading(false)
         }
@@ -246,7 +246,6 @@ const validationSchema = yup.object().shape({
 
 const FlashCardForm = ({ groupId }: { groupId: string }) => {
     const { createFlashCard } = useFlashCards(groupId)
-    const navigation = useNavigation<any>()
 
     const f = useFormik({
         initialValues: {
@@ -257,7 +256,7 @@ const FlashCardForm = ({ groupId }: { groupId: string }) => {
         onSubmit: async (values) => {
             try {
                 await createFlashCard(values)
-                navigation.navigate("FlashCard", { groupId: groupId })
+                router.push({ pathname: "/(tabs)/flashcards/[id]", params: { groupId }})
             } catch (error) {
                 console.error(error)
             }
@@ -303,7 +302,6 @@ const AIGeneratedFlashCards = ({ groupId }: { groupId: string }) => {
     const [selectedCards, setSelectedCards] = useState<Set<number>>(new Set())
     const [saving, setSaving] = useState(false)
     const { createFlashCard } = useFlashCards(groupId)
-    const navigation = useNavigation<any>()
 
     const [queryFlashCard, state] = useLazyQuery(gql`
         query GenerateFlashCards($prompt: String!, $groupId: ID) {
@@ -346,7 +344,7 @@ const AIGeneratedFlashCards = ({ groupId }: { groupId: string }) => {
             await Promise.all(promises)
 
             setSelectedCards(new Set())
-            navigation.navigate("FlashCard", { groupId })
+            router.push({ pathname: "/(tabs)/flashcards/[id]", params: { groupId }})
         } catch (error) {
             console.error(error)
             alert("Failed to save flashcards")

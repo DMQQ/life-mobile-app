@@ -5,7 +5,7 @@ import { gql, useMutation } from "@apollo/client";
 import ExercisesSelect from "@/components/ExercisesSelectDropdown/ExercisesSelect";
 import Button from "@/components/ui/Button/Button";
 import Colors from "@/constants/Colors";
-import { WorkoutScreenProps } from "../types";
+import { router, useLocalSearchParams } from "expo-router";
 import SegmentedButtons from "@/components/ui/SegmentedButtons";
 import Select from "@/components/ui/Select/Select";
 import ValidatedInput from "@/components/ui/ValidatedInput";
@@ -72,12 +72,12 @@ const validationSchema = yup.object().shape({
 
 const EXERCISE_TYPES = ["Cardio", "Strength", "Flexibility", "PushPullLegs", "FullBodyWorkout", "Split", "Other"] as string[];
 
-export default function WorkoutCreate({ navigation }: WorkoutScreenProps<"WorkoutCreate">) {
+export default function WorkoutCreate() {
   const [createWorkout, state] = useCreateWorkout(
     ({ createWorkout }: any) => {
-      navigation.navigate("Workout", {
+      router.push({ pathname: "/(tabs)/workout/[id]", params: {
         workoutId: createWorkout?.workoutId,
-      });
+      }});
     },
 
     (err: any) => console.log(JSON.stringify(err, null, 2)) // onError
@@ -90,9 +90,9 @@ export default function WorkoutCreate({ navigation }: WorkoutScreenProps<"Workou
   };
 
   const onHandleContribute = () => {
-    navigation.navigate("Exercise", {
+    router.push({ pathname: "/(tabs)/workout/exercise/[id]", params: {
       exerciseId: "",
-    });
+    }})
   };
 
   return (

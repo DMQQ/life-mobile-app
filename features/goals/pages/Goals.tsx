@@ -5,6 +5,7 @@ import Colors from "@/constants/Colors"
 import { Feather } from "@expo/vector-icons"
 import { FlashList } from "@shopify/flash-list"
 import { useState } from "react"
+import { router } from "expo-router"
 import { RefreshControl, View } from "react-native"
 import Feedback from "react-native-haptic-feedback"
 import Animated from "react-native-reanimated"
@@ -15,7 +16,7 @@ import { useGoal } from "../hooks/hooks"
 
 const AnimatedFlashList = Animated.createAnimatedComponent(FlashList)
 
-export default function Goals({ navigation }: any) {
+export default function Goals() {
     const { goals, loading, refetchGoals } = useGoal()
 
     const [scrollY, onAnimatedScrollHandler] = useTrackScroll({ screenName: "GoalsScreens" })
@@ -44,7 +45,7 @@ export default function Goals({ navigation }: any) {
                 animatedSubtitle="5 Active Goals"
                 buttons={[
                     {
-                        onPress: () => navigation.navigate("CreateGoal"),
+                        onPress: () => router.push({ pathname: "/(tabs)/goals/create" }),
                         icon: <Feather name="plus" size={20} color={Colors.foreground} />,
                     },
                 ]}
@@ -57,7 +58,7 @@ export default function Goals({ navigation }: any) {
                         index={index}
                         length={goals?.length}
                         onPress={() => {
-                            navigation.navigate("Goal", { id: item.id })
+                            router.push({ pathname: "/(tabs)/goals/[id]", params: { id: item.id }})
                         }}
                         {...item}
                     />

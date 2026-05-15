@@ -10,7 +10,7 @@ import ExpensesList from "../components/Wallet/ExpensesList"
 import SubscriptionsList from "../components/Wallet/SubscriptionsList"
 import { useWalletContext } from "../components/WalletContext"
 import useGetWallet from "../hooks/useGetWallet"
-import { WalletScreens } from "../Main"
+import { router } from "expo-router"
 import { Icons, CategoryUtils } from "../components/Expense/ExpenseIcon"
 import dayjs from "dayjs"
 import { Wallet } from "@/types"
@@ -43,7 +43,7 @@ const categoryIconMap: Record<string, string> = {
 
 type Tab = "expenses" | "subscriptions"
 
-export default function ExpensesListScreen({ navigation }: WalletScreens<"ExpensesList">) {
+export default function ExpensesListScreen() {
     const { data, refetch, onEndReached } = useGetWallet()
     const [scrollY, onScroll] = useTrackScroll({ screenName: "ExpensesListScreen" })
     const [tab, setTab] = useState<Tab>("expenses")
@@ -63,7 +63,7 @@ export default function ExpensesListScreen({ navigation }: WalletScreens<"Expens
                 buttons={[
                     {
                         icon: "plus",
-                        onPress: () => navigation.navigate("CreateExpense"),
+                        onPress: () => router.push("/(tabs)/wallet/create-expense"),
                     },
                 ]}
                 animatedTitle={tab === "expenses" ? "Expenses" : "Subscriptions"}
@@ -87,12 +87,12 @@ export default function ExpensesListScreen({ navigation }: WalletScreens<"Expens
             ) : (
                 <SubscriptionsList onScroll={onScroll} />
             )}
-            <BottomSearchBar navigation={navigation} />
+            <BottomSearchBar />
         </SafeAreaView>
     )
 }
 
-const BottomSearchBar = ({ navigation }: Omit<WalletScreens<"ExpensesList">, "route">) => {
+const BottomSearchBar = () => {
     const { filters, dispatch, hasFilters } = useWalletContext()
     const { height } = useReanimatedKeyboardAnimation()
     const [query, setQuery] = useState("")
@@ -313,7 +313,7 @@ const BottomSearchBar = ({ navigation }: Omit<WalletScreens<"ExpensesList">, "ro
                             <Button
                                 label="Advanced Filters"
                                 systemImage="slider.horizontal.3"
-                                onPress={() => navigation.navigate("Filters")}
+                                onPress={() => router.push("/(tabs)/wallet/filters")}
                             />
                             {hasFilters && (
                                 <>

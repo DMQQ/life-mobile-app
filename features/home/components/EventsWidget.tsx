@@ -3,7 +3,7 @@ import Text from "@/components/ui/Text/Text"
 import Colors, { Sizing } from "@/constants/Colors"
 import TimelineItem from "@/features/timeline/components/TimelineItem"
 import { DATE_FORMAT } from "@/utils/functions/parseDate"
-import { useNavigation } from "@react-navigation/native"
+import { router } from "expo-router"
 import Color from "color"
 import moment from "moment"
 import { StyleSheet, View } from "react-native"
@@ -65,7 +65,7 @@ const styles = StyleSheet.create({
 })
 
 export default function TodaysTimelineEvents(props: { data: any[]; loading: boolean }) {
-    const navigation = useNavigation<any>()
+    
 
     const date = moment()
 
@@ -86,7 +86,7 @@ export default function TodaysTimelineEvents(props: { data: any[]; loading: bool
                     Events
                 </Text>
 
-                <ChipButton onPress={() => navigation.navigate("TimelineScreens")}>View all</ChipButton>
+                <ChipButton onPress={() => router.push("/(tabs)/timeline")}>View all</ChipButton>
             </View>
 
             {props?.data?.slice(0, 3).map((timeline, index) => (

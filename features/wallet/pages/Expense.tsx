@@ -21,6 +21,7 @@ import ExpenseDetails from "../components/Expense/ExpenseDetails"
 import SimilarExpenses from "../components/Expense/SimilarExpenses"
 import FileUpload, { FileUploadHandle } from "../components/Expense/FileUpload"
 import SubscriptionSection from "../components/Expense/SubscriptionSection"
+import { router, useLocalSearchParams } from "expo-router"
 import { ConfirmDialog } from "@/components"
 import Section from "@/components/ui/Section"
 
@@ -93,10 +94,13 @@ export const GET_EXPENSE = gql`
     }
 `
 
-export default function Expense({ route: { params }, navigation }: any) {
-    const { data } = useQuery(GET_EXPENSE, { variables: { id: params?.expense?.id } })
+export default function Expense() {
+    const { expense: expenseParam, id } = useLocalSearchParams<{ expense?: any; id?: string }>()
+    const expenseId = id || expenseParam?.id
 
-    const [selected, setSelected] = useState(params?.expense)
+    const { data } = useQuery(GET_EXPENSE, { variables: { id: expenseId } })
+
+    const [selected, setSelected] = useState(expenseParam)
 
     useEffect(() => {
         if (data?.expense) setSelected(data.expense)
@@ -150,7 +154,7 @@ export default function Expense({ route: { params }, navigation }: any) {
         if (!selected?.id) return
         await deleteActivity({
             variables: { id: selected.id },
-            onCompleted: () => navigation.goBack(),
+            onCompleted: () => router.back(),
         })
         setConfirmDelete(false)
     }
@@ -220,14 +224,14 @@ export default function Expense({ route: { params }, navigation }: any) {
                     {
                         icon: <Feather name="git-pull-request" size={20} color={Colors.foreground} />,
                         onPress: () =>
-                            navigation.navigate("CorrectionMaps", {
+                            router.push({ pathname: "/(tabs)/wallet/correction-maps/create", params: {
                                 prefill: {
                                     shop: selected?.shop || undefined,
                                     description: selected?.description || undefined,
                                     category: selected?.category || undefined,
                                     amount: selected?.amount || undefined,
                                 },
-                            }),
+                            }}),
                     },
 
                     {
@@ -236,7 +240,7 @@ export default function Expense({ route: { params }, navigation }: any) {
                     },
                     {
                         icon: <Feather name="edit-2" size={20} color={Colors.foreground} />,
-                        onPress: () => navigation.navigate("CreateExpense", { ...selected, isEditing: true }),
+                        onPress: () => router.push({ pathname: "/(tabs)/wallet/create-expense", params: { ...selected, isEditing: true } }),
                         style: { marginLeft: 5 },
                     },
                 ]}

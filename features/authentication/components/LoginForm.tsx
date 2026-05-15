@@ -5,7 +5,7 @@ import { useState } from "react";
 import IconButton from "@/components/ui/IconButton/IconButton";
 import Button from "@/components/ui/Button/Button";
 import Input from "@/components/ui/TextInput/TextInput";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation } from "expo-router";
 import ChangeButton from "./ChangeButton";
 
 interface LoginFormProps {

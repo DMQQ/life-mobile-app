@@ -45,7 +45,7 @@ const Menu = ({ isVisible, navigation, setIsVisible }: { isVisible: boolean; nav
             <View style={styles.iconContainer}>
                 <IconButton
                     icon="create"
-                    onPress={() => navigation.navigate("WorkoutCreate")}
+                    onPress={() => navigation.navigate("create")}
                     color={Colors.secondary}
                     delay={isVisible ? 0 : 350}
                 />

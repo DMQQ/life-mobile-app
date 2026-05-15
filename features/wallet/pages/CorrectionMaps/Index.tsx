@@ -10,7 +10,7 @@ import lowOpacity from "@/utils/functions/lowOpacity"
 import GlassView from "@/components/ui/GlassView"
 import CorrectionMapItem from "../../components/CorrectionMap/CorrectionMapItem"
 import { useCorrectionMaps, type CorrectionMap } from "../../hooks/useCorrectionMaps"
-import { WalletScreens } from "../../Main"
+import { router, useNavigation, useLocalSearchParams } from "expo-router"
 
 export type CorrectionMapsParams = {
     prefill?: {
@@ -21,19 +21,19 @@ export type CorrectionMapsParams = {
     }
 }
 
-export default function CorrectionMapsScreen({ navigation, route }: any) {
+export default function CorrectionMapsScreen() {
     const { maps, loading, deleteCorrectionMap, toggleActive } = useCorrectionMaps()
-
-    const prefill = (route as any)?.params?.prefill as CorrectionMapsParams["prefill"] | undefined
+    const navigation = useNavigation()
+    const { prefill } = useLocalSearchParams<{ prefill?: any }>()
 
     const openAdd = useCallback(() => {
         Feedback.trigger("impactLight")
-        navigation.navigate("Create", { prefill })
+        router.push({ pathname: "/(tabs)/wallet/correction-maps/create", params: { prefill } })
     }, [prefill])
 
     const openEdit = useCallback((item: CorrectionMap) => {
         Feedback.trigger("impactLight")
-        navigation.navigate("Create", { editingItem: item })
+        router.push({ pathname: "/(tabs)/wallet/correction-maps/create", params: { editingItem: item } })
     }, [])
 
     const handleDelete = useCallback(async (id: string) => {
@@ -52,7 +52,7 @@ export default function CorrectionMapsScreen({ navigation, route }: any) {
             headerLeft: () => (
                 <IconButton
                     icon={<AntDesign name="close" size={20} color={Colors.foreground} />}
-                    onPress={() => navigation.goBack()}
+                    onPress={() => router.back()}
                 />
             ),
 

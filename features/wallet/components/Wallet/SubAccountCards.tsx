@@ -5,7 +5,7 @@ import Color from "color"
 import { FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import { useSubAccounts, useDeleteSubAccount } from "../../hooks/useSubAccounts"
 import { useWalletContext } from "../WalletContext"
-import { useNavigation } from "@react-navigation/native"
+import { useNavigation } from "expo-router"
 import Layout from "@/constants/Layout"
 import { useMemo } from "react"
 import Animated, { FadeIn } from "react-native-reanimated"
@@ -57,16 +57,16 @@ export default function SubAccountCards() {
                 contentContainerStyle={styles.scroll}
                 data={sortedAccounts}
                 keyExtractor={(a) => a.id}
-                ListFooterComponent={<AddCard onPress={() => navigation.navigate("CreateSubAccount")} />}
+                ListFooterComponent={<AddCard onPress={() => navigation.navigate("sub-account/create")} />}
                 renderItem={({ item: a }) => (
                     <AccountCard
                         key={a.id}
                         account={a}
                         active={filters?.accountId === a.id || (!filters.accountId && a.isDefault)}
                         onPress={() => onPress(a)}
-                        onEdit={() => navigation.navigate("CreateSubAccount", { editSubAccount: a })}
+                        onEdit={() => navigation.navigate("sub-account/create", { editSubAccount: a })}
                         onDelete={() => deleteSubAccount({ variables: { id: a.id } })}
-                        onTransfer={() => navigation.navigate("TransferSubAccount", { from: a.id })}
+                        onTransfer={() => navigation.navigate("sub-account/transfer", { from: a.id })}
                     />
                 )}
             />

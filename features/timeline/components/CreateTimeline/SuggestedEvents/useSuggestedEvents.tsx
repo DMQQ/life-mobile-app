@@ -2,7 +2,7 @@ import moment from "moment";
 import { useEffect, useState } from "react";
 import { CommonEvents } from "../CommonEvents.data";
 import { InitialValuesType } from "../../../hooks/mutation/useCreateEvent";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation } from "expo-router";
 
 export interface SuggestedEventType {
     name?: string

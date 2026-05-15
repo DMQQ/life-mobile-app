@@ -1,7 +1,8 @@
+import { router } from "expo-router"
 import { gql, useQuery } from "@apollo/client"
 import moment from "moment"
 import { useCallback, useEffect, useMemo, useState } from "react"
-import { TimelineScreenProps } from "../../types"
+
 import useGetOccurrencesQuery from "../query/useGetOccurrencesQuery"
 import dayjs from "dayjs"
 
@@ -22,7 +23,7 @@ const groupDates = (dates: { date: string }[]) => {
     return monthEvents
 }
 
-export default function useTimeline({ route, navigation }: TimelineScreenProps<"Timeline">) {
+export default function useTimeline() {
     const { data, selected, setSelected, loading, error, setQuery, query } = useGetOccurrencesQuery()
 
     const [switchView, setSwitchView] = useState<"day" | "week" | "month">("day")
@@ -35,11 +36,11 @@ export default function useTimeline({ route, navigation }: TimelineScreenProps<"
 
     const createTimeline = useCallback(
         () =>
-            navigation.navigate("TimelineCreate", {
+            router.push({ pathname: "/(tabs)/timeline/create", params: {
                 selectedDate: selected,
                 mode: "create",
-            }),
-        [navigation, selected],
+            }}),
+        [selected],
     )
 
     const dayEventsSorted = useMemo(() => {

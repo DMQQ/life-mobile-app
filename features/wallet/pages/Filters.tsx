@@ -7,7 +7,7 @@ import DatePicker from "@/components/DatePicker"
 import { formatDate } from "@/utils/functions/parseDate"
 import CategorySelect from "../components/CreateExpense/CategorySelect"
 import Colors from "@/constants/Colors"
-import { useNavigation } from "@react-navigation/native"
+import { router, useNavigation } from "expo-router"
 import Header from "@/components/ui/Header/Header"
 import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons"
 import { CategoryUtils } from "../components/Expense/ExpenseIcon"
@@ -61,11 +61,11 @@ const Forms = (props: ExpenseFiltersProps) => {
         <View style={{ flex: 1, height: "100%" }}>
             <ModalHeader
                 title="Filters"
-                onClose={navigation.goBack}
+                onClose={router.back}
                 saveLabel="Clear"
                 onSave={() => {
                     props.dispatch({ type: "RESET" })
-                    navigation.goBack()
+                    router.back()
                 }}
             />
             <Animated.ScrollView

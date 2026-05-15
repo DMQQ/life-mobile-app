@@ -19,10 +19,10 @@ import CategoryBreakdown from "@/features/wallet/components/Wallet/CategoryBreak
 import HomeExtras from "@/features/home/components/HomeExtras"
 import TimelineWidget from "@/features/home/components/TimelineWidget"
 import Background from "@/components/ui/Background"
-import { HomeScreenProps } from "./Main"
+import { router } from "expo-router"
 import { RefreshControl } from "react-native"
 
-export default function Root({ navigation }: HomeScreenProps<"Root">) {
+export default function Root() {
     const [loading, setLoading] = useState(true)
 
     const { data: home, refetch: refetchHome } = useQuery(GET_MAIN_SCREEN, {
@@ -64,14 +64,14 @@ export default function Root({ navigation }: HomeScreenProps<"Root">) {
                         {(data?.notifications as any[])?.some((n) => !n.read) && <PulsingIndicator />}
                     </View>
                 ),
-                onPress: () => navigation.navigate("HomeNotifications"),
+                onPress: () => router.push("/(tabs)/home/notifications"),
             },
             {
                 icon: <AntDesign name="setting" size={20} color={Colors.foreground} />,
-                onPress: () => navigation.navigate("HomeSettings"),
+                onPress: () => router.push("/(tabs)/home/settings"),
             },
         ],
-        [data?.notifications, navigation],
+        [data?.notifications],
     )
 
     return (

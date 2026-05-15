@@ -1,5 +1,5 @@
 import Colors from "@/constants/Colors"
-import { navigationRef } from "@/navigation"
+import { router } from "expo-router"
 import moment from "moment"
 import { useCallback, useMemo } from "react"
 import { StyleProp, StyleSheet, View, ViewStyle, Pressable } from "react-native"
@@ -39,21 +39,18 @@ export default function TimelineItem(
 ) {
     const onPress = () => {
         timeline.onPress?.()
-        navigationRef.current?.navigate("TimelineScreens", {
-            screen: timeline.location === "root" ? "TimelineScreens" : "TimelineDetails",
-            params: { timelineId: timeline.id },
-        } as any)
+        router.push(`/(tabs)/timeline/${timeline.id}`)
     }
 
     const handleCopyPress = () => {
-        navigationRef.current?.navigate("TimelineScreens", {
-            screen: "CopyTimelineModal",
+        router.push({
+            pathname: "/(tabs)/timeline/copy-timeline",
             params: {
                 timelineId: timeline.id,
                 timelineTitle: timeline.title,
                 originalDate: timeline.date,
             },
-        } as any)
+        })
     }
 
     const start = moment(timeline.beginTime, "HH:mm").format("HH:mm")
@@ -129,14 +126,14 @@ export default function TimelineItem(
                         systemIcon: "pencil",
                         title: "Edit",
                         onPress: () => {
-                            navigationRef.current?.navigate("TimelineScreens", {
-                                screen: "TimelineCreate",
+                            router.push({
+                                pathname: "/(tabs)/timeline/create",
                                 params: {
                                     mode: "edit",
                                     selectedDate: timeline?.date,
                                     timelineId: timeline?.id,
                                 },
-                            } as any)
+                            })
                         },
                     },
                     {

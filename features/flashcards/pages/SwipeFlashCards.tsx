@@ -2,9 +2,11 @@ import Header from "@/components/ui/Header/Header"
 import { View } from "react-native"
 import Feedback from "react-native-haptic-feedback"
 import { SafeAreaView } from "react-native-safe-area-context"
+import { router, useLocalSearchParams } from "expo-router"
 
-export default function SwipeFlashCardsScreen({ navigation, route }: any) {
-    const { flashCards, reviewFlashCard } = useFlashCards(route.params?.groupId)
+export default function SwipeFlashCardsScreen() {
+    const { groupId } = useLocalSearchParams<{ groupId: string }>()
+    const { flashCards, reviewFlashCard } = useFlashCards(groupId)
 
     const [cards, setCards] = useState(flashCards)
 
@@ -30,7 +32,7 @@ export default function SwipeFlashCardsScreen({ navigation, route }: any) {
 
             //   setCards(flashCards);
 
-            navigation.goBack()
+            router.back()
         }
     }, [cards])
 

@@ -1,6 +1,6 @@
 import useRemoveTimelineMutation from "@/features/timeline/hooks/mutation/useRemoveTimelineMutation"
 import DeleteDialog, { DeleteDialogProps } from "./DeleteDialog"
-import { useNavigation } from "@react-navigation/native"
+import { useNavigation } from "expo-router"
 
 export default function DeleteTimelineEvent({
     shouldNavigateBack = true,

@@ -1,6 +1,6 @@
 import Section from "@/components/ui/Section"
 import Colors from "@/constants/Colors"
-import { useNavigation } from "@react-navigation/native"
+import { useNavigation } from "expo-router"
 import { ReactNode, useCallback, useMemo, useState } from "react"
 import {
     NativeScrollEvent,
@@ -94,7 +94,7 @@ export default function SubscriptionsList({ onScroll, listHeader }: Props) {
                             borderWidth: 0,
                             borderBottomWidth: item.subscriptions.length - 1 === index ? 0 : 1,
                         }}
-                        onPress={() => navigation.navigate("Subscription", { subscriptionId: sub.id })}
+                        onPress={() => navigation.navigate("subscription/[id]", { subscriptionId: sub.id })}
                     />
                 ))}
             </Section>

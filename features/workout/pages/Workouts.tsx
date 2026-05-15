@@ -2,13 +2,12 @@ import { View, Text, FlatList, ScrollView, StyleSheet } from "react-native";
 import ScreenContainer from "@/components/ui/ScreenContainer";
 import Colors from "@/constants/Colors";
 import Ripple from "react-native-material-ripple";
-import { WorkoutScreenProps } from "../types";
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 
 import L from "@/constants/Layout";
 import { useAppSelector } from "@/utils/redux";
-import { useNavigation } from "@react-navigation/native";
+import { router, useNavigation } from "expo-router";
 import WorkoutTile from "../components/WorkoutTile";
 import useGetWorkoutsQuery from "../hooks/useGetWorkouts";
 import Menu from "../components/Menu";
@@ -47,7 +46,7 @@ const SearchTab = (props: { onPress: Function }) => {
   const navigation = useNavigation<any>();
 
   const onPress = () => {
-    navigation.navigate("PendingWorkout", {
+    navigation.navigate("pending/[id]", {
       workoutId,
       delayTimerStart: 0,
       exerciseId: currentExercise.exerciseId,
@@ -71,7 +70,7 @@ const SearchTab = (props: { onPress: Function }) => {
   );
 };
 
-export default function Workouts({ navigation }: WorkoutScreenProps<"Workouts">) {
+export default function Workouts() {
   const query = useGetWorkoutsQuery();
   const [isVisible, setIsVisible] = useState(false);
 
@@ -80,11 +79,11 @@ export default function Workouts({ navigation }: WorkoutScreenProps<"Workouts">)
       <SearchTab onPress={() => setIsVisible((p) => !p)} />
 
       <ScrollView horizontal pagingEnabled scrollEnabled={false}>
-        <WorkoutsList navigation={navigation} workouts={query.data?.workouts || []} />
+        <WorkoutsList navigation={router} workouts={query.data?.workouts || []} />
         <View style={{ width: L.screen.width, backgroundColor: Colors.foreground }}></View>
       </ScrollView>
 
-      <Menu isVisible={isVisible} navigation={navigation} setIsVisible={setIsVisible} />
+      <Menu isVisible={isVisible} navigation={router} setIsVisible={setIsVisible} />
 
       {!isVisible && (
         <Ripple onPress={() => setIsVisible((p) => !p)} style={styles.menuButton}>

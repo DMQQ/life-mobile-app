@@ -3,6 +3,7 @@ import Text from "@/components/ui/Text/Text"
 import Colors, { secondary_candidates } from "@/constants/Colors"
 import Layout from "@/constants/Layout"
 import { Expense, MonthlyExpenses } from "@/types"
+import { router } from "expo-router"
 import { Feather } from "@expo/vector-icons"
 import moment from "moment"
 import { useCallback, useMemo, useRef, useState } from "react"
@@ -280,7 +281,7 @@ function WalletCharts({ navigation }: any) {
                 expenses={selectedCategoryData}
                 categoryName={selected}
                 categoryColor={selectedColor}
-                onExpensePress={(expense) => navigation.navigate("Expense", { expense })}
+                onExpensePress={(expense) => router.push({ pathname: "/(tabs)/wallet/expense/[id]", params: { id: expense.id, expense } })}
             />
         </View>
     )

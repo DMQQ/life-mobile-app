@@ -1,5 +1,6 @@
 import Text from "@/components/ui/Text/Text"
 import { gql, useQuery } from "@apollo/client"
+import { router, useLocalSearchParams } from "expo-router"
 import { Feather } from "@expo/vector-icons"
 import moment from "moment"
 import { useEffect, useState } from "react"
@@ -31,10 +32,6 @@ import Color from "color"
 
 const muted = Colors.foreground_secondary
 
-interface SubscriptionDetailsProps {
-    route: { params: { subscriptionId: string } }
-    navigation: any
-}
 
 const SUBSCRIPTION_QUERY = gql`
     query Subscription($id: String!) {
@@ -63,8 +60,8 @@ const SUBSCRIPTION_QUERY = gql`
     }
 `
 
-export default function SubscriptionDetails({ route, navigation }: SubscriptionDetailsProps) {
-    const { subscriptionId } = route.params
+export default function SubscriptionDetails() {
+    const { subscriptionId, id } = useLocalSearchParams<{ subscriptionId?: string; id?: string }>()
 
     const { data, loading, error, refetch } = useQuery(SUBSCRIPTION_QUERY, {
         variables: { id: subscriptionId },
@@ -165,7 +162,7 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
     }
 
     const handleExpensePress = (expense: Expense) => {
-        navigation.navigate("Expense", { expense })
+        router.push({ pathname: "/(tabs)/wallet/expense/[id]", params: { id: expense.id, expense } })
     }
 
     const scrollY = useSharedValue(0)
@@ -210,7 +207,7 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                 buttons={[
                     {
                         icon: <Feather name="edit-2" size={20} color={Colors.foreground} />,
-                        onPress: () => navigation.navigate("EditSubscription", { subscription }),
+                        onPress: () => router.push({ pathname: "/(tabs)/wallet/subscription/[id]/edit", params: { id: subscription.id, subscription } }),
                     },
                 ]}
                 initialTitleFontSize={subscription?.description?.length > 25 ? 40 : 50}

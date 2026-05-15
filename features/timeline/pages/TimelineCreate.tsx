@@ -8,12 +8,13 @@ import { AntDesign, Ionicons } from "@expo/vector-icons"
 import moment from "moment"
 import { useRef, useState } from "react"
 import { Platform, Pressable, ScrollView, StyleSheet, View } from "react-native"
+import { router, useLocalSearchParams } from "expo-router"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import CreateRepeatableTimeline from "../components/CreateTimeline/CreateRepeatableTimeline"
 import EditScopeSheet from "../components/EditScopeSheet"
 import TimelineCreateHeader from "../components/CreateTimeline/TimelineCreateHeader"
 import useCreateTimeline from "../hooks/general/useCreateTimeline"
-import type { TimelineScreenProps } from "../types"
+
 import { Todo } from "./CreateTimelineTodos"
 import GlassView from "@/components/ui/GlassView"
 import TimePicker from "@/components/TimePicker"
@@ -42,13 +43,12 @@ const styles = StyleSheet.create({
     },
 })
 
-export default function CreateTimeLineEventModal({ route, navigation }: TimelineScreenProps<"TimelineCreate">) {
+export default function CreateTimeLineEventModal() {
     const isKeyboardOpen = useKeyboard()
 
-    const { f, isLoading, isEditing, sheetRef, scopeSheetRef, onScopeSelected, handleChangeDate } = useCreateTimeline({
-        route,
-        navigation,
-    })
+    const params = useLocalSearchParams<any>()
+
+    const { f, isLoading, isEditing, sheetRef, scopeSheetRef, onScopeSelected, handleChangeDate } = useCreateTimeline(params)
 
     const endManuallyChanged = useRef(isEditing)
 
@@ -62,11 +62,11 @@ export default function CreateTimeLineEventModal({ route, navigation }: Timeline
                 <TimelineCreateHeader
                     handleChangeDate={(date: Date) => {
                         handleChangeDate(date)
-                        navigation.setParams({
+                        router.setParams({
                             selectedDate: moment(date).format("YYYY-MM-DD"),
                         })
                     }}
-                    selectedDate={route.params.selectedDate}
+                    selectedDate={params.selectedDate}
                     onSubmit={f.handleSubmit}
                     submitDisabled={!(f.isValid && !f.isSubmitting && f.dirty)}
                 />
@@ -162,11 +162,11 @@ export default function CreateTimeLineEventModal({ route, navigation }: Timeline
 
                                 <Pressable
                                     onPress={() => {
-                                        ;(navigation as any).navigate("CreateTimelineTodos", {
+                                        ;router.push({ pathname: "/(tabs)/timeline/create-todos", params: {
                                             mode: "push-back",
-                                            selectedDate: route.params.selectedDate,
-                                            todos: route.params.todos || [],
-                                        })
+                                            selectedDate: params.selectedDate,
+                                            todos: params.todos || [],
+                                        }})
                                     }}
                                 >
                                     <Text
@@ -182,17 +182,17 @@ export default function CreateTimeLineEventModal({ route, navigation }: Timeline
                                 </Pressable>
                             </View>
                             <View style={{ marginTop: 2.5 }}>
-                                {(route.params.todos?.length || 0) > 0 ? (
-                                    route.params.todos?.map((todo, index) => (
+                                {(params.todos?.length || 0) > 0 ? (
+                                    params.todos?.map((todo, index) => (
                                         <Todo
                                             index={index}
                                             value={todo}
                                             key={index}
                                             showRemove
                                             onRemove={() => {
-                                                navigation.setParams({
-                                                    ...route.params,
-                                                    todos: route.params?.todos?.filter((_, i) => i !== index),
+                                                router.setParams({
+                                                    ...params,
+                                                    todos: params?.todos?.filter((_, i) => i !== index),
                                                 })
                                             }}
                                         />

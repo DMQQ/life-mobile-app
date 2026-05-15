@@ -3,13 +3,14 @@ import { AntDesign, Ionicons } from "@expo/vector-icons"
 import moment from "moment"
 import { useEffect, useRef, useState } from "react"
 import { ActivityIndicator, FlatList, StyleSheet, TouchableOpacity, View } from "react-native"
+import { router, useLocalSearchParams } from "expo-router"
 import Svg, { Circle, Defs, G, LinearGradient, Stop } from "react-native-svg"
 import Text from "@/components/ui/Text/Text"
 import { Header } from "@/components"
 import useGetOccurrenceById from "../hooks/query/useGetOccurrenceById"
 import useCompleteOccurrence from "../hooks/mutation/useCompleteOccurrence"
 import useCompleteTodo from "../hooks/mutation/useCompleteTodo"
-import { TimelineScreenProps } from "../types"
+
 import Checkbox from "@/components/ui/Checkbox"
 import lowOpacity from "@/utils/functions/lowOpacity"
 import Color from "color"
@@ -50,8 +51,8 @@ function TodoRow({ todo, timelineId }: { todo: { id: string; title: string; isCo
     )
 }
 
-export default function TimelineDoScreen({ route, navigation }: TimelineScreenProps<"TimelineDo">) {
-    const { timelineId } = route.params
+export default function TimelineDoScreen() {
+    const { timelineId } = useLocalSearchParams<{ timelineId: string }>()
     const { data: occurrence, loading } = useGetOccurrenceById(timelineId)
     const [completeOccurrence, { loading: completing }] = useCompleteOccurrence(timelineId)
 
@@ -93,7 +94,7 @@ export default function TimelineDoScreen({ route, navigation }: TimelineScreenPr
 
     const handleFinish = async () => {
         await completeOccurrence({ variables: { input: { id: timelineId, isCompleted: true } } })
-        navigation.goBack()
+        router.back()
     }
 
     return (
@@ -168,7 +169,7 @@ export default function TimelineDoScreen({ route, navigation }: TimelineScreenPr
 
                             <View style={styles.controls}>
                                 <TouchableOpacity
-                                    onPress={() => navigation.goBack()}
+                                    onPress={() => router.back()}
                                     style={styles.sideBtn}
                                     activeOpacity={0.7}
                                 >
@@ -226,7 +227,7 @@ export default function TimelineDoScreen({ route, navigation }: TimelineScreenPr
                                     <Text style={styles.emptyText}>No tasks added</Text>
                                     <TouchableOpacity
                                         style={styles.addTodoBtn}
-                                        onPress={() => (navigation as any).navigate("CreateTimelineTodos", { timelineId })}
+                                        onPress={() => router.push({ pathname: "/(tabs)/timeline/create-todos", params: { timelineId }})}
                                     >
                                         <Ionicons name="add" size={15} color={Colors.secondary} />
                                         <Text style={styles.addTodoBtnText}>Add tasks</Text>

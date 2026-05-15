@@ -1,7 +1,7 @@
 import Button2 from "@/components/ui/Button/Button2"
 import Colors, { Sizing } from "@/constants/Colors"
 import Layout from "@/constants/Layout"
-import { useNavigation } from "@react-navigation/native"
+import { router } from "expo-router"
 import moment from "moment"
 import { StyleSheet, View } from "react-native"
 import Animated, { FadeIn } from "react-native-reanimated"
@@ -31,10 +31,10 @@ const styles = StyleSheet.create({
 })
 
 export default function NotFound({ selectedDate }: { selectedDate: string }) {
-    const navigation = useNavigation<any>()
+    
 
     const onPress = () => {
-        navigation.navigate("TimelineScreens", {
+        router.push({
             screen: "TimelineCreate",
             params: {
                 selectedDate: selectedDate || moment().format("YYYY-MM-DD"),

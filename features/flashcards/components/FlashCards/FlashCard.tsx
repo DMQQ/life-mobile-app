@@ -5,7 +5,7 @@ import Colors from "@/constants/Colors";
 import Color from "color";
 import Ripple from "react-native-material-ripple";
 import { AntDesign, Entypo } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation } from "expo-router";
 
 interface FlipCardProps {
   frontContent: string;
@@ -60,7 +60,7 @@ const FlipCard: React.FC<FlipCardProps> = ({ frontContent, backContent, explanat
       {showExpand && (
         <Ripple
           style={{ position: "absolute", right: 15, bottom: 15, padding: 5 }}
-          onPress={() => groupId && navigation.navigate("SwipeFlashCards", { groupId })}
+          onPress={() => groupId && navigation.navigate("swipe", { groupId })}
         >
           <Entypo name="resize-full-screen" size={18} color={Colors.foreground} />
         </Ripple>

@@ -36,7 +36,7 @@ export default function WorkoutTile(props: Workout & { navigation: any }) {
   return (
     <Ripple
       onPress={() =>
-        props.navigation.navigate("Workout", {
+        props.navigation.navigate("[id]", {
           workoutId: props.workoutId,
         })
       }

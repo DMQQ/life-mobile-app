@@ -8,6 +8,7 @@ import { useCallback, useMemo, useState } from "react"
 import type { GoalEntry as GoalEntryType } from "@/gql/graphql"
 import { StyleSheet, View } from "react-native"
 import Animated, { useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated"
+import { router, useLocalSearchParams } from "expo-router"
 import { SafeAreaView } from "react-native-safe-area-context"
 import DayEntry from "../components/GoalEntry"
 import GitHubActivityGrid from "../components/StatGrid"
@@ -15,8 +16,8 @@ import { useGetGoal, useGoal, useDeleteGoalEntry } from "../hooks/hooks"
 import ConfirmDialog from "@/components/ui/ConfirmDialog"
 import { isLimitGoal } from "../hooks/hooks"
 
-export default function Goal({ route, navigation }: any) {
-    const { id } = route.params
+export default function Goal() {
+    const { id } = useLocalSearchParams<{ id: string }>()
     const { data: goalData } = useGetGoal(id)
     const { upsertStats } = useGoal()
     const deleteGoalEntry = useDeleteGoalEntry()
@@ -59,19 +60,19 @@ export default function Goal({ route, navigation }: any) {
     })
 
     const handleEditEntry = (entry: any) => {
-        navigation.navigate("UpdateGoalEntry", {
+        router.push({ pathname: "/(tabs)/goals/[id]/update-entry", params: {
             id,
             entryId: entry.id !== "new" ? entry.id : undefined,
             entryValue: entry.value,
             entryDate: entry.date,
-        })
+        }})
     }
 
     const handleAddEntry = (entry: any) => {
-        navigation.navigate("UpdateGoalEntry", {
+        router.push({ pathname: "/(tabs)/goals/[id]/update-entry", params: {
             id,
             entryDate: entry.date,
-        })
+        }})
     }
 
     const handleDeleteEntry = async (entryId: string) => {
@@ -101,11 +102,11 @@ export default function Goal({ route, navigation }: any) {
 
     const headerButtons = [
         {
-            onPress: () => navigation.navigate("CreateGoal", { id }),
+            onPress: () => router.push({ pathname: "/(tabs)/goals/create", params: { id }}),
             icon: <Feather name="edit-2" size={20} color={Colors.foreground} />,
         },
         {
-            onPress: () => navigation.navigate("UpdateGoalEntry", { id }),
+            onPress: () => router.push({ pathname: "/(tabs)/goals/[id]/update-entry", params: { id }}),
             icon: <Feather name="plus" size={20} color={Colors.foreground} />,
         },
     ]

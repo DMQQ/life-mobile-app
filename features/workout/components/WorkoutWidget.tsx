@@ -3,7 +3,7 @@ import Colors from "@/constants/Colors";
 import Color from "color";
 import { useAppSelector } from "@/utils/redux";
 import Ripple from "react-native-material-ripple";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation } from "expo-router";
 import { Padding, Rounded } from "@/constants/Layout";
 import { Feather } from "@expo/vector-icons";
 
@@ -43,7 +43,7 @@ export default function WorkoutWidget() {
   const navigation = useNavigation();
 
   const navigateWorkout = () =>
-    (navigation as any).navigate("WorkoutScreens", {
+    (navigation as any).navigate("workout", {
       screen: "PendingWorkout",
       params: {
         workoutId: workout.workoutId,

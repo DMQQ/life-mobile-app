@@ -3,7 +3,7 @@ import ScreenContainer from "@/components/ui/ScreenContainer";
 import ExerciseList from "@/components/Exercise/ExerciseList/ExerciseList";
 import { View, Text, ScrollView, StyleSheet, FlatList } from "react-native";
 import Button from "@/components/ui/Button/Button";
-import { WorkoutScreenProps } from "../types";
+import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import ExerciseProgressSheet from "../components/ExerciseProgressSheet";
 import { Exercise } from "@/types";
 import { useDispatch } from "react-redux";
@@ -50,8 +50,10 @@ const styles = StyleSheet.create({
   },
 });
 
-export default function Workout({ navigation, route }: WorkoutScreenProps<"Workout">) {
-  const { data } = useGetWorkoutQuery(route.params.workoutId);
+export default function Workout() {
+  const { workoutId } = useLocalSearchParams<{ workoutId: string }>()
+  const navigation = useNavigation()
+  const { data } = useGetWorkoutQuery(workoutId);
   const dispatch = useDispatch();
 
   const [selectedExercise, setSelectedExercise] = useState<Exercise | undefined>(undefined);
@@ -69,17 +71,17 @@ export default function Workout({ navigation, route }: WorkoutScreenProps<"Worko
     dispatch(
       workoutActions.start({
         exercises: exercises,
-        workoutId: route.params.workoutId,
+        workoutId: workoutId,
         title: data?.workout?.title,
         description: data?.workout?.description,
       })
     );
 
-    navigation.navigate("PendingWorkout", {
-      workoutId: route.params.workoutId,
+    router.push({ pathname: "/(tabs)/workout/pending/[id]", params: {
+      workoutId: workoutId,
       delayTimerStart: 0,
       exerciseId: canContinueWithOldExercise ? workout.exercises[workout.activeExerciseIndex].exerciseId : exercises[0].exerciseId,
-    });
+    }})
   };
 
   useEffect(() => {
@@ -95,7 +97,7 @@ export default function Workout({ navigation, route }: WorkoutScreenProps<"Worko
         <View style={styles.headerContainer}>
           <Text style={styles.titleText}>{data?.workout?.title}</Text>
 
-          {workout.workoutId === route.params.workoutId && workout.isWorkoutPending && <Text style={styles.pendingText}>PENDING</Text>}
+          {workout.workoutId === workoutId && workout.isWorkoutPending && <Text style={styles.pendingText}>PENDING</Text>}
         </View>
 
         <Text style={{ color: Colors.text_dark }}>{data?.workout?.description}</Text>
@@ -155,12 +157,12 @@ export default function Workout({ navigation, route }: WorkoutScreenProps<"Worko
       </View>
 
       <ExerciseProgressSheet
-        workoutId={route.params.workoutId}
+        workoutId={workoutId}
         onClearSelectedExercise={() => setSelectedExercise(undefined)}
         selectedExercise={selectedExercise}
       />
 
-      <ExerciseBottomSheet exercises={exercises} workoutId={route.params.workoutId} ref={sheetRef} />
+      <ExerciseBottomSheet exercises={exercises} workoutId={workoutId} ref={sheetRef} />
     </ScreenContainer>
   );
 }

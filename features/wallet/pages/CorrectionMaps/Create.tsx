@@ -18,7 +18,7 @@ import Ripple from "react-native-material-ripple"
 import Color from "color"
 import CategorySelect from "../../components/CreateExpense/CategorySelect"
 import { useCorrectionMaps, type CorrectionMap } from "../../hooks/useCorrectionMaps"
-import { WalletScreens } from "../../Main"
+import { router, useNavigation, useLocalSearchParams } from "expo-router"
 import GlassView from "@/components/ui/GlassView"
 import GroupSelector from "@/components/ui/GroupSelector"
 import Section from "@/components/ui/Section"
@@ -128,8 +128,9 @@ const OVERRIDE_OPTIONS: { key: OverrideType; label: string }[] = [
     { key: "description", label: "Description" },
 ]
 
-export default function CorrectionMapForm({ navigation, route }: any) {
-    const { prefill, editingItem } = (route as any).params ?? {}
+export default function CorrectionMapForm() {
+    const navigation = useNavigation()
+    const { prefill, editingItem } = useLocalSearchParams<{ prefill?: any; editingItem?: any }>()
     const { creating, createCorrectionMap, updateCorrectionMap } = useCorrectionMaps()
 
     const [state, setState] = useState<FormState>(() => {
@@ -188,7 +189,7 @@ export default function CorrectionMapForm({ navigation, route }: any) {
             await createCorrectionMap(input)
         }
         Feedback.trigger("impactMedium")
-        navigation.goBack()
+        router.back()
     }, [state, editingItem, creating])
 
     const valid = isValid(state)

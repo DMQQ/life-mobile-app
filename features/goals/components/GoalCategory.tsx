@@ -2,7 +2,7 @@ import { Card, GlassIconButton } from "@/components"
 import Text from "@/components/ui/Text/Text"
 import Colors, { secondary_candidates } from "@/constants/Colors"
 import { Group } from "@/features/flashcards/hooks"
-import { useNavigation } from "@react-navigation/native"
+import { useNavigation } from "expo-router"
 import { useCallback, useMemo, useOptimistic, useState } from "react"
 import { StyleSheet, View } from "react-native"
 import { FadeIn } from "react-native-reanimated"
@@ -59,7 +59,7 @@ export const GoalCategory = ({ name, icon, description, entries = [], onPress, .
             ]}
             onPress={(e) => {
                 if (e.nativeEvent.name === "Edit Goal") {
-                    navigation.navigate("CreateGoal", { id: rest.id })
+                    navigation.navigate("create", { id: rest.id })
                 }
                 if (e.nativeEvent.name === "Delete Goal") {
                     removeGroup({ variables: { id: rest.id } })
@@ -71,7 +71,7 @@ export const GoalCategory = ({ name, icon, description, entries = [], onPress, .
                 ripple
                 onLongPress={rest.onLongPress}
                 onPress={() => {
-                    navigation.navigate("Goal", { id: rest.id })
+                    navigation.navigate("[id]", { id: rest.id })
                 }}
                 style={styles.container}
                 entering={FadeIn.delay((rest.index + 1) * 50)}

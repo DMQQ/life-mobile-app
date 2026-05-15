@@ -2,7 +2,7 @@ import { Card, IconButton } from "@/components"
 import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
 import { Todos } from "@/types"
-import { useNavigation } from "@react-navigation/native"
+import { useNavigation } from "expo-router"
 import Color from "color"
 import { StyleSheet, View } from "react-native"
 import TodoItem from "./TodoItem"
@@ -17,7 +17,7 @@ export default function TimelineTodos(props: {
     const navigation = useNavigation<any>()
 
     const handleLongPress = () => {
-        navigation.navigate("TodosTransferModal", {
+        navigation.navigate("todos-transfer", {
             timelineId: props.timelineId,
         })
     }

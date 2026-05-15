@@ -2,16 +2,18 @@ import ScreenContainer from "@/components/ui/ScreenContainer";
 
 import IconPickerComponent from "../components/IconPicker";
 import { useState } from "react";
+import { router, useLocalSearchParams } from "expo-router";
 
-export default function IconPicker({ route, navigation }: any) {
-  const [icon, setIcon] = useState(route.params.selectedIcon);
+export default function IconPicker() {
+  const { selectedIcon, onSelectIcon } = useLocalSearchParams<{ selectedIcon: string; onSelectIcon: any }>();
+  const [icon, setIcon] = useState(selectedIcon);
 
   const onChange = (icon: string) => {
-    route.params.onSelectIcon(icon);
+    onSelectIcon(icon);
 
     setIcon(icon);
 
-    navigation.goBack();
+    router.back();
   };
 
   return (

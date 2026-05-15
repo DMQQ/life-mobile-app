@@ -4,7 +4,7 @@ import { View, StyleSheet, Text, Image, Vibration } from "react-native"
 import Colors from "@/constants/Colors"
 import Ripple from "react-native-material-ripple"
 import { useState, useEffect, useMemo, memo } from "react"
-import { WorkoutScreenProps } from "../types"
+import { router, useLocalSearchParams } from "expo-router"
 import { useDispatch } from "react-redux"
 import { useAppSelector } from "@/utils/redux"
 import { workoutActions } from "@/utils/redux/workout/workout"
@@ -109,7 +109,7 @@ const Header = (props: { nextButtonProps: NextButtonProps; text: string; navigat
             paddingHorizontal: 15,
         }}
     >
-        <Ripple style={{ padding: 5 }} onPress={() => props.navigation.goBack()}>
+        <Ripple style={{ padding: 5 }} onPress={() => props.navigation.back()}>
             <AntDesign name="arrow-left" color={Colors.text_light} size={22} />
         </Ripple>
 
@@ -129,19 +129,20 @@ const Header = (props: { nextButtonProps: NextButtonProps; text: string; navigat
     </View>
 )
 
-function PendingWorkout({ navigation, route }: WorkoutScreenProps<"PendingWorkout">) {
-    const { isPlaying, play, toggle } = usePlay(route.params.delayTimerStart)
+function PendingWorkout() {
+    const { delayTimerStart, exerciseId, workoutId: paramWorkoutId } = useLocalSearchParams<{ delayTimerStart: string; exerciseId: string; workoutId: string }>()
+    const { isPlaying, play, toggle } = usePlay(delayTimerStart)
     const [currentSet, setCurrentSet] = useState(1)
     const dispatch = useDispatch()
     const workout = useAppSelector((s) => s.workout)
     const hasNext = workout.activeExerciseIndex <= workout.exercises.length
     const exercise = useMemo(
-        () => workout.exercises.find((ex) => ex.exerciseId === route.params.exerciseId),
-        [route.params.exerciseId, workout.exercises],
+        () => workout.exercises.find((ex) => ex.exerciseId === exerciseId),
+        [exerciseId, workout.exercises],
     )
     const nextExercise = workout.exercises?.[workout.activeExerciseIndex + 1]
 
-    const progress = useGetExerciseProgressQuery(route.params.exerciseId)
+    const progress = useGetExerciseProgressQuery(exerciseId)
 
     const { sets: numberOfSets, reps: numberOfReps } = progress?.[0] || {
         sets: 4,
@@ -153,15 +154,15 @@ function PendingWorkout({ navigation, route }: WorkoutScreenProps<"PendingWorkou
     function onNextExercise(skip = false) {
         dispatch(workoutActions.next({ skip: skip }))
         if (typeof nextExercise === "undefined")
-            return navigation.navigate("WorkoutSummary", {
-                workoutId: route.params.workoutId,
-            })
+            return router.push({ pathname: "/(tabs)/workout/summary/[id]", params: {
+                workoutId: paramWorkoutId,
+            }})
 
-        navigation.push("PendingWorkout", {
-            workoutId: route.params.workoutId,
-            delayTimerStart: route.params.delayTimerStart,
+        router.push({ pathname: "/(tabs)/workout/pending/[id]", params: {
+            workoutId: paramWorkoutId,
+            delayTimerStart: delayTimerStart,
             exerciseId: nextExercise.exerciseId,
-        })
+        }})
     }
 
     const buttonText = currentSet > numberOfSets ? "Next Exercise" : !isPlaying ? "Skip rest" : "Workout running"
@@ -170,9 +171,9 @@ function PendingWorkout({ navigation, route }: WorkoutScreenProps<"PendingWorkou
         Vibration.cancel()
         if (currentSet > numberOfSets && typeof nextExercise === "undefined") {
             dispatch(workoutActions.end())
-            navigation.navigate("WorkoutSummary", {
-                workoutId: route.params.workoutId,
-            })
+            router.push({ pathname: "/(tabs)/workout/summary/[id]", params: {
+                workoutId: paramWorkoutId,
+            }})
             return
         }
         if (!isPlaying && currentSet <= numberOfSets) return play()
@@ -188,7 +189,7 @@ function PendingWorkout({ navigation, route }: WorkoutScreenProps<"PendingWorkou
 
     const [ex, setEx] = useState<Exercise | undefined>(undefined) // shit workaround, TO DO: forwardRef?? or leave it as it is
 
-    const currentExerciseIndex = workout.exercises.findIndex((ex) => ex.exerciseId === route.params.exerciseId)
+    const currentExerciseIndex = workout.exercises.findIndex((ex) => ex.exerciseId === exerciseId)
 
     const nextButtonProps = {
         isPending: !isFinished,
@@ -199,7 +200,7 @@ function PendingWorkout({ navigation, route }: WorkoutScreenProps<"PendingWorkou
     return (
         <ScreenContainer style={{ padding: 0 }}>
             <Header
-                navigation={navigation}
+                navigation={router}
                 text={`${currentExerciseIndex + 1} out of ${workout.exercises.length}`}
                 nextButtonProps={nextButtonProps}
             />

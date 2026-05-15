@@ -11,7 +11,7 @@ import Feedback from "react-native-haptic-feedback"
 import { SafeAreaView } from "react-native-safe-area-context"
 import * as yup from "yup"
 import { useCreateSubAccount, useUpdateSubAccount } from "../hooks/useSubAccounts"
-import { WalletScreens } from "../Main"
+import { router, useLocalSearchParams } from "expo-router"
 import GlassView from "@/components/ui/GlassView"
 import IconSaveButton from "@/components/ui/Button/IconSaveButton"
 
@@ -44,17 +44,17 @@ const schema = yup.object().shape({
     icon: yup.string().required(),
 })
 
-export default function CreateSubAccount({ navigation, route }: WalletScreens<"CreateSubAccount">) {
-    const editing = route.params?.editSubAccount
+export default function CreateSubAccount() {
+    const { editSubAccount: editing } = useLocalSearchParams<{ editSubAccount?: any }>()
 
     const [createSubAccount, { loading: creating }] = useCreateSubAccount(() => {
         Feedback.trigger("impactLight")
-        navigation.goBack()
+        router.back()
     })
 
     const [updateSubAccount, { loading: updating, error }] = useUpdateSubAccount(() => {
         Feedback.trigger("impactLight")
-        navigation.goBack()
+        router.back()
     })
 
     const loading = creating || updating
@@ -73,7 +73,7 @@ export default function CreateSubAccount({ navigation, route }: WalletScreens<"C
                 <GlassView style={{ borderRadius: 100, padding: 7.5 }}>
                     <IconButton
                         icon={<AntDesign name="close" size={20} color={Colors.foreground} />}
-                        onPress={() => navigation.goBack()}
+                        onPress={() => router.back()}
                     />
                 </GlassView>
                 <Text variant="title" style={styles.title}>

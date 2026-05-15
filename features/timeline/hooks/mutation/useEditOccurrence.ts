@@ -1,5 +1,5 @@
 import { gql, useMutation } from "@apollo/client"
-import { useNavigation } from "@react-navigation/native"
+import { useNavigation } from "expo-router"
 import { GET_MONTHLY_OCCURRENCES } from "../general/useTimeline"
 import useGetOccurrenceById, { GET_OCCURRENCE_BY_ID } from "../query/useGetOccurrenceById"
 import { GET_OCCURRENCES_QUERY } from "../query/useGetOccurrencesQuery"

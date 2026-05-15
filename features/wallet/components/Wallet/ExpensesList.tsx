@@ -3,7 +3,7 @@ import Layout from "@/constants/Layout"
 import { Expense, MonthlyExpenses, Wallet } from "@/types"
 import { gql, useQuery } from "@apollo/client"
 import { Feather } from "@expo/vector-icons"
-import { useNavigation } from "@react-navigation/native"
+import { useNavigation } from "expo-router"
 import moment from "moment"
 import { memo, ReactNode, useCallback, useEffect, useMemo, useState } from "react"
 import {
@@ -155,7 +155,7 @@ const MonthItem = ({
                                     <WalletItem
                                         key={expense.id}
                                         index={index}
-                                        handlePress={() => navigation.navigate("Expense", { expense })}
+                                        handlePress={() => navigation.navigate("expense/[id]", { expense })}
                                         {...(expense as any)}
                                         animatedStyle={{
                                             borderWidth: 0,
@@ -246,7 +246,7 @@ const DateHeader = ({
 
     const onPress = useCallback(() => {
         setCalendarDate(moment(date).toDate())
-        navigation.navigate("CreateExpense", { date: moment(date).format("YYYY-MM-DD") })
+        navigation.navigate("create-expense", { date: moment(date).format("YYYY-MM-DD") })
     }, [date])
 
     return (

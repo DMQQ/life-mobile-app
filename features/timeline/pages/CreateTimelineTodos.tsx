@@ -5,11 +5,12 @@ import { AntDesign } from "@expo/vector-icons"
 import Color from "color"
 import { useRef, useState, useEffect } from "react"
 import { ActivityIndicator, Keyboard, Pressable, StyleSheet, TextInput, View } from "react-native"
+import { router, useLocalSearchParams } from "expo-router"
 import { FlatList } from "react-native-gesture-handler"
 import Feedback from "react-native-haptic-feedback"
 import { SafeAreaView } from "react-native-safe-area-context"
 import useTodos, { TodoInput as ITodoInput } from "../hooks/general/useTodos"
-import type { TimelineScreenProps } from "../types"
+
 import GlassView from "@/components/ui/GlassView"
 
 const styles = StyleSheet.create({
@@ -83,24 +84,25 @@ const styles = StyleSheet.create({
     },
 })
 
-export default function CreateTimelineTodos({ route, navigation }: TimelineScreenProps<"CreateTimelineTodos">) {
-    const mode = route.params?.mode || "create"
+export default function CreateTimelineTodos() {
+    const { mode: modeParam, timelineId, todos: initialTodos, ...restParams } = useLocalSearchParams<any>()
+    const mode = modeParam || "create"
 
     const [keyboardHeight, setKeyboardHeight] = useState(0)
     const inputRef = useRef<TextInput>(null)
     const textRef = useRef<string>("")
     const [inputText, setInputText] = useState("")
 
-    const { dispatch, loading, onSaveTodos, state } = useTodos(route.params?.timelineId || "", () => {
+    const { dispatch, loading, onSaveTodos, state } = useTodos(timelineId || "", () => {
         Keyboard.dismiss()
-        navigation.goBack()
+        router.back()
     })
 
     useEffect(() => {
-        if (route.params?.todos?.length > 0) {
-            dispatch({ type: "set", payload: route.params.todos })
+        if (initialTodos?.length > 0) {
+            dispatch({ type: "set", payload: initialTodos })
         }
-    }, [route.params?.todos])
+    }, [initialTodos])
 
     useEffect(() => {
         const show = Keyboard.addListener("keyboardWillShow", (e) => setKeyboardHeight(e.endCoordinates.height))
@@ -133,7 +135,7 @@ export default function CreateTimelineTodos({ route, navigation }: TimelineScree
         if (mode === "push-back") {
             const mappedTodos = state.todos.map((t) => t.value)
             if (extraText.length > 0) mappedTodos.unshift(extraText)
-            ;(navigation as any).navigate("TimelineCreate", { ...route.params, todos: mappedTodos })
+            router.push({ pathname: "/(tabs)/timeline/create", params: { ...restParams, todos: mappedTodos }})
             return
         }
 
@@ -149,7 +151,7 @@ export default function CreateTimelineTodos({ route, navigation }: TimelineScree
             {/* Header */}
             <View style={styles.header}>
                 <GlassView style={{ borderRadius: 100, padding: 10 }}>
-                    <Pressable onPress={() => navigation.goBack()} hitSlop={12}>
+                    <Pressable onPress={() => router.back()} hitSlop={12}>
                         <Text style={styles.headerCancel}>Cancel</Text>
                     </Pressable>
                 </GlassView>

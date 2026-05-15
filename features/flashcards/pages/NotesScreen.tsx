@@ -5,10 +5,11 @@ import { RefreshControl, StyleSheet, View } from "react-native"
 
 import { Skeleton } from "@/components"
 import DeleteFlashCardGroupDialog from "@/components/ui/Dialog/Delete/DeleteGroupDialog"
-import { ScreenProps } from "@/types"
+
 import { useScreenSearch } from "@/utils/hooks/useScreenSearch"
 import { FlashList } from "@shopify/flash-list"
 import { useMemo, useState } from "react"
+import { router } from "expo-router"
 import Animated, { FadeOut, useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated"
 import useTrackScroll from "@/utils/hooks/ui/useTrackScroll"
 import FlashCardGroup from "../components/FlashCardGroup"
@@ -54,7 +55,7 @@ const AnimatedLoader = () => {
     )
 }
 
-export default function NotesScreen({ navigation }: ScreenProps<any>) {
+export default function NotesScreen() {
     const { groups, loading, refetch } = useGroups()
 
     const [scrollY, onAnimatedScrollHandler] = useTrackScroll({ screenName: "NotesScreens" })
@@ -89,7 +90,7 @@ export default function NotesScreen({ navigation }: ScreenProps<any>) {
                     buttons={[
                         {
                             icon: <AntDesign name="plus" size={20} color={Colors.foreground} />,
-                            onPress: () => (navigation.navigate as any)("CreateFlashCardGroup"),
+                            onPress: () => router.push({ pathname: "/(tabs)/flashcards/create" }),
                         },
                     ]}
                     animatedTitle="FlashCards"

@@ -1,5 +1,5 @@
 import { useCreateExpenseContext } from "@/features/wallet/context/CreateExpenseContext"
-import { useNavigation } from "@react-navigation/native"
+import { useNavigation } from "expo-router"
 import NumberPad from "@/components/ui/NumberPad"
 
 export default function ExpenseNumberPad() {
