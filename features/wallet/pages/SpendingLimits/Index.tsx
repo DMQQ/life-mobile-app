@@ -316,7 +316,7 @@ export default function SpendingLimitsIndex() {
                                                     styles.expenseRow,
                                                     pressed && { opacity: 0.6 },
                                                 ]}
-                                                onPress={() => router.push({ pathname: "/(tabs)/wallet/expense/[id]", params: { id: expense.id, expense } })}
+                                                onPress={() => router.push({ pathname: "/(tabs)/wallet/expense/[id]", params: { id: expense.id, expense: JSON.stringify(expense) as any } })}
                                             >
                                                 <View style={styles.expenseLeft}>
                                                     <Text variant="body" style={styles.expenseDesc} numberOfLines={1}>

@@ -6,8 +6,7 @@ import { memo, useMemo } from "react"
 import { StyleProp, StyleSheet, Text, View, ViewStyle } from "react-native"
 import { AnimatedStyle } from "react-native-reanimated"
 import { CategoryIcon, Icons } from "../Expense/ExpenseIcon"
-import ContextMenu from "react-native-context-menu-view"
-import { router } from "expo-router"
+import { router, Link } from "expo-router"
 import useDeleteActivity from "../../hooks/useDeleteActivity"
 import dayjs from "dayjs"
 
@@ -177,83 +176,119 @@ function WalletItem(
         return null
     }
 
-    return (
-        <ContextMenu
-            actions={items}
-            onPress={(e) => {
-                const action = items[e.nativeEvent.index] as (typeof items)[number]
-                if (action && action.onPress) {
-                    action.onPress()
-                }
-            }}
-            previewBackgroundColor="transparent"
-        >
-            <Card
-                style={[styles.container, item.animatedStyle as any, item.containerStyle]}
-                ripple
-                disabled={isBalanceEdit}
-                onPress={() => item.handlePress()}
-            >
-                <View style={styles.innerContainer}>
-                    <CategoryIcon
-                        style={{ padding: 0 }}
-                        type={item.type as "income" | "expense" | "refunded"}
-                        category={(isBalanceEdit ? "edit" : item.category) as keyof typeof Icons}
-                    />
+    const cardContent = (
+        <View style={styles.innerContainer}>
+            <CategoryIcon
+                style={{ padding: 0 }}
+                type={item.type as "income" | "expense" | "refunded"}
+                category={(isBalanceEdit ? "edit" : item.category) as keyof typeof Icons}
+            />
 
-                    <View style={styles.descContainer}>
-                        <Text style={styles.title} numberOfLines={1}>
-                            {item.description}
-                        </Text>
+            <View style={styles.descContainer}>
+                <Text style={styles.title} numberOfLines={1}>
+                    {item.description}
+                </Text>
 
-                        <Text style={styles.date}>
-                            {dateFormatter(item.date)}
-                            {item.category && (item.subscription as any)?.isActive && " • "}
-                            {(item.subscription as any)?.isActive ? <Text>Subscription</Text> : ""}
-                            {(item.files as any) && (item.files as any).length > 0 && (
-                                <>
-                                    {" • "}
-
-                                    <Text>
-                                        {(item.files as any).length} {(item.files as any).length > 1 ? "files" : "file"}
-                                    </Text>
-                                </>
-                            )}
-                            {(item.subexpenses as any) && (item.subexpenses as any)?.length > 0 && (
-                                <>
-                                    {" • "}
-                                    <Text>{(item.subexpenses as any)?.length} items</Text>
-                                </>
-                            )}
-                        </Text>
-                    </View>
-                    {!isBalanceEdit && (
-                        <View style={[styles.price_container, { flexDirection: "row" }]}>
-                            <Text
-                                style={[
-                                    styles.price,
-                                    {
-                                        marginRight: 10,
-                                        width: "100%",
-                                        textAlign: "right",
-                                        color:
-                                            item.type === "refunded"
-                                                ? Colors.secondary_light_2
-                                                : item.type === "expense"
-                                                  ? "#F07070"
-                                                  : "#66E875",
-                                        ...(item.type === "refunded" ? { textDecorationLine: "line-through" } : {}),
-                                    },
-                                ]}
-                            >
-                                {price}
-                                <Text style={{ fontSize: 12 }}>zł</Text>
+                <Text style={styles.date}>
+                    {dateFormatter(item.date)}
+                    {item.category && (item.subscription as any)?.isActive && " • "}
+                    {(item.subscription as any)?.isActive ? <Text>Subscription</Text> : ""}
+                    {(item.files as any) && (item.files as any).length > 0 && (
+                        <>
+                            {" • "}
+                            <Text>
+                                {(item.files as any).length} {(item.files as any).length > 1 ? "files" : "file"}
                             </Text>
-                        </View>
+                        </>
                     )}
+                    {(item.subexpenses as any) && (item.subexpenses as any)?.length > 0 && (
+                        <>
+                            {" • "}
+                            <Text>{(item.subexpenses as any)?.length} items</Text>
+                        </>
+                    )}
+                </Text>
+            </View>
+
+            {!isBalanceEdit && (
+                <View style={[styles.price_container, { flexDirection: "row" }]}>
+                    <Text
+                        style={[
+                            styles.price,
+                            {
+                                marginRight: 10,
+                                width: "100%",
+                                textAlign: "right",
+                                color:
+                                    item.type === "refunded"
+                                        ? Colors.secondary_light_2
+                                        : item.type === "expense"
+                                          ? "#F07070"
+                                          : "#66E875",
+                                ...(item.type === "refunded" ? { textDecorationLine: "line-through" } : {}),
+                            },
+                        ]}
+                    >
+                        {price}
+                        <Text style={{ fontSize: 12 }}>zł</Text>
+                    </Text>
                 </View>
+            )}
+        </View>
+    )
+
+    if (isBalanceEdit) {
+        return (
+            <Card style={[styles.container, item.animatedStyle as any, item.containerStyle]} disabled>
+                {cardContent}
             </Card>
-        </ContextMenu>
+        )
+    }
+
+    return (
+        <Link href={{ pathname: "/(tabs)/wallet/expense/[id]", params: { id: item.id, expense: JSON.stringify(item) as any } }}>
+            <Link.Preview />
+            <Link.Menu>
+                <Link.MenuAction
+                    icon="pencil"
+                    onPress={() =>
+                        router.push({
+                            pathname: "/(tabs)/wallet/create-expense",
+                            params: { ...(item as any), isEditing: "true" },
+                        })
+                    }
+                >
+                    Edit
+                </Link.MenuAction>
+                <Link.MenuAction
+                    icon="doc.on.doc"
+                    onPress={() =>
+                        router.push({
+                            pathname: "/(tabs)/wallet/create-expense",
+                            params: { ...(item as any), isDuplicating: "true" },
+                        })
+                    }
+                >
+                    Duplicate
+                </Link.MenuAction>
+                <Link.MenuAction
+                    icon="trash"
+                    destructive
+                    onPress={() => deleteActivity({ variables: { id: item.id } })}
+                >
+                    Delete
+                </Link.MenuAction>
+            </Link.Menu>
+            <Link.Trigger>
+                <Card
+                    style={StyleSheet.flatten([styles.container, item.animatedStyle as any, item.containerStyle])}
+                    ripple
+                    onPress={() => item.handlePress()}
+                >
+                    {cardContent}
+                </Card>
+            </Link.Trigger>
+        </Link>
     )
 }
 

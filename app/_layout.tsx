@@ -23,6 +23,7 @@ import { AiChatProvider } from "@/contexts/AiChatContext"
 import GlobalAiChat from "@/features/ai/GlobalAiChat"
 import { KeyboardProvider } from "react-native-keyboard-controller"
 import { Stack } from "expo-router"
+import { DarkTheme, ThemeProvider } from "@react-navigation/native"
 
 Sentry.init({
     enableNative: true,
@@ -32,6 +33,11 @@ Sentry.init({
 })
 
 setLogVerbosity("error")
+
+const AppTheme = {
+    ...DarkTheme,
+    colors: { ...DarkTheme.colors, background: Colors.primary, card: Colors.primary },
+}
 
 SystemUI.setBackgroundColorAsync(Colors.primary)
 
@@ -91,14 +97,20 @@ export default Sentry.wrap(function RootLayout() {
                                             <Provider store={store}>
                                                 <AiChatProvider>
                                                     <StatusBar style="light" />
-                                                    <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: Colors.primary } }}>
+                                                    <ThemeProvider value={AppTheme}>
+                                                    <Stack
+                                                        screenOptions={{
+                                                            headerShown: false,
+                                                            contentStyle: { backgroundColor: Colors.primary },
+                                                        }}
+                                                    >
                                                         <Stack.Screen name="index" />
                                                         <Stack.Screen name="(tabs)" />
                                                         <Stack.Screen name="(auth)" />
-                                                        <Stack.Screen name="workout" />
-                                                        <Stack.Screen name="flashcards" />
+                                                        {/*<Stack.Screen name="workout" />
+                                                        <Stack.Screen name="flashcards" />*/}
                                                     </Stack>
-                                                    <GlobalAiChat />
+                                                    </ThemeProvider>
                                                 </AiChatProvider>
                                             </Provider>
                                         </ApolloProvider>

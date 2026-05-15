@@ -95,12 +95,15 @@ export const GET_EXPENSE = gql`
 `
 
 export default function Expense() {
-    const { expense: expenseParam, id } = useLocalSearchParams<{ expense?: any; id?: string }>()
-    const expenseId = id || expenseParam?.id
+    const { expense: expenseParam, id } = useLocalSearchParams<{ expense?: string; id?: string }>()
+
+    const parsedExpense =
+        typeof expenseParam === "string" ? (() => { try { return JSON.parse(expenseParam) } catch { return null } })() : expenseParam
+    const expenseId = (Array.isArray(id) ? id[0] : id) || parsedExpense?.id
 
     const { data } = useQuery(GET_EXPENSE, { variables: { id: expenseId } })
 
-    const [selected, setSelected] = useState(expenseParam)
+    const [selected, setSelected] = useState<any>(parsedExpense)
 
     useEffect(() => {
         if (data?.expense) setSelected(data.expense)
@@ -240,7 +243,10 @@ export default function Expense() {
                     },
                     {
                         icon: <Feather name="edit-2" size={20} color={Colors.foreground} />,
-                        onPress: () => router.push({ pathname: "/(tabs)/wallet/create-expense", params: { ...selected, isEditing: true } }),
+                        onPress: () => {
+                            const { subscription, location, files, subexpenses, __typename, ...flatFields } = selected || {}
+                            router.push({ pathname: "/(tabs)/wallet/create-expense", params: { ...flatFields, isEditing: true } })
+                        },
                         style: { marginLeft: 5 },
                     },
                 ]}

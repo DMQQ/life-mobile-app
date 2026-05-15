@@ -247,7 +247,7 @@ export default function SubscriptionCalendar({ subscriptions = [], expenses = []
                                         handlePress={() => {
                                             router.push({
                                                 pathname: "/(tabs)/wallet/expense/[id]",
-                                                params: { id: e.id, expense: e },
+                                                params: { id: e.id, expense: JSON.stringify(e) as any },
                                             })
                                         }}
                                     />

@@ -22,7 +22,7 @@ import Layout from "../../constants/Layout"
 import GlassView from "../ui/GlassView"
 import { useAppSelector, useAppDispatch } from "../../utils/redux"
 import { setSearchActive, setSearchValue, clearSearch } from "../../utils/redux/search/search"
-import { useNavigation } from "expo-router"
+import { router, useNavigation } from "expo-router"
 import { LinearGradient } from "expo-linear-gradient"
 import useKeyboard from "@/utils/hooks/useKeyboard"
 import ContextMenuView, { type ContextMenuAction } from "react-native-context-menu-view"
@@ -201,6 +201,7 @@ const gradient = [
 ]
 
 const Btn = ({ buttonWidth, iconScale, activeRoute, ...props }: ButtonProps) => {
+    const navigation = useNavigation<any>()
     const isActive = activeRoute === props.route
     const pressScale = useSharedValue(1)
 
@@ -213,15 +214,12 @@ const Btn = ({ buttonWidth, iconScale, activeRoute, ...props }: ButtonProps) => 
 
     const handlePressIn = (route: string) => {
         pressScale.value = withTiming(0.85, { duration: 100 })
-
         navigation.navigate(route)
     }
 
     const handlePressOut = () => {
         pressScale.value = withTiming(1, { duration: 100 })
     }
-
-    const navigation = useNavigation<any>()
 
     return (
         <Animated.View entering={FadeIn.delay(props.index * 50)}>
@@ -273,22 +271,13 @@ export default function BottomTab({ navigation, state }: BottomTabBarProps) {
     const handleLongPress = (route: string) => {
         switch (route) {
             case "wallet":
-                navigation.navigate({
-                    name: "wallet",
-                    params: {
-                        screen: "create-expense",
-                        params: { expenseId: null },
-                    },
-                } as any)
+                router.push("/(tabs)/wallet/create-expense")
                 break
             case "timeline":
-                navigation.navigate({
-                    name: "timeline",
-                    params: {
-                        screen: "create",
-                        params: { selectedDate: moment(new Date()).format("YYYY-MM-DD"), mode: "create" },
-                    },
-                } as any)
+                router.push({
+                    pathname: "/(tabs)/timeline/create",
+                    params: { selectedDate: moment(new Date()).format("YYYY-MM-DD"), mode: "create" },
+                })
                 break
             default:
                 break

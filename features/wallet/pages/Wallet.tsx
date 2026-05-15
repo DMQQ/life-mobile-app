@@ -46,7 +46,7 @@ export default function WalletScreen() {
             router.setParams({ expenseId: undefined })
             router.push({
                 pathname: "/(tabs)/wallet/expense/[id]",
-                params: { id: expenseId, expense: found },
+                params: { id: expenseId, expense: JSON.stringify(found) as any },
             })
         }
     }, [expenseId])
@@ -282,7 +282,7 @@ export default function WalletScreen() {
                             <WalletItem
                                 key={expense.id}
                                 index={index}
-                                handlePress={() => router.push({ pathname: "/(tabs)/wallet/expense/[id]", params: { id: expense.id, expense } })}
+                                handlePress={() => router.push({ pathname: "/(tabs)/wallet/expense/[id]", params: { id: expense.id, expense: JSON.stringify(expense) as any } })}
                                 {...(expense as any)}
                                 animatedStyle={{
                                     borderWidth: 0,

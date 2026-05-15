@@ -62,9 +62,10 @@ const SUBSCRIPTION_QUERY = gql`
 
 export default function SubscriptionDetails() {
     const { subscriptionId, id } = useLocalSearchParams<{ subscriptionId?: string; id?: string }>()
+    const subscriptionIdValue = (Array.isArray(id) ? id[0] : id) ?? subscriptionId
 
     const { data, loading, error, refetch } = useQuery(SUBSCRIPTION_QUERY, {
-        variables: { id: subscriptionId },
+        variables: { id: subscriptionIdValue },
     })
 
     const [subscription, setSubscription] = useState<Subscription | null>(null)
@@ -162,7 +163,7 @@ export default function SubscriptionDetails() {
     }
 
     const handleExpensePress = (expense: Expense) => {
-        router.push({ pathname: "/(tabs)/wallet/expense/[id]", params: { id: expense.id, expense } })
+        router.push({ pathname: "/(tabs)/wallet/expense/[id]", params: { id: expense.id, expense: JSON.stringify(expense) as any } })
     }
 
     const scrollY = useSharedValue(0)
@@ -207,7 +208,7 @@ export default function SubscriptionDetails() {
                 buttons={[
                     {
                         icon: <Feather name="edit-2" size={20} color={Colors.foreground} />,
-                        onPress: () => router.push({ pathname: "/(tabs)/wallet/subscription/[id]/edit", params: { id: subscription.id, subscription } }),
+                        onPress: () => router.push({ pathname: "/(tabs)/wallet/subscription/[id]/edit", params: { id: subscription.id } }),
                     },
                 ]}
                 initialTitleFontSize={subscription?.description?.length > 25 ? 40 : 50}

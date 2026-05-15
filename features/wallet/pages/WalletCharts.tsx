@@ -281,7 +281,7 @@ function WalletCharts({ navigation }: any) {
                 expenses={selectedCategoryData}
                 categoryName={selected}
                 categoryColor={selectedColor}
-                onExpensePress={(expense) => router.push({ pathname: "/(tabs)/wallet/expense/[id]", params: { id: expense.id, expense } })}
+                onExpensePress={(expense) => router.push({ pathname: "/(tabs)/wallet/expense/[id]", params: { id: expense.id, expense: JSON.stringify(expense) as any } })}
             />
         </View>
     )
