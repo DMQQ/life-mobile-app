@@ -1,13 +1,10 @@
-import IconButton from "@/components/ui/IconButton/IconButton"
-import SegmentedButtons from "@/components/ui/SegmentedButtons"
 import Text from "@/components/ui/Text/Text"
 import ValidatedInput from "@/components/ui/ValidatedInput"
 import Colors from "@/constants/Colors"
-import useKeyboard from "@/utils/hooks/useKeyboard"
-import { AntDesign, Ionicons } from "@expo/vector-icons"
+import dayjs from "dayjs"
 import moment from "moment"
-import { useRef, useState } from "react"
-import { Platform, Pressable, ScrollView, StyleSheet, View } from "react-native"
+import { useRef } from "react"
+import { Platform, ScrollView, StyleSheet, View } from "react-native"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import CreateRepeatableTimeline from "../components/CreateTimeline/CreateRepeatableTimeline"
 import EditScopeSheet from "../components/EditScopeSheet"
@@ -15,37 +12,25 @@ import TimelineCreateHeader from "../components/CreateTimeline/TimelineCreateHea
 import useCreateTimeline from "../hooks/general/useCreateTimeline"
 import type { TimelineScreenProps } from "../types"
 import { Todo } from "./CreateTimelineTodos"
-import GlassView from "@/components/ui/GlassView"
 import TimePicker from "@/components/TimePicker"
 import GroupSelector from "@/components/ui/GroupSelector"
+import Section from "@/components/ui/Section"
+import DatePicker from "@/components/DatePicker"
+import ChipButton from "@/components/ui/Button/ChipButton"
 
 const styles = StyleSheet.create({
     timeContainer: {
         flexDirection: "row",
         width: "100%",
-        borderRadius: 15,
-        padding: 7.5,
+        paddingHorizontal: 15,
+        paddingVertical: 10,
         alignItems: "center",
         justifyContent: "space-between",
-    },
-    timeText: {
-        color: Colors.secondary,
-        textAlign: "center",
-    },
-    button: {
-        borderRadius: 100,
-        gap: 10,
-        padding: 15,
-        alignItems: "center",
-        justifyContent: "center",
-        position: "relative",
     },
 })
 
 export default function CreateTimeLineEventModal({ route, navigation }: TimelineScreenProps<"TimelineCreate">) {
-    const isKeyboardOpen = useKeyboard()
-
-    const { f, isLoading, isEditing, sheetRef, scopeSheetRef, onScopeSelected, handleChangeDate } = useCreateTimeline({
+    const { f, isLoading, isEditing, scopeSheetRef, onScopeSelected, handleChangeDate } = useCreateTimeline({
         route,
         navigation,
     })
@@ -73,39 +58,63 @@ export default function CreateTimeLineEventModal({ route, navigation }: Timeline
 
                 <ScrollView
                     style={{ flex: 1 }}
-                    contentContainerStyle={{ padding: 15, paddingTop: 80 }}
+                    contentContainerStyle={{ padding: 15, paddingTop: 60, paddingBottom: 40 }}
                     keyboardDismissMode={"on-drag"}
                 >
-                    <ValidatedInput
-                        placeholder="Like  'take out the trash' etc.."
-                        name="title"
-                        label="Title*"
-                        showLabel
-                        formik={f}
-                        helperStyle={{ marginLeft: 2.5 }}
-                    />
-                    <ValidatedInput
-                        showLabel
-                        label="Content"
-                        numberOfLines={
-                            isEditing ? f.values.desc.split("\n").length + 10 : f.values.desc.split("\n").length + 3
-                        }
-                        style={{
-                            ...(Platform.OS === "ios" && {
-                                minHeight: (numberOfLines <= 5 ? 5 : numberOfLines) * 30,
-                            }),
-                        }}
-                        multiline
-                        placeholder="What you wanted to do"
-                        name="desc"
-                        formik={f}
-                        scrollEnabled
-                        textAlignVertical="top"
-                    />
+                    <Section title="Content" cardStyle={{ padding: 5 }}>
+                        <ValidatedInput
+                            placeholder="Title"
+                            name="title"
+                            label="Title*"
+                            showLabel={false}
+                            formik={f}
+                            helperStyle={{ marginLeft: 2.5 }}
+                            flat
+                        />
+                        <View style={{ borderWidth: 0.5, borderColor: Colors.borderColor }} />
+                        <ValidatedInput
+                            flat
+                            showLabel={false}
+                            label="Content"
+                            numberOfLines={
+                                isEditing ? f.values.desc.split("\n").length + 10 : f.values.desc.split("\n").length + 3
+                            }
+                            style={{
+                                ...(Platform.OS === "ios" && {
+                                    minHeight: (numberOfLines <= 5 ? 5 : numberOfLines) * 30,
+                                }),
+                            }}
+                            multiline
+                            placeholder="Description"
+                            name="desc"
+                            formik={f}
+                            scrollEnabled
+                            textAlignVertical="top"
+                        />
+                    </Section>
 
-                    <ValidatedInput.Label error={false} text="Time range*" />
-                    <View style={styles.timeContainer}>
-                        <View>
+                    <Section title="Time">
+                        <View style={styles.timeContainer}>
+                            <Text variant="subtitle">Date</Text>
+                            <DatePicker
+                                mode="single"
+                                dates={{
+                                    start: dayjs(route.params.selectedDate).toDate(),
+                                    end: dayjs(route.params.selectedDate).toDate(),
+                                }}
+                                setDates={(d) => {
+                                    handleChangeDate(d.start)
+                                    navigation.setParams({
+                                        selectedDate: moment(d.start).format("YYYY-MM-DD"),
+                                    })
+                                }}
+                            />
+                        </View>
+
+                        <View style={{ borderWidth: 0.5, borderColor: Colors.borderColor }} />
+
+                        <View style={styles.timeContainer}>
+                            <Text variant="subtitle">Starts</Text>
                             <TimePicker
                                 label=""
                                 value={moment(f.values.begin, "HH:mm").format("HH:mm")}
@@ -117,10 +126,11 @@ export default function CreateTimeLineEventModal({ route, navigation }: Timeline
                                 }}
                             />
                         </View>
-                        <Text variant="body" style={{ color: "gray", padding: 5 }}>
-                            to
-                        </Text>
-                        <View>
+
+                        <View style={{ borderWidth: 0.5, borderColor: Colors.borderColor }} />
+
+                        <View style={styles.timeContainer}>
+                            <Text variant="subtitle">Ends</Text>
                             <TimePicker
                                 label=""
                                 value={moment(f.values.end, "HH:mm").format("HH:mm")}
@@ -136,12 +146,9 @@ export default function CreateTimeLineEventModal({ route, navigation }: Timeline
                                 }}
                             />
                         </View>
-                    </View>
+                    </Section>
 
-                    <View style={{ marginTop: 15 }}>
-                        <View style={{ flexDirection: "row", alignItems: "center", gap: 5, marginBottom: 6 }}>
-                            <ValidatedInput.Label error={false} text="Reminder" />
-                        </View>
+                    <Section title="Reminder" cardStyle={{ padding: 0 }}>
                         <GroupSelector
                             value={String(f.values.reminderBeforeMinutes || "")}
                             onChange={(value) => f.setFieldValue("reminderBeforeMinutes", value)}
@@ -153,14 +160,13 @@ export default function CreateTimeLineEventModal({ route, navigation }: Timeline
                                 { label: "1h", value: "60" },
                             ]}
                         />
-                    </View>
+                    </Section>
 
                     {!isEditing && (
-                        <View style={{ marginTop: 15 }}>
-                            <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                                <ValidatedInput.Label error={false} text={"Todos "} />
-
-                                <Pressable
+                        <Section
+                            title="Todos"
+                            headerRight={
+                                <ChipButton
                                     onPress={() => {
                                         ;(navigation as any).navigate("CreateTimelineTodos", {
                                             mode: "push-back",
@@ -169,87 +175,39 @@ export default function CreateTimeLineEventModal({ route, navigation }: Timeline
                                         })
                                     }}
                                 >
-                                    <Text
-                                        style={{
-                                            fontSize: 16,
-                                            fontWeight: "bold",
-                                            color: Colors.secondary,
-                                            padding: 5,
+                                    Add todos
+                                </ChipButton>
+                            }
+                            cardStyle={{ padding: 10 }}
+                        >
+                            {(route.params.todos?.length || 0) > 0 ? (
+                                route.params.todos?.map((todo, index) => (
+                                    <Todo
+                                        index={index}
+                                        value={todo}
+                                        key={index}
+                                        showRemove
+                                        onRemove={() => {
+                                            navigation.setParams({
+                                                ...route.params,
+                                                todos: route.params?.todos?.filter((_, i) => i !== index),
+                                            })
                                         }}
-                                    >
-                                        Create new todos
-                                    </Text>
-                                </Pressable>
-                            </View>
-                            <View style={{ marginTop: 2.5 }}>
-                                {(route.params.todos?.length || 0) > 0 ? (
-                                    route.params.todos?.map((todo, index) => (
-                                        <Todo
-                                            index={index}
-                                            value={todo}
-                                            key={index}
-                                            showRemove
-                                            onRemove={() => {
-                                                navigation.setParams({
-                                                    ...route.params,
-                                                    todos: route.params?.todos?.filter((_, i) => i !== index),
-                                                })
-                                            }}
-                                        />
-                                    ))
-                                ) : (
-                                    <View style={{ padding: 10 }}>
-                                        <Text style={{ color: "gray", fontStyle: "italic", fontSize: 15 }}>
-                                            No todos added yet.
-                                        </Text>
-                                    </View>
-                                )}
-                            </View>
-                        </View>
+                                    />
+                                ))
+                            ) : (
+                                <Text variant="caption" style={{ color: Colors.text_dark, fontStyle: "italic" }}>
+                                    No todos added yet.
+                                </Text>
+                            )}
+                        </Section>
                     )}
-                </ScrollView>
 
-                <SubmitButton
-                    f={f}
-                    openSheet={() => sheetRef.current?.expand()}
-                    isEditing={isEditing}
-                    isKeyboardOpen={isKeyboardOpen || false}
-                    isLoading={isLoading}
-                />
+                    {!isEditing && <CreateRepeatableTimeline formik={f} />}
+                </ScrollView>
             </View>
 
-            <CreateRepeatableTimeline formik={f} ref={sheetRef as any} />
             <EditScopeSheet ref={scopeSheetRef as any} onScopeSelected={onScopeSelected} />
         </>
     )
 }
-
-interface SubmitButtonProps {
-    isKeyboardOpen: boolean
-    isLoading: boolean
-    f: any
-    isEditing: boolean
-    openSheet: () => void
-}
-
-const SubmitButton = (props: SubmitButtonProps) => (
-    <View
-        style={{
-            position: "absolute",
-            bottom: 20,
-            left: 20,
-            right: 20,
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 10,
-            justifyContent: "space-between",
-        }}
-    >
-        <GlassView style={styles.button}>
-            <IconButton
-                onPress={props.openSheet}
-                icon={<AntDesign name="calendar" color={Colors.foreground} size={20} />}
-            />
-        </GlassView>
-    </View>
-)

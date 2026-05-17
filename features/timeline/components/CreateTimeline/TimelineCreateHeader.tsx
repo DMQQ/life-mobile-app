@@ -2,8 +2,6 @@ import { Header } from "@/components"
 import { Feather } from "@expo/vector-icons"
 import { useMemo } from "react"
 import Colors from "@/constants/Colors"
-import DatePicker from "@/components/DatePicker"
-import dayjs from "dayjs"
 
 interface TimelineCreateHeaderProps {
     selectedDate: string
@@ -27,8 +25,6 @@ export default function TimelineCreateHeader(props: TimelineCreateHeaderProps) {
         [props.submitDisabled, props.onSubmit],
     )
 
-    const date = props.selectedDate ? dayjs(props.selectedDate).toDate() : new Date()
-
     return (
         <Header
             shadow={false}
@@ -37,12 +33,6 @@ export default function TimelineCreateHeader(props: TimelineCreateHeaderProps) {
             isScreenModal
             initialHeight={80}
             buttons={buttons}
-        >
-            <DatePicker
-                mode="single"
-                dates={{ start: date, end: date }}
-                setDates={(d) => props.handleChangeDate(d.start)}
-            />
-        </Header>
+        />
     )
 }

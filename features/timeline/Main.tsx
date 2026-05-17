@@ -72,7 +72,6 @@ export default function TimelineScreens({ route, navigation }: RootStackScreenPr
             <Stack.Screen
                 options={{
                     headerTitle: "",
-                    headerTransparent: true,
                     presentation: "transparentModal",
                     animation: "fade",
                 }}

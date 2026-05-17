@@ -67,7 +67,7 @@ const DateComponent = (props: DateProps) => {
             onPress={() => props.onPress()}
             activeOpacity={0.85}
         >
-            <GlassView key={tintColor} tintColor={tintColor} style={styles.container}>
+            <GlassView key={tintColor} {...(tintColor && { tintColor })} style={styles.container}>
                 <Dots tasks={tasks} />
                 <Text
                     variant="title"

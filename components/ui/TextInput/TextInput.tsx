@@ -25,7 +25,7 @@ export interface InputProps extends TextInputProps {
      * Input value
      **/
     value: string
-    /** 
+    /**
      Input set text function
       **/
     setValue?: (text: string) => void
@@ -83,6 +83,8 @@ export interface InputProps extends TextInputProps {
     useBottomSheetInput?: boolean
 
     activeBorderColor?: string
+
+    flat?: boolean
 }
 
 export default function Input({
@@ -101,7 +103,7 @@ export default function Input({
     onBlur,
     activeBorderColor = Colors.secondary,
     useBottomSheetInput = false,
-
+    flat,
     ...rest
 }: InputProps) {
     const [isFocused, setIsFocused] = useState(false)
@@ -145,17 +147,21 @@ export default function Input({
             )}
             <View
                 style={[
+                    flat
+                        ? {}
+                        : {
+                              borderWidth: 2,
+                              borderColor: error
+                                  ? Colors.error
+                                  : isFocused
+                                    ? activeBorderColor
+                                    : Color(Colors.primary).lighten(0.5).hex(),
+                              backgroundColor: isFocused ? Colors.primary_lighter : Colors.primary_light,
+                          },
                     {
-                        backgroundColor: isFocused ? Colors.primary_lighter : Colors.primary_light,
                         borderRadius: 10,
                         flexDirection: "row",
                         width: (style as any)?.width || "100%", //(style as any)?.width ?? Layout.screen.width * 0.95,
-                        borderWidth: 2,
-                        borderColor: error
-                            ? Colors.error
-                            : isFocused
-                              ? activeBorderColor
-                              : Color(Colors.primary).lighten(0.5).hex(),
                         alignItems: "center",
                     },
                     applyContainerStyles(rest.containerStyle),

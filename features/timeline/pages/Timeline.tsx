@@ -18,7 +18,6 @@ import Animated, { withTiming } from "react-native-reanimated"
 import useTrackScroll from "@/utils/hooks/ui/useTrackScroll"
 import Background from "@/components/ui/Background"
 
-
 export default function Timeline({ navigation, route }: TimelineScreenProps<"Timeline">) {
     const timeline = useTimeline({ navigation, route })
     usePrefetchMonthRange(timeline.selected)
@@ -125,6 +124,7 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
                 shadow
             >
                 <DatePicker
+                    clear
                     mode="single"
                     placeholder={animatedTitle}
                     controlRef={datePickerRef}

@@ -92,7 +92,7 @@ export default function useWalletOverview() {
         return {
             date: {
                 from: now.subtract(7, "day").format("YYYY-MM-DD"),
-                to: now.format("YYYY-MM-DD"),
+                to: now.add(1, "day").format("YYYY-MM-DD"),
             },
         }
     }, [])

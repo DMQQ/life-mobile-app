@@ -5,20 +5,11 @@ import {
     VStack,
     HStack,
     RNHostView,
-    Text as SwiftText,
     Button as SwiftButton,
     Spacer,
     ScrollView as SwiftScrollView,
 } from "@expo/ui/swift-ui"
-import {
-    datePickerStyle,
-    frame,
-    padding,
-    foregroundStyle,
-    font,
-    bold,
-    scrollTargetBehavior,
-} from "@expo/ui/swift-ui/modifiers"
+import { datePickerStyle, frame, padding, bold, scrollTargetBehavior } from "@expo/ui/swift-ui/modifiers"
 import Colors from "@/constants/Colors"
 import moment from "moment"
 import { ReactElement, useState } from "react"
@@ -42,6 +33,8 @@ interface DatePickerProps {
     buttonComponent?: (prop: { start: Date; end: Date; onPress: () => void }) => ReactElement
     iconButton?: boolean
     controlRef?: React.MutableRefObject<DatePickerRef | null>
+
+    clear?: boolean
 }
 
 export default function DatePicker({
@@ -52,6 +45,7 @@ export default function DatePicker({
     buttonComponent,
     iconButton,
     controlRef,
+    clear = false,
 }: DatePickerProps) {
     const [show, setShow] = useState(false)
     const [pendingStart, setPendingStart] = useState<Date>(dates.start)
@@ -73,6 +67,8 @@ export default function DatePicker({
 
     const buttonWidth = Math.max(Math.ceil(title.length * 11) + 50, 100)
 
+    const Wrapper = clear ? View : GlassView
+
     const triggerContent = iconButton ? (
         <RNHostView matchContents>
             <Pressable
@@ -88,7 +84,7 @@ export default function DatePicker({
         </RNHostView>
     ) : (
         <RNHostView matchContents>
-            <GlassView style={{ height: 50, width: buttonWidth, borderRadius: 100 }}>
+            <Wrapper style={{ height: 50, width: buttonWidth, borderRadius: 100 }}>
                 <Pressable
                     onPress={() => setShow((p) => !p)}
                     style={{
@@ -103,7 +99,7 @@ export default function DatePicker({
                     <Text style={{ color: Colors.foreground, fontSize: 17, fontWeight: "600" }}>{title}</Text>
                     <AntDesign name="down" size={10} color={Colors.foreground} />
                 </Pressable>
-            </GlassView>
+            </Wrapper>
         </RNHostView>
     )
 

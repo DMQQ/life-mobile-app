@@ -67,7 +67,13 @@ export default function Navigation() {
                 colors: {
                     ...DarkTheme.colors,
                     background: Colors.primary,
+                    primary: Colors.secondary,
+                    card: Colors.primary_lighter,
+                    text: Colors.text_light,
+                    border: Colors.borderColor,
+                    notification: Colors.primary_dark,
                 },
+                dark: true,
             }}
         >
             <Tab.Navigator

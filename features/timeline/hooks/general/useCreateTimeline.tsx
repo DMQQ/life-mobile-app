@@ -22,7 +22,6 @@ export default function useCreateTimeline({ route, navigation }: TimelineScreenP
         selectedDate: route.params.selectedDate,
     })
 
-    const sheetRef = useRef<BottomSheetType>(null)
     const scopeSheetRef = useRef<BottomSheetType>(null)
 
     const client = useApolloClient()
@@ -117,7 +116,6 @@ export default function useCreateTimeline({ route, navigation }: TimelineScreenP
         initialEditFormValues,
         initialValues,
         handleSubmit,
-        sheetRef,
         scopeSheetRef,
         onScopeSelected,
         isRepeat,

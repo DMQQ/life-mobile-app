@@ -42,6 +42,7 @@ interface DatePickerProps {
 
     buttonComponent?: (prop: { start: Date; end: Date; onPress?: () => void }) => ReactElement
     controlRef?: React.MutableRefObject<DatePickerRef | null>
+    clear?: boolean
 }
 
 export default function DatePicker({
