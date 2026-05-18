@@ -1,7 +1,8 @@
-import { Header } from "@/components"
+import { ModalHeader } from "@/components"
 import { Feather } from "@expo/vector-icons"
 import { useMemo } from "react"
 import Colors from "@/constants/Colors"
+import { useNavigation } from "@react-navigation/native"
 
 interface TimelineCreateHeaderProps {
     selectedDate: string
@@ -11,28 +12,7 @@ interface TimelineCreateHeaderProps {
 }
 
 export default function TimelineCreateHeader(props: TimelineCreateHeaderProps) {
-    const buttons = useMemo(
-        () => [
-            {
-                position: "right" as const,
-                standalone: true,
-                icon: <Feather name="check" size={20} color="#fff" />,
-                onPress: props.onSubmit,
-                disabled: props.submitDisabled,
-                tintColor: Colors.secondary + (props.submitDisabled ? "80" : ""),
-            },
-        ],
-        [props.submitDisabled, props.onSubmit],
-    )
+    const navigation = useNavigation()
 
-    return (
-        <Header
-            shadow={false}
-            backIcon={<Feather name="x" size={20} color="#fff" />}
-            goBack
-            isScreenModal
-            initialHeight={80}
-            buttons={buttons}
-        />
-    )
+    return <ModalHeader onClose={navigation.goBack} onSave={props.onSubmit} saveDisabled={props.submitDisabled} />
 }

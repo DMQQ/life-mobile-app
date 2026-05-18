@@ -102,7 +102,7 @@ export default function Root({ navigation }: HomeScreenProps<"Root">) {
                 contentContainerStyle={{
                     paddingHorizontal: 15,
                     paddingBottom: 120,
-                    paddingTop: 300,
+                    paddingTop: 170,
                     gap: 10,
                 }}
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} />}

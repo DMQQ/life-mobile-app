@@ -4,7 +4,7 @@ import throttle from "@/utils/functions/throttle"
 import { AntDesign } from "@expo/vector-icons"
 import { useNavigation } from "@react-navigation/native"
 import Color from "color"
-import { memo, ReactNode, useMemo } from "react"
+import { memo, ReactNode, useLayoutEffect, useMemo } from "react"
 import { StyleProp, StyleSheet, TextStyle, TouchableOpacity, View, ViewStyle } from "react-native"
 import Haptic from "react-native-haptic-feedback"
 import Animated, { Extrapolation, interpolate, SharedValue, useAnimatedStyle } from "react-native-reanimated"
@@ -118,33 +118,54 @@ function Header({ shadow = true, ...props }: HeaderProps) {
         return props.renderAnimatedItem?.({ scrollY: props.scrollY })
     }, [props.renderAnimatedItem])
 
-    const standaloneButtons = useMemo(() => {
-        return (props.buttons || []).filter(Boolean).reduce(
-            (acc, button) => {
-                if (button!.standalone) {
-                    if (button!.position === "left") {
-                        acc.left.push(button!)
-                    } else if (button!.position === "right") {
-                        acc.right.push(button!)
-                    } else {
-                        acc.left.push(button!)
-                    }
-                }
-
-                return acc
+    useLayoutEffect(() => {
+        const buttons = (props.buttons ?? []).filter(Boolean)
+        navigation.setOptions({
+            headerShown: true,
+            headerShadowVisible: true,
+            headerTransparent: true,
+            headerStyle: {
+                backgroundColor: "transparent",
             },
-            {
-                left: [] as HeaderItem[],
-                right: [] as HeaderItem[],
-            },
-        )
-    }, [props.buttons])
+            title: props.animatedTitle === undefined && props.title !== undefined ? props.title : "",
+            headerBackVisible: (!!props.goBack && !props.children) || props.backIcon === undefined,
+            headerRight:
+                buttons.length > 0
+                    ? () => (
+                          <View
+                              style={{ gap: 10, flexDirection: "row", paddingHorizontal: buttons.length > 1 ? 5 : 0 }}
+                          >
+                              {buttons.map((button, index) => (
+                                  <HeaderIconButton button={button!} index={index} key={index} />
+                              ))}
+                          </View>
+                      )
+                    : undefined,
 
-    const regularButtons = useMemo(() => {
-        {
-            return (props.buttons || []).filter(Boolean).filter((button) => !button!.standalone)
-        }
-    }, [props.buttons])
+            headerLeft: () =>
+                (!!props.goBack && props.backIcon !== undefined) || props.children ? (
+                    <View style={{ flexDirection: "row" }}>
+                        {props.goBack && (
+                            <GlassView style={styles.iconContainer}>
+                                <IconButton
+                                    onPress={throttle(() => {
+                                        Haptic.trigger("impactLight")
+                                        navigation.canGoBack() && navigation.goBack()
+                                    }, 250)}
+                                    icon={
+                                        props.backIcon || (
+                                            <AntDesign name="arrow-left" size={20} color={Colors.foreground} />
+                                        )
+                                    }
+                                />
+                            </GlassView>
+                        )}
+
+                        {props.children}
+                    </View>
+                ) : undefined,
+        })
+    }, [props.buttons, props.children, props.goBack, props.title, props.animatedTitle, props.backIcon, navigation])
 
     return (
         <View style={[styles.blurContainer]}>
@@ -181,60 +202,13 @@ function Header({ shadow = true, ...props }: HeaderProps) {
                         props.containerStyle,
                     ]}
                 >
-                    {props.goBack && (
-                        <GlassView style={styles.iconContainer}>
-                            <IconButton
-                                onPress={throttle(() => {
-                                    Haptic.trigger("impactLight")
-                                    navigation.canGoBack() && navigation.goBack()
-                                }, 250)}
-                                icon={
-                                    props.backIcon || (
-                                        <AntDesign name="arrow-left" size={20} color={Colors.foreground} />
-                                    )
-                                }
-                            />
-                        </GlassView>
-                    )}
-
                     {props.titleAnimatedStyle && props.title && (
                         <Animated.Text style={[styles.animatedTitle, props.titleAnimatedStyle]}>
                             {props.title}
                         </Animated.Text>
                     )}
 
-                    {props.children}
-
                     {(props.animatedTitle || props.animatedValue !== undefined) && <AnimatedContent {...props} />}
-
-                    <View style={{ borderRadius: 100, overflow: "hidden", flexDirection: "row", gap: 10 }}>
-                        {standaloneButtons.left.map((button, index) => (
-                            <View key={index} style={{ overflow: "hidden", borderRadius: 100 }}>
-                                <GlassView style={styles.iconContainer} tintColor={button.tintColor}>
-                                    <HeaderIconButton button={button!} index={index} />
-                                </GlassView>
-                            </View>
-                        ))}
-
-                        {regularButtons.length > 0 && (
-                            <GlassView style={styles.iconContainer}>
-                                {(regularButtons || []).map((button, index) => {
-                                    return <HeaderIconButton key={index} button={button!} index={index} />
-                                })}
-                            </GlassView>
-                        )}
-
-                        {standaloneButtons.right.map((button, index) => (
-                            <View key={index} style={{ overflow: "hidden", borderRadius: 100 }}>
-                                <GlassView
-                                    style={styles.iconContainer}
-                                    {...(button.tintColor && { tintColor: button.tintColor })}
-                                >
-                                    <HeaderIconButton button={button!} index={index} />
-                                </GlassView>
-                            </View>
-                        ))}
-                    </View>
                 </View>
 
                 {props.renderAnimatedItem && memodRenderItem}

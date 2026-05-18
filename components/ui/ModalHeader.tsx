@@ -74,6 +74,10 @@ const styles = StyleSheet.create({
         paddingHorizontal: 15,
         paddingBottom: 10,
         zIndex: 100,
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
     },
     side: {
         flex: 1,

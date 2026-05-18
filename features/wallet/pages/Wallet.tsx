@@ -306,7 +306,7 @@ const styles = StyleSheet.create({
     },
     contentContainer: {
         padding: 15,
-        paddingTop: 230,
+        paddingTop: 186,
         paddingBottom: 60,
     },
     tabSection: {

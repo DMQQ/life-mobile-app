@@ -1,4 +1,3 @@
-import DeleteGoalsGroupDialog from "@/components/ui/Dialog/Delete/DeleteGoalsDialog"
 import Header from "@/components/ui/Header/Header"
 import { useScreenSearch } from "@/utils/hooks/useScreenSearch"
 import Colors from "@/constants/Colors"
@@ -6,14 +5,16 @@ import { Feather } from "@expo/vector-icons"
 import { FlashList } from "@shopify/flash-list"
 import { useState } from "react"
 import { RefreshControl, View } from "react-native"
-import Feedback from "react-native-haptic-feedback"
 import Animated from "react-native-reanimated"
 import useTrackScroll from "@/utils/hooks/ui/useTrackScroll"
 import { GoalCategory } from "../components/GoalCategory"
+import WeekGrid from "../components/WeekGrid"
 import AnimatedLoader from "../components/GoalsLoader"
 import { useGoal } from "../hooks/hooks"
 
 const AnimatedFlashList = Animated.createAnimatedComponent(FlashList)
+
+type ViewMode = "list" | "week"
 
 export default function Goals({ navigation }: any) {
     const { goals, loading, refetchGoals } = useGoal()
@@ -24,15 +25,19 @@ export default function Goals({ navigation }: any) {
 
     const onRefresh = async () => {
         setRefreshing(true)
-
         await refetchGoals()
-
         setRefreshing(false)
     }
 
     const [query, setQuery] = useState("")
 
     useScreenSearch(setQuery)
+
+    const [viewMode, setViewMode] = useState<ViewMode>("list")
+
+    const filteredGoals = query
+        ? goals?.filter((g: any) => g.name.toLowerCase().includes(query.toLowerCase()))
+        : goals
 
     return (
         <View style={{ flex: 1 }}>
@@ -44,33 +49,58 @@ export default function Goals({ navigation }: any) {
                 animatedSubtitle="5 Active Goals"
                 buttons={[
                     {
+                        onPress: () =>
+                            setViewMode((v) => (v === "list" ? "week" : "list")),
+                        icon: (
+                            <Feather
+                                name={viewMode === "list" ? "grid" : "list"}
+                                size={20}
+                                color={Colors.foreground}
+                            />
+                        ),
+                    },
+                    {
                         onPress: () => navigation.navigate("CreateGoal"),
                         icon: <Feather name="plus" size={20} color={Colors.foreground} />,
                     },
                 ]}
             />
-            <AnimatedFlashList
-                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-                data={goals}
-                renderItem={({ item, index }: any) => (
-                    <GoalCategory
-                        index={index}
-                        length={goals?.length}
-                        onPress={() => {
-                            navigation.navigate("Goal", { id: item.id })
-                        }}
-                        {...item}
+            {viewMode === "list" ? (
+                <AnimatedFlashList
+                    refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+                    data={filteredGoals}
+                    renderItem={({ item, index }: any) => (
+                        <GoalCategory
+                            index={index}
+                            length={filteredGoals?.length}
+                            onPress={() => {
+                                navigation.navigate("Goal", { id: item.id })
+                            }}
+                            {...item}
+                        />
+                    )}
+                    keyExtractor={(item: any) => item.id}
+                    onScroll={onAnimatedScrollHandler}
+                    contentContainerStyle={{
+                        paddingHorizontal: 15,
+                        paddingBottom: 100,
+                        paddingTop: 300,
+                    }}
+                    removeClippedSubviews
+                />
+            ) : (
+                <Animated.ScrollView
+                    refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+                    onScroll={onAnimatedScrollHandler}
+                    scrollEventThrottle={16}
+                    showsVerticalScrollIndicator={false}
+                >
+                    <WeekGrid
+                        goals={filteredGoals}
+                        onGoalPress={(id) => navigation.navigate("Goal", { id })}
                     />
-                )}
-                keyExtractor={(item: any) => item.id}
-                onScroll={onAnimatedScrollHandler}
-                contentContainerStyle={{
-                    paddingHorizontal: 15,
-                    paddingBottom: 100,
-                    paddingTop: 300,
-                }}
-                removeClippedSubviews
-            />
+                </Animated.ScrollView>
+            )}
         </View>
     )
 }

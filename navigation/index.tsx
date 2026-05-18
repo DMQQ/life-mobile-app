@@ -1,61 +1,34 @@
-import useDeeplinking from "@/utils/hooks/useDeeplinking"
-import useQuickActions from "@/utils/hooks/useQuickActions"
-import { useApolloClient } from "@apollo/client"
-import { BottomTabBarProps, createBottomTabNavigator } from "@react-navigation/bottom-tabs"
-import { DarkTheme, NavigationContainer, NavigationContainerRef } from "@react-navigation/native"
-import React, { useCallback, useEffect } from "react"
-import BottomTab from "../components/BottomTab/BottomTab"
+import { createNativeBottomTabNavigator } from "@react-navigation/bottom-tabs/unstable"
+import {
+    DarkTheme,
+    getFocusedRouteNameFromRoute,
+    NavigationContainer,
+    NavigationContainerRef,
+    LinkingOptions,
+} from "@react-navigation/native"
+import React from "react"
 import Colors from "../constants/Colors"
 import Authentication from "../features/authentication/Main"
 import GoalsScreens from "../features/goals/Main"
 import HomeScreens from "../features/home/Main"
 import TimelineScreens from "../features/timeline/Main"
 import WalletScreens from "../features/wallet/Main"
+import AiScreens from "../features/ai/Main"
 import { RootStackParamList } from "../types"
-import useNotifications from "../utils/hooks/useNotifications"
-import useUser from "../utils/hooks/useUser"
-import useWidgets from "@/utils/widget/hooks/useWidgets"
-import { useActivityManager } from "@/utils/hooks/useActivityManager"
 
 export const navigationRef = React.createRef<NavigationContainerRef<RootStackParamList>>()
 
-const Tab = createBottomTabNavigator<RootStackParamList>()
+const TAB_ROOT_SCREENS = new Set(["Root", "Goals", "Wallet", "Timeline", "AiWidget"])
 
-export default function Navigation() {
-    const { isAuthenticated, loadUser, isLoading, removeUser } = useUser()
-    const client = useApolloClient()
-    const { sendTokenToServer } = useNotifications(navigationRef as any)
+const Tab = createNativeBottomTabNavigator()
 
-    useQuickActions(navigationRef as any)
+interface NavigationProps {
+    isAuthenticated: boolean
+    isLoading: boolean
+    linking: LinkingOptions<RootStackParamList>
+}
 
-    useActivityManager()
-
-    useWidgets()
-
-    useEffect(() => {
-        loadUser()
-    }, [])
-
-    useEffect(() => {
-        if (isAuthenticated) {
-            sendTokenToServer().catch(async (err) => {
-                const cause = err?.cause
-
-                if (cause?.extensions?.response?.statusCode === 403) {
-                    await client.resetStore()
-                    await removeUser()
-                }
-            })
-        }
-    }, [isAuthenticated])
-
-    const renderTab = useCallback(
-        (props: BottomTabBarProps) => (isAuthenticated ? <BottomTab {...props} /> : null),
-        [isAuthenticated],
-    )
-
-    const linking = useDeeplinking(navigationRef as any)
-
+export default function Navigation({ isAuthenticated, isLoading, linking }: NavigationProps) {
     if (isLoading) return null
 
     return (
@@ -77,26 +50,80 @@ export default function Navigation() {
             }}
         >
             <Tab.Navigator
-                initialRouteName={"Root"}
-                tabBar={renderTab}
-                screenOptions={{
-                    headerShown: false,
-                    headerStyle: {
-                        backgroundColor: Colors.primary,
-                    },
+                initialRouteName={isAuthenticated ? "Root" : "Authentication"}
+                screenOptions={({ route }) => {
+                    const focusedRoute = getFocusedRouteNameFromRoute(route)
+                    const hideTabBar = focusedRoute !== undefined && !TAB_ROOT_SCREENS.has(focusedRoute)
+                    return {
+                        lazy: false,
+                        tabBarActiveTintColor: Colors.secondary,
+                        tabBarStyle: {
+                            backgroundColor: Colors.primary,
+                            display: hideTabBar ? "none" : "flex",
+                        },
 
-                    lazy: false,
+                        unstable_headerLeftItems: ({ tintColor }) => [],
+                        unstable_headerRightItems: ({ tintColor }) => [],
+                    }
                 }}
             >
                 {isAuthenticated ? (
                     <>
-                        <Tab.Screen name="Root" component={HomeScreens} />
-
-                        <Tab.Screen name="GoalsScreens" component={GoalsScreens} />
-
-                        <Tab.Screen name="WalletScreens" component={WalletScreens as any} />
-
-                        <Tab.Screen name="TimelineScreens" component={TimelineScreens} />
+                        <Tab.Screen
+                            name="Root"
+                            component={HomeScreens}
+                            options={{
+                                tabBarLabel: "Home",
+                                tabBarIcon: ({ focused }: { focused: boolean }) => ({
+                                    type: "sfSymbol" as const,
+                                    name: focused ? "house.fill" : "house",
+                                }),
+                            }}
+                        />
+                        <Tab.Screen
+                            name="GoalsScreens"
+                            component={GoalsScreens}
+                            options={{
+                                tabBarLabel: "Goals",
+                                tabBarIcon: ({ focused }: { focused: boolean }) => ({
+                                    type: "sfSymbol" as const,
+                                    name: focused ? "checkmark.circle.fill" : "checkmark.circle",
+                                }),
+                            }}
+                        />
+                        <Tab.Screen
+                            name="AiScreens"
+                            component={AiScreens}
+                            options={{
+                                tabBarLabel: "AI",
+                                tabBarIcon: ({ focused }: { focused: boolean }) => ({
+                                    type: "sfSymbol" as const,
+                                    name: focused ? "sparkles" : "sparkles",
+                                }),
+                            }}
+                        />
+                        <Tab.Screen
+                            name="WalletScreens"
+                            component={WalletScreens as any}
+                            options={{
+                                tabBarLabel: "Wallet",
+                                tabBarIcon: ({ focused }: { focused: boolean }) => ({
+                                    type: "sfSymbol" as const,
+                                    name: focused ? "creditcard.fill" : "creditcard",
+                                }),
+                            }}
+                        />
+                        <Tab.Screen
+                            name="TimelineScreens"
+                            component={TimelineScreens}
+                            options={{
+                                tabBarLabel: "Timeline",
+                                tabBarIcon: ({ focused }: { focused: boolean }) => ({
+                                    type: "sfSymbol" as const,
+                                    name: focused ? "calendar.circle.fill" : "calendar",
+                                }),
+                            }}
+                        />
                     </>
                 ) : (
                     <Tab.Screen name="Authentication" component={Authentication} />

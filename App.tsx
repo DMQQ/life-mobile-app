@@ -1,26 +1,39 @@
-import { ApolloClient, ApolloLink, ApolloProvider, createHttpLink, from, InMemoryCache } from "@apollo/client"
+import {
+    ApolloClient,
+    ApolloLink,
+    ApolloProvider,
+    createHttpLink,
+    from,
+    InMemoryCache,
+    useApolloClient,
+} from "@apollo/client"
 import { setContext } from "@apollo/client/link/context"
 import * as Notifications from "expo-notifications"
 import { getItemAsync } from "expo-secure-store"
 import * as SplashScreen from "expo-splash-screen"
 import { StatusBar } from "expo-status-bar"
+import { useEffect } from "react"
 import { GestureHandlerRootView } from "react-native-gesture-handler"
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context"
+import { SafeAreaProvider } from "react-native-safe-area-context"
 import { Provider } from "react-redux"
 import ErrorBoundary from "./components/ErrorBoundary"
 import Colors from "./constants/Colors"
 import Url from "./constants/Url"
-import Navigation from "./navigation"
+import Navigation, { navigationRef } from "./navigation"
 import ThemeContextProvider from "./utils/context/ThemeContext"
 import { ScrollYContextProvider } from "./utils/context/ScrollYContext"
-import { STORE_KEY } from "./utils/hooks/useUser"
+import useDeeplinking from "./utils/hooks/useDeeplinking"
+import useNotifications from "./utils/hooks/useNotifications"
+import useQuickActions from "./utils/hooks/useQuickActions"
+import useUser, { STORE_KEY } from "./utils/hooks/useUser"
+import { useActivityManager } from "./utils/hooks/useActivityManager"
 import { store } from "./utils/redux"
+import useWidgets from "./utils/widget/hooks/useWidgets"
 import { setLogVerbosity } from "@apollo/client"
 import * as Sentry from "@sentry/react-native"
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet"
 import { SearchMenuProvider } from "./contexts/SearchMenuContext"
 import { AiChatProvider } from "./contexts/AiChatContext"
-import GlobalAiChat from "./features/ai/GlobalAiChat"
 import { KeyboardProvider } from "react-native-keyboard-controller"
 
 Sentry.init({
@@ -86,7 +99,43 @@ const apolloClient = new ApolloClient({
     link,
 })
 
-export default Sentry.wrap(function App() {
+function AppContent() {
+    const { isAuthenticated, loadUser, isLoading, removeUser } = useUser()
+    const client = useApolloClient()
+    const { sendTokenToServer } = useNotifications(navigationRef as any)
+
+    useQuickActions(navigationRef as any)
+    useActivityManager()
+    useWidgets()
+
+    useEffect(() => {
+        loadUser()
+    }, [])
+
+    useEffect(() => {
+        if (isAuthenticated) {
+            sendTokenToServer().catch(async (err) => {
+                const cause = err?.cause
+
+                if (cause?.extensions?.response?.statusCode === 403) {
+                    await client.resetStore()
+                    await removeUser()
+                }
+            })
+        }
+    }, [isAuthenticated])
+
+    const linking = useDeeplinking(navigationRef as any)
+
+    return (
+        <>
+            <StatusBar />
+            <Navigation isAuthenticated={isAuthenticated} isLoading={isLoading} linking={linking} />
+        </>
+    )
+}
+
+function App() {
     return (
         <SafeAreaProvider style={{ flex: 1, backgroundColor: Colors.primary }}>
             <ErrorBoundary>
@@ -99,9 +148,7 @@ export default Sentry.wrap(function App() {
                                         <ApolloProvider client={apolloClient}>
                                             <Provider store={store}>
                                                 <AiChatProvider>
-                                                    <StatusBar />
-                                                    <Navigation />
-                                                    <GlobalAiChat />
+                                                    <AppContent />
                                                 </AiChatProvider>
                                             </Provider>
                                         </ApolloProvider>
@@ -114,4 +161,6 @@ export default Sentry.wrap(function App() {
             </ErrorBoundary>
         </SafeAreaProvider>
     )
-})
+}
+
+export default Sentry.wrap(App)
