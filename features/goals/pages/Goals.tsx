@@ -35,9 +35,7 @@ export default function Goals({ navigation }: any) {
 
     const [viewMode, setViewMode] = useState<ViewMode>("list")
 
-    const filteredGoals = query
-        ? goals?.filter((g: any) => g.name.toLowerCase().includes(query.toLowerCase()))
-        : goals
+    const filteredGoals = query ? goals?.filter((g: any) => g.name.toLowerCase().includes(query.toLowerCase())) : goals
 
     return (
         <View style={{ flex: 1 }}>
@@ -49,17 +47,13 @@ export default function Goals({ navigation }: any) {
                 animatedSubtitle="5 Active Goals"
                 buttons={[
                     {
-                        onPress: () =>
-                            setViewMode((v) => (v === "list" ? "week" : "list")),
+                        onPress: () => setViewMode((v) => (v === "list" ? "week" : "list")),
                         icon: (
-                            <Feather
-                                name={viewMode === "list" ? "grid" : "list"}
-                                size={20}
-                                color={Colors.foreground}
-                            />
+                            <Feather name={viewMode === "list" ? "grid" : "list"} size={20} color={Colors.foreground} />
                         ),
                     },
                     {
+                        standalone: true,
                         onPress: () => navigation.navigate("CreateGoal"),
                         icon: <Feather name="plus" size={20} color={Colors.foreground} />,
                     },
@@ -95,10 +89,7 @@ export default function Goals({ navigation }: any) {
                     scrollEventThrottle={16}
                     showsVerticalScrollIndicator={false}
                 >
-                    <WeekGrid
-                        goals={filteredGoals}
-                        onGoalPress={(id) => navigation.navigate("Goal", { id })}
-                    />
+                    <WeekGrid goals={filteredGoals} onGoalPress={(id) => navigation.navigate("Goal", { id })} />
                 </Animated.ScrollView>
             )}
         </View>

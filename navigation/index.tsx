@@ -84,7 +84,7 @@ export default function Navigation({ isAuthenticated, isLoading, linking }: Navi
                                 tabBarLabel: "Goals",
                                 tabBarIcon: ({ focused }: { focused: boolean }) => ({
                                     type: "sfSymbol" as const,
-                                    name: focused ? "checkmark.circle.fill" : "checkmark.circle",
+                                    name: focused ? "target" : "target",
                                 }),
                             }}
                         />
@@ -93,10 +93,15 @@ export default function Navigation({ isAuthenticated, isLoading, linking }: Navi
                             component={AiScreens}
                             options={{
                                 tabBarLabel: "AI",
+                                tabBarInactiveTintColor: Colors.text_light,
                                 tabBarIcon: ({ focused }: { focused: boolean }) => ({
                                     type: "sfSymbol" as const,
                                     name: focused ? "sparkles" : "sparkles",
                                 }),
+                                tabBarSystemItem: "search",
+                                tabBarActiveIndicatorColor: Colors.secondary,
+                                tabBarActiveTintColor: Colors.secondary,
+                                tabBarActiveIndicatorEnabled: true,
                             }}
                         />
                         <Tab.Screen

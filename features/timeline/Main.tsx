@@ -65,7 +65,7 @@ export default function TimelineScreens({ route, navigation }: RootStackScreenPr
                     mode: "create",
                 }}
                 options={{
-                    headerShown: false,
+                    headerShown: true,
                     presentation: "modal",
                 }}
             />
@@ -101,7 +101,7 @@ export default function TimelineScreens({ route, navigation }: RootStackScreenPr
                 name="TodosTransferModal"
                 component={TodosTransferModal}
                 options={{
-                    headerShown: false,
+                    headerShown: true,
                     presentation: "modal",
                 }}
             />
@@ -109,7 +109,7 @@ export default function TimelineScreens({ route, navigation }: RootStackScreenPr
                 name="CopyTimelineModal"
                 component={CopyTimelineModal}
                 options={{
-                    headerShown: false,
+                    headerShown: true,
                     presentation: "modal",
                 }}
             />

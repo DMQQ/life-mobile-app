@@ -3,34 +3,23 @@ import ValidatedInput from "@/components/ui/ValidatedInput"
 import Colors from "@/constants/Colors"
 import dayjs from "dayjs"
 import moment from "moment"
-import { useRef } from "react"
-import { Platform, ScrollView, StyleSheet, View } from "react-native"
-import { useSafeAreaInsets } from "react-native-safe-area-context"
+import { useRef, useState } from "react"
+import { Platform, Pressable, ScrollView, View } from "react-native"
+
 import CreateRepeatableTimeline from "../components/CreateTimeline/CreateRepeatableTimeline"
 import EditScopeSheet from "../components/EditScopeSheet"
 import TimelineCreateHeader from "../components/CreateTimeline/TimelineCreateHeader"
 import useCreateTimeline from "../hooks/general/useCreateTimeline"
 import type { TimelineScreenProps } from "../types"
 import { Todo } from "./CreateTimelineTodos"
-import TimePicker from "@/components/TimePicker"
 import GroupSelector from "@/components/ui/GroupSelector"
 import Section from "@/components/ui/Section"
-import DatePicker from "@/components/DatePicker"
 import ChipButton from "@/components/ui/Button/ChipButton"
-
-const styles = StyleSheet.create({
-    timeContainer: {
-        flexDirection: "row",
-        width: "100%",
-        paddingHorizontal: 15,
-        paddingVertical: 10,
-        alignItems: "center",
-        justifyContent: "space-between",
-    },
-})
+import { Host, DatePicker as SwiftDatePicker } from "@expo/ui/swift-ui"
+import { datePickerStyle, frame } from "@expo/ui/swift-ui/modifiers"
 
 export default function CreateTimeLineEventModal({ route, navigation }: TimelineScreenProps<"TimelineCreate">) {
-    const { f, isLoading, isEditing, scopeSheetRef, onScopeSelected, handleChangeDate } = useCreateTimeline({
+    const { f, isEditing, scopeSheetRef, onScopeSelected, handleChangeDate } = useCreateTimeline({
         route,
         navigation,
     })
@@ -39,11 +28,17 @@ export default function CreateTimeLineEventModal({ route, navigation }: Timeline
 
     const numberOfLines = f.values.desc.split("\n").length
 
-    const insets = useSafeAreaInsets()
+    const [expanded, setExpanded] = useState<{ date: boolean; start: boolean; end: boolean }>({
+        date: false,
+        start: false,
+        end: false,
+    })
+
+    const toggleExpanded = (key: "date" | "start" | "end") => setExpanded((p) => ({ ...p, [key]: !p[key] }))
 
     return (
         <>
-            <View style={{ flex: 1, paddingBottom: insets.bottom }}>
+            <View style={{ flex: 1 }}>
                 <TimelineCreateHeader
                     handleChangeDate={(date: Date) => {
                         handleChangeDate(date)
@@ -54,13 +49,10 @@ export default function CreateTimeLineEventModal({ route, navigation }: Timeline
                     selectedDate={route.params.selectedDate}
                     onSubmit={f.handleSubmit}
                     submitDisabled={!(f.isValid && !f.isSubmitting && f.dirty)}
+                    dirty={f.dirty}
                 />
 
-                <ScrollView
-                    style={{ flex: 1 }}
-                    contentContainerStyle={{ padding: 15, paddingTop: 60, paddingBottom: 40 }}
-                    keyboardDismissMode={"on-drag"}
-                >
+                <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 15 }} keyboardDismissMode={"on-drag"}>
                     <Section title="Content" cardStyle={{ padding: 5 }}>
                         <ValidatedInput
                             placeholder="Title"
@@ -94,58 +86,116 @@ export default function CreateTimeLineEventModal({ route, navigation }: Timeline
                     </Section>
 
                     <Section title="Time">
-                        <View style={styles.timeContainer}>
+                        <Pressable
+                            onPress={() => toggleExpanded("date")}
+                            style={{
+                                flexDirection: "row",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                                paddingHorizontal: 15,
+                                paddingVertical: 12,
+                            }}
+                        >
                             <Text variant="subtitle">Date</Text>
-                            <DatePicker
-                                mode="single"
-                                dates={{
-                                    start: dayjs(route.params.selectedDate).toDate(),
-                                    end: dayjs(route.params.selectedDate).toDate(),
-                                }}
-                                setDates={(d) => {
-                                    handleChangeDate(d.start)
-                                    navigation.setParams({
-                                        selectedDate: moment(d.start).format("YYYY-MM-DD"),
-                                    })
-                                }}
-                            />
-                        </View>
+                            <Text variant="body" style={{ color: Colors.foreground }}>
+                                {moment(route.params.selectedDate).format("DD MMMM YYYY")}
+                            </Text>
+                        </Pressable>
+                        {expanded.date && (
+                            <View style={{ alignItems: "center", paddingBottom: 10 }}>
+                                <Host matchContents>
+                                    <SwiftDatePicker
+                                        selection={dayjs(route.params.selectedDate).toDate()}
+                                        onDateChange={(d) => {
+                                            handleChangeDate(d)
+                                            navigation.setParams({
+                                                selectedDate: moment(d).format("YYYY-MM-DD"),
+                                            })
+                                        }}
+                                        modifiers={[datePickerStyle("graphical"), frame({ width: 340 })]}
+                                    />
+                                </Host>
+                            </View>
+                        )}
 
                         <View style={{ borderWidth: 0.5, borderColor: Colors.borderColor }} />
 
-                        <View style={styles.timeContainer}>
+                        <Pressable
+                            onPress={() => toggleExpanded("start")}
+                            style={{
+                                flexDirection: "row",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                                paddingHorizontal: 15,
+                                paddingVertical: 12,
+                            }}
+                        >
                             <Text variant="subtitle">Starts</Text>
-                            <TimePicker
-                                label=""
-                                value={moment(f.values.begin, "HH:mm").format("HH:mm")}
-                                onChange={(t) => {
-                                    f.setFieldValue("begin", t)
-                                    if (!endManuallyChanged.current) {
-                                        f.setFieldValue("end", moment(t, "HH:mm").add(1, "hours").format("HH:mm"))
-                                    }
-                                }}
-                            />
-                        </View>
+                            <Text variant="body" style={{ color: Colors.foreground }}>
+                                {f.values.begin}
+                            </Text>
+                        </Pressable>
+                        {expanded.start && (
+                            <View style={{ alignItems: "center", paddingBottom: 10 }}>
+                                <Host matchContents>
+                                    <SwiftDatePicker
+                                        selection={moment(f.values.begin, "HH:mm").toDate()}
+                                        displayedComponents={["hourAndMinute"]}
+                                        onDateChange={(d) => {
+                                            const t = moment(d).format("HH:mm")
+                                            f.setFieldValue("begin", t)
+                                            if (!endManuallyChanged.current) {
+                                                f.setFieldValue(
+                                                    "end",
+                                                    moment(t, "HH:mm").add(1, "hours").format("HH:mm"),
+                                                )
+                                            }
+                                        }}
+                                        modifiers={[datePickerStyle("wheel")]}
+                                    />
+                                </Host>
+                            </View>
+                        )}
 
                         <View style={{ borderWidth: 0.5, borderColor: Colors.borderColor }} />
 
-                        <View style={styles.timeContainer}>
+                        <Pressable
+                            onPress={() => toggleExpanded("end")}
+                            style={{
+                                flexDirection: "row",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                                paddingHorizontal: 15,
+                                paddingVertical: 12,
+                            }}
+                        >
                             <Text variant="subtitle">Ends</Text>
-                            <TimePicker
-                                label=""
-                                value={moment(f.values.end, "HH:mm").format("HH:mm")}
-                                onChange={(t) => {
-                                    endManuallyChanged.current = true
-                                    f.setFieldValue("end", t)
-                                    if (moment(t, "HH:mm").isBefore(moment(f.values.begin, "HH:mm"))) {
-                                        f.setFieldValue(
-                                            "begin",
-                                            moment(t, "HH:mm").subtract(1, "hours").format("HH:mm"),
-                                        )
-                                    }
-                                }}
-                            />
-                        </View>
+                            <Text variant="body" style={{ color: Colors.foreground }}>
+                                {f.values.end}
+                            </Text>
+                        </Pressable>
+                        {expanded.end && (
+                            <View style={{ alignItems: "center", paddingBottom: 10 }}>
+                                <Host matchContents>
+                                    <SwiftDatePicker
+                                        selection={moment(f.values.end, "HH:mm").toDate()}
+                                        displayedComponents={["hourAndMinute"]}
+                                        onDateChange={(d) => {
+                                            const t = moment(d).format("HH:mm")
+                                            endManuallyChanged.current = true
+                                            f.setFieldValue("end", t)
+                                            if (moment(t, "HH:mm").isBefore(moment(f.values.begin, "HH:mm"))) {
+                                                f.setFieldValue(
+                                                    "begin",
+                                                    moment(t, "HH:mm").subtract(1, "hours").format("HH:mm"),
+                                                )
+                                            }
+                                        }}
+                                        modifiers={[datePickerStyle("wheel")]}
+                                    />
+                                </Host>
+                            </View>
+                        )}
                     </Section>
 
                     <Section title="Reminder" cardStyle={{ padding: 0 }}>

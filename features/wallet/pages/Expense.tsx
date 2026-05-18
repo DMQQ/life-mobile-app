@@ -102,7 +102,6 @@ export default function Expense({ route: { params }, navigation }: any) {
         if (data?.expense) setSelected(data.expense)
     }, [data?.expense])
 
-    const [confirmDelete, setConfirmDelete] = useState(false)
     const [confirmRefund, setConfirmRefund] = useState(false)
     const [confirmSubExpenseId, setConfirmSubExpenseId] = useState<string | null>(null)
     const [confirmSubscriptionAction, setConfirmSubscriptionAction] = useState(false)
@@ -152,7 +151,6 @@ export default function Expense({ route: { params }, navigation }: any) {
             variables: { id: selected.id },
             onCompleted: () => navigation.goBack(),
         })
-        setConfirmDelete(false)
     }
 
     const handleRefundConfirm = async () => {
@@ -218,6 +216,12 @@ export default function Expense({ route: { params }, navigation }: any) {
                 scrollY={scrollY}
                 buttons={[
                     {
+                        icon: "trash" as SFSymbol,
+                        onPress: handleDeleteConfirm,
+                        tintColor: "#F07070",
+                        confirm: true,
+                    },
+                    {
                         icon: "arrow.triangle.branch" as SFSymbol,
                         onPress: () =>
                             navigation.navigate("CorrectionMaps", {
@@ -228,11 +232,6 @@ export default function Expense({ route: { params }, navigation }: any) {
                                     amount: selected?.amount || undefined,
                                 },
                             }),
-                    },
-                    {
-                        icon: "trash" as SFSymbol,
-                        onPress: () => setConfirmDelete(true),
-                        tintColor: "#F07070",
                     },
                     {
                         icon: "pencil" as SFSymbol,
@@ -325,15 +324,6 @@ export default function Expense({ route: { params }, navigation }: any) {
                 hasSubscription={hasSubscription}
                 isSubscriptionActive={isSubscriptionActive}
                 onSetLocation={() => mapPickerRef.current?.triggerSearch()}
-            />
-
-            <ConfirmDialog
-                isVisible={confirmDelete}
-                onDismiss={() => setConfirmDelete(false)}
-                onConfirm={handleDeleteConfirm}
-                title="Delete Expense"
-                description="This expense will be permanently removed."
-                destructive
             />
 
             <ConfirmDialog

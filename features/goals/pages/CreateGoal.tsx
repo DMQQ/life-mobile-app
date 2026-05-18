@@ -136,6 +136,7 @@ export default function CreateGoal({ route, navigation }: any) {
                         onSave={f.handleSubmit}
                         title={isEdit ? "Edit Goal" : "New Goal"}
                         saveLabel="Save"
+                        dirty={f.dirty}
                     />
 
                     <ScrollView
@@ -268,7 +269,7 @@ const styles = StyleSheet.create({
     },
     scrollContent: {
         padding: 20,
-        paddingTop: 10,
+        paddingTop: 60,
     },
     iconSection: {
         alignItems: "center",

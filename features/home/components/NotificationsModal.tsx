@@ -25,7 +25,7 @@ const styles = StyleSheet.create({
     },
     headerLeft: { flexDirection: "row", alignItems: "center", gap: 12 },
     title: { color: Colors.text_light, fontWeight: "bold" },
-    body: { flex: 1, backgroundColor: "rgba(0,0,0,0.2)" },
+    body: { flex: 1, backgroundColor: "rgba(0,0,0,0.2)", paddingTop: 60 },
 })
 
 export default function NotificationsScreen({ navigation }: HomeScreenProps<"HomeNotifications">) {

@@ -9,10 +9,18 @@ interface TimelineCreateHeaderProps {
     handleChangeDate: (date: Date) => void
     submitDisabled?: boolean
     onSubmit?: () => void
+    dirty?: boolean
 }
 
 export default function TimelineCreateHeader(props: TimelineCreateHeaderProps) {
     const navigation = useNavigation()
 
-    return <ModalHeader onClose={navigation.goBack} onSave={props.onSubmit} saveDisabled={props.submitDisabled} />
+    return (
+        <ModalHeader
+            dirty={props.dirty}
+            onClose={navigation.goBack}
+            onSave={props.onSubmit}
+            saveDisabled={props.submitDisabled}
+        />
+    )
 }

@@ -10,7 +10,9 @@ import {
 import Color from "color"
 import { LinearGradient } from "expo-linear-gradient"
 import { SFSymbol } from "expo-symbols"
-import { memo, ReactNode, useLayoutEffect, useMemo } from "react"
+import { Button, Host, Menu, Section } from "@expo/ui/swift-ui"
+import { buttonStyle, tint } from "@expo/ui/swift-ui/modifiers"
+import { memo, ReactNode, useLayoutEffect, useMemo, useState } from "react"
 import { StyleProp, StyleSheet, TextStyle, TouchableOpacity, View, ViewStyle } from "react-native"
 import Haptic from "react-native-haptic-feedback"
 import Animated, { Extrapolation, interpolate, SharedValue, useAnimatedStyle } from "react-native-reanimated"
@@ -44,6 +46,34 @@ function mapContextMenuItems(
     })
 }
 
+function ConfirmHeaderButton({ button }: { button: HeaderItem }) {
+    const sfSymbol = typeof button.icon === "string" ? (button.icon as SFSymbol) : undefined
+
+    const triggerModifiers = [...(button.tintColor ? [tint(button.tintColor)] : [])]
+
+    const menuMessage = button.confirmTitle
+        ? `This will ${button.confirmTitle.toLowerCase()}. Are you sure you want to continue?`
+        : "This action is irreversible. Are you sure you want to continue?"
+
+    return (
+        <Host matchContents>
+            <Menu label={""} systemImage={sfSymbol} modifiers={triggerModifiers}>
+                <Section title={menuMessage}>
+                    <Button
+                        role="destructive"
+                        label="Discard Changes"
+                        onPress={() => {
+                            button.onPress?.()
+                            Haptic.trigger("impactMedium")
+                        }}
+                        modifiers={[buttonStyle("bordered")]}
+                    />
+                </Section>
+            </Menu>
+        </Host>
+    )
+}
+
 function mapHeaderItem(button: HeaderItem): NativeStackHeaderItem {
     if (button.children) {
         return { type: "custom", element: button.children as React.ReactElement }
@@ -51,6 +81,13 @@ function mapHeaderItem(button: HeaderItem): NativeStackHeaderItem {
 
     const sfIcon =
         typeof button.icon === "string" ? { type: "sfSymbol" as const, name: button.icon as SFSymbol } : undefined
+
+    if (button.confirm) {
+        return {
+            type: "custom",
+            element: <ConfirmHeaderButton button={button} />,
+        }
+    }
 
     if (button.contextMenu) {
         return {
@@ -99,6 +136,7 @@ export interface ContextMenuItem {
     destructive?: boolean
     checked?: boolean
     children?: ContextMenuItem[]
+    confirm?: boolean
 }
 
 export interface HeaderItem {
@@ -107,6 +145,8 @@ export interface HeaderItem {
     style?: StyleProp<ViewStyle>
 
     standalone?: boolean
+    confirm?: boolean
+    confirmTitle?: string
 
     position?: "left" | "right"
 

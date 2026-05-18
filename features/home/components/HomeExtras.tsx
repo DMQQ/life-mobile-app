@@ -73,7 +73,7 @@ export default function HomeExtras() {
         <Section
             title={active === "limits" ? "Monthly Limits" : "Recent activity"}
             headerRight={
-                <View style={{ width: 140 }}>
+                <View style={{ width: 200 }}>
                     <GroupSelector
                         size="xs"
                         options={[

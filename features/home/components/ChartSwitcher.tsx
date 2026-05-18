@@ -17,7 +17,7 @@ const ChartSwitcher = () => {
         <Section
             title="Overview"
             headerRight={
-                <View style={{ width: 150 }}>
+                <View style={{ width: 200 }}>
                     <GroupSelector
                         size="xs"
                         options={[

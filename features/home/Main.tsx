@@ -19,7 +19,7 @@ const Stack = createNativeStackNavigator<HomeRootStack>()
 
 const MODAL_OPTIONS: NativeStackNavigationOptions = {
     presentation: "modal",
-    headerShown: false,
+    headerShown: true,
 }
 
 export default function HomeScreens() {

@@ -117,7 +117,7 @@ export default function WalletScreens({ navigation, route }: WalletScreens<"Wall
 
                 <Stack.Screen name="Wallet" component={Wallet} />
 
-                <Stack.Screen name="Filters" component={Filters} options={MODAL_OPTIONS} />
+                <Stack.Screen name="Filters" component={Filters} options={{ ...MODAL_OPTIONS, headerShown: true }} />
 
                 <Stack.Screen name="Subscription" component={SubscriptionScreen as any} />
 
