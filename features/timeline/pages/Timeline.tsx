@@ -2,8 +2,8 @@ import Header from "@/components/ui/Header/Header"
 import DatePicker, { DatePickerRef } from "@/components/DatePicker"
 import DateList from "@/components/DateList/DateList"
 import Colors from "@/constants/Colors"
-import { AntDesign } from "@expo/vector-icons"
 import dayjs from "dayjs"
+import { SFSymbol } from "expo-symbols"
 import moment from "moment"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { View } from "react-native"
@@ -88,8 +88,7 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
                 buttons={[
                     !isSearchActive
                         ? {
-                              onPress: () => {},
-                              icon: <AntDesign name="bars" size={20} color={Colors.foreground} />,
+                              icon: "line.3.horizontal" as SFSymbol,
                               contextMenu: {
                                   items: [
                                       {
@@ -115,10 +114,9 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
                           }
                         : undefined,
                     {
-                        icon: <AntDesign name="plus" size={20} color={Colors.foreground} />,
+                        icon: "plus" as SFSymbol,
                         onPress: () => timeline.createTimeline(),
                         position: "right",
-                        standalone: true,
                     },
                 ]}
                 shadow

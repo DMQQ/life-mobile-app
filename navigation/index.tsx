@@ -61,9 +61,6 @@ export default function Navigation({ isAuthenticated, isLoading, linking }: Navi
                             backgroundColor: Colors.primary,
                             display: hideTabBar ? "none" : "flex",
                         },
-
-                        unstable_headerLeftItems: ({ tintColor }) => [],
-                        unstable_headerRightItems: ({ tintColor }) => [],
                     }
                 }}
             >

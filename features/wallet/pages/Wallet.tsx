@@ -4,6 +4,7 @@ import Color from "color"
 import useTrackScroll from "@/utils/hooks/ui/useTrackScroll"
 import { Feather } from "@expo/vector-icons"
 import { useCallback, useEffect, useMemo, useState } from "react"
+import { SFSymbol } from "expo-symbols"
 import { Pressable, StyleSheet, View } from "react-native"
 import Haptic from "react-native-haptic-feedback"
 import Animated, { FadeOut } from "react-native-reanimated"
@@ -77,8 +78,7 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
         () =>
             [
                 {
-                    icon: <Feather name="more-vertical" size={20} color={Colors.foreground} />,
-                    onPress: () => {},
+                    icon: "ellipsis" as SFSymbol,
                     contextMenu: {
                         items: [
                             {
@@ -106,12 +106,10 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
                 },
                 {
                     onPress: () => navigation.navigate("Charts"),
-                    icon: <Feather name="bar-chart-2" size={20} color={Colors.foreground} />,
+                    icon: "chart.bar.xaxis" as SFSymbol,
                 },
                 {
-                    position: "right",
-                    standalone: true,
-                    icon: <Feather name="plus" size={20} color={Colors.foreground} />,
+                    icon: "plus" as SFSymbol,
                     contextMenu: {
                         items: [
                             {

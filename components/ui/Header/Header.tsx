@@ -1,23 +1,96 @@
 import Colors from "@/constants/Colors"
 import Layout from "@/constants/Layout"
 import throttle from "@/utils/functions/throttle"
-import { AntDesign } from "@expo/vector-icons"
 import { useNavigation } from "@react-navigation/native"
+import {
+    NativeStackHeaderItem,
+    NativeStackHeaderItemMenuAction,
+    NativeStackHeaderItemMenuSubmenu,
+} from "@react-navigation/native-stack"
 import Color from "color"
+import { LinearGradient } from "expo-linear-gradient"
+import { SFSymbol } from "expo-symbols"
 import { memo, ReactNode, useLayoutEffect, useMemo } from "react"
 import { StyleProp, StyleSheet, TextStyle, TouchableOpacity, View, ViewStyle } from "react-native"
 import Haptic from "react-native-haptic-feedback"
 import Animated, { Extrapolation, interpolate, SharedValue, useAnimatedStyle } from "react-native-reanimated"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import AnimatedNumber from "../AnimatedNumber"
-import IconButton from "../IconButton/IconButton"
-import { LinearGradient } from "expo-linear-gradient"
 import GlassView from "../GlassView"
-import { SFSymbol } from "expo-symbols"
-import { Menu, Button, Host } from "@expo/ui/swift-ui"
-import { background } from "@expo/ui/swift-ui/modifiers"
+import IconButton from "../IconButton/IconButton"
 
 const THRESHOLD = 200
+
+function mapContextMenuItems(
+    items: ContextMenuItem[],
+): (NativeStackHeaderItemMenuAction | NativeStackHeaderItemMenuSubmenu)[] {
+    return items.map((item) => {
+        if (item.children && item.children.length > 0) {
+            return {
+                type: "submenu" as const,
+                label: item.title,
+                icon: item.systemImage ? { type: "sfSymbol" as const, name: item.systemImage } : undefined,
+                items: mapContextMenuItems(item.children),
+            }
+        }
+        return {
+            type: "action" as const,
+            label: item.title,
+            icon: item.systemImage ? { type: "sfSymbol" as const, name: item.systemImage } : undefined,
+            onPress: item.onPress ?? (() => {}),
+            destructive: item.destructive,
+            state: item.checked ? ("on" as const) : ("off" as const),
+        }
+    })
+}
+
+function mapHeaderItem(button: HeaderItem): NativeStackHeaderItem {
+    if (button.children) {
+        return { type: "custom", element: button.children as React.ReactElement }
+    }
+
+    const sfIcon =
+        typeof button.icon === "string" ? { type: "sfSymbol" as const, name: button.icon as SFSymbol } : undefined
+
+    if (button.contextMenu) {
+        return {
+            type: "menu",
+            label: "",
+            icon: sfIcon,
+            tintColor: button.tintColor,
+            disabled: button.disabled,
+            menu: { items: mapContextMenuItems(button.contextMenu.items) },
+        }
+    }
+
+    if (sfIcon) {
+        return {
+            type: "button",
+            label: "",
+            icon: sfIcon,
+            tintColor: button.tintColor,
+            disabled: button.disabled,
+            onPress: () => {
+                button.onPress?.()
+                Haptic.trigger("impactLight")
+            },
+        }
+    }
+
+    return {
+        type: "custom",
+        element: (
+            <IconButton
+                style={button.style}
+                onPress={throttle(() => {
+                    button.onPress?.()
+                    Haptic.trigger("impactLight")
+                }, 250)}
+                icon={button.icon}
+            />
+        ),
+    }
+}
 
 export interface ContextMenuItem {
     title: string
@@ -119,51 +192,53 @@ function Header({ shadow = true, ...props }: HeaderProps) {
     }, [props.renderAnimatedItem])
 
     useLayoutEffect(() => {
-        const buttons = (props.buttons ?? []).filter(Boolean)
+        const buttons = (props.buttons ?? []).filter(Boolean) as HeaderItem[]
+        const rightButtons = buttons.filter((b) => b.position !== "left")
+        const leftButtons = buttons.filter((b) => b.position === "left")
+
+        const hasLeftItems =
+            (!!props.goBack && props.backIcon !== undefined) || !!props.children || leftButtons.length > 0
+
         navigation.setOptions({
             headerShown: true,
             headerShadowVisible: true,
             headerTransparent: true,
-            headerStyle: {
-                backgroundColor: "transparent",
-            },
+            headerStyle: { backgroundColor: "transparent" },
             title: props.animatedTitle === undefined && props.title !== undefined ? props.title : "",
-            headerBackVisible: (!!props.goBack && !props.children) || props.backIcon === undefined,
-            headerRight:
-                buttons.length > 0
-                    ? () => (
-                          <View
-                              style={{ gap: 10, flexDirection: "row", paddingHorizontal: buttons.length > 1 ? 5 : 0 }}
-                          >
-                              {buttons.map((button, index) => (
-                                  <HeaderIconButton button={button!} index={index} key={index} />
-                              ))}
-                          </View>
-                      )
-                    : undefined,
+            headerBackVisible: !!props.goBack && props.backIcon === undefined && !props.children,
 
-            headerLeft: () =>
-                (!!props.goBack && props.backIcon !== undefined) || props.children ? (
-                    <View style={{ flexDirection: "row" }}>
-                        {props.goBack && (
-                            <GlassView style={styles.iconContainer}>
-                                <IconButton
-                                    onPress={throttle(() => {
-                                        Haptic.trigger("impactLight")
-                                        navigation.canGoBack() && navigation.goBack()
-                                    }, 250)}
-                                    icon={
-                                        props.backIcon || (
-                                            <AntDesign name="arrow-left" size={20} color={Colors.foreground} />
-                                        )
-                                    }
-                                />
-                            </GlassView>
-                        )}
+            unstable_headerRightItems: () => rightButtons.map(mapHeaderItem),
 
-                        {props.children}
-                    </View>
-                ) : undefined,
+            unstable_headerLeftItems: hasLeftItems
+                ? () => {
+                      const items: NativeStackHeaderItem[] = []
+
+                      if (props.goBack && props.backIcon !== undefined) {
+                          items.push({
+                              type: "custom",
+                              element: (
+                                  <GlassView style={styles.iconContainer}>
+                                      <IconButton
+                                          onPress={throttle(() => {
+                                              Haptic.trigger("impactLight")
+                                              navigation.canGoBack() && navigation.goBack()
+                                          }, 250)}
+                                          icon={props.backIcon}
+                                      />
+                                  </GlassView>
+                              ),
+                          })
+                      }
+
+                      if (props.children) {
+                          items.push({ type: "custom", element: props.children as React.ReactElement })
+                      }
+
+                      leftButtons.forEach((b) => items.push(mapHeaderItem(b)))
+
+                      return items
+                  }
+                : undefined,
         })
     }, [props.buttons, props.children, props.goBack, props.title, props.animatedTitle, props.backIcon, navigation])
 
@@ -216,69 +291,6 @@ function Header({ shadow = true, ...props }: HeaderProps) {
         </View>
     )
 }
-
-function renderMenuItems(items: ContextMenuItem[]): React.ReactNode {
-    return items.map((item, i) => {
-        if (item.children && item.children.length > 0) {
-            return (
-                <Menu key={i} label={item.title} systemImage={item.systemImage}>
-                    {renderMenuItems(item.children)}
-                </Menu>
-            )
-        }
-        return (
-            <Button
-                key={i}
-                label={item.checked ? `✓ ${item.title}` : item.title}
-                systemImage={item.systemImage as any}
-                role={item.destructive ? "destructive" : "default"}
-                onPress={() => {
-                    item.onPress?.()
-                    Haptic.trigger("impactLight")
-                }}
-            />
-        )
-    })
-}
-
-const HeaderIconButton = memo(({ button, index }: { button: HeaderItem; index: number }) => {
-    if (button.children) {
-        return button.children
-    }
-
-    if (button.contextMenu) {
-        return (
-            <Host modifiers={[background("clear")]}>
-                <Menu
-                    label={
-                        <IconButton
-                            style={button.style}
-                            onPress={throttle(() => {
-                                button.onPress?.()
-                                Haptic.trigger("impactLight")
-                            }, 250)}
-                            icon={button.icon}
-                        />
-                    }
-                >
-                    {renderMenuItems(button.contextMenu.items)}
-                </Menu>
-            </Host>
-        )
-    }
-
-    return (
-        <IconButton
-            style={button.style}
-            key={index}
-            onPress={throttle(() => {
-                button.onPress?.()
-                Haptic.trigger("impactLight")
-            }, 250)}
-            icon={button.icon}
-        />
-    )
-})
 
 const AnimatedContent = memo(
     ({ isScreenModal = false, initialTitleFontSize = 60, initialNumberOfLines = 10, ...props }: HeaderProps) => {

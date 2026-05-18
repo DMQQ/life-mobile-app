@@ -2,7 +2,7 @@ import Header from "@/components/ui/Header/Header"
 import Colors from "@/constants/Colors"
 import { Expense as ExpenseType } from "@/types"
 import { gql, useMutation, useQuery } from "@apollo/client"
-import { Feather } from "@expo/vector-icons"
+import { SFSymbol } from "expo-symbols"
 import { useEffect, useRef, useState } from "react"
 import { StyleSheet, View } from "react-native"
 import useDeleteActivity from "../hooks/useDeleteActivity"
@@ -218,7 +218,7 @@ export default function Expense({ route: { params }, navigation }: any) {
                 scrollY={scrollY}
                 buttons={[
                     {
-                        icon: <Feather name="git-pull-request" size={20} color={Colors.foreground} />,
+                        icon: "arrow.triangle.branch" as SFSymbol,
                         onPress: () =>
                             navigation.navigate("CorrectionMaps", {
                                 prefill: {
@@ -229,15 +229,14 @@ export default function Expense({ route: { params }, navigation }: any) {
                                 },
                             }),
                     },
-
                     {
-                        icon: <Feather name="trash" size={20} color={Colors.foreground} />,
+                        icon: "trash" as SFSymbol,
                         onPress: () => setConfirmDelete(true),
+                        tintColor: "#F07070",
                     },
                     {
-                        icon: <Feather name="edit-2" size={20} color={Colors.foreground} />,
+                        icon: "pencil" as SFSymbol,
                         onPress: () => navigation.navigate("CreateExpense", { ...selected, isEditing: true }),
-                        style: { marginLeft: 5 },
                     },
                 ]}
                 animatedSubtitle={`${selected.type === "expense" ? "-" : ""}${selected.amount.toFixed(2)}zł`}
