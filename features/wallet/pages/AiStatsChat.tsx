@@ -300,7 +300,7 @@ export default function AiStatsChat({ route, navigation }: WalletScreens<"AiStat
                             )}
                             {!!error && (
                                 <View style={s.errorBox}>
-                                    <AntDesign name="exclamation-circle" size={14} color={Colors.error} />
+                                    <AntDesign name="exclamation-circle" size={14} color={Colors.danger} />
                                     <Text style={s.errorText}>{error}</Text>
                                 </View>
                             )}
@@ -414,14 +414,14 @@ const s = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         gap: 8,
-        backgroundColor: Color(Colors.error).alpha(0.1).string(),
+        backgroundColor: Color(Colors.danger).alpha(0.1).string(),
         borderRadius: 10,
         padding: 10,
         borderWidth: 1,
-        borderColor: Color(Colors.error).alpha(0.3).string(),
+        borderColor: Color(Colors.danger).alpha(0.3).string(),
         marginBottom: 8,
     },
-    errorText: { color: Colors.error, fontSize: 13, flex: 1 },
+    errorText: { color: Colors.danger, fontSize: 13, flex: 1 },
     inputRow: {
         flexDirection: "row",
         alignItems: "flex-start",

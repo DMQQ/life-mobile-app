@@ -376,10 +376,10 @@ function SettingsIndex({ navigation }: SP<"SettingsIndex">) {
                 <SectionLabel title="Account" />
                 <Card>
                     <TouchableOpacity onPress={handleSignout} activeOpacity={0.65} style={s.row}>
-                        <IconBox bg={Colors.error}>
+                        <IconBox bg={Colors.danger}>
                             <Feather name="log-out" size={16} color="#fff" />
                         </IconBox>
-                        <Text variant="body" style={[s.rowLabel, { color: Colors.error }]}>
+                        <Text variant="body" style={[s.rowLabel, { color: Colors.danger }]}>
                             Sign Out
                         </Text>
                     </TouchableOpacity>
@@ -479,21 +479,21 @@ function ToggleRow({
     )
 }
 
+type ColorGroup = "core" | "primary" | "secondary" | "status" | "financial" | "text" | "foreground" | "overlay" | "ternary" | "border"
+
 interface ColorConfig {
     key: string
     label: string
     sub: string
-    group?: "primary" | "secondary"
+    group?: ColorGroup
 }
 
 const ALL_COLORS: ColorConfig[] = [
-    // ── Core ──
-    { key: "primary", label: "Background", sub: "Main screen background" },
-    { key: "secondary", label: "Accent", sub: "Buttons, CTAs, highlights" },
-    { key: "ternary", label: "Ternary", sub: "Supplementary accent" },
-    { key: "foreground", label: "Text", sub: "Primary text color" },
+    { key: "primary", label: "Background", sub: "Main screen background", group: "core" },
+    { key: "secondary", label: "Accent", sub: "Buttons, CTAs, highlights", group: "core" },
+    { key: "ternary", label: "Ternary", sub: "Supplementary accent", group: "core" },
+    { key: "foreground", label: "Text", sub: "Primary text color", group: "core" },
 
-    // ── Primary variants (collapsible) ──
     { key: "primary_light", label: "Light", sub: "Cards, inputs (+25%)", group: "primary" },
     { key: "primary_lighter", label: "Lighter", sub: "Inner containers (+40%)", group: "primary" },
     { key: "primary_surface", label: "Surface", sub: "Chart items (+30%)", group: "primary" },
@@ -502,55 +502,47 @@ const ALL_COLORS: ColorConfig[] = [
     { key: "primary_dark", label: "Dark", sub: "Headers (-25%)", group: "primary" },
     { key: "primary_darker", label: "Darker", sub: "Calendar bg (-50%)", group: "primary" },
 
-    // ── Secondary variants (collapsible) ──
     { key: "secondary_light_1", label: "Light", sub: "Subtle accents (+25%)", group: "secondary" },
     { key: "secondary_light_2", label: "Lighter", sub: "Dimmed accents (+50%)", group: "secondary" },
     { key: "secondary_dark_1", label: "Dark", sub: "Event backgrounds (-25%)", group: "secondary" },
     { key: "secondary_dark_2", label: "Darker", sub: "Deep shadows (-50%)", group: "secondary" },
 
-    // ── Status ──
-    { key: "error", label: "Error", sub: "Error states" },
-    { key: "warning", label: "Warning", sub: "Warning color" },
-    { key: "warning_amber", label: "Warning Amber", sub: "Amber warning" },
-    { key: "success", label: "Success", sub: "Success states" },
-    { key: "danger", label: "Danger", sub: "Destructive actions" },
-    { key: "info", label: "Info", sub: "Info indicators" },
-    { key: "expired", label: "Expired", sub: "Overdue status" },
+    { key: "warning", label: "Warning", sub: "Warning color", group: "status" },
+    { key: "success", label: "Success", sub: "Success states", group: "status" },
+    { key: "danger", label: "Danger", sub: "Destructive actions", group: "status" },
+    { key: "info", label: "Info", sub: "Info indicators", group: "status" },
 
-    // ── Financial ──
-    { key: "positive", label: "Positive", sub: "Income amount" },
-    { key: "negative", label: "Negative", sub: "Expense amount" },
-    { key: "chart_positive", label: "Chart Pos", sub: "Chart positive" },
-    { key: "chart_negative", label: "Chart Neg", sub: "Chart negative" },
+    { key: "positive", label: "Positive", sub: "Income amount", group: "financial" },
+    { key: "negative", label: "Negative", sub: "Expense amount", group: "financial" },
+    { key: "chart_positive", label: "Chart Pos", sub: "Chart positive", group: "financial" },
 
-    // ── Text ──
-    { key: "text_light", label: "Text Light", sub: "High-contrast text" },
-    { key: "text_dark", label: "Text Dark", sub: "Placeholder text" },
+    { key: "text_light", label: "Text Light", sub: "High-contrast text", group: "text" },
+    { key: "text_dark", label: "Text Dark", sub: "Placeholder text", group: "text" },
 
-    // ── Overlays ──
-    { key: "overlay", label: "Overlay", sub: "Modal scrim (50%)" },
-    { key: "overlay_heavy", label: "Overlay Heavy", sub: "Image viewer (75%)" },
-    { key: "overlay_light", label: "Overlay Light", sub: "Subtle dim (20%)" },
+    { key: "overlay", label: "Overlay", sub: "Modal scrim (50%)", group: "overlay" },
 
-    // ── Foreground alpha variants ──
-    { key: "foreground_secondary", label: "Fg Secondary", sub: "Body text (70%)" },
-    { key: "foreground_muted", label: "Fg Muted", sub: "Meta text (60%)" },
-    { key: "foreground_disabled", label: "Fg Disabled", sub: "Disabled text (40%)" },
-    { key: "foreground_placeholder", label: "Fg Placeholder", sub: "Placeholder (30%)" },
-    { key: "foreground_hairline", label: "Fg Hairline", sub: "Separators (8%)" },
+    { key: "foreground_secondary", label: "Fg Secondary", sub: "Body text (70%)", group: "foreground" },
+    { key: "foreground_disabled", label: "Fg Disabled", sub: "Disabled text (40%)", group: "foreground" },
+    { key: "foreground_hairline", label: "Fg Hairline", sub: "Separators (8%)", group: "foreground" },
 
-    // ── Ternary variants ──
-    { key: "ternary_light_1", label: "Ternary Light", sub: "Light ternary (+25%)" },
-    { key: "ternary_light_2", label: "Ternary Lighter", sub: "Lighter ternary (+50%)" },
+    { key: "ternary_light_1", label: "Ternary Light", sub: "Light ternary (+25%)", group: "ternary" },
+    { key: "ternary_light_2", label: "Ternary Lighter", sub: "Lighter ternary (+50%)", group: "ternary" },
 
-    // ── Border ──
-    { key: "borderColor", label: "Border", sub: "Card borders" },
+    { key: "borderColor", label: "Border", sub: "Card borders", group: "border" },
 ]
 
-const GROUP_LABELS: Record<string, string> = {
-    primary: "Primary Variants",
-    secondary: "Secondary Variants",
-}
+const GROUPS: { key: ColorGroup; label: string }[] = [
+    { key: "core", label: "Core" },
+    { key: "primary", label: "Primary Variants" },
+    { key: "secondary", label: "Secondary Variants" },
+    { key: "status", label: "Status" },
+    { key: "financial", label: "Financial" },
+    { key: "text", label: "Text" },
+    { key: "foreground", label: "Foreground Alpha" },
+    { key: "overlay", label: "Overlays" },
+    { key: "ternary", label: "Ternary" },
+    { key: "border", label: "Border" },
+]
 
 const CARD_WIDTH = (Layout.screen.width - 32 - 10) / 2
 
@@ -650,12 +642,6 @@ function ThemeSection() {
 
     const canApply = mode === "custom" || selectedPalette !== null
 
-    // Separate colors by group
-    const coreColors = ALL_COLORS.filter((c) => !c.group)
-    const groupedColors = ALL_COLORS.filter((c) => c.group)
-    const primaryColors = groupedColors.filter((c) => c.group === "primary")
-    const secondaryColors = groupedColors.filter((c) => c.group === "secondary")
-
     return (
         <View style={ts.root}>
             {/* Mode toggle */}
@@ -721,86 +707,45 @@ function ThemeSection() {
                 </View>
             ) : (
                 <View style={ts.colorRows}>
-                    {/* Core colors */}
-                    {coreColors.map((cfg, i) => (
-                        <ColorRow
-                            key={cfg.key}
-                            color={customColors[cfg.key]}
-                            label={cfg.label}
-                            sub={cfg.sub}
-                            border={i < coreColors.length - 1}
-                            onChange={(c) => setCustomColors((p) => ({ ...p, [cfg.key]: c }))}
-                        />
-                    ))}
+                    {GROUPS.map((group) => {
+                        const items = ALL_COLORS.filter((c) => c.group === group.key)
+                        if (items.length === 0) return null
 
-                    {/* Primary variants collapsible */}
-                    <CollapsibleSection
-                        label="Primary Variants"
-                        count={primaryColors.length}
-                        expanded={expandedGroups.primary}
-                        onToggle={() => toggleGroup("primary")}
-                    >
-                        {primaryColors.map((cfg) => (
-                            <ColorRow
-                                key={cfg.key}
-                                color={customColors[cfg.key]}
-                                label={cfg.label}
-                                sub={cfg.sub}
-                                border
-                                onChange={(c) => setCustomColors((p) => ({ ...p, [cfg.key]: c }))}
-                            />
-                        ))}
-                    </CollapsibleSection>
+                        if (group.key === "primary") {
+                            return (
+                                <CollapsibleSection
+                                    key={group.key}
+                                    label={group.label}
+                                    count={items.length}
+                                    expanded={expandedGroups.primary}
+                                    onToggle={() => toggleGroup("primary")}
+                                >
+                                    {items.map((cfg) => (
+                                        <ColorRow
+                                            key={cfg.key}
+                                            color={customColors[cfg.key]}
+                                            label={cfg.label}
+                                            sub={cfg.sub}
+                                            border
+                                            onChange={(c) => setCustomColors((p) => ({ ...p, [cfg.key]: c }))}
+                                        />
+                                    ))}
+                                </CollapsibleSection>
+                            )
+                        }
 
-                    {/* Secondary variants collapsible */}
-                    <CollapsibleSection
-                        label="Secondary Variants"
-                        count={secondaryColors.length}
-                        expanded={expandedGroups.secondary}
-                        onToggle={() => toggleGroup("secondary")}
-                    >
-                        {secondaryColors.map((cfg) => (
-                            <ColorRow
-                                key={cfg.key}
-                                color={customColors[cfg.key]}
-                                label={cfg.label}
-                                sub={cfg.sub}
-                                border
-                                onChange={(c) => setCustomColors((p) => ({ ...p, [cfg.key]: c }))}
-                            />
-                        ))}
-                    </CollapsibleSection>
-
-                    {/* Separator between grouped and remaining standalone */}
-                    {expandedGroups.primary || expandedGroups.secondary ? (
-                        <View style={ts.groupDivider} />
-                    ) : null}
-
-                    {/* Status, Financial, Text, Foreground variants, Overlays, Ternary, Border */}
-                    {[
-                        { label: "Status", keys: ["error", "warning", "warning_amber", "success", "danger", "info", "expired"] },
-                        { label: "Financial", keys: ["positive", "negative", "chart_positive", "chart_negative"] },
-                        { label: "Text", keys: ["text_light", "text_dark"] },
-                        { label: "Foreground Alpha", keys: ["foreground_secondary", "foreground_muted", "foreground_disabled", "foreground_placeholder", "foreground_hairline"] },
-                        { label: "Overlays", keys: ["overlay", "overlay_heavy", "overlay_light"] },
-                        { label: "Ternary", keys: ["ternary_light_1", "ternary_light_2"] },
-                        { label: "Border", keys: ["borderColor"] },
-                    ].map((section) => {
-                        const sectionColors = coreColors.filter((c) => section.keys.includes(c.key))
-                        if (sectionColors.length === 0) return null
                         return (
-                            <View key={section.label}>
-                                {/* Small section label */}
+                            <View key={group.key}>
                                 <View style={ts.colorSectionLabel}>
-                                    <Text style={ts.colorSectionLabelText}>{section.label}</Text>
+                                    <Text style={ts.colorSectionLabelText}>{group.label}</Text>
                                 </View>
-                                {sectionColors.map((cfg) => (
+                                {items.map((cfg, i) => (
                                     <ColorRow
                                         key={cfg.key}
                                         color={customColors[cfg.key]}
                                         label={cfg.label}
                                         sub={cfg.sub}
-                                        border
+                                        border={i < items.length - 1}
                                         onChange={(c) => setCustomColors((p) => ({ ...p, [cfg.key]: c }))}
                                     />
                                 ))}
@@ -935,7 +880,7 @@ const ts = StyleSheet.create({
         paddingHorizontal: 7,
         paddingVertical: 2,
     },
-    groupBadgeText: { color: Colors.foreground_muted, fontSize: 11, fontWeight: "600" },
+    groupBadgeText: { color: Colors.foreground_secondary, fontSize: 11, fontWeight: "600" },
     groupDivider: { height: StyleSheet.hairlineWidth, backgroundColor: Colors.foreground_hairline, marginVertical: 4 },
 
     colorSectionLabel: {

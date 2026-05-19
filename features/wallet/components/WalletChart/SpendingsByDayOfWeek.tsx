@@ -303,7 +303,7 @@ const SpendingsByDay = ({ type, ...props }: { dateRange: [string, string]; type:
     )
 }
 
-const blueText = Colors.foreground_muted
+const blueText = Colors.foreground_secondary
 
 const styles = StyleSheet.create({
     chartWrapper: {

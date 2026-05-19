@@ -360,7 +360,7 @@ export default function AiChatScreen() {
                             {busy ? <ThinkingBubble /> : null}
                             {!!error ? (
                                 <GlassView tintColor={s.errorBox.backgroundColor} style={s.errorBox}>
-                                    <Feather name="alert-circle" size={14} color={Colors.error} />
+                                    <Feather name="alert-circle" size={14} color={Colors.danger} />
                                     <Text style={s.errorText}>{error}</Text>
                                 </GlassView>
                             ) : null}
@@ -383,7 +383,7 @@ export default function AiChatScreen() {
                 <Animated.View style={s.inputRow}>
                     <GlassView style={s.inputInner}>
                         {isRecording ? (
-                            <GlassView tintColor={Colors.error} style={s.voiceActiveRow}>
+                            <GlassView tintColor={Colors.danger} style={s.voiceActiveRow}>
                                 <Pressable style={s.voiceActiveInner} onPress={stopVoice}>
                                     <Feather name="square" size={18} color="#fff" />
                                     <Text style={s.voiceActiveText}>{partialText || "Listening… tap to stop"}</Text>
@@ -479,14 +479,14 @@ const s = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         gap: 8,
-        backgroundColor: Color(Colors.error).alpha(0.1).string(),
+        backgroundColor: Color(Colors.danger).alpha(0.1).string(),
         borderRadius: 10,
         padding: 10,
         borderWidth: 1,
-        borderColor: Color(Colors.error).alpha(0.3).string(),
+        borderColor: Color(Colors.danger).alpha(0.3).string(),
         marginBottom: 8,
     },
-    errorText: { color: Colors.error, fontSize: 13, flex: 1 },
+    errorText: { color: Colors.danger, fontSize: 13, flex: 1 },
     inputRow: { paddingHorizontal: 15, paddingBottom: 15, paddingTop: 8 },
     inputInner: { borderRadius: 30, flexDirection: "row", alignItems: "center", padding: 10, gap: 8 },
     textInput: { flex: 1, borderRadius: 100 },

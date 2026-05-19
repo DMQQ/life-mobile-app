@@ -215,7 +215,7 @@ const JSONImportForm = ({ groupId, navigation }: { groupId: string; navigation: 
                 {!!text && (
                     <Text
                         style={{
-                            color: isValid ? "lightgreen" : Colors.error,
+                            color: isValid ? "lightgreen" : Colors.danger,
                             paddingLeft: 10,
                             fontSize: 12,
                             marginTop: 5,

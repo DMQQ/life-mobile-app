@@ -116,7 +116,7 @@ export default function TimelineDetails({
                 {
                     onPress: () => {},
                     icon: "trash",
-                    tintColor: Colors.error,
+                    tintColor: Colors.danger,
                     contextMenu: {
                         items: [
                             {

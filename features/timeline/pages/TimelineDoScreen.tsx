@@ -85,7 +85,7 @@ export default function TimelineDoScreen({ route, navigation }: TimelineScreenPr
     const progress = Math.max(0, Math.min(1, remaining / totalSeconds))
     const dashOffset = CIRCUMFERENCE * (1 - progress)
     const isExpired = remaining <= 0
-    const arcColor = isExpired ? Colors.error : Colors.secondary
+    const arcColor = isExpired ? Colors.danger : Colors.secondary
 
     const todos: any[] = occurrence?.todos || []
     const completedCount = todos.filter((t) => t.isCompleted).length
@@ -146,7 +146,7 @@ export default function TimelineDoScreen({ route, navigation }: TimelineScreenPr
                                         <G transform={`rotate(-90 ${SIZE / 2} ${SIZE / 2})`}>
                                             <Circle
                                                 cx={SIZE / 2} cy={SIZE / 2} r={RADIUS}
-                                                stroke={isExpired ? Colors.error : "url(#arcGrad)"}
+                                                stroke={isExpired ? Colors.danger : "url(#arcGrad)"}
                                                 strokeWidth={STROKE}
                                                 fill="none"
                                                 strokeDasharray={CIRCUMFERENCE}
@@ -156,10 +156,10 @@ export default function TimelineDoScreen({ route, navigation }: TimelineScreenPr
                                         </G>
                                     </Svg>
                                     <View style={styles.ringInner} pointerEvents="none">
-                                        <Text style={[styles.timerText, isExpired && { color: Colors.error }]}>
+                                        <Text style={[styles.timerText, isExpired && { color: Colors.danger }]}>
                                             {formatTime(remaining)}
                                         </Text>
-                                        <Text style={[styles.timerLabel, isExpired && { color: Colors.error }]}>
+                                        <Text style={[styles.timerLabel, isExpired && { color: Colors.danger }]}>
                                             {isExpired ? "time's up" : !isRunning ? "paused" : "remaining"}
                                         </Text>
                                     </View>
@@ -172,8 +172,8 @@ export default function TimelineDoScreen({ route, navigation }: TimelineScreenPr
                                     style={styles.sideBtn}
                                     activeOpacity={0.7}
                                 >
-                                    <View style={[styles.sideBtnIcon, { backgroundColor: lowOpacity(Colors.error, 0.12) }]}>
-                                        <Ionicons name="stop" size={18} color={Colors.error} />
+                                    <View style={[styles.sideBtnIcon, { backgroundColor: lowOpacity(Colors.danger, 0.12) }]}>
+                                        <Ionicons name="stop" size={18} color={Colors.danger} />
                                     </View>
                                     <Text style={styles.sideBtnLabel}>Stop</Text>
                                 </TouchableOpacity>

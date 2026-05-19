@@ -27,7 +27,7 @@ export default function ConfirmDialog({
     destructive = false,
     loading = false,
 }: ConfirmDialogProps) {
-    const accentColor = destructive ? Colors.error : Colors.secondary
+    const accentColor = destructive ? Colors.danger : Colors.secondary
     const resolvedConfirmLabel = confirmLabel ?? (destructive ? "Delete" : "Confirm")
 
     return (

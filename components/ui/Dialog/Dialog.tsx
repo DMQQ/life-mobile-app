@@ -53,7 +53,7 @@ export default function Dialog({
     icon,
     iconPosition = "left",
     iconBackground = false,
-    iconBackgroundColor = Colors.error,
+    iconBackgroundColor = Colors.danger,
     iconBackgroundSize = 60,
     showCloseButton = true,
     closeButtonStyle,

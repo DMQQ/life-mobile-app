@@ -101,7 +101,7 @@ export default function SkillCard({ skill, startDate, endDate, onNavigate }: Ski
     }
 
     return (
-        <GlassView tintColor={Colors.error}>
+        <GlassView tintColor={Colors.danger}>
             <Text style={{ color: "#fff", padding: 12 }}>Unsupported skill type: {skill?.type ?? "UNDEFINED"}</Text>
             <Text style={{ color: "#fff", padding: 12 }}>Data: {JSON.stringify(skill?.data ?? {})}</Text>
         </GlassView>
@@ -413,7 +413,7 @@ function ActionRow({
                 </View>
             ) : (
                 <GlassView
-                    tintColor={status === "error" ? Colors.error : Colors.secondary}
+                    tintColor={status === "error" ? Colors.danger : Colors.secondary}
                     style={[sb.saveBtn, status === "loading" && { opacity: 0.6 }]}
                 >
                     <Pressable style={sb.btnInner} onPress={onSave} disabled={status === "loading"}>

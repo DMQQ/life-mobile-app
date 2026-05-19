@@ -58,13 +58,10 @@ import Colors from "@/constants/Colors"
 
 | Context | Color | Token |
 |---|---|---|
-| Error | `#f44336` | `Colors.error` |
-| Warning | `orange` | `Colors.warning` |
-| Warning (amber) | `#FFC107` | `Colors.warning_amber` |
+| Warning | `#FFC107` | `Colors.warning` |
 | Success / Low priority | `#34C759` | `Colors.success` |
-| Danger / High priority | `#FF3B30` | `Colors.danger` |
+| Danger / Error / Expired | `#FF3B30` | `Colors.danger` |
 | Info / Med priority | `#007AFF` | `Colors.info` |
-| Expired / overdue | `#BA4343` | `Colors.expired` |
 
 ### Financial indicator colors
 
@@ -73,15 +70,12 @@ import Colors from "@/constants/Colors"
 | Income / positive amount | `#66E875` | `Colors.positive` |
 | Expense / negative amount | `#F07070` | `Colors.negative` |
 | Chart positive (teal) | `#4ECDC4` | `Colors.chart_positive` |
-| Chart negative (rose) | `#FF8A80` | `Colors.chart_negative` |
 
 ### Overlay backgrounds
 
 | Token | Value | Use |
 |---|---|---|
 | `Colors.overlay` | black @ 50% | Modal/sheet scrims |
-| `Colors.overlay_heavy` | black @ 75% | Image viewers, full-screen overlays |
-| `Colors.overlay_light` | black @ 20% | Subtle backdrop dim |
 
 ### Foreground alpha scale (text, icons, borders)
 
@@ -89,9 +83,7 @@ import Colors from "@/constants/Colors"
 |---|---|---|
 | `Colors.foreground` | 100% | Primary text, icon fills |
 | `Colors.foreground_secondary` | 70% | Body text, secondary labels |
-| `Colors.foreground_muted` | 60% | Meta text, timestamps, hints |
 | `Colors.foreground_disabled` | 40% | Disabled states |
-| `Colors.foreground_placeholder` | 30% | Placeholder text |
 | `Colors.foreground_hairline` | 8% | Separators, hairline borders |
 
 ### Available secondary accent candidates
@@ -366,7 +358,7 @@ Replaces `IconBackButton`, `IconSaveButton`, `IconCloseButton`. Single consisten
 ```tsx
 <GlassIconButton name="x" onPress={navigation.goBack} positioned="top-left" />
 <GlassIconButton name="check" onPress={save} positioned="top-right" tintColor={Colors.secondary} loading={saving} />
-<GlassIconButton name="trash-2" onPress={handleDelete} color={Colors.error} />
+<GlassIconButton name="trash-2" onPress={handleDelete} color={Colors.danger} />
 ```
 
 Props: `name` (Feather), `size`, `color`, `tintColor`, `disabled`, `loading`, `positioned` (`"top-left" | "top-right"`), `padding`, `hitSlop`, `style`.
@@ -602,8 +594,7 @@ Reusable badge shape used in timeline items, wallet items:
 }
 // overrides:
 backgroundColor: Colors.success   // completed / low priority
-backgroundColor: Colors.expired   // late / expired
-backgroundColor: Colors.danger    // high priority
+backgroundColor: Colors.danger    // late / expired / high priority
 backgroundColor: Colors.info      // medium priority
 ```
 

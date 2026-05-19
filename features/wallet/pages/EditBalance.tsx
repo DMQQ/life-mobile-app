@@ -149,7 +149,7 @@ export default function EditBalance({ navigation }: WalletScreens<"EditBalance">
 
                 <View style={styles.warningBanner}>
                     <View style={styles.warningRow}>
-                        <Feather name="alert-triangle" size={20} color={Colors.error} style={{ marginRight: 8 }} />
+                        <Feather name="alert-triangle" size={20} color={Colors.danger} style={{ marginRight: 8 }} />
                         <Text style={styles.warningTitle}>Important warning</Text>
                     </View>
                     <Text style={styles.warningText}>
@@ -262,13 +262,13 @@ const styles = StyleSheet.create({
         paddingLeft: 8,
     },
     warningBanner: {
-        backgroundColor: Colors.error + "15",
+        backgroundColor: Colors.danger + "15",
         borderRadius: 12,
         padding: 12,
         marginTop: -16,
         marginBottom: 20,
         borderWidth: 1,
-        borderColor: Colors.error,
+        borderColor: Colors.danger,
     },
     warningRow: {
         flexDirection: "row",
@@ -276,12 +276,12 @@ const styles = StyleSheet.create({
         marginBottom: 4,
     },
     warningTitle: {
-        color: Colors.error,
+        color: Colors.danger,
         fontSize: 16,
         fontWeight: "600",
     },
     warningText: {
-        color: Colors.error,
+        color: Colors.danger,
         fontSize: 13,
         lineHeight: 18,
     },

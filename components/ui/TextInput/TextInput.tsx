@@ -152,7 +152,7 @@ export default function Input({
                         : {
                               borderWidth: 2,
                               borderColor: error
-                                  ? Colors.error
+                                  ? Colors.danger
                                   : isFocused
                                     ? activeBorderColor
                                     : Color(Colors.primary).lighten(0.5).hex(),
@@ -241,7 +241,7 @@ Input.Icon = ({
                 {...props}
                 size={props.size || 25}
                 color={
-                    props.isError ? Colors.error : props.isFocused ? props.theme.colors.secondary : Colors.foreground
+                    props.isError ? Colors.danger : props.isFocused ? props.theme.colors.secondary : Colors.foreground
                 }
             />
         </Ripple>

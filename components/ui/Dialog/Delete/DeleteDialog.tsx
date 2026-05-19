@@ -19,10 +19,10 @@ export interface DeleteDialogProps {
 export default function DeleteDialog(props: DeleteDialogProps) {
     return (
         <Dialog
-            icon={<AntDesign name="delete" size={20} color={Colors.error} />}
+            icon={<AntDesign name="delete" size={20} color={Colors.danger} />}
             iconBackground
             iconBackgroundSize={40}
-            iconBackgroundColor={lowOpacity(Colors.error, 0.2)}
+            iconBackgroundColor={lowOpacity(Colors.danger, 0.2)}
             isVisible={!!props.isVisible}
             onDismiss={props.onDismiss}
             title="Confirm deletion"
@@ -34,9 +34,9 @@ export default function DeleteDialog(props: DeleteDialogProps) {
                 },
                 {
                     children: "Delete",
-                    fontStyle: { color: Colors.error },
+                    fontStyle: { color: Colors.danger },
                     style: {
-                        backgroundColor: lowOpacity(Colors.error, 0.2),
+                        backgroundColor: lowOpacity(Colors.danger, 0.2),
                         borderRadius: 10,
                         padding: 7.5,
                         paddingHorizontal: 15,

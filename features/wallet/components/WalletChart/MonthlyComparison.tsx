@@ -124,7 +124,7 @@ const CustomBarChart: React.FC<CustomBarChartProps> = ({ data, maxValue }) => {
     )
 }
 
-const blueText = Colors.foreground_muted
+const blueText = Colors.foreground_secondary
 
 const MonthlyCategoryComparison = ({ dateRange, type: viewType }: { dateRange: [string, string]; type: Types }) => {
     const [selectedCategories, setSelectedCategories] = useState<string[]>([])

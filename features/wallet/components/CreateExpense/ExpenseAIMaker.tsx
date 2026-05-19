@@ -411,7 +411,7 @@ export function FloatingProcessingView({
                                     }}
                                 >
                                     <Ripple
-                                        style={[styles.aiConfirmButton, { backgroundColor: Colors.error }]}
+                                        style={[styles.aiConfirmButton, { backgroundColor: Colors.danger }]}
                                         onPress={() => {
                                             handleRemove?.(expense?.id || "")
                                         }}

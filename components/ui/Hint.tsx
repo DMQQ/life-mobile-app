@@ -15,7 +15,7 @@ interface HintProps {
 const variantConfig: Record<HintVariant, { icon: React.ComponentProps<typeof Feather>["name"]; color: string }> = {
     info: { icon: "info", color: Colors.secondary },
     warning: { icon: "alert-triangle", color: Colors.warning },
-    error: { icon: "alert-circle", color: Colors.error },
+    error: { icon: "alert-circle", color: Colors.danger },
     success: { icon: "check-circle", color: "#34C759" },
 }
 

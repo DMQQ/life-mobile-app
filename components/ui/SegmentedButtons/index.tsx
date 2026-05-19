@@ -41,7 +41,7 @@ export default function SegmentedButtons(props: SegmentedButtonsProps) {
                     width: "100%",
                     backgroundColor: Colors.primary_light,
                     borderWidth: 2,
-                    borderColor: props.isError ? Colors.error : Colors.primary_light,
+                    borderColor: props.isError ? Colors.danger : Colors.primary_light,
                     borderRadius: 5,
                     marginBottom: 10,
                 },

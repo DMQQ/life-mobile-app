@@ -100,7 +100,7 @@ export default function UpdateProgressModal({
           {(f) => {
             const color = (p: RenderComponentProps) =>
               p.isError
-                ? Colors.error
+                ? Colors.danger
                 : p.isFocused
                 ? Colors.secondary
                 : Colors.primary_lighter;

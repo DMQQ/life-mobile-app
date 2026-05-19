@@ -24,7 +24,7 @@ interface GlassButtonProps {
 
 const variantColor: Record<GlassButtonVariant, string> = {
     default: Colors.foreground,
-    destructive: Colors.error,
+    destructive: Colors.danger,
     accent: Colors.secondary,
 }
 

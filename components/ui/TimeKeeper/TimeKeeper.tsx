@@ -87,7 +87,7 @@ function TimeKeeper(props: TimeKeeperProps) {
     () =>
       isStopped
         ? Color(Colors.ternary).alpha(0.25).string()
-        : Color(Colors.error).alpha(0.25).string(),
+        : Color(Colors.danger).alpha(0.25).string(),
     [isStopped]
   );
 
@@ -123,7 +123,7 @@ function TimeKeeper(props: TimeKeeperProps) {
         >
           <Ionicons
             name={isStopped ? "play" : "pause"}
-            color={isStopped ? Colors.ternary : Colors.error}
+            color={isStopped ? Colors.ternary : Colors.danger}
             size={30}
           />
         </Ripple>

@@ -161,7 +161,7 @@ export default function ExerciseTile({
             onPress={() => {}}
             fontStyle={{ fontSize: 15 }}
             type="contained"
-            style={{ backgroundColor: Colors.error, flex: 3, marginRight: 20 }}
+            style={{ backgroundColor: Colors.danger, flex: 3, marginRight: 20 }}
           >
             Remove
           </Button>

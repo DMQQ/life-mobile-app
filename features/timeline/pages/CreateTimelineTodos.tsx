@@ -229,7 +229,7 @@ export const Todo = ({
 
             {showRemove && (
                 <IconButton
-                    icon={<AntDesign name="close" size={18} color={Colors.error} />}
+                    icon={<AntDesign name="close" size={18} color={Colors.danger} />}
                     onPress={todo.onRemove}
                     style={{ margin: 0, marginLeft: 8 }}
                 />

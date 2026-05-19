@@ -43,7 +43,7 @@ export default function AnimatedSelector<T>({
     textStyle,
     selectorColor = lowOpacity(Colors.secondary, 0.2),
     activeTextColor = Colors.secondary_light_1,
-    inactiveTextColor = Colors.foreground_muted,
+    inactiveTextColor = Colors.foreground_secondary,
     hapticFeedback = true,
     scale = 1,
 }: AnimatedSelectorProps<T>) {

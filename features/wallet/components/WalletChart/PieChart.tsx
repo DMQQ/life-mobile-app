@@ -12,7 +12,7 @@ interface PieChartProps {
     centerLabel?: { title: string; subtitle: string; color?: string }
 }
 
-const blueText = Colors.foreground_muted
+const blueText = Colors.foreground_secondary
 
 export default function PieChart(props: PieChartProps) {
     const mappedData =

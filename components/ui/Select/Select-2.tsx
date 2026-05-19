@@ -79,7 +79,7 @@ export default function Select<T>(props: SelectProps<T>) {
             width: "100%", //(style as any)?.width ?? Layout.screen.width * 0.95,
             borderWidth: 2,
             borderColor: false
-              ? Colors.error
+              ? Colors.danger
               : isFocused
               ? Colors.secondary
               : Colors.primary_light,

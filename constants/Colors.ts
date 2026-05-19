@@ -51,20 +51,18 @@ const theme = {
     ternary_light_1: getItem("theme_ternary_light_1") ?? Color(base_ternary).lighten(0.25).string(),
     ternary_light_2: getItem("theme_ternary_light_2") ?? Color(base_ternary).lighten(0.5).string(),
 
-    // ── Status & semantic ──
-    error: getItem("theme_error") ?? "#f44336",
-    warning: getItem("theme_warning") ?? "orange",
-    warning_amber: getItem("theme_warning_amber") ?? "#FFC107",
-    success: getItem("theme_success") ?? "#34C759",
+    // ── Danger / error / expired ──
     danger: getItem("theme_danger") ?? "#FF3B30",
+
+    // ── Status & semantic ──
+    warning: getItem("theme_warning") ?? "#FFC107",
+    success: getItem("theme_success") ?? "#34C759",
     info: getItem("theme_info") ?? "#007AFF",
-    expired: getItem("theme_expired") ?? "#BA4343",
 
     // ── Financial indicators ──
     positive: getItem("theme_positive") ?? "#66E875",
     negative: getItem("theme_negative") ?? "#F07070",
     chart_positive: getItem("theme_chart_positive") ?? "#4ECDC4",
-    chart_negative: getItem("theme_chart_negative") ?? "#FF8A80",
 
     // ── Text ──
     text_light: getItem("theme_text_light") ?? "#FAF8FF",
@@ -73,15 +71,11 @@ const theme = {
     // ── Foreground ──
     foreground: getItem("theme_foreground") ?? base_foreground,
     foreground_secondary: getItem("theme_foreground_secondary") ?? Color(base_foreground).alpha(0.7).string(),
-    foreground_muted: getItem("theme_foreground_muted") ?? Color(base_foreground).alpha(0.6).string(),
     foreground_disabled: getItem("theme_foreground_disabled") ?? Color(base_foreground).alpha(0.4).string(),
-    foreground_placeholder: getItem("theme_foreground_placeholder") ?? Color(base_foreground).alpha(0.3).string(),
     foreground_hairline: getItem("theme_foreground_hairline") ?? Color(base_foreground).alpha(0.08).string(),
 
-    // ── Overlays ──
+    // ── Overlay ──
     overlay: getItem("theme_overlay") ?? "rgba(0,0,0,0.5)",
-    overlay_heavy: getItem("theme_overlay_heavy") ?? "rgba(0,0,0,0.75)",
-    overlay_light: getItem("theme_overlay_light") ?? "rgba(0,0,0,0.2)",
 
     // ── Borders ──
     borderColor: getItem("theme_borderColor") ?? Color(Color(base_primary).lighten(0.4).string()).lighten(0.5).hex(),

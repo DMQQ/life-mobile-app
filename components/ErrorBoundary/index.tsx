@@ -166,7 +166,7 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 24,
         fontWeight: "600",
-        color: Colors.error,
+        color: Colors.danger,
     },
     scrollView: {
         flex: 1,
@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
     },
     errorText: {
         fontSize: 14,
-        color: Colors.error,
+        color: Colors.danger,
         backgroundColor: Colors.primary_lighter,
         padding: 12,
         borderRadius: 6,

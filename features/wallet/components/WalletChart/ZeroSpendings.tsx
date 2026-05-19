@@ -245,7 +245,7 @@ export default function ZeroExpenseStats() {
         return (
             <View style={styles.container}>
                 <View style={styles.errorContainer}>
-                    <Text variant="subtitle" color={Colors.error}>
+                    <Text variant="subtitle" color={Colors.danger}>
                         Unable to load zero expense data
                     </Text>
                 </View>

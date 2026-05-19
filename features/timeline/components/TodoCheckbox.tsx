@@ -22,7 +22,7 @@ export const TodoCheckbox = ({
             {isLoading ? (
                 <>
                     {completeLoading && <ActivityIndicator size="small" color={Colors.secondary} />}
-                    {removeLoading && <ActivityIndicator size="small" color={Colors.error} />}
+                    {removeLoading && <ActivityIndicator size="small" color={Colors.danger} />}
                 </>
             ) : (
                 <Checkbox checked={isCompleted} onPress={onToggleComplete} size={28} />

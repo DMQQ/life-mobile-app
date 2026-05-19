@@ -15,7 +15,7 @@ const button = {
     backgroundColor: Colors.primary_light,
 }
 
-const blueText = Colors.foreground_muted
+const blueText = Colors.foreground_secondary
 
 const DateRangePicker = (props: { filters: Filters; dispatch: React.Dispatch<Action> }) => {
     const DateRanges = [

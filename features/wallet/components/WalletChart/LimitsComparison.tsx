@@ -101,8 +101,8 @@ const CustomLimitChart: React.FC<CustomLimitChartProps> = ({ data, maxValue }) =
                                 index={index}
                                 barWidth={BAR_WIDTH}
                                 marginRight={BAR_SPACING}
-                                color={item.exceeded ? Colors.error : undefined}
-                                labelColor={item.exceeded ? Colors.error : Colors.secondary}
+                                color={item.exceeded ? Colors.danger : undefined}
+                                labelColor={item.exceeded ? Colors.danger : Colors.secondary}
                                 valueLabel={item.spent > 0 ? item.spent.toFixed(0) : undefined}
                             />
                         ))}
@@ -113,7 +113,7 @@ const CustomLimitChart: React.FC<CustomLimitChartProps> = ({ data, maxValue }) =
     )
 }
 
-const blueText = Colors.foreground_muted
+const blueText = Colors.foreground_secondary
 
 interface CategoryChartData {
     category: string
@@ -362,7 +362,7 @@ const LimitsComparisonComponent = ({ dateRange }: { dateRange: [string, string] 
                     <Text style={styles.legendText}>Limit</Text>
                 </View>
                 <View style={styles.legendItem}>
-                    <View style={[styles.legendIndicator, { backgroundColor: Colors.error }]} />
+                    <View style={[styles.legendIndicator, { backgroundColor: Colors.danger }]} />
                     <Text style={styles.legendText}>Exceeded</Text>
                 </View>
             </View>

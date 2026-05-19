@@ -123,7 +123,7 @@ export default function SearchResults<T extends SearchItem = SearchItem>({
         if (error) {
             return (
                 <View style={styles.emptyState}>
-                    <Feather name="alert-circle" size={48} color={Colors.error} />
+                    <Feather name="alert-circle" size={48} color={Colors.danger} />
                     <Text style={styles.emptyStateText}>Search Error</Text>
                     <Text style={styles.emptyStateSubtext}>{error}</Text>
                 </View>
