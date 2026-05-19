@@ -219,12 +219,7 @@ function WalletCharts({ navigation }: any) {
                                 }}
                                 buttonComponent={({ onPress }) => (
                                     <IconButton
-                                        icon={<Feather name="calendar" size={15} color="#fff" />}
-                                        style={{
-                                            backgroundColor: Colors.primary_lighter,
-                                            height: 35,
-                                            paddingHorizontal: 10,
-                                        }}
+                                        icon={<Feather name="calendar" size={20} color="#fff" />}
                                         onPress={onPress}
                                     />
                                 )}

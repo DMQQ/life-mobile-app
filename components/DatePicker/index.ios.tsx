@@ -7,15 +7,15 @@ import {
     RNHostView,
     Button as SwiftButton,
     Spacer,
-    ScrollView as SwiftScrollView,
+    Text as SwiftText,
 } from "@expo/ui/swift-ui"
-import { datePickerStyle, frame, padding, bold, scrollTargetBehavior } from "@expo/ui/swift-ui/modifiers"
+import { datePickerStyle, frame, padding } from "@expo/ui/swift-ui/modifiers"
 import Colors from "@/constants/Colors"
 import moment from "moment"
 import { ReactElement, useState } from "react"
 import { Pressable, Text, View } from "react-native"
 import GlassView from "@/components/ui/GlassView"
-import { AntDesign, MaterialIcons } from "@expo/vector-icons"
+import { Feather } from "@expo/vector-icons"
 
 export interface DatePickerRef {
     open: () => void
@@ -33,7 +33,6 @@ interface DatePickerProps {
     buttonComponent?: (prop: { start: Date; end: Date; onPress: () => void }) => ReactElement
     iconButton?: boolean
     controlRef?: React.MutableRefObject<DatePickerRef | null>
-
     clear?: boolean
 }
 
@@ -50,6 +49,7 @@ export default function DatePicker({
     const [show, setShow] = useState(false)
     const [pendingStart, setPendingStart] = useState<Date>(dates.start)
     const [pendingEnd, setPendingEnd] = useState<Date>(dates.end)
+    const [step, setStep] = useState<"start" | "end">("start")
 
     if (controlRef) {
         controlRef.current = {
@@ -75,7 +75,7 @@ export default function DatePicker({
                 onPress={() => setShow((p) => !p)}
                 style={{ width: 35, height: 35, alignItems: "center", justifyContent: "center" }}
             >
-                <MaterialIcons name="date-range" size={20} color={Colors.foreground} />
+                <Feather name="calendar" size={20} color={Colors.foreground} />
             </Pressable>
         </RNHostView>
     ) : buttonComponent ? (
@@ -97,7 +97,7 @@ export default function DatePicker({
                     }}
                 >
                     <Text style={{ color: Colors.foreground, fontSize: 17, fontWeight: "600" }}>{title}</Text>
-                    <AntDesign name="down" size={10} color={Colors.foreground} />
+                    <Feather name="chevron-down" size={10} color={Colors.foreground} />
                 </Pressable>
             </Wrapper>
         </RNHostView>
@@ -126,13 +126,14 @@ export default function DatePicker({
     }
 
     return (
-        <Host matchContents>
+        <Host style={{ width: 35, height: 35 }}>
             <Popover
                 isPresented={show}
                 onIsPresentedChange={(v) => {
                     if (!v) {
                         setPendingStart(dates.start)
                         setPendingEnd(dates.end)
+                        setStep("start")
                     }
                     setShow(v)
                 }}
@@ -140,24 +141,21 @@ export default function DatePicker({
                 <Popover.Trigger>{triggerContent}</Popover.Trigger>
                 <Popover.Content>
                     <VStack modifiers={[frame({ width: 300 }), padding({ all: 10 })]}>
-                        <SwiftScrollView
-                            axes="horizontal"
-                            showsIndicators={false}
-                            modifiers={[frame({ width: 280 }), scrollTargetBehavior("paging")]}
-                        >
-                            <HStack>
-                                <SwiftDatePicker
-                                    selection={pendingStart}
-                                    onDateChange={(d) => setPendingStart(d)}
-                                    modifiers={[datePickerStyle("graphical"), frame({ width: 270, height: 280 })]}
-                                />
-                                <SwiftDatePicker
-                                    selection={pendingEnd}
-                                    onDateChange={(d) => setPendingEnd(d)}
-                                    modifiers={[datePickerStyle("graphical"), frame({ width: 270, height: 280 })]}
-                                />
-                            </HStack>
-                        </SwiftScrollView>
+                        <SwiftText>{step === "start" ? "Select start date" : "Select end date"}</SwiftText>
+                        <SwiftDatePicker
+                            selection={step === "start" ? pendingStart : pendingEnd}
+                            onDateChange={(d) => {
+                                if (step === "start") {
+                                    setPendingStart(d)
+                                    setStep("end")
+                                } else {
+                                    setDates({ start: pendingStart, end: d })
+                                    setShow(false)
+                                    setStep("start")
+                                }
+                            }}
+                            modifiers={[datePickerStyle("graphical"), frame({ width: 270, height: 280 })]}
+                        />
                         <HStack modifiers={[frame({ maxWidth: 99999 }), padding({ horizontal: 16, vertical: 12 })]}>
                             <SwiftButton
                                 label="Cancel"
@@ -165,18 +163,12 @@ export default function DatePicker({
                                 onPress={() => {
                                     setPendingStart(dates.start)
                                     setPendingEnd(dates.end)
+                                    setStep("start")
                                     setShow(false)
                                 }}
                             />
                             <Spacer />
-                            <SwiftButton
-                                label="Apply"
-                                onPress={() => {
-                                    setDates({ start: pendingStart, end: pendingEnd })
-                                    setShow(false)
-                                }}
-                                modifiers={[bold()]}
-                            />
+                            {step === "end" && <SwiftButton label="← Back" onPress={() => setStep("start")} />}
                         </HStack>
                     </VStack>
                 </Popover.Content>

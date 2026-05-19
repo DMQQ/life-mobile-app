@@ -14,35 +14,27 @@ const ChartSwitcher = () => {
     const [activeChart, setActiveChart] = useState<ChartType>("weekly")
 
     return (
-        <Section
-            title="Overview"
-            headerRight={
-                <View style={{ width: 200 }}>
-                    <GroupSelector
-                        size="xs"
-                        options={[
-                            { label: "Weekly", value: "weekly" as ChartType },
-                            { label: "Prediction", value: "prediction" as ChartType },
-                        ]}
-                        value={activeChart}
-                        onChange={(value) => setActiveChart(value)}
-                    />
-                </View>
-            }
-        >
-            <View style={styles.container}>
-                <View style={styles.chartContent}>
-                    {activeChart === "weekly" ? (
-                        <Animated.View entering={FadeIn} exiting={FadeOut} key="weekly">
-                            <WeeklyComparisonChart />
-                        </Animated.View>
-                    ) : (
-                        <Animated.View entering={FadeIn} exiting={FadeOut} key="prediction">
-                            <BalancePredictionChart />
-                        </Animated.View>
-                    )}
-                </View>
+        <Section title="Overview" cardStyle={styles.container}>
+            <View style={styles.chartContent}>
+                {activeChart === "weekly" ? (
+                    <Animated.View entering={FadeIn} exiting={FadeOut} key="weekly">
+                        <WeeklyComparisonChart />
+                    </Animated.View>
+                ) : (
+                    <Animated.View entering={FadeIn} exiting={FadeOut} key="prediction">
+                        <BalancePredictionChart />
+                    </Animated.View>
+                )}
             </View>
+
+            <GroupSelector
+                options={[
+                    { label: "Weekly", value: "weekly" as ChartType },
+                    { label: "Prediction", value: "prediction" as ChartType },
+                ]}
+                value={activeChart}
+                onChange={(value) => setActiveChart(value)}
+            />
         </Section>
     )
 }

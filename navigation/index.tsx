@@ -12,7 +12,7 @@ import { navigationRef } from "./ref"
 
 export { navigationRef } from "./ref"
 
-const TAB_ROOT_SCREENS = new Set(["Root", "Goals", "Wallet", "Timeline", "AiWidget"])
+const TAB_ROOT_SCREENS = new Set(["HomeRoot", "Goals", "Wallet", "Timeline", "AiWidget"])
 
 const Tab = createNativeBottomTabNavigator()
 

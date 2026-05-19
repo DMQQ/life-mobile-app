@@ -209,7 +209,7 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                 scrollY={scrollY}
                 buttons={[
                     {
-                        icon: <Feather name="edit-2" size={20} color={Colors.foreground} />,
+                        icon: "pencil",
                         onPress: () => navigation.navigate("EditSubscription", { subscription }),
                     },
                 ]}

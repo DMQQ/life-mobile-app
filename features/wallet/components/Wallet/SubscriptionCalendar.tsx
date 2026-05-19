@@ -16,6 +16,7 @@ interface Props {
     expenses?: Expense[]
 
     style?: StyleProp<ViewStyle>
+    width?: number
 }
 
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
@@ -135,7 +136,7 @@ const DayCell = memo(
     },
 )
 
-export default function SubscriptionCalendar({ subscriptions = [], expenses = [], style }: Props) {
+export default function SubscriptionCalendar({ subscriptions = [], expenses = [], style, width }: Props) {
     const currentMonth = moment().startOf("month")
     const [selectedDay, setSelectedDay] = useState<string | null>(null)
     const navigation = useNavigation<any>()
@@ -178,7 +179,7 @@ export default function SubscriptionCalendar({ subscriptions = [], expenses = []
     const selectedSubs = selectedDay ? (billingMap.get(selectedDay) ?? []) : []
     const selectedExpenses = selectedDay ? (expenseMap.get(selectedDay) ?? []) : []
 
-    const [size, setSize] = useState({ width: Layout.screen.width, height: 420 })
+    const size = useMemo(() => ({ width: width ?? Layout.screen.width - 60 }), [width])
 
     const cellSize = size.width / 7 - 4
 
@@ -204,12 +205,7 @@ export default function SubscriptionCalendar({ subscriptions = [], expenses = []
     )
 
     return (
-        <View
-            style={{ minHeight: 420 }}
-            onLayout={(event) => {
-                setSize(event.nativeEvent.layout)
-            }}
-        >
+        <View style={{ minHeight: 420 }}>
             <View style={[styles.calendarCard, style]}>
                 <View style={styles.headerCenter}>
                     <View style={styles.monthNav}>

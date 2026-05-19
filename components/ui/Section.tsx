@@ -38,15 +38,13 @@ interface SectionProps {
 
 export default function Section({ title, headerRight, children, noGap, cardStyle }: SectionProps) {
     return (
-        <View style={!noGap && s.sectionGap}>
+        <Animated.View style={!noGap && s.sectionGap} layout={LinearTransition}>
             <View style={s.headerRow}>
                 <Text style={s.sectionLabel}>{title}</Text>
                 {headerRight}
             </View>
 
-            <Animated.View layout={LinearTransition} style={[s.card, cardStyle]}>
-                {children}
-            </Animated.View>
-        </View>
+            <View style={[s.card, cardStyle]}>{children}</View>
+        </Animated.View>
     )
 }

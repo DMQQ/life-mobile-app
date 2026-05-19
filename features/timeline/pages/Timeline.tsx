@@ -88,7 +88,7 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
                 buttons={[
                     !isSearchActive
                         ? {
-                              icon: "line.3.horizontal" as SFSymbol,
+                              icon: "calendar" as SFSymbol,
                               contextMenu: {
                                   items: [
                                       {

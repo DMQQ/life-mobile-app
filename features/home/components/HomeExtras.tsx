@@ -4,7 +4,7 @@ import { CategoryIcon, CategoryUtils } from "@/features/wallet/components/Expens
 import SubscriptionCalendar from "@/features/wallet/components/Wallet/SubscriptionCalendar"
 import { gql, useQuery } from "@apollo/client"
 import { useState } from "react"
-import { Pressable, StyleSheet, Text, View } from "react-native"
+import { StyleSheet, Text, View } from "react-native"
 import Color from "color"
 import moment from "moment"
 import GroupSelector from "@/components/ui/GroupSelector"
@@ -70,32 +70,24 @@ export default function HomeExtras() {
     const allExpenses = (data?.wallet?.expenses2 ?? []).flatMap((m: any) => m.expenses ?? [])
 
     return (
-        <Section
-            title={active === "limits" ? "Monthly Limits" : "Recent activity"}
-            headerRight={
-                <View style={{ width: 200 }}>
-                    <GroupSelector
-                        size="xs"
-                        options={[
-                            { label: "Calendar", value: "calendar" as const },
-                            { label: "Limits", value: "limits" as const },
-                        ]}
-                        value={active}
-                        onChange={(val) => setActive(val)}
-                    />
-                </View>
-            }
-        >
-            <View style={styles.card}>
-                {active === "limits" ? (
-                    <LimitsContent limits={limits} />
-                ) : (
-                    <SubscriptionCalendar
-                        style={{ padding: 0, backgroundColor: Colors.primary_lighter }}
-                        expenses={allExpenses}
-                    />
-                )}
-            </View>
+        <Section title={active === "limits" ? "Monthly Limits" : "Recent activity"} cardStyle={styles.card}>
+            {active === "limits" ? (
+                <LimitsContent limits={limits} />
+            ) : (
+                <SubscriptionCalendar
+                    style={{ padding: 0, backgroundColor: Colors.primary_lighter }}
+                    expenses={allExpenses}
+                />
+            )}
+
+            <GroupSelector
+                options={[
+                    { label: "Calendar", value: "calendar" as const },
+                    { label: "Limits", value: "limits" as const },
+                ]}
+                value={active}
+                onChange={(val) => setActive(val)}
+            />
         </Section>
     )
 }
@@ -138,6 +130,7 @@ const styles = StyleSheet.create({
     card: {
         width: Layout.screen.width - 30,
         padding: 15,
+        gap: 15,
     },
     sectionTitle: {
         fontSize: 11,
