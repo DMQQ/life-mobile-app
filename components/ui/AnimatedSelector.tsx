@@ -2,7 +2,6 @@ import Button from "@/components/ui/Button/Button"
 import Colors from "@/constants/Colors"
 import Layout from "@/constants/Layout"
 import lowOpacity from "@/utils/functions/lowOpacity"
-import Color from "color"
 import React from "react"
 import { ScrollView, StyleSheet } from "react-native"
 import Feedback from "react-native-haptic-feedback"
@@ -32,7 +31,6 @@ interface AnimatedSelectorProps<T> {
     scale?: number
 }
 
-const blueText = Color(Colors.primary).lighten(10).string()
 
 export default function AnimatedSelector<T>({
     items,
@@ -45,7 +43,7 @@ export default function AnimatedSelector<T>({
     textStyle,
     selectorColor = lowOpacity(Colors.secondary, 0.2),
     activeTextColor = Colors.secondary_light_1,
-    inactiveTextColor = blueText,
+    inactiveTextColor = Colors.foreground_muted,
     hapticFeedback = true,
     scale = 1,
 }: AnimatedSelectorProps<T>) {

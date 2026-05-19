@@ -2,7 +2,6 @@ import { PieChart as GFTPieChart } from "react-native-gifted-charts"
 import Colors, { secondary_candidates } from "@/constants/Colors"
 import Layout from "@/constants/Layout"
 import { View } from "react-native"
-import Color from "color"
 import Text from "@/components/ui/Text/Text"
 
 interface PieChartProps {
@@ -13,7 +12,7 @@ interface PieChartProps {
     centerLabel?: { title: string; subtitle: string; color?: string }
 }
 
-const blueText = Color(Colors.primary).lighten(10).string()
+const blueText = Colors.foreground_muted
 
 export default function PieChart(props: PieChartProps) {
     const mappedData =

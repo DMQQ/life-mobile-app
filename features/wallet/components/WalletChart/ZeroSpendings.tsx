@@ -452,7 +452,7 @@ const styles = StyleSheet.create({
         borderRadius: 15,
         alignItems: "center",
         borderWidth: 1,
-        borderColor: Color(Colors.primary_lighter).lighten(0.5).string(),
+        borderColor: Colors.borderColor,
     },
     itemContent: {
         flex: 1,

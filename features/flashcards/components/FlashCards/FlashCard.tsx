@@ -99,7 +99,7 @@ const styles = StyleSheet.create({
     transform: [{ rotateX: "0deg" }],
   },
   backCard: {
-    backgroundColor: Color(Colors.primary_lighter).lighten(0.5).hex(),
+    backgroundColor: Colors.borderColor,
     transform: [{ rotateX: "180deg" }],
   },
   text: {

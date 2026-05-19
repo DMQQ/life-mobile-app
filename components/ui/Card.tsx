@@ -48,6 +48,6 @@ const styles = StyleSheet.create({
         width: "100%",
         backgroundColor: Colors.primary_lighter,
         borderWidth: 1,
-        borderColor: Color(Colors.primary_lighter).lighten(0.5).hex(),
+        borderColor: Colors.borderColor,
     },
 })

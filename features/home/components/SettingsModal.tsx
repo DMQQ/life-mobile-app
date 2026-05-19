@@ -233,7 +233,7 @@ const s = StyleSheet.create({
     colorDot: { width: 13, height: 13, borderRadius: 7 },
 
     subCard: {
-        backgroundColor: Color(Colors.primary).lighten(0.25).string(),
+        backgroundColor: Colors.primary_light,
         borderRadius: 16,
         overflow: "hidden",
         marginBottom: 12,
@@ -479,24 +479,129 @@ function ToggleRow({
     )
 }
 
-const COLOR_ROLES = [
-    { key: "primary" as const, label: "Background", sub: "Main app background" },
-    { key: "secondary" as const, label: "Accent", sub: "Buttons & highlights" },
-    { key: "ternary" as const, label: "Highlight", sub: "Badges & tags" },
-    { key: "foreground" as const, label: "Text", sub: "Primary text color" },
+interface ColorConfig {
+    key: string
+    label: string
+    sub: string
+    group?: "primary" | "secondary"
+}
+
+const ALL_COLORS: ColorConfig[] = [
+    // ── Core ──
+    { key: "primary", label: "Background", sub: "Main screen background" },
+    { key: "secondary", label: "Accent", sub: "Buttons, CTAs, highlights" },
+    { key: "ternary", label: "Ternary", sub: "Supplementary accent" },
+    { key: "foreground", label: "Text", sub: "Primary text color" },
+
+    // ── Primary variants (collapsible) ──
+    { key: "primary_light", label: "Light", sub: "Cards, inputs (+25%)", group: "primary" },
+    { key: "primary_lighter", label: "Lighter", sub: "Inner containers (+40%)", group: "primary" },
+    { key: "primary_surface", label: "Surface", sub: "Chart items (+30%)", group: "primary" },
+    { key: "primary_lightest", label: "Lightest", sub: "Chart containers (+50%)", group: "primary" },
+    { key: "primary_faded", label: "Faded", sub: "Elevated surfaces (+80%)", group: "primary" },
+    { key: "primary_dark", label: "Dark", sub: "Headers (-25%)", group: "primary" },
+    { key: "primary_darker", label: "Darker", sub: "Calendar bg (-50%)", group: "primary" },
+
+    // ── Secondary variants (collapsible) ──
+    { key: "secondary_light_1", label: "Light", sub: "Subtle accents (+25%)", group: "secondary" },
+    { key: "secondary_light_2", label: "Lighter", sub: "Dimmed accents (+50%)", group: "secondary" },
+    { key: "secondary_dark_1", label: "Dark", sub: "Event backgrounds (-25%)", group: "secondary" },
+    { key: "secondary_dark_2", label: "Darker", sub: "Deep shadows (-50%)", group: "secondary" },
+
+    // ── Status ──
+    { key: "error", label: "Error", sub: "Error states" },
+    { key: "warning", label: "Warning", sub: "Warning color" },
+    { key: "warning_amber", label: "Warning Amber", sub: "Amber warning" },
+    { key: "success", label: "Success", sub: "Success states" },
+    { key: "danger", label: "Danger", sub: "Destructive actions" },
+    { key: "info", label: "Info", sub: "Info indicators" },
+    { key: "expired", label: "Expired", sub: "Overdue status" },
+
+    // ── Financial ──
+    { key: "positive", label: "Positive", sub: "Income amount" },
+    { key: "negative", label: "Negative", sub: "Expense amount" },
+    { key: "chart_positive", label: "Chart Pos", sub: "Chart positive" },
+    { key: "chart_negative", label: "Chart Neg", sub: "Chart negative" },
+
+    // ── Text ──
+    { key: "text_light", label: "Text Light", sub: "High-contrast text" },
+    { key: "text_dark", label: "Text Dark", sub: "Placeholder text" },
+
+    // ── Overlays ──
+    { key: "overlay", label: "Overlay", sub: "Modal scrim (50%)" },
+    { key: "overlay_heavy", label: "Overlay Heavy", sub: "Image viewer (75%)" },
+    { key: "overlay_light", label: "Overlay Light", sub: "Subtle dim (20%)" },
+
+    // ── Foreground alpha variants ──
+    { key: "foreground_secondary", label: "Fg Secondary", sub: "Body text (70%)" },
+    { key: "foreground_muted", label: "Fg Muted", sub: "Meta text (60%)" },
+    { key: "foreground_disabled", label: "Fg Disabled", sub: "Disabled text (40%)" },
+    { key: "foreground_placeholder", label: "Fg Placeholder", sub: "Placeholder (30%)" },
+    { key: "foreground_hairline", label: "Fg Hairline", sub: "Separators (8%)" },
+
+    // ── Ternary variants ──
+    { key: "ternary_light_1", label: "Ternary Light", sub: "Light ternary (+25%)" },
+    { key: "ternary_light_2", label: "Ternary Lighter", sub: "Lighter ternary (+50%)" },
+
+    // ── Border ──
+    { key: "borderColor", label: "Border", sub: "Card borders" },
 ]
 
+const GROUP_LABELS: Record<string, string> = {
+    primary: "Primary Variants",
+    secondary: "Secondary Variants",
+}
+
 const CARD_WIDTH = (Layout.screen.width - 32 - 10) / 2
+
+function CollapsibleSection({
+    label,
+    count,
+    expanded,
+    onToggle,
+    children,
+}: {
+    label: string
+    count: number
+    expanded: boolean
+    onToggle: () => void
+    children: React.ReactNode
+}) {
+    return (
+        <View>
+            <TouchableOpacity
+                onPress={onToggle}
+                style={ts.groupHeader}
+                activeOpacity={0.7}
+            >
+                <Feather name={expanded ? "chevron-down" : "chevron-right"} size={14} color={Colors.foreground_secondary} />
+                <Text style={ts.groupLabel}>{label}</Text>
+                <View style={ts.groupBadge}>
+                    <Text style={ts.groupBadgeText}>{count}</Text>
+                </View>
+            </TouchableOpacity>
+            {expanded && children}
+        </View>
+    )
+}
 
 function ThemeSection() {
     const [mode, setMode] = useState<"presets" | "custom">("presets")
     const [selectedPalette, setSelectedPalette] = useState<ColorPalette | null>(null)
-    const [customColors, setCustomColors] = useState({
-        primary: Colors.primary,
-        secondary: Colors.secondary,
-        ternary: Colors.ternary,
-        foreground: Colors.foreground,
+    const [customColors, setCustomColors] = useState<Record<string, string>>(() => {
+        const initial: Record<string, string> = {}
+        ALL_COLORS.forEach((cfg) => {
+            initial[cfg.key] = (Colors as any)[cfg.key] ?? ""
+        })
+        return initial
     })
+    const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
+        primary: false,
+        secondary: false,
+    })
+
+    const toggleGroup = (group: string) =>
+        setExpandedGroups((prev) => ({ ...prev, [group]: !prev[group] }))
 
     const preview =
         mode === "custom"
@@ -508,6 +613,13 @@ function ThemeSection() {
                   foreground: Colors.foreground,
               })
 
+    const clearGranularOverrides = async () => {
+        const results = ALL_COLORS.map((cfg) =>
+            SecureStore.deleteItemAsync(`theme_${cfg.key}`).catch(() => {}),
+        )
+        await Promise.all(results)
+    }
+
     const applyTheme = async (
         palette: Omit<ColorPalette, "name" | "category"> & { name: string; category: string },
     ) => {
@@ -515,19 +627,34 @@ function ThemeSection() {
         await SecureStore.setItemAsync("color_scheme_secondary", palette.secondary)
         await SecureStore.setItemAsync("color_scheme_ternary", palette.ternary)
         await SecureStore.setItemAsync("color_scheme_foreground", palette.foreground)
+        await clearGranularOverrides()
+        await reloadAppAsync()
+    }
+
+    const applyCustom = async () => {
+        const saves = ALL_COLORS.map((cfg) =>
+            SecureStore.setItemAsync(`theme_${cfg.key}`, customColors[cfg.key]),
+        )
+        await Promise.all(saves)
         await reloadAppAsync()
     }
 
     const handleApply = async () => {
         Feedback.trigger("impactMedium")
-        if (mode === "custom") {
-            await applyTheme({ name: "Custom", ...customColors, category: "Custom" })
-        } else if (selectedPalette) {
+        if (mode === "presets" && selectedPalette) {
             await applyTheme(selectedPalette)
+        } else if (mode === "custom") {
+            await applyCustom()
         }
     }
 
     const canApply = mode === "custom" || selectedPalette !== null
+
+    // Separate colors by group
+    const coreColors = ALL_COLORS.filter((c) => !c.group)
+    const groupedColors = ALL_COLORS.filter((c) => c.group)
+    const primaryColors = groupedColors.filter((c) => c.group === "primary")
+    const secondaryColors = groupedColors.filter((c) => c.group === "secondary")
 
     return (
         <View style={ts.root}>
@@ -537,14 +664,8 @@ function ThemeSection() {
                     value={mode}
                     onChange={(m) => setMode(m)}
                     options={[
-                        {
-                            label: "Presets",
-                            value: "presets",
-                        },
-                        {
-                            label: "Custom",
-                            value: "custom",
-                        },
+                        { label: "Presets", value: "presets" },
+                        { label: "Custom", value: "custom" },
                     ]}
                 />
             </View>
@@ -553,7 +674,7 @@ function ThemeSection() {
             <View style={[ts.preview, { backgroundColor: preview.primary }]}>
                 <View style={{ flex: 1 }}>
                     <Text style={[ts.previewTitle, { color: preview.foreground }]}>
-                        {mode === "custom" ? "Custom" : (selectedPalette?.name ?? "Select a palette")}
+                        {mode === "custom" ? "Custom" : selectedPalette?.name ?? "Select a palette"}
                     </Text>
                     <Text style={[ts.previewSub, { color: Color(preview.foreground).alpha(0.5).string() }]}>
                         {preview.primary}
@@ -600,28 +721,129 @@ function ThemeSection() {
                 </View>
             ) : (
                 <View style={ts.colorRows}>
-                    {COLOR_ROLES.map((role, i) => (
-                        <View key={role.key} style={[ts.colorRow, i < COLOR_ROLES.length - 1 && ts.colorRowBorder]}>
-                            <View style={[ts.colorSwatch, { backgroundColor: customColors[role.key] }]} />
-                            <View style={{ flex: 1 }}>
-                                <Text style={ts.colorLabel}>{role.label}</Text>
-                                <Text style={ts.colorSub}>{role.sub}</Text>
-                            </View>
-                            <Host matchContents>
-                                <NativeColorPicker
-                                    selection={customColors[role.key]}
-                                    onSelectionChange={(c) => setCustomColors((p) => ({ ...p, [role.key]: c }))}
-                                    supportsOpacity={false}
-                                />
-                            </Host>
-                        </View>
+                    {/* Core colors */}
+                    {coreColors.map((cfg, i) => (
+                        <ColorRow
+                            key={cfg.key}
+                            color={customColors[cfg.key]}
+                            label={cfg.label}
+                            sub={cfg.sub}
+                            border={i < coreColors.length - 1}
+                            onChange={(c) => setCustomColors((p) => ({ ...p, [cfg.key]: c }))}
+                        />
                     ))}
+
+                    {/* Primary variants collapsible */}
+                    <CollapsibleSection
+                        label="Primary Variants"
+                        count={primaryColors.length}
+                        expanded={expandedGroups.primary}
+                        onToggle={() => toggleGroup("primary")}
+                    >
+                        {primaryColors.map((cfg) => (
+                            <ColorRow
+                                key={cfg.key}
+                                color={customColors[cfg.key]}
+                                label={cfg.label}
+                                sub={cfg.sub}
+                                border
+                                onChange={(c) => setCustomColors((p) => ({ ...p, [cfg.key]: c }))}
+                            />
+                        ))}
+                    </CollapsibleSection>
+
+                    {/* Secondary variants collapsible */}
+                    <CollapsibleSection
+                        label="Secondary Variants"
+                        count={secondaryColors.length}
+                        expanded={expandedGroups.secondary}
+                        onToggle={() => toggleGroup("secondary")}
+                    >
+                        {secondaryColors.map((cfg) => (
+                            <ColorRow
+                                key={cfg.key}
+                                color={customColors[cfg.key]}
+                                label={cfg.label}
+                                sub={cfg.sub}
+                                border
+                                onChange={(c) => setCustomColors((p) => ({ ...p, [cfg.key]: c }))}
+                            />
+                        ))}
+                    </CollapsibleSection>
+
+                    {/* Separator between grouped and remaining standalone */}
+                    {expandedGroups.primary || expandedGroups.secondary ? (
+                        <View style={ts.groupDivider} />
+                    ) : null}
+
+                    {/* Status, Financial, Text, Foreground variants, Overlays, Ternary, Border */}
+                    {[
+                        { label: "Status", keys: ["error", "warning", "warning_amber", "success", "danger", "info", "expired"] },
+                        { label: "Financial", keys: ["positive", "negative", "chart_positive", "chart_negative"] },
+                        { label: "Text", keys: ["text_light", "text_dark"] },
+                        { label: "Foreground Alpha", keys: ["foreground_secondary", "foreground_muted", "foreground_disabled", "foreground_placeholder", "foreground_hairline"] },
+                        { label: "Overlays", keys: ["overlay", "overlay_heavy", "overlay_light"] },
+                        { label: "Ternary", keys: ["ternary_light_1", "ternary_light_2"] },
+                        { label: "Border", keys: ["borderColor"] },
+                    ].map((section) => {
+                        const sectionColors = coreColors.filter((c) => section.keys.includes(c.key))
+                        if (sectionColors.length === 0) return null
+                        return (
+                            <View key={section.label}>
+                                {/* Small section label */}
+                                <View style={ts.colorSectionLabel}>
+                                    <Text style={ts.colorSectionLabelText}>{section.label}</Text>
+                                </View>
+                                {sectionColors.map((cfg) => (
+                                    <ColorRow
+                                        key={cfg.key}
+                                        color={customColors[cfg.key]}
+                                        label={cfg.label}
+                                        sub={cfg.sub}
+                                        border
+                                        onChange={(c) => setCustomColors((p) => ({ ...p, [cfg.key]: c }))}
+                                    />
+                                ))}
+                            </View>
+                        )
+                    })}
                 </View>
             )}
 
             <Button onPress={handleApply} disabled={!canApply} style={ts.applyBtn}>
                 Apply Theme
             </Button>
+        </View>
+    )
+}
+
+function ColorRow({
+    color,
+    label,
+    sub,
+    border,
+    onChange,
+}: {
+    color: string
+    label: string
+    sub: string
+    border: boolean
+    onChange: (c: string) => void
+}) {
+    return (
+        <View style={[ts.colorRow, border && ts.colorRowBorder]}>
+            <View style={[ts.colorSwatch, { backgroundColor: color }]} />
+            <View style={{ flex: 1 }}>
+                <Text style={ts.colorLabel}>{label}</Text>
+                <Text style={ts.colorSub}>{sub}</Text>
+            </View>
+            <Host matchContents>
+                <NativeColorPicker
+                    selection={color}
+                    onSelectionChange={onChange}
+                    supportsOpacity={false}
+                />
+            </Host>
         </View>
     )
 }
@@ -675,7 +897,7 @@ const ts = StyleSheet.create({
     },
 
     colorRows: {
-        backgroundColor: Color(Colors.primary).lighten(0.25).string(),
+        backgroundColor: Colors.primary_light,
         borderRadius: 18,
         overflow: "hidden",
     },
@@ -696,6 +918,38 @@ const ts = StyleSheet.create({
     },
     colorLabel: { color: Colors.text_light, fontSize: 15, fontWeight: "500" },
     colorSub: { color: Colors.foreground_secondary, fontSize: 12, marginTop: 1 },
+
+    groupHeader: {
+        flexDirection: "row",
+        alignItems: "center",
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+        gap: 8,
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        borderBottomColor: Colors.foreground_hairline,
+    },
+    groupLabel: { color: Colors.foreground_secondary, fontSize: 13, fontWeight: "600", flex: 1 },
+    groupBadge: {
+        backgroundColor: Colors.foreground_hairline,
+        borderRadius: 8,
+        paddingHorizontal: 7,
+        paddingVertical: 2,
+    },
+    groupBadgeText: { color: Colors.foreground_muted, fontSize: 11, fontWeight: "600" },
+    groupDivider: { height: StyleSheet.hairlineWidth, backgroundColor: Colors.foreground_hairline, marginVertical: 4 },
+
+    colorSectionLabel: {
+        paddingHorizontal: 16,
+        paddingTop: 12,
+        paddingBottom: 4,
+    },
+    colorSectionLabelText: {
+        color: Colors.text_dark,
+        fontSize: 11,
+        fontWeight: "600",
+        letterSpacing: 0.5,
+        textTransform: "uppercase",
+    },
 
     applyBtn: { borderRadius: 16 },
 })

@@ -481,7 +481,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         alignItems: "center",
         justifyContent: "center",
-        backgroundColor: Color(Colors.primary).lighten(0.25).hex(),
+        backgroundColor: Colors.primary_light,
         borderWidth: StyleSheet.hairlineWidth,
         borderColor: "rgba(255,255,255,0.08)",
     },

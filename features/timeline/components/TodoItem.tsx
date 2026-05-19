@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
     fileItem: {
         alignItems: "center",
         borderRadius: 10,
-        backgroundColor: Color(Colors.primary_lighter).lighten(0.5).toString(),
+        backgroundColor: Colors.borderColor,
         borderWidth: 1,
         borderColor: Color(Colors.primary_lighter).lighten(0.75).toString(),
     },

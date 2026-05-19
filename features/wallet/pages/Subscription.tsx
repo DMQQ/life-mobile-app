@@ -439,7 +439,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         padding: 15,
         borderBottomWidth: 1,
-        borderColor: Color(Colors.primary_lighter).lighten(0.5).hex(),
+        borderColor: Colors.borderColor,
     },
     icon: {
         paddingHorizontal: 7.5,

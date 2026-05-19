@@ -20,54 +20,78 @@ export const secondary_candidates = [
     "#34A3FA",
 ]
 
-const primary = getItem("color_scheme_primary") ?? "#0d0f14"
-
-const secondary = getItem("color_scheme_secondary") ?? secondary_candidates[secondary_candidates.length - 1]
-
-const foreground = getItem("color_scheme_foreground") ?? "#FFFFFF"
+// Base colors (set by preset themes, used as derivation source for variants)
+const base_primary = getItem("color_scheme_primary") ?? "#0d0f14"
+const base_secondary = getItem("color_scheme_secondary") ?? secondary_candidates[secondary_candidates.length - 1]
+const base_foreground = getItem("color_scheme_foreground") ?? "#FFFFFF"
+const base_ternary = getItem("color_scheme_ternary") ?? "#7B84FF"
 
 export const randColor = () => secondary_candidates[Math.floor(Math.random() * secondary_candidates.length)]
 
-const ternary = "#7B84FF"
-
 const theme = {
-    primary: primary,
-    primary_light: Color(primary).lighten(0.25).string(),
-    primary_lighter: Color(primary).lighten(0.4).string(),
+    // ── Primary palette ──
+    primary: getItem("theme_primary") ?? base_primary,
+    primary_light: getItem("theme_primary_light") ?? Color(base_primary).lighten(0.25).string(),
+    primary_lighter: getItem("theme_primary_lighter") ?? Color(base_primary).lighten(0.4).string(),
+    primary_surface: getItem("theme_primary_surface") ?? Color(base_primary).lighten(0.3).string(),
+    primary_lightest: getItem("theme_primary_lightest") ?? Color(base_primary).lighten(0.5).string(),
+    primary_faded: getItem("theme_primary_faded") ?? Color(base_primary).lighten(0.8).string(),
+    primary_dark: getItem("theme_primary_dark") ?? Color(base_primary).darken(0.25).hex(),
+    primary_darker: getItem("theme_primary_darker") ?? Color(base_primary).darken(0.5).hex(),
 
-    primary_dark: Color(primary).darken(0.25).hex(),
-    primary_darker: Color(primary).darken(0.5).hex(),
+    // ── Secondary palette ──
+    secondary: getItem("theme_secondary") ?? base_secondary,
+    secondary_light_1: getItem("theme_secondary_light_1") ?? Color(base_secondary).lighten(0.25).string(),
+    secondary_light_2: getItem("theme_secondary_light_2") ?? Color(base_secondary).lighten(0.5).string(),
+    secondary_dark_1: getItem("theme_secondary_dark_1") ?? Color(base_secondary).darken(0.25).hex(),
+    secondary_dark_2: getItem("theme_secondary_dark_2") ?? Color(base_secondary).darken(0.5).hex(),
 
-    secondary: secondary,
-    secondary_light_1: Color(secondary).lighten(0.25).string(),
-    secondary_light_2: Color(secondary).lighten(0.5).string(),
+    // ── Ternary ──
+    ternary: getItem("theme_ternary") ?? base_ternary,
+    ternary_light_1: getItem("theme_ternary_light_1") ?? Color(base_ternary).lighten(0.25).string(),
+    ternary_light_2: getItem("theme_ternary_light_2") ?? Color(base_ternary).lighten(0.5).string(),
 
-    secondary_dark_1: Color(secondary).darken(0.25).hex(),
-    secondary_dark_2: Color(secondary).darken(0.5).hex(),
+    // ── Status & semantic ──
+    error: getItem("theme_error") ?? "#f44336",
+    warning: getItem("theme_warning") ?? "orange",
+    warning_amber: getItem("theme_warning_amber") ?? "#FFC107",
+    success: getItem("theme_success") ?? "#34C759",
+    danger: getItem("theme_danger") ?? "#FF3B30",
+    info: getItem("theme_info") ?? "#007AFF",
+    expired: getItem("theme_expired") ?? "#BA4343",
 
-    ternary: ternary,
-    ternary_light_1: Color(ternary).lighten(0.25).string(),
-    ternary_light_2: Color(ternary).lighten(0.5).string(),
+    // ── Financial indicators ──
+    positive: getItem("theme_positive") ?? "#66E875",
+    negative: getItem("theme_negative") ?? "#F07070",
+    chart_positive: getItem("theme_chart_positive") ?? "#4ECDC4",
+    chart_negative: getItem("theme_chart_negative") ?? "#FF8A80",
 
-    error: "#f44336",
-    warning: "orange",
+    // ── Text ──
+    text_light: getItem("theme_text_light") ?? "#FAF8FF",
+    text_dark: getItem("theme_text_dark") ?? "gray",
 
-    text_light: "#FAF8FF",
-    text_dark: "gray",
+    // ── Foreground ──
+    foreground: getItem("theme_foreground") ?? base_foreground,
+    foreground_secondary: getItem("theme_foreground_secondary") ?? Color(base_foreground).alpha(0.7).string(),
+    foreground_muted: getItem("theme_foreground_muted") ?? Color(base_foreground).alpha(0.6).string(),
+    foreground_disabled: getItem("theme_foreground_disabled") ?? Color(base_foreground).alpha(0.4).string(),
+    foreground_placeholder: getItem("theme_foreground_placeholder") ?? Color(base_foreground).alpha(0.3).string(),
+    foreground_hairline: getItem("theme_foreground_hairline") ?? Color(base_foreground).alpha(0.08).string(),
 
-    foreground,
+    // ── Overlays ──
+    overlay: getItem("theme_overlay") ?? "rgba(0,0,0,0.5)",
+    overlay_heavy: getItem("theme_overlay_heavy") ?? "rgba(0,0,0,0.75)",
+    overlay_light: getItem("theme_overlay_light") ?? "rgba(0,0,0,0.2)",
 
-    foreground_secondary: Color(foreground).alpha(0.7).string(), // 70% opacity
-    foreground_disabled: Color(foreground).alpha(0.4).string(),
-
-    borderColor: Color(Color(primary).lighten(0.4).string()).lighten(0.5).hex(),
+    // ── Borders ──
+    borderColor: getItem("theme_borderColor") ?? Color(Color(base_primary).lighten(0.4).string()).lighten(0.5).hex(),
 } as const
 
 export const defaultColors = {
     primary: "#0d0f14",
     secondary: secondary_candidates[secondary_candidates.length - 1],
     foreground: "#fff",
-    ternary: ternary,
+    ternary: base_ternary,
 }
 
 export default theme

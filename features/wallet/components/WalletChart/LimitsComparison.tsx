@@ -113,7 +113,7 @@ const CustomLimitChart: React.FC<CustomLimitChartProps> = ({ data, maxValue }) =
     )
 }
 
-const blueText = Color(Colors.primary).lighten(10).string()
+const blueText = Colors.foreground_muted
 
 interface CategoryChartData {
     category: string

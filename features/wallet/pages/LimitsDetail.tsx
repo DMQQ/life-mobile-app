@@ -419,7 +419,7 @@ const styles = StyleSheet.create({
         borderRadius: 18,
         overflow: "hidden",
         borderWidth: 1,
-        borderColor: Color(Colors.primary_lighter).lighten(0.5).hex(),
+        borderColor: Colors.borderColor,
     },
     catHeader: {
         flexDirection: "row",
@@ -479,7 +479,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 14,
         paddingVertical: 11,
         borderTopWidth: 0.5,
-        borderTopColor: Color(Colors.primary_lighter).lighten(0.5).hex(),
+        borderTopColor: Colors.borderColor,
         gap: 10,
     },
     expenseLeft: {
@@ -511,6 +511,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: 14,
         paddingVertical: 12,
         borderTopWidth: 0.5,
-        borderTopColor: Color(Colors.primary_lighter).lighten(0.5).hex(),
+        borderTopColor: Colors.borderColor,
     },
 })

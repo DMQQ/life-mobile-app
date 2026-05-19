@@ -223,7 +223,7 @@ export default function WalletLimits({ navigation }: { navigation: any }) {
                                         {
                                             backgroundColor: Colors.primary_lighter,
                                             borderWidth: 1,
-                                            borderColor: Color(Colors.primary_lighter).lighten(0.5).hex(),
+                                            borderColor: Colors.borderColor,
                                             flexDirection: compactMode ? "column" : "row",
                                             padding: compactMode ? 15 : 22.5,
                                         },

@@ -6,7 +6,6 @@ import Layout from "@/constants/Layout"
 import Button from "@/components/ui/Button/Button"
 import Colors from "@/constants/Colors"
 import lowOpacity from "@/utils/functions/lowOpacity"
-import Color from "color"
 import DatePicker from "@/components/DatePicker"
 
 const button = {
@@ -16,7 +15,7 @@ const button = {
     backgroundColor: Colors.primary_light,
 }
 
-const blueText = Color(Colors.primary).lighten(10).string()
+const blueText = Colors.foreground_muted
 
 const DateRangePicker = (props: { filters: Filters; dispatch: React.Dispatch<Action> }) => {
     const DateRanges = [

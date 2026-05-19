@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
     container: {
         borderWidth: 2,
         borderColor: Color(Colors.primary_lighter).lighten(1).hex(),
-        backgroundColor: Color(Colors.primary_lighter).lighten(0.5).hex(),
+        backgroundColor: Colors.borderColor,
         alignItems: "center",
         justifyContent: "center",
     },

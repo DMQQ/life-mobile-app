@@ -22,6 +22,12 @@ import Colors from "@/constants/Colors"
 | `Colors.primary_dark` | primary − 25% | Header backgrounds, overlays |
 | `Colors.primary_darker` | primary − 50% | Calendar bg, deep overlays |
 
+| Token | Default | Use |
+|---|---|---|
+| `Colors.primary_surface` | primary + 30% | Chart item backgrounds, elevated sections |
+| `Colors.primary_lightest` | primary + 50% | Chart container backgrounds, large surface areas |
+| `Colors.primary_faded` | primary + 80% | Very light elevated surfaces, workout cards |
+
 ### Secondary (accent) palette
 
 | Token | Default | Use |
@@ -54,15 +60,39 @@ import Colors from "@/constants/Colors"
 |---|---|---|
 | Error | `#f44336` | `Colors.error` |
 | Warning | `orange` | `Colors.warning` |
-| Priority High | `#FF3B30` | hardcoded |
-| Priority Med | `#007AFF` | hardcoded |
-| Priority Low | `#34C759` | hardcoded |
-| Income amount | `#66E875` | hardcoded |
-| Expense amount | `#F07070` | hardcoded |
-| Expired/overdue | `#BA4343` | hardcoded |
-| Completed | `lightgreen` | hardcoded |
+| Warning (amber) | `#FFC107` | `Colors.warning_amber` |
+| Success / Low priority | `#34C759` | `Colors.success` |
+| Danger / High priority | `#FF3B30` | `Colors.danger` |
+| Info / Med priority | `#007AFF` | `Colors.info` |
+| Expired / overdue | `#BA4343` | `Colors.expired` |
 
-> When adding new status colors, use the hardcoded values above to stay consistent.
+### Financial indicator colors
+
+| Context | Color | Token |
+|---|---|---|
+| Income / positive amount | `#66E875` | `Colors.positive` |
+| Expense / negative amount | `#F07070` | `Colors.negative` |
+| Chart positive (teal) | `#4ECDC4` | `Colors.chart_positive` |
+| Chart negative (rose) | `#FF8A80` | `Colors.chart_negative` |
+
+### Overlay backgrounds
+
+| Token | Value | Use |
+|---|---|---|
+| `Colors.overlay` | black @ 50% | Modal/sheet scrims |
+| `Colors.overlay_heavy` | black @ 75% | Image viewers, full-screen overlays |
+| `Colors.overlay_light` | black @ 20% | Subtle backdrop dim |
+
+### Foreground alpha scale (text, icons, borders)
+
+| Token | Opacity | Use |
+|---|---|---|
+| `Colors.foreground` | 100% | Primary text, icon fills |
+| `Colors.foreground_secondary` | 70% | Body text, secondary labels |
+| `Colors.foreground_muted` | 60% | Meta text, timestamps, hints |
+| `Colors.foreground_disabled` | 40% | Disabled states |
+| `Colors.foreground_placeholder` | 30% | Placeholder text |
+| `Colors.foreground_hairline` | 8% | Separators, hairline borders |
 
 ### Available secondary accent candidates
 
@@ -571,11 +601,10 @@ Reusable badge shape used in timeline items, wallet items:
   backgroundColor: Colors.secondary,   // default / "to do"
 }
 // overrides:
-backgroundColor: "lightgreen"   // completed
-backgroundColor: "#BA4343"      // late / expired / error
-backgroundColor: "#FF3B30"      // high priority
-backgroundColor: "#007AFF"      // medium priority
-backgroundColor: "#34C759"      // low priority
+backgroundColor: Colors.success   // completed / low priority
+backgroundColor: Colors.expired   // late / expired
+backgroundColor: Colors.danger    // high priority
+backgroundColor: Colors.info      // medium priority
 ```
 
 ---
