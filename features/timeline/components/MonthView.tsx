@@ -7,7 +7,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context"
 import Colors from "@/constants/Colors"
 import Text from "@/components/ui/Text/Text"
 import { useRangeEvents, CalendarOccurrenceItem } from "../hooks/query/useGetOccurrencesQuery"
-import { navigationRef } from "@/navigation"
+import { navigationRef } from "@/navigation/ref"
 import { useNavigation } from "@react-navigation/native"
 
 const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]

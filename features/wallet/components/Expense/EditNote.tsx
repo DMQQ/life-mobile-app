@@ -6,7 +6,7 @@ import Text from "@/components/ui/Text/Text"
 import { IconButton } from "@/components"
 import Colors from "@/constants/Colors"
 import { useEditExpenseNote } from "../../hooks/useEditExpense"
-import { GET_EXPENSE } from "../../pages/Expense"
+import { GET_EXPENSE } from "../../hooks/getExpenseQuery"
 
 export default function EditNote({ expense }: { expense: ExpenseType }) {
     const [isEditing, setIsEditing] = useState(false)

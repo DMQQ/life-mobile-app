@@ -1,5 +1,15 @@
 import { gql, useMutation } from "@apollo/client"
-import { GET_GROUPS } from "."
+
+const GET_GROUPS = gql`
+    query GetGroups {
+        groups {
+            id
+            name
+            description
+            createdAt
+        }
+    }
+`
 
 export default function useDeleteFlashCard() {
     const [removeGroup, { error, data }] = useMutation(

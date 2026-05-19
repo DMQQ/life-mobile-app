@@ -2,6 +2,7 @@ import Header from "@/components/ui/Header/Header"
 import Colors from "@/constants/Colors"
 import { Expense as ExpenseType } from "@/types"
 import { gql, useMutation, useQuery } from "@apollo/client"
+import { GET_EXPENSE } from "../hooks/getExpenseQuery"
 import { SFSymbol } from "expo-symbols"
 import { useEffect, useRef, useState } from "react"
 import { StyleSheet, View } from "react-native"
@@ -26,72 +27,6 @@ import Section from "@/components/ui/Section"
 
 const capitalize = (s = "") => s.charAt(0).toUpperCase() + s.slice(1)
 
-export const GET_EXPENSE = gql`
-    query Expense($id: ID!) {
-        expense(expenseId: $id) {
-            ...ExpenseDetails
-        }
-
-        expenseSimilar(expenseId: $id, limit: 20) {
-            ...ExpenseDetails
-        }
-
-        wallet {
-            income
-            monthlyPercentageTarget
-        }
-    }
-
-    fragment ExpenseDetails on ExpenseEntity {
-        id
-        amount
-        date
-        description
-        type
-        category
-        balanceBeforeInteraction
-        spontaneousRate
-        subAccountId
-        note
-
-        subscription {
-            id
-            amount
-            dateStart
-            dateEnd
-            description
-            isActive
-            nextBillingDate
-            billingCycle
-            billingDay
-            customBillingMonths
-            reminderDaysBeforehand
-            totalSpent
-            totalAmount
-            totalDuration
-        }
-
-        location {
-            id
-            kind
-            name
-            latitude
-            longitude
-        }
-
-        files {
-            id
-            url
-        }
-
-        subexpenses {
-            id
-            description
-            amount
-            category
-        }
-    }
-`
 
 export default function Expense({ route: { params }, navigation }: any) {
     const { data } = useQuery(GET_EXPENSE, { variables: { id: params?.expense?.id } })

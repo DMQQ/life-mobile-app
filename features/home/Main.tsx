@@ -8,7 +8,7 @@ import SettingsScreen from "./components/SettingsModal"
 import Root from "./Root"
 
 interface HomeRootStack extends ParamListBase {
-    Root: undefined
+    HomeRoot: undefined
     HomeNotifications: undefined
     HomeSettings: undefined
 }
@@ -22,19 +22,24 @@ const MODAL_OPTIONS: NativeStackNavigationOptions = {
     headerShown: true,
 }
 
+const NESTED_MODAL_OPTIONS: NativeStackNavigationOptions = {
+    presentation: "modal",
+    headerShown: false,
+}
+
 export default function HomeScreens() {
     return (
         <RefreshContextProvider>
             <Stack.Navigator
-                initialRouteName="Root"
+                initialRouteName="HomeRoot"
                 screenOptions={{
                     headerShown: false,
                     animation: "default",
                 }}
             >
-                <Stack.Screen name="Root" component={Root} />
+                <Stack.Screen name="HomeRoot" component={Root} />
                 <Stack.Screen name="HomeNotifications" component={NotificationsScreen} options={MODAL_OPTIONS} />
-                <Stack.Screen name="HomeSettings" component={SettingsScreen} options={MODAL_OPTIONS} />
+                <Stack.Screen name="HomeSettings" component={SettingsScreen} options={NESTED_MODAL_OPTIONS} />
             </Stack.Navigator>
         </RefreshContextProvider>
     )

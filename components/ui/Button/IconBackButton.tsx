@@ -2,7 +2,7 @@ import { Pressable, StyleProp, StyleSheet, ViewStyle } from "react-native"
 import GlassView from "../GlassView"
 import { AntDesign } from "@expo/vector-icons"
 import { useCallback } from "react"
-import { navigationRef } from "@/navigation"
+import { navigationRef } from "@/navigation/ref"
 
 interface IconBackButtonProps {
     disabled?: boolean

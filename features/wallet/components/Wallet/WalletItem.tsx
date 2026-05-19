@@ -7,7 +7,7 @@ import { StyleProp, StyleSheet, Text, View, ViewStyle } from "react-native"
 import { AnimatedStyle } from "react-native-reanimated"
 import { CategoryIcon, Icons } from "../Expense/ExpenseIcon"
 import ContextMenu from "react-native-context-menu-view"
-import { navigationRef } from "@/navigation"
+import { navigationRef } from "@/navigation/ref"
 import useDeleteActivity from "../../hooks/useDeleteActivity"
 import dayjs from "dayjs"
 

@@ -23,7 +23,7 @@ import { GET_MONTHLY_OCCURRENCES } from "@/features/timeline/hooks/general/useTi
 import moment from "moment"
 import GlassView from "@/components/ui/GlassView"
 import { invalidateGetMainScreen } from "@/utils/schemas/GET_MAIN_SCREEN"
-import { navigationRef } from "@/navigation"
+import { navigationRef } from "@/navigation/ref"
 
 const NOOP = () => {}
 

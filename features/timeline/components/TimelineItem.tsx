@@ -1,5 +1,5 @@
 import Colors from "@/constants/Colors"
-import { navigationRef } from "@/navigation"
+import { navigationRef } from "@/navigation/ref"
 import moment from "moment"
 import { useCallback, useMemo } from "react"
 import { StyleProp, StyleSheet, View, ViewStyle, Pressable } from "react-native"

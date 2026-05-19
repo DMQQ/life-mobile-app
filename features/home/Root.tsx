@@ -22,7 +22,7 @@ import Background from "@/components/ui/Background"
 import { HomeScreenProps } from "./Main"
 import { RefreshControl } from "react-native"
 
-export default function Root({ navigation }: HomeScreenProps<"Root">) {
+export default function Root({ navigation }: HomeScreenProps<"HomeRoot">) {
     const [loading, setLoading] = useState(true)
 
     const { data: home, refetch: refetchHome } = useQuery(GET_MAIN_SCREEN, {

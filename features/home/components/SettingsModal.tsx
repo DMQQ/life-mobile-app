@@ -1,26 +1,26 @@
-import { AnimatedSelector, ModalHeader } from "@/components"
+import { ModalHeader } from "@/components"
 import Button from "@/components/ui/Button/Button"
 import Text from "@/components/ui/Text/Text"
 import Colors, { defaultColors } from "@/constants/Colors"
 import Layout from "@/constants/Layout"
 import useUser from "@/utils/hooks/useUser"
 import { useExpoUpdates } from "@/utils/hooks/useExpoUpdate"
-import { GlassIconButton } from "@/components"
 import { Feather } from "@expo/vector-icons"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import { reloadAppAsync } from "expo"
-import { BlurView } from "expo-blur"
 import * as SecureStore from "expo-secure-store"
 import React, { useEffect, useState } from "react"
-import { FlatList, ScrollView, StyleSheet, Switch, TouchableOpacity, View } from "react-native"
+import { ScrollView, StyleSheet, Switch, TouchableOpacity, View } from "react-native"
 import Feedback from "react-native-haptic-feedback"
 import Ripple from "react-native-material-ripple"
 import * as ExpoAppleWatch from "@/modules/expo-apple-watch"
-import ColorPicker, { HueSlider, OpacitySlider, Panel1, Preview } from "reanimated-color-picker"
-import { HomeScreenProps } from "../Main"
+import { ColorPicker as NativeColorPicker, Host } from "@expo/ui/swift-ui"
 import { gql, useMutation, useQuery } from "@apollo/client"
 import Color from "color"
 import { NOTIFICATION_TYPES } from "./EnabledNotifications"
+import { createNativeStackNavigator } from "@react-navigation/native-stack"
+import { NativeStackScreenProps } from "@react-navigation/native-stack"
+import GroupSelector from "@/components/ui/GroupSelector"
 
 interface ColorPalette {
     name: string
@@ -176,20 +176,7 @@ const ICON_SIZE = 32
 
 const s = StyleSheet.create({
     container: { flex: 1 },
-    blur: { position: "absolute", top: 0, left: 0, right: 0, bottom: 0 },
     inner: { flex: 1 },
-    header: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        paddingHorizontal: 20,
-        paddingVertical: 16,
-        borderBottomWidth: StyleSheet.hairlineWidth,
-        borderBottomColor: SEPARATOR,
-        backgroundColor: "rgba(0,0,0,0.2)",
-    },
-    headerTitle: { color: Colors.text_light, fontWeight: "600" },
-    closeBtn: { padding: 4 },
     scroll: { paddingHorizontal: 16, paddingTop: 24, paddingBottom: 60 },
 
     profileCard: {
@@ -223,11 +210,7 @@ const s = StyleSheet.create({
     },
     sectionGap: { marginTop: 30 },
 
-    card: {
-        backgroundColor: CARD_BG,
-        borderRadius: 20,
-        overflow: "hidden",
-    },
+    card: { backgroundColor: CARD_BG, borderRadius: 20, overflow: "hidden" },
     row: {
         flexDirection: "row",
         alignItems: "center",
@@ -249,14 +232,11 @@ const s = StyleSheet.create({
     colorDots: { flexDirection: "row", gap: 4 },
     colorDot: { width: 13, height: 13, borderRadius: 7 },
 
-    expandedPad: { paddingHorizontal: 0, paddingBottom: 8 },
     subCard: {
         backgroundColor: Color(Colors.primary).lighten(0.25).string(),
         borderRadius: 16,
         overflow: "hidden",
-        marginHorizontal: 10,
-        marginTop: 4,
-        marginBottom: 10,
+        marginBottom: 12,
     },
     toggleRow: {
         flexDirection: "row",
@@ -268,40 +248,165 @@ const s = StyleSheet.create({
     },
     toggleLabel: { flex: 1, color: Colors.text_light, fontSize: 15 },
     toggleSub: { color: Colors.foreground_secondary, fontSize: 12, marginTop: 1 },
-    saveBtn: { marginHorizontal: 10, marginTop: 4, marginBottom: 12 },
-
-    paletteItem: {
-        width: 120,
-        height: 150,
-        borderRadius: 20,
-        overflow: "hidden",
-        borderWidth: 2.5,
-        borderColor: "transparent",
-        marginRight: 10,
-    },
-    paletteSelected: { borderColor: Colors.secondary },
-    paletteContent: { flex: 1, padding: 12, justifyContent: "space-between" },
-    paletteName: { color: "#fff", fontSize: 12, fontWeight: "700" },
-    swatchCircles: { flexDirection: "row", gap: 6 },
-    swatchCircle: {
-        width: 26,
-        height: 26,
-        borderRadius: 13,
-        borderWidth: 1.5,
-        borderColor: "rgba(255,255,255,0.25)",
-    },
+    saveBtn: { marginTop: 4 },
 
     watchStatus: { color: Colors.foreground_secondary, fontSize: 13 },
     watchStatusOk: { color: Colors.secondary },
-    watchActionRow: {
-        flexDirection: "row",
-        alignItems: "center",
-        minHeight: 46,
-        paddingHorizontal: 14,
-        gap: 12,
-    },
+    watchActionRow: { flexDirection: "row", alignItems: "center", minHeight: 46, paddingHorizontal: 14, gap: 12 },
     watchActionLabel: { flex: 1, color: Colors.text_light, fontSize: 15 },
 })
+
+type SettingSection = "notifications" | "watch" | "theme"
+
+type SettingsParamList = {
+    SettingsIndex: undefined
+    SettingsDetail: { section: SettingSection; title: string }
+}
+
+type SP<T extends keyof SettingsParamList> = NativeStackScreenProps<SettingsParamList, T>
+
+const SettingsStack = createNativeStackNavigator<SettingsParamList>()
+
+export default function SettingsNavigator() {
+    return (
+        <SettingsStack.Navigator screenOptions={{ headerShown: true }}>
+            <SettingsStack.Screen name="SettingsIndex" component={SettingsIndex} />
+            <SettingsStack.Screen name="SettingsDetail" component={SettingsDetail} />
+        </SettingsStack.Navigator>
+    )
+}
+
+function SettingsIndex({ navigation }: SP<"SettingsIndex">) {
+    const { removeUser, user } = useUser()
+
+    const dismiss = () => {
+        Feedback.trigger("impactLight")
+        navigation.getParent()?.goBack()
+    }
+
+    const go = (section: SettingSection, title: string) => {
+        Feedback.trigger("selection")
+        navigation.navigate("SettingsDetail", { section, title })
+    }
+
+    const handleSignout = async () => {
+        await removeUser()
+        let keys = await AsyncStorage.getAllKeys()
+        keys = keys.filter((k) => !k.startsWith("color_scheme"))
+        await AsyncStorage.multiRemove(keys)
+        navigation.getParent()?.goBack()
+    }
+
+    return (
+        <View style={s.container}>
+            <ModalHeader title="Settings" onClose={dismiss} />
+            <ScrollView
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={s.scroll}
+                keyboardDismissMode="on-drag"
+            >
+                <View style={s.profileCard}>
+                    <View style={s.avatar}>
+                        <Text style={s.avatarText}>{user?.email?.[0]?.toUpperCase() ?? "U"}</Text>
+                    </View>
+                    <View>
+                        <Text variant="body" style={s.profileEmail}>
+                            {user?.email}
+                        </Text>
+                        <Text variant="caption" style={s.profileSub}>
+                            Personal account
+                        </Text>
+                    </View>
+                </View>
+
+                <SectionLabel title="Preferences" />
+                <Card>
+                    <SettingsRow
+                        icon={
+                            <IconBox bg={Colors.secondary}>
+                                <Feather name="bell" size={16} color="#fff" />
+                            </IconBox>
+                        }
+                        label="Notifications"
+                        onPress={() => go("notifications", "Notifications")}
+                        right={<Feather name="chevron-right" size={16} color={Colors.text_dark} />}
+                    />
+                    <SettingsRow
+                        icon={
+                            <IconBox bg="#3A3A3C">
+                                <Feather name="watch" size={16} color="#fff" />
+                            </IconBox>
+                        }
+                        label="Apple Watch"
+                        isLast
+                        onPress={() => go("watch", "Apple Watch")}
+                        right={<Feather name="chevron-right" size={16} color={Colors.text_dark} />}
+                    />
+                </Card>
+
+                <View style={s.sectionGap} />
+                <SectionLabel title="Appearance" />
+                <Card>
+                    <SettingsRow
+                        icon={
+                            <IconBox bg={Colors.ternary}>
+                                <Feather name="sliders" size={16} color="#fff" />
+                            </IconBox>
+                        }
+                        label="Color Theme"
+                        isLast
+                        onPress={() => go("theme", "Color Theme")}
+                        right={
+                            <View style={s.colorDots}>
+                                <View style={[s.colorDot, { backgroundColor: Colors.secondary }]} />
+                                <View style={[s.colorDot, { backgroundColor: Colors.ternary }]} />
+                                <View style={[s.colorDot, { backgroundColor: Colors.foreground }]} />
+                            </View>
+                        }
+                    />
+                </Card>
+
+                <View style={s.sectionGap} />
+                <SectionLabel title="App" />
+                <Card>
+                    <UpdateRow />
+                </Card>
+
+                <View style={s.sectionGap} />
+                <SectionLabel title="Account" />
+                <Card>
+                    <TouchableOpacity onPress={handleSignout} activeOpacity={0.65} style={s.row}>
+                        <IconBox bg={Colors.error}>
+                            <Feather name="log-out" size={16} color="#fff" />
+                        </IconBox>
+                        <Text variant="body" style={[s.rowLabel, { color: Colors.error }]}>
+                            Sign Out
+                        </Text>
+                    </TouchableOpacity>
+                </Card>
+            </ScrollView>
+        </View>
+    )
+}
+
+function SettingsDetail({ navigation, route }: SP<"SettingsDetail">) {
+    const { section, title } = route.params
+
+    return (
+        <View style={s.container}>
+            <ModalHeader title={title} onClose={() => navigation.goBack()} closeIcon="chevron.backward" />
+            <ScrollView
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={s.scroll}
+                keyboardDismissMode="on-drag"
+            >
+                {section === "notifications" && <NotificationsSection />}
+                {section === "watch" && <WatchSection />}
+                {section === "theme" && <ThemeSection />}
+            </ScrollView>
+        </View>
+    )
+}
 
 function SectionLabel({ title }: { title: string }) {
     return <Text style={s.sectionLabel}>{title}</Text>
@@ -339,10 +444,6 @@ function IconBox({ bg, children }: { bg: string; children: React.ReactNode }) {
     return <View style={[s.iconBox, { backgroundColor: bg }]}>{children}</View>
 }
 
-function Chevron({ open }: { open: boolean }) {
-    return <Feather name={open ? "chevron-up" : "chevron-down"} size={16} color={Colors.text_dark} />
-}
-
 function ToggleRow({
     label,
     subtitle,
@@ -378,40 +479,38 @@ function ToggleRow({
     )
 }
 
-export default function SettingsScreen({ navigation }: HomeScreenProps<"HomeSettings">) {
-    const { removeUser, user } = useUser()
-    const [expandedSection, setExpandedSection] = useState<string | null>(null)
+const COLOR_ROLES = [
+    { key: "primary" as const, label: "Background", sub: "Main app background" },
+    { key: "secondary" as const, label: "Accent", sub: "Buttons & highlights" },
+    { key: "ternary" as const, label: "Highlight", sub: "Badges & tags" },
+    { key: "foreground" as const, label: "Text", sub: "Primary text color" },
+]
+
+const CARD_WIDTH = (Layout.screen.width - 32 - 10) / 2
+
+function ThemeSection() {
+    const [mode, setMode] = useState<"presets" | "custom">("presets")
     const [selectedPalette, setSelectedPalette] = useState<ColorPalette | null>(null)
-    const [isCustomMode, setIsCustomMode] = useState(false)
     const [customColors, setCustomColors] = useState({
-        primary: "#0D1421",
-        secondary: "#00C896",
-        ternary: "#FFA726",
-        foreground: "#FFFFFF",
+        primary: Colors.primary,
+        secondary: Colors.secondary,
+        ternary: Colors.ternary,
+        foreground: Colors.foreground,
     })
-    const [activeColorType, setActiveColorType] = useState<"primary" | "secondary" | "ternary" | "foreground">(
-        "primary",
-    )
 
-    const toggleSection = (key: string) => {
-        Feedback.trigger("selection")
-        setExpandedSection((prev) => (prev === key ? null : key))
-    }
+    const preview =
+        mode === "custom"
+            ? customColors
+            : (selectedPalette ?? {
+                  primary: Colors.primary,
+                  secondary: Colors.secondary,
+                  ternary: Colors.ternary,
+                  foreground: Colors.foreground,
+              })
 
-    const handleClose = () => {
-        Feedback.trigger("impactLight")
-        navigation.goBack()
-    }
-
-    const handleSignout = async () => {
-        await removeUser()
-        let keys = await AsyncStorage.getAllKeys()
-        keys = keys.filter((k) => !k.startsWith("color_scheme"))
-        await AsyncStorage.multiRemove(keys)
-        navigation.goBack()
-    }
-
-    const applyTheme = async (palette: ColorPalette) => {
+    const applyTheme = async (
+        palette: Omit<ColorPalette, "name" | "category"> & { name: string; category: string },
+    ) => {
         await SecureStore.setItemAsync("color_scheme_primary", palette.primary)
         await SecureStore.setItemAsync("color_scheme_secondary", palette.secondary)
         await SecureStore.setItemAsync("color_scheme_ternary", palette.ternary)
@@ -421,288 +520,185 @@ export default function SettingsScreen({ navigation }: HomeScreenProps<"HomeSett
 
     const handleApply = async () => {
         Feedback.trigger("impactMedium")
-        if (isCustomMode) {
+        if (mode === "custom") {
             await applyTheme({ name: "Custom", ...customColors, category: "Custom" })
         } else if (selectedPalette) {
             await applyTheme(selectedPalette)
         }
     }
 
-    const activeColors = isCustomMode
-        ? customColors
-        : (selectedPalette ?? { secondary: Colors.secondary, ternary: Colors.ternary, foreground: Colors.foreground })
-
-    const canApply = isCustomMode || selectedPalette !== null
+    const canApply = mode === "custom" || selectedPalette !== null
 
     return (
-        <View style={s.container}>
-            <ModalHeader title="Settings" onClose={handleClose} />
-            <View style={s.inner}>
-                <ScrollView
-                    showsVerticalScrollIndicator={false}
-                    contentContainerStyle={s.scroll}
-                    keyboardDismissMode="on-drag"
-                >
-                    <View style={s.profileCard}>
-                        <View style={s.avatar}>
-                            <Text style={s.avatarText}>{user?.email?.[0]?.toUpperCase() ?? "U"}</Text>
-                        </View>
-                        <View>
-                            <Text variant="body" style={s.profileEmail}>
-                                {user?.email}
-                            </Text>
-                            <Text variant="caption" style={s.profileSub}>
-                                Personal account
-                            </Text>
-                        </View>
-                    </View>
-
-                    <SectionLabel title="Preferences" />
-                    <Card>
-                        <SettingsRow
-                            icon={
-                                <IconBox bg={Colors.secondary}>
-                                    <Feather name="bell" size={16} color="#fff" />
-                                </IconBox>
-                            }
-                            label="Notifications"
-                            onPress={() => toggleSection("notifications")}
-                            right={<Chevron open={expandedSection === "notifications"} />}
-                        />
-                        {expandedSection === "notifications" && (
-                            <View style={s.expandedPad}>
-                                <NotificationsSection />
-                            </View>
-                        )}
-                        <SettingsRow
-                            icon={
-                                <IconBox bg="#3A3A3C">
-                                    <Feather name="watch" size={16} color="#fff" />
-                                </IconBox>
-                            }
-                            label="Apple Watch"
-                            isLast
-                            onPress={() => toggleSection("watch")}
-                            right={<Chevron open={expandedSection === "watch"} />}
-                        />
-                        {expandedSection === "watch" && (
-                            <View style={s.expandedPad}>
-                                <WatchSection />
-                            </View>
-                        )}
-                    </Card>
-
-                    <View style={s.sectionGap} />
-                    <SectionLabel title="Appearance" />
-                    <Card>
-                        <SettingsRow
-                            icon={
-                                <IconBox bg={Colors.ternary}>
-                                    <Feather name="sliders" size={16} color="#fff" />
-                                </IconBox>
-                            }
-                            label="Color Theme"
-                            isLast
-                            onPress={() => toggleSection("theme")}
-                            right={
-                                <>
-                                    <View style={s.colorDots}>
-                                        <View style={[s.colorDot, { backgroundColor: activeColors.secondary }]} />
-                                        <View style={[s.colorDot, { backgroundColor: activeColors.ternary }]} />
-                                        <View style={[s.colorDot, { backgroundColor: activeColors.foreground }]} />
-                                    </View>
-                                    <Chevron open={expandedSection === "theme"} />
-                                </>
-                            }
-                        />
-                        {expandedSection === "theme" && (
-                            <View style={{ paddingHorizontal: 12, paddingTop: 6, paddingBottom: 14 }}>
-                                <AnimatedSelector
-                                    items={["Presets", "Custom"]}
-                                    selectedItem={isCustomMode ? "Custom" : "Presets"}
-                                    onItemSelect={(item) => {
-                                        Feedback.trigger("selection")
-                                        setIsCustomMode(item === "Custom")
-                                        if (item === "Custom") setSelectedPalette(null)
-                                    }}
-                                    containerStyle={{
-                                        width: Layout.screen.width - 68,
-                                        backgroundColor: "transparent",
-                                        marginBottom: 16,
-                                    }}
-                                    buttonWidth={(Layout.screen.width - 78) / 2}
-                                    buttonStyle={{ backgroundColor: undefined }}
-                                />
-
-                                {!isCustomMode ? (
-                                    <>
-                                        <FlatList
-                                            horizontal
-                                            data={colorPalettes}
-                                            keyExtractor={(p) => p.name}
-                                            showsHorizontalScrollIndicator={false}
-                                            contentContainerStyle={{ paddingBottom: 4 }}
-                                            renderItem={({ item }) => (
-                                                <Ripple
-                                                    onPress={() => {
-                                                        Feedback.trigger("selection")
-                                                        setSelectedPalette(item)
-                                                    }}
-                                                    style={[
-                                                        s.paletteItem,
-                                                        selectedPalette?.name === item.name && s.paletteSelected,
-                                                        { backgroundColor: item.primary },
-                                                    ]}
-                                                >
-                                                    <View style={s.paletteContent}>
-                                                        <Text style={s.paletteName} numberOfLines={2}>
-                                                            {item.name}
-                                                        </Text>
-                                                        <View style={s.swatchCircles}>
-                                                            {[item.secondary, item.ternary, item.foreground].map(
-                                                                (c, i) => (
-                                                                    <View
-                                                                        key={i}
-                                                                        style={[s.swatchCircle, { backgroundColor: c }]}
-                                                                    />
-                                                                ),
-                                                            )}
-                                                        </View>
-                                                    </View>
-                                                </Ripple>
-                                            )}
-                                        />
-                                        {selectedPalette && (
-                                            <View
-                                                style={{
-                                                    flexDirection: "row",
-                                                    gap: 8,
-                                                    alignItems: "center",
-                                                    marginTop: 14,
-                                                    paddingHorizontal: 2,
-                                                }}
-                                            >
-                                                <View
-                                                    style={{
-                                                        width: 36,
-                                                        height: 36,
-                                                        borderRadius: 18,
-                                                        backgroundColor: selectedPalette.primary,
-                                                        borderWidth: 1.5,
-                                                        borderColor: "rgba(255,255,255,0.15)",
-                                                    }}
-                                                />
-                                                <View style={{ flex: 1 }}>
-                                                    <Text
-                                                        style={{
-                                                            color: Colors.text_light,
-                                                            fontWeight: "600",
-                                                            fontSize: 14,
-                                                        }}
-                                                    >
-                                                        {selectedPalette.name}
-                                                    </Text>
-                                                    <Text style={{ color: Colors.foreground_secondary, fontSize: 12 }}>
-                                                        {selectedPalette.secondary} · {selectedPalette.ternary}
-                                                    </Text>
-                                                </View>
-                                                <Feather name="check-circle" size={18} color={Colors.secondary} />
-                                            </View>
-                                        )}
-                                    </>
-                                ) : (
-                                    <>
-                                        <View
-                                            style={{
-                                                flexDirection: "row",
-                                                justifyContent: "space-around",
-                                                marginBottom: 18,
-                                            }}
-                                        >
-                                            {(["primary", "secondary", "ternary", "foreground"] as const).map((key) => (
-                                                <TouchableOpacity
-                                                    key={key}
-                                                    onPress={() => setActiveColorType(key)}
-                                                    style={{ alignItems: "center", gap: 6 }}
-                                                    activeOpacity={0.7}
-                                                >
-                                                    <View
-                                                        style={{
-                                                            width: 48,
-                                                            height: 48,
-                                                            borderRadius: 24,
-                                                            backgroundColor: customColors[key],
-                                                            borderWidth: activeColorType === key ? 3 : 1.5,
-                                                            borderColor:
-                                                                activeColorType === key
-                                                                    ? Colors.secondary
-                                                                    : "rgba(255,255,255,0.2)",
-                                                        }}
-                                                    />
-                                                    <Text
-                                                        style={{
-                                                            color:
-                                                                activeColorType === key
-                                                                    ? Colors.secondary
-                                                                    : Colors.text_dark,
-                                                            fontSize: 10,
-                                                            textTransform: "capitalize",
-                                                        }}
-                                                    >
-                                                        {key}
-                                                    </Text>
-                                                </TouchableOpacity>
-                                            ))}
-                                        </View>
-                                        <ColorPicker
-                                            value={customColors[activeColorType]}
-                                            onCompleteJS={(c) =>
-                                                setCustomColors((prev) => ({ ...prev, [activeColorType]: c.hex }))
-                                            }
-                                            style={{ width: "100%", marginBottom: 4 }}
-                                        >
-                                            <Preview style={{ marginBottom: 16, height: 56, borderRadius: 20 }} />
-                                            <Panel1 style={{ height: 180, borderRadius: 20, marginBottom: 14 }} />
-                                            <HueSlider style={{ height: 38, borderRadius: 20, marginBottom: 10 }} />
-                                            <OpacitySlider style={{ height: 38, borderRadius: 20 }} />
-                                        </ColorPicker>
-                                    </>
-                                )}
-
-                                <Button
-                                    onPress={handleApply}
-                                    disabled={!canApply}
-                                    style={{ marginTop: 16, borderRadius: 16 }}
-                                >
-                                    {isCustomMode ? "Apply Custom Colors" : "Apply Selected Palette"}
-                                </Button>
-                            </View>
-                        )}
-                    </Card>
-
-                    <View style={s.sectionGap} />
-                    <SectionLabel title="App" />
-                    <Card>
-                        <UpdateRow />
-                    </Card>
-
-                    <View style={s.sectionGap} />
-                    <SectionLabel title="Account" />
-                    <Card>
-                        <TouchableOpacity onPress={handleSignout} activeOpacity={0.65} style={s.row}>
-                            <IconBox bg={Colors.error}>
-                                <Feather name="log-out" size={16} color="#fff" />
-                            </IconBox>
-                            <Text variant="body" style={[s.rowLabel, { color: Colors.error }]}>
-                                Sign Out
-                            </Text>
-                        </TouchableOpacity>
-                    </Card>
-                </ScrollView>
+        <View style={ts.root}>
+            {/* Mode toggle */}
+            <View style={ts.toggle}>
+                <GroupSelector
+                    value={mode}
+                    onChange={(m) => setMode(m)}
+                    options={[
+                        {
+                            label: "Presets",
+                            value: "presets",
+                        },
+                        {
+                            label: "Custom",
+                            value: "custom",
+                        },
+                    ]}
+                />
             </View>
+
+            {/* Live preview */}
+            <View style={[ts.preview, { backgroundColor: preview.primary }]}>
+                <View style={{ flex: 1 }}>
+                    <Text style={[ts.previewTitle, { color: preview.foreground }]}>
+                        {mode === "custom" ? "Custom" : (selectedPalette?.name ?? "Select a palette")}
+                    </Text>
+                    <Text style={[ts.previewSub, { color: Color(preview.foreground).alpha(0.5).string() }]}>
+                        {preview.primary}
+                    </Text>
+                </View>
+                <View style={ts.previewSwatches}>
+                    {[preview.secondary, preview.ternary, preview.foreground].map((c, i) => (
+                        <View key={i} style={[ts.previewSwatch, { backgroundColor: c }]} />
+                    ))}
+                </View>
+            </View>
+
+            {mode === "presets" ? (
+                <View style={ts.grid}>
+                    {colorPalettes.map((palette) => {
+                        const selected = selectedPalette?.name === palette.name
+                        return (
+                            <Ripple
+                                key={palette.name}
+                                onPress={() => {
+                                    Feedback.trigger("selection")
+                                    setSelectedPalette(palette)
+                                }}
+                                style={[ts.card, { backgroundColor: palette.primary }, selected && ts.cardSelected]}
+                            >
+                                <View style={ts.cardInner}>
+                                    <View style={ts.cardTop}>
+                                        <Text style={ts.cardName} numberOfLines={2}>
+                                            {palette.name}
+                                        </Text>
+                                        {selected && (
+                                            <Feather name="check-circle" size={13} color={palette.secondary} />
+                                        )}
+                                    </View>
+                                    <View style={ts.cardSwatches}>
+                                        {[palette.secondary, palette.ternary, palette.foreground].map((c, i) => (
+                                            <View key={i} style={[ts.cardSwatch, { backgroundColor: c }]} />
+                                        ))}
+                                    </View>
+                                </View>
+                            </Ripple>
+                        )
+                    })}
+                </View>
+            ) : (
+                <View style={ts.colorRows}>
+                    {COLOR_ROLES.map((role, i) => (
+                        <View key={role.key} style={[ts.colorRow, i < COLOR_ROLES.length - 1 && ts.colorRowBorder]}>
+                            <View style={[ts.colorSwatch, { backgroundColor: customColors[role.key] }]} />
+                            <View style={{ flex: 1 }}>
+                                <Text style={ts.colorLabel}>{role.label}</Text>
+                                <Text style={ts.colorSub}>{role.sub}</Text>
+                            </View>
+                            <Host matchContents>
+                                <NativeColorPicker
+                                    selection={customColors[role.key]}
+                                    onSelectionChange={(c) => setCustomColors((p) => ({ ...p, [role.key]: c }))}
+                                    supportsOpacity={false}
+                                />
+                            </Host>
+                        </View>
+                    ))}
+                </View>
+            )}
+
+            <Button onPress={handleApply} disabled={!canApply} style={ts.applyBtn}>
+                Apply Theme
+            </Button>
         </View>
     )
 }
+
+const ts = StyleSheet.create({
+    root: { gap: 14 },
+
+    toggle: {},
+    toggleBtn: { flex: 1, paddingVertical: 9, borderRadius: 10, alignItems: "center" },
+    toggleBtnActive: { backgroundColor: Color(Colors.primary).lighten(0.6).string() },
+    toggleLabel: { color: Colors.text_dark, fontSize: 14, fontWeight: "500" },
+    toggleLabelActive: { color: Colors.text_light, fontWeight: "600" },
+
+    preview: {
+        borderRadius: 18,
+        padding: 16,
+        flexDirection: "row",
+        alignItems: "center",
+        minHeight: 72,
+    },
+    previewTitle: { fontSize: 15, fontWeight: "600", marginBottom: 2 },
+    previewSub: { fontSize: 11 },
+    previewSwatches: { flexDirection: "row", gap: 7 },
+    previewSwatch: {
+        width: 24,
+        height: 24,
+        borderRadius: 12,
+        borderWidth: 1.5,
+        borderColor: "rgba(255,255,255,0.18)",
+    },
+
+    grid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
+    card: {
+        width: CARD_WIDTH,
+        borderRadius: 18,
+        overflow: "hidden",
+        borderWidth: 2,
+        borderColor: "transparent",
+    },
+    cardSelected: { borderColor: Colors.secondary },
+    cardInner: { padding: 12, height: 86, justifyContent: "space-between" },
+    cardTop: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" },
+    cardName: { color: "#fff", fontSize: 12, fontWeight: "600", flex: 1, marginRight: 4 },
+    cardSwatches: { flexDirection: "row", gap: 5 },
+    cardSwatch: {
+        width: 18,
+        height: 18,
+        borderRadius: 9,
+        borderWidth: 1,
+        borderColor: "rgba(255,255,255,0.22)",
+    },
+
+    colorRows: {
+        backgroundColor: Color(Colors.primary).lighten(0.25).string(),
+        borderRadius: 18,
+        overflow: "hidden",
+    },
+    colorRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        paddingHorizontal: 16,
+        paddingVertical: 14,
+        gap: 14,
+    },
+    colorRowBorder: { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: "rgba(255,255,255,0.08)" },
+    colorSwatch: {
+        width: 38,
+        height: 38,
+        borderRadius: 19,
+        borderWidth: 1.5,
+        borderColor: "rgba(255,255,255,0.12)",
+    },
+    colorLabel: { color: Colors.text_light, fontSize: 15, fontWeight: "500" },
+    colorSub: { color: Colors.foreground_secondary, fontSize: 12, marginTop: 1 },
+
+    applyBtn: { borderRadius: 16 },
+})
 
 function NotificationsSection() {
     const [settings, setSettings] = useState({ isEnable: true, enabledNotifications: {} as Record<string, boolean> })

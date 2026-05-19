@@ -7,7 +7,7 @@ import Animated from "react-native-reanimated"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import Colors from "@/constants/Colors"
 import Text from "@/components/ui/Text/Text"
-import { navigationRef } from "@/navigation"
+import { navigationRef } from "@/navigation/ref"
 import { useWeekEvents } from "../hooks/query/useGetOccurrencesQuery"
 import { useNavigation } from "@react-navigation/native"
 

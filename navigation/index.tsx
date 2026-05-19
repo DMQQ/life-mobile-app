@@ -1,12 +1,5 @@
 import { createNativeBottomTabNavigator } from "@react-navigation/bottom-tabs/unstable"
-import {
-    DarkTheme,
-    getFocusedRouteNameFromRoute,
-    NavigationContainer,
-    NavigationContainerRef,
-    LinkingOptions,
-} from "@react-navigation/native"
-import React from "react"
+import { DarkTheme, getFocusedRouteNameFromRoute, NavigationContainer, LinkingOptions } from "@react-navigation/native"
 import Colors from "../constants/Colors"
 import Authentication from "../features/authentication/Main"
 import GoalsScreens from "../features/goals/Main"
@@ -15,8 +8,9 @@ import TimelineScreens from "../features/timeline/Main"
 import WalletScreens from "../features/wallet/Main"
 import AiScreens from "../features/ai/Main"
 import { RootStackParamList } from "../types"
+import { navigationRef } from "./ref"
 
-export const navigationRef = React.createRef<NavigationContainerRef<RootStackParamList>>()
+export { navigationRef } from "./ref"
 
 const TAB_ROOT_SCREENS = new Set(["Root", "Goals", "Wallet", "Timeline", "AiWidget"])
 
