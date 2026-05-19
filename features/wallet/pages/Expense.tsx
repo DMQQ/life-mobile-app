@@ -218,7 +218,7 @@ export default function Expense({ route: { params }, navigation }: any) {
                     {
                         icon: "trash" as SFSymbol,
                         onPress: handleDeleteConfirm,
-                        tintColor: "#F07070",
+                        tintColor: Colors.error,
                         confirm: true,
                     },
                     {

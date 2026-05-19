@@ -97,6 +97,7 @@ function mapHeaderItem(button: HeaderItem): NativeStackHeaderItem {
             tintColor: button.tintColor,
             disabled: button.disabled,
             menu: { items: mapContextMenuItems(button.contextMenu.items) },
+            identifier: sfIcon ? sfIcon.name : undefined,
         }
     }
 
@@ -111,6 +112,7 @@ function mapHeaderItem(button: HeaderItem): NativeStackHeaderItem {
                 button.onPress?.()
                 Haptic.trigger("impactLight")
             },
+            identifier: sfIcon.name,
         }
     }
 

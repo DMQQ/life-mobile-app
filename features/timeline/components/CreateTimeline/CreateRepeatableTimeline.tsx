@@ -187,7 +187,7 @@ export default function CreateRepeatableTimeline({ formik: f }: CreateRepeatable
                         </Text>
                     </Pressable>
                     {untilExpanded && (
-                        <View style={{ alignItems: "center", paddingBottom: 10 }}>
+                        <View style={{ alignItems: "center", paddingHorizontal: 10, paddingBottom: 15 }}>
                             <Host matchContents>
                                 <SwiftDatePicker
                                     selection={repeatUntilDate}

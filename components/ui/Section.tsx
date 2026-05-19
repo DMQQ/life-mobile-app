@@ -2,6 +2,7 @@ import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
 import React from "react"
 import { StyleSheet, View } from "react-native"
+import Animated, { LinearTransition } from "react-native-reanimated"
 
 const s = StyleSheet.create({
     sectionGap: { marginTop: 30 },
@@ -43,7 +44,9 @@ export default function Section({ title, headerRight, children, noGap, cardStyle
                 {headerRight}
             </View>
 
-            <View style={[s.card, cardStyle]}>{children}</View>
+            <Animated.View layout={LinearTransition} style={[s.card, cardStyle]}>
+                {children}
+            </Animated.View>
         </View>
     )
 }

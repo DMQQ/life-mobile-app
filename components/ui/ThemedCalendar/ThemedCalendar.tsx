@@ -224,7 +224,6 @@ const styles = StyleSheet.create({
     expandableContainer: { borderRadius: 15 },
     collapsibleContainer: {
         borderRadius: 15,
-        backgroundColor: Colors.primary_light,
         overflow: "hidden",
     },
     knob: {

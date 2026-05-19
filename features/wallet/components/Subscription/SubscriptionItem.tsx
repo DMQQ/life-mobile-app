@@ -31,6 +31,7 @@ interface SubscriptionItemProps {
     }
     index: number
     onPress: () => void
+    style?: StyleProp<ViewStyle>
 }
 
 function formatBillingCycle(cycle: string) {
@@ -54,19 +55,7 @@ function parseDateToText(date: string) {
     return d.format("MMM DD")
 }
 
-function formatDuration(days: number) {
-    if (days >= 365) return `${Math.floor(days / 365)}y ${Math.floor((days % 365) / 30)}m`
-    if (days >= 30) return `${Math.floor(days / 30)}m ${days % 30}d`
-    if (days > 0) return `${days}d`
-    return "Today"
-}
-
-export default function SubscriptionItem({
-    subscription,
-    index,
-    onPress,
-    style,
-}: SubscriptionItemProps & { style?: StyleProp<ViewStyle> }) {
+export default function SubscriptionItem({ subscription, index, onPress, style }: SubscriptionItemProps) {
     const daysUntilNext = moment(parseInt(subscription?.nextBillingDate || "0")).diff(moment(), "days")
     const isOverdue = daysUntilNext < 0
 
@@ -79,116 +68,94 @@ export default function SubscriptionItem({
     const nextColor = !subscription.isActive ? "#F07070" : isOverdue ? "#F07070" : secondary_candidates[0]
 
     return (
-        <Card ripple animated entering={FadeIn.delay((index + 1) * 50)} style={[styles.card, style]} onPress={onPress}>
-            <View style={styles.row}>
-                <CategoryIcon type="expense" category="subscriptions" />
+        <Card
+            ripple
+            animated
+            entering={FadeIn.delay((index + 1) * 50)}
+            style={[styles.container, style]}
+            onPress={onPress}
+        >
+            <View style={styles.innerContainer}>
+                <CategoryIcon style={{ padding: 0 }} type="expense" category="subscriptions" />
 
-                <View style={styles.body}>
-                    <View style={styles.topRow}>
-                        <Text style={styles.name} numberOfLines={1}>
-                            {subscription?.description}
+                <View style={styles.descContainer}>
+                    <Text style={styles.title} numberOfLines={1}>
+                        {subscription.description}
+                    </Text>
+                    <Text style={styles.meta}>
+                        {formatBillingCycle(subscription.billingCycle)}
+                        {"  ·  "}
+                        <Text style={[styles.meta, { color: nextColor }]}>{nextLabel}</Text>
+                    </Text>
+                </View>
+
+                <View style={styles.priceContainer}>
+                    <Text style={styles.amount}>
+                        -{subscription.amount.toFixed(2)}
+                        <Text style={styles.currency}>zł</Text>
+                    </Text>
+                    {subscription.totalSpent != null && subscription.totalSpent > 0 && (
+                        <Text style={styles.totalSpent}>
+                            {subscription.totalSpent.toFixed(2)}
+                            <Text style={styles.totalCurrency}> zł total</Text>
                         </Text>
-                        <Text style={styles.amount}>
-                            -{subscription?.amount?.toFixed(2)}
-                            <Text style={styles.currency}> zł</Text>
-                        </Text>
-                    </View>
-
-                    <View style={styles.chips}>
-                        <Chip
-                            label={formatBillingCycle(subscription.billingCycle)}
-                            color="rgba(255,255,255,0.08)"
-                            textColor="rgba(255,255,255,0.5)"
-                        />
-                        <Chip label={nextLabel} color={nextColor + "22"} textColor={nextColor} />
-                        {subscription.totalDuration != null && (
-                            <Chip
-                                label={formatDuration(subscription.totalDuration)}
-                                color="rgba(255,255,255,0.05)"
-                                textColor="rgba(255,255,255,0.35)"
-                            />
-                        )}
-                        {subscription.totalSpent != null && subscription.totalSpent > 0 && (
-                            <Chip
-                                label={`Spent: ${subscription.totalSpent.toFixed(2)} zł`}
-                                color={secondary_candidates[1] + "22"}
-                                textColor={secondary_candidates[1]}
-                            />
-                        )}
-
-                        {subscription.totalAmount != null && subscription.amount > 0 && (
-                            <Chip
-                                label={`${Math.round(subscription.totalAmount / subscription.amount)}x`}
-                                color="rgba(255,255,255,0.05)"
-                                textColor="rgba(255,255,255,0.35)"
-                            />
-                        )}
-                    </View>
+                    )}
                 </View>
             </View>
         </Card>
     )
 }
 
-function Chip({ label, color, textColor }: { label: string; color: string; textColor: string }) {
-    return (
-        <View style={[styles.chip, { backgroundColor: color }]}>
-            <Text style={[styles.chipText, { color: textColor }]}>{label}</Text>
-        </View>
-    )
-}
-
 const styles = StyleSheet.create({
-    card: {
-        marginBottom: 15,
-        paddingHorizontal: 10,
-        paddingVertical: 10,
-    },
-    row: {
+    container: {},
+    innerContainer: {
         flexDirection: "row",
-        alignItems: "flex-start",
-        gap: 2.5,
-    },
-    iconWrap: {},
-    body: {
-        paddingTop: 10,
-        flex: 1,
-        gap: 10,
-    },
-    topRow: {
-        flexDirection: "row",
-        justifyContent: "space-between",
+        height: 48,
         alignItems: "center",
-        gap: 8,
     },
-    name: {
+    descContainer: {
+        height: 48,
+        justifyContent: "center",
+        flex: 3,
+        overflow: "hidden",
+    },
+    title: {
         color: Colors.foreground,
         fontSize: 14,
+        marginLeft: 10,
         fontWeight: "bold",
-        marginBottom: 5,
+        marginBottom: 3,
         textTransform: "capitalize",
     },
-    amount: {
-        fontSize: 16,
-        fontWeight: "700",
-        color: "#F07070",
-    },
-    currency: {
-        fontSize: 13,
+    meta: {
+        color: "rgba(255,255,255,0.55)",
+        fontSize: 10,
+        marginLeft: 10,
         fontWeight: "500",
     },
-    chips: {
-        flexDirection: "row",
-        flexWrap: "wrap",
-        gap: 6,
+    priceContainer: {
+        flex: 2,
+        height: 48,
+        justifyContent: "center",
+        alignItems: "flex-end",
     },
-    chip: {
-        paddingHorizontal: 9,
-        paddingVertical: 4,
-        borderRadius: 20,
-    },
-    chipText: {
-        fontSize: 12,
+    amount: {
+        textAlign: "right",
+        color: "#F07070",
+        fontSize: 16,
         fontWeight: "600",
+    },
+    currency: {
+        fontSize: 12,
+    },
+    totalSpent: {
+        textAlign: "right",
+        color: "rgba(255,255,255,0.35)",
+        fontSize: 10,
+        fontWeight: "500",
+        marginTop: 2,
+    },
+    totalCurrency: {
+        fontSize: 10,
     },
 })

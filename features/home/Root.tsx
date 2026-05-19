@@ -58,16 +58,11 @@ export default function Root({ navigation }: HomeScreenProps<"Root">) {
     const headerButtons = useMemo(
         () => [
             {
-                icon: (
-                    <View style={{ position: "relative" }}>
-                        <AntDesign name="bell" size={20} color={Colors.foreground} />
-                        {(data?.notifications as any[])?.some((n) => !n.read) && <PulsingIndicator />}
-                    </View>
-                ),
+                icon: "bell",
                 onPress: () => navigation.navigate("HomeNotifications"),
             },
             {
-                icon: <AntDesign name="setting" size={20} color={Colors.foreground} />,
+                icon: "gear",
                 onPress: () => navigation.navigate("HomeSettings"),
             },
         ],

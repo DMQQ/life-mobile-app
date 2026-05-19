@@ -34,7 +34,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 15,
-        paddingTop: 10,
     },
     notificationCard: {
         borderRadius: 16,
@@ -501,7 +500,7 @@ export default function WalletNotifications({ data, error, loading }: WalletNoti
                 <NotificationCard index={index} notification={item} onDismiss={handleDismiss} />
             )}
             keyExtractor={(item) => item.id}
-            contentContainerStyle={{ paddingBottom: 40 }}
+            contentContainerStyle={{ paddingBottom: 40, paddingTop: 80 }}
             showsVerticalScrollIndicator={false}
             style={styles.container}
         />

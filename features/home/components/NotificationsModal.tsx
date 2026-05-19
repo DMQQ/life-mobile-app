@@ -25,7 +25,7 @@ const styles = StyleSheet.create({
     },
     headerLeft: { flexDirection: "row", alignItems: "center", gap: 12 },
     title: { color: Colors.text_light, fontWeight: "bold" },
-    body: { flex: 1, backgroundColor: "rgba(0,0,0,0.2)", paddingTop: 60 },
+    body: { flex: 1, backgroundColor: "rgba(0,0,0,0.2)" },
 })
 
 export default function NotificationsScreen({ navigation }: HomeScreenProps<"HomeNotifications">) {
@@ -45,25 +45,6 @@ export default function NotificationsScreen({ navigation }: HomeScreenProps<"Hom
     return (
         <View style={styles.container}>
             <View style={styles.content}>
-                {/* <View style={styles.header}>
-                    <Text variant="body" style={styles.title}>
-                        Notifications
-                    </Text>
-                    <View style={styles.headerLeft}>
-                        {unreadCount > 0 && (
-                            <Button
-                                type="text"
-                                onPress={handleClearAll}
-                                fontStyle={{ fontSize: 13, color: "#fff", textTransform: "none" }}
-                                style={{ padding: 5 }}
-                            >
-                                Clear all ({unreadCount})
-                            </Button>
-                        )}
-                        <IconCloseButton onPress={handleClose} />
-                    </View>
-                </View> */}
-
                 <ModalHeader
                     onClose={handleClose}
                     onSave={handleClearAll}

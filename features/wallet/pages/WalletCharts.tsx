@@ -207,6 +207,7 @@ function WalletCharts({ navigation }: any) {
                     {
                         children: (
                             <DatePicker
+                                clear
                                 mode="period"
                                 dates={{
                                     start: dayjs(filters.date.from).toDate(),
@@ -234,7 +235,7 @@ function WalletCharts({ navigation }: any) {
             />
 
             <AnimatedScrollView
-                style={{ paddingTop: 250 }}
+                style={{ paddingTop: 225 }}
                 onScroll={onScroll}
                 scrollEventThrottle={16}
                 bounces

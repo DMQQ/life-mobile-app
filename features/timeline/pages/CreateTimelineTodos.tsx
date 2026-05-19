@@ -133,7 +133,7 @@ export default function CreateTimelineTodos({ route, navigation }: TimelineScree
         if (mode === "push-back") {
             const mappedTodos = state.todos.map((t) => t.value)
             if (extraText.length > 0) mappedTodos.unshift(extraText)
-            ;(navigation as any).navigate("TimelineCreate", { ...route.params, todos: mappedTodos })
+            navigation.popTo("TimelineCreate", { ...route.params, todos: mappedTodos } as any)
             return
         }
 

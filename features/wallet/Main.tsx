@@ -121,7 +121,11 @@ export default function WalletScreens({ navigation, route }: WalletScreens<"Wall
 
                 <Stack.Screen name="Subscription" component={SubscriptionScreen as any} />
 
-                <Stack.Screen name="EditSubscription" component={EditSubscription as any} options={MODAL_OPTIONS} />
+                <Stack.Screen
+                    name="EditSubscription"
+                    component={EditSubscription as any}
+                    options={MODAL_OPTIONS}
+                />
 
                 <Stack.Screen
                     name="EditBalance"

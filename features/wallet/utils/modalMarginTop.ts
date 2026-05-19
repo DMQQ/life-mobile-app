@@ -1,7 +1,7 @@
 import Layout from "@/constants/Layout"
 
 export default function getModalMarginTop(str: string, baseFontSize = 50) {
-    if (!str) return 200
+    if (!str) return 100
 
     const length = str.length
 
@@ -18,7 +18,7 @@ export default function getModalMarginTop(str: string, baseFontSize = 50) {
 
     const titleHeight = numberOfLines * lineHeight
 
-    const baseHeaderHeight = 200
+    const baseHeaderHeight = 100
 
     return baseHeaderHeight + titleHeight + 30
 }

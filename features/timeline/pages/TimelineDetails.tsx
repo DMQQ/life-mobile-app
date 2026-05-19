@@ -115,12 +115,13 @@ export default function TimelineDetails({
             [
                 {
                     onPress: () => {},
-                    icon: <Feather name="trash" size={20} color={Colors.foreground} />,
+                    icon: "trash",
+                    tintColor: Colors.error,
                     contextMenu: {
                         items: [
                             {
                                 title: "Delete this",
-                                systemImage: "trash" as any,
+                                systemImage: "trash",
                                 destructive: true,
                                 onPress: () => removeOne(),
                             },
@@ -134,7 +135,7 @@ export default function TimelineDetails({
                     },
                 },
                 {
-                    icon: <Feather name="edit-2" size={20} color={Colors.foreground} />,
+                    icon: "pencil",
                     onPress: onFabPress,
                 },
                 {

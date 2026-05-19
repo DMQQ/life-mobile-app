@@ -20,7 +20,9 @@ export default function TimelineCreateHeader(props: TimelineCreateHeaderProps) {
             dirty={props.dirty}
             onClose={navigation.goBack}
             onSave={props.onSubmit}
+            title="Create event"
             saveDisabled={props.submitDisabled}
+            saveIcon="checkmark"
         />
     )
 }

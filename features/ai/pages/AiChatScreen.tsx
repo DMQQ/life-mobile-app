@@ -8,13 +8,13 @@ import { useCallback, useRef, useState } from "react"
 import {
     ActivityIndicator,
     FlatList,
-    KeyboardAvoidingView,
-    Platform,
     Pressable,
     StyleSheet,
     TextInput,
     View,
 } from "react-native"
+import { useReanimatedKeyboardAnimation } from "react-native-keyboard-controller"
+import Animated, { useAnimatedStyle } from "react-native-reanimated"
 import { SafeAreaView } from "react-native-safe-area-context"
 import GlassView from "@/components/ui/GlassView"
 import SkillCard from "@/features/wallet/components/AiChat/SkillCard"
@@ -136,6 +136,9 @@ export default function AiChatScreen() {
     const [error, setError] = useState("")
     const [showHistory, setShowHistory] = useState(false)
     const [dates, setDates] = useState({ start: dayjs().startOf("month").toDate(), end: dayjs().toDate() })
+
+    const { height } = useReanimatedKeyboardAnimation()
+    const keyboardStyle = useAnimatedStyle(() => ({ transform: [{ translateY: height.value }] }))
 
     const listRef = useRef<FlatList>(null)
     const finalTranscriptRef = useRef("")
@@ -304,12 +307,8 @@ export default function AiChatScreen() {
 
             <View style={s.divider} />
 
-            <KeyboardAvoidingView
-                style={{ flex: 1 }}
-                behavior={Platform.OS === "ios" ? "padding" : "height"}
-                keyboardVerticalOffset={80}
-            >
-                <FlatList
+            <Animated.View style={[{ flex: 1 }, keyboardStyle]}>
+                <Animated.FlatList
                     ref={listRef}
                     style={s.list}
                     contentContainerStyle={s.listContent}
@@ -381,7 +380,7 @@ export default function AiChatScreen() {
                     }
                 />
 
-                <View style={s.inputRow}>
+                <Animated.View style={s.inputRow}>
                     <GlassView style={s.inputInner}>
                         {isRecording ? (
                             <GlassView tintColor={Colors.error} style={s.voiceActiveRow}>
@@ -425,8 +424,8 @@ export default function AiChatScreen() {
                             </>
                         )}
                     </GlassView>
-                </View>
-            </KeyboardAvoidingView>
+                </Animated.View>
+            </Animated.View>
         </SafeAreaView>
     )
 }

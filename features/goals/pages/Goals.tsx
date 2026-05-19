@@ -44,7 +44,7 @@ export default function Goals({ navigation }: any) {
                 scrollY={scrollY}
                 animated={true}
                 animatedTitle="Goals"
-                animatedSubtitle="5 Active Goals"
+                animatedSubtitle={`${filteredGoals?.length || 0} Active Goals`}
                 buttons={[
                     {
                         onPress: () => setViewMode((v) => (v === "list" ? "week" : "list")),
@@ -55,43 +55,45 @@ export default function Goals({ navigation }: any) {
                     {
                         standalone: true,
                         onPress: () => navigation.navigate("CreateGoal"),
-                        icon: <Feather name="plus" size={20} color={Colors.foreground} />,
+                        icon: "plus",
                     },
                 ]}
             />
-            {viewMode === "list" ? (
-                <AnimatedFlashList
-                    refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-                    data={filteredGoals}
-                    renderItem={({ item, index }: any) => (
-                        <GoalCategory
-                            index={index}
-                            length={filteredGoals?.length}
-                            onPress={() => {
-                                navigation.navigate("Goal", { id: item.id })
-                            }}
-                            {...item}
-                        />
-                    )}
-                    keyExtractor={(item: any) => item.id}
-                    onScroll={onAnimatedScrollHandler}
-                    contentContainerStyle={{
-                        paddingHorizontal: 15,
-                        paddingBottom: 100,
-                        paddingTop: 300,
-                    }}
-                    removeClippedSubviews
-                />
-            ) : (
-                <Animated.ScrollView
-                    refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-                    onScroll={onAnimatedScrollHandler}
-                    scrollEventThrottle={16}
-                    showsVerticalScrollIndicator={false}
-                >
-                    <WeekGrid goals={filteredGoals} onGoalPress={(id) => navigation.navigate("Goal", { id })} />
-                </Animated.ScrollView>
-            )}
+            <View style={{ flex: 1, backgroundColor: Colors.primary }}>
+                {viewMode === "list" ? (
+                    <AnimatedFlashList
+                        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+                        data={filteredGoals}
+                        renderItem={({ item, index }: any) => (
+                            <GoalCategory
+                                index={index}
+                                length={filteredGoals?.length}
+                                onPress={() => {
+                                    navigation.navigate("Goal", { id: item.id })
+                                }}
+                                {...item}
+                            />
+                        )}
+                        keyExtractor={(item: any) => item.id}
+                        onScroll={onAnimatedScrollHandler}
+                        contentContainerStyle={{
+                            paddingHorizontal: 15,
+                            paddingTop: 300,
+                        }}
+                        style={{ flex: 1 }}
+                        removeClippedSubviews
+                    />
+                ) : (
+                    <Animated.ScrollView
+                        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+                        onScroll={onAnimatedScrollHandler}
+                        scrollEventThrottle={16}
+                        showsVerticalScrollIndicator={false}
+                    >
+                        <WeekGrid goals={filteredGoals} onGoalPress={(id) => navigation.navigate("Goal", { id })} />
+                    </Animated.ScrollView>
+                )}
+            </View>
         </View>
     )
 }
