@@ -17,6 +17,7 @@ import Section from "@/components/ui/Section"
 import ChipButton from "@/components/ui/Button/ChipButton"
 import { Host, DatePicker as SwiftDatePicker } from "@expo/ui/swift-ui"
 import { datePickerStyle, frame } from "@expo/ui/swift-ui/modifiers"
+import Layout from "@/constants/Layout"
 
 export default function CreateTimeLineEventModal({ route, navigation }: TimelineScreenProps<"TimelineCreate">) {
     const { f, isEditing, scopeSheetRef, onScopeSelected, handleChangeDate } = useCreateTimeline({
@@ -112,7 +113,10 @@ export default function CreateTimeLineEventModal({ route, navigation }: Timeline
                                                 selectedDate: moment(d).format("YYYY-MM-DD"),
                                             })
                                         }}
-                                        modifiers={[datePickerStyle("graphical"), frame({ width: 340 })]}
+                                        modifiers={[
+                                            datePickerStyle("graphical"),
+                                            frame({ width: Layout.screen.width - 30 }),
+                                        ]}
                                     />
                                 </Host>
                             </View>

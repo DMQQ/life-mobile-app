@@ -20,6 +20,7 @@ import useSubscription from "../../hooks/useSubscription"
 import { useSubAccounts } from "../../hooks/useSubAccounts"
 import { EditSubscriptionStackParams } from "./Main"
 import { NativeStackScreenProps } from "@react-navigation/native-stack"
+import layout from "@/constants/Layout"
 
 type BillingCycle = "daily" | "weekly" | "monthly" | "yearly" | "custom"
 
@@ -105,12 +106,12 @@ export default function Form({ route, navigation }: Props) {
         }
     }, [route.params?.customBilling])
 
-const loading = modifySubscriptionState.loading || createSubscriptionFromInputState.loading
+    const loading = modifySubscriptionState.loading || createSubscriptionFromInputState.loading
     const isValid = parseFloat(formik.values.amount) > 0
 
     const customLabel =
         formik.values.customBillingMonths.length > 0
-            ? `Day ${formik.values.billingDay} · ${formik.values.customBillingMonths.map((m) => ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][m - 1]).join(", ")}`
+            ? `Day ${formik.values.billingDay} · ${formik.values.customBillingMonths.map((m) => ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][m - 1]).join(", ")}`
             : `Day ${formik.values.billingDay}`
 
     const selectedAccount = subAccounts.find((a) => a.id === formik.values.subAccountId)
@@ -141,7 +142,11 @@ const loading = modifySubscriptionState.loading || createSubscriptionFromInputSt
                         flat
                         style={styles.amountInput}
                         containerStyle={{ borderRadius: 0 }}
-                        left={<Text variant="body" style={styles.currencyLabel}>zł</Text>}
+                        left={
+                            <Text variant="body" style={styles.currencyLabel}>
+                                zł
+                            </Text>
+                        }
                     />
                     <View style={styles.divider} />
                     <Input
@@ -166,7 +171,10 @@ const loading = modifySubscriptionState.loading || createSubscriptionFromInputSt
                                 <SwiftDatePicker
                                     selection={dayjs(formik.values.dateStart).toDate()}
                                     onDateChange={(d) => formik.setFieldValue("dateStart", d)}
-                                    modifiers={[datePickerStyle("graphical"), frame({ width: 340 })]}
+                                    modifiers={[
+                                        datePickerStyle("graphical"),
+                                        frame({ width: layout.screen.width - 30 }),
+                                    ]}
                                 />
                             </Host>
                         </View>
@@ -186,7 +194,10 @@ const loading = modifySubscriptionState.loading || createSubscriptionFromInputSt
                                 <SwiftDatePicker
                                     selection={dayjs(formik.values.nextBillingDate).toDate()}
                                     onDateChange={(d) => formik.setFieldValue("nextBillingDate", d)}
-                                    modifiers={[datePickerStyle("graphical"), frame({ width: 340 })]}
+                                    modifiers={[
+                                        datePickerStyle("graphical"),
+                                        frame({ width: layout.screen.width - 30 }),
+                                    ]}
                                 />
                             </Host>
                         </View>
@@ -231,7 +242,10 @@ const loading = modifySubscriptionState.loading || createSubscriptionFromInputSt
                                 <SwiftDatePicker
                                     selection={dayjs(formik.values.dateEnd).toDate()}
                                     onDateChange={(d) => formik.setFieldValue("dateEnd", d)}
-                                    modifiers={[datePickerStyle("graphical"), frame({ width: 340 })]}
+                                    modifiers={[
+                                        datePickerStyle("graphical"),
+                                        frame({ width: layout.screen.width - 30 }),
+                                    ]}
                                 />
                             </Host>
                         </View>
@@ -264,7 +278,12 @@ const loading = modifySubscriptionState.loading || createSubscriptionFromInputSt
                         >
                             <Feather name="settings" size={16} color={Colors.secondary} />
                             <Text style={styles.navRowText}>{customLabel}</Text>
-                            <Feather name="chevron-right" size={16} color={Colors.foreground_secondary} style={styles.navRowChevron} />
+                            <Feather
+                                name="chevron-right"
+                                size={16}
+                                color={Colors.foreground_secondary}
+                                style={styles.navRowChevron}
+                            />
                         </Ripple>
                     </Section>
                 )}
@@ -292,13 +311,21 @@ const loading = modifySubscriptionState.loading || createSubscriptionFromInputSt
                             style={styles.dateRow}
                         >
                             <Text variant="subtitle">Account</Text>
-                            <Text variant="body" style={[styles.rowValue, selectedAccount && { color: Colors.secondary }]}>
+                            <Text
+                                variant="body"
+                                style={[styles.rowValue, selectedAccount && { color: Colors.secondary }]}
+                            >
                                 {selectedAccount?.name ?? "Default"}
                             </Text>
                         </Pressable>
                         {expanded.account && (
                             <View>
-                                {([{ id: undefined as string | undefined, name: "Default" }, ...subAccounts] as { id: string | undefined; name: string }[]).map((item) => {
+                                {(
+                                    [{ id: undefined as string | undefined, name: "Default" }, ...subAccounts] as {
+                                        id: string | undefined
+                                        name: string
+                                    }[]
+                                ).map((item) => {
                                     const active = formik.values.subAccountId === item.id
                                     return (
                                         <Ripple

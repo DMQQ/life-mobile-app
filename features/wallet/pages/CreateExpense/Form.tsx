@@ -23,6 +23,7 @@ import { SpontaneousRateSelector, getRateColor } from "../../components/CreateEx
 import { useSubAccounts } from "../../hooks/useSubAccounts"
 import SubExpenseSheet from "../../components/CreateExpense/SubexpenseSheet"
 import PredictionView from "../../components/CreateExpense/PredictionView"
+import layout from "@/constants/Layout"
 
 type ExpenseType = "expense" | "income"
 
@@ -274,7 +275,7 @@ function DateSection() {
                         <SwiftDatePicker
                             selection={dateObj.toDate()}
                             onDateChange={setDatePart}
-                            modifiers={[datePickerStyle("graphical"), frame({ width: 340 })]}
+                            modifiers={[datePickerStyle("graphical"), frame({ width: layout.screen.width - 30 })]}
                         />
                     </Host>
                 </View>
