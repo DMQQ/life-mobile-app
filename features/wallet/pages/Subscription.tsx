@@ -1,9 +1,10 @@
 import Text from "@/components/ui/Text/Text"
+import SubscriptionSkeleton from "../components/Subscription/SubscriptionSkeleton"
 import { gql, useQuery } from "@apollo/client"
 import { Feather } from "@expo/vector-icons"
 import moment from "moment"
 import { useEffect, useState } from "react"
-import { ActivityIndicator, StyleSheet, View } from "react-native"
+import { StyleSheet, View } from "react-native"
 
 import Header from "@/components/ui/Header/Header"
 import Colors from "@/constants/Colors"
@@ -177,11 +178,7 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
     })
 
     if (loading || !subscription) {
-        return (
-            <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color={Colors.secondary} />
-            </View>
-        )
+        return <SubscriptionSkeleton />
     }
 
     const nextBillingDayjs = dayjs(parseInt(subscription.nextBillingDate || "0"))
@@ -427,12 +424,6 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
 }
 
 const styles = StyleSheet.create({
-    loadingContainer: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: Colors.primary,
-    },
     detailRow: {
         flexDirection: "row",
         justifyContent: "space-between",

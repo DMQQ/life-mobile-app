@@ -6,6 +6,7 @@ import Input from "@/components/ui/TextInput/TextInput"
 import Colors from "@/constants/Colors"
 import { Subscription } from "@/types"
 import { Feather } from "@expo/vector-icons"
+import { SymbolView } from "expo-symbols"
 import Color from "color"
 import { DatePicker as SwiftDatePicker, Host } from "@expo/ui/swift-ui"
 import { datePickerStyle, frame } from "@expo/ui/swift-ui/modifiers"
@@ -161,9 +162,12 @@ export default function Form({ route, navigation }: Props) {
                 <Section title="Dates">
                     <Pressable onPress={() => toggleExpanded("start")} style={styles.dateRow}>
                         <Text variant="subtitle">Start date</Text>
-                        <Text variant="body" style={styles.dateValue}>
-                            {moment(formik.values.dateStart).format("DD MMMM YYYY")}
-                        </Text>
+                        <View style={styles.rowRight}>
+                            <SymbolView name="calendar" size={15} tintColor={Colors.foreground_secondary} />
+                            <Text variant="body" style={styles.dateValue}>
+                                {moment(formik.values.dateStart).format("DD MMMM YYYY")}
+                            </Text>
+                        </View>
                     </Pressable>
                     {expanded.start && (
                         <View style={styles.pickerContainer}>
@@ -184,9 +188,12 @@ export default function Form({ route, navigation }: Props) {
 
                     <Pressable onPress={() => toggleExpanded("nextBilling")} style={styles.dateRow}>
                         <Text variant="subtitle">Next billing</Text>
-                        <Text variant="body" style={styles.dateValue}>
-                            {moment(formik.values.nextBillingDate).format("DD MMMM YYYY")}
-                        </Text>
+                        <View style={styles.rowRight}>
+                            <SymbolView name="arrow.clockwise" size={15} tintColor={Colors.foreground_secondary} />
+                            <Text variant="body" style={styles.dateValue}>
+                                {moment(formik.values.nextBillingDate).format("DD MMMM YYYY")}
+                            </Text>
+                        </View>
                     </Pressable>
                     {expanded.nextBilling && (
                         <View style={styles.pickerContainer}>
@@ -214,6 +221,7 @@ export default function Form({ route, navigation }: Props) {
                     >
                         <Text variant="subtitle">End date</Text>
                         <View style={styles.dateRowRight}>
+                            <SymbolView name="calendar.badge.minus" size={15} tintColor={Colors.foreground_secondary} />
                             <Text
                                 variant="body"
                                 style={[styles.dateValue, !formik.values.dateEnd && styles.dateValueMuted]}
@@ -276,7 +284,7 @@ export default function Form({ route, navigation }: Props) {
                             }}
                             style={styles.navRow}
                         >
-                            <Feather name="settings" size={16} color={Colors.secondary} />
+                            <SymbolView name="slider.horizontal.3" size={16} tintColor={Colors.secondary} />
                             <Text style={styles.navRowText}>{customLabel}</Text>
                             <Feather
                                 name="chevron-right"
@@ -311,12 +319,15 @@ export default function Form({ route, navigation }: Props) {
                             style={styles.dateRow}
                         >
                             <Text variant="subtitle">Account</Text>
-                            <Text
-                                variant="body"
-                                style={[styles.rowValue, selectedAccount && { color: Colors.secondary }]}
-                            >
-                                {selectedAccount?.name ?? "Default"}
-                            </Text>
+                            <View style={styles.rowRight}>
+                                <SymbolView name="creditcard.fill" size={15} tintColor={selectedAccount ? Colors.secondary : Colors.foreground_secondary} />
+                                <Text
+                                    variant="body"
+                                    style={[styles.rowValue, selectedAccount && { color: Colors.secondary }]}
+                                >
+                                    {selectedAccount?.name ?? "Default"}
+                                </Text>
+                            </View>
                         </Pressable>
                         {expanded.account && (
                             <View>
@@ -375,6 +386,11 @@ const styles = StyleSheet.create({
     divider: {
         borderWidth: 0.5,
         borderColor: Colors.borderColor,
+    },
+    rowRight: {
+        flexDirection: "row" as const,
+        alignItems: "center" as const,
+        gap: 6,
     },
     dateRow: {
         flexDirection: "row",

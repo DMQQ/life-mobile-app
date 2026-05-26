@@ -1,4 +1,5 @@
 import Header from "@/components/ui/Header/Header"
+import ExpenseSkeleton from "../components/Expense/ExpenseSkeleton"
 import Colors from "@/constants/Colors"
 import { Expense as ExpenseType } from "@/types"
 import { gql, useMutation, useQuery } from "@apollo/client"
@@ -140,6 +141,8 @@ export default function Expense({ route: { params }, navigation }: any) {
             scrollY.value = ev.contentOffset.y
         },
     })
+
+    if (!selected) return <ExpenseSkeleton />
 
     return (
         <View style={{ flex: 1 }}>

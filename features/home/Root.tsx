@@ -7,20 +7,17 @@ import useAppBackground from "@/utils/hooks/useAppBackground"
 import useRoutinePendingCompletions from "@/utils/widget/hooks/useRoutinePendingCompletions"
 import { GET_MAIN_SCREEN, getMainScreenBaseVariables } from "@/utils/schemas/GET_MAIN_SCREEN"
 import { useQuery } from "@apollo/client"
-import { AntDesign } from "@expo/vector-icons"
 import * as SplashScreen from "expo-splash-screen"
 import { useMemo, useState } from "react"
 import { View } from "react-native"
 import Animated from "react-native-reanimated"
 import { FloatingNotifications, useGetNotifications } from "../wallet/components/Wallet/WalletNotifications"
 import LoadingSkeleton from "./components/LoadingSkeleton"
-import ChartSwitcher from "./components/ChartSwitcher"
-import CategoryBreakdown from "@/features/wallet/components/Wallet/CategoryBreakdown"
-import HomeExtras from "@/features/home/components/HomeExtras"
-import TimelineWidget from "@/features/home/components/TimelineWidget"
 import Background from "@/components/ui/Background"
 import { HomeScreenProps } from "./Main"
 import { RefreshControl } from "react-native"
+import { useHomeWidgets } from "./hooks/useHomeWidgets"
+import { WIDGETS } from "./widgets/registry"
 
 export default function Root({ navigation }: HomeScreenProps<"HomeRoot">) {
     const [loading, setLoading] = useState(true)
@@ -41,6 +38,7 @@ export default function Root({ navigation }: HomeScreenProps<"HomeRoot">) {
     const { refreshing, refresh } = useRefresh([refetchHome, refetchNotifications], [])
     const [scrollY, onScroll] = useTrackScroll({ screenName: "Root" })
 
+    const { enabled, order } = useHomeWidgets()
     const { processPending } = useRoutinePendingCompletions()
     useAppBackground({
         onForeground: () => {
@@ -97,17 +95,17 @@ export default function Root({ navigation }: HomeScreenProps<"HomeRoot">) {
                 contentContainerStyle={{
                     paddingHorizontal: 15,
                     paddingBottom: 120,
-                    paddingTop: 170,
-                    gap: 10,
+                    paddingTop: 160,
                 }}
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} />}
             >
-                <ChartSwitcher />
-
-                <CategoryBreakdown />
-
-                <TimelineWidget />
-                <HomeExtras />
+                {order.map((key) => {
+                    if (!enabled[key]) return null
+                    const def = WIDGETS.find((w) => w.key === key)
+                    if (!def) return null
+                    const Widget = def.component
+                    return <Widget key={key} />
+                })}
             </Animated.ScrollView>
         </View>
     )

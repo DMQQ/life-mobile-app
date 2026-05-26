@@ -6,6 +6,7 @@ import GroupSelector from "@/components/ui/GroupSelector"
 import GlassView from "@/components/ui/GlassView"
 import Colors from "@/constants/Colors"
 import { Feather } from "@expo/vector-icons"
+import { SymbolView } from "expo-symbols"
 import { DatePicker as SwiftDatePicker, Host } from "@expo/ui/swift-ui"
 import { datePickerStyle, frame } from "@expo/ui/swift-ui/modifiers"
 import Color from "color"
@@ -155,9 +156,12 @@ function DetailsSection() {
                         style={styles.row}
                     >
                         <Text variant="subtitle">Category</Text>
-                        <Text variant="body" style={[styles.rowValue, hasCategory && { color: catColor }]}>
-                            {hasCategory ? CategoryUtils.getCategoryName(category) : "None selected"}
-                        </Text>
+                        <View style={styles.rowRight}>
+                            <SymbolView name="tag.fill" size={15} tintColor={hasCategory ? catColor : Colors.foreground_secondary} />
+                            <Text variant="body" style={[styles.rowValue, hasCategory && { color: catColor }]}>
+                                {hasCategory ? CategoryUtils.getCategoryName(category) : "None selected"}
+                            </Text>
+                        </View>
                     </Pressable>
                     {expanded === "category" && (
                         <View style={styles.categoryContainer}>
@@ -185,9 +189,12 @@ function DetailsSection() {
                 style={styles.row}
             >
                 <Text variant="subtitle">Impulsiveness</Text>
-                <Text variant="body" style={[styles.rowValue, spontaneousActive && { color: spontaneousColor }]}>
-                    {spontaneousRate === 0 ? "Not spontaneous" : `${spontaneousRate}%`}
-                </Text>
+                <View style={styles.rowRight}>
+                    <SymbolView name="bolt.fill" size={15} tintColor={spontaneousActive ? spontaneousColor : Colors.foreground_secondary} />
+                    <Text variant="body" style={[styles.rowValue, spontaneousActive && { color: spontaneousColor }]}>
+                        {spontaneousRate === 0 ? "Not spontaneous" : `${spontaneousRate}%`}
+                    </Text>
+                </View>
             </Pressable>
             {expanded === "spontaneous" && (
                 <View style={styles.spontaneousContainer}>
@@ -206,9 +213,12 @@ function DetailsSection() {
                         style={styles.row}
                     >
                         <Text variant="subtitle">Account</Text>
-                        <Text variant="body" style={[styles.rowValue, selectedAccount && { color: Colors.secondary }]}>
-                            {selectedAccount?.name ?? "Default"}
-                        </Text>
+                        <View style={styles.rowRight}>
+                            <SymbolView name="creditcard.fill" size={15} tintColor={selectedAccount ? Colors.secondary : Colors.foreground_secondary} />
+                            <Text variant="body" style={[styles.rowValue, selectedAccount && { color: Colors.secondary }]}>
+                                {selectedAccount?.name ?? "Default"}
+                            </Text>
+                        </View>
                     </Pressable>
                     {expanded === "account" && (
                         <View>
@@ -265,9 +275,12 @@ function DateSection() {
         <Section title="Date">
             <Pressable onPress={() => setExpanded((p) => ({ ...p, date: !p.date }))} style={styles.row}>
                 <Text variant="subtitle">Date</Text>
-                <Text variant="body" style={styles.rowValue}>
-                    {dateObj.format("DD MMMM YYYY")}
-                </Text>
+                <View style={styles.rowRight}>
+                    <SymbolView name="calendar" size={15} tintColor={Colors.foreground_secondary} />
+                    <Text variant="body" style={styles.rowValue}>
+                        {dateObj.format("DD MMMM YYYY")}
+                    </Text>
+                </View>
             </Pressable>
             {expanded.date && (
                 <View style={styles.pickerContainer}>
@@ -285,9 +298,12 @@ function DateSection() {
 
             <Pressable onPress={() => setExpanded((p) => ({ ...p, time: !p.time }))} style={styles.row}>
                 <Text variant="subtitle">Time</Text>
-                <Text variant="body" style={styles.rowValue}>
-                    {dateObj.format("HH:mm")}
-                </Text>
+                <View style={styles.rowRight}>
+                    <SymbolView name="clock.fill" size={15} tintColor={Colors.foreground_secondary} />
+                    <Text variant="body" style={styles.rowValue}>
+                        {dateObj.format("HH:mm")}
+                    </Text>
+                </View>
             </Pressable>
             {expanded.time && (
                 <View style={styles.pickerContainer}>
@@ -318,7 +334,7 @@ function SubExpensesSection() {
                 }}
                 style={styles.navRow}
             >
-                <Feather name="list" size={16} color={count > 0 ? Colors.secondary : Colors.foreground_secondary} />
+                <SymbolView name="list.bullet" size={16} tintColor={count > 0 ? Colors.secondary : Colors.foreground_secondary} />
                 <Text style={[styles.navRowText, count > 0 && { color: Colors.secondary }]}>
                     {count > 0 ? `${count} sub-expense${count > 1 ? "s" : ""}` : "Add sub-expenses"}
                 </Text>
@@ -352,6 +368,11 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
         paddingHorizontal: 15,
         paddingVertical: 12,
+    },
+    rowRight: {
+        flexDirection: "row" as const,
+        alignItems: "center" as const,
+        gap: 6,
     },
     rowValue: {
         color: Colors.foreground,
