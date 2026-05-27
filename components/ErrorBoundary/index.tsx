@@ -3,7 +3,6 @@ import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Clipboard } from 
 import Colors from "@/constants/Colors"
 import Button from "../ui/Button/Button"
 import { SafeAreaView } from "react-native-safe-area-context"
-import * as Sentry from "@sentry/react-native"
 
 interface Props {
     children: ReactNode
@@ -40,7 +39,6 @@ class ErrorBoundary extends Component<Props, State> {
         })
 
         this.props.onError?.(error, errorInfo.componentStack ?? "")
-        Sentry.captureException(error)
     }
 
     handleRestart = () => {

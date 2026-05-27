@@ -107,15 +107,6 @@
             "expo-speech-recognition",
             "@react-native-community/datetimepicker",
             [
-                "@sentry/react-native/expo",
-                {
-                    "url": "https://sentry.io/",
-                    "project": "life-expo",
-                    "organization": "dmq"
-                }
-            ],
-            "@sentry/react-native",
-            [
                 "expo-camera",
                 {
                     "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera to let you take photos for AI expense scanning"

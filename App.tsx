@@ -30,18 +30,10 @@ import { useActivityManager } from "./utils/hooks/useActivityManager"
 import { store } from "./utils/redux"
 import useWidgets from "./utils/widget/hooks/useWidgets"
 import { setLogVerbosity } from "@apollo/client"
-import * as Sentry from "@sentry/react-native"
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet"
 import { SearchMenuProvider } from "./contexts/SearchMenuContext"
 import { AiChatProvider } from "./contexts/AiChatContext"
 import { KeyboardProvider } from "react-native-keyboard-controller"
-
-Sentry.init({
-    enableNative: true,
-    attachScreenshot: true,
-    enableAutoPerformanceTracing: true,
-    attachViewHierarchy: true,
-})
 
 setLogVerbosity("error")
 
@@ -163,4 +155,4 @@ function App() {
     )
 }
 
-export default Sentry.wrap(App)
+export default App
