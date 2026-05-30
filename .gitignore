@@ -96,3 +96,5 @@ graphify-out
 .env.local
 
 .env
+
+.zed

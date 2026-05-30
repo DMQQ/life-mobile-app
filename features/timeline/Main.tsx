@@ -73,6 +73,7 @@ export default function TimelineScreens({ route, navigation }: RootStackScreenPr
                     headerTitle: "",
                     presentation: "transparentModal",
                     animation: "fade",
+                    headerShown: false,
                 }}
                 name="ImagesPreview"
                 component={ImagesPreview}

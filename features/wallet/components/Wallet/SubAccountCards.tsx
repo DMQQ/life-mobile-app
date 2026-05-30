@@ -28,16 +28,12 @@ const CARD_H = CARD_W * 0.6
 export default function SubAccountCards() {
     const { data } = useSubAccounts()
     const accounts = [...(data?.wallet?.subAccounts ?? [])].sort((a, b) => (a.isDefault ? -1 : b.isDefault ? 1 : 0))
-    const { filters, dispatch } = useWalletContext()
+    const { filters } = useWalletContext()
     const navigation = useNavigation<any>()
     const [deleteSubAccount] = useDeleteSubAccount()
 
     const onPress = (account: SubAccount) => {
-        if (filters?.accountId === account.id) {
-            dispatch({ type: "SET_ACCOUNT_ID", payload: undefined })
-        } else {
-            dispatch({ type: "SET_ACCOUNT_ID", payload: account.id })
-        }
+        navigation.navigate("ExpensesList", { filters: { accountId: account.id } })
     }
 
     const sortedAccounts = useMemo(() => {

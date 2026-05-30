@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react"
 import { RefreshControl } from "react-native"
-import DayTimeline from "./DayTimeline"
+import FeedTimeline from "./FeedTimeline"
 import useGetOccurrencesQuery from "../hooks/query/useGetOccurrencesQuery"
 
 interface TimelineDayPageProps {
@@ -20,11 +20,9 @@ export default function TimelineDayPage({ date, contentPaddingTop = 0, onScroll 
     }, [refetch])
 
     return (
-        <DayTimeline
-            selected={date}
-            date={date}
+        <FeedTimeline
             events={data?.occurrences || []}
-            theme={{}}
+            date={date}
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
             onScroll={onScroll}
             style={{ flex: 1, paddingTop: contentPaddingTop }}

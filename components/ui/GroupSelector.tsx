@@ -75,11 +75,14 @@ export default function GroupSelector<V>({ options, value, onChange, size = "lar
             translateX.value = Math.max(0, Math.min(maxX, selectedIndex * step + e.translationX))
             const vf = Math.min(Math.abs(e.velocityX) / 1200, 0.08)
             if (e.velocityX > 0) {
-                scaleX.value = withSpring(1 + vf, LIQUID_SPRING)
-                scaleY.value = withSpring(1 - vf, LIQUID_SPRING)
+                scaleX.value = 1 + vf
+                scaleY.value = 1 - vf
             } else if (e.velocityX < 0) {
-                scaleX.value = withSpring(1 - vf, LIQUID_SPRING)
-                scaleY.value = withSpring(1 + vf, LIQUID_SPRING)
+                scaleX.value = 1 - vf
+                scaleY.value = 1 + vf
+            } else {
+                scaleX.value = 1
+                scaleY.value = 1
             }
         })
         .onEnd(() => {

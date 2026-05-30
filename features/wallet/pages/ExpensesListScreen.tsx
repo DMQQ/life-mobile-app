@@ -2,12 +2,11 @@ import Header from "@/components/ui/Header/Header"
 import Colors from "@/constants/Colors"
 import useTrackScroll from "@/utils/hooks/ui/useTrackScroll"
 import { Feather } from "@expo/vector-icons"
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react"
 import { Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native"
 import Background from "@/components/ui/Background"
 import { SafeAreaView } from "react-native-safe-area-context"
 import ExpensesList from "../components/Wallet/ExpensesList"
-import SubscriptionsList from "../components/Wallet/SubscriptionsList"
 import { useWalletContext } from "../components/WalletContext"
 import useGetWallet from "../hooks/useGetWallet"
 import { useSubAccounts } from "../hooks/useSubAccounts"
@@ -41,10 +40,30 @@ const categoryIconMap: Record<string, string> = {
     gifts: "gift.fill",
 }
 
-export default function ExpensesListScreen({ navigation }: WalletScreens<"ExpensesList">) {
+export default function ExpensesListScreen({ navigation, route }: WalletScreens<"ExpensesList">) {
+    const initialFilters = route.params?.filters
     const { data, refetch, onEndReached } = useGetWallet()
-    const { hasFilters, filtersDiffCount } = useWalletContext()
+    const { hasFilters, filtersDiffCount, dispatch } = useWalletContext()
     const [scrollY, onScroll] = useTrackScroll({ screenName: "ExpensesListScreen" })
+
+    useLayoutEffect(() => {
+        if (!initialFilters) return
+        if (initialFilters.accountId !== undefined) {
+            dispatch({ type: "SET_ACCOUNT_ID", payload: initialFilters.accountId })
+        }
+        if (initialFilters.type !== undefined) {
+            dispatch({ type: "SET_TYPE", payload: initialFilters.type })
+        }
+        if (initialFilters.category?.length) {
+            dispatch({ type: "SET_CATEGORY", payload: initialFilters.category })
+        }
+        if (initialFilters.date?.from) {
+            dispatch({ type: "SET_DATE_MIN", payload: initialFilters.date.from })
+        }
+        if (initialFilters.date?.to) {
+            dispatch({ type: "SET_DATE_MAX", payload: initialFilters.date.to })
+        }
+    }, [])
 
     const header = useMemo(
         () => (
@@ -57,7 +76,11 @@ export default function ExpensesListScreen({ navigation }: WalletScreens<"Expens
                     {
                         icon: (
                             <View>
-                                <Feather name="sliders" size={18} color={hasFilters ? Colors.secondary : Colors.foreground} />
+                                <Feather
+                                    name="sliders"
+                                    size={18}
+                                    color={hasFilters ? Colors.secondary : Colors.foreground}
+                                />
                                 {hasFilters && (
                                     <View style={styles.filterBadge}>
                                         <Text style={styles.filterBadgeText}>{filtersDiffCount}</Text>
@@ -142,13 +165,12 @@ const BottomSearchBar = ({ navigation }: Omit<WalletScreens<"ExpensesList">, "ro
     const subAccountLabel = selectedSubAccount?.name ?? "Account"
 
     const hasTimeFilter = !!(filters.time?.from || filters.time?.to)
-    const activeTimePreset = TIME_PRESETS.find(
-        (p) => p.from === filters.time?.from && p.to === filters.time?.to,
-    )
+    const activeTimePreset = TIME_PRESETS.find((p) => p.from === filters.time?.from && p.to === filters.time?.to)
     const timeLabel = activeTimePreset?.label ?? (hasTimeFilter ? `${filters.time?.from}–${filters.time?.to}` : "Time")
 
     const hasScheduledFilter = filters.scheduled !== undefined
-    const scheduledLabel = filters.scheduled === true ? "Scheduled" : filters.scheduled === false ? "Not Scheduled" : "Scheduled"
+    const scheduledLabel =
+        filters.scheduled === true ? "Scheduled" : filters.scheduled === false ? "Not Scheduled" : "Scheduled"
 
     return (
         <Animated.View style={[searchBarStyles.wrapper, animatedStyle]}>
@@ -339,7 +361,9 @@ const BottomSearchBar = ({ navigation }: Omit<WalletScreens<"ExpensesList">, "ro
                                         <Feather
                                             name="credit-card"
                                             size={13}
-                                            color={hasSubAccountFilter ? Colors.foreground : Colors.foreground_secondary}
+                                            color={
+                                                hasSubAccountFilter ? Colors.foreground : Colors.foreground_secondary
+                                            }
                                         />
                                         <Text
                                             style={[
@@ -467,7 +491,6 @@ const BottomSearchBar = ({ navigation }: Omit<WalletScreens<"ExpensesList">, "ro
                             />
                         </Menu>
                     </Host>
-
                 </ScrollView>
             </GlassView>
         </Animated.View>

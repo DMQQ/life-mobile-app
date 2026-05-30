@@ -1,6 +1,4 @@
 import Colors from "@/constants/Colors"
-import Color from "color"
-import { useCallback, useRef } from "react"
 import { Pressable, PressableProps, StyleSheet, View, ViewProps } from "react-native"
 import Animated, { AnimatedProps, useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated"
 
@@ -13,28 +11,47 @@ type CardProps<T extends boolean = false> = {
     onPress?: () => void
     onLongPress?: () => void
     disabled?: boolean
-
     ref?: React.RefObject<View | null>
 } & (T extends true ? AnimatedProps<ViewProps> : ViewProps)
 
 const Clickable = (props: PressableProps) => {
-    return <AnimatedPressable {...props} onPress={props.onPress} style={[props.style]} />
+    return <AnimatedPressable {...props} style={[props.style]} />
 }
 
 export default function Card<T extends boolean = false>({
     ref,
-
     animated = false as T,
     ripple = false,
     children,
     ...rest
 }: CardProps<T>) {
+    const scale = useSharedValue(1)
+
+    const animatedStyle = useAnimatedStyle(() => ({
+        transform: [{ scale: scale.value }],
+    }))
+
+    const handlePressIn = () => {
+        scale.value = withTiming(0.97, { duration: 100 })
+    }
+
+    const handlePressOut = () => {
+        scale.value = withTiming(1, { duration: 100 })
+    }
+
+    const isPressable = ripple || rest?.onPress !== undefined
     const Component = (
-        animated ? (ripple ? Clickable : Animated.View) : ripple ? Clickable : View
+        animated ? (ripple ? Clickable : Animated.View) : isPressable ? Clickable : Animated.View
     ) as React.ComponentType<CardProps<T>>
 
     return (
-        <Component {...(rest as any)} style={[styles.container, rest.style as any]} ref={ref}>
+        <Component
+            {...(rest as any)}
+            style={[styles.container, rest.style as any, animatedStyle]}
+            ref={ref}
+            onPressIn={isPressable ? handlePressIn : undefined}
+            onPressOut={isPressable ? handlePressOut : undefined}
+        >
             {children}
         </Component>
     )

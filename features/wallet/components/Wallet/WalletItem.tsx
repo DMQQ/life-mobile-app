@@ -1,7 +1,6 @@
 import moment from "moment"
 import { Card } from "@/components"
 import Colors from "@/constants/Colors"
-import { Expense } from "@/types"
 import { memo, useMemo } from "react"
 import { StyleProp, StyleSheet, Text, View, ViewStyle } from "react-native"
 import { AnimatedStyle } from "react-native-reanimated"

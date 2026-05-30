@@ -51,7 +51,9 @@ interface WalletRootStack extends ParamListBase {
         | undefined
     TransferSubAccount: { fromId?: string } | undefined
     Expense: { expense?: ExpenseType; expenseId?: string }
-    ExpensesList: undefined
+    ExpensesList: {
+        filters: Record<string, any>
+    }
     SubscriptionsList: undefined
 }
 
@@ -119,7 +121,14 @@ export default function WalletScreens({ navigation, route }: WalletScreens<"Wall
 
                 <Stack.Screen name="Wallet" component={Wallet} />
 
-                <Stack.Screen name="Filters" component={Filters} options={{ ...MODAL_OPTIONS, headerShown: true }} />
+                <Stack.Screen
+                    name="Filters"
+                    component={Filters}
+                    options={{
+                        ...MODAL_OPTIONS,
+                        headerShown: true,
+                    }}
+                />
 
                 <Stack.Screen name="Subscription" component={SubscriptionScreen as any} />
 

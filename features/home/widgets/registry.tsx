@@ -7,6 +7,7 @@ import ChartSwitcher from "../components/ChartSwitcher"
 import BalanceSummaryWidget from "./BalanceSummaryWidget"
 import EventsCalendarWidget from "./EventsCalendarWidget"
 import GoalsGridWidget from "./GoalsGridWidget"
+import WeekLifeWidget from "./WeekLifeWidget"
 import {
     BalancePreview,
     CategoriesPreview,
@@ -15,6 +16,7 @@ import {
     ExtrasPreview,
     GoalsPreview,
     TimelinePreview,
+    WeekLifePreview,
 } from "./previews"
 
 export interface WidgetDefinition {
@@ -81,6 +83,15 @@ export const WIDGETS: WidgetDefinition[] = [
         accentColor: "#FFE66D",
         component: GoalsGridWidget,
         Preview: GoalsPreview,
+    },
+    {
+        key: "weeklife",
+        label: "Week Life",
+        subtitle: "Events, expenses & goals in one timeline",
+        icon: "layers",
+        accentColor: "#A29BFE",
+        component: WeekLifeWidget,
+        Preview: WeekLifePreview,
     },
     {
         key: "extras",

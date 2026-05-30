@@ -128,6 +128,34 @@ export function EventsPreview() {
     )
 }
 
+export function WeekLifePreview() {
+    const eventAccents = ["#5B9CF6", "#FF5F57", "#5B9CF6"]
+    const expColors = [Colors.negative, Colors.positive]
+    return (
+        <View style={s.preview}>
+            <View style={{ flexDirection: "row", gap: 3, marginBottom: 5 }}>
+                {Array.from({ length: 7 }).map((_, i) => (
+                    <View
+                        key={i}
+                        style={[
+                            s.daySq,
+                            i === 4 && { backgroundColor: Color(Colors.secondary).alpha(0.25).string() },
+                        ]}
+                    />
+                ))}
+            </View>
+            {eventAccents.map((accent, i) => (
+                <View key={i} style={{ flexDirection: "row", alignItems: "center", gap: 5, marginBottom: 3 }}>
+                    <View style={[s.dot, { backgroundColor: accent }]} />
+                    <View style={[s.tLine, { width: 55 + i * 12, backgroundColor: Color(accent).alpha(0.5).string() }]} />
+                    <View style={[s.tLine, { flex: 1, backgroundColor: Color(Colors.foreground).alpha(0.06).string() }]} />
+                    <View style={[s.tLine, { width: 20, backgroundColor: Color(expColors[i % 2]).alpha(0.4).string() }]} />
+                </View>
+            ))}
+        </View>
+    )
+}
+
 export function GoalsPreview() {
     const colors = [Colors.secondary, Colors.ternary, "#FF6B6B", "#4ECDC4", "#A29BFE"]
     const rows = [

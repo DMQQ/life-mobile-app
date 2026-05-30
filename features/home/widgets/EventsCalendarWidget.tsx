@@ -1,6 +1,7 @@
 import Section from "@/components/ui/Section"
 import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
+import TimelineItem from "@/features/timeline/components/TimelineItem"
 import { useWeekEvents } from "@/features/timeline/hooks/query/useGetOccurrencesQuery"
 import { Feather } from "@expo/vector-icons"
 import { useNavigation } from "@react-navigation/native"
@@ -82,34 +83,15 @@ export default function EventsCalendarWidget() {
                 ) : (
                     <View style={s.eventList}>
                         {todayEvents.slice(0, 3).map((event, i) => (
-                            <TouchableOpacity
-                                key={event.id}
-                                style={[s.eventRow, i < Math.min(todayEvents.length, 3) - 1 && s.eventBorder]}
-                                onPress={() => navigation.navigate("TimelineScreens", { date: today })}
-                                activeOpacity={0.65}
-                            >
-                                <View
-                                    style={[
-                                        s.eventAccent,
-                                        {
-                                            backgroundColor: event.isCompleted ? Colors.positive : Colors.secondary,
-                                        },
-                                    ]}
-                                />
-                                <Text variant="caption" style={s.eventTitle} numberOfLines={1}>
-                                    {event.title}
-                                </Text>
-                                {event.beginTime ? (
-                                    <Text variant="caption" style={s.eventTime}>
-                                        {event.beginTime.slice(0, 5)}
-                                    </Text>
-                                ) : (
-                                    <Text variant="caption" style={s.eventTime}>
-                                        All day
-                                    </Text>
-                                )}
-                                {event.isCompleted && <Feather name="check" size={11} color={Colors.positive} />}
-                            </TouchableOpacity>
+                            <TimelineItem
+                                styles={{
+                                    borderWidth: 0,
+                                    borderBottomWidth: todayEvents.slice(0, 3).length - 1 === i ? 0 : 1,
+                                    paddingVertical: 15,
+                                    paddingHorizontal: 0,
+                                }}
+                                {...(event as any)}
+                            />
                         ))}
                     </View>
                 )}
