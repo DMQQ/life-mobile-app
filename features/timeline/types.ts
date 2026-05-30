@@ -1,7 +1,7 @@
 import { StackScreenProps } from "@/types"
 
 export type TimelineRootStack = {
-    Timeline: undefined
+    Timeline: { date: string }
     TimelineDetails: { timelineId: string }
     TimelineDo: { timelineId: string }
     TimelineCreate: {

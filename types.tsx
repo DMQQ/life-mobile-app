@@ -163,11 +163,13 @@ export interface Expense {
         category: string
     }[]
 
-    files?: {
-        id: string
-        url: string
-        expenseId: string | undefined
-    }[] | null
+    files?:
+        | {
+              id: string
+              url: string
+              expenseId: string | undefined
+          }[]
+        | null
 
     note?: string | null
 
@@ -212,6 +214,8 @@ export interface Todos {
     createdAt: string
 
     modifiedAt: string
+
+    finishedAt: string | null
 
     files?: TodoFile[]
 }

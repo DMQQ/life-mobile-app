@@ -167,5 +167,9 @@ export default function useGetOccurrencesQuery(date?: string) {
         setSearchQuery(q)
     }
 
+    useEffect(() => {
+        setSelected(date || (() => moment().format("YYYY-MM-DD")))
+    }, [date])
+
     return { ...query, selected, setSelected, setQuery, query: searchQuery }
 }

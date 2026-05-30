@@ -4,6 +4,7 @@ import Layout from "@/constants/Layout"
 import Url from "@/constants/Url"
 import { StackScreenProps } from "@/types"
 import Color from "color"
+import dayjs from "dayjs"
 import { useCallback, useMemo, useState } from "react"
 import { ActionSheetIOS, StyleSheet, View } from "react-native"
 import Animated, { useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated"
@@ -42,6 +43,13 @@ const styles = StyleSheet.create({
         marginTop: 25,
         position: "absolute",
         bottom: 0,
+    },
+    completedBadge: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 6,
+        marginTop: 10,
+        marginBottom: 4,
     },
 })
 
@@ -227,6 +235,14 @@ export default function TimelineDetails({
                 ) : (
                     <View style={styles.container}>
                         {data?.description && <Text variant="body">{data?.description}</Text>}
+                        {data?.isCompleted && data?.finishedAt && (
+                            <View style={styles.completedBadge}>
+                                <Feather name="check-circle" size={13} color={Colors.secondary} />
+                                <Text variant="caption" color={Colors.secondary} style={{ fontSize: 12 }}>
+                                    Completed {dayjs(data.finishedAt).format("HH:mm · DD MMM")}
+                                </Text>
+                            </View>
+                        )}
                         <TimelineTodos timelineId={data?.id} sortedTodos={data?.todos || []} />
 
                         <FileList timelineId={data?.id} />

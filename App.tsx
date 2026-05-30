@@ -28,6 +28,8 @@ import useQuickActions from "./utils/hooks/useQuickActions"
 import useUser, { STORE_KEY } from "./utils/hooks/useUser"
 import { useActivityManager } from "./utils/hooks/useActivityManager"
 import { store } from "./utils/redux"
+import "./features/timeline/utils/geofenceTask"
+import "./utils/widget/widgetBackgroundFetch"
 import useWidgets from "./utils/widget/hooks/useWidgets"
 import { setLogVerbosity } from "@apollo/client"
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet"
@@ -117,7 +119,7 @@ function AppContent() {
         }
     }, [isAuthenticated])
 
-    const linking = useDeeplinking(navigationRef as any)
+    const linking = useDeeplinking()
 
     return (
         <>

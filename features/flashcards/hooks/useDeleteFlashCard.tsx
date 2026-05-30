@@ -1,15 +1,5 @@
 import { gql, useMutation } from "@apollo/client"
-
-const GET_GROUPS = gql`
-    query GetGroups {
-        groups {
-            id
-            name
-            description
-            createdAt
-        }
-    }
-`
+import { GET_GROUPS } from "./index"
 
 export default function useDeleteFlashCard() {
     const [removeGroup, { error, data }] = useMutation(
@@ -21,11 +11,7 @@ export default function useDeleteFlashCard() {
             }
         `,
         {
-            refetchQueries: [
-                {
-                    query: GET_GROUPS,
-                },
-            ],
+            refetchQueries: [{ query: GET_GROUPS }],
         },
     )
 

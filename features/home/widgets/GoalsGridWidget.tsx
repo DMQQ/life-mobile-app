@@ -10,6 +10,7 @@ import dayjs from "dayjs"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { StyleSheet, TouchableOpacity, View } from "react-native"
 import Feedback from "react-native-haptic-feedback"
+import ContextMenu from "react-native-context-menu-view"
 
 export default function GoalsGridWidget() {
     const navigation = useNavigation<any>()
@@ -91,12 +92,12 @@ function GoalRow({
     }, [entryMap])
 
     const handleTap = useCallback(
-        (date: string) => {
+        (date: string, amount = 1) => {
             Feedback.trigger("impactLight")
-            setLocalDeltas((prev) => ({ ...prev, [date]: (prev[date] ?? 0) + 1 }))
-            update({ variables: { input: { value: 1, goalsId: goal.id, date } } })
+            setLocalDeltas((prev) => ({ ...prev, [date]: (prev[date] ?? 0) + amount }))
+            update({ variables: { input: { value: (entryMap[date] ?? 0) + amount, goalsId: goal.id, date } } })
         },
-        [update, goal.id],
+        [update, goal.id, entryMap],
     )
 
     return (
@@ -113,21 +114,49 @@ function GoalRow({
                 const bgColor = met
                     ? color
                     : progress > 0
-                      ? Color(color).alpha(0.1 + progress * 0.55).string()
+                      ? Color(color)
+                            .alpha(0.1 + progress * 0.55)
+                            .string()
                       : Color(color).alpha(0.12).string()
                 return (
-                    <TouchableOpacity
-                        key={dateStr}
-                        style={[s.cell, { backgroundColor: bgColor }, isToday && !met && s.todayCell]}
-                        onPress={() => handleTap(dateStr)}
-                        activeOpacity={0.6}
+                    <ContextMenu
+                        actions={[
+                            { title: "+2", systemIcon: "plus" },
+                            { title: "+3", systemIcon: "plus" },
+                            { title: "+5", systemIcon: "plus" },
+                            { title: "+10", systemIcon: "plus" },
+                        ]}
+                        onPress={(e) => {
+                            const amounts = [2, 3, 5, 10]
+                            handleTap(dateStr, amounts[e.nativeEvent.index])
+                        }}
+                        style={s.cell}
+                        borderRadius={10}
+                        previewBackgroundColor={bgColor}
                     >
-                        {met ? (
-                            <Feather name="check" size={10} color={Colors.primary} />
-                        ) : progress > 0 ? (
-                            <Text style={s.cellCount}>{value}</Text>
-                        ) : null}
-                    </TouchableOpacity>
+                        <TouchableOpacity
+                            key={dateStr}
+                            style={[
+                                {
+                                    backgroundColor: bgColor,
+                                    flex: 1,
+                                    width: "100%",
+                                    justifyContent: "center",
+                                    alignItems: "center",
+                                    borderRadius: 10,
+                                },
+                                isToday && !met && s.todayCell,
+                            ]}
+                            onPress={() => handleTap(dateStr)}
+                            activeOpacity={0.6}
+                        >
+                            {met ? (
+                                <Feather name="check" size={10} color={Colors.primary} />
+                            ) : progress > 0 ? (
+                                <Text style={s.cellCount}>{value}</Text>
+                            ) : null}
+                        </TouchableOpacity>
+                    </ContextMenu>
                 )
             })}
         </View>
@@ -176,9 +205,6 @@ const s = StyleSheet.create({
     cell: {
         flex: 1,
         aspectRatio: 1,
-        borderRadius: 7,
-        alignItems: "center",
-        justifyContent: "center",
         minHeight: 32,
     },
     todayCell: {

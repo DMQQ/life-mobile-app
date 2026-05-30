@@ -48,8 +48,8 @@ export default function useCreateEvent(props: { selectedDate: string }) {
     const hasRepeat = (input: typeof initialValues) =>
         input.repeatType !== "" || (!!input.repeatCount && input.repeatOn !== "" && !!input.repeatEveryNth)
 
-    const handleSubmit = async (input: typeof initialValues) => {
-        await createEvent({
+    const handleSubmit = async (input: typeof initialValues): Promise<string | undefined> => {
+        const result = await createEvent({
             variables: {
                 input: {
                     input: {
@@ -106,6 +106,7 @@ export default function useCreateEvent(props: { selectedDate: string }) {
         })
 
         navigation.goBack()
+        return result.data?.createEvent?.id as string | undefined
     }
 
     const initialValuesMemo = useMemo<InitialValuesType>(

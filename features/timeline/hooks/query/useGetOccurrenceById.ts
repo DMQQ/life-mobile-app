@@ -17,12 +17,14 @@ export const GET_OCCURRENCE_BY_ID = gql`
             isRepeat
             tags
             reminderBeforeMinutes
+            finishedAt
             todos {
                 id
                 title
                 isCompleted
                 createdAt
                 modifiedAt
+                finishedAt
                 files {
                     id
                     type
@@ -40,11 +42,11 @@ export const GET_OCCURRENCE_BY_ID = gql`
 `
 
 export default function useGetOccurrenceById(id: string, options?: QueryHookOptions<any, OperationVariables>) {
-    const { data, refetch, loading } = useQuery(GET_OCCURRENCE_BY_ID, {
+    const state = useQuery(GET_OCCURRENCE_BY_ID, {
         variables: { id },
         ...options,
         skip: !id || options?.skip,
     })
 
-    return { data: data?.occurrenceById, refetch, loading }
+    return { ...state, data: state?.data?.occurrenceById }
 }

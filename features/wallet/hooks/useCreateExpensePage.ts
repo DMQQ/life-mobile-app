@@ -26,7 +26,7 @@ export default function useCreateExpensePage(
 
     const [amount, setAmount] = useState<string>(params?.amount.toString() || "0")
     const [date, setDate] = useState<null | string>(
-        params?.date ? moment(params.date).format("YYYY-MM-DD") : moment().format("YYYY-MM-DD"),
+        params?.date ? moment(params.date).format("YYYY-MM-DDTHH:mm:ss") : moment().format("YYYY-MM-DDTHH:mm:ss"),
     )
     const [view, setView] = useState<ViewType>("main")
     const [category, setCategory] = useState<keyof typeof Icons>((params.category || "none") as keyof typeof Icons)
@@ -218,7 +218,7 @@ export default function useCreateExpensePage(
 
     const [regularModeState, setRegularModeState] = useState({
         amount: params?.amount?.toString() || "0",
-        date: params?.date ? moment(params.date).format("YYYY-MM-DD") : moment().format("YYYY-MM-DD"),
+        date: params?.date ? moment(params.date).format("YYYY-MM-DDTHH:mm:ss") : moment().format("YYYY-MM-DDTHH:mm:ss"),
         category: params?.category || "none",
         name: params?.description || "",
         type: params?.type || null,
@@ -271,7 +271,7 @@ export default function useCreateExpensePage(
 
     const restorePreviousState = () => {
         setAmount(params?.amount.toString() || "0")
-        setDate(params?.date ? moment(params.date).format("YYYY-MM-DD") : moment().format("YYYY-MM-DD"))
+        setDate(params?.date ? moment(params.date).format("YYYY-MM-DDTHH:mm:ss") : moment().format("YYYY-MM-DDTHH:mm:ss"))
         setView("main")
         setCategory((params.category || "none") as keyof typeof Icons)
         setName(params?.description || "")
@@ -288,7 +288,7 @@ export default function useCreateExpensePage(
 
             setRegularModeState({
                 amount: params?.amount?.toString() || "0",
-                date: params?.date ? moment(params.date).format("YYYY-MM-DD") : moment().format("YYYY-MM-DD"),
+                date: params?.date ? moment(params.date).format("YYYY-MM-DDTHH:mm:ss") : moment().format("YYYY-MM-DDTHH:mm:ss"),
                 category: params?.category || "none",
                 name: params?.description || "",
                 type: params?.type || null,

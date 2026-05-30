@@ -1,5 +1,5 @@
 import Colors from "@/constants/Colors"
-import { StackScreenProps } from "@/types"
+import { Expense as ExpenseType, StackScreenProps } from "@/types"
 import { ParamListBase } from "@react-navigation/native"
 import { createNativeStackNavigator, NativeStackNavigationOptions } from "@react-navigation/native-stack"
 import { useEffect } from "react"
@@ -50,6 +50,7 @@ interface WalletRootStack extends ParamListBase {
           }
         | undefined
     TransferSubAccount: { fromId?: string } | undefined
+    Expense: { expense?: ExpenseType; expenseId?: string }
     ExpensesList: undefined
     SubscriptionsList: undefined
 }
@@ -66,8 +67,9 @@ const MODAL_OPTIONS: NativeStackNavigationOptions = {
 export default function WalletScreens({ navigation, route }: WalletScreens<"Wallet">) {
     useEffect(() => {
         if (route.params?.expenseId !== undefined && route.params?.expenseId == null) {
-            navigation.navigate("CreateExpense", {
-                ...(route.params || {}),
+            ;(navigation as any).navigate("WalletScreens", {
+                screen: "CreateExpense",
+                params: {},
             })
         }
     }, [route.params?.expenseId])
@@ -121,11 +123,7 @@ export default function WalletScreens({ navigation, route }: WalletScreens<"Wall
 
                 <Stack.Screen name="Subscription" component={SubscriptionScreen as any} />
 
-                <Stack.Screen
-                    name="EditSubscription"
-                    component={EditSubscription as any}
-                    options={MODAL_OPTIONS}
-                />
+                <Stack.Screen name="EditSubscription" component={EditSubscription as any} options={MODAL_OPTIONS} />
 
                 <Stack.Screen
                     name="EditBalance"

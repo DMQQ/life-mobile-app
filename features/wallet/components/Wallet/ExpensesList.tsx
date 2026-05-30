@@ -65,27 +65,24 @@ export default function ExpensesList({ wallet, onScroll, refetch, onEndReached, 
     }, [])
 
     return (
-        <>
-            <AnimatedList
-                keyboardDismissMode="on-drag"
-                data={items}
-                getItem={getItem}
-                getItemCount={getItemCount}
-                renderItem={renderItem as any}
-                keyExtractor={keyExtractor as any}
-                onScroll={onScroll}
-                ListHeaderComponent={listHeader ? <>{listHeader}</> : undefined}
-                stickyHeaderIndices={listHeader ? [0] : undefined}
-                contentContainerStyle={styles.contentContainer}
-                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-                onEndReached={onEndReached}
-                onEndReachedThreshold={0.2}
-                removeClippedSubviews
-                windowSize={4}
-                initialNumToRender={6}
-            />
-            <ClearFiltersButton />
-        </>
+        <AnimatedList
+            keyboardDismissMode="on-drag"
+            data={items}
+            getItem={getItem}
+            getItemCount={getItemCount}
+            renderItem={renderItem as any}
+            keyExtractor={keyExtractor as any}
+            onScroll={onScroll}
+            ListHeaderComponent={listHeader ? <>{listHeader}</> : undefined}
+            stickyHeaderIndices={listHeader ? [0] : undefined}
+            contentContainerStyle={styles.contentContainer}
+            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+            onEndReached={onEndReached}
+            onEndReachedThreshold={0.2}
+            removeClippedSubviews
+            windowSize={4}
+            initialNumToRender={6}
+        />
     )
 }
 
@@ -284,36 +281,10 @@ const ChevronIcon = ({ isExpanded }: { isExpanded: boolean }) => {
     )
 }
 
-const ClearFiltersButton = () => {
-    const { dispatch, hasFilters, filtersDiffCount } = useWalletContext()
-
-    if (!hasFilters) return null
-
-    return (
-        <Animated.View style={styles.clearContainer}>
-            <Pressable
-                onPress={() => {
-                    Haptics.trigger("impactLight")
-                    dispatch({ type: "RESET" })
-                }}
-            >
-                <GlassView style={styles.clearButton}>
-                    <Text style={styles.clearText}>
-                        {filtersDiffCount > 0
-                            ? `Reset (${filtersDiffCount}) ${filtersDiffCount > 1 ? "filters" : "filter"}`
-                            : "Reset filters"}
-                    </Text>
-                    <Feather name="x" size={16} color={Colors.secondary_light_2} />
-                </GlassView>
-            </Pressable>
-        </Animated.View>
-    )
-}
-
 const styles = StyleSheet.create({
     contentContainer: {
         padding: 15,
-        paddingTop: 230,
+        paddingTop: 186,
         paddingBottom: 200,
     },
     monthContainer: {

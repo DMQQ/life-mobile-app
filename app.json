@@ -29,7 +29,7 @@
                 "NSLocationAlwaysAndWhenInUseUsageDescription": "This app needs access to your location to show nearby places and assign locations to your expenses.",
                 "ITSAppUsesNonExemptEncryption": false,
                 "NSSupportsLiveActivities": true,
-                "UIBackgroundModes": ["remote-notification"]
+                "UIBackgroundModes": ["remote-notification", "fetch"]
             },
             "bundleIdentifier": "com.dmq.mylifemobile",
             "associatedDomains": ["applinks:life.dmqq.dev"],
@@ -86,7 +86,10 @@
             [
                 "expo-location",
                 {
-                    "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location to show nearby places and assign locations to your expenses."
+                    "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location to show nearby places, assign locations to your expenses, and notify you when you arrive at event locations.",
+                    "locationAlwaysPermission": "Allow $(PRODUCT_NAME) to use your location in the background to notify you when you arrive at event locations.",
+                    "isAndroidBackgroundLocationEnabled": true,
+                    "isAndroidForegroundServiceEnabled": true
                 }
             ],
             "expo-asset",

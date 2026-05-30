@@ -1,5 +1,6 @@
 import { TouchableOpacity, StyleSheet } from "react-native"
-import { Ionicons } from "@expo/vector-icons"
+import { Feather } from "@expo/vector-icons"
+import Colors from "@/constants/Colors"
 
 const styles = StyleSheet.create({
     uploadButton: {
@@ -17,7 +18,7 @@ interface UploadButtonProps {
 export const UploadButton = ({ onPress, disabled }: UploadButtonProps) => {
     return (
         <TouchableOpacity style={styles.uploadButton} onPress={onPress} disabled={disabled}>
-            <Ionicons name="attach" size={24} color={"#fff"} />
+            <Feather name="paperclip" size={22} color={Colors.foreground_secondary} />
         </TouchableOpacity>
     )
 }

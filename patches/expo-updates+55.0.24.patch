@@ -1,0 +1,29 @@
+diff --git a/node_modules/expo-updates/ios/EXUpdates/ErrorRecovery.swift b/node_modules/expo-updates/ios/EXUpdates/ErrorRecovery.swift
+index 14a9ce5..1f88ce2 100644
+--- a/node_modules/expo-updates/ios/EXUpdates/ErrorRecovery.swift
++++ b/node_modules/expo-updates/ios/EXUpdates/ErrorRecovery.swift
+@@ -5,6 +5,7 @@
+ 
+ import Foundation
+ import React
++import UIKit
+ 
+ // swiftlint:disable identifier_name
+ @objc(EXUpdatesRemoteLoadStatus)
+@@ -239,6 +240,16 @@ public final class ErrorRecovery: NSObject {
+   }
+ 
+   private func crash() {
++    // Background launches (e.g. Live Activity push-to-start) must not crash the process.
++    // Crashing in background creates an unrecoverable loop: every incoming push relaunches
++    // the process and triggers ErrorRecovery again before the bad-launch count can be
++    // cleared or a fix can be downloaded.
++    let isBackground = DispatchQueue.main.sync { UIApplication.shared.applicationState == .background }
++    if isBackground {
++      logger.warn(message: "ErrorRecovery: skipping intentional crash — app is in background")
++      return
++    }
++
+     // create new exception object from stack of errors
+     // use the initial error and put the rest into userInfo
+     let initialError = encounteredErrors.first!

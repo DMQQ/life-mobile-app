@@ -17,7 +17,6 @@ import { SafeAreaView } from "react-native-safe-area-context"
 import { Expense, MonthlyExpenses, Subscription } from "@/types"
 import SubscriptionItem from "../components/Subscription/SubscriptionItem"
 import Background from "@/components/ui/Background"
-import CategoryBreakdown from "../components/Wallet/CategoryBreakdown"
 import SubAccountCards from "../components/Wallet/SubAccountCards"
 import YearlySpendingsChart from "../components/Wallet/YearlySpendingsChart"
 import WalletItem from "../components/Wallet/WalletItem"
@@ -38,15 +37,15 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
     const [scrollY, onScroll] = useTrackScroll({ screenName: "WalletScreens" })
     const [tab, setTab] = useState("accounts")
 
-    useEffect(() => {
-        if (route.params?.expenseId && data?.wallet) {
-            const found = (data.wallet.expenses2 as MonthlyExpenses[])
-                .flatMap((m) => m.expenses)
-                .find((e) => (e as Expense).id === route.params?.expenseId) as Expense
-            navigation.setParams({ expenseId: undefined })
-            navigation.navigate("Expense", { expense: found })
-        }
-    }, [route.params?.expenseId])
+    // useEffect(() => {
+    //     if (route.params?.expenseId && data?.wallet) {
+    //         const found = (data.wallet.expenses2 as MonthlyExpenses[])
+    //             .flatMap((m) => m.expenses)
+    //             .find((e) => (e as Expense).id === route.params?.expenseId) as Expense
+    //         navigation.setParams({ expenseId: undefined })
+    //         navigation.navigate("Expense", { expense: found })
+    //     }
+    // }, [route.params?.expenseId, data?.wallet])
 
     const balance = loading && data?.wallet?.balance === undefined ? " ..." : (data?.wallet?.balance || 0).toFixed(2)
 
@@ -158,7 +157,7 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
         )
 
     return (
-        <SafeAreaView style={{ flex: 1 }}>
+        <SafeAreaView style={{ flex: 1 }} edges={["top"]}>
             <Background />
             {loading && (
                 <Animated.View

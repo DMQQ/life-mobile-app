@@ -25,14 +25,14 @@ import FileUpload, { FileUploadHandle } from "../components/Expense/FileUpload"
 import SubscriptionSection from "../components/Expense/SubscriptionSection"
 import { ConfirmDialog } from "@/components"
 import Section from "@/components/ui/Section"
+import { SafeAreaView } from "react-native-safe-area-context"
 
 const capitalize = (s = "") => s.charAt(0).toUpperCase() + s.slice(1)
 
-
 export default function Expense({ route: { params }, navigation }: any) {
-    const { data } = useQuery(GET_EXPENSE, { variables: { id: params?.expense?.id } })
+    const { data } = useQuery(GET_EXPENSE, { variables: { id: params?.expense?.id ?? params?.expenseId } })
 
-    const [selected, setSelected] = useState(params?.expense)
+    const [selected, setSelected] = useState(params?.expense ?? null)
 
     useEffect(() => {
         if (data?.expense) setSelected(data.expense)
@@ -145,7 +145,7 @@ export default function Expense({ route: { params }, navigation }: any) {
     if (!selected) return <ExpenseSkeleton />
 
     return (
-        <View style={{ flex: 1 }}>
+        <SafeAreaView edges={["top"]} style={{ flex: 1 }}>
             <Header
                 animated
                 animatedTitle={capitalize(selected?.description)}
@@ -297,7 +297,7 @@ export default function Expense({ route: { params }, navigation }: any) {
                 description="Are you sure you want to perform this action?"
                 loading={isSubscriptionLoading}
             />
-        </View>
+        </SafeAreaView>
     )
 }
 

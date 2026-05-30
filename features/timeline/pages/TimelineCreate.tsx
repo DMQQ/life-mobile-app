@@ -18,11 +18,15 @@ import ChipButton from "@/components/ui/Button/ChipButton"
 import { Host, DatePicker as SwiftDatePicker } from "@expo/ui/swift-ui"
 import { datePickerStyle, frame } from "@expo/ui/swift-ui/modifiers"
 import Layout from "@/constants/Layout"
+import GeofenceSection, { type GeofenceConfig } from "../components/CreateTimeline/GeofenceSection"
 
 export default function CreateTimeLineEventModal({ route, navigation }: TimelineScreenProps<"TimelineCreate">) {
+    const [geofence, setGeofence] = useState<GeofenceConfig | null>(null)
+
     const { f, isEditing, scopeSheetRef, onScopeSelected, handleChangeDate } = useCreateTimeline({
         route,
         navigation,
+        geofence,
     })
 
     const endManuallyChanged = useRef(isEditing)
@@ -215,6 +219,12 @@ export default function CreateTimeLineEventModal({ route, navigation }: Timeline
                             ]}
                         />
                     </Section>
+
+                    <GeofenceSection
+                        value={geofence}
+                        onChange={setGeofence}
+                        occurrenceId={isEditing ? route.params.timelineId : undefined}
+                    />
 
                     {!isEditing && (
                         <Section

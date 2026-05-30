@@ -15,6 +15,9 @@ export type Action =
     | { type: "RESET" }
     | { type: "SET_IS_EXACT_CATEGORY"; payload: boolean }
     | { type: "SET_ACCOUNT_ID"; payload: string | undefined }
+    | { type: "SET_TIME_FROM"; payload: string }
+    | { type: "SET_TIME_TO"; payload: string }
+    | { type: "SET_SCHEDULED"; payload: boolean | undefined }
 
 const reducer = (state: typeof init, action: Action) => {
     if (action.type === "SET_QUERY") {
@@ -107,6 +110,15 @@ const reducer = (state: typeof init, action: Action) => {
             accountId: action.payload,
         }
     }
+    if (action.type === "SET_TIME_FROM") {
+        return { ...state, time: { ...state.time, from: action.payload } }
+    }
+    if (action.type === "SET_TIME_TO") {
+        return { ...state, time: { ...state.time, to: action.payload } }
+    }
+    if (action.type === "SET_SCHEDULED") {
+        return { ...state, scheduled: action.payload }
+    }
     return state
 }
 
@@ -134,6 +146,10 @@ export const init = {
     isExactCategory: false,
 
     accountId: undefined as string | undefined,
+
+    time: { from: "", to: "" },
+
+    scheduled: undefined as boolean | undefined,
 }
 
 type WalletContextType = {

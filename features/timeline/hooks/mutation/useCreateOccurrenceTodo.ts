@@ -10,6 +10,7 @@ const CREATE_OCCURRENCE_TODO = gql`
             isCompleted
             createdAt
             modifiedAt
+            finishedAt
             files {
                 id
                 type

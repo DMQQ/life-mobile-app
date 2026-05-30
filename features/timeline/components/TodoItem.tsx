@@ -15,8 +15,11 @@ import Url from "@/constants/Url"
 import Color from "color"
 import { useFileUpload } from "../hooks/useFileUpload"
 import { useFileManagement } from "../hooks/useFileManagement"
-import { UploadButton } from "./UploadButton"
 import Checkbox from "@/components/ui/Checkbox"
+import ContextMenu from "react-native-context-menu-view"
+import { Host, Menu, Section, Button } from "@expo/ui/swift-ui"
+import { buttonStyle } from "@expo/ui/swift-ui/modifiers"
+import { SymbolView } from "expo-symbols"
 
 const styles = StyleSheet.create({
     container: {
@@ -95,7 +98,7 @@ export default function TodoItem(todo: Todos & { timelineId: string; index: numb
     const { loading: addFileLoading } = useAddTodoFile()
     const { loading: removeFileLoading } = useRemoveTodoFile()
 
-    const { handleUploadFile, uploadingFile } = useFileUpload({
+    const { handleUploadFile, handleUploadCamera, uploadingFile } = useFileUpload({
         todoId: todo.id,
         timelineId: todo.timelineId,
     })
@@ -104,63 +107,103 @@ export default function TodoItem(todo: Todos & { timelineId: string; index: numb
         timelineId: todo.timelineId,
     })
 
-    const handleRemoveTodo = () => {
-        Haptic.trigger("impactLight")
-        removeTodo()
-    }
-
     const isLoading = removeLoading || completeLoading || addFileLoading || removeFileLoading || uploadingFile
 
     return (
         <>
-            <Card
-                animated
-                entering={FadeInDown.delay(todo.index * 50)}
-                exiting={FadeOutDown}
-                style={[styles.container]}
+            <ContextMenu
+                actions={[{ title: "Delete", systemIcon: "trash", destructive: true }]}
+                previewBackgroundColor={Colors.primary_lighter}
+                onPress={() => {
+                    removeTodo()
+                    Haptic.trigger("impactMedium")
+                }}
             >
-                <View style={styles.todoCard}>
-                    <Pressable
-                        style={{ flexDirection: "row", alignItems: "center", flex: 1 }}
-                        onLongPress={handleRemoveTodo}
-                    >
-                        <Checkbox
-                            checked={todo.isCompleted}
-                            onPress={completeTodo}
-                            size={28}
-                            loading={completeLoading}
-                            disabled={isLoading}
-                        />
+                <Card
+                    animated
+                    entering={FadeInDown.delay(todo.index * 50)}
+                    exiting={FadeOutDown}
+                    style={[styles.container]}
+                >
+                    <View style={styles.todoCard}>
+                        <Pressable style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
+                            <Checkbox
+                                checked={todo.isCompleted}
+                                onPress={completeTodo}
+                                size={28}
+                                loading={completeLoading}
+                                disabled={isLoading}
+                            />
 
-                        <View style={{ flex: 1, gap: 5 }}>
-                            <Text
-                                variant="subtitle"
-                                color={todo.isCompleted ? Colors.secondary_light_1 : Colors.text_light}
-                                style={[styles.todoText, todo.isCompleted && styles.completedText]}
-                            >
-                                {todo.title.trim()}
-                            </Text>
+                            <View style={{ flex: 1, gap: 5 }}>
+                                <Text
+                                    variant="subtitle"
+                                    color={todo.isCompleted ? Colors.secondary_light_1 : Colors.text_light}
+                                    style={[styles.todoText, todo.isCompleted && styles.completedText]}
+                                >
+                                    {todo.title.trim()}
+                                </Text>
 
-                            <Text
-                                variant="caption"
-                                color={Colors.text_dark}
-                                style={{ fontSize: 12, marginLeft: styles.todoText.marginLeft }}
-                            >
-                                {dayjs(todo.modifiedAt).format("HH:mm - DD/MM")}
-                            </Text>
-                        </View>
-                    </Pressable>
-                    {todo.files && todo.files.length > 0 ? (
-                        <FilesList
-                            files={todo.files || []}
-                            handleShowPreview={handleShowPreview}
-                            handleRemoveFile={setFileToRemove}
-                        />
-                    ) : (
-                        <UploadButton onPress={handleUploadFile} disabled={isLoading} />
-                    )}
-                </View>
-            </Card>
+                                <Text
+                                    variant="caption"
+                                    color={
+                                        todo.isCompleted && todo.finishedAt
+                                            ? Colors.secondary_light_1
+                                            : Colors.text_dark
+                                    }
+                                    style={{ fontSize: 12, marginLeft: styles.todoText.marginLeft }}
+                                >
+                                    {todo.isCompleted && todo.finishedAt
+                                        ? `Done ${dayjs(todo.finishedAt).format("HH:mm - DD/MM")}`
+                                        : dayjs(todo.modifiedAt).format("HH:mm - DD/MM")}
+                                </Text>
+                            </View>
+                        </Pressable>
+
+                        {todo.files && todo.files.length > 0 ? (
+                            <FilesList
+                                files={todo.files}
+                                handleShowPreview={handleShowPreview}
+                                handleRemoveFile={setFileToRemove}
+                            />
+                        ) : (
+                            <Host matchContents>
+                                <Menu
+                                    label={
+                                        <SymbolView
+                                            name="paperclip"
+                                            size={20}
+                                            tintColor={Colors.foreground_secondary}
+                                            weight="regular"
+                                        />
+                                    }
+                                >
+                                    <Section>
+                                        <Button
+                                            label="Camera"
+                                            systemImage="camera"
+                                            onPress={() => {
+                                                handleUploadCamera()
+                                                Haptic.trigger("impactLight")
+                                            }}
+                                            modifiers={[buttonStyle("bordered")]}
+                                        />
+                                        <Button
+                                            label="Photo Library"
+                                            systemImage="photo.on.rectangle"
+                                            onPress={() => {
+                                                handleUploadFile()
+                                                Haptic.trigger("impactLight")
+                                            }}
+                                            modifiers={[buttonStyle("bordered")]}
+                                        />
+                                    </Section>
+                                </Menu>
+                            </Host>
+                        )}
+                    </View>
+                </Card>
+            </ContextMenu>
 
             <ConfirmDialog
                 isVisible={!!fileToRemove}
@@ -176,7 +219,7 @@ export default function TodoItem(todo: Todos & { timelineId: string; index: numb
 
 interface FilesListProps {
     files: TodoFile[]
-    handleShowPreview: (file: any) => void
+    handleShowPreview: (file: TodoFile) => void
     handleRemoveFile: (fileId: string) => void
 }
 

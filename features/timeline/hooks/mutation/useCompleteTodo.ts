@@ -11,6 +11,7 @@ export default function useCompleteTodo(props: { todoId: string; timelineId: str
                     title
                     modifiedAt
                     createdAt
+                    finishedAt
                 }
             }
         `,

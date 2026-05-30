@@ -157,10 +157,9 @@ export const useFileUpload = ({ todoId, timelineId }: UseFileUploadProps) => {
         }
     }
 
-    const handleUploadFile = handleImageFromLibrary
-
     return {
-        handleUploadFile,
+        handleUploadFile: handleImageFromLibrary,
+        handleUploadCamera: handleImageFromCamera,
         uploadingFile,
     }
 }

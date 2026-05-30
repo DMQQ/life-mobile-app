@@ -26,11 +26,11 @@ export default function Root({ navigation }: HomeScreenProps<"HomeRoot">) {
         variables: getMainScreenBaseVariables(),
         onCompleted: async () => {
             await SplashScreen.hideAsync()
-            setTimeout(() => setLoading(false), 500)
+            setLoading(false)
         },
         onError: () => {
             SplashScreen.hideAsync()
-            setTimeout(() => setLoading(false), 500)
+            setLoading(false)
         },
     })
 
@@ -40,12 +40,18 @@ export default function Root({ navigation }: HomeScreenProps<"HomeRoot">) {
 
     const { enabled, order } = useHomeWidgets()
     const { processPending } = useRoutinePendingCompletions()
-    useAppBackground({
-        onForeground: () => {
-            refresh()
-            processPending()
-        },
-    })
+
+    useAppBackground(
+        useMemo(
+            () => ({
+                onForeground: () => {
+                    refresh()
+                    processPending()
+                },
+            }),
+            [refresh, processPending],
+        ),
+    )
 
     const trendPercentage = home?.lastMonthSpendings?.expense
         ? ((home?.monthlySpendings?.expense - home?.lastMonthSpendings?.expense) / home?.lastMonthSpendings?.expense) *

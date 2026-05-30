@@ -29,6 +29,7 @@ export default function SuggestedEvents(props: SuggestedEventsProps) {
       },
     } as any,
     navigation,
+    geofence: null,
   });
   const {
     endTime,

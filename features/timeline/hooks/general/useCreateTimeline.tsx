@@ -11,8 +11,14 @@ import { useApolloClient } from "@apollo/client"
 import BottomSheetType from "@gorhom/bottom-sheet"
 import { GET_OCCURRENCES_QUERY } from "../query/useGetOccurrencesQuery"
 import { GET_MONTHLY_OCCURRENCES } from "./useTimeline"
+import type { GeofenceConfig } from "../../components/CreateTimeline/GeofenceSection"
+import { registerGeofence, unregisterGeofence } from "../../utils/geofenceTask"
 
-export default function useCreateTimeline({ route, navigation }: TimelineScreenProps<"TimelineCreate">) {
+export default function useCreateTimeline({
+    route,
+    navigation,
+    geofence,
+}: TimelineScreenProps<"TimelineCreate"> & { geofence: GeofenceConfig | null }) {
     const {
         handleSubmit,
         initialValues,
@@ -55,6 +61,14 @@ export default function useCreateTimeline({ route, navigation }: TimelineScreenP
 
     const [pendingEdit, setPendingEdit] = useState<{ input: typeof initialFormValues; date: string } | null>(null)
 
+    const handleGeofence = async (occurrenceId: string, title: string) => {
+        if (geofence) {
+            await registerGeofence({ occurrenceId, title, ...geofence })
+        } else {
+            await unregisterGeofence(occurrenceId)
+        }
+    }
+
     const formikSubmitForm = async (input: typeof initialFormValues) => {
         if (isEditing) {
             if (isRepeat) {
@@ -62,9 +76,14 @@ export default function useCreateTimeline({ route, navigation }: TimelineScreenP
                 scopeSheetRef.current?.expand()
                 return
             }
-            await editOccurrence(input as any, route.params.selectedDate, "THIS_ONLY")
+            const id = route.params.timelineId!
+            await Promise.all([
+                editOccurrence(input as any, route.params.selectedDate, "THIS_ONLY"),
+                handleGeofence(id, input.title ?? ""),
+            ])
         } else {
-            await handleSubmit({ ...input, todos: route.params?.todos || [], priority: 1 })
+            const occurrenceId = await handleSubmit({ ...input, todos: route.params?.todos || [], priority: 1 })
+            if (occurrenceId) await handleGeofence(occurrenceId, input.title ?? "")
         }
 
         await Promise.allSettled([
@@ -77,7 +96,11 @@ export default function useCreateTimeline({ route, navigation }: TimelineScreenP
     const onScopeSelected = async (scope: "THIS_ONLY" | "ALL") => {
         if (!pendingEdit) return
         scopeSheetRef.current?.close()
-        await editOccurrence(pendingEdit.input as any, pendingEdit.date, scope)
+        const id = route.params.timelineId!
+        await Promise.all([
+            editOccurrence(pendingEdit.input as any, pendingEdit.date, scope),
+            handleGeofence(id, pendingEdit.input.title ?? ""),
+        ])
         setPendingEdit(null)
 
         await Promise.allSettled([

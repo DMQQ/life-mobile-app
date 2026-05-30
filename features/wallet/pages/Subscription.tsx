@@ -29,6 +29,7 @@ import dayjs from "dayjs"
 import { Toggle, Host } from "@expo/ui/swift-ui"
 import { background } from "@expo/ui/swift-ui/modifiers"
 import Color from "color"
+import { SafeAreaView } from "react-native-safe-area-context"
 
 const muted = Colors.foreground_secondary
 
@@ -197,7 +198,7 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
         : "Are you sure you want to disable this subscription?"
 
     return (
-        <View style={{ flex: 1 }}>
+        <SafeAreaView style={{ flex: 1 }} edges={["top"]}>
             <Header
                 animated
                 animatedTitle={subscription.description}
@@ -419,7 +420,7 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                 destructive={!pendingToggle}
                 loading={isSubscriptionLoading}
             />
-        </View>
+        </SafeAreaView>
     )
 }
 

@@ -9,7 +9,7 @@ import { useCallback, useMemo, useRef, useState } from "react"
 import { ScrollView, StyleSheet, View } from "react-native"
 import Feedback from "react-native-haptic-feedback"
 import Animated, { FadeOut, useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated"
-import { useSafeAreaInsets } from "react-native-safe-area-context"
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context"
 import { Icons } from "../components/Wallet/WalletItem"
 import ChartLoader from "../components/WalletChart/ChartLoader"
 import Charts from "../components/WalletChart/Charts"
@@ -177,11 +177,11 @@ function WalletCharts({ navigation }: any) {
     const selectedColor = barData.find((c) => c.label === selected)?.color ?? Colors.secondary
 
     return (
-        <View style={{ paddingTop: 15, paddingBottom: insets.bottom }}>
+        <SafeAreaView style={{ flex: 1, paddingBottom: insets.bottom }} edges={["top"]}>
             {loading && (
                 <Animated.View
                     exiting={FadeOut.duration(250)}
-                    style={[StyleSheet.absoluteFill, styles.overlay, { paddingTop: 15 }]}
+                    style={[StyleSheet.absoluteFill, styles.overlay]}
                 >
                     <ChartLoader />
                 </Animated.View>
@@ -230,7 +230,7 @@ function WalletCharts({ navigation }: any) {
             />
 
             <AnimatedScrollView
-                style={{ paddingTop: 225 }}
+                style={{ paddingTop: 186 }}
                 onScroll={onScroll}
                 scrollEventThrottle={16}
                 bounces
@@ -278,6 +278,6 @@ function WalletCharts({ navigation }: any) {
                 categoryColor={selectedColor}
                 onExpensePress={(expense) => navigation.navigate("Expense", { expense })}
             />
-        </View>
+        </SafeAreaView>
     )
 }

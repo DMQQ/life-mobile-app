@@ -17,17 +17,13 @@ import Color from "color"
 import Colors from "@/constants/Colors"
 import { IconButton } from "@/components"
 import { AntDesign } from "@expo/vector-icons"
+import dayjs from "dayjs"
 
 const Stack = createNativeStackNavigator<RootStackParamList>()
 
 export default function TimelineScreens({ route, navigation }: RootStackScreenProps<"TimelineScreens">) {
     useEffect(() => {
-        if (!!route.params?.timelineId) {
-            ;(navigation as any).navigate("TimelineDetails", {
-                ...route.params,
-                timelineId: route.params.timelineId,
-            })
-        } else if (route.params?.selectedDate !== undefined) {
+        if (route.params?.selectedDate !== undefined) {
             ;(navigation as any).navigate("TimelineCreate", {
                 ...route.params,
             })
@@ -47,6 +43,9 @@ export default function TimelineScreens({ route, navigation }: RootStackScreenPr
                 component={Timeline}
                 options={{
                     headerShown: false,
+                }}
+                initialParams={{
+                    date: dayjs().format("YYYY-MM-DD"),
                 }}
             />
             <Stack.Screen

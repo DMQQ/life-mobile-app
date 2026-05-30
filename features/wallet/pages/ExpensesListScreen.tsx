@@ -10,12 +10,12 @@ import ExpensesList from "../components/Wallet/ExpensesList"
 import SubscriptionsList from "../components/Wallet/SubscriptionsList"
 import { useWalletContext } from "../components/WalletContext"
 import useGetWallet from "../hooks/useGetWallet"
+import { useSubAccounts } from "../hooks/useSubAccounts"
 import { WalletScreens } from "../Main"
 import { Icons, CategoryUtils } from "../components/Expense/ExpenseIcon"
 import dayjs from "dayjs"
 import { Wallet } from "@/types"
 import Text from "@/components/ui/Text/Text"
-import Haptic from "react-native-haptic-feedback"
 import GlassView from "@/components/ui/GlassView"
 import { useReanimatedKeyboardAnimation } from "react-native-keyboard-controller"
 import Animated, { useAnimatedStyle } from "react-native-reanimated"
@@ -41,17 +41,10 @@ const categoryIconMap: Record<string, string> = {
     gifts: "gift.fill",
 }
 
-type Tab = "expenses" | "subscriptions"
-
 export default function ExpensesListScreen({ navigation }: WalletScreens<"ExpensesList">) {
     const { data, refetch, onEndReached } = useGetWallet()
+    const { hasFilters, filtersDiffCount } = useWalletContext()
     const [scrollY, onScroll] = useTrackScroll({ screenName: "ExpensesListScreen" })
-    const [tab, setTab] = useState<Tab>("expenses")
-
-    const handleTabChange = useCallback((next: Tab) => {
-        Haptic.trigger("impactLight")
-        setTab(next)
-    }, [])
 
     const header = useMemo(
         () => (
@@ -62,40 +55,59 @@ export default function ExpensesListScreen({ navigation }: WalletScreens<"Expens
                 goBack={false}
                 buttons={[
                     {
+                        icon: (
+                            <View>
+                                <Feather name="sliders" size={18} color={hasFilters ? Colors.secondary : Colors.foreground} />
+                                {hasFilters && (
+                                    <View style={styles.filterBadge}>
+                                        <Text style={styles.filterBadgeText}>{filtersDiffCount}</Text>
+                                    </View>
+                                )}
+                            </View>
+                        ),
+                        onPress: () => navigation.navigate("Filters"),
+                    },
+                    {
                         icon: "plus",
                         onPress: () => navigation.navigate("CreateExpense"),
                     },
                 ]}
-                animatedTitle={tab === "expenses" ? "Expenses" : "Subscriptions"}
-                animatedSubtitle={tab === "expenses" ? "All transactions" : "Recurring payments"}
+                animatedTitle={"Expenses"}
+                animatedSubtitle={"All transactions"}
             />
         ),
-        [tab],
+        [hasFilters, filtersDiffCount],
     )
 
     return (
         <SafeAreaView style={{ flex: 1 }}>
             <Background />
             {header}
-            {tab === "expenses" ? (
-                <ExpensesList
-                    wallet={data?.wallet as unknown as Wallet}
-                    onScroll={onScroll}
-                    refetch={refetch}
-                    onEndReached={onEndReached}
-                />
-            ) : (
-                <SubscriptionsList onScroll={onScroll} />
-            )}
+
+            <ExpensesList
+                wallet={data?.wallet as unknown as Wallet}
+                onScroll={onScroll}
+                refetch={refetch}
+                onEndReached={onEndReached}
+            />
             <BottomSearchBar navigation={navigation} />
         </SafeAreaView>
     )
 }
 
+const TIME_PRESETS: { label: string; systemImage: any; from: string; to: string }[] = [
+    { label: "Morning", systemImage: "sunrise.fill", from: "06:00", to: "12:00" },
+    { label: "Afternoon", systemImage: "sun.max.fill", from: "12:00", to: "18:00" },
+    { label: "Evening", systemImage: "sunset.fill", from: "18:00", to: "24:00" },
+    { label: "Night", systemImage: "moon.fill", from: "00:00", to: "06:00" },
+]
+
 const BottomSearchBar = ({ navigation }: Omit<WalletScreens<"ExpensesList">, "route">) => {
     const { filters, dispatch, hasFilters } = useWalletContext()
     const { height } = useReanimatedKeyboardAnimation()
     const [query, setQuery] = useState("")
+    const { data: subAccountsData } = useSubAccounts()
+    const subAccounts = subAccountsData?.wallet?.subAccounts ?? []
 
     const animatedStyle = useAnimatedStyle(() => ({
         transform: [{ translateY: height.value }],
@@ -124,6 +136,19 @@ const BottomSearchBar = ({ navigation }: Omit<WalletScreens<"ExpensesList">, "ro
 
     const hasCategoryFilter = filters.category.length > 0
     const categoryLabel = hasCategoryFilter ? `${filters.category.length} selected` : "Categories"
+
+    const hasSubAccountFilter = !!filters.accountId
+    const selectedSubAccount = subAccounts.find((sa) => sa.id === filters.accountId)
+    const subAccountLabel = selectedSubAccount?.name ?? "Account"
+
+    const hasTimeFilter = !!(filters.time?.from || filters.time?.to)
+    const activeTimePreset = TIME_PRESETS.find(
+        (p) => p.from === filters.time?.from && p.to === filters.time?.to,
+    )
+    const timeLabel = activeTimePreset?.label ?? (hasTimeFilter ? `${filters.time?.from}–${filters.time?.to}` : "Time")
+
+    const hasScheduledFilter = filters.scheduled !== undefined
+    const scheduledLabel = filters.scheduled === true ? "Scheduled" : filters.scheduled === false ? "Not Scheduled" : "Scheduled"
 
     return (
         <Animated.View style={[searchBarStyles.wrapper, animatedStyle]}>
@@ -175,7 +200,6 @@ const BottomSearchBar = ({ navigation }: Omit<WalletScreens<"ExpensesList">, "ro
                                 </GlassView>
                             }
                         >
-                            <Button label="All" onPress={() => dispatch({ type: "SET_TYPE", payload: undefined })} />
                             <Button
                                 label="Income"
                                 systemImage="arrow.down.circle"
@@ -191,6 +215,8 @@ const BottomSearchBar = ({ navigation }: Omit<WalletScreens<"ExpensesList">, "ro
                                 systemImage="arrow.uturn.backward.circle"
                                 onPress={() => dispatch({ type: "SET_TYPE", payload: "refunded" })}
                             />
+                            <Divider />
+                            <Button label="All" onPress={() => dispatch({ type: "SET_TYPE", payload: undefined })} />
                         </Menu>
                     </Host>
 
@@ -270,7 +296,7 @@ const BottomSearchBar = ({ navigation }: Omit<WalletScreens<"ExpensesList">, "ro
                     <Host style={{ height: 35 }}>
                         <Menu
                             label={
-                                <View style={[searchBarStyles.pill, hasCategoryFilter && searchBarStyles.pillActive]}>
+                                <View style={[searchBarStyles.pill]}>
                                     <Feather
                                         name="grid"
                                         size={13}
@@ -302,39 +328,171 @@ const BottomSearchBar = ({ navigation }: Omit<WalletScreens<"ExpensesList">, "ro
                         </Menu>
                     </Host>
 
+                    {subAccounts.length > 0 && (
+                        <Host style={{ height: 35 }}>
+                            <Menu
+                                label={
+                                    <GlassView
+                                        style={searchBarStyles.pill}
+                                        tintColor={hasSubAccountFilter ? Colors.secondary : undefined}
+                                    >
+                                        <Feather
+                                            name="credit-card"
+                                            size={13}
+                                            color={hasSubAccountFilter ? Colors.foreground : Colors.foreground_secondary}
+                                        />
+                                        <Text
+                                            style={[
+                                                searchBarStyles.pillText,
+                                                hasSubAccountFilter && searchBarStyles.pillTextActive,
+                                            ]}
+                                            numberOfLines={1}
+                                        >
+                                            {subAccountLabel}
+                                        </Text>
+                                    </GlassView>
+                                }
+                            >
+                                <Button
+                                    label="All Accounts"
+                                    onPress={() => dispatch({ type: "SET_ACCOUNT_ID", payload: undefined })}
+                                />
+                                <Section title="Sub-accounts">
+                                    {subAccounts.map((sa) => (
+                                        <Toggle
+                                            key={sa.id}
+                                            label={sa.name}
+                                            isOn={filters.accountId === sa.id}
+                                            onIsOnChange={() =>
+                                                dispatch({
+                                                    type: "SET_ACCOUNT_ID",
+                                                    payload: filters.accountId === sa.id ? undefined : sa.id,
+                                                })
+                                            }
+                                        />
+                                    ))}
+                                </Section>
+                            </Menu>
+                        </Host>
+                    )}
+
                     <Host style={{ height: 35 }}>
                         <Menu
                             label={
-                                <View style={searchBarStyles.pill}>
-                                    <Feather name="more-horizontal" size={13} color={Colors.foreground_secondary} />
-                                </View>
+                                <GlassView
+                                    style={searchBarStyles.pill}
+                                    tintColor={hasTimeFilter ? Colors.secondary : undefined}
+                                >
+                                    <Feather
+                                        name="clock"
+                                        size={13}
+                                        color={hasTimeFilter ? Colors.foreground : Colors.foreground_secondary}
+                                    />
+                                    <Text
+                                        style={[
+                                            searchBarStyles.pillText,
+                                            hasTimeFilter && searchBarStyles.pillTextActive,
+                                        ]}
+                                        numberOfLines={1}
+                                    >
+                                        {timeLabel}
+                                    </Text>
+                                </GlassView>
                             }
                         >
-                            <Button
-                                label="Advanced Filters"
-                                systemImage="slider.horizontal.3"
-                                onPress={() => navigation.navigate("Filters")}
-                            />
-                            {hasFilters && (
+                            {TIME_PRESETS.map((preset) => (
+                                <Button
+                                    key={preset.label}
+                                    label={`${preset.label} (${preset.from}–${preset.to})`}
+                                    systemImage={preset.systemImage}
+                                    onPress={() => {
+                                        dispatch({ type: "SET_TIME_FROM", payload: preset.from })
+                                        dispatch({ type: "SET_TIME_TO", payload: preset.to })
+                                    }}
+                                />
+                            ))}
+                            {hasTimeFilter && (
                                 <>
                                     <Divider />
                                     <Button
-                                        label="Clear All Filters"
+                                        label="Clear Time"
                                         role="destructive"
                                         onPress={() => {
-                                            dispatch({ type: "RESET" })
-                                            handleChangeText("")
+                                            dispatch({ type: "SET_TIME_FROM", payload: "" })
+                                            dispatch({ type: "SET_TIME_TO", payload: "" })
                                         }}
                                     />
                                 </>
                             )}
                         </Menu>
                     </Host>
+
+                    <Host style={{ height: 35 }}>
+                        <Menu
+                            label={
+                                <GlassView
+                                    style={searchBarStyles.pill}
+                                    tintColor={hasScheduledFilter ? Colors.secondary : undefined}
+                                >
+                                    <Feather
+                                        name="repeat"
+                                        size={13}
+                                        color={hasScheduledFilter ? Colors.foreground : Colors.foreground_secondary}
+                                    />
+                                    <Text
+                                        style={[
+                                            searchBarStyles.pillText,
+                                            hasScheduledFilter && searchBarStyles.pillTextActive,
+                                        ]}
+                                        numberOfLines={1}
+                                    >
+                                        {scheduledLabel}
+                                    </Text>
+                                </GlassView>
+                            }
+                        >
+                            <Button
+                                label="All"
+                                onPress={() => dispatch({ type: "SET_SCHEDULED", payload: undefined })}
+                            />
+                            <Button
+                                label="Scheduled only"
+                                systemImage="calendar.badge.clock"
+                                onPress={() => dispatch({ type: "SET_SCHEDULED", payload: true })}
+                            />
+                            <Button
+                                label="Not scheduled"
+                                systemImage="xmark.circle"
+                                onPress={() => dispatch({ type: "SET_SCHEDULED", payload: false })}
+                            />
+                        </Menu>
+                    </Host>
+
                 </ScrollView>
             </GlassView>
         </Animated.View>
     )
 }
+
+const styles = StyleSheet.create({
+    filterBadge: {
+        position: "absolute",
+        top: -4,
+        right: -4,
+        backgroundColor: Colors.secondary,
+        borderRadius: 100,
+        minWidth: 14,
+        height: 14,
+        alignItems: "center",
+        justifyContent: "center",
+        paddingHorizontal: 3,
+    },
+    filterBadgeText: {
+        fontSize: 9,
+        fontWeight: "700",
+        color: Colors.foreground,
+    },
+})
 
 const searchBarStyles = StyleSheet.create({
     wrapper: {

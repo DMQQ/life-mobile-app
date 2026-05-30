@@ -12,7 +12,7 @@ export interface SuggestedEventType {
 }
 
 export default function useSuggestedEvents(props: {
-  createTimelineAsync: (input: InitialValuesType) => Promise<void>;
+  createTimelineAsync: (input: InitialValuesType) => Promise<string | undefined>;
   initialValues: InitialValuesType;
 }) {
   const [selected, setSelected] = useState<SuggestedEventType>({});

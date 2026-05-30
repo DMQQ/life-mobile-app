@@ -32,7 +32,12 @@ export default function EventsCalendarWidget() {
                             <TouchableOpacity
                                 key={date}
                                 style={[s.dayTile, isToday && s.todayTile]}
-                                onPress={() => navigation.navigate("TimelineScreens", { date })}
+                                onPress={() =>
+                                    navigation.navigate("TimelineScreens", {
+                                        screen: "Timeline",
+                                        params: { date },
+                                    })
+                                }
                                 activeOpacity={0.65}
                             >
                                 <Text style={[s.dayLetter, isToday && s.todayText]}>{d.format("dd")[0]}</Text>
@@ -87,9 +92,7 @@ export default function EventsCalendarWidget() {
                                     style={[
                                         s.eventAccent,
                                         {
-                                            backgroundColor: event.isCompleted
-                                                ? Colors.positive
-                                                : Colors.secondary,
+                                            backgroundColor: event.isCompleted ? Colors.positive : Colors.secondary,
                                         },
                                     ]}
                                 />
@@ -105,9 +108,7 @@ export default function EventsCalendarWidget() {
                                         All day
                                     </Text>
                                 )}
-                                {event.isCompleted && (
-                                    <Feather name="check" size={11} color={Colors.positive} />
-                                )}
+                                {event.isCompleted && <Feather name="check" size={11} color={Colors.positive} />}
                             </TouchableOpacity>
                         ))}
                     </View>

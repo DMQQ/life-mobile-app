@@ -23,7 +23,7 @@ const groupDates = (dates: { date: string }[]) => {
 }
 
 export default function useTimeline({ route, navigation }: TimelineScreenProps<"Timeline">) {
-    const { data, selected, setSelected, loading, error, setQuery, query } = useGetOccurrencesQuery()
+    const { data, selected, setSelected, loading, error, setQuery, query } = useGetOccurrencesQuery(route.params?.date)
 
     const [switchView, setSwitchView] = useState<"day" | "week" | "month">("day")
 

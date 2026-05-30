@@ -6,6 +6,7 @@ const COMPLETE_OCCURRENCE = gql`
         completeOccurrence(input: $input) {
             id
             isCompleted
+            finishedAt
         }
     }
 `
@@ -19,6 +20,7 @@ export default function useCompleteOccurrence(occurrenceId: string) {
                 id: cache.identify({ __typename: "OccurrenceView", id: occurrenceId }),
                 fields: {
                     isCompleted: () => result.isCompleted,
+                    finishedAt: () => result.finishedAt ?? null,
                 },
             })
             if (result.id !== occurrenceId) {
@@ -26,6 +28,7 @@ export default function useCompleteOccurrence(occurrenceId: string) {
                     id: cache.identify({ __typename: "OccurrenceView", id: result.id }),
                     fields: {
                         isCompleted: () => result.isCompleted,
+                        finishedAt: () => result.finishedAt ?? null,
                     },
                 })
             }

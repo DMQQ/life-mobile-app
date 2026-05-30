@@ -116,6 +116,8 @@ export default function useGetWallet(options?: {
             take: filters.take || defaultFilters.take || init.take,
 
             accountId: filters.accountId,
+            time: { from: filters.time?.from ?? "", to: filters.time?.to ?? "" },
+            scheduled: filters.scheduled,
         }
     }, [filters, options?.defaultFilters])
 
@@ -134,7 +136,11 @@ export default function useGetWallet(options?: {
             ...(effectiveFilters.type && { type: effectiveFilters.type }),
             ...(effectiveFilters.isExactCategory && { isExactCategory: effectiveFilters.isExactCategory }),
             ...(effectiveFilters.accountId && { accountId: effectiveFilters.accountId }),
-        }),
+            ...((effectiveFilters.time.from || effectiveFilters.time.to) && {
+                time: { from: effectiveFilters.time.from || undefined, to: effectiveFilters.time.to || undefined },
+            }),
+            ...(effectiveFilters.scheduled !== undefined && { schedule: effectiveFilters.scheduled }),
+        } as any),
         [effectiveFilters],
     )
 

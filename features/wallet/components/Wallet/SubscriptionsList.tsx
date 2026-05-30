@@ -143,7 +143,7 @@ export default function SubscriptionsList({ onScroll, listHeader }: Props) {
 const styles = StyleSheet.create({
     contentContainer: {
         padding: 15,
-        paddingTop: 230,
+        paddingTop: 186,
         paddingBottom: 120,
     },
     emptyContainer: {
