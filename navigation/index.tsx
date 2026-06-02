@@ -55,6 +55,8 @@ export default function Navigation({ isAuthenticated, isLoading, linking }: Navi
                             backgroundColor: Colors.primary,
                             display: hideTabBar ? "none" : "flex",
                         },
+                        tabBarLabel: "",
+                        tabBarLabelVisibilityMode: "unlabeled",
                     }
                 }}
             >
@@ -64,7 +66,6 @@ export default function Navigation({ isAuthenticated, isLoading, linking }: Navi
                             name="Root"
                             component={HomeScreens}
                             options={{
-                                tabBarLabel: "Home",
                                 tabBarIcon: ({ focused }: { focused: boolean }) => ({
                                     type: "sfSymbol" as const,
                                     name: focused ? "house.fill" : "house",
@@ -75,7 +76,6 @@ export default function Navigation({ isAuthenticated, isLoading, linking }: Navi
                             name="GoalsScreens"
                             component={GoalsScreens}
                             options={{
-                                tabBarLabel: "Goals",
                                 tabBarIcon: ({ focused }: { focused: boolean }) => ({
                                     type: "sfSymbol" as const,
                                     name: focused ? "target" : "target",
@@ -86,7 +86,6 @@ export default function Navigation({ isAuthenticated, isLoading, linking }: Navi
                             name="AiScreens"
                             component={AiScreens}
                             options={{
-                                tabBarLabel: "AI",
                                 tabBarInactiveTintColor: Colors.text_light,
                                 tabBarIcon: ({ focused }: { focused: boolean }) => ({
                                     type: "sfSymbol" as const,
@@ -102,7 +101,6 @@ export default function Navigation({ isAuthenticated, isLoading, linking }: Navi
                             name="WalletScreens"
                             component={WalletScreens as any}
                             options={{
-                                tabBarLabel: "Wallet",
                                 tabBarIcon: ({ focused }: { focused: boolean }) => ({
                                     type: "sfSymbol" as const,
                                     name: focused ? "creditcard.fill" : "creditcard",
@@ -113,7 +111,6 @@ export default function Navigation({ isAuthenticated, isLoading, linking }: Navi
                             name="TimelineScreens"
                             component={TimelineScreens}
                             options={{
-                                tabBarLabel: "Timeline",
                                 tabBarIcon: ({ focused }: { focused: boolean }) => ({
                                     type: "sfSymbol" as const,
                                     name: focused ? "calendar.circle.fill" : "calendar",

@@ -64,11 +64,7 @@ export default function Button({
     }
 
     const resolvedBg = (style as any)?.backgroundColor as string | undefined
-    const tintColor = disabled
-        ? resolvedBg
-            ? lowOpacity(resolvedBg, 0.1)
-            : lowOpacity(mainColor, 0.5)
-        : mainColor
+    const tintColor = disabled ? (resolvedBg ? lowOpacity(resolvedBg, 0.1) : lowOpacity(mainColor, 0.5)) : mainColor
 
     return (
         <Pressable style={{ flex: 1 }} onPress={callback} disabled={disabled} {...rest}>
@@ -76,13 +72,13 @@ export default function Button({
                 key={tintColor}
                 tintColor={tintColor}
                 style={[
-                    styles.button,
-                    buttonStyle,
-                    style,
                     {
                         backgroundColor: undefined,
                         borderRadius: 15,
                     },
+                    styles.button,
+                    buttonStyle,
+                    style,
                 ]}
             >
                 <View style={iconStyle}>{icon}</View>

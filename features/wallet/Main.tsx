@@ -107,7 +107,7 @@ export default function WalletScreens({ navigation, route }: WalletScreens<"Wall
                     name="Expense"
                     component={Expense}
                     options={{
-                        headerShown: false,
+                        headerShown: true,
                     }}
                 />
 
@@ -130,7 +130,11 @@ export default function WalletScreens({ navigation, route }: WalletScreens<"Wall
                     }}
                 />
 
-                <Stack.Screen name="Subscription" component={SubscriptionScreen as any} />
+                <Stack.Screen
+                    name="Subscription"
+                    component={SubscriptionScreen as any}
+                    options={{ headerShown: true }}
+                />
 
                 <Stack.Screen name="EditSubscription" component={EditSubscription as any} options={MODAL_OPTIONS} />
 

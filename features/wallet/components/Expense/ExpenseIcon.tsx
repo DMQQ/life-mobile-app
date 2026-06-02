@@ -627,10 +627,15 @@ const getCategoryParent = (category: string) => {
     return category?.split?.(":")?.shift?.()?.replace(/_/g, " ") || ""
 }
 
+const getCategoryColor = (category: string, type: "income" | "expense" | "refunded") => {
+    return Icons[getCategory({ category, type })].backgroundColor
+}
+
 export const CategoryUtils = {
     getCategoryName,
     getCategoryIcon,
     getCategoryParent,
+    getCategoryColor,
 }
 
 function getCategory(props: { category: string; type: "income" | "expense" | "refunded" }) {

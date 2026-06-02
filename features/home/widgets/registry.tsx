@@ -1,22 +1,20 @@
 import HomeExtras from "@/features/home/components/HomeExtras"
-import TimelineWidget from "@/features/home/components/TimelineWidget"
 import CategoryBreakdown from "@/features/wallet/components/Wallet/CategoryBreakdown"
 import Colors from "@/constants/Colors"
 import React from "react"
 import ChartSwitcher from "../components/ChartSwitcher"
 import BalanceSummaryWidget from "./BalanceSummaryWidget"
-import EventsCalendarWidget from "./EventsCalendarWidget"
 import GoalsGridWidget from "./GoalsGridWidget"
 import WeekLifeWidget from "./WeekLifeWidget"
+import QuickStatsWidget from "./QuickStatsWidget"
 import {
     BalancePreview,
     CategoriesPreview,
     ChartPreview,
-    EventsPreview,
     ExtrasPreview,
     GoalsPreview,
-    TimelinePreview,
     WeekLifePreview,
+    QuickStatsPreview,
 } from "./previews"
 
 export interface WidgetDefinition {
@@ -58,24 +56,6 @@ export const WIDGETS: WidgetDefinition[] = [
         Preview: CategoriesPreview,
     },
     {
-        key: "events",
-        label: "Week Calendar",
-        subtitle: "7-day strip with today's events",
-        icon: "calendar",
-        accentColor: "#4ECDC4",
-        component: EventsCalendarWidget,
-        Preview: EventsPreview,
-    },
-    {
-        key: "timeline",
-        label: "Today's Events",
-        subtitle: "Upcoming timeline items for today",
-        icon: "clock",
-        accentColor: "#A29BFE",
-        component: TimelineWidget,
-        Preview: TimelinePreview,
-    },
-    {
         key: "goals",
         label: "Goals Grid",
         subtitle: "Weekly habit tracker for your goals",
@@ -101,5 +81,14 @@ export const WIDGETS: WidgetDefinition[] = [
         accentColor: "#FF6B6B",
         component: HomeExtras,
         Preview: ExtrasPreview,
+    },
+    {
+        key: "quick-stats",
+        label: "Quick Stats",
+        subtitle: "Weekly spend & subscription costs at a glance",
+        icon: "activity",
+        accentColor: Colors.ternary,
+        component: QuickStatsWidget,
+        Preview: QuickStatsPreview,
     },
 ]

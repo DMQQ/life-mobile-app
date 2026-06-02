@@ -37,16 +37,6 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
     const [scrollY, onScroll] = useTrackScroll({ screenName: "WalletScreens" })
     const [tab, setTab] = useState("accounts")
 
-    // useEffect(() => {
-    //     if (route.params?.expenseId && data?.wallet) {
-    //         const found = (data.wallet.expenses2 as MonthlyExpenses[])
-    //             .flatMap((m) => m.expenses)
-    //             .find((e) => (e as Expense).id === route.params?.expenseId) as Expense
-    //         navigation.setParams({ expenseId: undefined })
-    //         navigation.navigate("Expense", { expense: found })
-    //     }
-    // }, [route.params?.expenseId, data?.wallet])
-
     const balance = loading && data?.wallet?.balance === undefined ? " ..." : (data?.wallet?.balance || 0).toFixed(2)
 
     const handleShowEditSheet = useCallback(() => {
@@ -71,7 +61,7 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
             .sort((a, b) => parseInt(a.nextBillingDate) - parseInt(b.nextBillingDate))
     }, [data?.subscriptions])
 
-    const selectedMonth = dayjs(filters.date.from).get("month")
+    const selectedMonth = filters.date.from ? dayjs(filters.date.from).get("month") : dayjs().get("month")
 
     const buttons = useMemo(
         () =>
@@ -205,7 +195,7 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
                 </View>
 
                 <View style={styles.quickNav}>
-                    <GlassView style={styles.quickNavCard}>
+                    <View style={styles.quickNavCard}>
                         <Pressable
                             onPress={() => {
                                 Haptic.trigger("impactLight")
@@ -218,8 +208,8 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
                             <Text style={styles.quickNavTitle}>Expenses</Text>
                             <Text style={styles.quickNavSub}>All transactions</Text>
                         </Pressable>
-                    </GlassView>
-                    <GlassView style={styles.quickNavCard}>
+                    </View>
+                    <View style={styles.quickNavCard}>
                         <Pressable
                             onPress={() => {
                                 Haptic.trigger("impactLight")
@@ -232,7 +222,7 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
                             <Text style={styles.quickNavTitle}>Subscriptions</Text>
                             <Text style={styles.quickNavSub}>Recurring payments</Text>
                         </Pressable>
-                    </GlassView>
+                    </View>
                 </View>
 
                 {upcomingSubscriptions.length > 0 && (
@@ -303,8 +293,8 @@ const styles = StyleSheet.create({
     },
     contentContainer: {
         padding: 15,
-        paddingTop: 186,
-        paddingBottom: 60,
+        paddingTop: 200,
+        paddingBottom: 100,
     },
     tabSection: {
         gap: 15,
@@ -334,10 +324,11 @@ const styles = StyleSheet.create({
         marginTop: 25,
     },
     quickNavCard: {
-        width: "48%",
+        flex: 1,
         borderRadius: 20,
         padding: 15,
         gap: 15,
+        backgroundColor: Colors.primary_lighter,
     },
     quickNavIconWrap: {
         width: 40,

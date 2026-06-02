@@ -78,7 +78,7 @@ export default function YearlySpendingsChart({
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
                 {MONTH_LABELS.map((label, i) => {
                     const isCurrentMonth = selectedBar !== undefined ? i === selectedBar : i === currentMonth
-                    const labelColor = isCurrentMonth ? "#fff" : Colors.secondary_light_2
+                    const labelColor = isCurrentMonth ? Colors.text_light : Colors.text_dark
                     return (
                         <View key={i} style={[styles.barWrapper, i < 11 && { marginRight: 8 }]}>
                             <Text style={[styles.valueLabel, { color: labelColor }]}>{formatValue(values[i])}</Text>
@@ -93,7 +93,7 @@ export default function YearlySpendingsChart({
                                 barWidth={BAR_WIDTH}
                                 minBarHeight={4}
                                 noPrevValue
-                                barColor={isCurrentMonth ? "#fff" : Colors.secondary_light_1}
+                                barColor={isCurrentMonth ? Colors.secondary : Colors.secondary + "60"}
                             />
                         </View>
                     )
@@ -107,7 +107,6 @@ const styles = StyleSheet.create({
     container: {
         width: CARD_W,
         height: CARD_H,
-        backgroundColor: Colors.secondary,
         borderRadius: 20,
         paddingTop: PT,
         paddingBottom: PB,
@@ -125,8 +124,7 @@ const styles = StyleSheet.create({
         flex: 1,
         height: 2,
         backgroundColor: "#fff",
-        borderRadius: 2,
-        marginLeft: 15,
+        borderRadius: 5,
     },
     refValuePill: {
         marginHorizontal: 10,
@@ -143,7 +141,6 @@ const styles = StyleSheet.create({
         color: Colors.primary,
     },
     scrollContent: {
-        paddingHorizontal: 15,
         alignItems: "flex-end",
     },
     barWrapper: {

@@ -13,6 +13,8 @@ import useCompleteOccurrence from "../hooks/mutation/useCompleteOccurrence"
 import { useActivityUtils } from "@/utils/hooks/useActivityManager"
 import { OccurrenceItem } from "../hooks/query/useGetOccurrencesQuery"
 import { Card } from "@/components"
+import Button from "@/components/ui/Button/Button2"
+import { SymbolView } from "expo-symbols"
 
 interface PriorityTheme {
     accent: string
@@ -78,6 +80,7 @@ function EmptyState({ date }: { date: string }) {
             <Text style={styles.emptySubtitle}>Your schedule is wide open</Text>
 
             <View style={styles.ghostSlots}>
+                <GhostSlot time="07:00" barWidth="85%" opacity={0.7} />
                 <GhostSlot time="09:00" barWidth="80%" opacity={0.6} />
                 <GhostSlot time="13:30" barWidth="70%" opacity={0.5} />
                 <GhostSlot time="15:00" barWidth="65%" opacity={0.4} />
@@ -85,13 +88,21 @@ function EmptyState({ date }: { date: string }) {
                 <GhostSlot time="21:00" barWidth="70%" opacity={0.2} />
             </View>
 
-            <Pressable
-                onPress={() => navigation.navigate("TimelineCreate", { mode: "create", selectedDate: date })}
-                style={styles.emptyAddBtn}
-            >
-                <Feather name="plus" size={17} color={Colors.foreground} />
-                <Text style={styles.emptyAddBtnText}>Add event</Text>
-            </Pressable>
+            <View style={{ width: "100%", alignItems: "center" }}>
+                <Button
+                    onPress={() => navigation.navigate("TimelineCreate", { mode: "create", selectedDate: date })}
+                    color="text"
+                    style={{
+                        borderRadius: 100,
+                        justifyContent: "center",
+                        gap: 10,
+                    }}
+                    fontStyle={{ textTransform: "capitalize" }}
+                    icon={<SymbolView name="plus" size={18} tintColor="#fff" />}
+                >
+                    Add event
+                </Button>
+            </View>
         </View>
     )
 }

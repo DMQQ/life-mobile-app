@@ -53,27 +53,6 @@ export function CategoriesPreview() {
     )
 }
 
-export function TimelinePreview() {
-    const rows = [
-        { line1: 60, line2: 40 },
-        { line1: 70, line2: 30 },
-        { line1: 50, line2: 50 },
-    ]
-    return (
-        <View style={s.preview}>
-            {rows.map((r, i) => (
-                <View key={i} style={s.timelineRow}>
-                    <View style={[s.eventDot, { backgroundColor: i === 0 ? Colors.secondary : Color(Colors.secondary).alpha(0.4).string() }]} />
-                    <View style={s.timelineLines}>
-                        <View style={[s.tLine, { width: r.line1, backgroundColor: Colors.text_dark }]} />
-                        <View style={[s.tLine, { width: r.line2, backgroundColor: Color(Colors.text_dark).alpha(0.5).string() }]} />
-                    </View>
-                </View>
-            ))}
-        </View>
-    )
-}
-
 export function ExtrasPreview() {
     const rows = [
         { fill: 0.7, color: Colors.positive },
@@ -106,28 +85,6 @@ export function BalancePreview() {
     )
 }
 
-export function EventsPreview() {
-    const dots = [0, 2, 0, 1, 3, 0, 1]
-    return (
-        <View style={s.preview}>
-            <View style={s.weekStrip}>
-                {dots.map((count, i) => (
-                    <View key={i} style={s.dayCol}>
-                        <View style={[s.daySq, i === 2 && { backgroundColor: Color(Colors.secondary).alpha(0.25).string() }]} />
-                        <View style={s.dotCluster}>
-                            {Array.from({ length: Math.min(count, 2) }).map((_, j) => (
-                                <View key={j} style={[s.eDot, { backgroundColor: Colors.secondary }]} />
-                            ))}
-                        </View>
-                    </View>
-                ))}
-            </View>
-            <View style={[s.eLine, { width: "80%" }]} />
-            <View style={[s.eLine, { width: "60%" }]} />
-        </View>
-    )
-}
-
 export function WeekLifePreview() {
     const eventAccents = ["#5B9CF6", "#FF5F57", "#5B9CF6"]
     const expColors = [Colors.negative, Colors.positive]
@@ -152,6 +109,23 @@ export function WeekLifePreview() {
                     <View style={[s.tLine, { width: 20, backgroundColor: Color(expColors[i % 2]).alpha(0.4).string() }]} />
                 </View>
             ))}
+        </View>
+    )
+}
+
+export function QuickStatsPreview() {
+    return (
+        <View style={[s.preview, { flexDirection: "row", gap: 6 }]}>
+            <View style={[s.statTile, { backgroundColor: Color(Colors.negative).alpha(0.12).string() }]}>
+                <View style={[s.statDot, { backgroundColor: Color(Colors.negative).alpha(0.25).string() }]} />
+                <View style={[s.tLine, { width: 36, backgroundColor: Color(Colors.negative).alpha(0.6).string(), height: 5 }]} />
+                <View style={[s.tLine, { width: 28, backgroundColor: Color(Colors.foreground).alpha(0.1).string() }]} />
+            </View>
+            <View style={[s.statTile, { backgroundColor: Color(Colors.ternary).alpha(0.12).string() }]}>
+                <View style={[s.statDot, { backgroundColor: Color(Colors.ternary).alpha(0.25).string() }]} />
+                <View style={[s.tLine, { width: 36, backgroundColor: Color(Colors.ternary).alpha(0.6).string(), height: 5 }]} />
+                <View style={[s.tLine, { width: 28, backgroundColor: Color(Colors.foreground).alpha(0.1).string() }]} />
+            </View>
         </View>
     )
 }
@@ -338,5 +312,18 @@ const s = StyleSheet.create({
         flex: 1,
         aspectRatio: 1,
         borderRadius: 3,
+    },
+    statTile: {
+        flex: 1,
+        borderRadius: 10,
+        padding: 8,
+        gap: 4,
+        justifyContent: "center",
+    },
+    statDot: {
+        width: 14,
+        height: 14,
+        borderRadius: 7,
+        marginBottom: 2,
     },
 })

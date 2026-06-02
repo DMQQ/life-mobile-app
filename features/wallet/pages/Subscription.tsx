@@ -5,31 +5,21 @@ import { Feather } from "@expo/vector-icons"
 import moment from "moment"
 import { useEffect, useState } from "react"
 import { StyleSheet, View } from "react-native"
-
 import Header from "@/components/ui/Header/Header"
 import Colors from "@/constants/Colors"
 import { Expense, Subscription } from "@/types"
-import lowOpacity from "@/utils/functions/lowOpacity"
 import { parseDate } from "@/utils/functions/parseDate"
-import Animated, {
-    Extrapolation,
-    interpolate,
-    SharedValue,
-    useAnimatedScrollHandler,
-    useAnimatedStyle,
-    useSharedValue,
-} from "react-native-reanimated"
-import WalletItem from "../components/Wallet/WalletItem"
+import Animated, { useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated"
+import WalletItem, { CategoryIcon } from "../components/Wallet/WalletItem"
 import useSubscription from "../hooks/useSubscription"
-import getModalMarginTop from "../utils/modalMarginTop"
 import { ConfirmDialog, EmptyState } from "@/components"
 import Section from "@/components/ui/Section"
 import { CollapsibleThemedCalendar } from "@/components/ui/ThemedCalendar/ThemedCalendar"
 import dayjs from "dayjs"
 import { Toggle, Host } from "@expo/ui/swift-ui"
 import { background } from "@expo/ui/swift-ui/modifiers"
-import Color from "color"
-import { SafeAreaView } from "react-native-safe-area-context"
+import Background from "@/components/ui/Background"
+import { CategoryUtils } from "../components/Expense/ExpenseIcon"
 
 const muted = Colors.foreground_secondary
 
@@ -198,29 +188,43 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
         : "Are you sure you want to disable this subscription?"
 
     return (
-        <SafeAreaView style={{ flex: 1 }} edges={["top"]}>
+        <View style={{ flex: 1 }}>
             <Header
-                animated
-                animatedTitle={subscription.description}
-                initialHeight={60}
-                titleAnimatedStyle={{ flexWrap: "nowrap" }}
+                goBack
                 scrollY={scrollY}
+                shadow={false}
                 buttons={[
                     {
-                        icon: "pencil",
+                        icon: "pencil" as any,
                         onPress: () => navigation.navigate("EditSubscription", { subscription }),
                     },
                 ]}
-                initialTitleFontSize={subscription?.description?.length > 25 ? 40 : 50}
-                animatedSubtitle={`Amount: ${subscription.amount.toFixed(2)}zł`}
-                subtitleStyles={{ fontSize: 25, color: muted, marginTop: 10, fontWeight: "400" }}
             />
+
+            <Background tintColor={CategoryUtils.getCategoryColor("subscriptions", "expense")} />
 
             <Animated.ScrollView
                 keyboardDismissMode={"on-drag"}
                 onScroll={onScroll}
-                style={{ flex: 1, paddingTop: getModalMarginTop(subscription.description) }}
+                style={{ flex: 1 }}
+                contentContainerStyle={{ paddingTop: 150 }}
             >
+                <View style={{ width: "100%", height: 150, justifyContent: "center", alignItems: "center", gap: 7.5 }}>
+                    <CategoryIcon
+                        category={"subscriptions"}
+                        size={60}
+                        containerStyle={{
+                            width: 100,
+                            height: 100,
+                            borderRadius: 100,
+                        }}
+                    />
+                    <Text style={{ fontSize: 15, color: Colors.text_dark }}>{subscription.description}</Text>
+                    <Text style={{ color: "#fff", fontSize: 40, fontWeight: "500" }}>
+                        {subscription.amount.toFixed(2)}zł
+                    </Text>
+                </View>
+
                 <View style={{ paddingHorizontal: 15 }}>
                     <Section title="Details">
                         <View style={styles.detailRow}>
@@ -420,7 +424,7 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                 destructive={!pendingToggle}
                 loading={isSubscriptionLoading}
             />
-        </SafeAreaView>
+        </View>
     )
 }
 

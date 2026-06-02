@@ -6,7 +6,7 @@ import { gql, useMutation, useQuery } from "@apollo/client"
 import { GET_EXPENSE } from "../hooks/getExpenseQuery"
 import { SFSymbol } from "expo-symbols"
 import { useEffect, useRef, useState } from "react"
-import { StyleSheet, View } from "react-native"
+import { StyleSheet, Text, View } from "react-native"
 import useDeleteActivity from "../hooks/useDeleteActivity"
 import useRefund from "../hooks/useRefundExpense"
 import useSubscription from "../hooks/useSubscription"
@@ -14,7 +14,6 @@ import useGetSubscriptions from "../hooks/useGetSubscriptions"
 import Animated, { useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated"
 import MapPicker, { MapPickerHandle } from "../components/Expense/Map"
 import SubexpenseStack from "../components/Expense/SubexpenseStack"
-import getModalMarginTop from "../utils/modalMarginTop"
 import FloatingBottomToolBar, { ContextMenuOption } from "../components/Expense/FloatingBottomToolBar"
 import { CollapsibleThemedCalendar } from "@/components/ui/ThemedCalendar/ThemedCalendar"
 import dayjs from "dayjs"
@@ -25,9 +24,8 @@ import FileUpload, { FileUploadHandle } from "../components/Expense/FileUpload"
 import SubscriptionSection from "../components/Expense/SubscriptionSection"
 import { ConfirmDialog } from "@/components"
 import Section from "@/components/ui/Section"
-import { SafeAreaView } from "react-native-safe-area-context"
-
-const capitalize = (s = "") => s.charAt(0).toUpperCase() + s.slice(1)
+import { CategoryIcon, CategoryUtils } from "../components/Expense/ExpenseIcon"
+import Background from "@/components/ui/Background"
 
 export default function Expense({ route: { params }, navigation }: any) {
     const { data } = useQuery(GET_EXPENSE, { variables: { id: params?.expense?.id ?? params?.expenseId } })
@@ -145,13 +143,11 @@ export default function Expense({ route: { params }, navigation }: any) {
     if (!selected) return <ExpenseSkeleton />
 
     return (
-        <SafeAreaView edges={["top"]} style={{ flex: 1 }}>
+        <View style={{ flex: 1 }}>
             <Header
-                animated
-                animatedTitle={capitalize(selected?.description)}
-                initialHeight={60}
-                titleAnimatedStyle={{ flexWrap: "nowrap" }}
+                goBack
                 scrollY={scrollY}
+                shadow={false}
                 buttons={[
                     {
                         icon: "trash" as SFSymbol,
@@ -159,43 +155,63 @@ export default function Expense({ route: { params }, navigation }: any) {
                         tintColor: Colors.danger,
                         confirm: true,
                     },
-                    {
-                        icon: "arrow.triangle.branch" as SFSymbol,
-                        onPress: () =>
-                            navigation.navigate("CorrectionMaps", {
-                                prefill: {
-                                    shop: selected?.shop || undefined,
-                                    description: selected?.description || undefined,
-                                    category: selected?.category || undefined,
-                                    amount: selected?.amount || undefined,
-                                },
-                            }),
-                    },
+                    // {
+                    //     icon: "arrow.triangle.branch" as SFSymbol,
+                    //     onPress: () =>
+                    //         navigation.navigate("CorrectionMaps", {
+                    //             prefill: {
+                    //                 shop: selected?.shop || undefined,
+                    //                 description: selected?.description || undefined,
+                    //                 category: selected?.category || undefined,
+                    //                 amount: selected?.amount || undefined,
+                    //             },
+                    //         }),
+                    // },
                     {
                         icon: "pencil" as SFSymbol,
                         onPress: () => navigation.navigate("CreateExpense", { ...selected, isEditing: true }),
                     },
                 ]}
-                animatedSubtitle={`${selected.type === "expense" ? "-" : ""}${selected.amount.toFixed(2)}zł`}
-                subtitleStyles={{
-                    fontSize: 25,
-                    color:
-                        selected.type === "refunded"
-                            ? Colors.secondary_light_2
-                            : selected.type === "expense"
-                              ? "#F07070"
-                              : "#66E875",
-                    marginTop: 10,
-                    fontWeight: "600",
-                }}
-                initialTitleFontSize={selected?.description?.length > 25 ? 40 : 50}
             />
+
+            <Background tintColor={CategoryUtils.getCategoryColor(selected?.category, selected?.type)} />
 
             <Animated.ScrollView
                 onScroll={onScroll}
                 keyboardDismissMode="on-drag"
-                style={{ flex: 1, paddingTop: getModalMarginTop(selected?.description) }}
+                style={{ flex: 1 }}
+                contentContainerStyle={{ paddingTop: 150 }}
             >
+                <View style={{ width: "100%", height: 150, justifyContent: "center", alignItems: "center", gap: 7.5 }}>
+                    <CategoryIcon
+                        category={selected?.category}
+                        size={60}
+                        type={selected?.type}
+                        containerStyle={{
+                            width: 100,
+                            height: 100,
+                            borderRadius: 100,
+                        }}
+                    />
+                    <Text
+                        style={{
+                            fontSize: 15,
+                            color: Colors.text_dark,
+                        }}
+                    >
+                        {selected?.description}
+                    </Text>
+                    <Text
+                        style={{
+                            color: "#fff",
+                            fontSize: 40,
+                            fontWeight: "500",
+                        }}
+                    >
+                        {selected?.amount}zł
+                    </Text>
+                </View>
+
                 <View style={styles.scrollContent}>
                     {selected.subexpenses?.length > 0 && (
                         <Section title="Subexpenses">
@@ -297,7 +313,7 @@ export default function Expense({ route: { params }, navigation }: any) {
                 description="Are you sure you want to perform this action?"
                 loading={isSubscriptionLoading}
             />
-        </SafeAreaView>
+        </View>
     )
 }
 

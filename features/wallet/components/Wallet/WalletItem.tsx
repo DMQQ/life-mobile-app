@@ -233,7 +233,6 @@ function WalletItem(
                                 style={[
                                     styles.price,
                                     {
-                                        marginRight: 10,
                                         width: "100%",
                                         textAlign: "right",
                                         color:

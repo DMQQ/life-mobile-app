@@ -1,6 +1,4 @@
 import Header from "@/components/ui/Header/Header"
-import PulsingIndicator from "@/components/ui/PulsingIndicator"
-import Colors from "@/constants/Colors"
 import { useRefresh } from "@/utils/context/RefreshContext"
 import useTrackScroll from "@/utils/hooks/ui/useTrackScroll"
 import useAppBackground from "@/utils/hooks/useAppBackground"
@@ -18,6 +16,7 @@ import { HomeScreenProps } from "./Main"
 import { RefreshControl } from "react-native"
 import { useHomeWidgets } from "./hooks/useHomeWidgets"
 import { WIDGETS } from "./widgets/registry"
+import { SafeAreaView } from "react-native-safe-area-context"
 
 export default function Root({ navigation }: HomeScreenProps<"HomeRoot">) {
     const [loading, setLoading] = useState(true)
@@ -74,7 +73,7 @@ export default function Root({ navigation }: HomeScreenProps<"HomeRoot">) {
     )
 
     return (
-        <View style={{ flex: 1 }}>
+        <SafeAreaView edges={["top"]} style={{ flex: 1 }}>
             <Background />
             {loading && <LoadingSkeleton />}
 
@@ -101,7 +100,7 @@ export default function Root({ navigation }: HomeScreenProps<"HomeRoot">) {
                 contentContainerStyle={{
                     paddingHorizontal: 15,
                     paddingBottom: 120,
-                    paddingTop: 160,
+                    paddingTop: 200,
                 }}
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} />}
             >
@@ -113,6 +112,6 @@ export default function Root({ navigation }: HomeScreenProps<"HomeRoot">) {
                     return <Widget key={key} />
                 })}
             </Animated.ScrollView>
-        </View>
+        </SafeAreaView>
     )
 }

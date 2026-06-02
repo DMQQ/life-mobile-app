@@ -259,15 +259,13 @@ function Header({ shadow = true, ...props }: HeaderProps) {
                           items.push({
                               type: "custom",
                               element: (
-                                  <GlassView style={styles.iconContainer}>
-                                      <IconButton
-                                          onPress={throttle(() => {
-                                              Haptic.trigger("impactLight")
-                                              navigation.canGoBack() && navigation.goBack()
-                                          }, 250)}
-                                          icon={props.backIcon}
-                                      />
-                                  </GlassView>
+                                  <IconButton
+                                      onPress={throttle(() => {
+                                          Haptic.trigger("impactLight")
+                                          navigation.canGoBack() && navigation.goBack()
+                                      }, 250)}
+                                      icon={props.backIcon}
+                                  />
                               ),
                           })
                       }
