@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import Colors from "@/constants/Colors"
 import Text from "@/components/ui/Text/Text"
 import ContextMenu from "react-native-context-menu-view"
@@ -182,7 +183,7 @@ const styles = StyleSheet.create({
     },
     statusText: {
         fontSize: 11,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
     },
     fieldRow: {
         flexDirection: "row",
@@ -199,7 +200,7 @@ const styles = StyleSheet.create({
     },
     prefixText: {
         fontSize: 10,
-        fontWeight: "700",
+        fontFamily: FONTS.bold,
         letterSpacing: 0.3,
     },
     fieldBadge: {
@@ -210,14 +211,14 @@ const styles = StyleSheet.create({
     },
     fieldLabel: {
         fontSize: 10,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
         color: Colors.foreground_secondary,
         textTransform: "uppercase",
         letterSpacing: 0.3,
     },
     fieldValue: {
         fontSize: 13,
-        fontWeight: "500",
+        fontFamily: FONTS.medium,
         color: Colors.foreground,
         flexShrink: 1,
     },

@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import Section from "@/components/ui/Section"
 import Text from "@/components/ui/Text/Text"
 import Colors, { secondary_candidates } from "@/constants/Colors"
@@ -394,18 +395,18 @@ const s = StyleSheet.create({
     },
     dayLetter: {
         fontSize: 10,
-        fontWeight: "600",
-        color: Colors.text_dark,
+        fontFamily: FONTS.semibold,
+        color: Colors.foreground_secondary,
         textTransform: "uppercase",
     },
     dayNum: {
-        fontSize: 13,
-        fontWeight: "600",
-        color: Colors.foreground_secondary,
+        fontSize: 14,
+        fontFamily: FONTS.bold,
+        color: Colors.foreground,
     },
     accentLabel: {
         color: Colors.secondary,
-        fontWeight: "700",
+        fontFamily: FONTS.bold,
     },
     dotRow: {
         flexDirection: "row",
@@ -428,8 +429,8 @@ const s = StyleSheet.create({
         marginBottom: 12,
     },
     dayHeading: {
-        fontSize: 13,
-        fontWeight: "700",
+        fontSize: 15,
+        fontFamily: FONTS.bold,
         color: Colors.foreground,
         marginBottom: 10,
     },
@@ -503,7 +504,7 @@ const s = StyleSheet.create({
     goalName: {
         color: Colors.foreground,
         fontSize: 14,
-        fontWeight: "bold",
+        fontFamily: FONTS.bold,
     },
     goalTrack: {
         height: 3,
@@ -523,7 +524,7 @@ const s = StyleSheet.create({
     },
     goalValue: {
         fontSize: 15,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
     },
     emptyRow: {
         flexDirection: "row",
@@ -534,6 +535,6 @@ const s = StyleSheet.create({
     },
     emptyText: {
         fontSize: 13,
-        color: Colors.text_dark,
+        color: Colors.foreground_secondary,
     },
 })

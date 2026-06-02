@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import { Card, GlassIconButton } from "@/components"
 import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
@@ -136,7 +137,7 @@ const styles = StyleSheet.create({
         minWidth: 50,
     },
     day: {
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
     },
     currentDay: {
         color: "#2196F3",
@@ -157,7 +158,7 @@ const styles = StyleSheet.create({
         gap: 4,
     },
     progressValue: {
-        fontWeight: "700",
+        fontFamily: FONTS.bold,
         fontSize: 15,
     },
     progressTarget: {

@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import Text from "@/components/ui/Text/Text"
 import { useState } from "react"
 import { View, StyleSheet, TouchableOpacity } from "react-native"
@@ -177,7 +178,7 @@ const styles = StyleSheet.create({
         marginBottom: 5,
     },
     optionTitle: {
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
     },
     optionDescription: {
         marginLeft: 28,

@@ -2,7 +2,8 @@ import Colors from "@/constants/Colors"
 import { CategoryIcon } from "@/features/wallet/components/Expense/ExpenseIcon"
 import moment, { Moment } from "moment"
 import { memo, useMemo, useState } from "react"
-import { Pressable, StyleProp, StyleSheet, Text, View, ViewStyle } from "react-native"
+import { Pressable, StyleProp, StyleSheet, View, ViewStyle } from "react-native"
+import Text from "@/components/ui/Text/Text"
 import SubscriptionItem from "../Subscription/SubscriptionItem"
 import WalletItem from "./WalletItem"
 import { useNavigation } from "@react-navigation/native"
@@ -105,12 +106,17 @@ const DayCell = memo(
             >
                 <View style={{ width: "100%", alignItems: "center", paddingTop: 10 }}>
                     <Text
-                        style={[
-                            styles.dayNumber,
-                            !isCurrentMonth && styles.dayFaded,
-                            isToday && styles.dayTodayText,
-                            isSelected && styles.daySelectedText,
-                        ]}
+                        size={11}
+                        weight="800"
+                        color={
+                            isSelected
+                                ? Colors.secondary
+                                : isToday
+                                  ? Colors.text_light
+                                  : !isCurrentMonth
+                                    ? "rgba(255,255,255,0.18)"
+                                    : "rgba(255,255,255,0.75)"
+                        }
                     >
                         {day.date()}
                     </Text>
@@ -209,13 +215,13 @@ export default function SubscriptionCalendar({ subscriptions = [], expenses = []
             <View style={[styles.calendarCard, style]}>
                 <View style={styles.headerCenter}>
                     <View style={styles.monthNav}>
-                        <Text style={styles.monthTitle}>{currentMonth.format("MMMM YYYY")}</Text>
+                        <Text size={22} weight="800" color={Colors.text_light} align="center" style={{ minWidth: 80, marginBottom: 10 }}>{currentMonth.format("MMMM YYYY")}</Text>
                     </View>
                 </View>
 
                 <View style={styles.weekRow}>
                     {DAYS.map((d) => (
-                        <Text key={d} style={styles.weekDayLabel}>
+                        <Text key={d} size={11} weight="700" color="rgba(255,255,255,0.3)" align="center" letterSpacing={0.5} style={{ flex: 1 }}>
                             {d}
                         </Text>
                     ))}
@@ -296,33 +302,9 @@ const styles = StyleSheet.create({
         alignItems: "center",
         gap: 10,
     },
-    navBtn: {
-        padding: 6,
-    },
-    monthTitle: {
-        fontSize: 22,
-        fontWeight: "800",
-        color: Colors.text_light,
-        minWidth: 80,
-        textAlign: "center",
-        marginBottom: 10,
-    },
-    monthTotal: {
-        fontSize: 12,
-        fontWeight: "600",
-        color: "#F07070",
-    },
     weekRow: {
         flexDirection: "row",
         marginBottom: 8,
-    },
-    weekDayLabel: {
-        flex: 1,
-        textAlign: "center",
-        fontSize: 11,
-        fontWeight: "700",
-        color: "rgba(255,255,255,0.3)",
-        letterSpacing: 0.5,
     },
     grid: {
         flexDirection: "row",
@@ -354,24 +336,8 @@ const styles = StyleSheet.create({
     daySelected: {
         backgroundColor: Colors.secondary + "80",
     },
-    dayNumber: {
-        fontSize: 11,
-        fontWeight: "800",
-        color: "rgba(255,255,255,0.75)",
-    },
-    dayFaded: {
-        color: "rgba(255,255,255,0.18)",
-    },
     cellFaded: {
         backgroundColor: Colors.primary_lighter,
-    },
-    dayTodayText: {
-        color: Colors.text_light,
-        fontWeight: "700",
-    },
-    daySelectedText: {
-        color: Colors.secondary,
-        fontWeight: "700",
     },
     cellIcons: {
         flexDirection: "row",
@@ -410,38 +376,8 @@ const styles = StyleSheet.create({
         alignItems: "center",
         gap: 5,
     },
-    legendText: {
-        fontSize: 10,
-        color: "rgba(255,255,255,0.35)",
-        fontWeight: "500",
-    },
     detail: {
         marginTop: 30,
     },
-    detailDate: {
-        fontSize: 12,
-        fontWeight: "700",
-        color: "rgba(255,255,255,0.45)",
-        textTransform: "uppercase",
-        letterSpacing: 0.5,
-        marginBottom: 15,
-    },
     detailSection: {},
-    expenseRow: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 8,
-    },
-    expenseDesc: {
-        flex: 1,
-        fontSize: 13,
-        fontWeight: "500",
-        color: Colors.text_light,
-        textTransform: "capitalize",
-    },
-    expenseAmount: {
-        fontSize: 13,
-        fontWeight: "700",
-        color: "#F07070",
-    },
 })

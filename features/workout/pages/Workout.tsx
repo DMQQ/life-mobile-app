@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import { useEffect, useState, useRef, forwardRef, useCallback } from "react";
 import ScreenContainer from "@/components/ui/ScreenContainer";
 import ExerciseList from "@/components/Exercise/ExerciseList/ExerciseList";
@@ -21,7 +22,7 @@ import { AntDesign } from "@expo/vector-icons";
 const styles = StyleSheet.create({
   pendingText: {
     color: Colors.secondary,
-    fontWeight: "bold",
+    fontFamily: FONTS.bold,
     fontSize: 12,
     marginLeft: 5,
     letterSpacing: 1,
@@ -30,7 +31,7 @@ const styles = StyleSheet.create({
   titleText: {
     color: Colors.secondary,
     fontSize: 35,
-    fontWeight: "bold",
+    fontFamily: FONTS.bold,
   },
   headerContainer: {
     flexDirection: "row",
@@ -45,7 +46,7 @@ const styles = StyleSheet.create({
   listInfoText: {
     color: Colors.secondary,
     fontSize: 18,
-    fontWeight: "bold",
+    fontFamily: FONTS.bold,
     marginTop: 15,
   },
 });

@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts";
 import { Pressable, StyleSheet, VirtualizedList } from "react-native";
 import Text from "@/components/ui/Text/Text";
 import { CommonEvents } from "../CommonEvents.data";
@@ -9,7 +10,7 @@ const styles = StyleSheet.create({
   tileContent: {
     color: "rgba(255,255,255,0.7)",
     fontSize: 14,
-    fontWeight: "400",
+    fontFamily: FONTS.regular,
     width: 170,
     flexWrap: "wrap",
   },
@@ -17,7 +18,7 @@ const styles = StyleSheet.create({
   tileTitle: {
     color: Colors.foreground,
     fontSize: 22,
-    fontWeight: "bold",
+    fontFamily: FONTS.bold,
     letterSpacing: 0.5,
     marginBottom: 2.5,
   },

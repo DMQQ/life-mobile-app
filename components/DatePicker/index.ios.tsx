@@ -13,7 +13,8 @@ import { datePickerStyle, frame, padding } from "@expo/ui/swift-ui/modifiers"
 import Colors from "@/constants/Colors"
 import moment from "moment"
 import { ReactElement, useState } from "react"
-import { Pressable, Text, View } from "react-native"
+import { Pressable, View } from "react-native"
+import Text from "@/components/ui/Text/Text"
 import GlassView from "@/components/ui/GlassView"
 import { Feather } from "@expo/vector-icons"
 
@@ -96,7 +97,7 @@ export default function DatePicker({
                         gap: 6,
                     }}
                 >
-                    <Text style={{ color: Colors.foreground, fontSize: 17, fontWeight: "600" }}>{title}</Text>
+                    <Text size={17} weight="600">{title}</Text>
                     <Feather name="chevron-down" size={10} color={Colors.foreground} />
                 </Pressable>
             </Wrapper>

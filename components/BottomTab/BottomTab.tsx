@@ -2,7 +2,7 @@ import { BottomTabBarProps } from "@react-navigation/bottom-tabs"
 import Color from "color"
 import moment from "moment"
 import { useEffect, useMemo, useState } from "react"
-import { Pressable, StyleSheet, TextInput, Keyboard, Text, View } from "react-native"
+import { Pressable, StyleSheet, TextInput, Keyboard, View } from "react-native"
 import { SymbolView } from "expo-symbols"
 import Animated, {
     FadeInDown,

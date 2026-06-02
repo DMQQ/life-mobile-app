@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
 import NumberPad from "@/components/ui/NumberPad"
@@ -226,7 +227,7 @@ const styles = StyleSheet.create({
     },
     amountText: {
         color: Colors.foreground,
-        fontWeight: "bold",
+        fontFamily: FONTS.bold,
         fontSize: 90,
     },
     amountUnit: {
@@ -253,7 +254,7 @@ const styles = StyleSheet.create({
     multiDayText: {
         color: Colors.secondary,
         fontSize: 12,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
     },
     card: {
         padding: 15,
@@ -289,7 +290,7 @@ const styles = StyleSheet.create({
     optionLabel: {
         flex: 1,
         color: "rgba(255,255,255,0.75)",
-        fontWeight: "500",
+        fontFamily: FONTS.medium,
     },
     optionValue: {
         color: "rgba(255,255,255,0.45)",
@@ -317,10 +318,10 @@ const styles = StyleSheet.create({
     quickChipText: {
         color: "rgba(255,255,255,0.7)",
         fontSize: 13,
-        fontWeight: "500",
+        fontFamily: FONTS.medium,
     },
     quickChipTextActive: {
         color: Colors.foreground,
-        fontWeight: "700",
+        fontFamily: FONTS.bold,
     },
 })

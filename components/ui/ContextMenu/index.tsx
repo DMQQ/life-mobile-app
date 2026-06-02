@@ -1,6 +1,7 @@
 import { BlurView } from "expo-blur"
 import React, { cloneElement, useMemo, useRef, useState } from "react"
-import { Dimensions, Modal, Pressable, StyleProp, StyleSheet, Text, View, ViewStyle } from "react-native"
+import { Dimensions, Modal, Pressable, StyleProp, StyleSheet, View, ViewStyle } from "react-native"
+import Text from "@/components/ui/Text/Text"
 import Animated, {
     useAnimatedStyle,
     useSharedValue,
@@ -32,11 +33,7 @@ interface ContextMenuProps {
 }
 
 const ContextMenuItem = ({ text, onPress, destructive, disabled, leading, trailing, style }: ContextMenuItemProps) => {
-    const iconColor = destructive
-        ? styles.destructiveText.color
-        : disabled
-          ? styles.disabledText.color
-          : styles.menuItemText.color
+    const iconColor = destructive ? "#ff453a" : disabled ? "#8e8e93" : "#fff"
 
     return (
         <Pressable
@@ -49,7 +46,11 @@ const ContextMenuItem = ({ text, onPress, destructive, disabled, leading, traili
                     <SymbolView name={leading} size={20} tintColor={iconColor} />
                 </View>
             )}
-            <Text style={[styles.menuItemText, destructive && styles.destructiveText, disabled && styles.disabledText]}>
+            <Text
+                flex={1}
+                size={17}
+                color={destructive ? "#ff453a" : disabled ? "#8e8e93" : "#fff"}
+            >
                 {text}
             </Text>
             {trailing && (
@@ -314,18 +315,6 @@ const styles = StyleSheet.create({
         height: StyleSheet.hairlineWidth,
         backgroundColor: "rgba(255, 255, 255, 0.3)",
         marginHorizontal: 10,
-    },
-    menuItemText: {
-        flex: 1,
-        fontSize: 17,
-        color: "#fff",
-        fontWeight: "400",
-    },
-    destructiveText: {
-        color: "#ff453a",
-    },
-    disabledText: {
-        color: "#8e8e93",
     },
     leading: {
         marginRight: 12,

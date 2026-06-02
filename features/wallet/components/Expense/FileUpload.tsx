@@ -1,5 +1,6 @@
 import { ReactNode } from "react"
-import { FlatList, Image, StyleSheet, Text, View } from "react-native"
+import { FlatList, Image, StyleSheet, View } from "react-native"
+import Text from "@/components/ui/Text/Text"
 import { forwardRef, useImperativeHandle, useState } from "react"
 import Ripple from "react-native-material-ripple"
 import * as ImagePicker from "expo-image-picker"
@@ -9,18 +10,6 @@ import Layout from "@/constants/Layout"
 import Colors from "@/constants/Colors"
 import ImageViewerModal from "./ImageViewer"
 
-const Txt = (props: { children: ReactNode; size: number; color?: any }) => (
-    <Text
-        style={{
-            color: props.color ?? Colors.secondary,
-            fontSize: props.size,
-            fontWeight: "bold",
-            lineHeight: props.size + 7.5,
-        }}
-    >
-        {props.children}
-    </Text>
-)
 
 export type FileUploadHandle = { takePhoto: () => void; pickImage: () => void }
 
@@ -107,9 +96,9 @@ const FileUpload = forwardRef<FileUploadHandle, { id: string; images: any[] }>((
 
     return (
         <View style={{ paddingHorizontal: 15, marginBottom: 40 }}>
-            <Txt size={20} color={Colors.foreground}>
+            <Text size={20} weight="bold" lineHeight={27.5}>
                 Attachments
-            </Txt>
+            </Text>
             <FlatList
                 style={{ marginTop: 25 }}
                 horizontal

@@ -2,9 +2,10 @@ import { CategoryUtils, Icons } from "../Expense/ExpenseIcon"
 import { cloneElement, useState } from "react"
 import Colors from "@/constants/Colors"
 import lowOpacity from "@/utils/functions/lowOpacity"
-import { Text, View, StyleSheet, ScrollView, TextInput } from "react-native"
+import { View, StyleSheet, ScrollView, TextInput } from "react-native"
 import Ripple from "react-native-material-ripple"
-import { AntDesign } from "@expo/vector-icons"
+import { Feather } from "@expo/vector-icons"
+import Text from "@/components/ui/Text/Text"
 import Feedback from "react-native-haptic-feedback"
 import Color from "color"
 import { CreateExpenseContext } from "@/features/wallet/context/CreateExpenseContext"
@@ -38,7 +39,7 @@ const CategorySelector = (props?: { current?: string; onPress?: (item: string) =
     return (
         <View style={styles.container}>
             <View style={styles.searchRow}>
-                <AntDesign name="search" size={15} color="rgba(255,255,255,0.4)" />
+                <Feather name="search" size={15} color="rgba(255,255,255,0.4)" />
                 <TextInput
                     placeholder="Search category..."
                     placeholderTextColor="rgba(255,255,255,0.35)"
@@ -48,7 +49,7 @@ const CategorySelector = (props?: { current?: string; onPress?: (item: string) =
                     autoFocus
                 />
                 <Ripple onPress={dismiss} style={styles.closeBtn}>
-                    <AntDesign name="close" size={15} color="rgba(255,255,255,0.5)" />
+                    <Feather name="x" size={15} color="rgba(255,255,255,0.5)" />
                 </Ripple>
             </View>
 
@@ -84,18 +85,18 @@ const CategorySelector = (props?: { current?: string; onPress?: (item: string) =
                                         { size: 20, color: meta.backgroundColor },
                                     )}
                             </View>
-                            <Text style={[styles.tileLabel, { color: labelColor }]} numberOfLines={1}>
+                            <Text flex={1} size={14} weight="500" color={labelColor} numberOfLines={1}>
                                 {key.includes(":")
                                     ? `${CategoryUtils.getCategoryParent(key)} · ${CategoryUtils.getCategoryName(key)}`
                                     : CategoryUtils.getCategoryName(key)}
                             </Text>
-                            {selected && <AntDesign name="check" size={16} color={meta.backgroundColor} />}
+                            {selected && <Feather name="check" size={16} color={meta.backgroundColor} />}
                         </Ripple>
                     )
                 })}
                 {filtered.length === 0 && (
                     <View style={styles.empty}>
-                        <Text style={styles.emptyText}>No categories found</Text>
+                        <Text size={14} color="rgba(255,255,255,0.5)">No categories found</Text>
                     </View>
                 )}
             </ScrollView>
@@ -139,18 +140,9 @@ const styles = StyleSheet.create({
         width: 24,
         alignItems: "center",
     },
-    tileLabel: {
-        flex: 1,
-        fontSize: 14,
-        fontWeight: "500",
-    },
     empty: {
         padding: 20,
         alignItems: "center",
-    },
-    emptyText: {
-        color: "rgba(255,255,255,0.5)",
-        fontSize: 14,
     },
 })
 

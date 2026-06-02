@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
-import { View, Text, ScrollView } from "react-native";
+import { View, ScrollView } from "react-native";
+import Text from "@/components/ui/Text/Text";
 import { barDataItem, LineChart } from "react-native-gifted-charts";
 import moment from "moment";
 import Colors from "@/constants/Colors";
@@ -79,8 +80,8 @@ export default function FutureProjection({ data, income, currentBalance: current
   return (
     <View style={{ overflow: "hidden", marginVertical: 20 }}>
       <View style={{ width: "100%", marginBottom: 10 }}>
-        <Text style={{ color: Colors.foreground, fontWeight: "bold", fontSize: 18 }}>Balance projection</Text>
-        <Text style={{ color: "gray", marginTop: 5 }}>Takes current spending average and calculates the balance</Text>
+        <Text size={18} weight="bold" color={Colors.foreground}>Balance projection</Text>
+        <Text color="gray" style={{ marginTop: 5 }}>Takes current spending average and calculates the balance</Text>
       </View>
 
       <ScrollView style={{ height: 300, overflow: "hidden" }}>
@@ -127,8 +128,8 @@ export default function FutureProjection({ data, income, currentBalance: current
             gap: 8,
           }}
         >
-          <Text style={{ fontSize: 14, color: Colors.foreground }}>Average Expenses</Text>
-          <Text style={{ fontSize: 25, fontWeight: "600", color: Colors.secondary }}>{(projectionData[0] as any)?.expenses.toLocaleString() ?? '0'}zł</Text>
+          <Text size={14} color={Colors.foreground}>Average Expenses</Text>
+          <Text size={25} weight="600" color={Colors.secondary} mono>{(projectionData[0] as any)?.expenses.toLocaleString() ?? '0'}zł</Text>
         </View>
 
         <View
@@ -140,8 +141,8 @@ export default function FutureProjection({ data, income, currentBalance: current
             gap: 8,
           }}
         >
-          <Text style={{ fontSize: 14, color: Colors.foreground }}>Projection for (9mo)</Text>
-          <Text style={{ fontSize: 25, fontWeight: "600", color: Colors.secondary }}>
+          <Text size={14} color={Colors.foreground}>Projection for (9mo)</Text>
+          <Text size={25} weight="600" color={Colors.secondary} mono>
             {projectionData[projectionData.length - 1]?.value?.toLocaleString() ?? '0'}zł
           </Text>
         </View>

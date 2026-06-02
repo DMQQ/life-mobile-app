@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import React from "react"
 import { StyleSheet, View } from "react-native"
 import { AntDesign } from "@expo/vector-icons"
@@ -118,7 +119,7 @@ const styles = StyleSheet.create({
     },
     title: {
         fontSize: 16,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
         color: Colors.foreground,
         marginBottom: 2,
     },

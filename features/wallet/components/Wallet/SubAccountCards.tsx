@@ -1,8 +1,9 @@
 import Colors from "@/constants/Colors"
-import { MaterialCommunityIcons } from "@expo/vector-icons"
+import { Feather } from "@expo/vector-icons"
 import { LinearGradient } from "expo-linear-gradient"
 import Color from "color"
-import { FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native"
+import { FlatList, StyleSheet, TouchableOpacity, View } from "react-native"
+import Text from "@/components/ui/Text/Text"
 import { useSubAccounts, useDeleteSubAccount } from "../../hooks/useSubAccounts"
 import { useWalletContext } from "../WalletContext"
 import { useNavigation } from "@react-navigation/native"
@@ -125,7 +126,7 @@ function AccountCard({
                 {/* top row */}
                 <View style={styles.topRow}>
                     <View style={[styles.iconWrap, { backgroundColor: Color(accent).alpha(0.22).string() }]}>
-                        <MaterialCommunityIcons name={(account.icon ?? "bank") as any} size={20} color={accent} />
+                        <Feather name="credit-card" size={20} color={accent} />
                     </View>
                     <View style={styles.topRight}>
                         <View style={styles.actions}>
@@ -139,7 +140,7 @@ function AccountCard({
                                 onPress={onTransfer}
                                 hitSlop={6}
                             >
-                                <MaterialCommunityIcons name="swap-horizontal" size={13} color={oposite} />
+                                <Feather name="repeat" size={13} color={oposite} />
                             </TouchableOpacity>
                             <TouchableOpacity
                                 style={[
@@ -151,7 +152,7 @@ function AccountCard({
                                 onPress={onEdit}
                                 hitSlop={6}
                             >
-                                <MaterialCommunityIcons name="pencil-outline" size={13} color={oposite} />
+                                <Feather name="edit-2" size={13} color={oposite} />
                             </TouchableOpacity>
                             {/* <TouchableOpacity style={styles.actionBtn} onPress={onDelete} hitSlop={6}>
                                 <MaterialCommunityIcons name="trash-can-outline" size={13} color={Colors.primary} />
@@ -162,12 +163,12 @@ function AccountCard({
 
                 {/* name + balance */}
                 <View>
-                    <Text style={styles.cardName} numberOfLines={1}>
+                    <Text size={15} weight="700" color="rgba(255,255,255,0.9)" letterSpacing={0.3} style={{ marginTop: 2 }} numberOfLines={1}>
                         {account.name}
                     </Text>
                     <View style={styles.balanceBlock}>
-                        <Text style={[styles.balanceAmount, { color: "#fff" }]}>{account.balance.toFixed(2)}</Text>
-                        <Text style={[styles.balanceCurrency, { color: Color(accent).alpha(0.7).string() }]}>zł</Text>
+                        <Text size={24} weight="800" color="#fff" letterSpacing={0.5} mono>{account.balance.toFixed(2)}</Text>
+                        <Text size={13} weight="500" color={Color(accent).alpha(0.7).string()} style={{ marginBottom: 3 }}>zł</Text>
                     </View>
                 </View>
 
@@ -175,21 +176,21 @@ function AccountCard({
                 <View style={[styles.separator, { backgroundColor: Color(accent).alpha(0.18).string() }]} />
                 <View style={styles.bottomRow}>
                     <View style={styles.statBlock}>
-                        <Text style={[styles.statLabel, { color: Color(accent).alpha(0.85).string() }]}>
+                        <Text size={9} weight="500" uppercase letterSpacing={0.4} color={Color(accent).alpha(0.85).string()}>
                             Monthly Income
                         </Text>
                         <View style={styles.statRow}>
-                            <Text style={styles.statAmount}>{account.income ? account.income.toFixed(2) : "0.00"}</Text>
-                            <MaterialCommunityIcons name="trending-up" size={13} color="#4ade80" />
+                            <Text size={13} weight="700" color="#fff" mono>{account.income ? account.income.toFixed(2) : "0.00"}</Text>
+                            <Feather name="trending-up" size={13} color="#4ade80" />
                         </View>
                     </View>
                     <View style={[styles.statBlock, { alignItems: "flex-end" }]}>
-                        <Text style={[styles.statLabel, { color: "#f87171" }]}>Monthly Expense</Text>
+                        <Text size={9} weight="500" uppercase letterSpacing={0.4} color="#f87171">Monthly Expense</Text>
                         <View style={styles.statRow}>
-                            <Text style={styles.statAmount}>
+                            <Text size={13} weight="700" color="#fff" mono>
                                 {account.expense ? account.expense.toFixed(2) : "0.00"}
                             </Text>
-                            <MaterialCommunityIcons name="trending-down" size={13} color="#f87171" />
+                            <Feather name="trending-down" size={13} color="#f87171" />
                         </View>
                     </View>
                 </View>
@@ -201,8 +202,8 @@ function AccountCard({
 function AddCard({ onPress }: { onPress: () => void }) {
     return (
         <TouchableOpacity activeOpacity={0.7} onPress={onPress} style={[styles.card, styles.addCard]}>
-            <MaterialCommunityIcons name="plus" size={30} color={Colors.foreground_secondary} />
-            <Text style={styles.addLabel}>New account</Text>
+            <Feather name="plus" size={30} color={Colors.foreground_secondary} />
+            <Text size={12} color={Colors.foreground_secondary} style={{ marginTop: 8 }}>New account</Text>
         </TouchableOpacity>
     )
 }
@@ -268,29 +269,6 @@ const styles = StyleSheet.create({
         right: 0,
         top: 0,
     },
-    defaultBadge: {
-        borderRadius: 6,
-        paddingHorizontal: 7,
-        paddingVertical: 3,
-    },
-    defaultText: {
-        fontSize: 10,
-        fontWeight: "600",
-        letterSpacing: 0.5,
-        textTransform: "uppercase",
-    },
-    cardName: {
-        color: "rgba(255,255,255,0.9)",
-        fontSize: 15,
-        fontWeight: "700",
-        letterSpacing: 0.3,
-        marginTop: 2,
-    },
-    cardDesc: {
-        color: "rgba(255,255,255,0.38)",
-        fontSize: 11,
-        marginTop: 1,
-    },
     separator: {
         height: StyleSheet.hairlineWidth,
         marginBottom: 8,
@@ -306,35 +284,13 @@ const styles = StyleSheet.create({
         gap: 3,
         marginTop: 2,
     },
-    balanceAmount: {
-        fontSize: 24,
-        fontWeight: "800",
-        letterSpacing: 0.5,
-        color: "#fff",
-    },
-    balanceCurrency: {
-        fontSize: 13,
-        fontWeight: "500",
-        marginBottom: 3,
-    },
     statBlock: {
         gap: 1,
-    },
-    statLabel: {
-        fontSize: 9,
-        fontWeight: "500",
-        textTransform: "uppercase",
-        letterSpacing: 0.4,
     },
     statRow: {
         flexDirection: "row",
         alignItems: "center",
         gap: 3,
-    },
-    statAmount: {
-        fontSize: 13,
-        fontWeight: "700",
-        color: "#fff",
     },
     actions: {
         flexDirection: "row",
@@ -355,10 +311,5 @@ const styles = StyleSheet.create({
         borderWidth: 1.5,
         borderColor: Color(Colors.primary_lighter).lighten(0.3).string(),
         borderStyle: "dashed",
-    },
-    addLabel: {
-        color: Colors.foreground_secondary,
-        fontSize: 12,
-        marginTop: 8,
     },
 })

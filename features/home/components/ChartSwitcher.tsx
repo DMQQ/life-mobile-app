@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import { useState } from "react"
 import { StyleSheet, View } from "react-native"
 import Colors from "@/constants/Colors"
@@ -68,7 +69,7 @@ const styles = StyleSheet.create({
     },
     tabText: {
         fontSize: 12,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
         letterSpacing: 0.3,
         color: Color(Colors.text_light).alpha(0.4).string(),
     },

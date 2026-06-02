@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import GlassView from "@/components/ui/GlassView"
 import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
@@ -170,7 +171,7 @@ const styles = StyleSheet.create({
     },
     typeBadgeLabel: {
         fontSize: 12,
-        fontWeight: "700",
+        fontFamily: FONTS.bold,
         letterSpacing: 0.2,
     },
     aiBadge: {
@@ -185,7 +186,7 @@ const styles = StyleSheet.create({
     aiBadgeLabel: {
         color: Colors.secondary,
         fontSize: 12,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
         letterSpacing: 0.2,
     },
     resultHero: {
@@ -193,13 +194,13 @@ const styles = StyleSheet.create({
     },
     resultAmount: {
         fontSize: 44,
-        fontWeight: "800",
+        fontFamily: FONTS.extrabold,
         letterSpacing: -2,
     },
     resultDescription: {
         color: Colors.foreground,
         fontSize: 17,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
         lineHeight: 23,
     },
     resultMeta: {
@@ -219,7 +220,7 @@ const styles = StyleSheet.create({
     metaChipAccent: {
         color: Colors.secondary,
         fontSize: 12,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
     },
     metaChipText: {
         color: Colors.foreground_secondary,
@@ -247,7 +248,7 @@ const styles = StyleSheet.create({
     subexpenseAmount: {
         color: Colors.foreground,
         fontSize: 12,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
     },
     divider: {
         height: 1,
@@ -273,7 +274,7 @@ const styles = StyleSheet.create({
     fillFormLabel: {
         color: Colors.secondary,
         fontSize: 16,
-        fontWeight: "700",
+        fontFamily: FONTS.bold,
     },
     secondaryActions: {
         flexDirection: "row",
@@ -290,12 +291,12 @@ const styles = StyleSheet.create({
     secondaryBtnLabel: {
         color: Colors.foreground,
         fontSize: 14,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
     },
     discardLabel: {
         color: Colors.foreground_secondary,
         fontSize: 14,
-        fontWeight: "500",
+        fontFamily: FONTS.medium,
     },
     actionFlex: {
         flex: 1,

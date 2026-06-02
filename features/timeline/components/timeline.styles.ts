@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import Colors from "@/constants/Colors"
 import Color from "color"
 import { StyleSheet } from "react-native"
@@ -8,7 +9,7 @@ export default StyleSheet.create({
     dayHeader: {
         color: Colors.foreground + "da",
         fontSize: 17,
-        fontWeight: "bold",
+        fontFamily: FONTS.bold,
         marginLeft: 15,
     },
     eventsLeft: {
@@ -25,7 +26,7 @@ export default StyleSheet.create({
     },
     itemTitle: {
         color: Colors.secondary,
-        fontWeight: "bold",
+        fontFamily: FONTS.bold,
         fontSize: 20,
     },
     itemDescription: {
@@ -41,7 +42,7 @@ export default StyleSheet.create({
     eventTitle: {
         color: Colors.foreground,
         fontSize: 20,
-        fontWeight: "bold",
+        fontFamily: FONTS.bold,
         marginRight: 2.5,
     },
     pickerStyle: {
@@ -78,7 +79,7 @@ export default StyleSheet.create({
         paddingVertical: 10,
     },
     listHeadingText: {
-        fontWeight: "bold",
+        fontFamily: FONTS.bold,
         paddingHorizontal: 5,
         color: Colors.foreground + "da",
         fontSize: 22,
@@ -93,7 +94,7 @@ export default StyleSheet.create({
     },
     status: {
         color: "#fff",
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
         fontSize: 13,
     },
 
@@ -116,7 +117,7 @@ export default StyleSheet.create({
     floatingText: {
         color: iconColor,
         fontSize: 18,
-        fontWeight: "bold",
+        fontFamily: FONTS.bold,
         marginLeft: 10,
     },
 

@@ -1,6 +1,7 @@
 import Layout from "@/constants/Layout"
 import React, { useMemo, useState } from "react"
-import { StyleSheet, Text, View, ScrollView } from "react-native"
+import { StyleSheet, View, ScrollView } from "react-native"
+import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
 import Button from "@/components/ui/Button/Button"
 import lowOpacity from "@/utils/functions/lowOpacity"
@@ -140,13 +141,13 @@ const LimitsComparisonComponent = ({ dateRange }: { dateRange: [string, string] 
     if (loading)
         return (
             <View style={styles.loadingContainer}>
-                <Text style={styles.loadingText}>Loading...</Text>
+                <Text size={16} color={Colors.foreground}>Loading...</Text>
             </View>
         )
     if (error)
         return (
             <View style={styles.errorContainer}>
-                <Text style={styles.errorText}>Error: {error.message}</Text>
+                <Text size={16} color="#ff7777">Error: {error.message}</Text>
             </View>
         )
 
@@ -163,10 +164,8 @@ const LimitsComparisonComponent = ({ dateRange }: { dateRange: [string, string] 
                     ]}
                 >
                     <Text
-                        style={[
-                            styles.categoryFilterText,
-                            selectedCategories.length === 0 && showGeneral && styles.selectedCategoryText,
-                        ]}
+                        size={14}
+                        color={selectedCategories.length === 0 && showGeneral ? Colors.secondary : blueText}
                     >
                         All
                     </Text>
@@ -185,10 +184,8 @@ const LimitsComparisonComponent = ({ dateRange }: { dateRange: [string, string] 
                     ]}
                 >
                     <Text
-                        style={[
-                            styles.categoryFilterText,
-                            selectedCategories.includes("general") && styles.selectedCategoryText,
-                        ]}
+                        size={14}
+                        color={selectedCategories.includes("general") ? Colors.secondary : blueText}
                     >
                         General
                     </Text>
@@ -223,13 +220,8 @@ const LimitsComparisonComponent = ({ dateRange }: { dateRange: [string, string] 
                             </View>
                         ) : null}
                         <Text
-                            style={[
-                                styles.categoryFilterText,
-                                selectedCategories.includes(category) && {
-                                    ...styles.selectedCategoryText,
-                                    color: Icons[category as keyof typeof Icons]?.backgroundColor || Colors.secondary,
-                                },
-                            ]}
+                            size={14}
+                            color={selectedCategories.includes(category) ? (Icons[category as keyof typeof Icons]?.backgroundColor || Colors.secondary) : blueText}
                         >
                             {CategoryUtils.getCategoryName(category)}
                         </Text>
@@ -259,14 +251,9 @@ const LimitsComparisonComponent = ({ dateRange }: { dateRange: [string, string] 
                                     </View>
                                 ) : null}
                                 <Text
-                                    style={[
-                                        styles.categoryChartTitle,
-                                        {
-                                            color:
-                                                Icons[chart.category as keyof typeof Icons]?.backgroundColor ||
-                                                Colors.secondary,
-                                        },
-                                    ]}
+                                    size={16}
+                                    weight="bold"
+                                    color={Icons[chart.category as keyof typeof Icons]?.backgroundColor || Colors.secondary}
                                 >
                                     {CategoryUtils.getCategoryName(chart.category)}
                                 </Text>
@@ -277,22 +264,22 @@ const LimitsComparisonComponent = ({ dateRange }: { dateRange: [string, string] 
                 </ScrollView>
             ) : (
                 <View style={styles.noDataContainer}>
-                    <Text style={styles.noDataText}>No data available for the selected date range</Text>
+                    <Text size={16} color={Colors.foreground}>No data available for the selected date range</Text>
                 </View>
             )}
 
             <View style={styles.legendContainer}>
                 <View style={styles.legendItem}>
                     <View style={[styles.legendIndicator, { backgroundColor: Colors.secondary }]} />
-                    <Text style={styles.legendText}>Spent</Text>
+                    <Text size={12} color={Colors.foreground}>Spent</Text>
                 </View>
                 <View style={styles.legendItem}>
                     <View style={[styles.legendIndicator, { backgroundColor: Colors.secondary_dark_2 }]} />
-                    <Text style={styles.legendText}>Limit</Text>
+                    <Text size={12} color={Colors.foreground}>Limit</Text>
                 </View>
                 <View style={styles.legendItem}>
                     <View style={[styles.legendIndicator, { backgroundColor: Colors.danger }]} />
-                    <Text style={styles.legendText}>Exceeded</Text>
+                    <Text size={12} color={Colors.foreground}>Exceeded</Text>
                 </View>
             </View>
         </View>
@@ -320,21 +307,10 @@ const styles = StyleSheet.create({
         backgroundColor: lowOpacity(Colors.secondary, 0.15),
         borderColor: lowOpacity(Colors.secondary, 0.5),
     },
-    categoryFilterText: {
-        color: blueText,
-        fontSize: 14,
-    },
-    selectedCategoryText: {
-        color: Colors.secondary,
-    },
     loadingContainer: {
         justifyContent: "center",
         alignItems: "center",
         minHeight: 300,
-    },
-    loadingText: {
-        color: Colors.foreground,
-        fontSize: 16,
     },
     errorContainer: {
         padding: 20,
@@ -344,10 +320,6 @@ const styles = StyleSheet.create({
         borderColor: lowOpacity("#ff0000", 0.3),
         marginVertical: 20,
     },
-    errorText: {
-        color: "#ff7777",
-        fontSize: 16,
-    },
     noDataContainer: {
         padding: 30,
         alignItems: "center",
@@ -356,10 +328,6 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         height: 200,
         width: Layout.screen.width - 60,
-    },
-    noDataText: {
-        color: Colors.foreground,
-        fontSize: 16,
     },
     legendContainer: {
         flexDirection: "row",
@@ -377,10 +345,6 @@ const styles = StyleSheet.create({
         borderRadius: 6,
         marginRight: 6,
     },
-    legendText: {
-        color: Colors.foreground,
-        fontSize: 12,
-    },
     horizontalChartsContainer: {
         flexDirection: "row",
     },
@@ -392,10 +356,6 @@ const styles = StyleSheet.create({
         alignItems: "center",
         marginBottom: 5,
         paddingLeft: 10,
-    },
-    categoryChartTitle: {
-        fontSize: 16,
-        fontWeight: "bold",
     },
 })
 

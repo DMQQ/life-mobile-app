@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import Text from "@/components/ui/Text/Text"
 import ValidatedInput from "@/components/ui/ValidatedInput"
 import Colors from "@/constants/Colors"
@@ -208,7 +209,7 @@ const styles = StyleSheet.create({
     saveBtnText: {
         color: Colors.secondary,
         fontSize: 16,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
         textAlign: "center",
     },
     saveBtnDisabled: {
@@ -240,7 +241,7 @@ const styles = StyleSheet.create({
     },
     sectionTitle: {
         color: Colors.foreground,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
         fontSize: 18,
         marginBottom: 8,
     },

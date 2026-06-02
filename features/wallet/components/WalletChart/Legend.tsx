@@ -1,12 +1,13 @@
 import Layout from "@/constants/Layout";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
+import Text from "@/components/ui/Text/Text";
 import Ripple from "react-native-material-ripple";
 import Colors from "@/constants/Colors";
 import Color from "color";
 import { CategoryIcon, CategoryUtils, Icons } from "../Expense/ExpenseIcon";
 import lowOpacity from "@/utils/functions/lowOpacity";
 import { useEffect, useMemo, useState } from "react";
-import { AntDesign } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
 
 interface ICategory {
   category: string;
@@ -79,22 +80,15 @@ const Legend = (props: LegendProps) => {
               },
             ]}
           >
-            <Text
-              style={[
-                styles.totalText,
-                {
-                  color: isExcluded ? "rgba(255,255,255,0.5)" : Colors.foreground,
-                },
-              ]}
-            >
+            <Text size={22} weight="bold" color={isExcluded ? "rgba(255,255,255,0.5)" : Colors.foreground} mono>
               {Math.trunc(item.total)}zł
-              <Text style={{ color: "gray" }}>
+              <Text color="gray">
                 {!isExcluded && (
                   <>
-                    <Text style={{ fontSize: 12 }}>
+                    <Text size={12} color="gray">
                       {"  "} / {"  "}
                     </Text>
-                    <Text style={{ fontSize: 12 }}>{percentage.toFixed(2)}%</Text>
+                    <Text size={12} color="gray">{percentage.toFixed(2)}%</Text>
                   </>
                 )}
               </Text>
@@ -112,10 +106,10 @@ const Legend = (props: LegendProps) => {
               </View>
 
               <View style={{ gap: 1.5 }}>
-                <Text style={{ color: blueText, fontSize: 15, fontWeight: 500 }}>
+                <Text size={15} weight="500" color={blueText}>
                   {capitalize(CategoryUtils.getCategoryName(item.category ?? "None"))}
                 </Text>
-                <Text style={{ fontSize: 11, color: "rgba(255,255,255,0.6)" }}>{item.count} Transactions</Text>
+                <Text size={11} color="rgba(255,255,255,0.6)">{item.count} Transactions</Text>
               </View>
             </View>
 
@@ -149,14 +143,14 @@ const Legend = (props: LegendProps) => {
     <View style={styles.tilesContainer}>
       <View style={{ width: "100%", marginBottom: 10, flexDirection: "row", justifyContent: "space-between" }}>
         <View>
-          <Text style={{ color: Colors.foreground, fontWeight: "bold", fontSize: 18 }}>Chart legend</Text>
-          <Text style={{ color: "gray", marginTop: 5 }}>Detailed percentage of your expenses</Text>
+          <Text size={18} weight="bold" color={Colors.foreground}>Chart legend</Text>
+          <Text color="gray" style={{ marginTop: 5 }}>Detailed percentage of your expenses</Text>
         </View>
 
         <View style={{ alignItems: "center" }}>
           <Ripple onPress={props.toggleMode} style={styles.viewToggle}>
-            <AntDesign name="swap" size={20} color={Colors.secondary} />
-            <Text style={{ color: Colors.secondary, textTransform: "capitalize" }}>{props.detailed}</Text>
+            <Feather name="repeat" size={20} color={Colors.secondary} />
+            <Text uppercase color={Colors.secondary}>{props.detailed}</Text>
           </Ripple>
         </View>
       </View>
@@ -164,7 +158,7 @@ const Legend = (props: LegendProps) => {
       <View style={{ justifyContent: "center", alignItems: "center", padding: 10, width: "100%" }}>
         <Ripple onPress={() => setShowAll((p) => !p)} style={{ width: Layout.screen.width / 3 }}>
           {data?.length > 8 && (
-            <Text style={{ color: Colors.secondary, fontWeight: "bold", textAlign: "center" }}>
+            <Text weight="bold" align="center" color={Colors.secondary}>
               {showAll ? "Show less" : "Show all" + (showAll ? "" : ` (${data.length})`)}
             </Text>
           )}
@@ -206,24 +200,6 @@ const styles = StyleSheet.create({
     marginTop: 10,
     gap: 10,
   },
-  expenseTitle: {
-    color: Colors.foreground,
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 15,
-  },
-  totalText: {
-    color: Colors.foreground,
-    fontSize: 22,
-    fontWeight: "bold",
-  },
-  listHeader: {
-    flex: 1,
-    paddingHorizontal: 15,
-    alignItems: "center",
-    marginBottom: 30,
-  },
-
   viewToggle: {
     backgroundColor: lowOpacity(Colors.secondary, 0.15),
     borderWidth: 0.5,

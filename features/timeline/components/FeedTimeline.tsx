@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import Colors from "@/constants/Colors"
 import Color from "color"
 import dayjs from "dayjs"
@@ -129,7 +130,7 @@ function AddItem({ date }: { date: string }) {
                 >
                     <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 7 }}>
                         <Feather name="plus" size={14} color={Colors.text_light} />
-                        <Text style={{ fontSize: 13, fontWeight: "700", color: Colors.text_light }}>New event</Text>
+                        <Text style={{ fontSize: 13, fontFamily: FONTS.bold, color: Colors.text_light }}>New event</Text>
                     </View>
                 </Pressable>
             </View>
@@ -384,7 +385,7 @@ const styles = StyleSheet.create({
     },
     heading: {
         fontSize: 26,
-        fontWeight: "700",
+        fontFamily: FONTS.bold,
         color: Colors.foreground,
         paddingTop: 20,
         paddingBottom: 16,
@@ -449,7 +450,7 @@ const styles = StyleSheet.create({
     },
     timeRange: {
         fontSize: 11,
-        fontWeight: "500",
+        fontFamily: FONTS.medium,
         letterSpacing: 0.3,
     },
     statusBadge: {
@@ -459,12 +460,12 @@ const styles = StyleSheet.create({
     },
     statusText: {
         fontSize: 10,
-        fontWeight: "700",
+        fontFamily: FONTS.bold,
         letterSpacing: 0.4,
     },
     title: {
         fontSize: 16,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
         lineHeight: 22,
     },
     titleDone: {
@@ -517,7 +518,7 @@ const styles = StyleSheet.create({
     },
     emptyTitle: {
         fontSize: 35,
-        fontWeight: "700",
+        fontFamily: FONTS.bold,
         color: Colors.foreground,
         marginBottom: 6,
     },
@@ -566,7 +567,7 @@ const styles = StyleSheet.create({
     },
     emptyAddBtnText: {
         fontSize: 15,
-        fontWeight: "700",
+        fontFamily: FONTS.bold,
         color: Colors.foreground,
     },
 })

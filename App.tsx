@@ -12,7 +12,9 @@ import * as Notifications from "expo-notifications"
 import { getItemAsync } from "expo-secure-store"
 import * as SplashScreen from "expo-splash-screen"
 import { StatusBar } from "expo-status-bar"
+import { useFonts } from "expo-font"
 import { useEffect } from "react"
+import { FONT_SOURCE } from "./constants/Fonts"
 import { GestureHandlerRootView } from "react-native-gesture-handler"
 import { SafeAreaProvider } from "react-native-safe-area-context"
 import { Provider } from "react-redux"
@@ -130,6 +132,12 @@ function AppContent() {
 }
 
 function App() {
+    const [fontsLoaded] = useFonts(FONT_SOURCE)
+
+    useEffect(() => {
+        if (fontsLoaded) SplashScreen.hideAsync()
+    }, [fontsLoaded])
+
     return (
         <SafeAreaProvider style={{ flex: 1, backgroundColor: Colors.primary }}>
             <ErrorBoundary>

@@ -1,5 +1,5 @@
 import { memo } from "react"
-import { Text, TextStyle } from "react-native"
+import { TextStyle } from "react-native"
 import Animated, { AnimatedStyle, FadeInDown } from "react-native-reanimated"
 
 interface AnimatedNumberProps {

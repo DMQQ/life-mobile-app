@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import Button from "@/components/ui/Button/Button"
 import Colors from "@/constants/Colors"
 import Layout from "@/constants/Layout"
@@ -117,7 +118,7 @@ export default function AnimatedSelector<T>({
                             {
                                 fontSize: 14,
                                 color: isActive ? activeTextColor : inactiveTextColor,
-                                fontWeight: isActive ? "600" : "400",
+                                fontFamily: isActive ? FONTS.semibold : FONTS.regular,
                             },
                             textStyle,
                         ]}

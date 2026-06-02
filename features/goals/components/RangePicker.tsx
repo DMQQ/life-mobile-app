@@ -1,5 +1,7 @@
+import { FONTS } from "@/constants/Fonts";
 import React, { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, TextInput } from "react-native";
+import { View, StyleSheet, TouchableOpacity, TextInput } from "react-native";
+import Text from "@/components/ui/Text/Text";
 import { Feather } from "@expo/vector-icons";
 import Colors from "@/constants/Colors";
 
@@ -68,7 +70,7 @@ const ValuePicker = ({ label, value, min, max, step, onChange }: ValuePickerProp
 
   return (
     <View style={styles.pickerContainer}>
-      <Text style={styles.pickerLabel}>{label}</Text>
+      <Text size={14} color="rgba(255,255,255,0.7)" style={{ marginBottom: 8 }}>{label}</Text>
       <View style={styles.pickerControls}>
         <TouchableOpacity style={[styles.pickerButton, styles.pickerButtonBig]} onPress={decrementBig} disabled={value <= min}>
           <Feather
@@ -95,7 +97,7 @@ const ValuePicker = ({ label, value, min, max, step, onChange }: ValuePickerProp
               maxLength={8}
             />
           ) : (
-            <Text style={styles.valueText}>{value}</Text>
+            <Text size={18} weight="bold">{value}</Text>
           )}
         </TouchableOpacity>
 
@@ -147,11 +149,6 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     width: "100%",
   },
-  pickerLabel: {
-    color: "rgba(255,255,255,0.7)",
-    marginBottom: 8,
-    fontSize: 14,
-  },
   pickerControls: {
     flexDirection: "row",
     alignItems: "center",
@@ -178,14 +175,9 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.secondary,
     minWidth: 60,
   },
-  valueText: {
-    color: Colors.foreground,
-    fontWeight: "bold",
-    fontSize: 18,
-  },
   valueInput: {
     color: Colors.foreground,
-    fontWeight: "bold",
+    fontFamily: FONTS.bold,
     fontSize: 18,
     textAlign: "center",
     width: "100%",

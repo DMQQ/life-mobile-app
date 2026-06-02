@@ -1,5 +1,6 @@
 import Colors from "@/constants/Colors"
-import { StyleSheet, Text, View } from "react-native"
+import { StyleSheet, View } from "react-native"
+import Text from "@/components/ui/Text/Text"
 import TodoPreviewCard from "./TodoPreviewCard"
 
 interface TodosPreviewSectionProps {
@@ -40,7 +41,7 @@ export default function TodosPreviewSection({
                 />
             ))}
             {remainingCount > 0 && (
-                <Text style={[styles.moreText, textColor && { color: textColor }]}>
+                <Text size={11} opacity={0.6} align="center" italic color={textColor ?? Colors.text_dark} style={{ marginTop: 4 }}>
                     +{remainingCount} more todo{remainingCount > 1 ? "s" : ""}
                 </Text>
             )}
@@ -51,13 +52,5 @@ export default function TodosPreviewSection({
 const styles = StyleSheet.create({
     container: {
         gap: 3,
-    },
-    moreText: {
-        fontSize: 11,
-        opacity: 0.6,
-        textAlign: "center",
-        marginTop: 4,
-        color: Colors.text_dark,
-        fontStyle: "italic",
     },
 })

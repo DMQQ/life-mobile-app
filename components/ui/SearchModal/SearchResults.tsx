@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import React, { useCallback, useContext, useEffect, useState } from "react"
 import { ActivityIndicator, FlatList, StyleSheet, View } from "react-native"
 import { Feather } from "@expo/vector-icons"
@@ -194,7 +195,7 @@ const styles = StyleSheet.create({
     },
     emptyStateText: {
         fontSize: 18,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
         color: Colors.foreground,
         marginTop: 16,
         textAlign: "center",

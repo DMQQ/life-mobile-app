@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import Colors from "@/constants/Colors"
 import { useMemo, useState } from "react"
 import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native"
@@ -215,8 +216,8 @@ const tw = StyleSheet.create({
         gap: 10,
     },
     taskInfo: { flex: 1, gap: 3 },
-    taskName: { color: Colors.foreground, fontSize: 14, fontWeight: "600" },
-    taskMeta: { color: Colors.secondary, fontSize: 12, fontWeight: "500" },
+    taskName: { color: Colors.foreground, fontSize: 14, fontFamily: FONTS.semibold },
+    taskMeta: { color: Colors.secondary, fontSize: 12, fontFamily: FONTS.medium },
     taskDesc: { color: Colors.foreground_secondary, fontSize: 12 },
     todoList: { gap: 4, marginTop: 4 },
     todoRow: { flexDirection: "row", alignItems: "center", gap: 6 },
@@ -224,5 +225,5 @@ const tw = StyleSheet.create({
     todoText: { color: Colors.foreground_secondary, fontSize: 11, flex: 1 },
     addBtn: { borderRadius: 20, minWidth: 54, height: 40, overflow: "hidden" },
     addBtnInner: { flex: 1, justifyContent: "center", alignItems: "center", paddingHorizontal: 12 },
-    addBtnText: { color: "#fff", fontSize: 13, fontWeight: "700" },
+    addBtnText: { color: "#fff", fontSize: 13, fontFamily: FONTS.bold },
 })

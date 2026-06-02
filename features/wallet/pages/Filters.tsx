@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import Input from "@/components/ui/TextInput/TextInput"
 import { useEffect, useState } from "react"
 import { StyleSheet, Switch, TouchableOpacity, View } from "react-native"
@@ -362,7 +363,7 @@ const s = StyleSheet.create({
     },
     quickChipText: {
         fontSize: 12,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
         color: Colors.foreground_secondary,
     },
     quickChipTextActive: {

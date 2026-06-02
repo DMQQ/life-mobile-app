@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import Button from "@/components/ui/Button/Button"
 import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
@@ -182,7 +183,7 @@ const styles = StyleSheet.create({
     },
     masterSwitchTitle: {
         color: Colors.text_light,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
     },
     masterSwitchDescription: {
         color: "rgba(255, 255, 255, 0.6)",

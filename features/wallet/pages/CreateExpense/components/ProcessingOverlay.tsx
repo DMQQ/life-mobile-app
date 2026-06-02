@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import GlassView from "@/components/ui/GlassView"
 import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
@@ -172,7 +173,7 @@ const styles = StyleSheet.create({
     processingLabel: {
         color: Colors.foreground,
         fontSize: 14,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
     },
     steps: {
         gap: 6,
@@ -210,7 +211,7 @@ const styles = StyleSheet.create({
     stepLabel: {
         fontSize: 13,
         color: Colors.foreground_disabled,
-        fontWeight: "500",
+        fontFamily: FONTS.medium,
     },
     stepLabelActive: {
         color: Colors.foreground,

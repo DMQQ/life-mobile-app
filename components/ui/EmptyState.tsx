@@ -1,4 +1,5 @@
 import { StyleProp, StyleSheet, View, ViewStyle } from "react-native"
+import { FONTS } from "@/constants/Fonts"
 import { Feather } from "@expo/vector-icons"
 import Text from "./Text/Text"
 import GlassButton from "./GlassButton"
@@ -70,7 +71,7 @@ const styles = StyleSheet.create({
     },
     title: {
         textAlign: "center",
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
         color: Colors.foreground,
         opacity: 1,
     },

@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import { useMemo, useState } from "react"
 import { StyleSheet, TouchableOpacity, View } from "react-native"
 import moment from "moment"
@@ -198,14 +199,14 @@ const styles = StyleSheet.create({
     },
     sectionTitle: {
         fontSize: 11,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
         color: Colors.foreground_secondary,
         textTransform: "uppercase",
         letterSpacing: 0.8,
     },
     monthLabel: {
         fontSize: 25,
-        fontWeight: "700",
+        fontFamily: FONTS.bold,
         color: Colors.foreground,
         marginTop: 2,
     },
@@ -215,12 +216,12 @@ const styles = StyleSheet.create({
     },
     totalAmount: {
         fontSize: 20,
-        fontWeight: "700",
+        fontFamily: FONTS.bold,
         color: Colors.foreground,
     },
     targetInfo: {
         fontSize: 11,
-        fontWeight: "500",
+        fontFamily: FONTS.medium,
     },
     textOver: {
         color: "#f44336",
@@ -291,7 +292,7 @@ const styles = StyleSheet.create({
     },
     catName: {
         fontSize: 13,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
         color: Colors.foreground,
     },
     catBar: {
@@ -309,11 +310,11 @@ const styles = StyleSheet.create({
     },
     catAmount: {
         fontSize: 13,
-        fontWeight: "700",
+        fontFamily: FONTS.bold,
     },
     catPct: {
         fontSize: 11,
         color: Colors.foreground_secondary,
-        fontWeight: "500",
+        fontFamily: FONTS.medium,
     },
 })

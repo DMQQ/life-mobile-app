@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import ChipButton from "@/components/ui/Button/ChipButton"
 import Colors from "@/constants/Colors"
 import Layout from "@/constants/Layout"
@@ -18,7 +19,7 @@ import Section from "@/components/ui/Section"
 const styles = StyleSheet.create({
     available: {
         fontSize: 16,
-        fontWeight: "bold",
+        fontFamily: FONTS.bold,
     },
     img: {
         width: (Layout.screen.width - 10 * 2) / 2 - 5,

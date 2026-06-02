@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import Section from "@/components/ui/Section"
 import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
@@ -121,18 +122,18 @@ const s = StyleSheet.create({
     },
     dayLetter: {
         fontSize: 10,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
         color: Colors.text_dark,
         textTransform: "uppercase",
     },
     dayNum: {
         fontSize: 13,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
         color: Colors.foreground_secondary,
     },
     todayText: {
         color: Colors.secondary,
-        fontWeight: "700",
+        fontFamily: FONTS.bold,
     },
     dotRow: {
         flexDirection: "row",

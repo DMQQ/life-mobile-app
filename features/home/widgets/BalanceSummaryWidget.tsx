@@ -1,9 +1,11 @@
+import { FONTS } from "@/constants/Fonts"
 import Section from "@/components/ui/Section"
 import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
 import { Feather } from "@expo/vector-icons"
 import { gql, useQuery } from "@apollo/client"
 import Color from "color"
+import { LinearGradient } from "expo-linear-gradient"
 import moment from "moment"
 import { StyleSheet, View } from "react-native"
 
@@ -12,6 +14,7 @@ const BALANCE_SUMMARY_QUERY = gql`
         wallet {
             id
             balance
+            income
         }
         stats: getStatistics(range: $range) {
             expense
@@ -31,21 +34,20 @@ export default function BalanceSummaryWidget() {
     })
 
     const balance = data?.wallet?.balance ?? 0
-    const income = data?.stats?.income ?? 0
+    const incomeTarget = data?.wallet?.income ?? 0
+    const statsIncome = data?.stats?.income ?? 0
     const expense = data?.stats?.expense ?? 0
-    const ratio = income > 0 ? expense / income : 0
+
+    const baseline = incomeTarget > 0 ? incomeTarget : statsIncome
+    const ratio = baseline > 0 ? expense / baseline : 0
     const pct = Math.min(100, ratio * 100)
-    const remaining = income - expense
+    const remaining = baseline - expense
 
     const barColor = pct > 90 ? Colors.danger : pct > 70 ? Colors.warning : Colors.secondary
-    const dotColor = pct > 90 ? Colors.danger : Colors.positive
-
+    const dotColor = pct > 90 ? Colors.danger : pct > 70 ? Colors.warning : Colors.positive
     return (
         <Section title="Balance">
             <View style={s.card}>
-                <View style={s.circle1} />
-                <View style={s.circle2} />
-
                 <View style={s.topRow}>
                     <Text variant="caption" style={s.month}>
                         {moment().format("MMMM YYYY")}
@@ -62,25 +64,30 @@ export default function BalanceSummaryWidget() {
 
                 <View style={s.progressRow}>
                     <View style={s.track}>
-                        <View style={[s.fill, { width: `${pct}%` as any, backgroundColor: barColor }]} />
+                        <LinearGradient
+                            colors={[barColor, Color(barColor).lighten(0.3).string()]}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 0 }}
+                            style={[s.fill, { width: `${pct}%` as any }]}
+                        />
                     </View>
-                    <Text variant="caption" style={[s.remaining, { color: remaining >= 0 ? Colors.text_dark : Colors.danger }]}>
+                    <Text variant="caption" style={[s.remaining, remaining < 0 && { color: Colors.danger }]}>
                         {remaining >= 0 ? `${remaining.toFixed(0)} left` : `${Math.abs(remaining).toFixed(0)} over`}
                     </Text>
                 </View>
 
                 <View style={s.stats}>
-                    <View style={[s.statBlock, { backgroundColor: Color(Colors.positive).alpha(0.09).string() }]}>
-                        <View style={[s.iconCircle, { backgroundColor: Color(Colors.positive).alpha(0.15).string() }]}>
+                    <View style={[s.statBlock, { backgroundColor: Color(Colors.positive).alpha(0.12).string() }]}>
+                        <View style={[s.iconCircle, { backgroundColor: Color(Colors.positive).alpha(0.2).string() }]}>
                             <Feather name="arrow-up-right" size={14} color={Colors.positive} />
                         </View>
                         <View style={s.statText}>
-                            <Text style={[s.statValue, { color: Colors.positive }]}>{income.toFixed(0)} zł</Text>
+                            <Text style={[s.statValue, { color: Colors.positive }]}>{statsIncome.toFixed(0)} zł</Text>
                             <Text variant="caption" style={s.statLabel}>Income</Text>
                         </View>
                     </View>
-                    <View style={[s.statBlock, { backgroundColor: Color(Colors.negative).alpha(0.09).string() }]}>
-                        <View style={[s.iconCircle, { backgroundColor: Color(Colors.negative).alpha(0.15).string() }]}>
+                    <View style={[s.statBlock, { backgroundColor: Color(Colors.negative).alpha(0.12).string() }]}>
+                        <View style={[s.iconCircle, { backgroundColor: Color(Colors.negative).alpha(0.2).string() }]}>
                             <Feather name="arrow-down-right" size={14} color={Colors.negative} />
                         </View>
                         <View style={s.statText}>
@@ -99,25 +106,6 @@ const s = StyleSheet.create({
         padding: 18,
         gap: 16,
         overflow: "hidden",
-        position: "relative",
-    },
-    circle1: {
-        position: "absolute",
-        width: 200,
-        height: 200,
-        borderRadius: 100,
-        backgroundColor: Color(Colors.secondary).alpha(0.06).string(),
-        right: -60,
-        top: -80,
-    },
-    circle2: {
-        position: "absolute",
-        width: 100,
-        height: 100,
-        borderRadius: 50,
-        backgroundColor: Color(Colors.secondary).alpha(0.04).string(),
-        right: 100,
-        top: -50,
     },
     topRow: {
         flexDirection: "row",
@@ -125,7 +113,7 @@ const s = StyleSheet.create({
         justifyContent: "space-between",
     },
     month: {
-        color: Colors.text_dark,
+        color: Colors.foreground_secondary,
     },
     badge: {
         flexDirection: "row",
@@ -138,29 +126,30 @@ const s = StyleSheet.create({
         borderRadius: 3,
     },
     badgeText: {
-        fontWeight: "700",
+        fontFamily: FONTS.bold,
     },
     balance: {
-        fontSize: 36,
-        fontWeight: "800",
+        fontSize: 40,
+        fontFamily: FONTS.extrabold,
         color: Colors.text_light,
-        letterSpacing: -1.5,
+        letterSpacing: -1,
     },
     progressRow: {
         gap: 6,
     },
     track: {
-        height: 8,
-        borderRadius: 4,
-        backgroundColor: "rgba(255,255,255,0.08)",
+        height: 6,
+        borderRadius: 3,
+        backgroundColor: "rgba(255,255,255,0.1)",
         overflow: "hidden",
     },
     fill: {
-        height: 8,
-        borderRadius: 4,
+        height: 6,
+        borderRadius: 3,
     },
     remaining: {
         textAlign: "right",
+        color: Colors.foreground_secondary,
     },
     stats: {
         flexDirection: "row",
@@ -172,12 +161,12 @@ const s = StyleSheet.create({
         alignItems: "center",
         gap: 10,
         padding: 12,
-        borderRadius: 16,
+        borderRadius: 15,
     },
     iconCircle: {
-        width: 34,
-        height: 34,
-        borderRadius: 17,
+        width: 32,
+        height: 32,
+        borderRadius: 16,
         alignItems: "center",
         justifyContent: "center",
     },
@@ -185,11 +174,11 @@ const s = StyleSheet.create({
         gap: 2,
     },
     statValue: {
-        fontSize: 16,
-        fontWeight: "700",
+        fontSize: 17,
+        fontFamily: FONTS.bold,
         letterSpacing: -0.3,
     },
     statLabel: {
-        color: Colors.text_dark,
+        color: Colors.foreground_secondary,
     },
 })

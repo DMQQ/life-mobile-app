@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import moment from "moment"
 import { StyleSheet, View } from "react-native"
 import Animated, { interpolate, useAnimatedStyle } from "react-native-reanimated"
@@ -27,7 +28,7 @@ export default function AmountDisplay() {
         <Animated.View style={[styles.container, animatedContainer]}>
             <View>
                 <Animated.Text
-                    style={[{ color: Colors.foreground, fontWeight: "bold", textAlign: "center" }, animatedAmount]}
+                    style={[{ color: Colors.foreground, fontFamily: FONTS.bold, textAlign: "center" }, animatedAmount]}
                 >
                     {amount}
                     <Text variant="body" style={{ fontSize: 20 }}>

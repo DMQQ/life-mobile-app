@@ -1,4 +1,5 @@
 import { StyleProp, StyleSheet, View, ViewStyle } from "react-native"
+import { FONTS } from "@/constants/Fonts"
 import Text from "./Text/Text"
 import Colors from "@/constants/Colors"
 import Color from "color"
@@ -49,6 +50,6 @@ const styles = StyleSheet.create({
     },
     label: {
         fontSize: 12,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
     },
 })

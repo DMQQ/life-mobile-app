@@ -1,7 +1,8 @@
 import moment, { Moment } from "moment"
 import { Action, Filters } from "../WalletContext"
 import { useEffect, useState } from "react"
-import { ScrollView, Text, View } from "react-native"
+import { ScrollView, View } from "react-native"
+import Text from "@/components/ui/Text/Text"
 import Layout from "@/constants/Layout"
 import Button from "@/components/ui/Button/Button"
 import Colors from "@/constants/Colors"
@@ -133,7 +134,7 @@ const CustomDatePicker = (props: {
                     props.setSelected()
                 }}
             />
-            <Text style={{ color: blueText }}>–</Text>
+            <Text color={blueText}>–</Text>
             <DatePicker
                 mode="single"
                 placeholder={endDate ? endDate.format("DD/MM") : "To"}

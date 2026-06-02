@@ -1,9 +1,10 @@
 import { useMemo } from "react"
-import { StyleSheet, Text, View } from "react-native"
+import { StyleSheet, View } from "react-native"
+import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
 import Color from "color"
 import { gql, useQuery } from "@apollo/client"
-import { AntDesign } from "@expo/vector-icons"
+import { Feather } from "@expo/vector-icons"
 import moment from "moment"
 import { useRefresh } from "@/utils/context/RefreshContext"
 import AnimatedBar from "@/components/ui/Charts/AnimatedBar"
@@ -89,7 +90,7 @@ const CompactSpendingChart = () => {
         return (
             <View style={styles.container}>
                 <View style={styles.loadingContainer}>
-                    <Text style={styles.loadingText}>Loading...</Text>
+                    <Text size={14} color={Colors.text_light} opacity={0.7}>Loading...</Text>
                 </View>
             </View>
         )
@@ -111,7 +112,10 @@ const CompactSpendingChart = () => {
                         return (
                             <Text
                                 key={i}
-                                style={[styles.yAxisLabel, { position: "absolute", bottom: currentDistance + 15 }]}
+                                size={10}
+                                weight="500"
+                                opacity={0.5}
+                                style={{ position: "absolute", bottom: currentDistance + 15, width: 50, marginLeft: -5 }}
                             >
                                 {value > 1000 ? `${(value / 1000).toFixed(1)}k` : value + "zł"}
                             </Text>
@@ -152,20 +156,20 @@ const CompactSpendingChart = () => {
 
             <View style={styles.footer}>
                 <View style={styles.footerStat}>
-                    <Text style={styles.footerAmount}>{Math.round(prevTotal)}zł</Text>
-                    <Text style={styles.footerLabel}>last week</Text>
+                    <Text size={16} weight="700" color={Colors.text_light} mono>{Math.round(prevTotal)}zł</Text>
+                    <Text size={10} color={Colors.text_light} opacity={0.4} letterSpacing={0.5} uppercase>last week</Text>
                 </View>
 
                 <View style={styles.changeBadge}>
-                    <AntDesign name={isUp ? "caret-up" : "caret-down"} size={9} color={changeColor} />
-                    <Text style={[styles.changeText, { color: changeColor }]}>
+                    <Feather name={isUp ? "arrow-up" : "arrow-down"} size={9} color={changeColor} />
+                    <Text size={13} weight="700" color={changeColor}>
                         {Math.abs(Math.round(percentageChange))}%
                     </Text>
                 </View>
 
                 <View style={[styles.footerStat, { alignItems: "flex-end" }]}>
-                    <Text style={[styles.footerAmount, { color: Colors.secondary }]}>{Math.round(total)}zł</Text>
-                    <Text style={styles.footerLabel}>this week</Text>
+                    <Text size={16} weight="700" color={Colors.secondary} mono>{Math.round(total)}zł</Text>
+                    <Text size={10} color={Colors.text_light} opacity={0.4} letterSpacing={0.5} uppercase>this week</Text>
                 </View>
             </View>
         </View>
@@ -187,14 +191,6 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
         alignItems: "flex-start",
         paddingRight: 8,
-    },
-    yAxisLabel: {
-        color: "#fff",
-        fontSize: 10,
-        fontWeight: "500",
-        width: 50,
-        marginLeft: -5,
-        opacity: 0.5,
     },
     chartContent: {
         flex: 1,
@@ -231,18 +227,6 @@ const styles = StyleSheet.create({
     footerStat: {
         gap: 2,
     },
-    footerAmount: {
-        fontSize: 16,
-        fontWeight: "700",
-        color: Colors.text_light,
-    },
-    footerLabel: {
-        fontSize: 10,
-        color: Colors.text_light,
-        opacity: 0.4,
-        letterSpacing: 0.5,
-        textTransform: "uppercase",
-    },
     changeBadge: {
         flexDirection: "row",
         alignItems: "center",
@@ -252,19 +236,10 @@ const styles = StyleSheet.create({
         paddingVertical: 5,
         borderRadius: 20,
     },
-    changeText: {
-        fontSize: 13,
-        fontWeight: "700",
-    },
     loadingContainer: {
         height: CHART_HEIGHT,
         justifyContent: "center",
         alignItems: "center",
-    },
-    loadingText: {
-        color: Colors.text_light,
-        fontSize: 14,
-        opacity: 0.7,
     },
 })
 

@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import ChipButton from "@/components/ui/Button/ChipButton"
 import Text from "@/components/ui/Text/Text"
 import Colors, { Sizing } from "@/constants/Colors"
@@ -25,7 +26,7 @@ const styles = StyleSheet.create({
     heading: {
         color: Colors.foreground,
         fontSize: 18,
-        fontWeight: "bold",
+        fontFamily: FONTS.bold,
     },
     button: {
         borderRadius: 100,
@@ -44,7 +45,7 @@ const styles = StyleSheet.create({
     notFoundText: {
         fontSize: 20,
         padding: 10,
-        fontWeight: "bold",
+        fontFamily: FONTS.bold,
         color: Colors.foreground,
     },
 

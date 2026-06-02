@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import Button2 from "@/components/ui/Button/Button2"
 import Colors, { Sizing } from "@/constants/Colors"
 import Layout from "@/constants/Layout"
@@ -19,7 +20,7 @@ const styles = StyleSheet.create({
     heading: {
         color: Colors.foreground,
         fontSize: Sizing.subHead + 2,
-        fontWeight: "bold",
+        fontFamily: FONTS.bold,
     },
     content: {
         color: Colors.foreground,

@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import { Button } from "@/components"
 import IconButton from "@/components/ui/IconButton/IconButton"
 import Text from "@/components/ui/Text/Text"
@@ -257,7 +258,7 @@ const styles = StyleSheet.create({
     },
     title: {
         fontSize: 18,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
     },
     content: {
         flex: 1,
@@ -307,12 +308,12 @@ const styles = StyleSheet.create({
     },
     slotName: {
         fontSize: 13,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
         textAlign: "center",
     },
     slotBalance: {
         fontSize: 12,
-        fontWeight: "500",
+        fontFamily: FONTS.medium,
     },
     slotLabel: {
         fontSize: 13,
@@ -354,7 +355,7 @@ const styles = StyleSheet.create({
     },
     accountName: {
         fontSize: 14,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
     },
     accountBalance: {
         fontSize: 12,

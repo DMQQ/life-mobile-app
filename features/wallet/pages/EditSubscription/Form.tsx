@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import GroupSelector from "@/components/ui/GroupSelector"
 import ModalHeader from "@/components/ui/ModalHeader"
 import Section from "@/components/ui/Section"
@@ -376,7 +377,7 @@ const styles = StyleSheet.create({
     },
     amountInput: {
         fontSize: 28,
-        fontWeight: "700",
+        fontFamily: FONTS.bold,
         color: Colors.foreground,
     },
     currencyLabel: {

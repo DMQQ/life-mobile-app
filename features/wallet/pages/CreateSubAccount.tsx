@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import { Button } from "@/components"
 import IconButton from "@/components/ui/IconButton/IconButton"
 import Text from "@/components/ui/Text/Text"
@@ -230,7 +231,7 @@ const styles = StyleSheet.create({
     },
     title: {
         fontSize: 18,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
     },
     content: {
         flex: 1,

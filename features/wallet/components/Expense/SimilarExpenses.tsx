@@ -1,26 +1,13 @@
 import { Expense as ExpenseType } from "@/types"
-import { AntDesign } from "@expo/vector-icons"
+import { Feather } from "@expo/vector-icons"
 import { useNavigation } from "@react-navigation/native"
-import { ReactNode, useState } from "react"
-import { Text, View } from "react-native"
+import { useState } from "react"
+import { View } from "react-native"
 import Colors from "@/constants/Colors"
 import { IconButton } from "@/components"
 import WalletItem from "../Wallet/WalletItem"
 import SimilarExpensesChart from "./SimilarExpensesChart"
 import Section from "@/components/ui/Section"
-
-const Txt = (props: { children: ReactNode; size: number; color?: any }) => (
-    <Text
-        style={{
-            color: props.color ?? Colors.secondary,
-            fontSize: props.size,
-            fontWeight: "bold",
-            lineHeight: props.size + 7.5,
-        }}
-    >
-        {props.children}
-    </Text>
-)
 
 export default function SimilarExpenses({
     similarExpenses,
@@ -38,7 +25,7 @@ export default function SimilarExpenses({
                 title="Similar"
                 headerRight={
                     <IconButton
-                        icon={<AntDesign name="down" size={11} color={Colors.text_dark} />}
+                        icon={<Feather name={isExpanded ? "chevron-up" : "chevron-down"} size={11} color={Colors.text_dark} />}
                         onPress={() => setIsExpanded(!isExpanded)}
                     />
                 }

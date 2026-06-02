@@ -3,7 +3,8 @@ import GlassView from "@/components/ui/GlassView"
 import Colors from "@/constants/Colors"
 import { LinearGradient } from "expo-linear-gradient"
 import { useCallback, useEffect, useRef, useState } from "react"
-import { Pressable, StyleSheet, Text, View } from "react-native"
+import { Pressable, StyleSheet, View } from "react-native"
+import Text from "@/components/ui/Text/Text"
 import Animated, { FadeInDown, FadeOutUp } from "react-native-reanimated"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { formatTimeAgo, Notification, useGetNotifications, useReadNotification } from "./useNotifications"
@@ -32,18 +33,15 @@ export function FloatingNotificationItem({
                                 { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
                             ]}
                         >
-                            <Text style={[styles.title, { fontSize: 14 }]} numberOfLines={2}>
+                            <Text size={14} weight="600" color={Colors.text_light} lineHeight={20} numberOfLines={2}>
                                 {notification.message.title}
                             </Text>
-                            <Text style={{ fontSize: 12, color: Colors.secondary, fontWeight: "bold" }}>
+                            <Text size={12} weight="bold" color={Colors.secondary}>
                                 {formatTimeAgo(notification.sendAt)}
                             </Text>
                         </View>
 
-                        <Text
-                            style={[styles.body, { marginTop: 2.5, marginBottom: 0, fontSize: 12 }]}
-                            numberOfLines={3}
-                        >
+                        <Text size={12} color={Colors.text_light} lineHeight={18} opacity={0.85} style={{ marginTop: 2.5 }} numberOfLines={3}>
                             {notification.message.body}
                         </Text>
                     </View>
@@ -158,19 +156,5 @@ const styles = StyleSheet.create({
     contentContainer: {
         flex: 1,
         minHeight: 0,
-    },
-    title: {
-        color: Colors.text_light,
-        fontSize: 16,
-        fontWeight: "600",
-        lineHeight: 20,
-        marginBottom: 4,
-    },
-    body: {
-        color: Colors.text_light,
-        fontSize: 14,
-        lineHeight: 18,
-        opacity: 0.85,
-        marginBottom: 10,
     },
 })

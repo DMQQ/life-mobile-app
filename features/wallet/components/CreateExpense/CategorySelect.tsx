@@ -4,8 +4,9 @@ import Color from "color";
 import Colors from "@/constants/Colors";
 import { CategoryIcon, CategoryUtils, Icons } from "../Expense/ExpenseIcon";
 import lowOpacity from "@/utils/functions/lowOpacity";
-import { Text, View } from "react-native";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { View } from "react-native";
+import { Feather } from "@expo/vector-icons";
+import Text from "@/components/ui/Text/Text";
 
 interface CategorySelectProps<T> extends Partial<Props<T>> {
   selected: T[];
@@ -44,11 +45,11 @@ export default function CategorySelect<T>(props: CategorySelectProps<T>) {
           }}
         >
           <CategoryIcon type="expense" category={item.item} clear />
-          <Text style={{ color: Colors.foreground, fontSize: 16, marginLeft: 10, fontWeight: "bold" }}>
+          <Text size={16} weight="bold" style={{ marginLeft: 10 }}>
             {CategoryUtils.getCategoryName(item.item)}
           </Text>
           {props.isActive(item.item) && (
-            <MaterialCommunityIcons name="check" size={25} color={Colors.secondary} style={{ position: "absolute", right: 25 }} />
+            <Feather name="check" size={25} color={Colors.secondary} style={{ position: "absolute", right: 25 }} />
           )}
         </View>
       )}

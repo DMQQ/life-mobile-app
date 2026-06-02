@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts";
 import Colors from "@/constants/Colors";
 import { Modal } from "react-native";
 import Text from "@/components/ui/Text/Text";
@@ -34,7 +35,7 @@ export default function ErrorMessageModal(props: {
             variant="heading"
             style={{
               color: Colors.secondary,
-              fontWeight: "bold",
+              fontFamily: FONTS.bold,
               marginBottom: 15,
             }}
           >
@@ -44,7 +45,7 @@ export default function ErrorMessageModal(props: {
             variant="title"
             style={{
               color: Colors.secondary,
-              fontWeight: "bold",
+              fontFamily: FONTS.bold,
             }}
           >
             {props.errorMessage}

@@ -1,4 +1,5 @@
 import { View, Animated, Keyboard } from "react-native";
+import { FONTS } from "@/constants/Fonts";
 import Text from "@/components/ui/Text/Text";
 import Modal from "react-native-modal";
 import Layout from "../../../constants/Layout";
@@ -86,7 +87,7 @@ export default function UpdateProgressModal({
           variant="title"
           style={{
             color: Colors.foreground,
-            fontWeight: "bold",
+            fontFamily: FONTS.bold,
             marginBottom: 20,
           }}
         >

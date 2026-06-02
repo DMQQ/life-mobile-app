@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts";
 import { View } from "react-native";
 import Text from "@/components/ui/Text/Text";
 import useGetStatistics, { WalletStatisticsResponse } from "../../hooks/useGetStatistics";
@@ -34,7 +35,7 @@ export const Item = ({ label, value, icon, formatValue = true, width }: ItemProp
   >
     {icon}
     <View>
-      <Text variant="body" style={{ color: Colors.foreground, fontWeight: "bold" }}>
+      <Text variant="body" style={{ color: Colors.foreground, fontFamily: FONTS.bold }}>
         {formatValue ? (typeof value === "number" ? value.toFixed(2) + "zł" : value) : value}
       </Text>
       <Text variant="caption" style={{ color: "grey", marginTop: 2.5 }}>{label}</Text>
@@ -124,7 +125,7 @@ export default function StatisticsSummary() {
         <View style={{ flex: 1 }}>
           {view === "current" ? (
             <>
-              <Text variant="body" style={{ color: Colors.foreground, fontWeight: "bold" }}>Statistics Summary</Text>
+              <Text variant="body" style={{ color: Colors.foreground, fontFamily: FONTS.bold }}>Statistics Summary</Text>
 
               <Text variant="body" style={{ color: "gray", marginTop: 5 }}>
                 From {filters.date.from} to {filters.date.to}
@@ -132,7 +133,7 @@ export default function StatisticsSummary() {
             </>
           ) : (
             <>
-              <Text variant="body" style={{ color: Colors.foreground, fontWeight: "bold" }}>Difference in spendings</Text>
+              <Text variant="body" style={{ color: Colors.foreground, fontFamily: FONTS.bold }}>Difference in spendings</Text>
               <Text variant="body" style={{ color: "gray", marginTop: 5 }}>
                 Dates {oppositeRange[0]} to {oppositeRange[1]}
               </Text>

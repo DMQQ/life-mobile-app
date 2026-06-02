@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts";
 import { Image, View } from "react-native";
 import Text from "@/components/ui/Text/Text";
 import ScreenContainer from "@/components/ui/ScreenContainer";
@@ -14,7 +15,7 @@ export default function Landing({ navigation }: any) {
         variant="title"
         style={{
           color: Colors.foreground,
-          fontWeight: "bold",
+          fontFamily: FONTS.bold,
         }}
       >
         Hello there!

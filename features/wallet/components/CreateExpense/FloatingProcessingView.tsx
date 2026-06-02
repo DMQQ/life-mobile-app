@@ -1,12 +1,13 @@
 import Colors from "@/constants/Colors"
 import Layout from "@/constants/Layout"
-import { AntDesign, Feather, Ionicons, MaterialIcons } from "@expo/vector-icons"
+import { Feather } from "@expo/vector-icons"
 import { Expense } from "@/types"
 import Color from "color"
 import { BlurView } from "expo-blur"
 import { LinearGradient } from "expo-linear-gradient"
 import { useEffect, useState } from "react"
-import { Pressable, StyleSheet, Text, View } from "react-native"
+import { Pressable, StyleSheet, View } from "react-native"
+import Text from "@/components/ui/Text/Text"
 import Ripple from "react-native-material-ripple"
 import Animated, {
     Easing,
@@ -186,13 +187,13 @@ export function FloatingProcessingView({
 
         switch (step) {
             case "compress":
-                return <MaterialIcons name="compress" {...iconProps} />
+                return <Feather name="minimize-2" {...iconProps} />
             case "upload":
-                return <AntDesign name="cloud-upload" {...iconProps} />
+                return <Feather name="upload-cloud" {...iconProps} />
             case "analyze":
-                return <Ionicons name="analytics" {...iconProps} />
+                return <Feather name="bar-chart-2" {...iconProps} />
             default:
-                return <AntDesign name="camera" {...iconProps} />
+                return <Feather name="camera" {...iconProps} />
         }
     }
 
@@ -299,12 +300,12 @@ export function FloatingProcessingView({
                             </View>
 
                             <View style={styles.textContainer}>
-                                <Text style={styles.title}>AI Processing</Text>
-                                <Text style={styles.subtitle}>{currentStepData.label}...</Text>
+                                <Text size={14} weight="bold" style={{ marginBottom: 2 }}>AI Processing</Text>
+                                <Text size={11} color="rgba(255,255,255,0.7)">{currentStepData.label}...</Text>
                             </View>
 
                             <Pressable style={styles.closeButton} onPress={onClose}>
-                                <AntDesign name="close" size={16} color="rgba(255, 255, 255, 0.7)" />
+                                <Feather name="x" size={16} color="rgba(255, 255, 255, 0.7)" />
                             </Pressable>
                         </View>
                         {showExpense && (
@@ -341,8 +342,8 @@ export function FloatingProcessingView({
                                             handleRemove?.(expense?.id || "")
                                         }}
                                     >
-                                        <AntDesign name="close-circle" size={18} color="rgba(255,255,255,0.8)" />
-                                        <Text style={{ color: "rgba(255,255,255,0.8)" }}>Cancel</Text>
+                                        <Feather name="x-circle" size={18} color="rgba(255,255,255,0.8)" />
+                                        <Text color="rgba(255,255,255,0.8)">Cancel</Text>
                                     </Ripple>
                                     <Ripple
                                         style={[styles.aiConfirmButton, { backgroundColor: Colors.warning }]}
@@ -351,7 +352,7 @@ export function FloatingProcessingView({
                                         }}
                                     >
                                         <Feather name="edit" size={18} color="rgba(255,255,255,0.8)" />
-                                        <Text style={{ color: "rgba(255,255,255,0.8)" }}>Edit</Text>
+                                        <Text color="rgba(255,255,255,0.8)">Edit</Text>
                                     </Ripple>
 
                                     <Ripple
@@ -360,8 +361,8 @@ export function FloatingProcessingView({
                                             handleSuccess?.()
                                         }}
                                     >
-                                        <AntDesign name="check-circle" size={18} color="rgba(255,255,255,0.8)" />
-                                        <Text style={{ color: "rgba(255,255,255,0.8)" }}>All good!</Text>
+                                        <Feather name="check-circle" size={18} color="rgba(255,255,255,0.8)" />
+                                        <Text color="rgba(255,255,255,0.8)">All good!</Text>
                                     </Ripple>
                                 </View>
                             </Animated.View>
@@ -412,16 +413,6 @@ const styles = StyleSheet.create({
     textContainer: {
         flex: 1,
         justifyContent: "center",
-    },
-    title: {
-        color: Colors.foreground,
-        fontSize: 14,
-        fontWeight: "bold",
-        marginBottom: 2,
-    },
-    subtitle: {
-        color: "rgba(255, 255, 255, 0.7)",
-        fontSize: 11,
     },
     closeButton: {
         padding: 5,

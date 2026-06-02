@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import { View, StyleSheet, Pressable } from "react-native"
 import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
@@ -100,7 +101,7 @@ const styles = StyleSheet.create({
     description: {
         color: Colors.foreground,
         fontSize: 15,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
     },
     meta: {
         color: Colors.foreground_secondary,
@@ -108,11 +109,11 @@ const styles = StyleSheet.create({
     },
     amount: {
         fontSize: 16,
-        fontWeight: "700",
+        fontFamily: FONTS.bold,
     },
     currency: {
         fontSize: 12,
-        fontWeight: "500",
+        fontFamily: FONTS.medium,
     },
     footer: {
         flexDirection: "row",
@@ -129,7 +130,7 @@ const styles = StyleSheet.create({
     aiBadgeText: {
         color: Colors.foreground_disabled,
         fontSize: 11,
-        fontWeight: "500",
+        fontFamily: FONTS.medium,
     },
     applyBtn: {
         paddingVertical: 5,
@@ -138,6 +139,6 @@ const styles = StyleSheet.create({
     },
     applyBtnText: {
         fontSize: 12,
-        fontWeight: "700",
+        fontFamily: FONTS.bold,
     },
 })

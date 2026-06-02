@@ -1,6 +1,8 @@
-import { StyleSheet, Text, View } from "react-native"
-import moment from "moment"
+import { FONTS } from "@/constants/Fonts"
+import { StyleSheet, View } from "react-native"
+import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
+import moment from "moment"
 import SubscriptionItem from "../Subscription/SubscriptionItem"
 
 interface SubscriptionSectionProps {
@@ -17,7 +19,7 @@ export default function SubscriptionSection({
     if (!hasSubscription) {
         return (
             <View style={styles.card}>
-                <Text style={{ color: Colors.text_dark, fontSize: 14, fontStyle: "italic", textAlign: "center" }}>
+                <Text size={14} italic align="center" color={Colors.text_dark}>
                     No subscription details available for this expense.
                 </Text>
             </View>
@@ -29,7 +31,7 @@ export default function SubscriptionSection({
             {hasSubscription && (
                 <>
                     <View style={styles.cardHeader}>
-                        <Text style={styles.dateLabel}>Status</Text>
+                        <Text size={13} weight="500" color={Colors.text_dark}>Status</Text>
                         <View
                             style={[
                                 styles.statusPill,
@@ -46,12 +48,7 @@ export default function SubscriptionSection({
                                     { backgroundColor: isSubscriptionActive ? "#66E875" : Colors.text_dark },
                                 ]}
                             />
-                            <Text
-                                style={[
-                                    styles.statusPillText,
-                                    { color: isSubscriptionActive ? "#66E875" : Colors.text_dark },
-                                ]}
-                            >
+                            <Text size={12} weight="600" color={isSubscriptionActive ? "#66E875" : Colors.text_dark}>
                                 {isSubscriptionActive ? "Active" : "Inactive"}
                             </Text>
                         </View>
@@ -59,18 +56,18 @@ export default function SubscriptionSection({
 
                     <View style={styles.cardDates}>
                         <View style={styles.dateRow}>
-                            <Text style={styles.dateLabel}>
+                            <Text size={13} weight="500" color={Colors.text_dark}>
                                 {isSubscriptionActive ? "Next payment" : "Last payment"}
                             </Text>
-                            <Text style={styles.dateValue}>
+                            <Text size={13} weight="500" color={Colors.foreground_secondary}>
                                 {selected.subscription?.nextBillingDate
                                     ? moment(+selected.subscription.nextBillingDate).format("MMM D, YYYY")
                                     : "—"}
                             </Text>
                         </View>
                         <View style={styles.dateRow}>
-                            <Text style={styles.dateLabel}>{isSubscriptionActive ? "Active since" : "Created on"}</Text>
-                            <Text style={styles.dateValue}>
+                            <Text size={13} weight="500" color={Colors.text_dark}>{isSubscriptionActive ? "Active since" : "Created on"}</Text>
+                            <Text size={13} weight="500" color={Colors.foreground_secondary}>
                                 {moment(+selected.subscription.dateStart).format("MMM D, YYYY")}
                             </Text>
                         </View>
@@ -104,11 +101,6 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "space-between",
     },
-    cardTitle: {
-        color: Colors.foreground,
-        fontSize: 16,
-        fontWeight: "600",
-    },
     statusPill: {
         flexDirection: "row",
         alignItems: "center",
@@ -122,10 +114,6 @@ const styles = StyleSheet.create({
         height: 6,
         borderRadius: 3,
     },
-    statusPillText: {
-        fontSize: 12,
-        fontWeight: "600",
-    },
     cardDates: {
         marginTop: 12,
         gap: 15,
@@ -135,16 +123,6 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
-    },
-    dateLabel: {
-        color: Colors.text_dark,
-        fontSize: 13,
-        fontWeight: "500",
-    },
-    dateValue: {
-        color: Colors.foreground_secondary,
-        fontSize: 13,
-        fontWeight: "500",
     },
     contextMenuTrigger: {
         borderRadius: 10,
@@ -157,6 +135,6 @@ const styles = StyleSheet.create({
     contextMenuTriggerText: {
         color: Colors.foreground,
         fontSize: 14,
-        fontWeight: "500",
+        fontFamily: FONTS.medium,
     },
 })

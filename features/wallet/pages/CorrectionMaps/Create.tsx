@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import Colors from "@/constants/Colors"
 import Text from "@/components/ui/Text/Text"
 import Input from "@/components/ui/TextInput/TextInput"
@@ -400,7 +401,7 @@ const styles = StyleSheet.create({
     },
     headerTitle: {
         fontSize: 17,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
         color: Colors.foreground,
     },
     headerCancel: {
@@ -409,7 +410,7 @@ const styles = StyleSheet.create({
     },
     headerSave: {
         fontSize: 16,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
         color: Colors.secondary,
         textAlign: "center",
     },
@@ -432,7 +433,7 @@ const styles = StyleSheet.create({
     sectionLabel: {
         color: Colors.foreground_secondary,
         fontSize: 12,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
         textTransform: "uppercase",
         letterSpacing: 0.6,
         paddingHorizontal: 4,
@@ -491,7 +492,7 @@ const styles = StyleSheet.create({
     },
     overrideChipText: {
         fontSize: 13,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
         color: Colors.foreground_secondary,
     },
     overrideChipTextActive: {

@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import Colors from "@/constants/Colors"
 import { navigationRef } from "@/navigation/ref"
 import Color from "color"
@@ -238,7 +239,7 @@ const styles = StyleSheet.create({
     },
     timeRange: {
         fontSize: 11,
-        fontWeight: "500",
+        fontFamily: FONTS.medium,
         letterSpacing: 0.3,
     },
     statusBadge: {
@@ -248,12 +249,12 @@ const styles = StyleSheet.create({
     },
     statusText: {
         fontSize: 10,
-        fontWeight: "700",
+        fontFamily: FONTS.bold,
         letterSpacing: 0.4,
     },
     title: {
         fontSize: 16,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
         lineHeight: 22,
     },
     titleDone: {

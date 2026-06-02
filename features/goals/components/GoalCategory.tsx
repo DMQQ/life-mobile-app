@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import { Card, GlassIconButton } from "@/components"
 import Text from "@/components/ui/Text/Text"
 import Colors, { secondary_candidates } from "@/constants/Colors"
@@ -81,7 +82,7 @@ export const GoalCategory = ({ name, icon, description, entries = [], onPress, .
                         <View style={styles.iconContainer}>
                             <Feather name={icon as any} size={14} color={Colors.foreground} />
                         </View>
-                        <Text style={{ color: Colors.foreground, fontSize: 14, fontWeight: "bold" }}>{name}</Text>
+                        <Text style={{ color: Colors.foreground, fontSize: 14, fontFamily: FONTS.bold }}>{name}</Text>
                     </View>
                     <IncrementCategory id={rest.id} entries={entries} min={rest.min} target={rest.target} />
                 </View>
@@ -155,7 +156,7 @@ const IncrementCategory = ({
                         style={{
                             color: Colors.foreground,
                             fontSize: 12,
-                            fontWeight: "semibold",
+                            fontFamily: FONTS.semibold,
                         }}
                     >
                         +1

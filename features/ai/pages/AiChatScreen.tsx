@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
 import { Feather } from "@expo/vector-icons"
@@ -450,7 +451,7 @@ const s = StyleSheet.create({
         left: 0,
         right: 0,
     },
-    headerTitle: { color: Colors.secondary, fontWeight: "700", fontSize: 16 },
+    headerTitle: { color: Colors.secondary, fontFamily: FONTS.bold, fontSize: 16 },
     headerActions: { flexDirection: "row", gap: 6 },
     divider: { height: StyleSheet.hairlineWidth, backgroundColor: "rgba(255,255,255,0.08)" },
     list: { flex: 1 },

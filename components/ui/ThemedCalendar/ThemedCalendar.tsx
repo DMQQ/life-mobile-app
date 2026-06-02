@@ -1,8 +1,9 @@
 import Colors from "@/constants/Colors"
-import { AntDesign } from "@expo/vector-icons"
+import { Feather } from "@expo/vector-icons"
+import Text from "@/components/ui/Text/Text"
 import dayjs from "dayjs"
 import { memo, useRef, useState } from "react"
-import { Animated, StyleSheet, Text, TouchableOpacity, View } from "react-native"
+import { Animated, StyleSheet, TouchableOpacity, View } from "react-native"
 import {
     Calendar,
     CalendarProps,
@@ -55,17 +56,17 @@ function WeekStrip({ date }: { date: string }) {
     return (
         <View>
             <View style={weekStyles.header}>
-                <Text style={weekStyles.month}>{d.format("MMMM")}</Text>
-                <Text style={weekStyles.year}>{d.format("YYYY")}</Text>
+                <Text size={16} weight="600">{d.format("MMMM")}</Text>
+                <Text size={13} weight="500" color={Colors.text_dark}>{d.format("YYYY")}</Text>
             </View>
             <View style={weekStyles.row}>
                 {days.map((day, i) => {
                     const isSelected = day.isSame(d, "day")
                     return (
                         <View key={i} style={weekStyles.col}>
-                            <Text style={weekStyles.letter}>{letters[i]}</Text>
+                            <Text size={11} weight="500" color={Colors.text_dark}>{letters[i]}</Text>
                             <View style={[weekStyles.circle, isSelected && weekStyles.selectedCircle]}>
-                                <Text style={[weekStyles.num, isSelected && weekStyles.selectedNum]}>{day.date()}</Text>
+                                <Text size={13} weight={isSelected ? "700" : "500"} color={isSelected ? "#fff" : Colors.foreground}>{day.date()}</Text>
                             </View>
                         </View>
                     )
@@ -125,7 +126,7 @@ export const CollapsibleThemedCalendar = memo(function CollapsibleThemedCalendar
             </Animated.View>
 
             <TouchableOpacity onPress={toggle} style={styles.knob} activeOpacity={0.7}>
-                <AntDesign name={expanded ? "up" : "down"} size={11} color={Colors.text_dark} />
+                <Feather name={expanded ? "chevron-up" : "chevron-down"} size={11} color={Colors.text_dark} />
             </TouchableOpacity>
         </View>
     )
@@ -143,16 +144,6 @@ const weekStyles = StyleSheet.create({
         paddingBottom: 5,
         marginBottom: 4,
     },
-    month: {
-        fontSize: 16,
-        color: Colors.foreground,
-        fontWeight: "600",
-    },
-    year: {
-        fontSize: 13,
-        fontWeight: "500",
-        color: Colors.text_dark,
-    },
     row: {
         flexDirection: "row",
         justifyContent: "space-around",
@@ -164,11 +155,6 @@ const weekStyles = StyleSheet.create({
         alignItems: "center",
         gap: 4,
     },
-    letter: {
-        fontSize: 11,
-        color: Colors.text_dark,
-        fontWeight: "500",
-    },
     circle: {
         width: 32,
         height: 32,
@@ -178,15 +164,6 @@ const weekStyles = StyleSheet.create({
     },
     selectedCircle: {
         backgroundColor: Colors.secondary,
-    },
-    num: {
-        fontSize: 13,
-        color: Colors.foreground,
-        fontWeight: "500",
-    },
-    selectedNum: {
-        color: "#fff",
-        fontWeight: "700",
     },
 })
 

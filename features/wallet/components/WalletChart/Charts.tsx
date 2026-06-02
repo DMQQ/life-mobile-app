@@ -1,4 +1,5 @@
-import { Text, View } from "react-native";
+import { View } from "react-native";
+import Text from "@/components/ui/Text/Text";
 import { BarChart, barDataItem } from "react-native-gifted-charts";
 import Colors from "@/constants/Colors";
 import Color from "color";
@@ -47,7 +48,7 @@ export default function Charts({ data, onPress }: ChartsProps) {
               </View>
             </View>
           ),
-          topLabelComponent: () => <Text style={{ color: item.color }}>{Math.trunc(item.value)}</Text>,
+          topLabelComponent: () => <Text size={12} color={item.color}>{Math.trunc(item.value)}</Text>,
         })) as barDataItem[]
       }
       yAxisThickness={0}

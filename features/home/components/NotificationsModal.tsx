@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import { Button, ModalHeader } from "@/components"
 import IconCloseButton from "@/components/ui/Button/IconCloseButton"
 import Text from "@/components/ui/Text/Text"
@@ -11,8 +12,7 @@ import { HomeScreenProps } from "../Main"
 
 const styles = StyleSheet.create({
     container: { flex: 1 },
-    blur: { position: "absolute", top: 0, left: 0, right: 0, bottom: 0 },
-    content: { flex: 1, backgroundColor: "rgba(0,0,0,0.3)" },
+    content: { flex: 1 },
     header: {
         flexDirection: "row",
         justifyContent: "space-between",
@@ -24,8 +24,8 @@ const styles = StyleSheet.create({
         backgroundColor: "rgba(0,0,0,0.2)",
     },
     headerLeft: { flexDirection: "row", alignItems: "center", gap: 12 },
-    title: { color: Colors.text_light, fontWeight: "bold" },
-    body: { flex: 1, backgroundColor: "rgba(0,0,0,0.2)" },
+    title: { color: Colors.text_light, fontFamily: FONTS.bold },
+    body: { flex: 1 },
 })
 
 export default function NotificationsScreen({ navigation }: HomeScreenProps<"HomeNotifications">) {
@@ -44,18 +44,16 @@ export default function NotificationsScreen({ navigation }: HomeScreenProps<"Hom
 
     return (
         <View style={styles.container}>
-            <View style={styles.content}>
-                <ModalHeader
-                    onClose={handleClose}
-                    onSave={handleClearAll}
-                    saveLabel="Clear all"
-                    saveDisabled={unreadCount === 0}
-                    saveLoading={loading}
-                    title={`Notifications${unreadCount > 0 ? ` (${unreadCount})` : ""}`}
-                />
-                <View style={styles.body}>
-                    <WalletNotifications data={data} error={error} loading={loading} />
-                </View>
+            <ModalHeader
+                onClose={handleClose}
+                onSave={handleClearAll}
+                saveLabel="Clear all"
+                saveDisabled={unreadCount === 0}
+                saveLoading={loading}
+                title={`Notifications${unreadCount > 0 ? ` (${unreadCount})` : ""}`}
+            />
+            <View style={styles.body}>
+                <WalletNotifications data={data} error={error} loading={loading} />
             </View>
         </View>
     )

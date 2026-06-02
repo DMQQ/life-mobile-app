@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { StyleSheet, TouchableOpacity, View } from "react-native"
 import PagerView from "react-native-pager-view"
@@ -278,7 +279,7 @@ const styles = StyleSheet.create({
         flex: 1,
         textAlign: "center",
         fontSize: 11,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
         color: Colors.text_dark,
     },
     weekRow: {
@@ -309,7 +310,7 @@ const styles = StyleSheet.create({
     },
     dayNumber: {
         fontSize: 14,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
         color: Colors.foreground,
     },
     eventChip: {
@@ -320,7 +321,7 @@ const styles = StyleSheet.create({
     },
     eventChipText: {
         fontSize: 9,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
         color: Colors.foreground,
     },
     moreText: {

@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import { AnimatedSelector, IconButton } from "@/components"
 import DatePicker from "@/components/DatePicker"
 import Skeleton from "@/components/SkeletonLoader/Skeleton"
@@ -450,13 +451,13 @@ const styles = StyleSheet.create({
     },
     catName: {
         color: Colors.foreground,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
         fontSize: 15,
         textTransform: "capitalize",
     },
     pct: {
         fontSize: 13,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
     },
     progressBg: {
         height: 4,
@@ -488,7 +489,7 @@ const styles = StyleSheet.create({
     expenseDesc: {
         color: Colors.foreground,
         fontSize: 14,
-        fontWeight: "500",
+        fontFamily: FONTS.medium,
     },
     expenseDate: {
         color: "rgba(255,255,255,0.4)",
@@ -496,7 +497,7 @@ const styles = StyleSheet.create({
     },
     expenseAmount: {
         color: "#F07070",
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
         fontSize: 14,
         flexShrink: 0,
     },

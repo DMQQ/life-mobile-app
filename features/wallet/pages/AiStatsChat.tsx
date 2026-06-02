@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
 import { AntDesign, Ionicons } from "@expo/vector-icons"
@@ -363,7 +364,7 @@ const s = StyleSheet.create({
         right: 0,
         justifyContent: "center",
     },
-    headerTitle: { color: Colors.secondary, fontWeight: "700", fontSize: 16 },
+    headerTitle: { color: Colors.secondary, fontFamily: FONTS.bold, fontSize: 16 },
     divider: { height: StyleSheet.hairlineWidth, backgroundColor: "rgba(255,255,255,0.08)" },
     statsSection: { paddingTop: 10, paddingBottom: 8 },
     chips: { paddingHorizontal: 16, gap: 8, flexDirection: "row" },
@@ -380,7 +381,7 @@ const s = StyleSheet.create({
     },
     chipActive: { backgroundColor: Color(Colors.secondary).alpha(0.2).string(), borderColor: Colors.secondary },
     chipText: { color: Colors.foreground_secondary, fontSize: 12 },
-    chipTextActive: { color: Colors.secondary, fontWeight: "600" },
+    chipTextActive: { color: Colors.secondary, fontFamily: FONTS.semibold },
     chat: { flex: 1 },
     chatContent: { padding: 16, paddingBottom: 24 },
     emptyHint: { paddingVertical: 40, alignItems: "center" },

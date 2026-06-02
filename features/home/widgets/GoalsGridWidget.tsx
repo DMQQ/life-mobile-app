@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import Section from "@/components/ui/Section"
 import Text from "@/components/ui/Text/Text"
 import Colors, { secondary_candidates } from "@/constants/Colors"
@@ -181,8 +182,8 @@ const s = StyleSheet.create({
         flex: 1,
         textAlign: "center",
         fontSize: 10,
-        fontWeight: "600",
-        color: Colors.text_dark,
+        fontFamily: FONTS.semibold,
+        color: Colors.foreground_secondary,
         textTransform: "uppercase",
     },
     todayLabel: {
@@ -213,7 +214,7 @@ const s = StyleSheet.create({
     },
     cellCount: {
         fontSize: 9,
-        fontWeight: "700",
+        fontFamily: FONTS.bold,
         color: "#fff",
     },
 })

@@ -4,15 +4,21 @@ import Colors from "@/constants/Colors"
 import React from "react"
 import ChartSwitcher from "../components/ChartSwitcher"
 import BalanceSummaryWidget from "./BalanceSummaryWidget"
+import AiInsightWidget from "./AiInsightWidget"
+import EventCompletionWidget from "./EventCompletionWidget"
 import GoalsGridWidget from "./GoalsGridWidget"
+import UpcomingBillsWidget from "./UpcomingBillsWidget"
 import WeekLifeWidget from "./WeekLifeWidget"
 import QuickStatsWidget from "./QuickStatsWidget"
 import {
+    AiInsightPreview,
     BalancePreview,
     CategoriesPreview,
     ChartPreview,
+    EventCompletionPreview,
     ExtrasPreview,
     GoalsPreview,
+    UpcomingBillsPreview,
     WeekLifePreview,
     QuickStatsPreview,
 } from "./previews"
@@ -90,5 +96,32 @@ export const WIDGETS: WidgetDefinition[] = [
         accentColor: Colors.ternary,
         component: QuickStatsWidget,
         Preview: QuickStatsPreview,
+    },
+    {
+        key: "event-completion",
+        label: "Event Completion",
+        subtitle: "14-day timeline completion chart & streak",
+        icon: "check-circle",
+        accentColor: Colors.positive,
+        component: EventCompletionWidget,
+        Preview: EventCompletionPreview,
+    },
+    {
+        key: "ai-insight",
+        label: "AI Insight",
+        subtitle: "Smart summaries of your spending & habits",
+        icon: "cpu",
+        accentColor: "#7C3AED",
+        component: AiInsightWidget,
+        Preview: AiInsightPreview,
+    },
+    {
+        key: "upcoming-bills",
+        label: "Upcoming Bills",
+        subtitle: "Subscriptions due in the next 30 days",
+        icon: "calendar",
+        accentColor: Colors.warning,
+        component: UpcomingBillsWidget,
+        Preview: UpcomingBillsPreview,
     },
 ]

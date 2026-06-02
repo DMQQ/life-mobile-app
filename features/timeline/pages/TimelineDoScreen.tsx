@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import Colors from "@/constants/Colors"
 import { AntDesign, Ionicons } from "@expo/vector-icons"
 import moment from "moment"
@@ -208,7 +209,7 @@ export default function TimelineDoScreen({ route, navigation }: TimelineScreenPr
                                     <View style={styles.todosHeaderTop}>
                                         <Text style={styles.todosTitle}>Tasks</Text>
                                         <Text style={styles.todosCount}>
-                                            <Text style={{ color: Colors.secondary, fontWeight: "700" }}>{completedCount}</Text>
+                                            <Text style={{ color: Colors.secondary, fontFamily: FONTS.bold }}>{completedCount}</Text>
                                             {"/" + todos.length}
                                         </Text>
                                     </View>
@@ -259,7 +260,7 @@ const styles = StyleSheet.create({
     },
     taskTitle: {
         fontSize: 30,
-        fontWeight: "800",
+        fontFamily: FONTS.extrabold,
         color: Colors.foreground,
         letterSpacing: -0.3,
         lineHeight: 36,
@@ -272,7 +273,7 @@ const styles = StyleSheet.create({
     taskTimeRange: {
         fontSize: 13,
         color: Colors.foreground_secondary,
-        fontWeight: "500",
+        fontFamily: FONTS.medium,
     },
     timerSection: {
         alignItems: "center",
@@ -295,7 +296,7 @@ const styles = StyleSheet.create({
     },
     timerText: {
         fontSize: 44,
-        fontWeight: "700",
+        fontFamily: FONTS.bold,
         letterSpacing: 1,
         fontVariant: ["tabular-nums"],
         color: Colors.foreground,
@@ -341,7 +342,7 @@ const styles = StyleSheet.create({
     sideBtnLabel: {
         fontSize: 11,
         color: Colors.foreground_secondary,
-        fontWeight: "500",
+        fontFamily: FONTS.medium,
     },
     todosHeader: {
         paddingHorizontal: 20,
@@ -356,7 +357,7 @@ const styles = StyleSheet.create({
     },
     todosTitle: {
         fontSize: 13,
-        fontWeight: "700",
+        fontFamily: FONTS.bold,
         color: Colors.foreground_secondary,
         textTransform: "uppercase",
         letterSpacing: 1,
@@ -364,7 +365,7 @@ const styles = StyleSheet.create({
     todosCount: {
         fontSize: 13,
         color: Colors.foreground_secondary,
-        fontWeight: "500",
+        fontFamily: FONTS.medium,
     },
     todoProgress: {
         height: 3,
@@ -391,7 +392,7 @@ const styles = StyleSheet.create({
         flex: 1,
         fontSize: 15,
         color: Colors.foreground,
-        fontWeight: "500",
+        fontFamily: FONTS.medium,
     },
     todoTitleDone: {
         textDecorationLine: "line-through",
@@ -420,7 +421,7 @@ const styles = StyleSheet.create({
     emptyText: {
         fontSize: 14,
         color: Colors.foreground_secondary,
-        fontWeight: "500",
+        fontFamily: FONTS.medium,
     },
     addTodoBtn: {
         flexDirection: "row",
@@ -435,6 +436,6 @@ const styles = StyleSheet.create({
     addTodoBtnText: {
         color: Colors.secondary,
         fontSize: 13,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
     },
 })

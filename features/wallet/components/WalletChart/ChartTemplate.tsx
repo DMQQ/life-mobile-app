@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import GroupSelector from "@/components/ui/GroupSelector"
 import Colors from "@/constants/Colors"
 import { Padding } from "@/constants/Layout"
@@ -65,7 +66,7 @@ const styles = StyleSheet.create({
     },
     title: {
         fontSize: 30,
-        fontWeight: "700",
+        fontFamily: FONTS.bold,
         color: Colors.foreground,
     },
     description: {

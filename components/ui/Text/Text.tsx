@@ -1,5 +1,31 @@
 import Colors, { Sizing } from "@/constants/Colors"
+import { FONTS } from "@/constants/Fonts"
 import { Text as RNText, TextProps as RNTextProps, StyleProp, TextStyle } from "react-native"
+
+const FONT: Record<string, string> = {
+    "400": FONTS.regular,
+    "500": FONTS.medium,
+    "600": FONTS.semibold,
+    "700": FONTS.bold,
+    "800": FONTS.extrabold,
+    "900": FONTS.black,
+    bold: FONTS.bold,
+    normal: FONTS.regular,
+}
+
+const FONT_ITALIC: Record<string, string> = {
+    "400": FONTS.italic,
+    "500": FONTS.mediumItalic,
+    "600": FONTS.semiboldItalic,
+    "700": FONTS.boldItalic,
+    bold: FONTS.boldItalic,
+    normal: FONTS.italic,
+}
+
+function resolveFontFamily(weight: TextStyle["fontWeight"], italic: boolean): string {
+    const key = String(weight ?? "400")
+    return (italic ? FONT_ITALIC[key] : FONT[key]) ?? (italic ? FONTS.italic : FONTS.regular)
+}
 
 export type TextVariant = "heading" | "subheading" | "body" | "caption" | "title" | "subtitle" | "label"
 
@@ -26,39 +52,39 @@ export interface TextProps extends Omit<RNTextProps, "style"> {
 const variantStyles: Record<TextVariant, TextStyle> = {
     heading: {
         fontSize: 60,
-        fontWeight: "bold",
+        fontFamily: FONTS.bold,
         color: Colors.foreground,
         letterSpacing: 1,
     },
     title: {
         fontSize: Sizing.heading,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
         color: Colors.foreground,
         letterSpacing: 0.3,
     },
     subheading: {
         fontSize: Sizing.subHead,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
         color: Colors.text_light,
     },
     subtitle: {
         fontSize: 16,
-        fontWeight: "500",
+        fontFamily: FONTS.medium,
         color: Colors.foreground_secondary,
     },
     body: {
         fontSize: Sizing.text,
-        fontWeight: "400",
+        fontFamily: FONTS.regular,
         color: Colors.foreground,
     },
     caption: {
         fontSize: Sizing.tooltip,
-        fontWeight: "400",
+        fontFamily: FONTS.regular,
         color: Colors.foreground_secondary,
     },
     label: {
         fontSize: 11,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
         color: Colors.foreground_secondary,
         letterSpacing: 0.8,
         textTransform: "uppercase",
@@ -92,14 +118,18 @@ function Text({
     else if (muted) overrides.color = Colors.foreground_secondary
     else if (dim) overrides.color = Colors.foreground_disabled
 
-    if (weight) overrides.fontWeight = weight
+    if (weight || italic) {
+        const baseVariantStyle = variantStyles[variant]
+        const baseWeight = weight ?? (baseVariantStyle.fontWeight as TextStyle["fontWeight"]) ?? "400"
+        overrides.fontFamily = resolveFontFamily(baseWeight, !!italic)
+    }
+
     if (align) overrides.textAlign = align
     if (size) overrides.fontSize = size
     if (lineHeight) overrides.lineHeight = lineHeight
     if (letterSpacing !== undefined) overrides.letterSpacing = letterSpacing
     if (opacity !== undefined) overrides.opacity = opacity
     if (flex !== undefined) overrides.flex = flex
-    if (italic) overrides.fontStyle = "italic"
     if (uppercase) overrides.textTransform = "uppercase"
     if (underline) overrides.textDecorationLine = "underline"
     if (strikethrough) overrides.textDecorationLine = "line-through"

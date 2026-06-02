@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import { Feather } from "@expo/vector-icons"
 import { Formik, FormikProps } from "formik"
 import { useMemo } from "react"
@@ -302,7 +303,7 @@ const styles = StyleSheet.create({
     },
     label: {
         color: Colors.foreground,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
         marginBottom: 8,
     },
     typeHint: {

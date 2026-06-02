@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import { ModalHeader } from "@/components"
 import Colors from "@/constants/Colors"
 import useUser from "@/utils/hooks/useUser"
@@ -203,8 +204,8 @@ const s = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
     },
-    avatarText: { color: "#fff", fontWeight: "700", fontSize: 24 },
-    profileEmail: { color: Colors.text_light, fontWeight: "600" },
+    avatarText: { color: "#fff", fontFamily: FONTS.bold, fontSize: 24 },
+    profileEmail: { color: Colors.text_light, fontFamily: FONTS.semibold },
     profileSub: { color: Colors.foreground_secondary, marginTop: 2 },
 
     sectionGap: { marginTop: 30 },

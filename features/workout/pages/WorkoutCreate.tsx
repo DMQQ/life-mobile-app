@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import React from "react";
 import ScreenContainer from "@/components/ui/ScreenContainer";
 import { Formik } from "formik";
@@ -131,7 +132,7 @@ export default function WorkoutCreate({ navigation }: WorkoutScreenProps<"Workou
                   text,
                   value: text,
                 }))}
-                buttonTextStyle={{ fontWeight: "400", fontSize: 16 }}
+                buttonTextStyle={{ fontFamily: FONTS.regular, fontSize: 16 }}
                 buttonStyle={{ height: 40, margin: 10, borderRadius: 5 }}
                 containerStyle={{ borderRadius: 5 }}
                 onChange={(value) => f.setFieldValue("difficulty", value)}

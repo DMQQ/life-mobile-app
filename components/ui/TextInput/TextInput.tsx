@@ -1,5 +1,6 @@
 import React, { useState } from "react"
-import { StyleProp, Text, TextInput, TextInputProps, TextStyle, View, ViewStyle } from "react-native"
+import { StyleProp, TextInput, TextInputProps, TextStyle, View, ViewStyle } from "react-native"
+import AppText from "@/components/ui/Text/Text"
 import Colors from "../../../constants/Colors"
 import { Theme, useTheme } from "../../../utils/context/ThemeContext"
 import styles from "./styles"
@@ -202,20 +203,9 @@ export default function Input({
                 )}
             </View>
             {typeof helperText !== "undefined" && !rest.label && (
-                <Text
-                    style={[
-                        styles.label,
-                        {
-                            color: error ? "#ff3030" : "#e0e0e0",
-                            fontSize: 15,
-                            fontWeight: "400",
-                            marginLeft: 10,
-                        },
-                        helperStyle,
-                    ]}
-                >
+                <AppText size={15} color={error ? "#ff3030" : "#e0e0e0"} style={[{ marginLeft: 10 }, helperStyle]}>
                     {helperText}
-                </Text>
+                </AppText>
             )}
         </View>
     )
@@ -249,15 +239,7 @@ Input.Icon = ({
 }
 
 Input.Label = (props: { text: string; labelStyle?: StyleProp<TextStyle>; error: boolean }) => (
-    <Text
-        style={[
-            styles.label,
-            props.labelStyle,
-            {
-                color: props.error ? "#ff3030" : "#e0e0e0f1",
-            },
-        ]}
-    >
+    <AppText color={props.error ? "#ff3030" : "#e0e0e0f1"} style={props.labelStyle}>
         {props.text}
-    </Text>
+    </AppText>
 )

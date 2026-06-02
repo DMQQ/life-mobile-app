@@ -1,9 +1,10 @@
 import { useMemo, useEffect, useState } from "react"
-import { StyleSheet, Text, View } from "react-native"
+import { StyleSheet, View } from "react-native"
+import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
 import Color from "color"
 import { gql, useQuery } from "@apollo/client"
-import { AntDesign } from "@expo/vector-icons"
+import { Feather } from "@expo/vector-icons"
 import moment from "moment"
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, withDelay, runOnJS } from "react-native-reanimated"
 import { useRefresh } from "@/utils/context/RefreshContext"
@@ -174,7 +175,7 @@ const AnimatedLineChart = ({ data, currentBalance, index, onPositionChange }: An
                     {[0, 1, 2, 3, 4].map((i) => {
                         const value = maxValue - ((maxValue - minValue) / 4) * i
                         return (
-                            <Text key={i} style={styles.yAxisLabel}>
+                            <Text key={i} size={9} color={Colors.text_light} opacity={0.5}>
                                 {formatValue(value)}
                             </Text>
                         )
@@ -239,15 +240,15 @@ const AnimatedLineChart = ({ data, currentBalance, index, onPositionChange }: An
 
                     {tooltip && (
                         <View style={[styles.tooltip, { left: tooltipLeft, top: tooltipTop }]} pointerEvents="none">
-                            <Text style={styles.tooltipLabel}>{tooltip.label}</Text>
-                            <Text style={styles.tooltipValue}>{formatValue(tooltip.value)}zł</Text>
+                            <Text size={9} weight="600" color={Colors.text_dark} letterSpacing={0.5} uppercase>{tooltip.label}</Text>
+                            <Text size={14} weight="700" color={Colors.text_light}>{formatValue(tooltip.value)}zł</Text>
                             <View style={styles.tooltipChange}>
-                                <AntDesign
-                                    name={isPositive ? "caret-up" : "caret-down"}
+                                <Feather
+                                    name={isPositive ? "arrow-up" : "arrow-down"}
                                     size={8}
                                     color={isPositive ? "#4ECDC4" : "#FF8A80"}
                                 />
-                                <Text style={[styles.tooltipPct, { color: isPositive ? "#4ECDC4" : "#FF8A80" }]}>
+                                <Text size={11} weight="600" color={isPositive ? "#4ECDC4" : "#FF8A80"}>
                                     {Math.abs(Math.round(tooltip.percentChange))}%
                                 </Text>
                             </View>
@@ -283,7 +284,7 @@ const BalancePredictionChart = () => {
         return (
             <View style={styles.container}>
                 <View style={styles.loadingContainer}>
-                    <Text style={styles.loadingText}>Loading...</Text>
+                    <Text size={14} color={Colors.text_light} opacity={0.7}>Loading...</Text>
                 </View>
             </View>
         )
@@ -293,7 +294,7 @@ const BalancePredictionChart = () => {
         return (
             <View style={styles.container}>
                 <View style={styles.loadingContainer}>
-                    <Text style={styles.loadingText}>No prediction data</Text>
+                    <Text size={14} color={Colors.text_light} opacity={0.7}>No prediction data</Text>
                 </View>
             </View>
         )
@@ -313,28 +314,26 @@ const BalancePredictionChart = () => {
 
             <View style={styles.footer}>
                 <View style={styles.footerStat}>
-                    <Text style={styles.footerAmount}>
-                        {currentBalance >= 1000 ? `${(currentBalance / 1000).toFixed(1)}k` : Math.round(currentBalance)}
-                        zł
+                    <Text size={16} weight="700" color={Colors.text_light} mono>
+                        {currentBalance >= 1000 ? `${(currentBalance / 1000).toFixed(1)}k` : Math.round(currentBalance)}zł
                     </Text>
-                    <Text style={styles.footerLabel}>current</Text>
+                    <Text size={10} color={Colors.text_light} opacity={0.4} letterSpacing={0.5} uppercase>current</Text>
                 </View>
 
                 <View style={styles.changeBadge}>
-                    <AntDesign name={isPositiveNet ? "caret-up" : "caret-down"} size={9} color={netColor} />
-                    <Text style={[styles.changeText, { color: netColor }]}>
+                    <Feather name={isPositiveNet ? "arrow-up" : "arrow-down"} size={9} color={netColor} />
+                    <Text size={12} weight="700" color={netColor}>
                         {Math.abs(Math.round(avgMonthlyNet))}zł/mo
                     </Text>
                 </View>
 
                 <View style={[styles.footerStat, { alignItems: "flex-end" }]}>
-                    <Text style={[styles.footerAmount, { color: Colors.secondary }]}>
+                    <Text size={16} weight="700" color={Colors.secondary} mono>
                         {projectedBalance >= 1000
                             ? `${(projectedBalance / 1000).toFixed(1)}k`
-                            : Math.round(projectedBalance)}
-                        zł
+                            : Math.round(projectedBalance)}zł
                     </Text>
-                    <Text style={styles.footerLabel}>12 months</Text>
+                    <Text size={10} color={Colors.text_light} opacity={0.4} letterSpacing={0.5} uppercase>12 months</Text>
                 </View>
             </View>
         </View>
@@ -360,11 +359,6 @@ const styles = StyleSheet.create({
         alignItems: "flex-start",
         paddingBottom: 17,
     },
-    yAxisLabel: {
-        color: Colors.text_light,
-        fontSize: 9,
-        opacity: 0.5,
-    },
     verticalLine: {
         position: "absolute",
         top: 0,
@@ -389,26 +383,10 @@ const styles = StyleSheet.create({
         alignItems: "center",
         gap: 1,
     },
-    tooltipLabel: {
-        fontSize: 9,
-        color: Colors.text_dark,
-        fontWeight: "600",
-        letterSpacing: 0.5,
-        textTransform: "uppercase",
-    },
-    tooltipValue: {
-        fontSize: 14,
-        fontWeight: "700",
-        color: Colors.text_light,
-    },
     tooltipChange: {
         flexDirection: "row",
         alignItems: "center",
         gap: 3,
-    },
-    tooltipPct: {
-        fontSize: 11,
-        fontWeight: "600",
     },
     footer: {
         flexDirection: "row",
@@ -420,18 +398,6 @@ const styles = StyleSheet.create({
     footerStat: {
         gap: 2,
     },
-    footerAmount: {
-        fontSize: 16,
-        fontWeight: "700",
-        color: Colors.text_light,
-    },
-    footerLabel: {
-        fontSize: 10,
-        color: Colors.text_light,
-        opacity: 0.4,
-        letterSpacing: 0.5,
-        textTransform: "uppercase",
-    },
     changeBadge: {
         flexDirection: "row",
         alignItems: "center",
@@ -441,19 +407,10 @@ const styles = StyleSheet.create({
         paddingVertical: 5,
         borderRadius: 20,
     },
-    changeText: {
-        fontSize: 12,
-        fontWeight: "700",
-    },
     loadingContainer: {
         height: CHART_HEIGHT + 30,
         justifyContent: "center",
         alignItems: "center",
-    },
-    loadingText: {
-        color: Colors.text_light,
-        fontSize: 14,
-        opacity: 0.7,
     },
 })
 

@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts";
 import Button from "@/components/ui/Button/Button";
 import Colors from "@/constants/Colors";
 import Layout from "@/constants/Layout";
@@ -29,7 +30,7 @@ export default function ChangeButton(props: {
           fontSize: 15,
           color: Color(Colors.primary_lighter).lighten(0.25).hex(),
           textDecorationLine: "underline",
-          fontWeight: "bold",
+          fontFamily: FONTS.bold,
         }}
       >
         {props.displayText}

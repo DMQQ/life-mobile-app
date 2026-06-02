@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import { Card, IconButton } from "@/components"
 import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
@@ -29,7 +30,7 @@ const styles = StyleSheet.create({
     },
     headerTitle: {
         fontSize: 17,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
         color: Colors.foreground,
     },
     headerCancel: {

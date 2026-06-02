@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import { Padding } from "@/constants/Layout"
 import { Rounded } from "@/constants/Values"
 import Color from "color"
@@ -73,7 +74,7 @@ const DateComponent = (props: DateProps) => {
                     variant="title"
                     style={{
                         color: props.isSelected ? Colors.foreground : Color(Colors.foreground).alpha(0.75).toString(),
-                        fontWeight: props.isSelected ? "bold" : "500",
+                        fontFamily: props.isSelected ? FONTS.bold : FONTS.medium,
                         fontSize: 23,
                     }}
                 >

@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import { AnimatedNumber } from "@/components"
 import DatePicker from "@/components/DatePicker"
 import Text from "@/components/ui/Text/Text"
@@ -167,7 +168,7 @@ const StreakTile = ({
                         variant="body"
                         style={[
                             styles.streakLengthHorizontal,
-                            { color: isLongest ? "#000" : Colors.foreground, fontWeight: "bold" },
+                            { color: isLongest ? "#000" : Colors.foreground, fontFamily: FONTS.bold },
                         ]}
                     >
                         {actualLength} days
@@ -400,7 +401,7 @@ const styles = StyleSheet.create({
     headerTitle: {
         color: Colors.foreground,
         fontSize: 18,
-        fontWeight: "bold",
+        fontFamily: FONTS.bold,
     },
     headerSubtitle: {
         color: "gray",
@@ -418,7 +419,7 @@ const styles = StyleSheet.create({
     dateToggleText: {
         color: Colors.foreground,
         textAlign: "center",
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
         fontSize: 13,
     },
     currentStreakAlert: {
@@ -459,7 +460,7 @@ const styles = StyleSheet.create({
     },
     itemValue: {
         color: Colors.foreground,
-        fontWeight: "bold",
+        fontFamily: FONTS.bold,
         fontSize: 17,
     },
     itemLabel: {
@@ -474,7 +475,7 @@ const styles = StyleSheet.create({
     sectionTitle: {
         color: Colors.foreground,
         marginBottom: 15,
-        fontWeight: "bold",
+        fontFamily: FONTS.bold,
     },
     streaksSection: {
         marginBottom: 0,

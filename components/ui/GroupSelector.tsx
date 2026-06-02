@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react"
-import { LayoutChangeEvent, Pressable, StyleSheet, Text, View } from "react-native"
+import { LayoutChangeEvent, Pressable, StyleSheet, View } from "react-native"
+import Text from "@/components/ui/Text/Text"
 import Animated, { useSharedValue, useAnimatedStyle, runOnJS, withTiming, withSpring } from "react-native-reanimated"
 import { Gesture, GestureDetector } from "react-native-gesture-handler"
 import theme from "@/constants/Colors"
@@ -129,7 +130,12 @@ export default function GroupSelector<V>({ options, value, onChange, size = "lar
                                     onPress={() => onChange(option.value)}
                                     style={styles.segment}
                                 >
-                                    <Text style={[styles.label, dynamicStyles.label, selected && styles.labelSelected]}>
+                                    <Text
+                                        size={dynamicStyles.label.fontSize}
+                                        weight={selected ? "600" : "500"}
+                                        color={selected ? theme.foreground : theme.foreground_secondary}
+                                        letterSpacing={-0.1}
+                                    >
                                         {option.label}
                                     </Text>
                                 </Pressable>
@@ -165,14 +171,5 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
         borderRadius: 9,
-    },
-    label: {
-        fontWeight: "500",
-        color: theme.foreground_secondary,
-        letterSpacing: -0.1,
-    },
-    labelSelected: {
-        color: theme.foreground,
-        fontWeight: "600",
     },
 })

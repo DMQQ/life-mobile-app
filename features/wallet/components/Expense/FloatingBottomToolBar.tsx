@@ -2,7 +2,8 @@ import { IconButton } from "@/components"
 import GlassView from "@/components/ui/GlassView"
 import Colors from "@/constants/Colors"
 import { SFSymbols6_0 } from "sf-symbols-typescript"
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native"
+import { ActivityIndicator, StyleSheet, View } from "react-native"
+import Text from "@/components/ui/Text/Text"
 import ContextMenu from "react-native-context-menu-view"
 
 export type ContextMenuOption = {
@@ -160,7 +161,7 @@ function ToolbarButton({
                 {hasBadge && <View style={styles.badge} />}
             </View>
 
-            <Text style={[styles.btnLabel, (dimmed || disabled) && { opacity: 0.35 }]}>{label}</Text>
+            <Text size={9} weight="500" letterSpacing={0.1} color={Colors.foreground_secondary} opacity={(dimmed || disabled) ? 0.35 : undefined}>{label}</Text>
         </View>
     )
 }
@@ -201,11 +202,5 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.secondary,
         borderWidth: 1.5,
         borderColor: Colors.primary,
-    },
-    btnLabel: {
-        color: Colors.foreground_secondary,
-        fontSize: 9,
-        fontWeight: "500",
-        letterSpacing: 0.1,
     },
 })

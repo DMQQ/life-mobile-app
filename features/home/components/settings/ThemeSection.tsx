@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import Button from "@/components/ui/Button/Button"
 import GroupSelector from "@/components/ui/GroupSelector"
 import Colors, { defaultColors } from "@/constants/Colors"
@@ -539,8 +540,8 @@ const ts = StyleSheet.create({
     toggle: {},
     toggleBtn: { flex: 1, paddingVertical: 9, borderRadius: 10, alignItems: "center" },
     toggleBtnActive: { backgroundColor: Color(Colors.primary).lighten(0.6).string() },
-    toggleLabel: { color: Colors.text_dark, fontSize: 14, fontWeight: "500" },
-    toggleLabelActive: { color: Colors.text_light, fontWeight: "600" },
+    toggleLabel: { color: Colors.text_dark, fontSize: 14, fontFamily: FONTS.medium },
+    toggleLabelActive: { color: Colors.text_light, fontFamily: FONTS.semibold },
 
     preview: {
         borderRadius: 18,
@@ -549,7 +550,7 @@ const ts = StyleSheet.create({
         alignItems: "center",
         minHeight: 72,
     },
-    previewTitle: { fontSize: 15, fontWeight: "600", marginBottom: 2 },
+    previewTitle: { fontSize: 15, fontFamily: FONTS.semibold, marginBottom: 2 },
     previewSub: { fontSize: 11 },
     previewSwatches: { flexDirection: "row", gap: 7 },
     previewSwatch: {
@@ -571,7 +572,7 @@ const ts = StyleSheet.create({
     cardSelected: { borderColor: Colors.secondary },
     cardInner: { padding: 12, height: 86, justifyContent: "space-between" },
     cardTop: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" },
-    cardName: { color: "#fff", fontSize: 12, fontWeight: "600", flex: 1, marginRight: 4 },
+    cardName: { color: "#fff", fontSize: 12, fontFamily: FONTS.semibold, flex: 1, marginRight: 4 },
     cardSwatches: { flexDirection: "row", gap: 5 },
     cardSwatch: {
         width: 18,
@@ -601,7 +602,7 @@ const ts = StyleSheet.create({
         borderWidth: 1.5,
         borderColor: "rgba(255,255,255,0.12)",
     },
-    colorLabel: { color: Colors.text_light, fontSize: 15, fontWeight: "500" },
+    colorLabel: { color: Colors.text_light, fontSize: 15, fontFamily: FONTS.medium },
     colorSub: { color: Colors.foreground_secondary, fontSize: 12, marginTop: 1 },
 
     groupHeader: {
@@ -613,14 +614,14 @@ const ts = StyleSheet.create({
         borderBottomWidth: StyleSheet.hairlineWidth,
         borderBottomColor: Colors.foreground_hairline,
     },
-    groupLabel: { color: Colors.foreground_secondary, fontSize: 13, fontWeight: "600", flex: 1 },
+    groupLabel: { color: Colors.foreground_secondary, fontSize: 13, fontFamily: FONTS.semibold, flex: 1 },
     groupBadge: {
         backgroundColor: Colors.foreground_hairline,
         borderRadius: 8,
         paddingHorizontal: 7,
         paddingVertical: 2,
     },
-    groupBadgeText: { color: Colors.foreground_secondary, fontSize: 11, fontWeight: "600" },
+    groupBadgeText: { color: Colors.foreground_secondary, fontSize: 11, fontFamily: FONTS.semibold },
     groupDivider: { height: StyleSheet.hairlineWidth, backgroundColor: Colors.foreground_hairline, marginVertical: 4 },
 
     colorSectionLabel: {
@@ -631,7 +632,7 @@ const ts = StyleSheet.create({
     colorSectionLabelText: {
         color: Colors.text_dark,
         fontSize: 11,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
         letterSpacing: 0.5,
         textTransform: "uppercase",
     },

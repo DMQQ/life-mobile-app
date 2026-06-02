@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import GlassView from "@/components/ui/GlassView"
 import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
@@ -47,6 +48,6 @@ const styles = StyleSheet.create({
     permissionBtnLabel: {
         color: Colors.secondary,
         fontSize: 15,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
     },
 })

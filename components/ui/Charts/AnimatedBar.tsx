@@ -1,5 +1,7 @@
+import { FONTS } from "@/constants/Fonts"
 import { useEffect } from "react"
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native"
+import { StyleSheet, TouchableOpacity, View } from "react-native"
+import Text from "@/components/ui/Text/Text"
 import Animated, {
     Extrapolation,
     interpolate,
@@ -101,7 +103,7 @@ const AnimatedBar: React.FC<AnimatedBarProps> = ({
                 <Animated.View style={[styles.singleBar, { backgroundColor: barColor }, animatedBarHeightOnly]}>
                     {valueLabel !== undefined && value > 0 && (
                         <Animated.View style={[styles.valueLabelWrapper, animatedValueOpacity]}>
-                            <Text style={styles.valueLabelText}>{isOutlier ? "↑" + valueLabel : valueLabel}</Text>
+                            <Text size={11} align="center" style={styles.valueLabelText}>{isOutlier ? "↑" + valueLabel : valueLabel}</Text>
                         </Animated.View>
                     )}
                 </Animated.View>
@@ -117,7 +119,7 @@ const AnimatedBar: React.FC<AnimatedBarProps> = ({
                     <Animated.View style={[styles.sideBySideBar, { backgroundColor: barColor }, animatedBarHeightOnly]}>
                         {valueLabel !== undefined && value > 0 && (
                             <Animated.View style={[styles.valueLabelWrapper, animatedValueOpacity]}>
-                                <Text style={styles.valueLabelText}>{isOutlier ? "↑" + valueLabel : valueLabel}</Text>
+                                <Text size={11} align="center" style={styles.valueLabelText}>{isOutlier ? "↑" + valueLabel : valueLabel}</Text>
                             </Animated.View>
                         )}
                     </Animated.View>
@@ -140,7 +142,7 @@ const AnimatedBar: React.FC<AnimatedBarProps> = ({
     return (
         <Animated.View style={[styles.barContainer, containerStyle, animatedContainerStyle]}>
             {bars}
-            <Text style={[styles.label, { color: "#fff" }]}>{label}</Text>
+            <Text size={11} weight="600" opacity={0.8} style={{ marginTop: 5 }}>{label}</Text>
         </Animated.View>
     )
 }
@@ -182,6 +184,12 @@ const styles = StyleSheet.create({
         alignItems: "center",
         overflow: "visible",
     },
+    label: {
+        fontSize: 11,
+        fontFamily: FONTS.semibold,
+        opacity: 0.8,
+        marginTop: 5,
+    },
     valueLabelWrapper: {
         position: "absolute",
         width: "100%",
@@ -190,18 +198,8 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     valueLabelText: {
-        color: "#fff",
-        fontSize: 11,
-        fontWeight: "400",
-        textAlign: "center",
         transform: [{ rotate: "-90deg" }],
         width: 80,
-    },
-    label: {
-        fontSize: 11,
-        fontWeight: "600",
-        marginTop: 5,
-        opacity: 0.8,
     },
 })
 

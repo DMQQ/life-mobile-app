@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Dimensions, StyleSheet, TouchableOpacity, View } from "react-native"
 import PagerView from "react-native-pager-view"
@@ -336,7 +337,7 @@ const styles = StyleSheet.create({
     },
     dayName: {
         fontSize: 11,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
         color: Colors.text_dark,
         letterSpacing: 0.5,
     },
@@ -349,7 +350,7 @@ const styles = StyleSheet.create({
     },
     dayNumberText: {
         fontSize: 13,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
         color: Colors.foreground,
     },
     hourGutterCell: {
@@ -361,7 +362,7 @@ const styles = StyleSheet.create({
     timeLabel: {
         fontSize: 10,
         color: Colors.foreground_secondary,
-        fontWeight: "700",
+        fontFamily: FONTS.bold,
     },
     dayColumnContent: {
         position: "relative",
@@ -406,7 +407,7 @@ const styles = StyleSheet.create({
     },
     eventTitle: {
         fontSize: 9,
-        fontWeight: "700",
+        fontFamily: FONTS.bold,
         color: Colors.foreground,
     },
     eventTime: {

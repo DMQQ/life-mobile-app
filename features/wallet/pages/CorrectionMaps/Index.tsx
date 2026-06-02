@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import Colors from "@/constants/Colors"
 import Text from "@/components/ui/Text/Text"
 import IconButton from "@/components/ui/IconButton/IconButton"
@@ -133,7 +134,7 @@ const styles = StyleSheet.create({
     },
     title: {
         fontSize: 18,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
     },
     scroll: { flex: 1 },
     scrollContent: {
@@ -154,7 +155,7 @@ const styles = StyleSheet.create({
     emptyText: {
         color: Colors.foreground,
         fontSize: 17,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
     },
     emptySubtext: {
         color: Colors.foreground_secondary,
@@ -173,6 +174,6 @@ const styles = StyleSheet.create({
     emptyBtnText: {
         color: Colors.secondary,
         fontSize: 14,
-        fontWeight: "500",
+        fontFamily: FONTS.medium,
     },
 })

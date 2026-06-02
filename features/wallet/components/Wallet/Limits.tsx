@@ -6,7 +6,8 @@ import Color from "color"
 import dayjs from "dayjs"
 import moment from "moment"
 import { useEffect, useMemo, useState } from "react"
-import { ScrollView, StyleSheet, Text, View } from "react-native"
+import { ScrollView, StyleSheet, View } from "react-native"
+import Text from "@/components/ui/Text/Text"
 import Feedback from "react-native-haptic-feedback"
 import Ripple from "react-native-material-ripple"
 import Animated, { FadeIn, LinearTransition } from "react-native-reanimated"
@@ -136,7 +137,7 @@ export default function WalletLimits({ navigation }: { navigation: any }) {
     if (error) {
         return (
             <View style={[styles.errorContainer, { height }]}>
-                <Text style={styles.errorText}>Failed to load limits</Text>
+                <Text size={15} color="#F07070">Failed to load limits</Text>
             </View>
         )
     }
@@ -165,25 +166,22 @@ export default function WalletLimits({ navigation }: { navigation: any }) {
                         style={{ flexDirection: "row", alignItems: "center", gap: 7.5 }}
                     >
                         <SymbolView name="gauge" size={20} tintColor={Colors.secondary} />
-                        <Text style={styles.header}>Spending Limits</Text>
+                        <Text size={18} weight="600" color={Colors.foreground}>Spending Limits</Text>
                     </Ripple>
                 </View>
 
                 {budgetStatus && (
                     <View style={{ flexDirection: "row", justifyContent: "center", marginBottom: 5 }}>
-                        <Animated.Text
-                            style={[styles.budgetIndicator, { color: budgetStatus.color }]}
-                            entering={FadeIn}
-                        >
+                        <Text size={12} weight="500" color={budgetStatus.color} style={{ marginTop: 4 }}>
                             {budgetStatus.text}
-                        </Animated.Text>
+                        </Text>
                     </View>
                 )}
             </View>
 
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                 {limits?.limits?.length === 0 ? (
-                    <Text style={[styles.emptyText, { width: Layout.screen.width - 30 }]}>
+                    <Text size={14} color="#9f9f9f" align="center" style={{ width: Layout.screen.width - 30, padding: 30, backgroundColor: Colors.primary_lighter, borderRadius: 15 }}>
                         No limits set for this period
                     </Text>
                 ) : (
@@ -262,18 +260,15 @@ export default function WalletLimits({ navigation }: { navigation: any }) {
                                                     { flexDirection: compactMode ? "column" : "row" },
                                                 ]}
                                             >
-                                                <Text
-                                                    style={[styles.categoryText, { textTransform: "capitalize" }]}
-                                                    numberOfLines={1}
-                                                >
+                                                <Text size={15} weight="600" color={Colors.foreground} uppercase flex={1} numberOfLines={1}>
                                                     {CategoryUtils.getCategoryName(limit.category)}
                                                 </Text>
 
-                                                <Text style={[styles.amountText, isOverLimit && styles.overLimitText]}>
+                                                <Text size={14} weight="600" color={isOverLimit ? "#F07070" : Colors.foreground}>
                                                     {limit.current.toFixed(2)}
-                                                    <Text style={styles.currencyText}> zł</Text>
-                                                    <Text style={styles.slashText}> / </Text>
-                                                    <Text>{limit.amount.toFixed(2)} zł</Text>
+                                                    <Text size={12} color={isOverLimit ? "#F07070" : Colors.foreground}> zł</Text>
+                                                    <Text size={14} color="#9f9f9f"> / </Text>
+                                                    <Text size={14} color={isOverLimit ? "#F07070" : Colors.foreground}>{limit.amount.toFixed(2)} zł</Text>
                                                 </Text>
                                             </View>
                                         )}
@@ -294,15 +289,11 @@ export default function WalletLimits({ navigation }: { navigation: any }) {
                                             </View>
 
                                             <Text
-                                                style={[
-                                                    styles.percentageText,
-                                                    {
-                                                        color: isOverLimit
-                                                            ? "#F07070"
-                                                            : iconData.backgroundColor || color,
-                                                    },
-                                                    compactMode && { fontSize: 12 },
-                                                ]}
+                                                size={compactMode ? 12 : 12}
+                                                weight="500"
+                                                color={isOverLimit ? "#F07070" : iconData.backgroundColor || color}
+                                                align="center"
+                                                style={{ marginLeft: 8, minWidth: 80, paddingRight: 7.5 }}
                                                 numberOfLines={2}
                                             >
                                                 {percentage.toFixed(0)}%
@@ -341,39 +332,11 @@ const styles = StyleSheet.create({
         marginBottom: 15,
         height: 25,
     },
-    header: {
-        fontSize: 18,
-        fontWeight: "600",
-        color: Colors.foreground,
-    },
-    budgetIndicator: {
-        fontSize: 12,
-        marginTop: 4,
-        fontWeight: "500",
-    },
     tabContainer: {
         flexDirection: "row",
         overflow: "hidden",
         gap: 5,
         justifyContent: "center",
-    },
-    tabButton: {
-        paddingVertical: 6,
-        paddingHorizontal: 10,
-    },
-    activeTabButton: {
-        backgroundColor: Colors.secondary,
-        borderRadius: 10,
-        paddingHorizontal: 15,
-    },
-    tabText: {
-        fontSize: 12,
-        color: "#9f9f9f",
-        fontWeight: "500",
-    },
-    activeTabText: {
-        color: Colors.foreground,
-        fontWeight: "600",
     },
     loadingContainer: {
         padding: 30,
@@ -389,17 +352,6 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.primary_lighter,
         borderRadius: 15,
         marginBottom: 15,
-    },
-    errorText: {
-        color: "#F07070",
-        fontSize: 15,
-    },
-    emptyText: {
-        textAlign: "center",
-        color: "#9f9f9f",
-        padding: 30,
-        backgroundColor: Colors.primary_lighter,
-        borderRadius: 15,
     },
     limitCard: {
         padding: 15,
@@ -427,26 +379,6 @@ const styles = StyleSheet.create({
         alignItems: "center",
         marginBottom: 8,
     },
-    categoryText: {
-        color: Colors.foreground,
-        fontWeight: "600",
-        fontSize: 15,
-        flex: 1,
-    },
-    amountText: {
-        color: Colors.foreground,
-        fontSize: 14,
-        fontWeight: "600",
-    },
-    currencyText: {
-        fontSize: 12,
-    },
-    slashText: {
-        color: "#9f9f9f",
-    },
-    overLimitText: {
-        color: "#F07070",
-    },
     progressContainer: {
         flexDirection: "row",
         alignItems: "center",
@@ -461,13 +393,5 @@ const styles = StyleSheet.create({
     progressFill: {
         height: "100%",
         borderRadius: 2,
-    },
-    percentageText: {
-        marginLeft: 8,
-        fontSize: 12,
-        fontWeight: "500",
-        minWidth: 80,
-        textAlign: "center",
-        paddingRight: 7.5,
     },
 })

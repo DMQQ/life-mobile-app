@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
 import { Expense } from "@/types"
@@ -35,7 +36,7 @@ const CategoryExpensesSheet = forwardRef<BottomSheet, Props>(
                         <View style={[styles.dot, { backgroundColor: categoryColor }]} />
                         <Text
                             variant="subheading"
-                            style={{ color: Colors.foreground, fontWeight: "bold", textTransform: "capitalize" }}
+                            style={{ color: Colors.foreground, fontFamily: FONTS.bold, textTransform: "capitalize" }}
                         >
                             {displayName}
                         </Text>

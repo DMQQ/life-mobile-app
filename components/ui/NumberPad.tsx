@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
 import { Entypo } from "@expo/vector-icons"
@@ -84,7 +85,7 @@ const NumberKey = ({
                 {isBack ? (
                     <Entypo name="chevron-left" size={40} color={Colors.foreground} />
                 ) : (
-                    <Text variant="title" style={{ color: Colors.foreground, fontWeight: "bold" }}>
+                    <Text variant="title" style={{ color: Colors.foreground, fontFamily: FONTS.bold }}>
                         {label}
                     </Text>
                 )}

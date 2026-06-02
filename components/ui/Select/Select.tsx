@@ -6,6 +6,7 @@ import {
     Pressable,
     LayoutChangeEvent,
 } from "react-native"
+import { FONTS } from "@/constants/Fonts"
 import Text from "@/components/ui/Text/Text"
 import GlassView from "@/components/ui/GlassView"
 import Layout from "../../../constants/Layout"
@@ -100,7 +101,7 @@ export default function Select({
                         variant="body"
                         style={{
                             color: isSelected ? Colors.secondary : Colors.foreground,
-                            fontWeight: isSelected ? "600" : "400",
+                            fontFamily: isSelected ? FONTS.semibold : FONTS.regular,
                         }}
                     >
                         {item}

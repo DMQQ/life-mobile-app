@@ -1,5 +1,6 @@
 import { Expense } from "@/types"
-import { StyleSheet, Text, View } from "react-native"
+import { StyleSheet, View } from "react-native"
+import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
 
 interface MonthlyBreakdownProps {
@@ -22,18 +23,17 @@ const MonthlyBreakdown = ({ expense, income }: MonthlyBreakdownProps) => {
             <View style={styles.contentContainer}>
                 {/* Working Days Row */}
                 <View style={styles.statItem}>
-                    <Text style={styles.statValue}>
-                        {workingDaysToAfford.toFixed(1)} <Text style={styles.unit}>days</Text>
+                    <Text size={35} weight="bold" color={Colors.secondary} mono>
+                        {workingDaysToAfford.toFixed(1)} <Text size={12} weight="400" color={Colors.text_dark}>days</Text>
                     </Text>
-                    <Text style={styles.statLabel}>Work days to afford</Text>
+                    <Text size={12} weight="500" color={Colors.text_dark}>Work days to afford</Text>
                 </View>
 
-                {/* Hours Row */}
                 <View style={styles.statItem}>
-                    <Text style={styles.statValue}>
-                        {hoursToAfford.toFixed(1)} <Text style={styles.unit}>hrs</Text>
+                    <Text size={35} weight="bold" color={Colors.secondary} mono>
+                        {hoursToAfford.toFixed(1)} <Text size={12} weight="400" color={Colors.text_dark}>hrs</Text>
                     </Text>
-                    <Text style={styles.statLabel}>Hours to afford</Text>
+                    <Text size={12} weight="500" color={Colors.text_dark}>Hours to afford</Text>
                 </View>
             </View>
         </View>
@@ -52,21 +52,6 @@ const styles = StyleSheet.create({
         flexDirection: "column",
 
         flex: 1,
-    },
-    statLabel: {
-        fontSize: 12,
-        color: Colors.text_dark,
-        fontWeight: "500",
-    },
-    statValue: {
-        fontSize: 35,
-        color: Colors.secondary,
-        fontWeight: "bold",
-    },
-    unit: {
-        fontSize: 12,
-        color: Colors.text_dark,
-        fontWeight: "normal",
     },
 })
 

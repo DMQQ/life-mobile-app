@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import { FlatList, Text } from "react-native";
 import ScreenContainer from "@/components/ui/ScreenContainer";
 import { useAppSelector } from "@/utils/redux";
@@ -48,7 +49,7 @@ export default function WorkoutSummary({ navigation }: WorkoutScreenProps<"Worko
       <Text
         style={{
           fontSize: 40,
-          fontWeight: "bold",
+          fontFamily: FONTS.bold,
           letterSpacing: 1,
           color: Colors.secondary,
         }}
@@ -64,7 +65,7 @@ export default function WorkoutSummary({ navigation }: WorkoutScreenProps<"Worko
             style={{
               color: Colors.text_light,
               fontSize: 20,
-              fontWeight: "bold",
+              fontFamily: FONTS.bold,
               padding: 10,
             }}
           >

@@ -1,6 +1,8 @@
+import { FONTS } from "@/constants/Fonts"
 import GlassView from "@/components/ui/GlassView"
 import Colors from "@/constants/Colors"
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native"
+import { StyleSheet, TouchableOpacity, View } from "react-native"
+import Text from "@/components/ui/Text/Text"
 import Ripple from "react-native-material-ripple"
 import { CategoryIcon } from "../Expense/ExpenseIcon"
 import { formatTimeAgo, Notification, useReadNotification } from "./useNotifications"
@@ -32,16 +34,16 @@ export default function NotificationCard({
                             </View>
 
                             <View style={styles.contentContainer}>
-                                <Text style={styles.title} numberOfLines={2}>
+                                <Text size={16} weight="600" color={Colors.text_light} lineHeight={20} numberOfLines={2} style={{ marginBottom: 4 }}>
                                     {notification.message.title}
                                 </Text>
                             </View>
                         </View>
 
-                        <Text style={styles.body}>{notification.message.body}</Text>
+                        <Text size={14} color={Colors.text_light} lineHeight={18} opacity={0.85} style={{ marginBottom: 10 }}>{notification.message.body}</Text>
 
                         <View style={[styles.footerRow]}>
-                            <Text style={styles.timestamp}>
+                            <Text size={12} weight="500" color={Colors.secondary_light_1}>
                                 {`${notification.read ? "" : "Not read, "} ${formatTimeAgo(notification.sendAt)}`.trim()}
                             </Text>
                         </View>
@@ -52,7 +54,7 @@ export default function NotificationCard({
                             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                             activeOpacity={0.7}
                         >
-                            <Text style={styles.dismissText}>×</Text>
+                            <Text size={16} weight="bold" color={Colors.text_light} lineHeight={16}>×</Text>
                         </TouchableOpacity>
                     </View>
                 </Ripple>
@@ -102,30 +104,11 @@ const styles = StyleSheet.create({
         flex: 1,
         minHeight: 0,
     },
-    title: {
-        color: Colors.text_light,
-        fontSize: 16,
-        fontWeight: "600",
-        lineHeight: 20,
-        marginBottom: 4,
-    },
-    body: {
-        color: Colors.text_light,
-        fontSize: 14,
-        lineHeight: 18,
-        opacity: 0.85,
-        marginBottom: 10,
-    },
     footerRow: {
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
         marginTop: 2,
-    },
-    timestamp: {
-        color: Colors.secondary_light_1,
-        fontSize: 12,
-        fontWeight: "500",
     },
     typeTag: {
         paddingHorizontal: 8,
@@ -135,7 +118,7 @@ const styles = StyleSheet.create({
     },
     typeTagText: {
         fontSize: 11,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
         textTransform: "uppercase",
         letterSpacing: 0.5,
         color: Colors.text_light,
@@ -152,11 +135,5 @@ const styles = StyleSheet.create({
         alignItems: "center",
         opacity: 0.8,
         backgroundColor: "rgba(255, 255, 255, 0.1)",
-    },
-    dismissText: {
-        color: Colors.text_light,
-        fontSize: 16,
-        fontWeight: "bold",
-        lineHeight: 16,
     },
 })

@@ -2,7 +2,8 @@ import { IconButton } from "@/components"
 import GlassView from "@/components/ui/GlassView"
 import Colors from "@/constants/Colors"
 import { SFSymbols6_0 } from "sf-symbols-typescript"
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native"
+import { ActivityIndicator, StyleSheet, View } from "react-native"
+import Text from "@/components/ui/Text/Text"
 import ContextMenu from "react-native-context-menu-view"
 
 interface Props {
@@ -99,11 +100,11 @@ function ToolbarButton({
                 <ActivityIndicator size="small" color={Colors.secondary} style={{ marginTop: 3, height: 13 }} />
             ) : (
                 <Text
-                    style={[
-                        styles.btnLabel,
-                        (dimmed || disabled) && { opacity: 0.35 },
-                        accent && { color: Colors.secondary },
-                    ]}
+                    size={9}
+                    weight="500"
+                    letterSpacing={0.1}
+                    color={accent ? Colors.secondary : Colors.foreground_secondary}
+                    opacity={(dimmed || disabled) ? 0.35 : undefined}
                 >
                     {label}
                 </Text>
@@ -151,11 +152,5 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.secondary,
         borderWidth: 1.5,
         borderColor: Colors.primary,
-    },
-    btnLabel: {
-        color: Colors.foreground_secondary,
-        fontSize: 9,
-        fontWeight: "500",
-        letterSpacing: 0.1,
     },
 })

@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import Colors from "@/constants/Colors"
 import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native"
 import Text from "@/components/ui/Text/Text"
@@ -56,8 +57,8 @@ const sb = StyleSheet.create({
         gap: 4,
         paddingHorizontal: 14,
     },
-    btnText: { color: "#fff", fontSize: 13, fontWeight: "700" },
-    editBtnText: { color: Colors.foreground, fontSize: 13, fontWeight: "600" },
+    btnText: { color: "#fff", fontSize: 13, fontFamily: FONTS.bold },
+    editBtnText: { color: Colors.foreground, fontSize: 13, fontFamily: FONTS.semibold },
     doneRow: { flexDirection: "row", alignItems: "center", gap: 6, paddingVertical: 4 },
-    doneText: { color: Colors.secondary, fontSize: 13, fontWeight: "600" },
+    doneText: { color: Colors.secondary, fontSize: 13, fontFamily: FONTS.semibold },
 })

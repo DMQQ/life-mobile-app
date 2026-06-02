@@ -1,6 +1,7 @@
 import Layout from "@/constants/Layout"
 import React, { useMemo, useState } from "react"
-import { StyleSheet, Text, View, ScrollView } from "react-native"
+import { StyleSheet, View, ScrollView } from "react-native"
+import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
 import Color from "color"
 import Button from "@/components/ui/Button/Button"
@@ -70,7 +71,7 @@ const CustomBarChart: React.FC<CustomBarChartProps> = ({ data, maxValue }) => {
         <View style={styles.chartWrapper}>
             <View style={styles.yAxisLabels}>
                 {[4, 3, 2, 1, 0].map((i) => (
-                    <Text key={i} style={styles.yAxisLabel}>
+                    <Text key={i} size={10} color={Colors.foreground}>
                         {Math.round((maxValue / 4) * i)}zł
                     </Text>
                 ))}
@@ -109,7 +110,7 @@ const CustomBarChart: React.FC<CustomBarChartProps> = ({ data, maxValue }) => {
                                     />
                                     {item.isLastInCategory && (
                                         <View style={styles.categoryLabelContainer}>
-                                            <Text style={styles.categoryLabelText}>
+                                            <Text size={12} weight="bold" color={Colors.foreground} align="center" style={{ backgroundColor: Color(Colors.primary).lighten(0.3).string(), paddingHorizontal: 8, paddingVertical: 3, borderRadius: 4 }}>
                                                 {CategoryUtils.getCategoryName(item.category)}
                                             </Text>
                                         </View>
@@ -230,13 +231,13 @@ const MonthlyCategoryComparison = ({ dateRange, type: viewType }: { dateRange: [
     if (loading)
         return (
             <View style={styles.loadingContainer}>
-                <Text style={styles.loadingText}>Loading...</Text>
+                <Text size={16} color={Colors.foreground}>Loading...</Text>
             </View>
         )
     if (error)
         return (
             <View style={styles.errorContainer}>
-                <Text style={styles.errorText}>Error: {error.message}</Text>
+                <Text size={16} color="#ff7777">Error: {error.message}</Text>
             </View>
         )
 
@@ -253,12 +254,7 @@ const MonthlyCategoryComparison = ({ dateRange, type: viewType }: { dateRange: [
                             selectedCategories.length === 0 && styles.selectedCategoryButton,
                         ]}
                     >
-                        <Text
-                            style={[
-                                styles.categoryFilterText,
-                                selectedCategories.length === 0 && styles.selectedCategoryText,
-                            ]}
-                        >
+                        <Text size={14} color={selectedCategories.length === 0 ? Colors.secondary : blueText}>
                             All
                         </Text>
                     </Button>
@@ -289,14 +285,8 @@ const MonthlyCategoryComparison = ({ dateRange, type: viewType }: { dateRange: [
                                 </View>
                             ) : null}
                             <Text
-                                style={[
-                                    styles.categoryFilterText,
-                                    selectedCategories.includes(category) && {
-                                        ...styles.selectedCategoryText,
-                                        color:
-                                            Icons[category as keyof typeof Icons]?.backgroundColor || Colors.secondary,
-                                    },
-                                ]}
+                                size={14}
+                                color={selectedCategories.includes(category) ? (Icons[category as keyof typeof Icons]?.backgroundColor || Colors.secondary) : blueText}
                             >
                                 {CategoryUtils.getCategoryName(category)}
                             </Text>
@@ -309,7 +299,7 @@ const MonthlyCategoryComparison = ({ dateRange, type: viewType }: { dateRange: [
                 <CustomBarChart data={chartData} maxValue={maxValue} />
             ) : (
                 <View style={styles.noDataContainer}>
-                    <Text style={styles.noDataText}>No data available for the selected months</Text>
+                    <Text size={16} color={Colors.foreground}>No data available for the selected months</Text>
                 </View>
             )}
         </View>
@@ -337,22 +327,11 @@ const styles = StyleSheet.create({
         backgroundColor: lowOpacity(Colors.secondary, 0.15),
         borderColor: lowOpacity(Colors.secondary, 0.5),
     },
-    categoryFilterText: {
-        color: blueText,
-        fontSize: 14,
-    },
-    selectedCategoryText: {
-        color: Colors.secondary,
-    },
     loadingContainer: {
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
         minHeight: 300,
-    },
-    loadingText: {
-        color: Colors.foreground,
-        fontSize: 16,
     },
     errorContainer: {
         padding: 20,
@@ -362,10 +341,6 @@ const styles = StyleSheet.create({
         borderColor: lowOpacity("#ff0000", 0.3),
         marginVertical: 20,
     },
-    errorText: {
-        color: "#ff7777",
-        fontSize: 16,
-    },
     noDataContainer: {
         padding: 30,
         alignItems: "center",
@@ -374,10 +349,6 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         height: 200,
         width: Layout.screen.width - 60,
-    },
-    noDataText: {
-        color: Colors.foreground,
-        fontSize: 16,
     },
     chartWrapper: {
         flexDirection: "row",
@@ -390,10 +361,6 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
         alignItems: "flex-end",
         paddingRight: 5,
-    },
-    yAxisLabel: {
-        color: Colors.foreground,
-        fontSize: 10,
     },
     chartContent: {
         flex: 1,
@@ -420,16 +387,6 @@ const styles = StyleSheet.create({
         right: -20,
         alignItems: "center",
         justifyContent: "center",
-    },
-    categoryLabelText: {
-        color: Colors.foreground,
-        fontSize: 12,
-        fontWeight: "bold",
-        backgroundColor: Color(Colors.primary).lighten(0.3).string(),
-        paddingHorizontal: 8,
-        paddingVertical: 3,
-        borderRadius: 4,
-        textAlign: "center",
     },
 })
 

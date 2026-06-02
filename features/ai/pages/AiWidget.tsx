@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
 import { Feather } from "@expo/vector-icons"
@@ -113,7 +114,7 @@ const s = StyleSheet.create({
         justifyContent: "center",
         marginBottom: 4,
     },
-    heroTitle: { fontSize: 22, fontWeight: "700", color: Colors.foreground, textAlign: "center" },
+    heroTitle: { fontSize: 22, fontFamily: FONTS.bold, color: Colors.foreground, textAlign: "center" },
     heroSubtitle: {
         fontSize: 14,
         color: Colors.foreground_secondary,
@@ -130,12 +131,12 @@ const s = StyleSheet.create({
         paddingVertical: 14,
         borderRadius: 100,
     },
-    startBtnText: { color: "#fff", fontWeight: "600", fontSize: 15 },
+    startBtnText: { color: "#fff", fontFamily: FONTS.semibold, fontSize: 15 },
     section: { gap: 8 },
     sectionTitle: {
         fontSize: 13,
         color: Colors.foreground_secondary,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
         marginBottom: 4,
         textTransform: "uppercase",
         letterSpacing: 0.5,

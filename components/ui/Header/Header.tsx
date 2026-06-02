@@ -1,4 +1,5 @@
 import Colors from "@/constants/Colors"
+import { FONTS } from "@/constants/Fonts"
 import Layout from "@/constants/Layout"
 import throttle from "@/utils/functions/throttle"
 import { useNavigation } from "@react-navigation/native"
@@ -394,7 +395,7 @@ const AnimatedContent = memo(
                 lineHeight: interpolate(
                     props.scrollY?.value || 0,
                     [0, THRESHOLD],
-                    [initialTitleFontSize * 0.95, 24],
+                    [initialTitleFontSize * 1.15, 20],
                     Extrapolation.CLAMP,
                 ),
             }
@@ -462,7 +463,7 @@ const styles = StyleSheet.create({
     animatedTitle: {
         color: Colors.foreground,
         fontSize: 16,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
         letterSpacing: 0.5,
         zIndex: 210,
     },
@@ -479,13 +480,13 @@ const styles = StyleSheet.create({
     },
     title: {
         fontSize: 60,
-        fontWeight: "bold",
+        fontFamily: FONTS.bold,
         color: Colors.foreground,
         letterSpacing: 1,
     },
     numericTitle: {
         fontSize: 60,
-        fontWeight: "bold",
+        fontFamily: FONTS.bold,
         textAlign: "center",
         color: Colors.foreground,
         letterSpacing: 1,

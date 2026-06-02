@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import { Card } from "@/components"
 import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
@@ -62,7 +63,7 @@ const FlashCardGroup = (group: Group & { index: number; length: number; onLongPr
                 }}
                 entering={FadeIn.delay((group.index + 1) * 50)}
             >
-                <Text style={{ color: Colors.secondary, fontSize: 22, fontWeight: "bold" }}>{group.name}</Text>
+                <Text style={{ color: Colors.secondary, fontSize: 22, fontFamily: FONTS.bold }}>{group.name}</Text>
                 <Text style={{ color: Colors.foreground, fontSize: 15 }}>{group.description}</Text>
 
                 <Animated.View entering={FadeIn} style={{ gap: 15, marginTop: 5, height: 50 }}>

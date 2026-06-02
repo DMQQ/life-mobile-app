@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import Colors from "@/constants/Colors"
 import Layout from "@/constants/Layout"
 import { Expense, MonthlyExpenses, Wallet } from "@/types"
@@ -309,18 +310,18 @@ const styles = StyleSheet.create({
     },
     monthText: {
         fontSize: 25,
-        fontWeight: "700",
+        fontFamily: FONTS.bold,
         color: Colors.text_light,
     },
     monthAmountPositive: {
         color: "#66E875",
         fontSize: 17,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
     },
     monthAmountNegative: {
         color: "#F07070",
         fontSize: 17,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
     },
     monthAmountCurrency: {
         fontSize: 13,
@@ -343,7 +344,7 @@ const styles = StyleSheet.create({
     },
     dateText: {
         color: "rgba(255,255,255,0.7)",
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
         fontSize: 14,
     },
     dateSumContainer: {
@@ -353,7 +354,7 @@ const styles = StyleSheet.create({
     },
     amount: {
         fontSize: 14,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
     },
     negative: {
         color: "#F07070",

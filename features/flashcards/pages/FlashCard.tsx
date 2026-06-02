@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import { Card } from "@/components"
 import DeleteFlashCardDialog from "@/components/ui/Dialog/Delete/DeleteFlashCardDialog"
 import Header from "@/components/ui/Header/Header"
@@ -54,7 +55,7 @@ export default function FlashCardScreen({ navigation, route }: any) {
                 }}
                 style={{ marginBottom: 15 }}
             >
-                <Text style={{ color: Colors.foreground, fontSize: 18, fontWeight: "600" }}>{item.question}</Text>
+                <Text style={{ color: Colors.foreground, fontSize: 18, fontFamily: FONTS.semibold }}>{item.question}</Text>
                 <Text style={{ color: Colors.foreground, marginTop: 10, fontSize: 16 }}>{item.answer}</Text>
 
                 <Text style={{ color: "rgba(255,255,255,0.6)", marginTop: 10, fontSize: 16 }}>

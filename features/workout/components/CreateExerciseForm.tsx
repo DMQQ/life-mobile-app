@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import { View, Text, StyleSheet, StyleProp, ViewStyle } from "react-native";
 import * as Yup from "yup";
 import { Formik } from "formik";
@@ -75,7 +76,7 @@ export default function CreateExerciseForm(
               <ValidatedInput.Label error={false} text="Exercise difficulty" />
               <SegmentedButtons
                 buttonTextStyle={{
-                  fontWeight: "400",
+                  fontFamily: FONTS.regular,
                 }}
                 buttonStyle={{
                   margin: 5,

@@ -2,7 +2,8 @@ import Colors from "@/constants/Colors"
 import lowOpacity from "@/utils/functions/lowOpacity"
 import { Feather } from "@expo/vector-icons"
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { Pressable, StyleSheet, Text, TextStyle, View, ViewStyle } from "react-native"
+import { Pressable, StyleSheet, TextStyle, View, ViewStyle } from "react-native"
+import Text from "@/components/ui/Text/Text"
 import Feedback from "react-native-haptic-feedback"
 import Animated, { useAnimatedStyle, useSharedValue, withSpring, withTiming } from "react-native-reanimated"
 import ChipButton from "./Button/ChipButton"
@@ -294,7 +295,7 @@ const CollapsibleStack = React.memo(
             <View style={[defaultStyles.container, customStyles.container]}>
                 {showHeader && (
                     <View style={[defaultStyles.header, customStyles.header]}>
-                        <Text style={[defaultStyles.title, customStyles.title]}>{titleText}</Text>
+                        <Text size={16} weight="bold" style={customStyles.title}>{titleText}</Text>
 
                         <ChipButton
                             onPress={toggleExpand}
@@ -358,11 +359,6 @@ const defaultStyles = StyleSheet.create({
         alignItems: "center",
         marginBottom: 10,
         zIndex: 2,
-    },
-    title: {
-        color: Colors.foreground,
-        fontSize: 16,
-        fontWeight: "bold",
     },
     expandButton: {
         flexDirection: "row",

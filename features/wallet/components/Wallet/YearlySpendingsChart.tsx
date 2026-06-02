@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import Colors from "@/constants/Colors"
 import Layout from "@/constants/Layout"
 import { gql, useQuery } from "@apollo/client"
@@ -137,7 +138,7 @@ const styles = StyleSheet.create({
     },
     refValueText: {
         fontSize: 10,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
         color: Colors.primary,
     },
     scrollContent: {
@@ -148,7 +149,7 @@ const styles = StyleSheet.create({
     },
     valueLabel: {
         fontSize: 9,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
         marginBottom: VALUE_TEXT_MB,
         height: VALUE_TEXT_H,
         textAlignVertical: "bottom",

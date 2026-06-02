@@ -1,7 +1,13 @@
+import { FONTS } from "@/constants/Fonts"
 import Colors from "@/constants/Colors"
 import Color from "color"
+import { LinearGradient } from "expo-linear-gradient"
 import React from "react"
-import { StyleSheet, View } from "react-native"
+import { StyleSheet, View, Text } from "react-native"
+
+const AI_A = "#7C3AED"
+const AI_B = "#06B6D4"
+const AI_BG = Color(Colors.primary_lighter).mix(Color(AI_A), 0.22).hex()
 
 export function ChartPreview() {
     const heights = [20, 35, 28, 42, 18, 38, 30]
@@ -125,6 +131,74 @@ export function QuickStatsPreview() {
                 <View style={[s.statDot, { backgroundColor: Color(Colors.ternary).alpha(0.25).string() }]} />
                 <View style={[s.tLine, { width: 36, backgroundColor: Color(Colors.ternary).alpha(0.6).string(), height: 5 }]} />
                 <View style={[s.tLine, { width: 28, backgroundColor: Color(Colors.foreground).alpha(0.1).string() }]} />
+            </View>
+        </View>
+    )
+}
+
+export function AiInsightPreview() {
+    return (
+        <View style={[s.preview, { padding: 0, overflow: "hidden", borderRadius: 10 }]}>
+            <LinearGradient colors={[AI_BG, Color(Colors.primary_lighter).mix(Color(AI_B), 0.14).hex()]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
+            <View style={{ padding: 10, gap: 6 }}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
+                    <LinearGradient colors={[AI_A, AI_B]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={{ borderRadius: 100, paddingHorizontal: 6, paddingVertical: 2 }}>
+                        <Text style={{ fontSize: 7, fontFamily: FONTS.extrabold, color: "#fff" }}>AI</Text>
+                    </LinearGradient>
+                    <View style={[s.tLine, { width: 40, backgroundColor: "rgba(255,255,255,0.15)" }]} />
+                </View>
+                <View style={[s.tLine, { width: 90, height: 5, backgroundColor: "rgba(255,255,255,0.6)" }]} />
+                <View style={[s.tLine, { width: 70, backgroundColor: "rgba(255,255,255,0.25)" }]} />
+            </View>
+        </View>
+    )
+}
+
+export function UpcomingBillsPreview() {
+    const rows = [
+        { color: Colors.secondary, days: "2d", w: 55 },
+        { color: Colors.ternary ?? Colors.positive, days: "5d", w: 70 },
+        { color: Colors.positive, days: "12d", w: 45 },
+    ]
+    return (
+        <View style={[s.preview, { justifyContent: "space-around" }]}>
+            {rows.map((r, i) => (
+                <View key={i} style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                    <View style={{ width: 14, height: 14, borderRadius: 7, backgroundColor: Color(r.color).alpha(0.2).string() }} />
+                    <View style={[s.tLine, { flex: 1, backgroundColor: "rgba(255,255,255,0.12)" }]} />
+                    <View style={[s.tLine, { width: r.w, backgroundColor: Color(r.color).alpha(0.5).string() }]} />
+                    <View style={{ paddingHorizontal: 5, paddingVertical: 2, borderRadius: 100, backgroundColor: Color(Colors.warning).alpha(0.15).string() }}>
+                        <Text style={{ fontSize: 7, color: Colors.warning, fontFamily: FONTS.bold }}>{r.days}</Text>
+                    </View>
+                </View>
+            ))}
+        </View>
+    )
+}
+
+export function EventCompletionPreview() {
+    const bars = [0, 0.6, 1, 0.4, 1, 1, 0.8, 0.3, 1, 0.7, 0, 1, 0.9, 0.6]
+    const color = (r: number) =>
+        r === 1 ? Colors.positive : r >= 0.5 ? Colors.secondary : r > 0 ? Colors.warning : "transparent"
+    return (
+        <View style={[s.preview, { flexDirection: "column", justifyContent: "flex-end", gap: 4 }]}>
+            <View style={{ flexDirection: "row", gap: 2, alignItems: "center" }}>
+                <View style={[s.tLine, { width: 22, height: 5, backgroundColor: Color(Colors.positive).alpha(0.8).string() }]} />
+                <View style={[s.tLine, { width: 14, height: 4, backgroundColor: Color(Colors.text_dark).alpha(0.4).string() }]} />
+            </View>
+            <View style={{ flexDirection: "row", alignItems: "flex-end", gap: 2, height: 38 }}>
+                {bars.map((r, i) => (
+                    <View
+                        key={i}
+                        style={{
+                            flex: 1,
+                            height: r > 0 ? Math.max(r * 38, 3) : 2,
+                            backgroundColor:
+                                r > 0 ? Color(color(r)).alpha(0.75).string() : "rgba(255,255,255,0.05)",
+                            borderRadius: 3,
+                        }}
+                    />
+                ))}
             </View>
         </View>
     )

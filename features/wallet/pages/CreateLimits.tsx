@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import { AnimatedSelector, Button } from "@/components"
 import IconButton from "@/components/ui/IconButton/IconButton"
 import Text from "@/components/ui/Text/Text"
@@ -236,7 +237,7 @@ const styles = StyleSheet.create({
     modalTitle: {
         textAlign: "center",
         fontSize: 18,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
     },
     content: {
         flex: 1,
@@ -264,7 +265,7 @@ const styles = StyleSheet.create({
     },
     sectionTitle: {
         color: Colors.foreground,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
         fontSize: 18,
         marginBottom: 8,
     },

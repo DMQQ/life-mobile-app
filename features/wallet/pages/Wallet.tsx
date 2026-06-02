@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import Header, { HeaderItem } from "@/components/ui/Header/Header"
 import Colors from "@/constants/Colors"
 import Color from "color"
@@ -305,7 +306,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     tabTitle: {
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
         fontSize: 22.5,
         color: Colors.foreground,
     },
@@ -315,7 +316,7 @@ const styles = StyleSheet.create({
     seeAll: {
         fontSize: 13,
         color: Colors.secondary,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
         marginRight: 10,
     },
     quickNav: {
@@ -341,14 +342,14 @@ const styles = StyleSheet.create({
     },
     quickNavTitle: {
         fontSize: 15,
-        fontWeight: "700",
+        fontFamily: FONTS.bold,
         color: Colors.foreground,
         marginTop: 5,
     },
     quickNavSub: {
         fontSize: 12,
         color: Colors.foreground_secondary,
-        fontWeight: "500",
+        fontFamily: FONTS.medium,
         marginTop: 5,
     },
 })

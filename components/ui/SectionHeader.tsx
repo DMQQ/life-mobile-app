@@ -1,4 +1,5 @@
 import { StyleProp, StyleSheet, View, ViewStyle } from "react-native"
+import { FONTS } from "@/constants/Fonts"
 import Text from "./Text/Text"
 import Colors from "@/constants/Colors"
 
@@ -35,7 +36,7 @@ const styles = StyleSheet.create({
     title: {
         color: Colors.text_dark,
         fontSize: 11,
-        fontWeight: "700",
+        fontFamily: FONTS.bold,
         letterSpacing: 0.8,
     },
     divider: {

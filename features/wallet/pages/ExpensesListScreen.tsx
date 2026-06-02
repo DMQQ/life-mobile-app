@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import Header from "@/components/ui/Header/Header"
 import Colors from "@/constants/Colors"
 import useTrackScroll from "@/utils/hooks/ui/useTrackScroll"
@@ -512,7 +513,7 @@ const styles = StyleSheet.create({
     },
     filterBadgeText: {
         fontSize: 9,
-        fontWeight: "700",
+        fontFamily: FONTS.bold,
         color: Colors.foreground,
     },
 })
@@ -549,7 +550,7 @@ const searchBarStyles = StyleSheet.create({
     },
     pillText: {
         fontSize: 12,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
         color: Colors.foreground_secondary,
     },
     pillTextActive: {

@@ -1,7 +1,8 @@
 import Colors from "@/constants/Colors"
 import lowOpacity from "@/utils/functions/lowOpacity"
 import Color from "color"
-import { ScrollView, StyleSheet, Text, View } from "react-native"
+import { ScrollView, StyleSheet, View } from "react-native"
+import Text from "@/components/ui/Text/Text"
 import Feedback from "react-native-haptic-feedback"
 import Ripple from "react-native-material-ripple"
 import { useCreateExpenseContext } from "@/features/wallet/context/CreateExpenseContext"
@@ -62,14 +63,8 @@ export const SpontaneousRateChip = ({ value, onPress }: { value: number; onPress
                 },
             ]}
         >
-            <Text style={{ fontSize: 15 }}>{selectedOption.icon}</Text>
-            <Text
-                style={{
-                    color: value === 0 ? "rgba(255,255,255,0.7)" : color,
-                    fontSize: 14,
-                    fontWeight: "500",
-                }}
-            >
+            <Text size={15}>{selectedOption.icon}</Text>
+            <Text size={14} weight="500" color={value === 0 ? "rgba(255,255,255,0.7)" : color}>
                 Spontaneous
             </Text>
         </Ripple>
@@ -100,12 +95,12 @@ export const SpontaneousRateSelector = ({ onDismiss }: { onDismiss?: () => void 
                             setTimeout(() => dismiss(), 300)
                         }}
                     >
-                        <Text style={styles.tileIcon}>{option.icon}</Text>
-                        <Text style={[styles.tileLabel, { color: selected ? color : "rgba(255,255,255,0.85)" }]}>
+                        <Text size={20} align="center" style={{ width: 24 }}>{option.icon}</Text>
+                        <Text flex={1} size={14} weight="500" color={selected ? color : "rgba(255,255,255,0.85)"}>
                             {option.label}
                         </Text>
                         <View style={[styles.badge, { backgroundColor: color, opacity: selected ? 1 : 0.3 }]}>
-                            <Text style={styles.badgeText}>{option.value}%</Text>
+                            <Text size={12} weight="bold" color="#fff">{option.value}%</Text>
                         </View>
                     </Ripple>
                 )
@@ -134,24 +129,9 @@ const styles = StyleSheet.create({
         gap: 12,
         marginBottom: 8,
     },
-    tileIcon: {
-        fontSize: 20,
-        width: 24,
-        textAlign: "center",
-    },
-    tileLabel: {
-        flex: 1,
-        fontSize: 14,
-        fontWeight: "500",
-    },
     badge: {
         paddingHorizontal: 10,
         paddingVertical: 4,
         borderRadius: 20,
-    },
-    badgeText: {
-        color: "#fff",
-        fontWeight: "bold",
-        fontSize: 12,
     },
 })

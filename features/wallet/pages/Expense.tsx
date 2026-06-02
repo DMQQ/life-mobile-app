@@ -6,7 +6,8 @@ import { gql, useMutation, useQuery } from "@apollo/client"
 import { GET_EXPENSE } from "../hooks/getExpenseQuery"
 import { SFSymbol, SymbolView } from "expo-symbols"
 import { useEffect, useRef, useState } from "react"
-import { Pressable, StyleSheet, Text, View } from "react-native"
+import { Pressable, StyleSheet, View } from "react-native"
+import Text from "@/components/ui/Text/Text"
 import useDeleteActivity from "../hooks/useDeleteActivity"
 import useRefund from "../hooks/useRefundExpense"
 import useSubscription from "../hooks/useSubscription"
@@ -216,21 +217,10 @@ export default function Expense({ route: { params }, navigation }: any) {
                             borderRadius: 100,
                         }}
                     />
-                    <Text
-                        style={{
-                            fontSize: 15,
-                            color: Colors.text_dark,
-                        }}
-                    >
+                    <Text size={15} color={Colors.text_dark}>
                         {selected?.description}
                     </Text>
-                    <Text
-                        style={{
-                            color: "#fff",
-                            fontSize: 40,
-                            fontWeight: "500",
-                        }}
-                    >
+                    <Text size={40} weight="500" color="#fff" mono>
                         {selected?.amount}zł
                     </Text>
                 </View>
@@ -263,7 +253,7 @@ export default function Expense({ route: { params }, navigation }: any) {
                                 }}
                                 style={styles.emptySubRow}
                             >
-                                <Text style={styles.emptySubText}>Add sub-expenses to break down this expense</Text>
+                                <Text size={13} color={Colors.text_dark}>Add sub-expenses to break down this expense</Text>
                             </Pressable>
                         )}
                     </Section>
@@ -381,9 +371,5 @@ const styles = StyleSheet.create({
     emptySubRow: {
         paddingHorizontal: 15,
         paddingVertical: 14,
-    },
-    emptySubText: {
-        color: Colors.text_dark,
-        fontSize: 13,
     },
 })

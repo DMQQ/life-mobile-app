@@ -1,4 +1,5 @@
 import { View, StyleSheet } from "react-native";
+import { FONTS } from "@/constants/Fonts";
 import Text from "@/components/ui/Text/Text";
 import { useState, useEffect, memo, useMemo } from "react";
 import Colors from "../../../constants/Colors";
@@ -47,11 +48,11 @@ const styles = StyleSheet.create({
   timer: {
     color: Colors.secondary,
     fontSize: 100,
-    fontWeight: "bold",
+    fontFamily: FONTS.bold,
     lineHeight: 110,
     textAlign: "center",
   },
-  text: { color: Colors.foreground, fontSize: 18, fontWeight: "bold" },
+  text: { color: Colors.foreground, fontSize: 18, fontFamily: FONTS.bold },
   stop: {
     borderRadius: 5,
     padding: 10,

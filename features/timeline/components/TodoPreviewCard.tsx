@@ -1,6 +1,8 @@
+import { FONTS } from "@/constants/Fonts"
 import Colors from "@/constants/Colors"
 import Color from "color"
-import { StyleSheet, Text, View } from "react-native"
+import { StyleSheet, View } from "react-native"
+import Text from "@/components/ui/Text/Text"
 import Ripple from "react-native-material-ripple"
 import useQuickCompleteTodo from "../hooks/mutation/useQuickCompleteTodo"
 import Checkbox from "@/components/ui/Checkbox"
@@ -36,11 +38,12 @@ export default function TodoPreviewCard({ todo, timelineId, occurrenceDate, text
 
             <Text
                 numberOfLines={1}
-                style={[
-                    styles.todoText,
-                    todo.isCompleted && styles.todoTextCompleted,
-                    textColor && { color: textColor },
-                ]}
+                size={13}
+                flex={1}
+                weight="500"
+                color={textColor ?? (todo.isCompleted ? Colors.text_dark : Colors.text_light)}
+                strikethrough={todo.isCompleted}
+                opacity={todo.isCompleted ? 0.6 : undefined}
             >
                 {todo.title}
             </Text>
@@ -76,17 +79,6 @@ const styles = StyleSheet.create({
     checkmark: {
         color: "white",
         fontSize: 12,
-        fontWeight: "bold",
-    },
-    todoText: {
-        fontSize: 13,
-        flex: 1,
-        color: Colors.text_light,
-        fontWeight: "500",
-    },
-    todoTextCompleted: {
-        textDecorationLine: "line-through",
-        opacity: 0.6,
-        color: Colors.text_dark,
+        fontFamily: FONTS.bold,
     },
 })

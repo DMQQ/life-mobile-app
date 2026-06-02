@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import { ModalHeader } from "@/components"
 import Text from "@/components/ui/Text/Text"
 import { calendarTheme } from "@/constants/Colors"
@@ -120,7 +121,7 @@ const styles = StyleSheet.create({
     },
     daySummaryText: {
         color: Colors.secondary,
-        fontWeight: "700",
+        fontFamily: FONTS.bold,
         fontSize: 16,
     },
     calendar: {
@@ -130,7 +131,7 @@ const styles = StyleSheet.create({
     sectionLabel: {
         color: Colors.foreground_disabled,
         fontSize: 12,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
         textTransform: "uppercase",
         letterSpacing: 0.5,
         marginBottom: 10,
@@ -146,7 +147,7 @@ const styles = StyleSheet.create({
     monthLabel: {
         color: Colors.foreground_disabled,
         fontSize: 16,
-        fontWeight: "500",
+        fontFamily: FONTS.medium,
     },
     toggle: {
         width: 26,

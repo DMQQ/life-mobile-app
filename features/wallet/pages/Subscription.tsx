@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import Text from "@/components/ui/Text/Text"
 import SubscriptionSkeleton from "../components/Subscription/SubscriptionSkeleton"
 import { gql, useQuery } from "@apollo/client"
@@ -225,7 +226,7 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                             }}
                         />
                         <Text style={{ fontSize: 15, color: Colors.text_dark }}>{subscription.description}</Text>
-                        <Text style={{ color: "#fff", fontSize: 40, fontWeight: "500" }}>
+                        <Text style={{ color: "#fff", fontSize: 40, fontFamily: FONTS.medium }}>
                             {subscription.amount.toFixed(2)}zł
                         </Text>
                     </View>
@@ -312,7 +313,7 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                                         variant="caption"
                                         style={{
                                             color: subscription.isActive ? "#66E875" : Colors.text_dark,
-                                            fontWeight: "600",
+                                            fontFamily: FONTS.semibold,
                                         }}
                                     >
                                         {subscription.isActive ? "Active" : "Inactive"}
@@ -483,7 +484,7 @@ const styles = StyleSheet.create({
     },
     statValue: {
         color: Colors.foreground,
-        fontWeight: "bold",
+        fontFamily: FONTS.bold,
         marginBottom: 5,
     },
     statLabel: {

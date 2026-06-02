@@ -1,6 +1,7 @@
 import Layout from "@/constants/Layout"
 import { useMemo, useState, useEffect } from "react"
-import { StyleSheet, Text, View } from "react-native"
+import { StyleSheet, View } from "react-native"
+import Text from "@/components/ui/Text/Text"
 import Colors, { secondary_candidates } from "@/constants/Colors"
 import Color from "color"
 import ChartTemplate, { Types } from "./ChartTemplate"
@@ -36,19 +37,14 @@ function ChartLegend({ data, type }: LegendProps) {
                 return (
                     <View key={index} style={styles.legendItem}>
                         <View style={styles.legendTextContainer}>
-                            <Text style={styles.legendLabel}>{labels[index]}</Text>
+                            <Text size={14} weight="600" color={Colors.foreground}>{labels[index]}</Text>
                             <View style={styles.valueRow}>
-                                <Text style={styles.legendValue}>
+                                <Text size={12} color={blueText}>
                                     {item.value.toFixed(type === "count" ? 0 : 1)}
                                     {type !== "count" && "zł"}
                                 </Text>
                                 {item.prevValue !== undefined && (
-                                    <Text
-                                        style={[
-                                            styles.changeText,
-                                            { color: changePercent >= 0 ? "#4ade80" : "#f87171" },
-                                        ]}
-                                    >
+                                    <Text size={10} weight="600" color={changePercent >= 0 ? "#4ade80" : "#f87171"}>
                                         {changePercent >= 0 ? "+" : ""}
                                         {changePercent.toFixed(0)}%
                                     </Text>
@@ -98,7 +94,7 @@ export const CustomDayBarChart = ({ data, maxValue, type }: { data: BarItem[]; m
         <View style={styles.chartWrapper}>
             <View style={styles.yAxisLabels}>
                 {[4, 3, 2, 1, 0].map((i) => (
-                    <Text key={i} style={styles.yAxisLabel}>
+                    <Text key={i} size={10} color={Colors.foreground}>
                         {type === "count" ? Math.round((maxValue / 4) * i) : Math.round((maxValue / 4) * i)}
                     </Text>
                 ))}
@@ -133,18 +129,18 @@ export const CustomDayBarChart = ({ data, maxValue, type }: { data: BarItem[]; m
 
                 {selectedBar && (
                     <Animated.View style={[styles.tooltip, animatedTooltipStyle]}>
-                        <Text style={styles.tooltipTitle}>{labels[selectedBar.day - 1]}</Text>
-                        <Text style={styles.tooltipValue}>
+                        <Text size={14} weight="bold" color={Colors.foreground}>{labels[selectedBar.day - 1]}</Text>
+                        <Text size={12} color={Colors.foreground} style={{ marginVertical: 1 }}>
                             Current: {selectedBar.value.toFixed(type === "count" ? 0 : 2)}
                             {type === "count" ? " tx" : "zł"}
                         </Text>
                         {selectedBar.prevValue !== undefined ? (
-                            <Text style={styles.tooltipValue}>
+                            <Text size={12} color={Colors.foreground} style={{ marginVertical: 1 }}>
                                 Previous: {selectedBar.prevValue.toFixed(type === "count" ? 0 : 2)}
                                 {type === "count" ? " tx" : "zł"}
                             </Text>
                         ) : (
-                            <Text style={[styles.tooltipValue, { fontStyle: "italic", opacity: 0.7 }]}>
+                            <Text size={12} color={Colors.foreground} italic opacity={0.7} style={{ marginVertical: 1 }}>
                                 Previous: No data
                             </Text>
                         )}
@@ -254,7 +250,7 @@ const SpendingsByDay = ({ type, ...props }: { dateRange: [string, string]; type:
     if (query.loading || prevQuery.loading) {
         return (
             <View style={styles.loadingContainer}>
-                <Text style={styles.loadingText}>Loading...</Text>
+                <Text size={16} color={Colors.foreground}>Loading...</Text>
             </View>
         )
     }
@@ -275,7 +271,7 @@ const SpendingsByDay = ({ type, ...props }: { dateRange: [string, string]; type:
                                     borderRadius: 2,
                                 }}
                             />
-                            <Text style={{ fontSize: 12, color: Colors.foreground }}>Current Period</Text>
+                            <Text size={12} color={Colors.foreground}>Current Period</Text>
                         </View>
                         <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
                             <View
@@ -286,10 +282,10 @@ const SpendingsByDay = ({ type, ...props }: { dateRange: [string, string]; type:
                                     borderRadius: 2,
                                 }}
                             />
-                            <Text style={{ fontSize: 12, color: Colors.foreground }}>Previous Period</Text>
+                            <Text size={12} color={Colors.foreground}>Previous Period</Text>
                         </View>
                     </View>
-                    <Text style={styles.dateRangeText}>
+                    <Text size={10} color={Color(Colors.foreground).alpha(0.7).string()} align="center">
                         {formatDate(props.dateRange[0])} - {formatDate(props.dateRange[1])} vs{" "}
                         {formatDate(previousDateRange[0])} - {formatDate(previousDateRange[1])}
                     </Text>
@@ -316,10 +312,6 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
         alignItems: "flex-start",
         paddingLeft: 2,
-    },
-    yAxisLabel: {
-        color: Colors.foreground,
-        fontSize: 10,
     },
     chartContent: {
         flex: 1,
@@ -356,16 +348,6 @@ const styles = StyleSheet.create({
         minWidth: 120,
         zIndex: 10,
     },
-    tooltipTitle: {
-        color: Colors.foreground,
-        fontWeight: "bold",
-        fontSize: 14,
-    },
-    tooltipValue: {
-        color: Colors.foreground,
-        fontSize: 12,
-        marginVertical: 1,
-    },
     periodLegendContainer: {
         marginTop: 15,
         alignItems: "center",
@@ -375,11 +357,6 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         gap: 15,
         justifyContent: "center",
-    },
-    dateRangeText: {
-        fontSize: 10,
-        color: Color(Colors.foreground).alpha(0.7).string(),
-        textAlign: "center",
     },
     legendContainer: {
         flexDirection: "row",
@@ -408,34 +385,17 @@ const styles = StyleSheet.create({
     legendTextContainer: {
         flex: 1,
     },
-    legendLabel: {
-        color: Colors.foreground,
-        fontSize: 14,
-        fontWeight: "600",
-    },
     valueRow: {
         flexDirection: "row",
         alignItems: "center",
         gap: 6,
         marginTop: 2,
     },
-    legendValue: {
-        color: blueText,
-        fontSize: 12,
-    },
-    changeText: {
-        fontSize: 10,
-        fontWeight: "600",
-    },
     loadingContainer: {
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
         minHeight: 300,
-    },
-    loadingText: {
-        color: Colors.foreground,
-        fontSize: 16,
     },
 })
 

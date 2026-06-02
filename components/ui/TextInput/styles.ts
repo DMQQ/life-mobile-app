@@ -1,4 +1,5 @@
 import { StyleSheet } from "react-native";
+import { FONTS } from "@/constants/Fonts";
 import Colors from "../../../constants/Colors";
 
 const styles = StyleSheet.create({
@@ -19,7 +20,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
-    fontWeight: "bold",
+    fontFamily: FONTS.bold,
     color: "black",
     padding: 5,
   },

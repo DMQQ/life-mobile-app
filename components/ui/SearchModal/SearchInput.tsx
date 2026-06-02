@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import React, { forwardRef, useCallback, useContext, useEffect, useState } from "react"
 import { StyleSheet, TextInput, View } from "react-native"
 import { AntDesign } from "@expo/vector-icons"
@@ -110,7 +111,7 @@ const styles = StyleSheet.create({
     title: {
         color: Colors.foreground,
         fontSize: 24,
-        fontWeight: "bold",
+        fontFamily: FONTS.bold,
     },
     closeButton: {
         padding: 8,

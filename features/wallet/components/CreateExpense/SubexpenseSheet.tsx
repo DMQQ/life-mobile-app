@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import { ConfirmDialog } from "@/components"
 import Colors from "@/constants/Colors"
 import GlassView from "@/components/ui/GlassView"
@@ -214,13 +215,13 @@ const styles = StyleSheet.create({
     },
     currency: {
         fontSize: 26,
-        fontWeight: "300",
+        fontFamily: FONTS.light,
     },
     amountInput: {
         flex: 1,
         color: Colors.foreground,
         fontSize: 36,
-        fontWeight: "700",
+        fontFamily: FONTS.bold,
         letterSpacing: -0.5,
     },
     hairline: {

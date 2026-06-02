@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import Colors from "@/constants/Colors"
 import Layout from "@/constants/Layout"
 import { FlatList, StyleSheet, View } from "react-native"
@@ -57,7 +58,7 @@ const styles = StyleSheet.create({
         color: Colors.foreground,
         marginBottom: 16,
         fontSize: 20,
-        fontWeight: "bold",
+        fontFamily: FONTS.bold,
     },
     list: {
         gap: 12,

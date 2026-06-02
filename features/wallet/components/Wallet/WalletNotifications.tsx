@@ -2,7 +2,8 @@ import Colors from "@/constants/Colors"
 import lowOpacity from "@/utils/functions/lowOpacity"
 import { BlurView } from "expo-blur"
 import { useState } from "react"
-import { FlatList, StyleSheet, Text, View } from "react-native"
+import { FlatList, StyleSheet, View } from "react-native"
+import Text from "@/components/ui/Text/Text"
 import { CategoryIcon } from "../Expense/ExpenseIcon"
 import NotificationCard from "./NotificationCard"
 import { Notification } from "./useNotifications"
@@ -29,7 +30,7 @@ export default function WalletNotifications({ data, error, loading }: WalletNoti
     if (loading) {
         return (
             <View style={styles.emptyState}>
-                <Text style={styles.emptyText}>Loading notifications...</Text>
+                <Text size={18} weight="600" color={Colors.text_light}>Loading notifications...</Text>
             </View>
         )
     }
@@ -37,8 +38,8 @@ export default function WalletNotifications({ data, error, loading }: WalletNoti
     if (error) {
         return (
             <View style={styles.emptyState}>
-                <Text style={styles.emptyText}>Error loading notifications</Text>
-                <Text style={styles.emptySubtext}>{error.message}</Text>
+                <Text size={18} weight="600" color={Colors.text_light} style={{ marginBottom: 8 }}>Error loading notifications</Text>
+                <Text size={14} color={Colors.text_light} opacity={0.6} align="center">{error.message}</Text>
             </View>
         )
     }
@@ -57,8 +58,8 @@ export default function WalletNotifications({ data, error, loading }: WalletNoti
                         <CategoryIcon type="income" category="bell" size={32} />
                     </View>
                 </View>
-                <Text style={styles.emptyText}>All caught up!</Text>
-                <Text style={styles.emptySubtext}>You don't have any new notifications right now.</Text>
+                <Text size={18} weight="600" color={Colors.text_light} style={{ marginBottom: 8 }}>All caught up!</Text>
+                <Text size={14} color={Colors.text_light} opacity={0.6} align="center">You don't have any new notifications right now.</Text>
             </View>
         )
     }
@@ -110,17 +111,5 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         backgroundColor: "rgba(0, 0, 0, 0.2)",
-    },
-    emptyText: {
-        color: Colors.text_light,
-        fontSize: 18,
-        fontWeight: "600",
-        marginBottom: 8,
-    },
-    emptySubtext: {
-        color: Colors.text_light,
-        fontSize: 14,
-        opacity: 0.6,
-        textAlign: "center",
     },
 })

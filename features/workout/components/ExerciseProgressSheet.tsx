@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import BottomSheet, { BottomSheetBackdrop, BottomSheetBackdropProps, BottomSheetFlatList } from "@gorhom/bottom-sheet";
 import Colors from "@/constants/Colors";
 import { Text, View, StyleSheet } from "react-native";
@@ -15,7 +16,7 @@ import Animated, { FadeInDown, FadeInUp, FadeOutDown } from "react-native-reanim
 import moment from "moment";
 
 const styles = StyleSheet.create({
-  title: { color: Colors.secondary, fontWeight: "bold", fontSize: 25 },
+  title: { color: Colors.secondary, fontFamily: FONTS.bold, fontSize: 25 },
   overview: {
     width: "100%",
     flexDirection: "row",
@@ -25,19 +26,19 @@ const styles = StyleSheet.create({
   last: {
     color: Colors.secondary,
     fontSize: 16,
-    fontWeight: "bold",
+    fontFamily: FONTS.bold,
   },
   weekly: {
     color: Colors.secondary,
     fontSize: 16,
-    fontWeight: "bold",
+    fontFamily: FONTS.bold,
   },
   weeklyContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
 
   pr: {
     color: Colors.secondary,
     fontSize: 16,
-    fontWeight: "bold",
+    fontFamily: FONTS.bold,
   },
   listHeader: {
     flexDirection: "row",
@@ -47,7 +48,7 @@ const styles = StyleSheet.create({
   },
   recentStatsText: {
     color: Colors.secondary,
-    fontWeight: "bold",
+    fontFamily: FONTS.bold,
     fontSize: 17,
     letterSpacing: 1,
   },
@@ -58,7 +59,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.secondary,
   },
   recentStatsBtnText: {
-    fontWeight: "bold",
+    fontFamily: FONTS.bold,
     fontSize: 15,
     letterSpacing: 1,
   },

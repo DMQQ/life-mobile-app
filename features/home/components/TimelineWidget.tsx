@@ -1,8 +1,10 @@
+import { FONTS } from "@/constants/Fonts"
 import Colors from "@/constants/Colors"
 import { GET_OCCURRENCES_QUERY } from "@/features/timeline/hooks/query/useGetOccurrencesQuery"
 import { useQuery } from "@apollo/client"
 import moment from "moment"
-import { StyleSheet, Text, View } from "react-native"
+import { StyleSheet, View } from "react-native"
+import Text from "@/components/ui/Text/Text"
 import Color from "color"
 import TimelineItem from "@/features/timeline/components/TimelineItem"
 import Section from "@/components/ui/Section"
@@ -20,7 +22,7 @@ export default function TimelineWidget() {
         <Section title="Today">
             <View style={styles.card}>
                 {events.length === 0 ? (
-                    <Text style={styles.empty}>No events today</Text>
+                    <Text size={13} color={Colors.text_dark} align="center" style={{ paddingVertical: 12 }}>No events today</Text>
                 ) : (
                     events.slice(0, 5).map((event: any) => {
                         return (
@@ -55,7 +57,7 @@ const styles = StyleSheet.create({
     },
     sectionTitle: {
         fontSize: 11,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
         letterSpacing: 0.8,
         textTransform: "uppercase",
         color: Colors.text_dark,
@@ -71,7 +73,7 @@ const styles = StyleSheet.create({
     },
     viewAllText: {
         fontSize: 11,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
         color: Colors.secondary,
     },
     empty: {
@@ -96,7 +98,7 @@ const styles = StyleSheet.create({
     },
     timeText: {
         fontSize: 11,
-        fontWeight: "700",
+        fontFamily: FONTS.bold,
         color: Colors.text_light,
     },
     timeTextSub: {
@@ -109,7 +111,7 @@ const styles = StyleSheet.create({
     },
     eventTitle: {
         fontSize: 13,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
         color: Colors.text_light,
     },
     eventDesc: {
@@ -123,6 +125,6 @@ const styles = StyleSheet.create({
     },
     statusText: {
         fontSize: 10,
-        fontWeight: "700",
+        fontFamily: FONTS.bold,
     },
 })

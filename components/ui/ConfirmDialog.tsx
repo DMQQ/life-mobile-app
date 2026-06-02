@@ -1,4 +1,5 @@
 import { StyleSheet, View } from "react-native"
+import { FONTS } from "@/constants/Fonts"
 import { Feather } from "@expo/vector-icons"
 import Dialog from "./Dialog/Dialog"
 import Colors from "@/constants/Colors"
@@ -66,7 +67,7 @@ export default function ConfirmDialog({
                     onPress: onConfirm,
                     variant: "text",
                     loading,
-                    fontStyle: { color: accentColor, fontWeight: "700" },
+                    fontStyle: { color: accentColor, fontFamily: FONTS.bold },
                 },
             ]}
         />

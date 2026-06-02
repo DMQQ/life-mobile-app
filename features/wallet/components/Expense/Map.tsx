@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import React, { useState, useEffect, useRef, ReactNode, forwardRef, useImperativeHandle } from "react"
 import { View, Alert, TouchableOpacity, StyleSheet } from "react-native" // Alert.prompt retained for native text input
 import Text from "@/components/ui/Text/Text"
@@ -69,7 +70,7 @@ const Txt = (props: { children: ReactNode; size: number; color?: any }) => (
         style={{
             color: props.color ?? Colors.secondary,
             fontSize: props.size,
-            fontWeight: "bold",
+            fontFamily: FONTS.bold,
             lineHeight: props.size + 7.5,
         }}
     >
@@ -409,7 +410,7 @@ const styles = StyleSheet.create({
         elevation: 5,
     },
     calloutTitle: {
-        fontWeight: "bold",
+        fontFamily: FONTS.bold,
         fontSize: 14,
         marginBottom: 3,
     },
@@ -427,7 +428,7 @@ const styles = StyleSheet.create({
     },
     calloutButtonText: {
         color: Colors.foreground,
-        fontWeight: "bold",
+        fontFamily: FONTS.bold,
         fontSize: 12,
     },
     legendContainer: {
@@ -438,7 +439,7 @@ const styles = StyleSheet.create({
     },
     legendText: {
         fontSize: 12,
-        fontWeight: "bold",
+        fontFamily: FONTS.bold,
         marginHorizontal: 5,
     },
 })

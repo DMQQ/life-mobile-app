@@ -1,4 +1,5 @@
 import { ActivityIndicator, Pressable, StyleProp, StyleSheet, ViewStyle } from "react-native"
+import { FONTS } from "@/constants/Fonts"
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated"
 import { Feather } from "@expo/vector-icons"
 import GlassView from "./GlassView"
@@ -103,7 +104,7 @@ const styles = StyleSheet.create({
         gap: 7,
     },
     label: {
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
         fontSize: 14,
     },
     disabled: {

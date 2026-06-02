@@ -1,7 +1,8 @@
 import { Card } from "@/components"
 import Colors, { secondary_candidates } from "@/constants/Colors"
 import moment from "moment"
-import { StyleProp, StyleSheet, Text, View, ViewStyle } from "react-native"
+import { StyleProp, StyleSheet, View, ViewStyle } from "react-native"
+import Text from "@/components/ui/Text/Text"
 import { FadeIn } from "react-native-reanimated"
 import { CategoryIcon } from "../Expense/ExpenseIcon"
 
@@ -79,25 +80,44 @@ export default function SubscriptionItem({ subscription, index, onPress, style }
                 <CategoryIcon style={{ padding: 0 }} type="expense" category="subscriptions" />
 
                 <View style={styles.descContainer}>
-                    <Text style={styles.title} numberOfLines={1}>
+                    <Text
+                        size={14}
+                        weight="bold"
+                        color={Colors.foreground}
+                        style={{ marginLeft: 10, marginBottom: 3 }}
+                        numberOfLines={1}
+                    >
                         {subscription.description}
                     </Text>
-                    <Text style={styles.meta}>
+                    <Text size={10} weight="500" color="rgba(255,255,255,0.55)" style={{ marginLeft: 10 }}>
                         {formatBillingCycle(subscription.billingCycle)}
                         {"  ·  "}
-                        <Text style={[styles.meta, { color: nextColor }]}>{nextLabel}</Text>
+                        <Text size={10} weight="500" color={nextColor}>
+                            {nextLabel}
+                        </Text>
                     </Text>
                 </View>
 
                 <View style={styles.priceContainer}>
-                    <Text style={styles.amount}>
+                    <Text size={16} weight="600" color="#F07070" align="right" mono>
                         -{subscription.amount.toFixed(2)}
-                        <Text style={styles.currency}>zł</Text>
+                        <Text size={12} color="#F07070">
+                            zł
+                        </Text>
                     </Text>
                     {subscription.totalSpent != null && subscription.totalSpent > 0 && (
-                        <Text style={styles.totalSpent}>
+                        <Text
+                            size={10}
+                            weight="500"
+                            color="rgba(255,255,255,0.35)"
+                            align="right"
+                            style={{ marginTop: 2 }}
+                        >
                             {subscription.totalSpent.toFixed(2)}
-                            <Text style={styles.totalCurrency}> zł total</Text>
+                            <Text size={10} color="rgba(255,255,255,0.35)">
+                                {" "}
+                                zł total
+                            </Text>
                         </Text>
                     )}
                 </View>
@@ -119,43 +139,10 @@ const styles = StyleSheet.create({
         flex: 3,
         overflow: "hidden",
     },
-    title: {
-        color: Colors.foreground,
-        fontSize: 14,
-        marginLeft: 10,
-        fontWeight: "bold",
-        marginBottom: 3,
-        textTransform: "capitalize",
-    },
-    meta: {
-        color: "rgba(255,255,255,0.55)",
-        fontSize: 10,
-        marginLeft: 10,
-        fontWeight: "500",
-    },
     priceContainer: {
         flex: 2,
         height: 48,
         justifyContent: "center",
         alignItems: "flex-end",
-    },
-    amount: {
-        textAlign: "right",
-        color: "#F07070",
-        fontSize: 16,
-        fontWeight: "600",
-    },
-    currency: {
-        fontSize: 12,
-    },
-    totalSpent: {
-        textAlign: "right",
-        color: "rgba(255,255,255,0.35)",
-        fontSize: 10,
-        fontWeight: "500",
-        marginTop: 2,
-    },
-    totalCurrency: {
-        fontSize: 10,
     },
 })

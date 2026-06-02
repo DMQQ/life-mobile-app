@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import { Feather } from "@expo/vector-icons"
 import { useMemo, useCallback } from "react"
 import { StyleSheet, TouchableOpacity, View } from "react-native"
@@ -127,7 +128,7 @@ function GoalWeekCard({
                                 <Text
                                     style={[
                                         styles.valueText,
-                                        hasValue && { color: Colors.foreground, fontWeight: "700" },
+                                        hasValue && { color: Colors.foreground, fontFamily: FONTS.bold },
                                     ]}
                                 >
                                     {value || "-"}
@@ -169,7 +170,7 @@ const styles = StyleSheet.create({
     },
     goalName: {
         fontSize: 14,
-        fontWeight: "bold",
+        fontFamily: FONTS.bold,
         color: Colors.foreground,
     },
     weekRow: {
@@ -189,18 +190,18 @@ const styles = StyleSheet.create({
     },
     todayText: {
         color: Colors.secondary,
-        fontWeight: "700",
+        fontFamily: FONTS.bold,
     },
     dayLabel: {
         fontSize: 10,
         color: Colors.text_dark,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
         textTransform: "uppercase",
     },
     dayNum: {
         fontSize: 12,
         color: Colors.foreground_secondary,
-        fontWeight: "500",
+        fontFamily: FONTS.medium,
     },
     valueCell: {
         width: "100%",
@@ -211,7 +212,7 @@ const styles = StyleSheet.create({
     },
     valueText: {
         fontSize: 13,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
         color: Colors.text_dark,
     },
 })

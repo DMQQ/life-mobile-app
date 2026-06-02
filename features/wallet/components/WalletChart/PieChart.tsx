@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import { PieChart as GFTPieChart } from "react-native-gifted-charts"
 import Colors, { secondary_candidates } from "@/constants/Colors"
 import Layout from "@/constants/Layout"
@@ -55,7 +56,7 @@ export default function PieChart(props: PieChartProps) {
                         variant="caption"
                         style={{
                             color: center ? (center.color ?? blueText) : blueText,
-                            fontWeight: "bold",
+                            fontFamily: FONTS.bold,
                             textAlign: "center",
                             marginTop: 5,
                             opacity: 0.7,

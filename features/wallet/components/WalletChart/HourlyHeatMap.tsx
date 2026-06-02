@@ -1,6 +1,7 @@
 import Layout from "@/constants/Layout"
 import { useMemo, useState, useEffect } from "react"
-import { StyleSheet, Text, View, ScrollView } from "react-native"
+import { StyleSheet, View, ScrollView } from "react-native"
+import Text from "@/components/ui/Text/Text"
 import Colors, { secondary_candidates } from "@/constants/Colors"
 import Color from "color"
 import lowOpacity from "@/utils/functions/lowOpacity"
@@ -90,7 +91,7 @@ const CustomBarChart: React.FC<CustomBarChartProps> = ({ data, maxValue, viewTyp
         <View style={styles.chartWrapper}>
             <View style={styles.yAxisLabels}>
                 {[4, 3, 2, 1, 0].map((i) => (
-                    <Text key={i} style={styles.yAxisLabel}>
+                    <Text key={i} size={11} color={Colors.foreground}>
                         {viewType === "count" ? Math.round((maxValue / 4) * i) : Math.round((maxValue / 4) * i) + "zł"}
                     </Text>
                 ))}
@@ -139,23 +140,23 @@ const CustomBarChart: React.FC<CustomBarChartProps> = ({ data, maxValue, viewTyp
 
                 {selectedBarInfo && (
                     <Animated.View style={[styles.tooltip, animatedTooltipStyle]}>
-                        <Text style={styles.tooltipTitle}>Hour {selectedBarInfo.hour}:00</Text>
-                        <Text style={styles.tooltipValue}>
+                        <Text size={14} weight="bold" color={Colors.foreground}>Hour {selectedBarInfo.hour}:00</Text>
+                        <Text size={12} color={Colors.foreground} style={{ marginVertical: 1 }}>
                             Current: {selectedBarInfo.value.toFixed(viewType === "count" ? 0 : 2)}
                             {viewType === "count" ? " tx" : "zł"}
                         </Text>
                         {(selectedBarInfo.prevValue || 0) > 0 ? (
-                            <Text style={styles.tooltipValue}>
+                            <Text size={12} color={Colors.foreground} style={{ marginVertical: 1 }}>
                                 Previous: {selectedBarInfo.prevValue!.toFixed(viewType === "count" ? 0 : 2)}
                                 {viewType === "count" ? " tx" : "zł"}
                             </Text>
                         ) : (
-                            <Text style={[styles.tooltipValue, { fontStyle: "italic", opacity: 0.7 }]}>
+                            <Text size={12} color={Colors.foreground} italic opacity={0.7} style={{ marginVertical: 1 }}>
                                 Previous: No data
                             </Text>
                         )}
                         {selectedBarInfo.count !== undefined && viewType !== "count" && (
-                            <Text style={styles.tooltipValue}>Transactions: {selectedBarInfo.count}</Text>
+                            <Text size={12} color={Colors.foreground} style={{ marginVertical: 1 }}>Transactions: {selectedBarInfo.count}</Text>
                         )}
                     </Animated.View>
                 )}
@@ -264,13 +265,13 @@ const HourlySpendingsBarChart = ({ type, dateRange }: { type: string; dateRange?
     if (loading || prevQuery.loading)
         return (
             <View style={styles.loadingContainer}>
-                <Text style={styles.loadingText}>Loading...</Text>
+                <Text size={16} color={Colors.foreground}>Loading...</Text>
             </View>
         )
     if (error)
         return (
             <View style={styles.errorContainer}>
-                <Text style={styles.errorText}>Error: {error.message}</Text>
+                <Text size={16} color="#ff7777">Error: {error.message}</Text>
             </View>
         )
 
@@ -291,7 +292,7 @@ const HourlySpendingsBarChart = ({ type, dateRange }: { type: string; dateRange?
                                         borderRadius: 2,
                                     }}
                                 />
-                                <Text style={{ fontSize: 12, color: Colors.foreground }}>Current Period</Text>
+                                <Text size={12} color={Colors.foreground}>Current Period</Text>
                             </View>
                             <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
                                 <View
@@ -302,11 +303,11 @@ const HourlySpendingsBarChart = ({ type, dateRange }: { type: string; dateRange?
                                         borderRadius: 2,
                                     }}
                                 />
-                                <Text style={{ fontSize: 12, color: Colors.foreground }}>Previous Period</Text>
+                                <Text size={12} color={Colors.foreground}>Previous Period</Text>
                             </View>
                         </View>
                         {dateRange && previousDateRange && (
-                            <Text style={styles.dateRangeText}>
+                            <Text size={10} color={Color(Colors.foreground).alpha(0.7).string()} align="center">
                                 {formatDate(dateRange[0])} - {formatDate(dateRange[1])} vs{" "}
                                 {formatDate(previousDateRange[0])} - {formatDate(previousDateRange[1])}
                             </Text>
@@ -315,7 +316,7 @@ const HourlySpendingsBarChart = ({ type, dateRange }: { type: string; dateRange?
                 </View>
             ) : (
                 <View style={styles.noDataContainer}>
-                    <Text style={styles.noDataText}>No data available for the selected time period</Text>
+                    <Text size={16} color={Colors.foreground}>No data available for the selected time period</Text>
                 </View>
             )}
         </View>
@@ -333,10 +334,6 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
         alignItems: "flex-start",
         paddingLeft: 2,
-    },
-    yAxisLabel: {
-        color: Colors.foreground,
-        fontSize: 11,
     },
     chartContent: {
         flex: 1,
@@ -366,16 +363,6 @@ const styles = StyleSheet.create({
         minWidth: 120,
         zIndex: 10,
     },
-    tooltipTitle: {
-        color: Colors.foreground,
-        fontWeight: "bold",
-        fontSize: 14,
-    },
-    tooltipValue: {
-        color: Colors.foreground,
-        fontSize: 12,
-        marginVertical: 1,
-    },
     periodLegendContainer: {
         marginTop: 15,
         alignItems: "center",
@@ -386,11 +373,6 @@ const styles = StyleSheet.create({
         gap: 15,
         justifyContent: "center",
     },
-    dateRangeText: {
-        fontSize: 10,
-        color: Color(Colors.foreground).alpha(0.7).string(),
-        textAlign: "center",
-    },
     noDataContainer: {
         padding: 30,
         alignItems: "center",
@@ -400,19 +382,11 @@ const styles = StyleSheet.create({
         height: 200,
         width: Layout.screen.width - 60,
     },
-    noDataText: {
-        color: Colors.foreground,
-        fontSize: 16,
-    },
     loadingContainer: {
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
         minHeight: 300,
-    },
-    loadingText: {
-        color: Colors.foreground,
-        fontSize: 16,
     },
     errorContainer: {
         padding: 20,
@@ -421,10 +395,6 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: lowOpacity("#ff0000", 0.3),
         marginVertical: 20,
-    },
-    errorText: {
-        color: "#ff7777",
-        fontSize: 16,
     },
 })
 

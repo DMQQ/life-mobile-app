@@ -2,7 +2,8 @@ import moment from "moment"
 import { Card } from "@/components"
 import Colors from "@/constants/Colors"
 import { memo, useMemo } from "react"
-import { StyleProp, StyleSheet, Text, View, ViewStyle } from "react-native"
+import { StyleProp, StyleSheet, View, ViewStyle } from "react-native"
+import Text from "@/components/ui/Text/Text"
 import { AnimatedStyle } from "react-native-reanimated"
 import { CategoryIcon, Icons } from "../Expense/ExpenseIcon"
 import ContextMenu from "react-native-context-menu-view"
@@ -40,39 +41,11 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         backgroundColor: Colors.primary_lighter,
     },
-    title: {
-        color: Colors.foreground,
-        fontSize: 14,
-        marginLeft: 10,
-        fontWeight: "bold",
-        marginBottom: 5,
-        textTransform: "capitalize",
-    },
-
-    date: {
-        color: "rgba(255,255,255,0.65)",
-        fontSize: 10,
-        marginLeft: 10,
-        lineHeight: 16,
-        fontWeight: "500",
-    },
     price_container: {
         flex: 2,
         justifyContent: "center",
         alignItems: "center",
     },
-    price: {
-        color: Colors.foreground,
-        fontSize: 16,
-        fontWeight: "600",
-    },
-
-    buttonText: {
-        color: Colors.secondary,
-        fontSize: 20,
-        fontWeight: "bold",
-    },
-
     expanded: {
         padding: 0,
         borderRadius: 20,
@@ -202,19 +175,36 @@ function WalletItem(
                     />
 
                     <View style={styles.descContainer}>
-                        <Text style={styles.title} numberOfLines={1}>
+                        <Text
+                            size={14}
+                            weight="bold"
+                            color={Colors.foreground}
+                            style={{ marginLeft: 10, marginBottom: 5 }}
+                            numberOfLines={1}
+                        >
                             {item.description}
                         </Text>
 
-                        <Text style={styles.date}>
+                        <Text
+                            size={10}
+                            weight="500"
+                            color="rgba(255,255,255,0.65)"
+                            lineHeight={16}
+                            style={{ marginLeft: 10 }}
+                        >
                             {dateFormatter(item.date)}
                             {item.category && (item.subscription as any)?.isActive && " • "}
-                            {(item.subscription as any)?.isActive ? <Text>Subscription</Text> : ""}
+                            {(item.subscription as any)?.isActive ? (
+                                <Text size={10} color="rgba(255,255,255,0.65)">
+                                    Subscription
+                                </Text>
+                            ) : (
+                                ""
+                            )}
                             {(item.files as any) && (item.files as any).length > 0 && (
                                 <>
                                     {" • "}
-
-                                    <Text>
+                                    <Text size={10} color="rgba(255,255,255,0.65)">
                                         {(item.files as any).length} {(item.files as any).length > 1 ? "files" : "file"}
                                     </Text>
                                 </>
@@ -222,7 +212,9 @@ function WalletItem(
                             {(item.subexpenses as any) && (item.subexpenses as any)?.length > 0 && (
                                 <>
                                     {" • "}
-                                    <Text>{(item.subexpenses as any)?.length} items</Text>
+                                    <Text size={10} color="rgba(255,255,255,0.65)">
+                                        {(item.subexpenses as any)?.length} items
+                                    </Text>
                                 </>
                             )}
                         </Text>
@@ -230,23 +222,33 @@ function WalletItem(
                     {!isBalanceEdit && (
                         <View style={[styles.price_container, { flexDirection: "row" }]}>
                             <Text
-                                style={[
-                                    styles.price,
-                                    {
-                                        width: "100%",
-                                        textAlign: "right",
-                                        color:
-                                            item.type === "refunded"
-                                                ? Colors.secondary_light_2
-                                                : item.type === "expense"
-                                                  ? "#F07070"
-                                                  : "#66E875",
-                                        ...(item.type === "refunded" ? { textDecorationLine: "line-through" } : {}),
-                                    },
-                                ]}
+                                size={16}
+                                weight="600"
+                                align="right"
+                                mono
+                                strikethrough={item.type === "refunded"}
+                                color={
+                                    item.type === "refunded"
+                                        ? Colors.secondary_light_2
+                                        : item.type === "expense"
+                                          ? "#F07070"
+                                          : "#66E875"
+                                }
+                                style={{ width: "100%" }}
                             >
                                 {price}
-                                <Text style={{ fontSize: 12 }}>zł</Text>
+                                <Text
+                                    size={12}
+                                    color={
+                                        item.type === "refunded"
+                                            ? Colors.secondary_light_2
+                                            : item.type === "expense"
+                                              ? "#F07070"
+                                              : "#66E875"
+                                    }
+                                >
+                                    zł
+                                </Text>
                             </Text>
                         </View>
                     )}

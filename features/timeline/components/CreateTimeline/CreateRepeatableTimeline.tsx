@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import Section from "@/components/ui/Section"
 import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
@@ -106,7 +107,7 @@ export default function CreateRepeatableTimeline({ formik: f }: CreateRepeatable
                                                     variant="caption"
                                                     style={{
                                                         color: isSelected ? "#fff" : Colors.foreground_secondary,
-                                                        fontWeight: "600",
+                                                        fontFamily: FONTS.semibold,
                                                     }}
                                                 >
                                                     {day.label}
@@ -163,7 +164,7 @@ export default function CreateRepeatableTimeline({ formik: f }: CreateRepeatable
                             >
                                 <Feather name="minus" size={16} color={Colors.foreground} />
                             </Ripple>
-                            <Text variant="body" style={{ color: Colors.foreground, minWidth: 24, textAlign: "center", fontWeight: "600" }}>
+                            <Text variant="body" style={{ color: Colors.foreground, minWidth: 24, textAlign: "center", fontFamily: FONTS.semibold }}>
                                 {f.values.repeatCount || "0"}
                             </Text>
                             <Ripple
@@ -258,6 +259,6 @@ const styles = StyleSheet.create({
     },
     menuPillText: {
         color: Colors.foreground,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
     },
 })

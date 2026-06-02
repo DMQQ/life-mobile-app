@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import Colors from "@/constants/Colors"
 import Layout from "@/constants/Layout"
 import { AntDesign } from "@expo/vector-icons"
@@ -238,7 +239,7 @@ const styles = StyleSheet.create({
     title: {
         color: Colors.foreground,
         fontSize: 25,
-        fontWeight: "bold",
+        fontFamily: FONTS.bold,
     },
     description: {
         color: Colors.foreground,

@@ -1,6 +1,7 @@
 import React, { Component, ReactNode } from "react"
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Clipboard } from "react-native"
+import { View, TouchableOpacity, ScrollView, StyleSheet, Clipboard } from "react-native"
 import Colors from "@/constants/Colors"
+import Text from "@/components/ui/Text/Text"
 import Button from "../ui/Button/Button"
 import { SafeAreaView } from "react-native-safe-area-context"
 
@@ -89,33 +90,33 @@ class ErrorBoundary extends Component<Props, State> {
                 <SafeAreaView style={{ flex: 1 }}>
                     <View style={styles.container}>
                         <View style={styles.header}>
-                            <Text style={styles.title}>Something went wrong</Text>
+                            <Text size={24} weight="600" color={Colors.danger}>Something went wrong</Text>
                             <TouchableOpacity style={styles.copyButton} onPress={this.copyAllErrors}>
-                                <Text style={styles.copyButtonText}>Copy All</Text>
+                                <Text size={12} weight="500" color={Colors.text_light}>Copy All</Text>
                             </TouchableOpacity>
                         </View>
 
                         <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
                             <View style={styles.section}>
                                 <View style={styles.sectionHeader}>
-                                    <Text style={styles.sectionTitle}>Error</Text>
+                                    <Text size={16} weight="600" color={Colors.text_light}>Error</Text>
                                     <TouchableOpacity style={styles.copyButton} onPress={this.copyError}>
-                                        <Text style={styles.copyButtonText}>Copy</Text>
+                                        <Text size={12} weight="500" color={Colors.text_light}>Copy</Text>
                                     </TouchableOpacity>
                                 </View>
-                                <Text style={styles.errorText} selectable>
+                                <Text size={14} color={Colors.danger} style={styles.errorText} selectable>
                                     {this.state.error?.message}
                                 </Text>
                             </View>
 
                             <View style={styles.section}>
                                 <View style={styles.sectionHeader}>
-                                    <Text style={styles.sectionTitle}>Stack Trace</Text>
+                                    <Text size={16} weight="600" color={Colors.text_light}>Stack Trace</Text>
                                     <TouchableOpacity style={styles.copyButton} onPress={this.copyStackTrace}>
-                                        <Text style={styles.copyButtonText}>Copy</Text>
+                                        <Text size={12} weight="500" color={Colors.text_light}>Copy</Text>
                                     </TouchableOpacity>
                                 </View>
-                                <Text style={styles.stackTrace} selectable>
+                                <Text size={12} color={Colors.text_light} lineHeight={16} style={styles.stackTrace} selectable>
                                     {this.state.error?.stack}
                                 </Text>
                             </View>
@@ -123,12 +124,12 @@ class ErrorBoundary extends Component<Props, State> {
                             {this.state.errorInfo && (
                                 <View style={styles.section}>
                                     <View style={styles.sectionHeader}>
-                                        <Text style={styles.sectionTitle}>Component Stack</Text>
+                                        <Text size={16} weight="600" color={Colors.text_light}>Component Stack</Text>
                                         <TouchableOpacity style={styles.copyButton} onPress={this.copyComponentStack}>
-                                            <Text style={styles.copyButtonText}>Copy</Text>
+                                            <Text size={12} weight="500" color={Colors.text_light}>Copy</Text>
                                         </TouchableOpacity>
                                     </View>
-                                    <Text style={styles.stackTrace} selectable>
+                                    <Text size={12} color={Colors.text_light} lineHeight={16} style={styles.stackTrace} selectable>
                                         {this.state.errorInfo}
                                     </Text>
                                 </View>
@@ -161,11 +162,6 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderBottomColor: Colors.primary_lighter,
     },
-    title: {
-        fontSize: 24,
-        fontWeight: "600",
-        color: Colors.danger,
-    },
     scrollView: {
         flex: 1,
     },
@@ -178,38 +174,23 @@ const styles = StyleSheet.create({
         alignItems: "center",
         marginBottom: 8,
     },
-    sectionTitle: {
-        fontSize: 16,
-        fontWeight: "600",
-        color: Colors.text_light,
-    },
     copyButton: {
         backgroundColor: Colors.secondary,
         paddingHorizontal: 12,
         paddingVertical: 6,
         borderRadius: 4,
     },
-    copyButtonText: {
-        color: Colors.text_light,
-        fontSize: 12,
-        fontWeight: "500",
-    },
     errorText: {
-        fontSize: 14,
-        color: Colors.danger,
         backgroundColor: Colors.primary_lighter,
         padding: 12,
         borderRadius: 6,
         fontFamily: "monospace",
     },
     stackTrace: {
-        fontSize: 12,
-        color: Colors.text_light,
         backgroundColor: Colors.primary_lighter,
         padding: 12,
         borderRadius: 6,
         fontFamily: "monospace",
-        lineHeight: 16,
     },
 })
 

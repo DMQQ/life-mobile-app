@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import Section from "@/components/ui/Section"
 import Colors from "@/constants/Colors"
 import { useNavigation } from "@react-navigation/native"
@@ -155,7 +156,7 @@ const styles = StyleSheet.create({
     emptyText: {
         color: Colors.text_light,
         fontSize: 18,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
         marginBottom: 8,
     },
     emptySubtext: {

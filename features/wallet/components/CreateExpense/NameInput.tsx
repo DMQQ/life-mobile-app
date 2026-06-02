@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import { IconButton } from "@/components"
 import Input from "@/components/ui/TextInput/TextInput"
 import Text from "@/components/ui/Text/Text"
@@ -146,7 +147,7 @@ export default function NameInput({ isEditing }: { isEditing?: boolean }) {
                                                 height: 18,
                                                 textAlign: "center",
                                                 color: Colors.foreground,
-                                                fontWeight: "900",
+                                                fontFamily: FONTS.black,
                                             }}
                                         >
                                             {SubExpenses.length}
@@ -189,7 +190,7 @@ const styles = StyleSheet.create({
     },
     suggestionLabel: {
         color: Colors.foreground,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
         maxWidth: 200,
     },
     floatingSuggestion: {

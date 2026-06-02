@@ -7,6 +7,7 @@ import {
   View,
   ViewStyle,
 } from "react-native";
+import { FONTS } from "@/constants/Fonts";
 import { Exercise } from "../../../types";
 import Colors from "../../../constants/Colors";
 import Color from "color";
@@ -94,7 +95,7 @@ export default function ExerciseTile({
             style={{
               color: Colors.secondary,
               fontSize: 18,
-              fontWeight: "bold",
+              fontFamily: FONTS.bold,
               lineHeight: 25,
             }}
           >

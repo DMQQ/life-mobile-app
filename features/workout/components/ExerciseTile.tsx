@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import { View, Text, StyleSheet, Pressable, Image } from "react-native";
 import { Exercise } from "@/types";
 import Color from "color";
@@ -40,8 +41,8 @@ export default function ExerciseTile(props: Exercise & { onPress: (exerciseId: s
         }}
       />
       <View style={styles.contentContainer}>
-        <Text style={{ fontWeight: "bold", color: Colors.foreground, fontSize: 20 }}>{props.title}</Text>
-        <Text style={{ fontWeight: "500", color: "#ffffff8c" }} numberOfLines={3}>
+        <Text style={{ fontFamily: FONTS.bold, color: Colors.foreground, fontSize: 20 }}>{props.title}</Text>
+        <Text style={{ fontFamily: FONTS.medium, color: "#ffffff8c" }} numberOfLines={3}>
           {props.description}
         </Text>
       </View>

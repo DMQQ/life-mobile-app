@@ -1,10 +1,12 @@
+import { FONTS } from "@/constants/Fonts"
 import Colors from "@/constants/Colors"
 import Layout from "@/constants/Layout"
 import { CategoryIcon, CategoryUtils } from "@/features/wallet/components/Expense/ExpenseIcon"
 import SubscriptionCalendar from "@/features/wallet/components/Wallet/SubscriptionCalendar"
 import { gql, useQuery } from "@apollo/client"
 import { useState } from "react"
-import { StyleSheet, Text, View } from "react-native"
+import { StyleSheet, View } from "react-native"
+import Text from "@/components/ui/Text/Text"
 import Color from "color"
 import moment from "moment"
 import GroupSelector from "@/components/ui/GroupSelector"
@@ -93,7 +95,7 @@ export default function HomeExtras() {
 }
 
 function LimitsContent({ limits }: { limits: any[] }) {
-    if (!limits.length) return <Text style={styles.empty}>No limits set for this month</Text>
+    if (!limits.length) return <Text size={13} color={Colors.text_dark} align="center" style={{ paddingVertical: 20 }}>No limits set for this month</Text>
 
     return (
         <View style={styles.limitsContainer}>
@@ -105,7 +107,7 @@ function LimitsContent({ limits }: { limits: any[] }) {
                 return (
                     <View key={limit.id} style={styles.limitRow}>
                         <CategoryIcon category={limit.category} type="expense" clear={false} size={14} />
-                        <Text style={styles.limitLabel} numberOfLines={1}>
+                        <Text size={12} weight="500" color={Colors.text_dark} uppercase numberOfLines={1} style={{ width: 80 }}>
                             {CategoryUtils.getCategoryName(limit.category)}
                         </Text>
                         <View style={styles.progressTrack}>
@@ -116,7 +118,7 @@ function LimitsContent({ limits }: { limits: any[] }) {
                                 ]}
                             />
                         </View>
-                        <Text style={[styles.limitPct, { color: isOver ? "#F07070" : Colors.text_dark }]}>
+                        <Text size={11} weight="600" color={isOver ? "#F07070" : Colors.text_dark} align="right" style={{ width: 36 }}>
                             {percentage.toFixed(0)}%
                         </Text>
                     </View>
@@ -132,13 +134,6 @@ const styles = StyleSheet.create({
         padding: 15,
         gap: 15,
     },
-    sectionTitle: {
-        fontSize: 11,
-        fontWeight: "600",
-        letterSpacing: 0.8,
-        textTransform: "uppercase",
-        color: Colors.text_dark,
-    },
     limitsContainer: {
         gap: 10,
     },
@@ -146,13 +141,6 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         gap: 8,
-    },
-    limitLabel: {
-        fontSize: 12,
-        fontWeight: "500",
-        color: Colors.text_dark,
-        width: 80,
-        textTransform: "capitalize",
     },
     progressTrack: {
         flex: 1,
@@ -164,18 +152,6 @@ const styles = StyleSheet.create({
     progressBar: {
         height: "100%",
         borderRadius: 2,
-    },
-    limitPct: {
-        fontSize: 11,
-        fontWeight: "600",
-        width: 36,
-        textAlign: "right",
-    },
-    empty: {
-        fontSize: 13,
-        color: Colors.text_dark,
-        textAlign: "center",
-        paddingVertical: 20,
     },
     tabs: {
         flexDirection: "row",
@@ -197,7 +173,7 @@ const styles = StyleSheet.create({
     },
     tabText: {
         fontSize: 12,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
         letterSpacing: 0.3,
         color: Color(Colors.text_light).alpha(0.4).string(),
     },

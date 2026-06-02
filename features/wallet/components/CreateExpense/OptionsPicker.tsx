@@ -5,11 +5,12 @@ import { SpontaneousRateChip } from "@/features/wallet/components/CreateExpense/
 import { CategoryUtils, Icons } from "@/features/wallet/components/Expense/ExpenseIcon"
 import { useCreateExpenseContext } from "@/features/wallet/context/CreateExpenseContext"
 import lowOpacity from "@/utils/functions/lowOpacity"
-import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons"
+import { Feather } from "@expo/vector-icons"
 import Color from "color"
 import dayjs from "dayjs"
 import moment from "moment/moment"
-import { StyleSheet, Text, View } from "react-native"
+import { StyleSheet, View } from "react-native"
+import Text from "@/components/ui/Text/Text"
 import Haptic from "react-native-haptic-feedback"
 import Ripple from "react-native-material-ripple"
 import Animated from "react-native-reanimated"
@@ -48,8 +49,8 @@ export default function OptionsPicker() {
                         onPress={onPress}
                         style={[styles.chip, { backgroundColor: Colors.primary_lighter, flex: undefined, height: 45 }]}
                     >
-                        <AntDesign name="calendar" size={15} color="rgba(255,255,255,0.7)" />
-                        <Text style={{ color: "rgba(255,255,255,0.7)", fontSize: 14 }}>
+                        <Feather name="calendar" size={15} color="rgba(255,255,255,0.7)" />
+                        <Text size={14} color="rgba(255,255,255,0.7)">
                             {moment(start).format("YYYY-MM-DD")}
                         </Text>
                     </Ripple>
@@ -75,13 +76,12 @@ export default function OptionsPicker() {
                 >
                     {Icons[category]?.icon ?? null}
                     <Text
-                        style={{
-                            color:
-                                category === "none"
-                                    ? "rgba(255,255,255,0.7)"
-                                    : Color(Icons[category]?.backgroundColor).lighten(0.25).hex(),
-                            fontSize: 15,
-                        }}
+                        size={15}
+                        color={
+                            category === "none"
+                                ? "rgba(255,255,255,0.7)"
+                                : Color(Icons[category]?.backgroundColor).lighten(0.25).hex()
+                        }
                     >
                         {category === "none" ? "Select category" : CategoryUtils.getCategoryName(category)}
                     </Text>
@@ -109,18 +109,12 @@ export default function OptionsPicker() {
                         },
                     ]}
                 >
-                    <MaterialCommunityIcons
-                        name={selectedAccount ? (selectedAccount.icon as any) : "credit-card-outline"}
+                    <Feather
+                        name="credit-card"
                         size={15}
                         color={selectedAccount?.color ?? "rgba(255,255,255,0.7)"}
                     />
-                    <Text
-                        style={{
-                            color: selectedAccount?.color ?? "rgba(255,255,255,0.7)",
-                            fontSize: 14,
-                        }}
-                        numberOfLines={1}
-                    >
+                    <Text size={14} color={selectedAccount?.color ?? "rgba(255,255,255,0.7)"} numberOfLines={1}>
                         {selectedAccount ? selectedAccount.name : "Account"}
                     </Text>
                 </Ripple>

@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import { StyleSheet, Text, View } from "react-native";
 import Ripple from "react-native-material-ripple";
 import Colors from "@/constants/Colors";
@@ -13,7 +14,7 @@ const styles = StyleSheet.create({
     padding: 2.5,
     borderRadius: 10,
     marginRight: 5,
-    fontWeight: "600",
+    fontFamily: FONTS.semibold,
   },
   workoutContainer: {
     backgroundColor: bgColor,
@@ -23,7 +24,7 @@ const styles = StyleSheet.create({
   },
 
   workoutTitle: {
-    fontWeight: "bold",
+    fontFamily: FONTS.bold,
     fontSize: 20,
     color: Colors.secondary,
     marginBottom: 7.5,

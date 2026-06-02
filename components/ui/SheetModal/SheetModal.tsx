@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts";
 import Colors from "@/constants/Colors";
 import { ReactNode } from "react";
 import { View, Modal, Pressable } from "react-native";
@@ -29,7 +30,7 @@ export default function SheetModal(props: SheetModalProps) {
             variant="title"
             style={{
               color: Colors.foreground,
-              fontWeight: "bold",
+              fontFamily: FONTS.bold,
               padding: 10,
             }}
           >

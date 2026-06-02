@@ -1,8 +1,10 @@
+import { FONTS } from "@/constants/Fonts"
 import Colors from "@/constants/Colors"
 import Color from "color"
 import dayjs from "dayjs"
 import { useEffect } from "react"
-import { StyleSheet, Text, View } from "react-native"
+import { StyleSheet, View } from "react-native"
+import Text from "@/components/ui/Text/Text"
 import Animated, {
     Extrapolation,
     interpolate,
@@ -73,16 +75,13 @@ function Bar({
                     ]}
                 >
                     <Animated.View style={[styles.valueWrapper, valueOpacity]}>
-                        <Text style={[styles.barValue, { color: isCurrent ? "#000" : Colors.foreground }]}>
+                        <Text size={9} weight="700" color={isCurrent ? "#000" : Colors.foreground} style={{ transform: [{ rotate: "-90deg" }] }}>
                             {Math.round(amount)}
                         </Text>
                     </Animated.View>
                 </Animated.View>
             </View>
-            <Text
-                style={[styles.dateLabel, { color: isCurrent ? Colors.secondary : Colors.text_dark }]}
-                numberOfLines={1}
-            >
+            <Text size={9} weight="500" align="center" color={isCurrent ? Colors.secondary : Colors.text_dark} numberOfLines={1} style={{ marginTop: 6 }}>
                 {dayjs(date).format("DD")}
             </Text>
         </Animated.View>
@@ -106,23 +105,23 @@ export default function SimilarExpensesChart({ expenses, currentExpenseId }: Sim
         <View style={styles.container}>
             <View style={styles.statsRow}>
                 <View style={styles.statItem}>
-                    <Text style={styles.statValue}>{amounts.length}×</Text>
-                    <Text style={styles.statLabel}>visits</Text>
+                    <Text size={15} weight="700" color={Colors.secondary} mono>{amounts.length}×</Text>
+                    <Text size={10} color={Colors.text_dark} style={{ marginTop: 2 }}>visits</Text>
                 </View>
                 <View style={styles.statDivider} />
                 <View style={styles.statItem}>
-                    <Text style={styles.statValue}>{avgAmount.toFixed(2)}zł</Text>
-                    <Text style={styles.statLabel}>avg</Text>
+                    <Text size={15} weight="700" color={Colors.secondary} mono>{avgAmount.toFixed(2)}zł</Text>
+                    <Text size={10} color={Colors.text_dark} style={{ marginTop: 2 }}>avg</Text>
                 </View>
                 <View style={styles.statDivider} />
                 <View style={styles.statItem}>
-                    <Text style={[styles.statValue, { color: "#66E875" }]}>{minAmount.toFixed(2)}zł</Text>
-                    <Text style={styles.statLabel}>min</Text>
+                    <Text size={15} weight="700" color="#66E875" mono>{minAmount.toFixed(2)}zł</Text>
+                    <Text size={10} color={Colors.text_dark} style={{ marginTop: 2 }}>min</Text>
                 </View>
                 <View style={styles.statDivider} />
                 <View style={styles.statItem}>
-                    <Text style={[styles.statValue, { color: "#F07070" }]}>{maxRaw.toFixed(2)}zł</Text>
-                    <Text style={styles.statLabel}>max</Text>
+                    <Text size={15} weight="700" color="#F07070" mono>{maxRaw.toFixed(2)}zł</Text>
+                    <Text size={10} color={Colors.text_dark} style={{ marginTop: 2 }}>max</Text>
                 </View>
             </View>
 
@@ -130,7 +129,7 @@ export default function SimilarExpensesChart({ expenses, currentExpenseId }: Sim
                 {/* Average line */}
                 <View style={[styles.avgLine, { bottom: avgLineBottom + 28 }]} pointerEvents="none">
                     <View style={styles.avgLineDash} />
-                    <Text style={styles.avgLineLabel}>{avgAmount.toFixed(2)}zł avg</Text>
+                    <Text size={9} weight="600" color={Colors.text_light}>{avgAmount.toFixed(2)}zł avg</Text>
                 </View>
 
                 {/* Bars */}
@@ -150,17 +149,17 @@ export default function SimilarExpensesChart({ expenses, currentExpenseId }: Sim
             <View style={styles.legend}>
                 <View style={styles.legendItem}>
                     <View style={[styles.legendSwatch, { backgroundColor: Colors.secondary }]} />
-                    <Text style={styles.legendText}>This expense</Text>
+                    <Text size={11} color={Colors.text_dark}>This expense</Text>
                 </View>
                 <View style={styles.legendItem}>
                     <View
                         style={[styles.legendSwatch, { backgroundColor: Color(Colors.secondary).alpha(0.3).string() }]}
                     />
-                    <Text style={styles.legendText}>Previous</Text>
+                    <Text size={11} color={Colors.text_dark}>Previous</Text>
                 </View>
                 <View style={styles.legendItem}>
                     <View style={styles.avgLineLegendSwatch} />
-                    <Text style={styles.legendText}>Average</Text>
+                    <Text size={11} color={Colors.text_dark}>Average</Text>
                 </View>
             </View>
         </View>
@@ -191,7 +190,7 @@ const styles = StyleSheet.create({
     statValue: {
         color: Colors.secondary,
         fontSize: 15,
-        fontWeight: "700",
+        fontFamily: FONTS.bold,
     },
     statLabel: {
         color: Colors.text_dark,
@@ -236,13 +235,13 @@ const styles = StyleSheet.create({
     },
     barValue: {
         fontSize: 9,
-        fontWeight: "700",
+        fontFamily: FONTS.bold,
         transform: [{ rotate: "-90deg" }],
     },
     dateLabel: {
         fontSize: 9,
         marginTop: 6,
-        fontWeight: "500",
+        fontFamily: FONTS.medium,
         textAlign: "center",
     },
     avgLine: {
@@ -262,7 +261,7 @@ const styles = StyleSheet.create({
     avgLineLabel: {
         color: Colors.text_light,
         fontSize: 9,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
     },
     legend: {
         flexDirection: "row",

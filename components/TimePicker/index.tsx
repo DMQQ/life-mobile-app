@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import { useState } from "react"
 import { Pressable } from "react-native"
 import DateTimePicker from "react-native-modal-datetime-picker"
@@ -29,7 +30,7 @@ export default function TimePicker({ value, onChange, label }: TimePickerProps) 
                 }}
             >
                 {label && <Text style={{ color: Colors.text_dark, fontSize: 13 }}>{label}</Text>}
-                <Text style={{ color: Colors.foreground, fontSize: 17, fontWeight: "600" }}>{value}</Text>
+                <Text style={{ color: Colors.foreground, fontSize: 17, fontFamily: FONTS.semibold }}>{value}</Text>
             </Pressable>
             <DateTimePicker
                 date={moment(value, "HH:mm").toDate()}

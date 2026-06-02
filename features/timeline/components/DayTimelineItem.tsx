@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import moment from "moment"
 import { useMemo } from "react"
 import { StyleProp, StyleSheet, View, ViewStyle } from "react-native"
@@ -203,7 +204,7 @@ const localStyles = StyleSheet.create({
     },
     title: {
         color: Colors.secondary,
-        fontWeight: "bold",
+        fontFamily: FONTS.bold,
         fontSize: 18,
         flex: 1,
     },
@@ -228,7 +229,7 @@ const localStyles = StyleSheet.create({
     },
     chipText: {
         fontSize: 12,
-        fontWeight: "600",
+        fontFamily: FONTS.semibold,
     },
     metadataText: {
         color: Colors.foreground_secondary,

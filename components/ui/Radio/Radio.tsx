@@ -1,5 +1,6 @@
 import Ripple from "react-native-material-ripple";
-import { View, Text } from "react-native";
+import { View } from "react-native";
+import Text from "@/components/ui/Text/Text";
 import Colors from "../../../constants/Colors";
 
 export default function Radio(props: { onPress: Function; checked: boolean }) {
@@ -65,14 +66,7 @@ export function RadioGroup(props: RadioGroupProps) {
               props.onChange(option.value);
             }}
           />
-          <Text
-            style={{
-              color: Colors.secondary,
-              fontSize: 18,
-              fontWeight: "bold",
-              marginLeft: 10,
-            }}
-          >
+          <Text size={18} weight="bold" color={Colors.secondary} style={{ marginLeft: 10 }}>
             {option.label}
           </Text>
         </View>

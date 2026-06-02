@@ -1,4 +1,5 @@
 import { View, StyleProp, TextStyle, ViewStyle } from "react-native"
+import { FONTS } from "@/constants/Fonts"
 import Text from "@/components/ui/Text/Text"
 import Layout from "../../../constants/Layout"
 import Colors from "../../../constants/Colors"
@@ -76,7 +77,7 @@ export default function SegmentedButtons(props: SegmentedButtonsProps) {
                                 //  color: Colors.secondary,
                                 color: Colors.foreground,
                                 letterSpacing: 0.5,
-                                fontWeight: "bold",
+                                fontFamily: FONTS.bold,
                             },
                             props.buttonTextStyle,
                         ]}

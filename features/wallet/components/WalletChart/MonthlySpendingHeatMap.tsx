@@ -1,6 +1,7 @@
 import Layout from "@/constants/Layout";
 import { useMemo, useState } from "react";
-import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
+import { StyleSheet, View, TouchableOpacity } from "react-native";
+import Text from "@/components/ui/Text/Text";
 import Colors, { secondary_candidates } from "@/constants/Colors";
 import Color from "color";
 import lowOpacity from "@/utils/functions/lowOpacity";
@@ -88,13 +89,13 @@ const MonthlyHeatmap = ({ dateRange, type }: { dateRange: [string, string]; type
   if (loading)
     return (
       <View style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>Loading...</Text>
+        <Text size={16} color={Colors.foreground}>Loading...</Text>
       </View>
     );
   if (error)
     return (
       <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>Error: {error.message}</Text>
+        <Text size={16} color="#ff7777">Error: {error.message}</Text>
       </View>
     );
 
@@ -114,8 +115,8 @@ const MonthlyHeatmap = ({ dateRange, type }: { dateRange: [string, string]; type
                 onPress={() => dayData && handleDayPress(dayData)}
                 disabled={!hasData}
               >
-                <Text style={styles.dayNumber}>{day}</Text>
-                {hasData && <Text style={styles.dayValue}>{getLabel(value)}</Text>}
+                <Text size={16} weight="bold" color={Colors.foreground} style={{ marginBottom: 2 }}>{day}</Text>
+                {hasData && <Text size={10} weight="500" color={Colors.foreground} align="center" style={{ height: 15, width: "100%" }}>{getLabel(value)}</Text>}
               </TouchableOpacity>
             );
           })}
@@ -123,10 +124,10 @@ const MonthlyHeatmap = ({ dateRange, type }: { dateRange: [string, string]; type
 
         {selectedDayInfo && (
           <View style={styles.tooltip}>
-            <Text style={styles.tooltipTitle}>Day {selectedDayInfo.dayOfMonth}</Text>
-            <Text style={styles.tooltipValue}>Total: {selectedDayInfo.totalAmount.toFixed(2)}zł</Text>
-            <Text style={styles.tooltipValue}>Average: {selectedDayInfo.averageAmount.toFixed(2)}zł</Text>
-            <Text style={styles.tooltipValue}>Count: {selectedDayInfo.totalCount} transactions</Text>
+            <Text size={16} weight="bold" color={Colors.foreground} style={{ marginBottom: 8 }}>Day {selectedDayInfo.dayOfMonth}</Text>
+            <Text size={14} color={Colors.foreground} style={{ marginBottom: 4 }}>Total: {selectedDayInfo.totalAmount.toFixed(2)}zł</Text>
+            <Text size={14} color={Colors.foreground} style={{ marginBottom: 4 }}>Average: {selectedDayInfo.averageAmount.toFixed(2)}zł</Text>
+            <Text size={14} color={Colors.foreground} style={{ marginBottom: 4 }}>Count: {selectedDayInfo.totalCount} transactions</Text>
           </View>
         )}
       </View>
@@ -165,20 +166,6 @@ const styles = StyleSheet.create({
     borderColor: lowOpacity(Colors.primary, 0.4),
     borderRadius: 5,
   },
-  dayNumber: {
-    color: Colors.foreground,
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 2,
-  },
-  dayValue: {
-    color: Colors.foreground,
-    fontSize: 10,
-    textAlign: "center",
-    fontWeight: "500",
-    height: 15,
-    width: "100%",
-  },
   tooltip: {
     position: "absolute",
     top: 100,
@@ -189,27 +176,11 @@ const styles = StyleSheet.create({
     width: 180,
     zIndex: 10,
   },
-  tooltipTitle: {
-    color: Colors.foreground,
-    fontWeight: "bold",
-    fontSize: 16,
-    marginBottom: 8,
-  },
-  tooltipValue: {
-    color: Colors.foreground,
-    fontSize: 14,
-    marginBottom: 4,
-  },
   legendContainer: {
     marginTop: 10,
     padding: 15,
     backgroundColor: lowOpacity(Colors.primary, 0.15),
     borderRadius: 10,
-  },
-  legendTitle: {
-    color: Colors.foreground,
-    fontSize: 14,
-    marginBottom: 10,
   },
   legendItems: {
     flexDirection: "row",
@@ -226,19 +197,11 @@ const styles = StyleSheet.create({
     borderRadius: 3,
     marginBottom: 5,
   },
-  legendText: {
-    color: Colors.foreground,
-    fontSize: 10,
-  },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     minHeight: 300,
-  },
-  loadingText: {
-    color: Colors.foreground,
-    fontSize: 16,
   },
   errorContainer: {
     padding: 20,
@@ -247,10 +210,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: lowOpacity("#ff0000", 0.3),
     marginVertical: 20,
-  },
-  errorText: {
-    color: "#ff7777",
-    fontSize: 16,
   },
 });
 

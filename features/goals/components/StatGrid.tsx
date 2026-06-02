@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import React, { useEffect, useMemo, useRef } from "react"
 import { View, ScrollView, StyleSheet } from "react-native"
 import Colors, { secondary_candidates } from "@/constants/Colors"
@@ -237,7 +238,7 @@ const styles = StyleSheet.create({
     tooltipDate: {
         color: "#ffffff",
         fontSize: 12,
-        fontWeight: "bold",
+        fontFamily: FONTS.bold,
         marginBottom: 2,
     },
     tooltipCount: {

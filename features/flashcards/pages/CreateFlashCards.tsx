@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import Button from "@/components/ui/Button/Button"
 import Input from "@/components/ui/TextInput/TextInput"
 import ValidatedInput from "@/components/ui/ValidatedInput"
@@ -62,7 +63,7 @@ const CustomTabs = ({
                         style={{
                             color: Colors.foreground,
                             fontSize: 14,
-                            fontWeight: activeTab === tab.value ? "bold" : "normal",
+                            fontFamily: activeTab === tab.value ? FONTS.bold : FONTS.regular,
                         }}
                     >
                         {tab.text}
@@ -382,7 +383,7 @@ const AIGeneratedFlashCards = ({ groupId }: { groupId: string }) => {
                     })
                 }}
                 icon={state.loading && <ActivityIndicator size="small" color={Colors.secondary} />}
-                fontStyle={{ color: Colors.secondary, fontWeight: "600", paddingHorizontal: 10 }}
+                fontStyle={{ color: Colors.secondary, fontFamily: FONTS.semibold, paddingHorizontal: 10 }}
                 style={{
                     backgroundColor: lowOpacity(Colors.secondary, 0.15),
                     marginTop: 15,
@@ -408,7 +409,7 @@ const AIGeneratedFlashCards = ({ groupId }: { groupId: string }) => {
                                 marginBottom: 15,
                             }}
                         >
-                            <Text style={{ color: Colors.foreground, fontSize: 16, fontWeight: "bold" }}>
+                            <Text style={{ color: Colors.foreground, fontSize: 16, fontFamily: FONTS.bold }}>
                                 Cards ({selectedCards.size}/{state.data.generateAIFlashcards.length})
                             </Text>
                             <View style={{ flexDirection: "row", gap: 15 }}>
@@ -444,7 +445,7 @@ const AIGeneratedFlashCards = ({ groupId }: { groupId: string }) => {
                                             <Text
                                                 style={{
                                                     color: Colors.foreground,
-                                                    fontWeight: "600",
+                                                    fontFamily: FONTS.semibold,
                                                     fontSize: 13,
                                                     marginBottom: 4,
                                                 }}

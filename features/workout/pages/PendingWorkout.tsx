@@ -1,3 +1,4 @@
+import { FONTS } from "@/constants/Fonts"
 import Button from "@/components/ui/Button/Button"
 import ScreenContainer from "@/components/ui/ScreenContainer"
 import { View, StyleSheet, Text, Image, Vibration } from "react-native"
@@ -28,14 +29,14 @@ const styles = StyleSheet.create({
     exerciseTitle: {
         fontSize: 40,
         color: Colors.foreground,
-        fontWeight: "bold",
+        fontFamily: FONTS.bold,
         letterSpacing: 1,
         marginBottom: 5,
     },
 
     nextButtonText: {
         color: Colors.secondary,
-        fontWeight: "bold",
+        fontFamily: FONTS.bold,
         letterSpacing: 2,
     },
 
@@ -117,7 +118,7 @@ const Header = (props: { nextButtonProps: NextButtonProps; text: string; navigat
             style={{
                 color: Colors.text_light,
                 fontSize: 18,
-                fontWeight: "bold",
+                fontFamily: FONTS.bold,
                 flex: 1,
                 textAlign: "center",
             }}

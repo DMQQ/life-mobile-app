@@ -1,6 +1,7 @@
 import Layout from "@/constants/Layout"
 import React from "react"
-import { StyleSheet, Text, View, ScrollView } from "react-native"
+import { StyleSheet, View, ScrollView } from "react-native"
+import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
 import Color from "color"
 import AnimatedBar from "@/components/ui/Charts/AnimatedBar"
@@ -32,7 +33,7 @@ const CustomLimitChart: React.FC<CustomLimitChartProps> = ({ data, maxValue }) =
         <View style={styles.chartWrapper}>
             <View style={[styles.yAxisLabels, { height: CHART_HEIGHT }]}>
                 {[4, 3, 2, 1, 0].map((i) => (
-                    <Text key={i} style={styles.yAxisLabel}>
+                    <Text key={i} size={10} color={Colors.foreground}>
                         {Math.round((maxValue / 4) * i)}zł
                     </Text>
                 ))}
@@ -89,10 +90,6 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
         alignItems: "flex-end",
         paddingRight: 5,
-    },
-    yAxisLabel: {
-        color: Colors.foreground,
-        fontSize: 10,
     },
     chartContent: {
         flex: 1,
