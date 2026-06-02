@@ -168,11 +168,11 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
         },
     })
 
-    if (loading || !subscription) {
-        return <SubscriptionSkeleton />
-    }
+    // if (loading || !subscription) {
+    //     return <SubscriptionSkeleton />
+    // }
 
-    const nextBillingDayjs = dayjs(parseInt(subscription.nextBillingDate || "0"))
+    const nextBillingDayjs = dayjs(parseInt(subscription?.nextBillingDate || "0"))
     const calendarDate = nextBillingDayjs.isValid()
         ? nextBillingDayjs.format("YYYY-MM-DD")
         : dayjs().format("YYYY-MM-DD")
@@ -203,214 +203,220 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
 
             <Background tintColor={CategoryUtils.getCategoryColor("subscriptions", "expense")} />
 
-            <Animated.ScrollView
-                keyboardDismissMode={"on-drag"}
-                onScroll={onScroll}
-                style={{ flex: 1 }}
-                contentContainerStyle={{ paddingTop: 150 }}
-            >
-                <View style={{ width: "100%", height: 150, justifyContent: "center", alignItems: "center", gap: 7.5 }}>
-                    <CategoryIcon
-                        category={"subscriptions"}
-                        size={60}
-                        containerStyle={{
-                            width: 100,
-                            height: 100,
-                            borderRadius: 100,
-                        }}
-                    />
-                    <Text style={{ fontSize: 15, color: Colors.text_dark }}>{subscription.description}</Text>
-                    <Text style={{ color: "#fff", fontSize: 40, fontWeight: "500" }}>
-                        {subscription.amount.toFixed(2)}zł
-                    </Text>
-                </View>
+            {loading || !subscription ? (
+                <SubscriptionSkeleton />
+            ) : (
+                <Animated.ScrollView
+                    keyboardDismissMode={"on-drag"}
+                    onScroll={onScroll}
+                    style={{ flex: 1 }}
+                    contentContainerStyle={{ paddingTop: 150 }}
+                >
+                    <View
+                        style={{ width: "100%", height: 150, justifyContent: "center", alignItems: "center", gap: 7.5 }}
+                    >
+                        <CategoryIcon
+                            category={"subscriptions"}
+                            size={60}
+                            containerStyle={{
+                                width: 100,
+                                height: 100,
+                                borderRadius: 100,
+                            }}
+                        />
+                        <Text style={{ fontSize: 15, color: Colors.text_dark }}>{subscription.description}</Text>
+                        <Text style={{ color: "#fff", fontSize: 40, fontWeight: "500" }}>
+                            {subscription.amount.toFixed(2)}zł
+                        </Text>
+                    </View>
 
-                <View style={{ paddingHorizontal: 15 }}>
-                    <Section title="Details">
-                        <View style={styles.detailRow}>
-                            <Feather name="refresh-cw" size={20} color={muted} style={styles.icon} />
-                            <Text style={styles.detailText}>
-                                {formatBillingCycle(subscription.billingCycle)} Subscription
-                            </Text>
-                        </View>
-
-                        {subscription.billingCycle === "custom" && subscription.billingDay != null && (
+                    <View style={{ paddingHorizontal: 15 }}>
+                        <Section title="Details">
                             <View style={styles.detailRow}>
-                                <Feather name="calendar" size={20} color={muted} style={styles.icon} />
-                                <Text style={styles.detailText}>Billing day: {subscription.billingDay}</Text>
+                                <Feather name="refresh-cw" size={20} color={muted} style={styles.icon} />
+                                <Text style={styles.detailText}>
+                                    {formatBillingCycle(subscription.billingCycle)} Subscription
+                                </Text>
                             </View>
-                        )}
 
-                        {subscription.billingCycle === "custom" &&
-                            (subscription.customBillingMonths?.length ?? 0) > 0 && (
-                                <View
-                                    style={[
-                                        styles.detailRow,
-                                        { flexDirection: "column", alignItems: "flex-start", gap: 8 },
-                                    ]}
-                                >
-                                    <Text style={styles.detailText}>Active months:</Text>
-                                    <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
-                                        {subscription.customBillingMonths!.map((m) => (
-                                            <View key={m} style={styles.monthChip}>
-                                                <Text variant="caption" style={{ color: Colors.secondary }}>
-                                                    {MONTH_NAMES[m - 1]}
-                                                </Text>
-                                            </View>
-                                        ))}
-                                    </View>
+                            {subscription.billingCycle === "custom" && subscription.billingDay != null && (
+                                <View style={styles.detailRow}>
+                                    <Feather name="calendar" size={20} color={muted} style={styles.icon} />
+                                    <Text style={styles.detailText}>Billing day: {subscription.billingDay}</Text>
                                 </View>
                             )}
 
-                        {subscription.reminderDaysBeforehand != null && (
-                            <View style={styles.detailRow}>
-                                <Feather name="bell" size={20} color={muted} style={styles.icon} />
-                                <Text style={styles.detailText}>
-                                    Reminder:{" "}
-                                    {subscription.reminderDaysBeforehand === 0
-                                        ? "on billing day"
-                                        : `${subscription.reminderDaysBeforehand}d before`}
-                                </Text>
-                            </View>
-                        )}
-
-                        <View style={styles.detailRow}>
-                            <Feather name="calendar" size={20} color={muted} style={styles.icon} />
-                            <Text style={styles.detailText}>Started: {parseDate(+subscription.dateStart)}</Text>
-                        </View>
-
-                        <View style={styles.detailRow}>
-                            <Feather name="clock" size={20} color={muted} style={styles.icon} />
-                            <Text style={styles.detailText}>Running for: {getSubscriptionDuration()}</Text>
-                        </View>
-
-                        {subscription.isActive && (
-                            <View style={styles.detailRow}>
-                                <Feather name="calendar" size={20} color={muted} style={styles.icon} />
-                                <Text style={[styles.detailText, { color: isOverdue ? "#F07070" : muted }]}>
-                                    {isOverdue
-                                        ? "Overdue"
-                                        : `Next billing: ${parseDate(+subscription.nextBillingDate)}`}
-                                </Text>
-                            </View>
-                        )}
-
-                        <View style={[styles.detailRow, { borderBottomWidth: 0 }]}>
-                            <View style={styles.statusChip}>
-                                <View
-                                    style={[
-                                        styles.statusDot,
-                                        { backgroundColor: subscription.isActive ? "#66E875" : Colors.text_dark },
-                                    ]}
-                                />
-                                <Text
-                                    variant="caption"
-                                    style={{
-                                        color: subscription.isActive ? "#66E875" : Colors.text_dark,
-                                        fontWeight: "600",
-                                    }}
-                                >
-                                    {subscription.isActive ? "Active" : "Inactive"}
-                                </Text>
-                            </View>
-
-                            <View style={{ width: 150 }}>
-                                <Host modifiers={[background("clear")]}>
-                                    <Toggle isOn={subscription.isActive} onIsOnChange={handleToggleChange} />
-                                </Host>
-                            </View>
-                        </View>
-                    </Section>
-                </View>
-
-                {subscription.isActive && (
-                    <View style={{ paddingHorizontal: 15 }}>
-                        <Section title="Next Billing">
-                            <CollapsibleThemedCalendar
-                                date={calendarDate}
-                                markedDates={{ [calendarDate]: { selected: true } }}
-                            />
-                        </Section>
-                    </View>
-                )}
-
-                {subscription.expenses.length > 0 && (
-                    <>
-                        <View style={{ paddingHorizontal: 15 }}>
-                            <Section title="Statistics">
-                                <View style={styles.statsContainer}>
-                                    <View style={styles.statItem}>
-                                        <Text variant="subheading" style={styles.statValue}>
-                                            {subscription.expenses.length}
-                                        </Text>
-                                        <Text variant="caption" style={styles.statLabel}>
-                                            Total Payments
-                                        </Text>
-                                    </View>
-
-                                    <View style={styles.statItem}>
-                                        <Text variant="subheading" style={styles.statValue}>
-                                            {totalSpent.toFixed(2)}zł
-                                        </Text>
-                                        <Text variant="caption" style={styles.statLabel}>
-                                            Total Spent
-                                        </Text>
-                                    </View>
-
-                                    <View style={styles.statItem}>
-                                        <Text variant="subheading" style={styles.statValue}>
-                                            {avgMonthlySpend.toFixed(2)}zł
-                                        </Text>
-                                        <Text variant="caption" style={styles.statLabel}>
-                                            Avg Payment
-                                        </Text>
-                                    </View>
-                                </View>
-                            </Section>
-                        </View>
-
-                        <View style={{ paddingHorizontal: 15 }}>
-                            <Section title="Payment History">
-                                {sortedExpenses.slice(0, 10).map((expense: any) => (
-                                    <WalletItem
-                                        key={expense.id}
-                                        {...expense}
-                                        handlePress={() =>
-                                            handleExpensePress({
-                                                ...expense,
-                                                type: "expense",
-                                            })
-                                        }
-                                        type="expense"
-                                        animatedStyle={{
-                                            marginBottom: 0,
-                                            borderWidth: 0,
-                                            borderBottomWidth: 1,
-                                        }}
-                                    />
-                                ))}
-
-                                {subscription.expenses.length > 10 && (
-                                    <View style={styles.morePaymentsContainer}>
-                                        <Text variant="caption" style={styles.morePaymentsText}>
-                                            +{subscription.expenses.length - 10} more payments
-                                        </Text>
+                            {subscription.billingCycle === "custom" &&
+                                (subscription.customBillingMonths?.length ?? 0) > 0 && (
+                                    <View
+                                        style={[
+                                            styles.detailRow,
+                                            { flexDirection: "column", alignItems: "flex-start", gap: 8 },
+                                        ]}
+                                    >
+                                        <Text style={styles.detailText}>Active months:</Text>
+                                        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
+                                            {subscription.customBillingMonths!.map((m) => (
+                                                <View key={m} style={styles.monthChip}>
+                                                    <Text variant="caption" style={{ color: Colors.secondary }}>
+                                                        {MONTH_NAMES[m - 1]}
+                                                    </Text>
+                                                </View>
+                                            ))}
+                                        </View>
                                     </View>
                                 )}
+
+                            {subscription.reminderDaysBeforehand != null && (
+                                <View style={styles.detailRow}>
+                                    <Feather name="bell" size={20} color={muted} style={styles.icon} />
+                                    <Text style={styles.detailText}>
+                                        Reminder:{" "}
+                                        {subscription.reminderDaysBeforehand === 0
+                                            ? "on billing day"
+                                            : `${subscription.reminderDaysBeforehand}d before`}
+                                    </Text>
+                                </View>
+                            )}
+
+                            <View style={styles.detailRow}>
+                                <Feather name="calendar" size={20} color={muted} style={styles.icon} />
+                                <Text style={styles.detailText}>Started: {parseDate(+subscription.dateStart)}</Text>
+                            </View>
+
+                            <View style={styles.detailRow}>
+                                <Feather name="clock" size={20} color={muted} style={styles.icon} />
+                                <Text style={styles.detailText}>Running for: {getSubscriptionDuration()}</Text>
+                            </View>
+
+                            {subscription.isActive && (
+                                <View style={styles.detailRow}>
+                                    <Feather name="calendar" size={20} color={muted} style={styles.icon} />
+                                    <Text style={[styles.detailText, { color: isOverdue ? "#F07070" : muted }]}>
+                                        {isOverdue
+                                            ? "Overdue"
+                                            : `Next billing: ${parseDate(+subscription.nextBillingDate)}`}
+                                    </Text>
+                                </View>
+                            )}
+
+                            <View style={[styles.detailRow, { borderBottomWidth: 0 }]}>
+                                <View style={styles.statusChip}>
+                                    <View
+                                        style={[
+                                            styles.statusDot,
+                                            { backgroundColor: subscription.isActive ? "#66E875" : Colors.text_dark },
+                                        ]}
+                                    />
+                                    <Text
+                                        variant="caption"
+                                        style={{
+                                            color: subscription.isActive ? "#66E875" : Colors.text_dark,
+                                            fontWeight: "600",
+                                        }}
+                                    >
+                                        {subscription.isActive ? "Active" : "Inactive"}
+                                    </Text>
+                                </View>
+
+                                <View style={{ width: 150 }}>
+                                    <Host modifiers={[background("clear")]}>
+                                        <Toggle isOn={subscription.isActive} onIsOnChange={handleToggleChange} />
+                                    </Host>
+                                </View>
+                            </View>
+                        </Section>
+                    </View>
+
+                    {subscription.isActive && (
+                        <View style={{ paddingHorizontal: 15 }}>
+                            <Section title="Next Billing">
+                                <CollapsibleThemedCalendar
+                                    date={calendarDate}
+                                    markedDates={{ [calendarDate]: { selected: true } }}
+                                />
                             </Section>
                         </View>
-                    </>
-                )}
+                    )}
 
-                {subscription.expenses.length === 0 && (
-                    <EmptyState
-                        icon="credit-card"
-                        title="No payments yet"
-                        description="Payments will appear here once the subscription becomes active"
-                    />
-                )}
-                <View style={{ height: 100 }} />
-            </Animated.ScrollView>
+                    {subscription.expenses.length > 0 && (
+                        <>
+                            <View style={{ paddingHorizontal: 15 }}>
+                                <Section title="Statistics">
+                                    <View style={styles.statsContainer}>
+                                        <View style={styles.statItem}>
+                                            <Text variant="subheading" style={styles.statValue}>
+                                                {subscription.expenses.length}
+                                            </Text>
+                                            <Text variant="caption" style={styles.statLabel}>
+                                                Total Payments
+                                            </Text>
+                                        </View>
+
+                                        <View style={styles.statItem}>
+                                            <Text variant="subheading" style={styles.statValue}>
+                                                {totalSpent.toFixed(2)}zł
+                                            </Text>
+                                            <Text variant="caption" style={styles.statLabel}>
+                                                Total Spent
+                                            </Text>
+                                        </View>
+
+                                        <View style={styles.statItem}>
+                                            <Text variant="subheading" style={styles.statValue}>
+                                                {avgMonthlySpend.toFixed(2)}zł
+                                            </Text>
+                                            <Text variant="caption" style={styles.statLabel}>
+                                                Avg Payment
+                                            </Text>
+                                        </View>
+                                    </View>
+                                </Section>
+                            </View>
+
+                            <View style={{ paddingHorizontal: 15 }}>
+                                <Section title="Payment History">
+                                    {sortedExpenses.slice(0, 10).map((expense: any) => (
+                                        <WalletItem
+                                            key={expense.id}
+                                            {...expense}
+                                            handlePress={() =>
+                                                handleExpensePress({
+                                                    ...expense,
+                                                    type: "expense",
+                                                })
+                                            }
+                                            type="expense"
+                                            animatedStyle={{
+                                                marginBottom: 0,
+                                                borderWidth: 0,
+                                                borderBottomWidth: 1,
+                                            }}
+                                        />
+                                    ))}
+
+                                    {subscription.expenses.length > 10 && (
+                                        <View style={styles.morePaymentsContainer}>
+                                            <Text variant="caption" style={styles.morePaymentsText}>
+                                                +{subscription.expenses.length - 10} more payments
+                                            </Text>
+                                        </View>
+                                    )}
+                                </Section>
+                            </View>
+                        </>
+                    )}
+
+                    {subscription.expenses.length === 0 && (
+                        <EmptyState
+                            icon="credit-card"
+                            title="No payments yet"
+                            description="Payments will appear here once the subscription becomes active"
+                        />
+                    )}
+                    <View style={{ height: 100 }} />
+                </Animated.ScrollView>
+            )}
 
             <ConfirmDialog
                 isVisible={confirmAction}

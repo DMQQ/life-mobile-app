@@ -1,11 +1,25 @@
 import Colors, { Sizing } from "@/constants/Colors"
 import { Text as RNText, TextProps as RNTextProps, StyleProp, TextStyle } from "react-native"
 
-export type TextVariant = "heading" | "subheading" | "body" | "caption" | "title" | "subtitle"
+export type TextVariant = "heading" | "subheading" | "body" | "caption" | "title" | "subtitle" | "label"
 
 export interface TextProps extends Omit<RNTextProps, "style"> {
     variant?: TextVariant
     color?: string
+    weight?: TextStyle["fontWeight"]
+    align?: TextStyle["textAlign"]
+    size?: number
+    lineHeight?: number
+    letterSpacing?: number
+    opacity?: number
+    flex?: number
+    muted?: boolean
+    dim?: boolean
+    mono?: boolean
+    italic?: boolean
+    uppercase?: boolean
+    underline?: boolean
+    strikethrough?: boolean
     style?: StyleProp<TextStyle>
 }
 
@@ -20,7 +34,7 @@ const variantStyles: Record<TextVariant, TextStyle> = {
         fontSize: Sizing.heading,
         fontWeight: "600",
         color: Colors.foreground,
-        letterSpacing: 0.5,
+        letterSpacing: 0.3,
     },
     subheading: {
         fontSize: Sizing.subHead,
@@ -31,7 +45,6 @@ const variantStyles: Record<TextVariant, TextStyle> = {
         fontSize: 16,
         fontWeight: "500",
         color: Colors.foreground_secondary,
-        opacity: 0.8,
     },
     body: {
         fontSize: Sizing.text,
@@ -43,39 +56,100 @@ const variantStyles: Record<TextVariant, TextStyle> = {
         fontWeight: "400",
         color: Colors.foreground_secondary,
     },
+    label: {
+        fontSize: 11,
+        fontWeight: "600",
+        color: Colors.foreground_secondary,
+        letterSpacing: 0.8,
+        textTransform: "uppercase",
+    },
 }
 
-export default function Text({ variant = "body", color, style, children, ...props }: TextProps) {
+function Text({
+    variant = "body",
+    color,
+    weight,
+    align,
+    size,
+    lineHeight,
+    letterSpacing,
+    opacity,
+    flex,
+    muted,
+    dim,
+    mono,
+    italic,
+    uppercase,
+    underline,
+    strikethrough,
+    style,
+    children,
+    ...props
+}: TextProps) {
+    const overrides: TextStyle = {}
+
+    if (color) overrides.color = color
+    else if (muted) overrides.color = Colors.foreground_secondary
+    else if (dim) overrides.color = Colors.foreground_disabled
+
+    if (weight) overrides.fontWeight = weight
+    if (align) overrides.textAlign = align
+    if (size) overrides.fontSize = size
+    if (lineHeight) overrides.lineHeight = lineHeight
+    if (letterSpacing !== undefined) overrides.letterSpacing = letterSpacing
+    if (opacity !== undefined) overrides.opacity = opacity
+    if (flex !== undefined) overrides.flex = flex
+    if (italic) overrides.fontStyle = "italic"
+    if (uppercase) overrides.textTransform = "uppercase"
+    if (underline) overrides.textDecorationLine = "underline"
+    if (strikethrough) overrides.textDecorationLine = "line-through"
+    if (mono) overrides.fontVariant = ["tabular-nums"]
+
     return (
-        <RNText
-            style={[variantStyles[variant], color ? { color } : undefined, style]}
-            {...props}
-        >
+        <RNText style={[variantStyles[variant], overrides, style]} {...props}>
             {children}
         </RNText>
     )
 }
 
-export function Heading({ style, ...props }: Omit<TextProps, "variant">) {
+type VariantProps = Omit<TextProps, "variant">
+
+function Heading({ style, ...props }: VariantProps) {
     return <Text variant="heading" style={style} {...props} />
 }
 
-export function Title({ style, ...props }: Omit<TextProps, "variant">) {
+function Title({ style, ...props }: VariantProps) {
     return <Text variant="title" style={style} {...props} />
 }
 
-export function SubHeading({ style, ...props }: Omit<TextProps, "variant">) {
+function SubHeading({ style, ...props }: VariantProps) {
     return <Text variant="subheading" style={style} {...props} />
 }
 
-export function Subtitle({ style, ...props }: Omit<TextProps, "variant">) {
+function Subtitle({ style, ...props }: VariantProps) {
     return <Text variant="subtitle" style={style} {...props} />
 }
 
-export function Body({ style, ...props }: Omit<TextProps, "variant">) {
+function Body({ style, ...props }: VariantProps) {
     return <Text variant="body" style={style} {...props} />
 }
 
-export function Caption({ style, ...props }: Omit<TextProps, "variant">) {
+function Caption({ style, ...props }: VariantProps) {
     return <Text variant="caption" style={style} {...props} />
 }
+
+function Label({ style, ...props }: VariantProps) {
+    return <Text variant="label" style={style} {...props} />
+}
+
+Text.Heading = Heading
+Text.Title = Title
+Text.SubHeading = SubHeading
+Text.Subtitle = Subtitle
+Text.Body = Body
+Text.Caption = Caption
+Text.Label = Label
+
+export default Text
+
+export { Heading, Title, SubHeading, Subtitle, Body, Caption, Label }

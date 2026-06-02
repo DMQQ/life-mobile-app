@@ -11,6 +11,7 @@ import { GoalCategory } from "../components/GoalCategory"
 import WeekGrid from "../components/WeekGrid"
 import AnimatedLoader from "../components/GoalsLoader"
 import { useGoal } from "../hooks/hooks"
+import Background from "@/components/ui/Background"
 
 const AnimatedFlashList = Animated.createAnimatedComponent(FlashList)
 
@@ -59,7 +60,9 @@ export default function Goals({ navigation }: any) {
                     },
                 ]}
             />
-            <View style={{ flex: 1, backgroundColor: Colors.primary }}>
+            <Background />
+
+            <View style={{ flex: 1 }}>
                 {viewMode === "list" ? (
                     <AnimatedFlashList
                         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}

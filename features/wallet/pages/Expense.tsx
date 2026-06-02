@@ -4,9 +4,9 @@ import Colors from "@/constants/Colors"
 import { Expense as ExpenseType } from "@/types"
 import { gql, useMutation, useQuery } from "@apollo/client"
 import { GET_EXPENSE } from "../hooks/getExpenseQuery"
-import { SFSymbol } from "expo-symbols"
+import { SFSymbol, SymbolView } from "expo-symbols"
 import { useEffect, useRef, useState } from "react"
-import { StyleSheet, Text, View } from "react-native"
+import { Pressable, StyleSheet, Text, View } from "react-native"
 import useDeleteActivity from "../hooks/useDeleteActivity"
 import useRefund from "../hooks/useRefundExpense"
 import useSubscription from "../hooks/useSubscription"
@@ -26,6 +26,9 @@ import { ConfirmDialog } from "@/components"
 import Section from "@/components/ui/Section"
 import { CategoryIcon, CategoryUtils } from "../components/Expense/ExpenseIcon"
 import Background from "@/components/ui/Background"
+import AddSubExpenseSheet, { AddSubExpenseSheetHandle } from "../components/Expense/AddSubExpenseSheet"
+import { useUploadSubExpense } from "../hooks/useUploadSubExpense"
+import Feedback from "react-native-haptic-feedback"
 
 export default function Expense({ route: { params }, navigation }: any) {
     const { data } = useQuery(GET_EXPENSE, { variables: { id: params?.expense?.id ?? params?.expenseId } })
@@ -110,6 +113,26 @@ export default function Expense({ route: { params }, navigation }: any) {
 
     const fileUploadRef = useRef<FileUploadHandle>(null)
     const mapPickerRef = useRef<MapPickerHandle>(null)
+    const addSubExpenseSheetRef = useRef<AddSubExpenseSheetHandle>(null)
+
+    const [uploadSubexpenses] = useUploadSubExpense(() => {})
+
+    const handleAddSubExpense = async (item: { description: string; amount: number; category: string }) => {
+        const result = await uploadSubexpenses({
+            variables: {
+                input: {
+                    expenseId: selected.id,
+                    inputs: [{ description: item.description, amount: item.amount, category: item.category }],
+                },
+            },
+        })
+        if (result.data?.addMultipleSubExpenses) {
+            setSelected((prev: any) => ({
+                ...prev,
+                subexpenses: [...(prev.subexpenses || []), ...result.data!.addMultipleSubExpenses],
+            }))
+        }
+    }
 
     const subscriptionMenuOptions: ContextMenuOption[] = [
         {
@@ -213,14 +236,37 @@ export default function Expense({ route: { params }, navigation }: any) {
                 </View>
 
                 <View style={styles.scrollContent}>
-                    {selected.subexpenses?.length > 0 && (
-                        <Section title="Subexpenses">
+                    <Section
+                        title="Subexpenses"
+                        headerRight={
+                            <Pressable
+                                onPress={() => {
+                                    Feedback.trigger("impactLight")
+                                    addSubExpenseSheetRef.current?.expand()
+                                }}
+                                style={styles.addSubBtn}
+                            >
+                                <SymbolView name="plus.circle.fill" size={18} tintColor={Colors.secondary} />
+                            </Pressable>
+                        }
+                    >
+                        {selected.subexpenses?.length > 0 ? (
                             <SubexpenseStack
                                 selected={selected}
                                 handleDeleteSubExpense={(id) => setConfirmSubExpenseId(id)}
                             />
-                        </Section>
-                    )}
+                        ) : (
+                            <Pressable
+                                onPress={() => {
+                                    Feedback.trigger("impactLight")
+                                    addSubExpenseSheetRef.current?.expand()
+                                }}
+                                style={styles.emptySubRow}
+                            >
+                                <Text style={styles.emptySubText}>Add sub-expenses to break down this expense</Text>
+                            </Pressable>
+                        )}
+                    </Section>
 
                     <ExpenseDetails expense={selected} />
 
@@ -299,6 +345,8 @@ export default function Expense({ route: { params }, navigation }: any) {
                 destructive
             />
 
+            <AddSubExpenseSheet ref={addSubExpenseSheetRef} onAdd={handleAddSubExpense} />
+
             <ConfirmDialog
                 isVisible={confirmSubscriptionAction}
                 onDismiss={() => setConfirmSubscriptionAction(false)}
@@ -326,5 +374,16 @@ const styles = StyleSheet.create({
     },
     bottomSpacer: {
         height: 100,
+    },
+    addSubBtn: {
+        padding: 2,
+    },
+    emptySubRow: {
+        paddingHorizontal: 15,
+        paddingVertical: 14,
+    },
+    emptySubText: {
+        color: Colors.text_dark,
+        fontSize: 13,
     },
 })
