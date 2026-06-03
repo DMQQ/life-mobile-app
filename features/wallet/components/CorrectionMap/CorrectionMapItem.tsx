@@ -1,3 +1,4 @@
+import { formatAmount } from "@/utils/functions/formatCurrency"
 import { FONTS } from "@/constants/Fonts"
 import Colors from "@/constants/Colors"
 import Text from "@/components/ui/Text/Text"
@@ -26,7 +27,7 @@ function matchDescription(item: CorrectionMap): { field: string; value: string; 
     if (item.matchDescription) return { field: "desc", value: item.matchDescription }
     if (item.matchCategory) return { field: "category", value: item.matchCategory, isCategory: true }
     if (item.matchAmountMin !== null || item.matchAmountMax !== null) {
-        return { field: "amount", value: `${item.matchAmountMin ?? 0}–${item.matchAmountMax ?? "∞"} zł` }
+        return { field: "amount", value: `${formatAmount(item.matchAmountMin ?? 0, 0)}–${item.matchAmountMax != null ? formatAmount(item.matchAmountMax, 0) : "∞"} zł` }
     }
     return null
 }

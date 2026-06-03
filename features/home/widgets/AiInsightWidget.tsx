@@ -6,8 +6,8 @@ import Color from "color"
 import { LinearGradient } from "expo-linear-gradient"
 import { useState } from "react"
 import { StyleSheet, TouchableOpacity, View } from "react-native"
-import Svg, { Defs, LinearGradient as SvgGrad, Path, Polyline, Stop } from "react-native-svg"
 import Section from "@/components/ui/Section"
+import { gql, useQuery } from "@apollo/client"
 
 const AI_A = "#7C3AED"
 const AI_B = "#06B6D4"
@@ -15,76 +15,86 @@ const AI_B = "#06B6D4"
 const CARD_BG_TOP = Color(Colors.primary_lighter).mix(Color(AI_A), 0.42).hex()
 const CARD_BG_BOT = Color(Colors.primary_lighter).mix(Color(AI_B), 0.18).hex()
 
-const INSIGHTS = [
-    {
-        headline: "Spending is down 23% vs last month",
-        detail: "Mostly fewer restaurant visits and impulse purchases.",
-        metric: "−23%",
-        positive: true,
-        trend: [420, 390, 450, 375, 310, 290, 265],
-    },
-    {
-        headline: "You completed 80% of this week's events",
-        detail: "Best streak in the last 30 days — keep it up.",
-        metric: "80%",
-        positive: true,
-        trend: [5, 4, 6, 5, 7, 8, 8],
-    },
-    {
-        headline: "Food & drinks is 34% of your expenses",
-        detail: "Up from 28% last month. Consider setting a limit.",
-        metric: "34%",
-        positive: false,
-        trend: [90, 105, 95, 130, 120, 145, 160],
-    },
-    {
-        headline: "3 subscriptions renew in the next 7 days",
-        detail: "Total upcoming charge: 89 zł. Review before renewal.",
-        metric: "89 zł",
-        positive: false,
-        trend: [20, 20, 20, 20, 20, 49, 89],
-    },
-]
+const AI_INSIGHTS = gql`
+    query AiInsights {
+        aiInsights {
+            insights {
+                title
+                description
+                topic
+                value
+                trend
+            }
+        }
+    }
+`
 
-function Sparkline({ values, color }: { values: number[]; color: string }) {
-    const W = 82
-    const H = 46
-    const PAD = 4
-    const min = Math.min(...values)
-    const max = Math.max(...values)
-    const range = max - min || 1
+type InsightTopic =
+    | "spending_trend"
+    | "top_category"
+    | "biggest_expense"
+    | "income_balance"
+    | "subscription_cost"
+    | "goals_progress"
+    | "upcoming_events"
+    | "flashcard_mastery"
+    | "exercise_activity"
+    | "no_spend_streak"
 
-    const xs = values.map((_, i) => PAD + (i / (values.length - 1)) * (W - PAD * 2))
-    const ys = values.map((v) => PAD + (1 - (v - min) / range) * (H - PAD * 2))
-    const pts = xs.map((x, i) => `${x},${ys[i]}`).join(" ")
-    const area = `M ${xs[0]},${H} ` + xs.map((x, i) => `L ${x},${ys[i]}`).join(" ") + ` L ${xs[xs.length - 1]},${H} Z`
+type InsightTrend = "up" | "down" | "neutral"
 
-    return (
-        <Svg width={W} height={H}>
-            <Defs>
-                <SvgGrad id="fill" x1="0" y1="0" x2="0" y2="1">
-                    <Stop offset="0" stopColor={color} stopOpacity="0.4" />
-                    <Stop offset="1" stopColor={color} stopOpacity="0" />
-                </SvgGrad>
-            </Defs>
-            <Path d={area} fill="url(#fill)" />
-            <Polyline
-                points={pts}
-                fill="none"
-                stroke={color}
-                strokeWidth={2}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-            />
-        </Svg>
-    )
+interface AiInsight {
+    title: string
+    description: string
+    topic: InsightTopic
+    value?: string
+    trend?: InsightTrend
+}
+
+interface AiInsightsData {
+    aiInsights: { insights: AiInsight[] }
+}
+
+const TOPIC_META: Record<InsightTopic, { icon: React.ComponentProps<typeof Feather>["name"]; color: string }> = {
+    spending_trend: { icon: "trending-up", color: Colors.secondary },
+    top_category: { icon: "tag", color: Colors.ternary },
+    biggest_expense: { icon: "credit-card", color: Colors.negative },
+    income_balance: { icon: "bar-chart-2", color: Colors.positive },
+    subscription_cost: { icon: "repeat", color: Colors.warning },
+    goals_progress: { icon: "check-circle", color: Colors.positive },
+    upcoming_events: { icon: "calendar", color: Colors.info },
+    flashcard_mastery: { icon: "book-open", color: Colors.info },
+    exercise_activity: { icon: "activity", color: Colors.chart_positive },
+    no_spend_streak: { icon: "zap", color: Colors.secondary },
+}
+
+function topicIcon(insight: AiInsight): React.ComponentProps<typeof Feather>["name"] {
+    if (insight.topic === "spending_trend") {
+        return insight.trend === "down" ? "trending-down" : "trending-up"
+    }
+    return TOPIC_META[insight.topic].icon
+}
+
+function accentColor(insight: AiInsight): string {
+    if (insight.trend === "up") return Colors.positive
+    if (insight.trend === "down") return Colors.negative
+    return TOPIC_META[insight.topic].color
 }
 
 export default function AiInsightWidget() {
     const [idx, setIdx] = useState(0)
-    const insight = INSIGHTS[idx]
-    const accentColor = insight.positive ? Colors.positive : Colors.warning
-    const next = () => setIdx((i) => (i + 1) % INSIGHTS.length)
+    const { data } = useQuery<AiInsightsData>(AI_INSIGHTS)
+    const insights = data?.aiInsights?.insights ?? []
+
+    if (insights.length === 0) return null
+
+    const safeIdx = idx % insights.length
+    const insight = insights[safeIdx]
+    const color = accentColor(insight)
+    const icon = topicIcon(insight)
+    const meta = TOPIC_META[insight.topic]
+
+    const next = () => setIdx((i) => (i + 1) % insights.length)
 
     return (
         <Section title="AI Insight">
@@ -109,43 +119,56 @@ export default function AiInsightWidget() {
                                 <Text style={s.badgeText}>AI</Text>
                             </LinearGradient>
                             <Text variant="caption" style={s.counter}>
-                                {idx + 1}/{INSIGHTS.length}
+                                {safeIdx + 1}/{insights.length}
                             </Text>
                         </View>
 
                         <Text style={s.headline} numberOfLines={2}>
-                            {insight.headline}
+                            {insight.title}
                         </Text>
 
-                        <Text variant="caption" style={s.detail} numberOfLines={2}>
-                            {insight.detail}
+                        <Text variant="caption" style={s.detail}>
+                            {insight.description}
                         </Text>
                     </View>
 
                     <View style={s.right}>
-                        <Sparkline values={insight.trend} color={accentColor} />
-                        <View style={[s.metricBadge, { backgroundColor: Color(accentColor).alpha(0.18).string() }]}>
-                            <Text style={[s.metric, { color: accentColor }]}>{insight.metric}</Text>
+                        <View
+                            style={[
+                                s.iconCircle,
+                                {
+                                    backgroundColor: Color(meta.color).alpha(0.15).string(),
+                                    borderColor: Color(meta.color).alpha(0.35).hex(),
+                                    borderWidth: 1,
+                                },
+                            ]}
+                        >
+                            <Feather name={icon} size={22} color={meta.color} />
                         </View>
+                        {insight.value != null && (
+                            <View style={[s.metricBadge, { backgroundColor: Color(color).alpha(0.18).string() }]}>
+                                <Text style={[s.metric, { color }]}>{insight.value}</Text>
+                            </View>
+                        )}
                     </View>
                 </View>
 
                 <View style={s.footer}>
                     <View style={s.dots}>
-                        {INSIGHTS.map((_, i) => (
+                        {insights.map((_, i) => (
                             <View
                                 key={i}
                                 style={[
                                     s.dot,
                                     {
                                         backgroundColor:
-                                            i === idx
+                                            i === safeIdx
                                                 ? Color(AI_A)
-                                                      .mix(Color(AI_B), i / INSIGHTS.length)
+                                                      .mix(Color(AI_B), i / insights.length)
                                                       .hex()
                                                 : Color(Colors.foreground).alpha(0.3).string(),
                                     },
-                                    i === idx && s.dotActive,
+                                    i === safeIdx && s.dotActive,
                                 ]}
                             />
                         ))}
@@ -208,18 +231,28 @@ const s = StyleSheet.create({
         lineHeight: 18,
     },
     right: {
-        alignItems: "flex-end",
+        width: 80,
+        alignItems: "center",
         justifyContent: "center",
-        gap: 8,
+        gap: 10,
+    },
+    iconCircle: {
+        width: 60,
+        height: 60,
+        borderRadius: 100,
+        alignItems: "center",
+        justifyContent: "center",
     },
     metricBadge: {
+        height: 28,
+        minWidth: 65,
         paddingHorizontal: 10,
-        paddingVertical: 5,
         borderRadius: 100,
-        alignSelf: "flex-end",
+        alignItems: "center",
+        justifyContent: "center",
     },
     metric: {
-        fontSize: 15,
+        fontSize: 13,
         fontFamily: FONTS.extrabold,
         letterSpacing: -0.3,
     },

@@ -1,216 +1,229 @@
-import Layout from "@/constants/Layout";
-import { StyleSheet, View } from "react-native";
-import Text from "@/components/ui/Text/Text";
-import Ripple from "react-native-material-ripple";
-import Colors from "@/constants/Colors";
-import Color from "color";
-import { CategoryIcon, CategoryUtils, Icons } from "../Expense/ExpenseIcon";
-import lowOpacity from "@/utils/functions/lowOpacity";
-import { useEffect, useMemo, useState } from "react";
-import { Feather } from "@expo/vector-icons";
+import { formatAmount } from "@/utils/functions/formatCurrency"
+import { Rounded } from "@/constants/Layout"
+import { FONTS } from "@/constants/Fonts"
+import { Pressable, StyleSheet, View } from "react-native"
+import Text from "@/components/ui/Text/Text"
+import Colors from "@/constants/Colors"
+import Color from "color"
+import { CategoryIcon, CategoryUtils, Icons } from "../Expense/ExpenseIcon"
+import { useEffect, useMemo, useState } from "react"
+import { Feather } from "@expo/vector-icons"
 
 interface ICategory {
-  category: string;
-
-  percentage: number;
-
-  total: number;
-
-  count: string;
+    category: string
+    percentage: number
+    total: number
+    count: string
 }
 
 interface LegendProps {
-  totalSum: number;
-  onPress: (item: ICategory) => void;
-  selected: string;
-
-  onLongPress?: (item: ICategory) => void;
-
-  excluded?: string[];
-
-  startDate: string;
-
-  endDate: string;
-
-  detailed: string;
-
-  toggleMode: () => void;
-
-  statisticsLegendData: {
-    statisticsLegend: ICategory[];
-  };
+    totalSum: number
+    onPress: (item: ICategory) => void
+    selected: string
+    onLongPress?: (item: ICategory) => void
+    excluded?: string[]
+    startDate: string
+    endDate: string
+    detailed: string
+    toggleMode: () => void
+    statisticsLegendData: {
+        statisticsLegend: ICategory[]
+    }
 }
 
-const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
+const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1)
 
-const Legend = (props: LegendProps) => {
-  const [data, setData] = useState<ICategory[]>(props.statisticsLegendData?.statisticsLegend || []);
+interface TileProps {
+    item: ICategory
+    isSelected: boolean
+    isExcluded: boolean
+    percentage: number
+    isLastOdd: boolean
+    onPress: () => void
+    onLongPress?: () => void
+}
 
-  useEffect(() => {
-    if (props.statisticsLegendData?.statisticsLegend?.length > 0) {
-      setData(props.statisticsLegendData.statisticsLegend);
-    }
-  }, [props.statisticsLegendData]);
+function LegendTile({ item, isSelected, isExcluded, percentage, isLastOdd, onPress, onLongPress }: TileProps) {
+    const accentColor = Icons[item.category as keyof typeof Icons]?.backgroundColor ?? Colors.secondary
 
-  const [showAll, setShowAll] = useState(false);
-
-  const legendList = useMemo(
-    () =>
-      data?.slice(0, showAll ? data.length : 8).map((item, index) => {
-        const isExcluded = props.excluded?.includes(item.category);
-        const percentage = (props?.excluded?.length || 0) > 0 ? (item.total / props.totalSum) * 100 : item.percentage;
-        const isLastOdd = data?.length - 1 === index && data?.length % 2 === 1;
-        const tileWidth = isLastOdd ? "100%" : (Layout.screen.width - 30) / 2 - 7.5;
-
-        return (
-          <Ripple
-            onLongPress={() => props.onLongPress?.(item)}
-            onPress={() => props.onPress(item)}
-            key={item.category}
-            style={[
-              styles.tile,
-              {
-                width: tileWidth,
-                backgroundColor:
-                  props.selected === item.category
-                    ? Color(Colors.primary_light).lighten(0.4).string()
-                    : isExcluded
-                    ? Color(Colors.primary_light).darken(0.4).string()
-                    : Colors.primary_light,
-              },
+    return (
+        <Pressable
+            onPress={onPress}
+            onLongPress={onLongPress}
+            style={({ pressed }) => [
+                s.tile,
+                isLastOdd && s.tileFullWidth,
+                isSelected && s.tileSelected,
+                isExcluded && s.tileExcluded,
+                pressed && { opacity: 0.7 },
             ]}
-          >
-            <Text size={22} weight="bold" color={isExcluded ? "rgba(255,255,255,0.5)" : Colors.foreground} mono>
-              {Math.trunc(item.total)}zł
-              <Text color="gray">
-                {!isExcluded && (
-                  <>
-                    <Text size={12} color="gray">
-                      {"  "} / {"  "}
+        >
+            <View style={s.amountRow}>
+                <Text style={s.amount}>{formatAmount(item.total, 0)}zł</Text>
+                <Text style={s.pct}>{percentage.toFixed(1)}%</Text>
+            </View>
+
+            <View style={s.categoryRow}>
+                <View style={[s.iconWrap, { backgroundColor: Color(accentColor).alpha(0.15).string() }]}>
+                    <CategoryIcon size={20} category={item.category as any} type="expense" />
+                </View>
+                <View style={{ flex: 1 }}>
+                    <Text style={s.categoryName} numberOfLines={1}>
+                        {capitalize(CategoryUtils.getCategoryName(item.category ?? "None"))}
                     </Text>
-                    <Text size={12} color="gray">{percentage.toFixed(2)}%</Text>
-                  </>
-                )}
-              </Text>
-            </Text>
-            <View style={styles.tileText}>
-              <View
-                style={{
-                  width: 40,
-                  height: 40,
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <CategoryIcon size={20} category={item.category as any} type="expense" />
-              </View>
-
-              <View style={{ gap: 1.5 }}>
-                <Text size={15} weight="500" color={blueText}>
-                  {capitalize(CategoryUtils.getCategoryName(item.category ?? "None"))}
-                </Text>
-                <Text size={11} color="rgba(255,255,255,0.6)">{item.count} Transactions</Text>
-              </View>
+                    <Text style={s.txnCount}>{item.count} Transactions</Text>
+                </View>
             </View>
 
-            <View
-              style={{
-                position: "absolute",
-                bottom: 0,
-                left: 0,
-                right: 0,
-                height: 5,
-                backgroundColor: "rgba(255,255,255,0.1)",
-                overflow: "hidden",
-              }}
-            >
-              <View
-                style={{
-                  width: `${Math.min(percentage, 100)}%`,
-                  height: 5,
-                  backgroundColor: Icons[item.category as keyof typeof Icons]?.backgroundColor || Colors.secondary,
-                  borderRadius: 10,
-                }}
-              />
+            <View style={s.track}>
+                <View style={[s.fill, { width: `${Math.min(percentage, 100)}%`, backgroundColor: accentColor }]} />
             </View>
-          </Ripple>
-        );
-      }),
-    [data, props.selected, props.excluded, props.totalSum, showAll]
-  );
+        </Pressable>
+    )
+}
 
-  return data?.length === 0 ? null : (
-    <View style={styles.tilesContainer}>
-      <View style={{ width: "100%", marginBottom: 10, flexDirection: "row", justifyContent: "space-between" }}>
-        <View>
-          <Text size={18} weight="bold" color={Colors.foreground}>Chart legend</Text>
-          <Text color="gray" style={{ marginTop: 5 }}>Detailed percentage of your expenses</Text>
+export default function Legend(props: LegendProps) {
+    const [data, setData] = useState<ICategory[]>(props.statisticsLegendData?.statisticsLegend ?? [])
+    const [showAll, setShowAll] = useState(false)
+
+    useEffect(() => {
+        if (props.statisticsLegendData?.statisticsLegend?.length > 0) {
+            setData(props.statisticsLegendData.statisticsLegend)
+        }
+    }, [props.statisticsLegendData])
+
+    const tiles = useMemo(
+        () =>
+            data.slice(0, showAll ? data.length : 8).map((item, index) => {
+                const isExcluded = props.excluded?.includes(item.category) ?? false
+                const percentage =
+                    (props.excluded?.length ?? 0) > 0
+                        ? (item.total / props.totalSum) * 100
+                        : item.percentage
+                const isLastOdd = data.length - 1 === index && data.length % 2 === 1
+
+                return (
+                    <LegendTile
+                        key={item.category}
+                        item={item}
+                        isSelected={props.selected === item.category}
+                        isExcluded={isExcluded}
+                        percentage={percentage}
+                        isLastOdd={isLastOdd}
+                        onPress={() => props.onPress(item)}
+                        onLongPress={props.onLongPress ? () => props.onLongPress!(item) : undefined}
+                    />
+                )
+            }),
+        [data, props.selected, props.excluded, props.totalSum, showAll],
+    )
+
+    if (data.length === 0) return null
+
+    return (
+        <View style={s.container}>
+            <View style={s.header}>
+                <View>
+                    <Text style={s.headerTitle}>Chart legend</Text>
+                    <Text style={s.headerSub}>Spending breakdown by category</Text>
+                </View>
+                <Pressable onPress={props.toggleMode} style={s.toggleBtn}>
+                    <Feather name="repeat" size={13} color={Colors.secondary} />
+                    <Text style={s.toggleBtnText}>{props.detailed}</Text>
+                </Pressable>
+            </View>
+
+            <View style={s.grid}>{tiles}</View>
+
+            {data.length > 8 && (
+                <Pressable onPress={() => setShowAll((p) => !p)} style={s.showMore}>
+                    <Text style={s.showMoreText}>{showAll ? "Show less" : `Show all (${data.length})`}</Text>
+                    <Feather name={showAll ? "chevron-up" : "chevron-down"} size={13} color={Colors.secondary} />
+                </Pressable>
+            )}
         </View>
+    )
+}
 
-        <View style={{ alignItems: "center" }}>
-          <Ripple onPress={props.toggleMode} style={styles.viewToggle}>
-            <Feather name="repeat" size={20} color={Colors.secondary} />
-            <Text uppercase color={Colors.secondary}>{props.detailed}</Text>
-          </Ripple>
-        </View>
-      </View>
-      {legendList}
-      <View style={{ justifyContent: "center", alignItems: "center", padding: 10, width: "100%" }}>
-        <Ripple onPress={() => setShowAll((p) => !p)} style={{ width: Layout.screen.width / 3 }}>
-          {data?.length > 8 && (
-            <Text weight="bold" align="center" color={Colors.secondary}>
-              {showAll ? "Show less" : "Show all" + (showAll ? "" : ` (${data.length})`)}
-            </Text>
-          )}
-        </Ripple>
-      </View>
-    </View>
-  );
-};
+const s = StyleSheet.create({
+    container: { marginTop: 15, gap: 16 },
 
-const blueText = Colors.foreground;
+    header: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+    headerTitle: { fontFamily: FONTS.bold, fontSize: 20, color: Colors.foreground },
+    headerSub: { fontSize: 13, color: Colors.foreground_secondary, marginTop: 3 },
+    toggleBtn: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 6,
+        paddingHorizontal: 12,
+        paddingVertical: 7,
+        borderRadius: Rounded.full,
+        backgroundColor: Color(Colors.secondary).alpha(0.1).string(),
+        borderWidth: 1,
+        borderColor: Color(Colors.secondary).alpha(0.25).string(),
+    },
+    toggleBtnText: { fontSize: 12, fontWeight: "500", color: Colors.secondary },
 
-const styles = StyleSheet.create({
-  tilesContainer: {
-    marginTop: 15,
-    width: Layout.window.width - 30,
-    gap: 15,
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-  },
+    grid: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        justifyContent: "space-between",
+        rowGap: 12,
+    },
 
-  tile: {
-    flexDirection: "column",
-    padding: 20,
-    backgroundColor: Colors.primary_light,
-    borderRadius: 15,
-    gap: 5,
-    paddingBottom: 30,
-  },
-  dot: {
-    width: 10,
-    height: 10,
-    borderRadius: 10,
-    marginRight: 10,
-  },
-  tileText: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 10,
-    gap: 10,
-  },
-  viewToggle: {
-    backgroundColor: lowOpacity(Colors.secondary, 0.15),
-    borderWidth: 0.5,
-    borderColor: lowOpacity(Colors.secondary, 0.5),
-    padding: 7.5,
-    paddingHorizontal: 15,
-    borderRadius: 10,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-  },
-});
+    tile: {
+        width: "48.5%",
+        backgroundColor: Colors.primary_lighter,
+        borderRadius: Rounded.xxl,
+        padding: 18,
+        paddingBottom: 26,
+        overflow: "hidden",
+        borderWidth: 1,
+        borderColor: "rgba(255,255,255,0.05)",
+    },
+    tileFullWidth: { width: "100%" },
+    tileSelected: {
+        borderColor: Color(Colors.secondary).alpha(0.4).string(),
+        backgroundColor: Color(Colors.secondary).alpha(0.07).string(),
+    },
+    tileExcluded: { opacity: 0.4 },
 
-export default Legend;
+    amountRow: {
+        flexDirection: "row",
+        alignItems: "flex-end",
+        justifyContent: "space-between",
+        marginBottom: 12,
+    },
+    amount: { fontFamily: FONTS.bold, fontSize: 22, color: Colors.foreground },
+    pct: { fontSize: 13, color: Colors.foreground_secondary, paddingBottom: 2 },
+
+    categoryRow: { flexDirection: "row", alignItems: "center", gap: 10 },
+    iconWrap: {
+        width: 38,
+        height: 38,
+        borderRadius: 10,
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    categoryName: { fontFamily: FONTS.semibold, fontSize: 13, color: Colors.foreground },
+    txnCount: { fontSize: 11, color: Colors.foreground_secondary, marginTop: 2 },
+
+    track: {
+        position: "absolute",
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: 4,
+        backgroundColor: "rgba(255,255,255,0.06)",
+    },
+    fill: { height: 4, borderRadius: 2 },
+
+    showMore: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 6,
+        paddingVertical: 10,
+    },
+    showMoreText: { fontFamily: FONTS.semibold, fontSize: 13, color: Colors.secondary },
+})

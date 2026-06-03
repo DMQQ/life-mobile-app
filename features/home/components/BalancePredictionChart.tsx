@@ -1,4 +1,5 @@
 import { useMemo, useEffect, useState } from "react"
+import { formatAmount } from "@/utils/functions/formatCurrency"
 import { StyleSheet, View } from "react-native"
 import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
@@ -241,7 +242,7 @@ const AnimatedLineChart = ({ data, currentBalance, index, onPositionChange }: An
                     {tooltip && (
                         <View style={[styles.tooltip, { left: tooltipLeft, top: tooltipTop }]} pointerEvents="none">
                             <Text size={9} weight="600" color={Colors.text_dark} letterSpacing={0.5} uppercase>{tooltip.label}</Text>
-                            <Text size={14} weight="700" color={Colors.text_light}>{formatValue(tooltip.value)}zł</Text>
+                            <Text size={14} weight="700" color={Colors.text_light}>{formatAmount(tooltip.value)}zł</Text>
                             <View style={styles.tooltipChange}>
                                 <Feather
                                     name={isPositive ? "arrow-up" : "arrow-down"}
@@ -315,7 +316,7 @@ const BalancePredictionChart = () => {
             <View style={styles.footer}>
                 <View style={styles.footerStat}>
                     <Text size={16} weight="700" color={Colors.text_light} mono>
-                        {currentBalance >= 1000 ? `${(currentBalance / 1000).toFixed(1)}k` : Math.round(currentBalance)}zł
+                        {currentBalance >= 1000 ? `${(currentBalance / 1000).toFixed(1)}k` : formatAmount(currentBalance, 0)}zł
                     </Text>
                     <Text size={10} color={Colors.text_light} opacity={0.4} letterSpacing={0.5} uppercase>current</Text>
                 </View>
@@ -323,7 +324,7 @@ const BalancePredictionChart = () => {
                 <View style={styles.changeBadge}>
                     <Feather name={isPositiveNet ? "arrow-up" : "arrow-down"} size={9} color={netColor} />
                     <Text size={12} weight="700" color={netColor}>
-                        {Math.abs(Math.round(avgMonthlyNet))}zł/mo
+                        {formatAmount(Math.abs(avgMonthlyNet), 0)}zł/mo
                     </Text>
                 </View>
 
@@ -331,7 +332,7 @@ const BalancePredictionChart = () => {
                     <Text size={16} weight="700" color={Colors.secondary} mono>
                         {projectedBalance >= 1000
                             ? `${(projectedBalance / 1000).toFixed(1)}k`
-                            : Math.round(projectedBalance)}zł
+                            : formatAmount(projectedBalance, 0)}zł
                     </Text>
                     <Text size={10} color={Colors.text_light} opacity={0.4} letterSpacing={0.5} uppercase>12 months</Text>
                 </View>

@@ -1,4 +1,5 @@
 import Layout from "@/constants/Layout";
+import { formatAmount } from "@/utils/functions/formatCurrency";
 import { useMemo, useState } from "react";
 import { StyleSheet, View, TouchableOpacity } from "react-native";
 import Text from "@/components/ui/Text/Text";
@@ -82,7 +83,7 @@ const MonthlyHeatmap = ({ dateRange, type }: { dateRange: [string, string]; type
     if (viewType === "totalCount") {
       return value.toString() + "tx";
     } else {
-      return Math.round(value) + "zł";
+      return formatAmount(value, 0) + "zł";
     }
   };
 
@@ -125,8 +126,8 @@ const MonthlyHeatmap = ({ dateRange, type }: { dateRange: [string, string]; type
         {selectedDayInfo && (
           <View style={styles.tooltip}>
             <Text size={16} weight="bold" color={Colors.foreground} style={{ marginBottom: 8 }}>Day {selectedDayInfo.dayOfMonth}</Text>
-            <Text size={14} color={Colors.foreground} style={{ marginBottom: 4 }}>Total: {selectedDayInfo.totalAmount.toFixed(2)}zł</Text>
-            <Text size={14} color={Colors.foreground} style={{ marginBottom: 4 }}>Average: {selectedDayInfo.averageAmount.toFixed(2)}zł</Text>
+            <Text size={14} color={Colors.foreground} style={{ marginBottom: 4 }}>Total: {formatAmount(selectedDayInfo.totalAmount)}zł</Text>
+            <Text size={14} color={Colors.foreground} style={{ marginBottom: 4 }}>Average: {formatAmount(selectedDayInfo.averageAmount)}zł</Text>
             <Text size={14} color={Colors.foreground} style={{ marginBottom: 4 }}>Count: {selectedDayInfo.totalCount} transactions</Text>
           </View>
         )}

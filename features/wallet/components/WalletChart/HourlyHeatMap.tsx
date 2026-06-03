@@ -1,3 +1,4 @@
+import { formatAmount } from "@/utils/functions/formatCurrency"
 import Layout from "@/constants/Layout"
 import { useMemo, useState, useEffect } from "react"
 import { StyleSheet, View, ScrollView } from "react-native"
@@ -92,7 +93,7 @@ const CustomBarChart: React.FC<CustomBarChartProps> = ({ data, maxValue, viewTyp
             <View style={styles.yAxisLabels}>
                 {[4, 3, 2, 1, 0].map((i) => (
                     <Text key={i} size={11} color={Colors.foreground}>
-                        {viewType === "count" ? Math.round((maxValue / 4) * i) : Math.round((maxValue / 4) * i) + "zł"}
+                        {viewType === "count" ? Math.round((maxValue / 4) * i) : formatAmount((maxValue / 4) * i, 0) + "zł"}
                     </Text>
                 ))}
             </View>
@@ -142,12 +143,12 @@ const CustomBarChart: React.FC<CustomBarChartProps> = ({ data, maxValue, viewTyp
                     <Animated.View style={[styles.tooltip, animatedTooltipStyle]}>
                         <Text size={14} weight="bold" color={Colors.foreground}>Hour {selectedBarInfo.hour}:00</Text>
                         <Text size={12} color={Colors.foreground} style={{ marginVertical: 1 }}>
-                            Current: {selectedBarInfo.value.toFixed(viewType === "count" ? 0 : 2)}
+                            Current: {viewType === "count" ? selectedBarInfo.value.toFixed(0) : formatAmount(selectedBarInfo.value)}
                             {viewType === "count" ? " tx" : "zł"}
                         </Text>
                         {(selectedBarInfo.prevValue || 0) > 0 ? (
                             <Text size={12} color={Colors.foreground} style={{ marginVertical: 1 }}>
-                                Previous: {selectedBarInfo.prevValue!.toFixed(viewType === "count" ? 0 : 2)}
+                                Previous: {viewType === "count" ? selectedBarInfo.prevValue!.toFixed(0) : formatAmount(selectedBarInfo.prevValue!)}
                                 {viewType === "count" ? " tx" : "zł"}
                             </Text>
                         ) : (

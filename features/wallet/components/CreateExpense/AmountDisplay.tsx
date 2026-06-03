@@ -1,4 +1,5 @@
 import { FONTS } from "@/constants/Fonts"
+import { formatAmount } from "@/utils/functions/formatCurrency"
 import moment from "moment"
 import { StyleSheet, View } from "react-native"
 import Animated, { interpolate, useAnimatedStyle } from "react-native-reanimated"
@@ -38,7 +39,7 @@ export default function AmountDisplay() {
 
                 {SubExpenses.length > 0 && (
                     <Text variant="body" style={{ color: "rgba(255,255,255,0.7)", textAlign: "center" }}>
-                        {SubExpenses.length} item for ~{methods.calculateSubExpensesTotal().toFixed(2)}zł
+                        {SubExpenses.length} item for ~{formatAmount(methods.calculateSubExpensesTotal())}zł
                     </Text>
                 )}
             </View>

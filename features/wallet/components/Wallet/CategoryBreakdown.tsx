@@ -1,4 +1,5 @@
 import { FONTS } from "@/constants/Fonts"
+import { formatAmount } from "@/utils/functions/formatCurrency"
 import { useMemo, useState } from "react"
 import { StyleSheet, TouchableOpacity, View } from "react-native"
 import moment from "moment"
@@ -93,7 +94,7 @@ export default function CategoryBreakdown() {
                     <Text style={styles.monthLabel}>{moment().format("MMMM YYYY")}</Text>
 
                     <View style={styles.rightBlock}>
-                        <Text style={styles.totalAmount}>{total.toFixed(2)} zł</Text>
+                        <Text style={styles.totalAmount}>{formatAmount(total)} zł</Text>
                         {targetPct !== null && income > 0 && (
                             <Text style={[styles.targetInfo, reachedTarget ? styles.textOver : styles.textMuted]}>
                                 {reachedTarget
@@ -175,7 +176,7 @@ export default function CategoryBreakdown() {
                                     </View>
                                 </View>
                                 <View style={styles.legendRight}>
-                                    <Text style={[styles.catAmount, { color: c.color }]}>{c.amount.toFixed(0)} zł</Text>
+                                    <Text style={[styles.catAmount, { color: c.color }]}>{formatAmount(c.amount, 0)} zł</Text>
                                     <Text style={styles.catPct}>{c.pct.toFixed(0)}%</Text>
                                 </View>
                             </View>

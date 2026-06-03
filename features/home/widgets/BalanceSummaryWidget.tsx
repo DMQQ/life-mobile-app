@@ -1,13 +1,14 @@
 import { FONTS } from "@/constants/Fonts"
+import { formatAmount } from "@/utils/functions/formatCurrency"
 import Section from "@/components/ui/Section"
 import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
-import { Feather } from "@expo/vector-icons"
 import { gql, useQuery } from "@apollo/client"
 import Color from "color"
-import { LinearGradient } from "expo-linear-gradient"
 import moment from "moment"
 import { StyleSheet, View } from "react-native"
+import IconCircle from "@/components/ui/IconCircle"
+import ProgressBar from "@/components/ui/ProgressBar"
 
 const BALANCE_SUMMARY_QUERY = gql`
     query BalanceSummaryWidget($range: [String!]!) {
@@ -60,17 +61,10 @@ export default function BalanceSummaryWidget() {
                     </View>
                 </View>
 
-                <Text style={s.balance}>{balance.toFixed(2)} zł</Text>
+                <Text style={s.balance}>{formatAmount(balance)} zł</Text>
 
                 <View style={s.progressRow}>
-                    <View style={s.track}>
-                        <LinearGradient
-                            colors={[barColor, Color(barColor).lighten(0.3).string()]}
-                            start={{ x: 0, y: 0 }}
-                            end={{ x: 1, y: 0 }}
-                            style={[s.fill, { width: `${pct}%` as any }]}
-                        />
-                    </View>
+                    <ProgressBar progress={pct} color={barColor} gradient />
                     <Text variant="caption" style={[s.remaining, remaining < 0 && { color: Colors.danger }]}>
                         {remaining >= 0 ? `${remaining.toFixed(0)} left` : `${Math.abs(remaining).toFixed(0)} over`}
                     </Text>
@@ -78,20 +72,24 @@ export default function BalanceSummaryWidget() {
 
                 <View style={s.stats}>
                     <View style={[s.statBlock, { backgroundColor: Color(Colors.positive).alpha(0.12).string() }]}>
-                        <View style={[s.iconCircle, { backgroundColor: Color(Colors.positive).alpha(0.2).string() }]}>
-                            <Feather name="arrow-up-right" size={14} color={Colors.positive} />
-                        </View>
+                        <IconCircle
+                            name="arrow-up-right"
+                            color={Colors.positive}
+                            backgroundColor={Color(Colors.positive).alpha(0.2).string()}
+                        />
                         <View style={s.statText}>
-                            <Text style={[s.statValue, { color: Colors.positive }]}>{statsIncome.toFixed(0)} zł</Text>
+                            <Text style={[s.statValue, { color: Colors.positive }]}>{formatAmount(statsIncome, 0)} zł</Text>
                             <Text variant="caption" style={s.statLabel}>Income</Text>
                         </View>
                     </View>
                     <View style={[s.statBlock, { backgroundColor: Color(Colors.negative).alpha(0.12).string() }]}>
-                        <View style={[s.iconCircle, { backgroundColor: Color(Colors.negative).alpha(0.2).string() }]}>
-                            <Feather name="arrow-down-right" size={14} color={Colors.negative} />
-                        </View>
+                        <IconCircle
+                            name="arrow-down-right"
+                            color={Colors.negative}
+                            backgroundColor={Color(Colors.negative).alpha(0.2).string()}
+                        />
                         <View style={s.statText}>
-                            <Text style={[s.statValue, { color: Colors.negative }]}>{expense.toFixed(0)} zł</Text>
+                            <Text style={[s.statValue, { color: Colors.negative }]}>{formatAmount(expense, 0)} zł</Text>
                             <Text variant="caption" style={s.statLabel}>Spent</Text>
                         </View>
                     </View>
@@ -137,16 +135,6 @@ const s = StyleSheet.create({
     progressRow: {
         gap: 6,
     },
-    track: {
-        height: 6,
-        borderRadius: 3,
-        backgroundColor: "rgba(255,255,255,0.1)",
-        overflow: "hidden",
-    },
-    fill: {
-        height: 6,
-        borderRadius: 3,
-    },
     remaining: {
         textAlign: "right",
         color: Colors.foreground_secondary,
@@ -162,13 +150,6 @@ const s = StyleSheet.create({
         gap: 10,
         padding: 12,
         borderRadius: 15,
-    },
-    iconCircle: {
-        width: 32,
-        height: 32,
-        borderRadius: 16,
-        alignItems: "center",
-        justifyContent: "center",
     },
     statText: {
         gap: 2,

@@ -1,4 +1,5 @@
 import moment from "moment"
+import { formatAmount } from "@/utils/functions/formatCurrency"
 import { Card } from "@/components"
 import Colors from "@/constants/Colors"
 import { memo, useMemo } from "react"
@@ -106,8 +107,8 @@ function WalletItem(
 
     const price =
         item?.type === "expense"
-            ? (item.amount * -1).toFixed(2)
-            : (item.type === "refunded" ? "" : "+") + item.amount?.toFixed(2)
+            ? formatAmount(item.amount * -1)
+            : (item.type === "refunded" ? "" : "+") + formatAmount(item.amount)
 
     const isBalanceEdit = item?.description?.includes("Balance edited") || item?.amount === 0
 

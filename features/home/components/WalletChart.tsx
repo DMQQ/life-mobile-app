@@ -1,4 +1,5 @@
 import { useMemo } from "react"
+import { formatAmount } from "@/utils/functions/formatCurrency"
 import { StyleSheet, View } from "react-native"
 import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
@@ -117,7 +118,7 @@ const CompactSpendingChart = () => {
                                 opacity={0.5}
                                 style={{ position: "absolute", bottom: currentDistance + 15, width: 50, marginLeft: -5 }}
                             >
-                                {value > 1000 ? `${(value / 1000).toFixed(1)}k` : value + "zł"}
+                                {value > 1000 ? `${(value / 1000).toFixed(1)}k` : formatAmount(value, 0) + "zł"}
                             </Text>
                         )
                     })}
@@ -156,7 +157,7 @@ const CompactSpendingChart = () => {
 
             <View style={styles.footer}>
                 <View style={styles.footerStat}>
-                    <Text size={16} weight="700" color={Colors.text_light} mono>{Math.round(prevTotal)}zł</Text>
+                    <Text size={16} weight="700" color={Colors.text_light} mono>{formatAmount(prevTotal, 0)}zł</Text>
                     <Text size={10} color={Colors.text_light} opacity={0.4} letterSpacing={0.5} uppercase>last week</Text>
                 </View>
 
@@ -168,7 +169,7 @@ const CompactSpendingChart = () => {
                 </View>
 
                 <View style={[styles.footerStat, { alignItems: "flex-end" }]}>
-                    <Text size={16} weight="700" color={Colors.secondary} mono>{Math.round(total)}zł</Text>
+                    <Text size={16} weight="700" color={Colors.secondary} mono>{formatAmount(total, 0)}zł</Text>
                     <Text size={10} color={Colors.text_light} opacity={0.4} letterSpacing={0.5} uppercase>this week</Text>
                 </View>
             </View>

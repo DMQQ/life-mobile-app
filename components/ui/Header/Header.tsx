@@ -416,7 +416,7 @@ const AnimatedContent = memo(
                         delay={250}
                         value={parseFloat(displayValue)}
                         style={[styles.numericTitle, animatedFontSize]}
-                        formatValue={props.animatedValueFormat || ((value) => `${value.toFixed(2)}`)}
+                        formatValue={props.animatedValueFormat}
                     />
                 ) : props.onAnimatedTitlePress ? (
                     <TouchableOpacity onPress={props.onAnimatedTitlePress} activeOpacity={0.7}>

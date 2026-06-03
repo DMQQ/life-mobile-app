@@ -1,4 +1,5 @@
 import { FONTS } from "@/constants/Fonts"
+import { formatAmount } from "@/utils/functions/formatCurrency"
 import Colors from "@/constants/Colors"
 import Layout from "@/constants/Layout"
 import { gql, useQuery } from "@apollo/client"
@@ -71,7 +72,7 @@ export default function YearlySpendingsChart({
                 <View style={[styles.referenceLine, { top: refLineTop }]} pointerEvents="none">
                     <View style={styles.refLineBar} />
                     <View style={styles.refValuePill}>
-                        <Text style={styles.refValueText}>{currentValue.toFixed(0)} zł</Text>
+                        <Text style={styles.refValueText}>{formatAmount(currentValue, 0)} zł</Text>
                     </View>
                 </View>
             )}

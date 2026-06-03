@@ -1,4 +1,5 @@
 import Header from "@/components/ui/Header/Header"
+import { formatAmount } from "@/utils/functions/formatCurrency"
 import Text from "@/components/ui/Text/Text"
 import Colors, { secondary_candidates } from "@/constants/Colors"
 import Layout from "@/constants/Layout"
@@ -188,7 +189,7 @@ function WalletCharts({ navigation }: any) {
             )}
 
             <Header
-                animatedTitle={sumOfExpenses ? `Spent ${sumOfExpenses.toFixed(2)}zł` : "No expenses"}
+                animatedTitle={sumOfExpenses ? `Spent ${formatAmount(sumOfExpenses)}zł` : "No expenses"}
                 animatedSubtitle={
                     filters.date.from && filters.date.to
                         ? `${filters.date.from} - ${filters.date.to}`

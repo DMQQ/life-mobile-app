@@ -5,7 +5,7 @@ import AiChatScreen from "./pages/AiChatScreen"
 
 type AiStackParamList = {
     AiWidget: undefined
-    AiChatScreen: undefined
+    AiChatScreen: { conversationId?: string } | undefined
 }
 
 const Stack = createNativeStackNavigator<AiStackParamList>()

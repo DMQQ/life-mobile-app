@@ -1,4 +1,5 @@
 import { FONTS } from "@/constants/Fonts"
+import { formatAmount } from "@/utils/functions/formatCurrency"
 import Colors from "@/constants/Colors"
 import Layout from "@/constants/Layout"
 import { Expense, MonthlyExpenses, Wallet } from "@/types"
@@ -212,7 +213,7 @@ const MonthHeader = ({
                 <Text style={styles.monthText}>{moment(monthData.month).format("MMMM YYYY")}</Text>
             </View>
             <Text style={amount > 0 ? styles.monthAmountPositive : styles.monthAmountNegative}>
-                {amount > 0 ? `+${amount.toFixed(2)}` : amount.toFixed(2)}
+                {amount > 0 ? `+${formatAmount(amount)}` : formatAmount(amount)}
                 <Text
                     style={[
                         amount > 0 ? styles.monthAmountPositive : styles.monthAmountNegative,
@@ -255,9 +256,9 @@ const DateHeader = ({
             <Ripple onPress={onPress} style={styles.dateTextContainer}>
                 <Text style={styles.dateText}>{parseDateToText(date)}</Text>
                 <View style={styles.dateSumContainer}>
-                    {sum[0] > 0 && <Text style={[styles.amount, styles.negative]}>{`-${sum[0].toFixed(2)}`}zł</Text>}
+                    {sum[0] > 0 && <Text style={[styles.amount, styles.negative]}>{`-${formatAmount(sum[0])}`}zł</Text>}
                     {sum[0] > 0 && sum[1] > 0 && <Text style={styles.dateText}>/</Text>}
-                    {sum[1] > 0 && <Text style={[styles.amount, styles.positive]}>{`+${sum[1].toFixed(2)}`}zł</Text>}
+                    {sum[1] > 0 && <Text style={[styles.amount, styles.positive]}>{`+${formatAmount(sum[1])}`}zł</Text>}
                 </View>
             </Ripple>
         </View>

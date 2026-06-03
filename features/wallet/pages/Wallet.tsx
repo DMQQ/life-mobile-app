@@ -1,4 +1,5 @@
 import { FONTS } from "@/constants/Fonts"
+import { formatAmount } from "@/utils/functions/formatCurrency"
 import Header, { HeaderItem } from "@/components/ui/Header/Header"
 import Colors from "@/constants/Colors"
 import Color from "color"
@@ -38,7 +39,7 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
     const [scrollY, onScroll] = useTrackScroll({ screenName: "WalletScreens" })
     const [tab, setTab] = useState("accounts")
 
-    const balance = loading && data?.wallet?.balance === undefined ? " ..." : (data?.wallet?.balance || 0).toFixed(2)
+    const balance = loading && data?.wallet?.balance === undefined ? " ..." : formatAmount(data?.wallet?.balance || 0)
 
     const handleShowEditSheet = useCallback(() => {
         Haptic.trigger("impactMedium")
@@ -128,7 +129,7 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
                 goBack={false}
                 animatedValue={parseFloat(balance)}
                 animatedValueLoading={loading && data?.wallet?.balance === undefined}
-                animatedValueFormat={(value) => `${value.toFixed(2)}zł`}
+                animatedValueFormat={(value) => `${formatAmount(value)}zł`}
                 animatedSubtitle="Total balance across all accounts"
                 onAnimatedTitleLongPress={handleShowEditSheet}
             />

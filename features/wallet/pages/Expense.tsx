@@ -7,6 +7,7 @@ import { GET_EXPENSE } from "../hooks/getExpenseQuery"
 import { SFSymbol, SymbolView } from "expo-symbols"
 import { useEffect, useRef, useState } from "react"
 import { Pressable, StyleSheet, View } from "react-native"
+import { formatAmount } from "@/utils/functions/formatCurrency"
 import Text from "@/components/ui/Text/Text"
 import useDeleteActivity from "../hooks/useDeleteActivity"
 import useRefund from "../hooks/useRefundExpense"
@@ -164,8 +165,6 @@ export default function Expense({ route: { params }, navigation }: any) {
         },
     })
 
-    if (!selected) return <ExpenseSkeleton />
-
     return (
         <View style={{ flex: 1 }}>
             <Header
@@ -200,157 +199,173 @@ export default function Expense({ route: { params }, navigation }: any) {
 
             <Background tintColor={CategoryUtils.getCategoryColor(selected?.category, selected?.type)} />
 
-            <Animated.ScrollView
-                onScroll={onScroll}
-                keyboardDismissMode="on-drag"
-                style={{ flex: 1 }}
-                contentContainerStyle={{ paddingTop: 150 }}
-            >
-                <View style={{ width: "100%", height: 150, justifyContent: "center", alignItems: "center", gap: 7.5 }}>
-                    <CategoryIcon
-                        category={selected?.category}
-                        size={60}
-                        type={selected?.type}
-                        containerStyle={{
-                            width: 100,
-                            height: 100,
-                            borderRadius: 100,
-                        }}
-                    />
-                    <Text size={15} color={Colors.text_dark}>
-                        {selected?.description}
-                    </Text>
-                    <Text size={40} weight="500" color="#fff" mono>
-                        {selected?.amount}zł
-                    </Text>
-                </View>
-
-                <View style={styles.scrollContent}>
-                    <Section
-                        title="Subexpenses"
-                        headerRight={
-                            <Pressable
-                                onPress={() => {
-                                    Feedback.trigger("impactLight")
-                                    addSubExpenseSheetRef.current?.expand()
-                                }}
-                                style={styles.addSubBtn}
-                            >
-                                <SymbolView name="plus.circle.fill" size={18} tintColor={Colors.secondary} />
-                            </Pressable>
-                        }
+            {!selected ? (
+                <ExpenseSkeleton />
+            ) : (
+                <>
+                    <Animated.ScrollView
+                        onScroll={onScroll}
+                        keyboardDismissMode="on-drag"
+                        style={{ flex: 1 }}
+                        contentContainerStyle={{ paddingTop: 150 }}
                     >
-                        {selected.subexpenses?.length > 0 ? (
-                            <SubexpenseStack
-                                selected={selected}
-                                handleDeleteSubExpense={(id) => setConfirmSubExpenseId(id)}
-                            />
-                        ) : (
-                            <Pressable
-                                onPress={() => {
-                                    Feedback.trigger("impactLight")
-                                    addSubExpenseSheetRef.current?.expand()
+                        <View
+                            style={{
+                                width: "100%",
+                                height: 150,
+                                justifyContent: "center",
+                                alignItems: "center",
+                                gap: 7.5,
+                            }}
+                        >
+                            <CategoryIcon
+                                category={selected?.category}
+                                size={60}
+                                type={selected?.type}
+                                containerStyle={{
+                                    width: 100,
+                                    height: 100,
+                                    borderRadius: 100,
                                 }}
-                                style={styles.emptySubRow}
+                            />
+                            <Text size={15} color={Colors.text_dark}>
+                                {selected?.description}
+                            </Text>
+                            <Text size={40} weight="500" color="#fff" mono>
+                                {formatAmount(selected?.amount)}zł
+                            </Text>
+                        </View>
+
+                        <View style={styles.scrollContent}>
+                            <Section
+                                title="Subexpenses"
+                                headerRight={
+                                    <Pressable
+                                        onPress={() => {
+                                            Feedback.trigger("impactLight")
+                                            addSubExpenseSheetRef.current?.expand()
+                                        }}
+                                        style={styles.addSubBtn}
+                                    >
+                                        <SymbolView name="plus.circle.fill" size={18} tintColor={Colors.secondary} />
+                                    </Pressable>
+                                }
                             >
-                                <Text size={13} color={Colors.text_dark}>Add sub-expenses to break down this expense</Text>
-                            </Pressable>
-                        )}
-                    </Section>
+                                {selected.subexpenses?.length > 0 ? (
+                                    <SubexpenseStack
+                                        selected={selected}
+                                        handleDeleteSubExpense={(id) => setConfirmSubExpenseId(id)}
+                                    />
+                                ) : (
+                                    <Pressable
+                                        onPress={() => {
+                                            Feedback.trigger("impactLight")
+                                            addSubExpenseSheetRef.current?.expand()
+                                        }}
+                                        style={styles.emptySubRow}
+                                    >
+                                        <Text size={13} color={Colors.text_dark}>
+                                            Add sub-expenses to break down this expense
+                                        </Text>
+                                    </Pressable>
+                                )}
+                            </Section>
 
-                    <ExpenseDetails expense={selected} />
+                            <ExpenseDetails expense={selected} />
 
-                    <Section title="Calendar">
-                        <CollapsibleThemedCalendar
-                            date={dayjs(selected?.date).format("YYYY-MM-DD")}
-                            markedDates={{ [dayjs(selected?.date).format("YYYY-MM-DD")]: { selected: true } }}
-                        />
-                    </Section>
+                            <Section title="Calendar">
+                                <CollapsibleThemedCalendar
+                                    date={dayjs(selected?.date).format("YYYY-MM-DD")}
+                                    markedDates={{ [dayjs(selected?.date).format("YYYY-MM-DD")]: { selected: true } }}
+                                />
+                            </Section>
 
-                    {selected?.type === "expense" && (
-                        <Section title="Breakdown">
-                            <MonthlyBreakdown
-                                expense={selected as ExpenseType}
-                                income={data?.wallet?.income || 0}
-                                monthlyPercentageTarget={data?.wallet?.monthlyPercentageTarget || 0}
-                            />
-                        </Section>
-                    )}
+                            {selected?.type === "expense" && (
+                                <Section title="Breakdown">
+                                    <MonthlyBreakdown
+                                        expense={selected as ExpenseType}
+                                        income={data?.wallet?.income || 0}
+                                        monthlyPercentageTarget={data?.wallet?.monthlyPercentageTarget || 0}
+                                    />
+                                </Section>
+                            )}
 
-                    {hasSubscription && (
-                        <Section title="Subscription">
-                            <SubscriptionSection
-                                hasSubscription={hasSubscription}
-                                isSubscriptionActive={isSubscriptionActive}
+                            {hasSubscription && (
+                                <Section title="Subscription">
+                                    <SubscriptionSection
+                                        hasSubscription={hasSubscription}
+                                        isSubscriptionActive={isSubscriptionActive}
+                                        selected={selected}
+                                    />
+                                </Section>
+                            )}
+                        </View>
+
+                        {data?.expenseSimilar?.length > 1 && (
+                            <SimilarExpenses
                                 selected={selected}
+                                similarExpenses={data.expenseSimilar.filter((e: any) => e.id !== selected.id)}
                             />
-                        </Section>
-                    )}
-                </View>
+                        )}
 
-                {data?.expenseSimilar?.length > 1 && (
-                    <SimilarExpenses
-                        selected={selected}
-                        similarExpenses={data.expenseSimilar.filter((e: any) => e.id !== selected.id)}
+                        <FileUpload ref={fileUploadRef} id={selected.id} images={selected?.files} />
+                        <MapPicker ref={mapPickerRef} location={selected.location} id={selected.id} />
+
+                        <View style={styles.bottomSpacer} />
+                    </Animated.ScrollView>
+
+                    <FloatingBottomToolBar
+                        onRefund={() => setConfirmRefund(true)}
+                        refundLoading={refundLoading}
+                        isRefunded={selected?.type === "refunded"}
+                        onTakePhoto={() => fileUploadRef.current?.takePhoto()}
+                        onPickImage={() => fileUploadRef.current?.pickImage()}
+                        subscriptionMenuOptions={subscriptionMenuOptions}
+                        subscriptionOptions={subscriptionOptions}
+                        onAssignSubscription={handleAssignSubscription}
+                        isSubscriptionLoading={isSubscriptionLoading}
+                        hasSubscription={hasSubscription}
+                        isSubscriptionActive={isSubscriptionActive}
+                        onSetLocation={() => mapPickerRef.current?.triggerSearch()}
                     />
-                )}
 
-                <FileUpload ref={fileUploadRef} id={selected.id} images={selected?.files} />
-                <MapPicker ref={mapPickerRef} location={selected.location} id={selected.id} />
+                    <ConfirmDialog
+                        isVisible={confirmRefund}
+                        onDismiss={() => setConfirmRefund(false)}
+                        onConfirm={handleRefundConfirm}
+                        title="Refund Expense"
+                        description="Mark this expense as refunded?"
+                        confirmLabel="Refund"
+                        loading={refundLoading}
+                    />
 
-                <View style={styles.bottomSpacer} />
-            </Animated.ScrollView>
+                    <ConfirmDialog
+                        isVisible={!!confirmSubExpenseId}
+                        onDismiss={() => setConfirmSubExpenseId(null)}
+                        onConfirm={handleDeleteSubExpenseConfirm}
+                        title="Delete Sub-Expense"
+                        description="This cannot be undone."
+                        destructive
+                    />
 
-            <FloatingBottomToolBar
-                onRefund={() => setConfirmRefund(true)}
-                refundLoading={refundLoading}
-                isRefunded={selected?.type === "refunded"}
-                onTakePhoto={() => fileUploadRef.current?.takePhoto()}
-                onPickImage={() => fileUploadRef.current?.pickImage()}
-                subscriptionMenuOptions={subscriptionMenuOptions}
-                subscriptionOptions={subscriptionOptions}
-                onAssignSubscription={handleAssignSubscription}
-                isSubscriptionLoading={isSubscriptionLoading}
-                hasSubscription={hasSubscription}
-                isSubscriptionActive={isSubscriptionActive}
-                onSetLocation={() => mapPickerRef.current?.triggerSearch()}
-            />
+                    <AddSubExpenseSheet ref={addSubExpenseSheetRef} onAdd={handleAddSubExpense} />
 
-            <ConfirmDialog
-                isVisible={confirmRefund}
-                onDismiss={() => setConfirmRefund(false)}
-                onConfirm={handleRefundConfirm}
-                title="Refund Expense"
-                description="Mark this expense as refunded?"
-                confirmLabel="Refund"
-                loading={refundLoading}
-            />
-
-            <ConfirmDialog
-                isVisible={!!confirmSubExpenseId}
-                onDismiss={() => setConfirmSubExpenseId(null)}
-                onConfirm={handleDeleteSubExpenseConfirm}
-                title="Delete Sub-Expense"
-                description="This cannot be undone."
-                destructive
-            />
-
-            <AddSubExpenseSheet ref={addSubExpenseSheetRef} onAdd={handleAddSubExpense} />
-
-            <ConfirmDialog
-                isVisible={confirmSubscriptionAction}
-                onDismiss={() => setConfirmSubscriptionAction(false)}
-                onConfirm={handleSubscriptionConfirm}
-                title={
-                    hasSubscription
-                        ? isSubscriptionActive
-                            ? "Disable Subscription"
-                            : "Enable Subscription"
-                        : "Create Subscription"
-                }
-                description="Are you sure you want to perform this action?"
-                loading={isSubscriptionLoading}
-            />
+                    <ConfirmDialog
+                        isVisible={confirmSubscriptionAction}
+                        onDismiss={() => setConfirmSubscriptionAction(false)}
+                        onConfirm={handleSubscriptionConfirm}
+                        title={
+                            hasSubscription
+                                ? isSubscriptionActive
+                                    ? "Disable Subscription"
+                                    : "Enable Subscription"
+                                : "Create Subscription"
+                        }
+                        description="Are you sure you want to perform this action?"
+                        loading={isSubscriptionLoading}
+                    />
+                </>
+            )}
         </View>
     )
 }

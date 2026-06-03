@@ -1,3 +1,4 @@
+import { formatAmount } from "@/utils/functions/formatCurrency"
 import Colors from "@/constants/Colors"
 import { Feather } from "@expo/vector-icons"
 import { LinearGradient } from "expo-linear-gradient"
@@ -167,7 +168,7 @@ function AccountCard({
                         {account.name}
                     </Text>
                     <View style={styles.balanceBlock}>
-                        <Text size={24} weight="800" color="#fff" letterSpacing={0.5} mono>{account.balance.toFixed(2)}</Text>
+                        <Text size={24} weight="800" color="#fff" letterSpacing={0.5} mono>{formatAmount(account.balance)}</Text>
                         <Text size={13} weight="500" color={Color(accent).alpha(0.7).string()} style={{ marginBottom: 3 }}>zł</Text>
                     </View>
                 </View>
@@ -180,7 +181,7 @@ function AccountCard({
                             Monthly Income
                         </Text>
                         <View style={styles.statRow}>
-                            <Text size={13} weight="700" color="#fff" mono>{account.income ? account.income.toFixed(2) : "0.00"}</Text>
+                            <Text size={13} weight="700" color="#fff" mono>{account.income ? formatAmount(account.income) : "0.00"}</Text>
                             <Feather name="trending-up" size={13} color="#4ade80" />
                         </View>
                     </View>
@@ -188,7 +189,7 @@ function AccountCard({
                         <Text size={9} weight="500" uppercase letterSpacing={0.4} color="#f87171">Monthly Expense</Text>
                         <View style={styles.statRow}>
                             <Text size={13} weight="700" color="#fff" mono>
-                                {account.expense ? account.expense.toFixed(2) : "0.00"}
+                                {account.expense ? formatAmount(account.expense) : "0.00"}
                             </Text>
                             <Feather name="trending-down" size={13} color="#f87171" />
                         </View>

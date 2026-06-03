@@ -1,4 +1,5 @@
 import Layout from "@/constants/Layout"
+import { formatAmount } from "@/utils/functions/formatCurrency"
 import React from "react"
 import { StyleSheet, View, ScrollView } from "react-native"
 import Text from "@/components/ui/Text/Text"
@@ -34,7 +35,7 @@ const CustomLimitChart: React.FC<CustomLimitChartProps> = ({ data, maxValue }) =
             <View style={[styles.yAxisLabels, { height: CHART_HEIGHT }]}>
                 {[4, 3, 2, 1, 0].map((i) => (
                     <Text key={i} size={10} color={Colors.foreground}>
-                        {Math.round((maxValue / 4) * i)}zł
+                        {formatAmount((maxValue / 4) * i, 0)}zł
                     </Text>
                 ))}
             </View>

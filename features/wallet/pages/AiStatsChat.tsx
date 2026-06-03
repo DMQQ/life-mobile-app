@@ -2,16 +2,15 @@ import { FONTS } from "@/constants/Fonts"
 import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
 import { AntDesign, Ionicons } from "@expo/vector-icons"
-import { gql, useMutation, useQuery } from "@apollo/client"
+import { gql, useMutation } from "@apollo/client"
 import Color from "color"
-import { useCallback, useMemo, useRef, useState } from "react"
+import { useCallback, useRef, useState } from "react"
 import {
     ActivityIndicator,
     FlatList,
     KeyboardAvoidingView,
     Platform,
     Pressable,
-    ScrollView,
     StyleSheet,
     TextInput,
     View,
@@ -24,11 +23,8 @@ import SkillCard from "../components/AiChat/SkillCard"
 import DatePicker from "@/components/DatePicker"
 import dayjs from "dayjs"
 
-export interface AiChatMessageItem {
-    type: string
-    data: any
-    subtype?: string
-}
+import type { AiChatMessageItem } from "@/features/ai/types"
+export type { AiChatMessageItem }
 
 const MESSAGE_FIELDS = gql`
     fragment AiChatMessageFields on AiChatMessageItem {
@@ -49,16 +45,6 @@ export const STATISTICS_AI_CHAT = gql`
     }
 `
 
-export const GET_AI_HISTORY = gql`
-    ${MESSAGE_FIELDS}
-    query GetStatisticsAiChatHistory {
-        aiChatHistory {
-            messages {
-                ...AiChatMessageFields
-            }
-        }
-    }
-`
 
 const THINKING_MESSAGES = [
     "Interrogating your wallet…",
@@ -145,7 +131,6 @@ export default function AiStatsChat({ route, navigation }: WalletScreens<"AiStat
     const [busy, setBusy] = useState(false)
     const [error, setError] = useState("")
     const [thinkingMsg] = useState(() => THINKING_MESSAGES[Math.floor(Math.random() * THINKING_MESSAGES.length)])
-    const [showHistory, setShowHistory] = useState(false)
 
     const scrollRef = useRef<FlatList>(null)
     const [chat] = useMutation(STATISTICS_AI_CHAT)
@@ -208,17 +193,6 @@ export default function AiStatsChat({ route, navigation }: WalletScreens<"AiStat
 
     const canSend = inputText.trim().length > 0 && !busy
 
-    const { data } = useQuery(GET_AI_HISTORY)
-
-    const memoMessages = useMemo(() => {
-        if (!showHistory) return messages
-        return (data?.aiChatHistory || []).map((item: any, index: number) => ({
-            id: `history-${index}`,
-            role: "assistant" as const,
-            content: "",
-            items: item.messages || [],
-        }))
-    }, [data, messages, showHistory])
 
     return (
         <KeyboardAvoidingView style={{ flex: 1, backgroundColor: Colors.primary }}>
@@ -254,24 +228,11 @@ export default function AiStatsChat({ route, navigation }: WalletScreens<"AiStat
 
                 <View style={[s.divider, { marginTop: 80 }]} />
 
-                <View style={s.statsSection}>
-                    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.chips}>
-                        <Pressable
-                            style={[s.chip, showHistory && s.chipActive]}
-                            onPress={() => setShowHistory(!showHistory)}
-                        >
-                            <Text style={[s.chipText, showHistory && s.chipTextActive]}>Show previous</Text>
-                        </Pressable>
-                    </ScrollView>
-                </View>
-
-                <View style={s.divider} />
-
                 <FlatList
                     ref={scrollRef}
                     style={s.chat}
                     contentContainerStyle={s.chatContent}
-                    data={memoMessages}
+                    data={messages}
                     keyExtractor={(m) => m.id}
                     onContentSizeChange={scrollToBottom}
                     ListEmptyComponent={
@@ -366,22 +327,6 @@ const s = StyleSheet.create({
     },
     headerTitle: { color: Colors.secondary, fontFamily: FONTS.bold, fontSize: 16 },
     divider: { height: StyleSheet.hairlineWidth, backgroundColor: "rgba(255,255,255,0.08)" },
-    statsSection: { paddingTop: 10, paddingBottom: 8 },
-    chips: { paddingHorizontal: 16, gap: 8, flexDirection: "row" },
-    chip: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 5,
-        paddingHorizontal: 12,
-        paddingVertical: 6,
-        borderRadius: 20,
-        backgroundColor: Colors.primary_light,
-        borderWidth: 1,
-        borderColor: Colors.primary_lighter,
-    },
-    chipActive: { backgroundColor: Color(Colors.secondary).alpha(0.2).string(), borderColor: Colors.secondary },
-    chipText: { color: Colors.foreground_secondary, fontSize: 12 },
-    chipTextActive: { color: Colors.secondary, fontFamily: FONTS.semibold },
     chat: { flex: 1 },
     chatContent: { padding: 16, paddingBottom: 24 },
     emptyHint: { paddingVertical: 40, alignItems: "center" },

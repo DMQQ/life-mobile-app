@@ -1,4 +1,5 @@
 import { FONTS } from "@/constants/Fonts";
+import { formatAmount } from "@/utils/functions/formatCurrency";
 import { View } from "react-native";
 import Text from "@/components/ui/Text/Text";
 import useGetStatistics, { WalletStatisticsResponse } from "../../hooks/useGetStatistics";
@@ -36,7 +37,7 @@ export const Item = ({ label, value, icon, formatValue = true, width }: ItemProp
     {icon}
     <View>
       <Text variant="body" style={{ color: Colors.foreground, fontFamily: FONTS.bold }}>
-        {formatValue ? (typeof value === "number" ? value.toFixed(2) + "zł" : value) : value}
+        {formatValue ? (typeof value === "number" ? formatAmount(value) + "zł" : value) : value}
       </Text>
       <Text variant="caption" style={{ color: "grey", marginTop: 2.5 }}>{label}</Text>
     </View>
@@ -102,7 +103,7 @@ export default function StatisticsSummary() {
   const getValue = (key: keyof WalletStatisticsResponse["statistics"], t: string = "zł") => {
     let value = lastRangeStatistics.data?.statistics?.[key];
 
-    if (typeof value === "number") value = value.toFixed(2) + " " + (t || "");
+    if (typeof value === "number") value = formatAmount(value) + " " + (t || "");
 
     return "\n" + value;
   };

@@ -1,4 +1,5 @@
 import { FONTS } from "@/constants/Fonts"
+import { formatAmount } from "@/utils/functions/formatCurrency"
 import Colors from "@/constants/Colors"
 import Color from "color"
 import dayjs from "dayjs"
@@ -110,17 +111,17 @@ export default function SimilarExpensesChart({ expenses, currentExpenseId }: Sim
                 </View>
                 <View style={styles.statDivider} />
                 <View style={styles.statItem}>
-                    <Text size={15} weight="700" color={Colors.secondary} mono>{avgAmount.toFixed(2)}zł</Text>
+                    <Text size={15} weight="700" color={Colors.secondary} mono>{formatAmount(avgAmount)}zł</Text>
                     <Text size={10} color={Colors.text_dark} style={{ marginTop: 2 }}>avg</Text>
                 </View>
                 <View style={styles.statDivider} />
                 <View style={styles.statItem}>
-                    <Text size={15} weight="700" color="#66E875" mono>{minAmount.toFixed(2)}zł</Text>
+                    <Text size={15} weight="700" color="#66E875" mono>{formatAmount(minAmount)}zł</Text>
                     <Text size={10} color={Colors.text_dark} style={{ marginTop: 2 }}>min</Text>
                 </View>
                 <View style={styles.statDivider} />
                 <View style={styles.statItem}>
-                    <Text size={15} weight="700" color="#F07070" mono>{maxRaw.toFixed(2)}zł</Text>
+                    <Text size={15} weight="700" color="#F07070" mono>{formatAmount(maxRaw)}zł</Text>
                     <Text size={10} color={Colors.text_dark} style={{ marginTop: 2 }}>max</Text>
                 </View>
             </View>
@@ -129,7 +130,7 @@ export default function SimilarExpensesChart({ expenses, currentExpenseId }: Sim
                 {/* Average line */}
                 <View style={[styles.avgLine, { bottom: avgLineBottom + 28 }]} pointerEvents="none">
                     <View style={styles.avgLineDash} />
-                    <Text size={9} weight="600" color={Colors.text_light}>{avgAmount.toFixed(2)}zł avg</Text>
+                    <Text size={9} weight="600" color={Colors.text_light}>{formatAmount(avgAmount)}zł avg</Text>
                 </View>
 
                 {/* Bars */}

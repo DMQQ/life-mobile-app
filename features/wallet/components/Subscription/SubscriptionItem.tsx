@@ -1,3 +1,4 @@
+import { formatAmount } from "@/utils/functions/formatCurrency"
 import { Card } from "@/components"
 import Colors, { secondary_candidates } from "@/constants/Colors"
 import moment from "moment"
@@ -100,7 +101,7 @@ export default function SubscriptionItem({ subscription, index, onPress, style }
 
                 <View style={styles.priceContainer}>
                     <Text size={16} weight="600" color="#F07070" align="right" mono>
-                        -{subscription.amount.toFixed(2)}
+                        -{formatAmount(subscription.amount)}
                         <Text size={12} color="#F07070">
                             zł
                         </Text>
@@ -113,7 +114,7 @@ export default function SubscriptionItem({ subscription, index, onPress, style }
                             align="right"
                             style={{ marginTop: 2 }}
                         >
-                            {subscription.totalSpent.toFixed(2)}
+                            {formatAmount(subscription.totalSpent)}
                             <Text size={10} color="rgba(255,255,255,0.35)">
                                 {" "}
                                 zł total

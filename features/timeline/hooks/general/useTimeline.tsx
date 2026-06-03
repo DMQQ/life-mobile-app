@@ -16,7 +16,7 @@ export const GET_MONTHLY_OCCURRENCES = gql`
 const groupDates = (dates: { date: string }[]) => {
     const monthEvents = {} as { [date: string]: number }
     for (let { date } of dates) {
-        const formattedDate = dayjs(parseInt(date)).format("YYYY-MM-DD")
+        const formattedDate = dayjs(date).format("YYYY-MM-DD")
         !!monthEvents[formattedDate] ? (monthEvents[formattedDate] += 1) : (monthEvents[formattedDate] = 1)
     }
     return monthEvents
@@ -43,9 +43,7 @@ export default function useTimeline({ route, navigation }: TimelineScreenProps<"
     )
 
     const dayEventsSorted = useMemo(() => {
-        const data = groupDates(monthData?.occurrenceMonth || [])
-
-        return data
+        return groupDates(monthData?.occurrenceMonth || [])
     }, [monthData?.occurrenceMonth])
 
     const displayDate = useMemo(

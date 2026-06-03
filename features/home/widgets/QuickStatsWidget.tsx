@@ -46,6 +46,7 @@ interface MonthStatsData {
     m4?: { expense: number }
 }
 
+
 function Sparkline({
     values,
     color,

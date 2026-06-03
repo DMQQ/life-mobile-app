@@ -1,4 +1,5 @@
 import Header from "@/components/ui/Header/Header"
+import { formatAmount } from "@/utils/functions/formatCurrency"
 import { useRefresh } from "@/utils/context/RefreshContext"
 import useTrackScroll from "@/utils/hooks/ui/useTrackScroll"
 import useAppBackground from "@/utils/hooks/useAppBackground"
@@ -83,7 +84,7 @@ export default function Root({ navigation }: HomeScreenProps<"HomeRoot">) {
                 goBack={false}
                 animatedValue={parseFloat(home?.monthlySpendings?.expense || 0)}
                 animatedValueLoading={loading && home?.wallet?.balance === undefined}
-                animatedValueFormat={(value) => `${value?.toFixed(2)}zł`}
+                animatedValueFormat={(value) => `${formatAmount(value)}zł`}
                 animatedSubtitle={`This month spendings, ${Math.abs(trendPercentage).toFixed(1)}% ${isIncreasing ? "more" : "less"} vs last month`}
                 scrollY={scrollY}
                 animated={true}

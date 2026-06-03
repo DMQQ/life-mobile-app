@@ -1,6 +1,7 @@
 import { memo } from "react"
 import { TextStyle } from "react-native"
 import Animated, { AnimatedStyle, FadeInDown } from "react-native-reanimated"
+import { formatAmount } from "@/utils/functions/formatCurrency"
 
 interface AnimatedNumberProps {
     value: number
@@ -10,7 +11,7 @@ interface AnimatedNumberProps {
 }
 
 const AnimatedNumber = memo<AnimatedNumberProps>(
-    ({ value, style, formatValue = (val) => val.toFixed(2), delay = 0 }) => {
+    ({ value, style, formatValue = (val) => formatAmount(val), delay = 0 }) => {
         // const formattedValue = formatValue(value)
         // const characters = formattedValue.split("")
 

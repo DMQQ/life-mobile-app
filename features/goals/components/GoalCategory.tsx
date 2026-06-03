@@ -4,16 +4,16 @@ import Text from "@/components/ui/Text/Text"
 import Colors, { secondary_candidates } from "@/constants/Colors"
 import { Group } from "@/features/flashcards/hooks"
 import { useNavigation } from "@react-navigation/native"
-import { useCallback, useMemo, useOptimistic, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { StyleSheet, View } from "react-native"
 import { FadeIn } from "react-native-reanimated"
 import GoalActivityGrid from "./StatGrid"
 import useDeleteGoals from "../hooks/useDeleteGoals"
 import ContextMenu from "react-native-context-menu-view"
-import { Feather } from "@expo/vector-icons"
 import GlassView from "@/components/ui/GlassView"
 import dayjs from "dayjs"
 import { useUpsertGoalEntry } from "../hooks/hooks"
+import IconCircle from "@/components/ui/IconCircle"
 
 interface GoalCategoryProps extends Group {
     icon: string
@@ -79,9 +79,12 @@ export const GoalCategory = ({ name, icon, description, entries = [], onPress, .
             >
                 <View style={[styles.row, styles.header]}>
                     <View style={styles.row}>
-                        <View style={styles.iconContainer}>
-                            <Feather name={icon as any} size={14} color={Colors.foreground} />
-                        </View>
+                        <IconCircle
+                            name={icon as any}
+                            color={Colors.foreground}
+                            backgroundColor={Colors.primary}
+                            containerSize={30}
+                        />
                         <Text style={{ color: Colors.foreground, fontSize: 14, fontFamily: FONTS.bold }}>{name}</Text>
                     </View>
                     <IncrementCategory id={rest.id} entries={entries} min={rest.min} target={rest.target} />
@@ -171,14 +174,6 @@ const styles = StyleSheet.create({
     container: {
         marginVertical: 7.5,
         gap: 15,
-    },
-    iconContainer: {
-        width: 30,
-        height: 30,
-        borderRadius: 15,
-        backgroundColor: Colors.primary,
-        alignItems: "center",
-        justifyContent: "center",
     },
     header: {
         justifyContent: "space-between",

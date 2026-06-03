@@ -8,6 +8,7 @@ import { StyleSheet, View } from "react-native"
 import ContextMenu from "react-native-context-menu-view"
 import { isLimitGoal } from "../hooks/hooks"
 import dayjs from "dayjs"
+import ProgressBar from "@/components/ui/ProgressBar"
 
 interface Entry {
     id: string
@@ -39,7 +40,6 @@ const DayEntry = ({ entry, index, onEdit, onDelete, onAdd }: DayEntryProps) => {
     const statusColor = isOverLimit ? "#F44336" : isGoalMet ? "#4CAF50" : isCurrentDay ? "#FFC107" : "#F44336"
 
     const progress = target > 0 ? Math.min(entry.value / target, 1) : 0
-    const progressWidth = `${Math.round(progress * 100)}%` as any
 
     const actions = []
     if (onEdit) {
@@ -91,9 +91,7 @@ const DayEntry = ({ entry, index, onEdit, onDelete, onAdd }: DayEntryProps) => {
                         / {target} {entry.unit}
                     </Text>
                 </View>
-                <View style={styles.progressTrack}>
-                    <View style={[styles.progressFill, { width: progressWidth, backgroundColor: statusColor }]} />
-                </View>
+                <ProgressBar progress={progress * 100} color={statusColor} />
             </View>
 
             <GlassIconButton name="plus" size={20} onPress={() => onAdd?.(entry)} />
@@ -164,16 +162,6 @@ const styles = StyleSheet.create({
     progressTarget: {
         color: "rgba(255,255,255,0.45)",
         fontSize: 12,
-    },
-    progressTrack: {
-        height: 6,
-        borderRadius: 100,
-        backgroundColor: "rgba(255,255,255,0.1)",
-        overflow: "hidden",
-    },
-    progressFill: {
-        height: "100%",
-        borderRadius: 100,
     },
 })
 

@@ -1,4 +1,5 @@
 import { FONTS } from "@/constants/Fonts"
+import { formatAmount } from "@/utils/functions/formatCurrency"
 import Section from "@/components/ui/Section"
 import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
@@ -47,7 +48,7 @@ export default function UpcomingBillsWidget() {
                     <View style={[s.summaryPill, { backgroundColor: Color(Colors.warning).alpha(0.12).string() }]}>
                         <Feather name="alert-circle" size={11} color={Colors.warning} />
                         <Text style={[s.summaryText, { color: Colors.warning }]}>
-                            {totalDue7d.toFixed(0)} zł due within 7 days
+                            {formatAmount(totalDue7d, 0)} zł due within 7 days
                         </Text>
                     </View>
                 )}

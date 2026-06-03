@@ -1,4 +1,5 @@
 import React, { useMemo } from "react";
+import { formatAmount } from "@/utils/functions/formatCurrency";
 import { View, ScrollView } from "react-native";
 import Text from "@/components/ui/Text/Text";
 import { barDataItem, LineChart } from "react-native-gifted-charts";
@@ -129,7 +130,7 @@ export default function FutureProjection({ data, income, currentBalance: current
           }}
         >
           <Text size={14} color={Colors.foreground}>Average Expenses</Text>
-          <Text size={25} weight="600" color={Colors.secondary} mono>{(projectionData[0] as any)?.expenses.toLocaleString() ?? '0'}zł</Text>
+          <Text size={25} weight="600" color={Colors.secondary} mono>{formatAmount((projectionData[0] as any)?.expenses ?? 0, 0)}zł</Text>
         </View>
 
         <View
@@ -143,7 +144,7 @@ export default function FutureProjection({ data, income, currentBalance: current
         >
           <Text size={14} color={Colors.foreground}>Projection for (9mo)</Text>
           <Text size={25} weight="600" color={Colors.secondary} mono>
-            {projectionData[projectionData.length - 1]?.value?.toLocaleString() ?? '0'}zł
+            {formatAmount(projectionData[projectionData.length - 1]?.value ?? 0, 0)}zł
           </Text>
         </View>
       </View>

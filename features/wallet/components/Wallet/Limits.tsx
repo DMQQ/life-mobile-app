@@ -1,4 +1,5 @@
 import { AnimatedSelector } from "@/components"
+import { formatAmount } from "@/utils/functions/formatCurrency"
 import Colors, { secondary_candidates } from "@/constants/Colors"
 import Layout from "@/constants/Layout"
 import { gql, useQuery } from "@apollo/client"
@@ -265,10 +266,10 @@ export default function WalletLimits({ navigation }: { navigation: any }) {
                                                 </Text>
 
                                                 <Text size={14} weight="600" color={isOverLimit ? "#F07070" : Colors.foreground}>
-                                                    {limit.current.toFixed(2)}
+                                                    {formatAmount(limit.current)}
                                                     <Text size={12} color={isOverLimit ? "#F07070" : Colors.foreground}> zł</Text>
                                                     <Text size={14} color="#9f9f9f"> / </Text>
-                                                    <Text size={14} color={isOverLimit ? "#F07070" : Colors.foreground}>{limit.amount.toFixed(2)} zł</Text>
+                                                    <Text size={14} color={isOverLimit ? "#F07070" : Colors.foreground}>{formatAmount(limit.amount)} zł</Text>
                                                 </Text>
                                             </View>
                                         )}

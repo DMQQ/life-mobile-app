@@ -1,65 +1,33 @@
+import Colors from "@/constants/Colors"
 import { FONTS } from "@/constants/Fonts"
 import Text from "@/components/ui/Text/Text"
-import Colors from "@/constants/Colors"
-import { Feather } from "@expo/vector-icons"
-import { useQuery } from "@apollo/client"
-import { Pressable, StyleSheet, View } from "react-native"
-import Animated from "react-native-reanimated"
 import GlassView from "@/components/ui/GlassView"
 import Header from "@/components/ui/Header/Header"
+import { Feather } from "@expo/vector-icons"
+import { Pressable, StyleSheet, View } from "react-native"
+import Animated from "react-native-reanimated"
 import useTrackScroll from "@/utils/hooks/ui/useTrackScroll"
-import { GET_AI_HISTORY, AiChatMessageItem } from "@/features/wallet/pages/AiStatsChat"
-
-function HistoryPreviewItem({ item, onPress }: { item: { messages: AiChatMessageItem[] }; onPress: () => void }) {
-    const firstText = item.messages.find((m) => m.type === "text")?.data?.trim()
-    const dataCount = item.messages.filter((m) => m.type === "data").length
-
-    if (!firstText && dataCount === 0) return null
-
-    return (
-        <Pressable onPress={onPress}>
-            <GlassView style={s.historyItem}>
-                <View style={s.historyIconWrap}>
-                    <Feather name="zap" size={14} color={Colors.secondary} />
-                </View>
-                <View style={s.historyContent}>
-                    {firstText ? (
-                        <Text style={s.historyText} numberOfLines={2}>
-                            {firstText}
-                        </Text>
-                    ) : (
-                        <Text style={s.historyText}>
-                            {dataCount} result{dataCount !== 1 ? "s" : ""}
-                        </Text>
-                    )}
-                </View>
-                <Feather name="chevron-right" size={16} color={Colors.foreground_secondary} />
-            </GlassView>
-        </Pressable>
-    )
-}
+import { useAiConversations } from "../hooks/useAiConversations"
+import ConversationListItem from "../components/ConversationListItem"
+import Background from "@/components/ui/Background"
+import { SafeAreaView } from "react-native-safe-area-context"
 
 export default function AiWidget({ navigation }: any) {
     const [scrollY, onAnimatedScrollHandler] = useTrackScroll({ screenName: "AiScreens" })
-    const { data } = useQuery(GET_AI_HISTORY)
-    const history: { messages: AiChatMessageItem[] }[] = data?.aiChatHistory || []
+    const { conversations } = useAiConversations()
 
     return (
-        <View style={s.container}>
+        <SafeAreaView edges={["top"]} style={s.container}>
             <Header
                 scrollY={scrollY}
-                animated
-                animatedTitle="AI Assistant"
-                buttons={[
-                    {
-                        icon: "message",
-                        onPress: () => navigation.navigate("AiChatScreen"),
-                    },
-                ]}
+                title="AI Assistant"
+                buttons={[{ icon: "square.and.pencil", onPress: () => navigation.navigate("AiChatScreen") }]}
             />
+            <Background />
+
             <Animated.ScrollView
                 onScroll={onAnimatedScrollHandler}
-                style={{ flex: 1, paddingTop: 60 }}
+                style={{ flex: 1 }}
                 contentContainerStyle={s.scroll}
             >
                 <GlassView style={s.heroCard}>
@@ -73,38 +41,33 @@ export default function AiWidget({ navigation }: any) {
                     <Pressable style={s.startBtn} onPress={() => navigation.navigate("AiChatScreen")}>
                         <GlassView tintColor={Colors.secondary} style={s.startBtnInner}>
                             <Feather name="message-circle" size={16} color="#fff" />
-                            <Text style={s.startBtnText}>Start conversation</Text>
+                            <Text style={s.startBtnText}>New conversation</Text>
                             <Feather name="arrow-right" size={16} color="#fff" />
                         </GlassView>
                     </Pressable>
                 </GlassView>
 
-                {history.length > 0 && (
+                {conversations.length > 0 && (
                     <View style={s.section}>
                         <Text style={s.sectionTitle}>Recent</Text>
-                        {history.slice(0, 8).map((item, i) => (
-                            <HistoryPreviewItem
-                                key={i}
-                                item={item}
-                                onPress={() => navigation.navigate("AiChatScreen")}
+                        {conversations.slice(0, 10).map((conv) => (
+                            <ConversationListItem
+                                key={conv.id}
+                                conversation={conv}
+                                onPress={() => navigation.navigate("AiChatScreen", { conversationId: conv.id })}
                             />
                         ))}
                     </View>
                 )}
             </Animated.ScrollView>
-        </View>
+        </SafeAreaView>
     )
 }
 
 const s = StyleSheet.create({
     container: { flex: 1 },
-    scroll: { paddingHorizontal: 15, paddingTop: 100, paddingBottom: 40, gap: 24 },
-    heroCard: {
-        borderRadius: 25,
-        padding: 24,
-        alignItems: "center",
-        gap: 12,
-    },
+    scroll: { paddingHorizontal: 15, paddingTop: 80, paddingBottom: 100, gap: 24 },
+    heroCard: { borderRadius: 25, padding: 24, alignItems: "center", gap: 12 },
     heroIcon: {
         width: 60,
         height: 60,
@@ -141,21 +104,4 @@ const s = StyleSheet.create({
         textTransform: "uppercase",
         letterSpacing: 0.5,
     },
-    historyItem: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 12,
-        padding: 14,
-        borderRadius: 16,
-    },
-    historyIconWrap: {
-        width: 32,
-        height: 32,
-        borderRadius: 100,
-        backgroundColor: `${Colors.secondary}22`,
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    historyContent: { flex: 1 },
-    historyText: { fontSize: 13, color: Colors.foreground, lineHeight: 18 },
 })

@@ -1,4 +1,5 @@
 import { FONTS } from "@/constants/Fonts"
+import { formatAmount } from "@/utils/functions/formatCurrency"
 import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
 import { Expense } from "@/types"
@@ -42,7 +43,7 @@ const CategoryExpensesSheet = forwardRef<BottomSheet, Props>(
                         </Text>
                     </View>
                     <Text variant="caption" style={{ color: Colors.foreground_secondary }}>
-                        {expenses.length} transactions · {total.toFixed(2)}zł
+                        {expenses.length} transactions · {formatAmount(total)}zł
                     </Text>
                 </View>
 

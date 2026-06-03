@@ -1,3 +1,4 @@
+import { formatAmount } from "@/utils/functions/formatCurrency"
 import { FONTS } from "@/constants/Fonts"
 import { View, StyleSheet, Pressable } from "react-native"
 import Text from "@/components/ui/Text/Text"
@@ -56,7 +57,7 @@ export default function PredictionView() {
                     {!isBalanceEdit && (
                         <Text style={[styles.amount, { color: amountColor }]}>
                             {sign}
-                            {item.amount.toFixed(2)}
+                            {formatAmount(item.amount)}
                             <Text style={[styles.currency, { color: amountColor }]}>zł</Text>
                         </Text>
                     )}

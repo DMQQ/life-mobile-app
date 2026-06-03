@@ -1,4 +1,5 @@
 import { FONTS } from "@/constants/Fonts"
+import { formatAmount } from "@/utils/functions/formatCurrency"
 import { AnimatedSelector } from "@/components"
 import DatePicker from "@/components/DatePicker"
 import Skeleton from "@/components/SkeletonLoader/Skeleton"
@@ -140,7 +141,7 @@ export default function LimitsDetail({ navigation }: WalletScreens<"LimitsDetail
         const color = Icons[selectedLimit.category as keyof typeof Icons]?.backgroundColor ?? Colors.secondary
         const isOver = selectedLimit.current > selectedLimit.amount
         return {
-            title: `${selectedLimit.current.toFixed(0)} / ${selectedLimit.amount.toFixed(0)}zł`,
+            title: `${formatAmount(selectedLimit.current, 0)} / ${formatAmount(selectedLimit.amount, 0)}zł`,
             subtitle: CategoryUtils.getCategoryName(selectedLimit.category),
             color: isOver ? "#F07070" : color,
         }
@@ -289,10 +290,10 @@ export default function LimitsDetail({ navigation }: WalletScreens<"LimitsDetail
                                                 variant="caption"
                                                 style={{ color: isOver ? "#F07070" : "rgba(255,255,255,0.7)" }}
                                             >
-                                                {limit.current.toFixed(2)} zł
+                                                {formatAmount(limit.current)} zł
                                             </Text>
                                             {"  /  "}
-                                            {limit.amount.toFixed(2)} zł
+                                            {formatAmount(limit.amount)} zł
                                         </Text>
                                     </View>
                                 </Pressable>
@@ -322,7 +323,7 @@ export default function LimitsDetail({ navigation }: WalletScreens<"LimitsDetail
                                                     </Text>
                                                 </View>
                                                 <Text variant="body" style={styles.expenseAmount}>
-                                                    -{expense.amount.toFixed(2)}{" "}
+                                                    -{formatAmount(expense.amount)}{" "}
                                                     <Text variant="caption" style={styles.expenseAmountCurrency}>
                                                         zł
                                                     </Text>

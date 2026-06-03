@@ -1,4 +1,5 @@
 import { FONTS } from "@/constants/Fonts"
+import { formatAmount } from "@/utils/functions/formatCurrency"
 import GlassView from "@/components/ui/GlassView"
 import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
@@ -49,7 +50,7 @@ export default function ResultPanel({
             <View style={styles.resultHero}>
                 <Text style={[styles.resultAmount, { color: "#fff" }]}>
                     {sign}
-                    {Math.abs(expense.amount).toFixed(2)}zł
+                    {formatAmount(Math.abs(expense.amount))}zł
                 </Text>
                 <Text style={styles.resultDescription} numberOfLines={2}>
                     {expense.description}
@@ -105,7 +106,7 @@ export default function ResultPanel({
                             <Text style={styles.subexpenseDesc} numberOfLines={1}>
                                 {sub.description}
                             </Text>
-                            <Text style={styles.subexpenseAmount}>{Math.abs(sub.amount).toFixed(2)}</Text>
+                            <Text style={styles.subexpenseAmount}>{formatAmount(Math.abs(sub.amount))}</Text>
                         </View>
                     ))}
                 </ScrollView>

@@ -1,4 +1,5 @@
 import { FONTS } from "@/constants/Fonts"
+import { formatAmount } from "@/utils/functions/formatCurrency"
 import { AnimatedNumber } from "@/components"
 import DatePicker from "@/components/DatePicker"
 import Text from "@/components/ui/Text/Text"
@@ -68,7 +69,7 @@ const AnimatedItem = ({
     const getFormatValue = () => {
         switch (formatType) {
             case "currency":
-                return (val: number) => `${val.toFixed(2)}zł`
+                return (val: number) => `${formatAmount(val)}zł`
             case "percentage":
                 return (val: number) => `${val.toFixed(1)}%`
             case "days":

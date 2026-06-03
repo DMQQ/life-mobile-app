@@ -1,8 +1,8 @@
 import { FONTS } from "@/constants/Fonts"
+import { formatAmount } from "@/utils/functions/formatCurrency"
 import Text from "@/components/ui/Text/Text"
 import SubscriptionSkeleton from "../components/Subscription/SubscriptionSkeleton"
 import { gql, useQuery } from "@apollo/client"
-import { Feather } from "@expo/vector-icons"
 import moment from "moment"
 import { useEffect, useState } from "react"
 import { StyleSheet, View } from "react-native"
@@ -21,6 +21,7 @@ import { Toggle, Host } from "@expo/ui/swift-ui"
 import { background } from "@expo/ui/swift-ui/modifiers"
 import Background from "@/components/ui/Background"
 import { CategoryUtils } from "../components/Expense/ExpenseIcon"
+import DetailRow from "@/components/ui/DetailRow"
 
 const muted = Colors.foreground_secondary
 
@@ -227,34 +228,23 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                         />
                         <Text style={{ fontSize: 15, color: Colors.text_dark }}>{subscription.description}</Text>
                         <Text style={{ color: "#fff", fontSize: 40, fontFamily: FONTS.medium }}>
-                            {subscription.amount.toFixed(2)}zł
+                            {formatAmount(subscription.amount)}zł
                         </Text>
                     </View>
 
                     <View style={{ paddingHorizontal: 15 }}>
                         <Section title="Details">
-                            <View style={styles.detailRow}>
-                                <Feather name="refresh-cw" size={20} color={muted} style={styles.icon} />
-                                <Text style={styles.detailText}>
-                                    {formatBillingCycle(subscription.billingCycle)} Subscription
-                                </Text>
-                            </View>
+                            <DetailRow icon="refresh-cw">
+                                {formatBillingCycle(subscription.billingCycle)} Subscription
+                            </DetailRow>
 
                             {subscription.billingCycle === "custom" && subscription.billingDay != null && (
-                                <View style={styles.detailRow}>
-                                    <Feather name="calendar" size={20} color={muted} style={styles.icon} />
-                                    <Text style={styles.detailText}>Billing day: {subscription.billingDay}</Text>
-                                </View>
+                                <DetailRow icon="calendar">Billing day: {subscription.billingDay}</DetailRow>
                             )}
 
                             {subscription.billingCycle === "custom" &&
                                 (subscription.customBillingMonths?.length ?? 0) > 0 && (
-                                    <View
-                                        style={[
-                                            styles.detailRow,
-                                            { flexDirection: "column", alignItems: "flex-start", gap: 8 },
-                                        ]}
-                                    >
+                                    <DetailRow style={{ flexDirection: "column", alignItems: "flex-start", gap: 8 }}>
                                         <Text style={styles.detailText}>Active months:</Text>
                                         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
                                             {subscription.customBillingMonths!.map((m) => (
@@ -265,43 +255,45 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                                                 </View>
                                             ))}
                                         </View>
-                                    </View>
+                                    </DetailRow>
                                 )}
 
                             {subscription.reminderDaysBeforehand != null && (
-                                <View style={styles.detailRow}>
-                                    <Feather name="bell" size={20} color={muted} style={styles.icon} />
-                                    <Text style={styles.detailText}>
-                                        Reminder:{" "}
-                                        {subscription.reminderDaysBeforehand === 0
-                                            ? "on billing day"
-                                            : `${subscription.reminderDaysBeforehand}d before`}
-                                    </Text>
-                                </View>
+                                <DetailRow icon="bell">
+                                    Reminder:{" "}
+                                    {subscription.reminderDaysBeforehand === 0
+                                        ? "on billing day"
+                                        : `${subscription.reminderDaysBeforehand}d before`}
+                                </DetailRow>
                             )}
 
-                            <View style={styles.detailRow}>
-                                <Feather name="calendar" size={20} color={muted} style={styles.icon} />
-                                <Text style={styles.detailText}>Started: {parseDate(+subscription.dateStart)}</Text>
-                            </View>
+                            <DetailRow icon="calendar">Started: {parseDate(+subscription.dateStart)}</DetailRow>
 
-                            <View style={styles.detailRow}>
-                                <Feather name="clock" size={20} color={muted} style={styles.icon} />
-                                <Text style={styles.detailText}>Running for: {getSubscriptionDuration()}</Text>
-                            </View>
+                            <DetailRow icon="clock">Running for: {getSubscriptionDuration()}</DetailRow>
 
                             {subscription.isActive && (
-                                <View style={styles.detailRow}>
-                                    <Feather name="calendar" size={20} color={muted} style={styles.icon} />
-                                    <Text style={[styles.detailText, { color: isOverdue ? "#F07070" : muted }]}>
+                                <DetailRow icon="calendar">
+                                    <Text
+                                        variant="body"
+                                        style={{ color: isOverdue ? "#F07070" : muted, fontSize: 16 }}
+                                    >
                                         {isOverdue
                                             ? "Overdue"
                                             : `Next billing: ${parseDate(+subscription.nextBillingDate)}`}
                                     </Text>
-                                </View>
+                                </DetailRow>
                             )}
 
-                            <View style={[styles.detailRow, { borderBottomWidth: 0 }]}>
+                            <DetailRow
+                                last
+                                right={
+                                    <View style={{ width: 150 }}>
+                                        <Host modifiers={[background("clear")]}>
+                                            <Toggle isOn={subscription.isActive} onIsOnChange={handleToggleChange} />
+                                        </Host>
+                                    </View>
+                                }
+                            >
                                 <View style={styles.statusChip}>
                                     <View
                                         style={[
@@ -319,13 +311,7 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                                         {subscription.isActive ? "Active" : "Inactive"}
                                     </Text>
                                 </View>
-
-                                <View style={{ width: 150 }}>
-                                    <Host modifiers={[background("clear")]}>
-                                        <Toggle isOn={subscription.isActive} onIsOnChange={handleToggleChange} />
-                                    </Host>
-                                </View>
-                            </View>
+                            </DetailRow>
                         </Section>
                     </View>
 
@@ -356,7 +342,7 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
 
                                         <View style={styles.statItem}>
                                             <Text variant="subheading" style={styles.statValue}>
-                                                {totalSpent.toFixed(2)}zł
+                                                {formatAmount(totalSpent)}zł
                                             </Text>
                                             <Text variant="caption" style={styles.statLabel}>
                                                 Total Spent
@@ -365,7 +351,7 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
 
                                         <View style={styles.statItem}>
                                             <Text variant="subheading" style={styles.statValue}>
-                                                {avgMonthlySpend.toFixed(2)}zł
+                                                {formatAmount(avgMonthlySpend)}zł
                                             </Text>
                                             <Text variant="caption" style={styles.statLabel}>
                                                 Avg Payment
@@ -436,18 +422,6 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
 }
 
 const styles = StyleSheet.create({
-    detailRow: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        padding: 15,
-        borderBottomWidth: 1,
-        borderColor: Colors.borderColor,
-    },
-    icon: {
-        paddingHorizontal: 7.5,
-        padding: 2.5,
-    },
     detailText: {
         color: muted,
         fontSize: 16,

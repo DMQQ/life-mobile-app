@@ -1,3 +1,4 @@
+import { formatAmount } from "@/utils/functions/formatCurrency"
 import Layout from "@/constants/Layout"
 import { useMemo, useState, useEffect } from "react"
 import { StyleSheet, View } from "react-native"
@@ -40,7 +41,7 @@ function ChartLegend({ data, type }: LegendProps) {
                             <Text size={14} weight="600" color={Colors.foreground}>{labels[index]}</Text>
                             <View style={styles.valueRow}>
                                 <Text size={12} color={blueText}>
-                                    {item.value.toFixed(type === "count" ? 0 : 1)}
+                                    {type === "count" ? item.value.toFixed(0) : formatAmount(item.value, 1)}
                                     {type !== "count" && "zł"}
                                 </Text>
                                 {item.prevValue !== undefined && (
@@ -131,12 +132,12 @@ export const CustomDayBarChart = ({ data, maxValue, type }: { data: BarItem[]; m
                     <Animated.View style={[styles.tooltip, animatedTooltipStyle]}>
                         <Text size={14} weight="bold" color={Colors.foreground}>{labels[selectedBar.day - 1]}</Text>
                         <Text size={12} color={Colors.foreground} style={{ marginVertical: 1 }}>
-                            Current: {selectedBar.value.toFixed(type === "count" ? 0 : 2)}
+                            Current: {type === "count" ? selectedBar.value.toFixed(0) : formatAmount(selectedBar.value)}
                             {type === "count" ? " tx" : "zł"}
                         </Text>
                         {selectedBar.prevValue !== undefined ? (
                             <Text size={12} color={Colors.foreground} style={{ marginVertical: 1 }}>
-                                Previous: {selectedBar.prevValue.toFixed(type === "count" ? 0 : 2)}
+                                Previous: {type === "count" ? selectedBar.prevValue.toFixed(0) : formatAmount(selectedBar.prevValue)}
                                 {type === "count" ? " tx" : "zł"}
                             </Text>
                         ) : (
