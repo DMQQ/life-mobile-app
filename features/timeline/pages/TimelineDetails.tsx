@@ -102,7 +102,7 @@ export default function TimelineDetails({
 
     const contentPaddingTop = useMemo(() => {
         const title = data?.title ?? ""
-        const fontSize = title.length > 25 ? 40 : 50
+        const fontSize = title.length > 25 ? 35 : 45
         const lineHeight = fontSize * 0.95
         const charsPerLine = Math.floor((Layout.screen.width - 30) / (fontSize * 0.5))
         const lines = title.length > 0 ? Math.ceil(title.length / charsPerLine) : 1
@@ -221,7 +221,7 @@ export default function TimelineDetails({
                 animated={true}
                 animatedTitle={capitalize(data?.title)}
                 buttons={buttons}
-                initialTitleFontSize={data?.title?.length > 25 ? 40 : 50}
+                initialTitleFontSize={data?.title?.length > 25 ? 35 : 45}
             />
             <Animated.ScrollView
                 keyboardDismissMode={"on-drag"}

@@ -82,7 +82,6 @@ export const getCurrentLocation = async () => {
     try {
         const serviceEnabled = await Location.hasServicesEnabledAsync()
         if (!serviceEnabled) {
-            console.log("Location services are not enabled")
             return {
                 latitude: 53.7701,
                 longitude: 20.4862,
@@ -93,7 +92,6 @@ export const getCurrentLocation = async () => {
         const { status } = await Location.requestForegroundPermissionsAsync()
 
         if (status !== "granted") {
-            console.log("Permission not granted, using default location")
             return {
                 latitude: 53.7701,
                 longitude: 20.4862,

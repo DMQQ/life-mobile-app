@@ -27,7 +27,7 @@ interface MyItem extends SearchItem {
 // In your component
 const searchModal = useSearchModal<MyItem>({
   onSelect: (item) => {
-    console.log("Selected:", item)
+
   }
 })
 
@@ -94,7 +94,7 @@ const {
 ```tsx
 const exerciseSearch = useSearchModal({
   onSelect: (exercise) => {
-    console.log("Selected exercise:", exercise.title)
+
   }
 })
 
@@ -113,7 +113,7 @@ const exerciseSearch = useSearchModal({
 const peopleSearch = useSearchModal({
   multiSelect: true,
   onMultiSelect: (people) => {
-    console.log("Selected people:", people)
+
   }
 })
 

@@ -24,6 +24,8 @@ const s = StyleSheet.create({
         backgroundColor: Colors.primary_lighter,
         borderRadius: 20,
         overflow: "hidden",
+        borderWidth: 1,
+        borderColor: Colors.borderColor,
     },
 })
 

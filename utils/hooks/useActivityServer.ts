@@ -119,7 +119,6 @@ export const useActivityServer = () => {
         timelineId?: string,
     ): Promise<boolean> => {
         try {
-            console.log("Setting live activity", { activityId, updateToken, timelineId })
             const { data } = await setLiveActivityUpdateTokenMutation({
                 variables: {
                     input: {

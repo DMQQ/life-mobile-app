@@ -118,7 +118,6 @@ function WalletItem(
                 systemIcon: "pencil",
                 title: "Edit",
                 onPress: () => {
-                    console.log("Editing item:", item)
                     navigationRef.current?.navigate("WalletScreens", {
                         screen: "CreateExpense",
                         params: { ...(item as any), isEditing: true },

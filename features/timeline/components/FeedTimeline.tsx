@@ -46,7 +46,9 @@ function priorityTheme(priority: number | null | undefined): PriorityTheme {
 }
 
 function formatTime(time: string): string {
-    return dayjs(`2000-01-01T${time}`).format("HH:MM")
+    if (!time || !time.includes(":")) return "-"
+    const [h, m, s] = time.split(":")
+    return dayjs().set("hours", +h).set("minutes", +m).set("seconds", +s).format("HH:mm")
 }
 
 function durationLabel(begin: string, end: string): string {
@@ -130,7 +132,9 @@ function AddItem({ date }: { date: string }) {
                 >
                     <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 7 }}>
                         <Feather name="plus" size={14} color={Colors.text_light} />
-                        <Text style={{ fontSize: 13, fontFamily: FONTS.bold, color: Colors.text_light }}>New event</Text>
+                        <Text style={{ fontSize: 13, fontFamily: FONTS.bold, color: Colors.text_light }}>
+                            New event
+                        </Text>
                     </View>
                 </Pressable>
             </View>

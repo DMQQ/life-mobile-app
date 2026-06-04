@@ -129,7 +129,6 @@ export default function UpdateGoalEntry({ route, navigation }: any) {
 
         try {
             if (isEditing) {
-                console.log("Editing entry with id:", entryId, "new value:", total)
                 await editGoalEntry({
                     variables: { id: entryId, value: total },
                     refetchQueries: ["GetGoal"],

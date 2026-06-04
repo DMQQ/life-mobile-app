@@ -7,6 +7,7 @@ import {
     NativeStackHeaderItem,
     NativeStackHeaderItemMenuAction,
     NativeStackHeaderItemMenuSubmenu,
+    NativeStackNavigationOptions,
 } from "@react-navigation/native-stack"
 import Color from "color"
 import { LinearGradient } from "expo-linear-gradient"
@@ -224,6 +225,8 @@ interface HeaderProps {
     initialTitleFontSize?: number
 
     shadow?: boolean
+
+    screenOptions?: NativeStackNavigationOptions
 }
 
 function Header({ shadow = true, ...props }: HeaderProps) {
@@ -249,7 +252,9 @@ function Header({ shadow = true, ...props }: HeaderProps) {
             headerStyle: { backgroundColor: "transparent" },
             title: props.animatedTitle === undefined && props.title !== undefined ? props.title : "",
             headerBackVisible: !!props.goBack && props.backIcon === undefined && !props.children,
-
+            headerBackTitle: "",
+            headerBackTitleVisible: false,
+            headerBackButtonDisplayMode: "minimal",
             unstable_headerRightItems: () => rightButtons.map(mapHeaderItem),
 
             unstable_headerLeftItems: hasLeftItems
@@ -280,8 +285,19 @@ function Header({ shadow = true, ...props }: HeaderProps) {
                       return items
                   }
                 : undefined,
+
+            ...props.screenOptions,
         })
-    }, [props.buttons, props.children, props.goBack, props.title, props.animatedTitle, props.backIcon, navigation])
+    }, [
+        props.buttons,
+        props.children,
+        props.goBack,
+        props.title,
+        props.animatedTitle,
+        props.backIcon,
+        navigation,
+        props.screenOptions,
+    ])
 
     return (
         <View style={[styles.blurContainer]}>

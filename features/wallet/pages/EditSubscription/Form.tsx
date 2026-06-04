@@ -72,7 +72,7 @@ export default function Form({ route, navigation }: Props) {
             reminderDaysBeforehand: subscription?.reminderDaysBeforehand ?? 3,
             dateStart: subscription?.dateStart ? new Date(+subscription.dateStart) : new Date(),
             dateEnd: subscription?.dateEnd ? new Date(+subscription.dateEnd) : (null as Date | null),
-            nextBillingDate: subscription?.nextBillingDate ? new Date(+subscription.nextBillingDate) : new Date(),
+            nextBillingDate: subscription?.nextBillingDate ? new Date(+subscription.nextBillingDate) : dayjs().add(1, "month").toDate(),
             subAccountId: undefined as string | undefined,
         },
         onSubmit: async (values) => {

@@ -286,7 +286,7 @@ const ChevronIcon = ({ isExpanded }: { isExpanded: boolean }) => {
 const styles = StyleSheet.create({
     contentContainer: {
         padding: 15,
-        paddingTop: 186,
+        paddingTop: 100,
         paddingBottom: 200,
     },
     monthContainer: {
@@ -384,5 +384,7 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.primary_lighter,
         borderRadius: 20,
         overflow: "hidden",
+        borderWidth: 1,
+        borderColor: Colors.borderColor,
     },
 })

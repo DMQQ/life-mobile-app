@@ -123,7 +123,7 @@ const ASSIGN_EXPENSE_TO_SUBSCRIPTION_MUTATION = graphql(`
 
 export default function useSubscription() {
     const [cancelSubscription, cancelSubscriptionState] = useMutation(CANCEL_SUBSCRIPTION_MUTATION, {
-        refetchQueries: ["GetWallet"],
+        refetchQueries: ["GetWallet", "Subscription"],
     })
 
     const [createSubscription, createSubscriptionState] = useMutation(CREATE_SUBSCRIPTION_MUTATION, {
@@ -131,7 +131,7 @@ export default function useSubscription() {
     })
 
     const [renewSubscription, renewSubscriptionState] = useMutation(RENEW_SUBSCRIPTION_MUTATION, {
-        refetchQueries: ["GetWallet"],
+        refetchQueries: ["GetWallet", "Subscription"],
     })
 
     const [assignExpenseToSubscription, assignExpenseToSubscriptionState] = useMutation(
@@ -148,7 +148,7 @@ export default function useSubscription() {
     const [createSubscriptionFromInput, createSubscriptionFromInputState] = useMutation(
         CREATE_SUBSCRIPTION_INPUT_MUTATION,
         {
-            refetchQueries: ["GetWallet", "Subscriptions"],
+            refetchQueries: ["GetWallet", "WalletOverview", "Subscriptions", "SubAccounts"],
             onError(error) {
                 console.log("Error creating subscription:", JSON.stringify(error, null, 2))
             },

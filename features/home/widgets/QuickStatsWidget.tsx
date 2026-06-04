@@ -46,7 +46,6 @@ interface MonthStatsData {
     m4?: { expense: number }
 }
 
-
 function Sparkline({
     values,
     color,
@@ -272,8 +271,10 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: Colors.primary_lighter,
         borderRadius: 20,
-        padding: 14,
+        padding: 15,
         gap: 10,
+        borderWidth: 1,
+        borderColor: Colors.borderColor,
     },
     tileHead: {
         flexDirection: "row",

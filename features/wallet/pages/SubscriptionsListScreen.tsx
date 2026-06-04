@@ -25,16 +25,7 @@ export default function SubscriptionsListScreen({ navigation }: WalletScreens<"S
     )
 
     const header = useMemo(
-        () => (
-            <Header
-                scrollY={scrollY}
-                animated={true}
-                goBack={false}
-                buttons={buttons}
-                animatedTitle="Subscriptions"
-                animatedSubtitle="Recurring payments"
-            />
-        ),
+        () => <Header scrollY={scrollY} animated={false} goBack={true} buttons={buttons} title="Subscriptions" />,
         [buttons],
     )
 

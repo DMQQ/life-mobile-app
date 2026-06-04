@@ -35,8 +35,6 @@ export const useActivityManager = (): UseActivityManagerReturn => {
 
         ExpoLiveActivityModule.getPushToStartToken().then((token) => {
             if (token && serverHook?.registerPushToStartToken) {
-                console.log("ExpoLiveActivityModule.getPushToStartToken", { token })
-
                 serverHook.registerPushToStartToken(token)
             }
         })
@@ -86,8 +84,6 @@ export const useActivityManager = (): UseActivityManagerReturn => {
                                 activityData.eventId,
                             )
                         }
-
-                        console.log(`Activity ${activityID} (${activityData.eventId}): ${activityData.state}`)
                     }
                 }
             } catch (error) {

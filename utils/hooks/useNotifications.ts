@@ -102,9 +102,7 @@ export default function useNotifications(navigationRef: React.RefObject<Navigati
 
     useEffect(() => {
         let timeeout: ReturnType<typeof setTimeout>
-        notificationListener.current = Notifications.addNotificationReceivedListener((notification: any) => {
-            console.log("Notification received:", notification)
-        })
+        notificationListener.current = Notifications.addNotificationReceivedListener((notification: any) => {})
 
         responseListener.current = Notifications.addNotificationResponseReceivedListener((response) => {
             const data = response.notification.request.content.data

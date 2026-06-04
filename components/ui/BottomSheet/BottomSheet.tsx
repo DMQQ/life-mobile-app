@@ -59,7 +59,6 @@ const BottomSheet = forwardRef<
             snapPoints={props.snapPoints}
             ref={ref}
             onChange={(index) => {
-                console.log("BottomSheet index changed to:", index)
                 props.onChange?.(index)
             }}
             handleIndicatorStyle={{

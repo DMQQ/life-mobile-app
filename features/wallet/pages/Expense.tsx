@@ -171,6 +171,7 @@ export default function Expense({ route: { params }, navigation }: any) {
                 goBack
                 scrollY={scrollY}
                 shadow={false}
+                title={selected?.description}
                 buttons={[
                     {
                         icon: "trash" as SFSymbol,

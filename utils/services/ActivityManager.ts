@@ -44,8 +44,6 @@ export class ActivityManager {
     }
 
     async startCountdownActivity(config: ActivityConfig): Promise<string | null> {
-        console.log("Starting Live Activity with config:", config)
-
         if (Platform.OS !== "ios") {
             console.warn("Live Activities are only supported on iOS")
             return null
@@ -55,8 +53,6 @@ export class ActivityManager {
             console.warn("Live Activities are not enabled")
             return null
         }
-
-        console.log("Live Activities are enabled, starting activity...")
 
         try {
             const activityToken = await ExpoLiveActivityModule.startCountdownActivity(
@@ -69,8 +65,6 @@ export class ActivityManager {
                 config.todos || [],
                 false,
             )
-
-            console.log("Received activity token:", activityToken)
 
             if (activityToken) {
                 this.activeActivities.set(config.eventId, activityToken)
@@ -164,7 +158,6 @@ export class ActivityManager {
         try {
             // Listen for push tokens
             ExpoLiveActivityModule.addListener("onActivityPushToken", (event: ActivityPushTokenEvent) => {
-                console.log("Activity push token received:", event)
                 this.activityPushTokens.set(event.activityID, event.activityPushToken)
 
                 // Send token to server
@@ -178,7 +171,6 @@ export class ActivityManager {
 
             // Listen for push-to-start tokens
             ExpoLiveActivityModule.addListener("onPushToStartToken", (event: PushToStartTokenEvent) => {
-                console.log("Push-to-start token received:", event)
                 this.pushToStartToken = event.activityPushToStartToken
 
                 // Send token to server
@@ -192,8 +184,6 @@ export class ActivityManager {
 
             // Listen for remotely started activities
             ExpoLiveActivityModule.addListener("onActivityStartedRemotely", (event: ActivityStartedEvent) => {
-                console.log("🚨 Activity started remotely via push notification:", event)
-                
                 // Register the activity as active
                 this.activeActivities.set(event.eventId, event.activityId)
                 this.activityPushTokens.set(event.activityId, event.pushToken)
@@ -209,8 +199,6 @@ export class ActivityManager {
 
             // Listen for push notifications that update activities
             ExpoLiveActivityModule.addListener("onPushNotificationReceived", (event: PushNotificationEvent) => {
-                console.log("Push notification received for Live Activity:", event)
-                
                 // Notify callbacks
                 this.pushNotificationCallbacks.forEach((callback) => callback(event))
             })

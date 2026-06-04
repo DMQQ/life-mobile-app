@@ -36,8 +36,6 @@ export default function TransferSubAccount({ navigation, route }: WalletScreens<
         navigation.goBack()
     })
 
-    console.log("Transfer error:", JSON.stringify(error, null, 2))
-
     const swap = () => {
         const tmp = fromAccount
         setFromAccount(toAccount)
@@ -130,7 +128,9 @@ export default function TransferSubAccount({ navigation, route }: WalletScreens<
                                             styles.accountRow,
                                             selected && {
                                                 borderColor: acc.color ?? Colors.secondary,
-                                                backgroundColor: Color(acc.color ?? Colors.secondary).alpha(0.1).string(),
+                                                backgroundColor: Color(acc.color ?? Colors.secondary)
+                                                    .alpha(0.1)
+                                                    .string(),
                                             },
                                             disabled && styles.accountRowDisabled,
                                         ]}
@@ -138,7 +138,11 @@ export default function TransferSubAccount({ navigation, route }: WalletScreens<
                                         <View
                                             style={[
                                                 styles.accountIcon,
-                                                { backgroundColor: Color(acc.color ?? Colors.secondary).alpha(0.2).string() },
+                                                {
+                                                    backgroundColor: Color(acc.color ?? Colors.secondary)
+                                                        .alpha(0.2)
+                                                        .string(),
+                                                },
                                             ]}
                                         >
                                             <MaterialCommunityIcons
@@ -151,7 +155,9 @@ export default function TransferSubAccount({ navigation, route }: WalletScreens<
                                             <Text style={styles.accountName}>{acc.name}</Text>
                                             <Text style={styles.accountBalance}>${acc.balance.toFixed(2)}</Text>
                                         </View>
-                                        {selected && <AntDesign name="check" size={16} color={acc.color ?? Colors.foreground} />}
+                                        {selected && (
+                                            <AntDesign name="check" size={16} color={acc.color ?? Colors.foreground} />
+                                        )}
                                     </TouchableOpacity>
                                 )
                             })}
@@ -185,7 +191,11 @@ export default function TransferSubAccount({ navigation, route }: WalletScreens<
 
                         <View>
                             <GroupSelector
-                                options={[{ label: "500", value: "500" }, { label: "50%", value: "50%" }, { label: "100%", value: "100%" }]}
+                                options={[
+                                    { label: "500", value: "500" },
+                                    { label: "50%", value: "50%" },
+                                    { label: "100%", value: "100%" },
+                                ]}
                                 value={amount}
                                 onChange={(value) => {
                                     const numericValue = value.endsWith("%")
@@ -220,18 +230,37 @@ function AccountSlot({
             style={[
                 styles.slot,
                 active && styles.slotActive,
-                account && { borderColor: Color(account.color ?? Colors.secondary).alpha(0.5).string() },
+                account && {
+                    borderColor: Color(account.color ?? Colors.secondary)
+                        .alpha(0.5)
+                        .string(),
+                },
             ]}
         >
             {account ? (
                 <>
-                    <View style={[styles.slotIcon, { backgroundColor: Color(account.color ?? Colors.secondary).alpha(0.2).string() }]}>
-                        <MaterialCommunityIcons name={(account.icon ?? "help-circle") as any} size={22} color={account.color ?? Colors.foreground} />
+                    <View
+                        style={[
+                            styles.slotIcon,
+                            {
+                                backgroundColor: Color(account.color ?? Colors.secondary)
+                                    .alpha(0.2)
+                                    .string(),
+                            },
+                        ]}
+                    >
+                        <MaterialCommunityIcons
+                            name={(account.icon ?? "help-circle") as any}
+                            size={22}
+                            color={account.color ?? Colors.foreground}
+                        />
                     </View>
                     <Text style={styles.slotName} numberOfLines={1}>
                         {account.name}
                     </Text>
-                    <Text style={[styles.slotBalance, { color: account.color ?? Colors.foreground }]}>${account.balance.toFixed(2)}</Text>
+                    <Text style={[styles.slotBalance, { color: account.color ?? Colors.foreground }]}>
+                        ${account.balance.toFixed(2)}
+                    </Text>
                 </>
             ) : (
                 <>

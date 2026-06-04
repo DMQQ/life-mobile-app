@@ -31,14 +31,13 @@ import dayjs from "dayjs"
 import { IconButton } from "@/components"
 import BottomSheet from "@gorhom/bottom-sheet"
 import CategoryExpensesSheet from "../components/WalletChart/CategoryExpensesSheet"
-import LineChart from "../components/WalletChart/LineChart"
+import Background from "@/components/ui/Background"
 
 const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView)
 
 const styles = StyleSheet.create({
     listHeader: {
         flex: 1,
-        paddingHorizontal: 15,
         alignItems: "center",
         marginBottom: 30,
     },
@@ -180,24 +179,16 @@ function WalletCharts({ navigation }: any) {
     return (
         <SafeAreaView style={{ flex: 1, paddingBottom: insets.bottom }} edges={["top"]}>
             {loading && (
-                <Animated.View
-                    exiting={FadeOut.duration(250)}
-                    style={[StyleSheet.absoluteFill, styles.overlay]}
-                >
+                <Animated.View exiting={FadeOut.duration(250)} style={[StyleSheet.absoluteFill, styles.overlay]}>
                     <ChartLoader />
                 </Animated.View>
             )}
 
             <Header
-                animatedTitle={sumOfExpenses ? `Spent ${formatAmount(sumOfExpenses)}zł` : "No expenses"}
-                animatedSubtitle={
-                    filters.date.from && filters.date.to
-                        ? `${filters.date.from} - ${filters.date.to}`
-                        : "Set date range"
-                }
+                title={sumOfExpenses ? `Spent ${formatAmount(sumOfExpenses)}zł` : "No expenses"}
                 scrollY={scrollY}
-                initialTitleFontSize={45}
-                animated
+                animated={false}
+                goBack
                 buttons={[
                     {
                         icon: <Feather name="repeat" color={"#fff"} size={20} />,
@@ -230,8 +221,10 @@ function WalletCharts({ navigation }: any) {
                 ]}
             />
 
+            <Background tintColor={secondary_candidates[3]} />
+
             <AnimatedScrollView
-                style={{ paddingTop: 186 }}
+                style={{ paddingTop: 100 }}
                 onScroll={onScroll}
                 scrollEventThrottle={16}
                 bounces

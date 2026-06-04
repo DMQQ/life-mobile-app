@@ -26,7 +26,6 @@ import GroupSelector from "@/components/ui/GroupSelector"
 import Section from "@/components/ui/Section"
 import Text from "@/components/ui/Text/Text"
 import dayjs from "dayjs"
-import GlassView from "@/components/ui/GlassView"
 
 const TABS = [
     { label: "Accounts", value: "accounts" as string },
@@ -35,11 +34,8 @@ const TABS = [
 
 export default function WalletScreen({ navigation, route }: WalletScreens<"Wallet">) {
     const { data, loading, error } = useWalletOverview()
-    const { dispatch, filters } = useWalletContext()
     const [scrollY, onScroll] = useTrackScroll({ screenName: "WalletScreens" })
     const [tab, setTab] = useState("accounts")
-
-    const balance = loading && data?.wallet?.balance === undefined ? " ..." : formatAmount(data?.wallet?.balance || 0)
 
     const handleShowEditSheet = useCallback(() => {
         Haptic.trigger("impactMedium")
@@ -62,8 +58,6 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
             })
             .sort((a, b) => parseInt(a.nextBillingDate) - parseInt(b.nextBillingDate))
     }, [data?.subscriptions])
-
-    const selectedMonth = filters.date.from ? dayjs(filters.date.from).get("month") : dayjs().get("month")
 
     const buttons = useMemo(
         () =>
@@ -127,14 +121,14 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
                 animated={true}
                 buttons={buttons}
                 goBack={false}
-                animatedValue={parseFloat(balance)}
+                animatedValue={data?.wallet?.balance || 0}
                 animatedValueLoading={loading && data?.wallet?.balance === undefined}
                 animatedValueFormat={(value) => `${formatAmount(value)}zł`}
                 animatedSubtitle="Total balance across all accounts"
                 onAnimatedTitleLongPress={handleShowEditSheet}
             />
         ),
-        [balance, loading, buttons],
+        [loading, buttons],
     )
 
     if (
@@ -165,36 +159,7 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
                 scrollEventThrottle={16}
                 contentContainerStyle={styles.contentContainer}
             >
-                <View style={styles.tabSection}>
-                    <View style={styles.tabRow}>
-                        <Text style={styles.tabTitle}>{tab === "accounts" ? "Accounts" : "Spendings"}</Text>
-                        <View style={styles.tabSelectorWrap}>
-                            <GroupSelector size="small" options={TABS} value={tab} onChange={setTab} />
-                        </View>
-                    </View>
-                    {tab === "accounts" ? (
-                        <SubAccountCards />
-                    ) : (
-                        <YearlySpendingsChart
-                            selectedBar={selectedMonth}
-                            onBarPress={(monthIndex) => {
-                                if (monthIndex === selectedMonth) {
-                                    dispatch({ type: "RESET" })
-                                    return
-                                }
-                                const month = dayjs().set("month", monthIndex)
-                                dispatch({
-                                    type: "SET_DATE_MIN",
-                                    payload: month.startOf("month").format("YYYY-MM-DD"),
-                                })
-                                dispatch({
-                                    type: "SET_DATE_MAX",
-                                    payload: month.endOf("month").format("YYYY-MM-DD"),
-                                })
-                            }}
-                        />
-                    )}
-                </View>
+                <WalletTab />
 
                 <View style={styles.quickNav}>
                     <View style={styles.quickNavCard}>
@@ -285,6 +250,45 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
     )
 }
 
+const WalletTab = () => {
+    const [tab, setTab] = useState("accounts")
+    const { dispatch, filters } = useWalletContext()
+    const selectedMonth = filters.date.from ? dayjs(filters.date.from).get("month") : dayjs().get("month")
+
+    return (
+        <View style={styles.tabSection}>
+            <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                <Text variant="subheading">{tab === "accounts" ? "Accounts" : "Spendings"}</Text>
+                <View style={{ width: "50%" }}>
+                    <GroupSelector size="small" options={TABS} value={tab} onChange={setTab} />
+                </View>
+            </View>
+            {tab === "accounts" ? (
+                <SubAccountCards />
+            ) : (
+                <YearlySpendingsChart
+                    selectedBar={selectedMonth}
+                    onBarPress={(monthIndex) => {
+                        if (monthIndex === selectedMonth) {
+                            dispatch({ type: "RESET" })
+                            return
+                        }
+                        const month = dayjs().set("month", monthIndex)
+                        dispatch({
+                            type: "SET_DATE_MIN",
+                            payload: month.startOf("month").format("YYYY-MM-DD"),
+                        })
+                        dispatch({
+                            type: "SET_DATE_MAX",
+                            payload: month.endOf("month").format("YYYY-MM-DD"),
+                        })
+                    }}
+                />
+            )}
+        </View>
+    )
+}
+
 const styles = StyleSheet.create({
     overlay: {
         backgroundColor: Colors.primary,
@@ -300,6 +304,7 @@ const styles = StyleSheet.create({
     },
     tabSection: {
         gap: 15,
+        marginTop: 15,
     },
     tabRow: {
         flexDirection: "row",
@@ -331,6 +336,8 @@ const styles = StyleSheet.create({
         padding: 15,
         gap: 15,
         backgroundColor: Colors.primary_lighter,
+        borderWidth: 1,
+        borderColor: Colors.borderColor,
     },
     quickNavIconWrap: {
         width: 40,

@@ -126,32 +126,22 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
         try {
             if (pendingToggle) {
                 if (hasSubscription && !isSubscriptionActive) {
-                    const result = await sub.renewSubscription({
+                    await sub.renewSubscription({
                         variables: { subscriptionId: subscription!.id },
                     })
-                    if (result.data?.renewSubscription) {
-                        setSubscription(result.data.renewSubscription.subscription as Subscription)
-                        refetch()
-                    }
                 } else {
-                    const result = await sub.createSubscription({
+                    await sub.createSubscription({
                         variables: { expenseId: subscription!.id },
                     })
-                    if (result.data?.createSubscription) {
-                        setSubscription(result.data.createSubscription.subscription as Subscription)
-                        refetch()
-                    }
                 }
             } else {
-                const result = await sub.cancelSubscription({
+                await sub.cancelSubscription({
                     variables: { subscriptionId: subscription!.id },
                 })
-                if (result.data?.cancelSubscription) {
-                    setSubscription(result.data.cancelSubscription.subscription as Subscription)
-                    refetch()
-                }
             }
-        } catch {
+            await refetch()
+        } catch (e) {
+            console.error("Subscription toggle failed:", e)
         } finally {
             setConfirmAction(false)
             setPendingToggle(null)
@@ -195,10 +185,15 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                 goBack
                 scrollY={scrollY}
                 shadow={false}
+                title={subscription?.description}
                 buttons={[
                     {
                         icon: "pencil" as any,
-                        onPress: () => navigation.navigate("EditSubscription", { subscription }),
+                        onPress: () =>
+                            navigation.navigate("EditSubscription", {
+                                screen: "Form",
+                                params: { subscription },
+                            }),
                     },
                 ]}
             />
@@ -273,10 +268,7 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
 
                             {subscription.isActive && (
                                 <DetailRow icon="calendar">
-                                    <Text
-                                        variant="body"
-                                        style={{ color: isOverdue ? "#F07070" : muted, fontSize: 16 }}
-                                    >
+                                    <Text variant="body" style={{ color: isOverdue ? "#F07070" : muted, fontSize: 16 }}>
                                         {isOverdue
                                             ? "Overdue"
                                             : `Next billing: ${parseDate(+subscription.nextBillingDate)}`}
@@ -287,11 +279,9 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                             <DetailRow
                                 last
                                 right={
-                                    <View style={{ width: 150 }}>
-                                        <Host modifiers={[background("clear")]}>
-                                            <Toggle isOn={subscription.isActive} onIsOnChange={handleToggleChange} />
-                                        </Host>
-                                    </View>
+                                    <Host matchContents modifiers={[background("clear")]}>
+                                        <Toggle isOn={subscription.isActive} onIsOnChange={handleToggleChange} />
+                                    </Host>
                                 }
                             >
                                 <View style={styles.statusChip}>

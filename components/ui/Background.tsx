@@ -1,11 +1,11 @@
 import { StyleSheet, View, Dimensions } from "react-native"
 import Svg, { Defs, RadialGradient, Stop, Circle, Filter, FeGaussianBlur } from "react-native-svg"
 import theme from "@/constants/Colors"
+import { LinearGradient } from "expo-linear-gradient"
 
 const { width } = Dimensions.get("window")
 const HEIGHT = 320
 
-// Symmetrical size for a perfect circle bloom
 const CIRCLE_RADIUS = width * 0.6
 
 export default function Background({ tintColor = theme.secondary }: { tintColor?: string }) {
@@ -13,6 +13,7 @@ export default function Background({ tintColor = theme.secondary }: { tintColor?
 
     return (
         <View style={styles.container} pointerEvents="none">
+            <LinearGradient style={StyleSheet.absoluteFill} colors={[accentColor + "15", "transparent"]} />
             <Svg height={HEIGHT} width={width}>
                 <Defs>
                     {/* Kept the blur but contained it tightly to preserve the round structure */}
@@ -31,9 +32,9 @@ export default function Background({ tintColor = theme.secondary }: { tintColor?
                     >
                         {/* High core opacity fading quickly to define the circular edge */}
                         <Stop offset="0%" stopColor={accentColor} stopOpacity="1" />
-                        <Stop offset="50%" stopColor={accentColor} stopOpacity="0.4" />
-                        <Stop offset="85%" stopColor={accentColor} stopOpacity="0.2" />
-                        <Stop offset="100%" stopColor={accentColor} stopOpacity="0.075" />
+                        <Stop offset="50%" stopColor={accentColor} stopOpacity="0.6" />
+                        <Stop offset="85%" stopColor={accentColor} stopOpacity="0.3" />
+                        <Stop offset="100%" stopColor={accentColor} stopOpacity="0.1" />
                     </RadialGradient>
                 </Defs>
 

@@ -71,8 +71,8 @@ export default function ExpensesListScreen({ navigation, route }: WalletScreens<
             <Header
                 containerStyle={{ justifyContent: "flex-end" }}
                 scrollY={scrollY}
-                animated={true}
-                goBack={false}
+                animated={false}
+                goBack={true}
                 buttons={[
                     {
                         icon: (
@@ -96,8 +96,7 @@ export default function ExpensesListScreen({ navigation, route }: WalletScreens<
                         onPress: () => navigation.navigate("CreateExpense"),
                     },
                 ]}
-                animatedTitle={"Expenses"}
-                animatedSubtitle={"All transactions"}
+                title={"Expenses"}
             />
         ),
         [hasFilters, filtersDiffCount],

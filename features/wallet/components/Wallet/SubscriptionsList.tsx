@@ -124,7 +124,7 @@ export default function SubscriptionsList({ onScroll, listHeader }: Props) {
             ListHeaderComponent={
                 <>
                     {listHeader}
-                    <Section title="Calendar">
+                    <Section title="Calendar" noGap>
                         <View style={{ padding: 15 }}>
                             <SubscriptionCalendar subscriptions={[...active, ...inactive] as any} />
                         </View>
@@ -144,7 +144,7 @@ export default function SubscriptionsList({ onScroll, listHeader }: Props) {
 const styles = StyleSheet.create({
     contentContainer: {
         padding: 15,
-        paddingTop: 186,
+        paddingTop: 100,
         paddingBottom: 120,
     },
     emptyContainer: {
