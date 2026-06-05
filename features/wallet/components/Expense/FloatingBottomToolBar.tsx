@@ -64,14 +64,8 @@ export default function FloatingBottomToolBar({
                     style={{ flex: 1 }}
                     dropdownMenuMode
                     actions={[
-                        ...subscriptionMenuOptions.map((o) => ({
-                            title: o.label,
-                            systemIcon: o.icon,
-                            destructive: o.destructive,
-                        })),
                         {
-                            systemIcon: "arrow-triangle.swap",
-                            icon: "arrow.triangle.swap",
+                            systemIcon: "arrow.triangle.swap",
                             title: "Assign",
                             actions: [
                                 ...subscriptionOptions.map((o) => ({
@@ -80,15 +74,18 @@ export default function FloatingBottomToolBar({
                                 })),
                             ],
                         },
+                        ...subscriptionMenuOptions.map((o) => ({
+                            title: o.label,
+                            systemIcon: o.icon,
+                            destructive: o.destructive,
+                        })),
                     ]}
                     onPress={(e) => {
-                        const index = e.nativeEvent.index
-                        const subMenuCount = subscriptionMenuOptions.length
-                        if (index < subMenuCount) {
+                        const { index, indexPath } = e.nativeEvent
+                        if (indexPath.length === 1) {
                             subscriptionMenuOptions[index]?.onPress()
                         } else {
-                            const subIndex = index - subMenuCount
-                            onAssignSubscription(subscriptionOptions[subIndex]?.id)
+                            onAssignSubscription(subscriptionOptions[index]?.id)
                         }
                     }}
                 >
@@ -161,7 +158,15 @@ function ToolbarButton({
                 {hasBadge && <View style={styles.badge} />}
             </View>
 
-            <Text size={9} weight="500" letterSpacing={0.1} color={Colors.foreground_secondary} opacity={(dimmed || disabled) ? 0.35 : undefined}>{label}</Text>
+            <Text
+                size={9}
+                weight="500"
+                letterSpacing={0.1}
+                color={Colors.foreground_secondary}
+                opacity={dimmed || disabled ? 0.35 : undefined}
+            >
+                {label}
+            </Text>
         </View>
     )
 }

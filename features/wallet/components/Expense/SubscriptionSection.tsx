@@ -4,6 +4,7 @@ import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
 import moment from "moment"
 import SubscriptionItem from "../Subscription/SubscriptionItem"
+import { useNavigation } from "@react-navigation/native"
 
 interface SubscriptionSectionProps {
     hasSubscription: boolean
@@ -16,6 +17,7 @@ export default function SubscriptionSection({
     isSubscriptionActive,
     selected,
 }: SubscriptionSectionProps) {
+    const navigation = useNavigation()
     if (!hasSubscription) {
         return (
             <View style={styles.card}>
@@ -31,7 +33,9 @@ export default function SubscriptionSection({
             {hasSubscription && (
                 <>
                     <View style={styles.cardHeader}>
-                        <Text size={13} weight="500" color={Colors.text_dark}>Status</Text>
+                        <Text size={13} weight="500" color={Colors.text_dark}>
+                            Status
+                        </Text>
                         <View
                             style={[
                                 styles.statusPill,
@@ -66,7 +70,9 @@ export default function SubscriptionSection({
                             </Text>
                         </View>
                         <View style={styles.dateRow}>
-                            <Text size={13} weight="500" color={Colors.text_dark}>{isSubscriptionActive ? "Active since" : "Created on"}</Text>
+                            <Text size={13} weight="500" color={Colors.text_dark}>
+                                {isSubscriptionActive ? "Active since" : "Created on"}
+                            </Text>
                             <Text size={13} weight="500" color={Colors.foreground_secondary}>
                                 {moment(+selected.subscription.dateStart).format("MMM D, YYYY")}
                             </Text>
@@ -81,7 +87,11 @@ export default function SubscriptionSection({
                                 borderRadius: 15,
                             }}
                             index={0}
-                            onPress={() => {}}
+                            onPress={() =>
+                                navigation.navigate("Subscription", {
+                                    subscriptionId: selected.id,
+                                })
+                            }
                             subscription={selected?.subscription}
                         />
                     )}

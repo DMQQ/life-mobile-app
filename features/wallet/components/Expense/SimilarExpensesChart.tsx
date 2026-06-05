@@ -1,18 +1,20 @@
-import { FONTS } from "@/constants/Fonts"
 import { formatAmount } from "@/utils/functions/formatCurrency"
 import Colors from "@/constants/Colors"
 import Color from "color"
 import dayjs from "dayjs"
 import { useEffect } from "react"
-import { StyleSheet, View } from "react-native"
+import { StyleSheet, View, useWindowDimensions } from "react-native"
 import Text from "@/components/ui/Text/Text"
-import Animated, {
-    Extrapolation,
-    interpolate,
-    useAnimatedStyle,
-    useSharedValue,
-    withTiming,
-} from "react-native-reanimated"
+import Svg, {
+    Defs,
+    LinearGradient as SvgGrad,
+    Stop,
+    Path,
+    Polyline,
+    Circle,
+    Line as SvgLine,
+} from "react-native-svg"
+import Animated, { useSharedValue, useAnimatedStyle, withTiming } from "react-native-reanimated"
 
 interface Expense {
     id: string
@@ -25,145 +27,186 @@ interface SimilarExpensesChartProps {
     currentExpenseId: string
 }
 
-const CHART_HEIGHT = 180
-const MIN_BAR_HEIGHT = 14
+const CHART_H = 96
+const PAD = 10
 
-function Bar({
-    amount,
-    date,
-    isCurrent,
-    maxAmount,
+function Sparkline({
+    values,
+    color,
+    uid,
+    width,
+    currentIndex,
+    avgRatio,
 }: {
-    amount: number
-    date: string
-    isCurrent: boolean
-    maxAmount: number
+    values: number[]
+    color: string
+    uid: string
+    width: number
+    currentIndex: number
+    avgRatio: number
 }) {
-    const targetHeight = maxAmount > 0 ? Math.max((amount / maxAmount) * CHART_HEIGHT, MIN_BAR_HEIGHT) : MIN_BAR_HEIGHT
+    if (values.length < 2) return null
 
-    const animHeight = useSharedValue(0)
-    const animOpacity = useSharedValue(0)
+    const min = Math.min(...values)
+    const max = Math.max(...values)
+    const range = max - min || 1
 
-    useEffect(() => {
-        animHeight.value = withTiming(targetHeight, { duration: 500 })
-        animOpacity.value = withTiming(1, { duration: 400 })
-    }, [targetHeight])
+    const xs = values.map((_, i) => PAD + (i / (values.length - 1)) * (width - PAD * 2))
+    const ys = values.map((v) => PAD + (1 - (v - min) / range) * (CHART_H - PAD * 2))
+    const pts = xs.map((x, i) => `${x},${ys[i]}`).join(" ")
+    const area =
+        `M ${xs[0]},${CHART_H} ` +
+        xs.map((x, i) => `L ${x},${ys[i]}`).join(" ") +
+        ` L ${xs[xs.length - 1]},${CHART_H} Z`
 
-    const barStyle = useAnimatedStyle(() => ({ height: animHeight.value }))
-
-    const valueOpacity = useAnimatedStyle(() => ({
-        opacity: interpolate(
-            animHeight.value,
-            [0, MIN_BAR_HEIGHT, MIN_BAR_HEIGHT * 2.5],
-            [0, 0, 1],
-            Extrapolation.CLAMP,
-        ),
-    }))
-
-    const containerStyle = useAnimatedStyle(() => ({ opacity: animOpacity.value }))
-
-    const barColor = isCurrent ? Colors.secondary : Color(Colors.secondary).alpha(0.3).string()
-    const borderColor = isCurrent ? Colors.secondary : "transparent"
+    const avgY = PAD + (1 - avgRatio) * (CHART_H - PAD * 2)
 
     return (
-        <Animated.View style={[styles.barColumn, containerStyle]}>
-            <View style={styles.barSlot}>
-                <Animated.View
-                    style={[
-                        styles.bar,
-                        { backgroundColor: barColor, borderColor, borderWidth: isCurrent ? 1.5 : 0 },
-                        barStyle,
-                    ]}
-                >
-                    <Animated.View style={[styles.valueWrapper, valueOpacity]}>
-                        <Text size={9} weight="700" color={isCurrent ? "#000" : Colors.foreground} style={{ transform: [{ rotate: "-90deg" }] }}>
-                            {Math.round(amount)}
-                        </Text>
-                    </Animated.View>
-                </Animated.View>
-            </View>
-            <Text size={9} weight="500" align="center" color={isCurrent ? Colors.secondary : Colors.text_dark} numberOfLines={1} style={{ marginTop: 6 }}>
-                {dayjs(date).format("DD")}
-            </Text>
-        </Animated.View>
+        <Svg width={width} height={CHART_H}>
+            <Defs>
+                <SvgGrad id={uid} x1="0" y1="0" x2="0" y2="1">
+                    <Stop offset="0" stopColor={color} stopOpacity="0.28" />
+                    <Stop offset="1" stopColor={color} stopOpacity="0" />
+                </SvgGrad>
+            </Defs>
+            <Path d={area} fill={`url(#${uid})`} />
+            <SvgLine
+                x1={PAD}
+                y1={avgY}
+                x2={width - PAD}
+                y2={avgY}
+                stroke={Color(Colors.text_dark).alpha(0.35).string()}
+                strokeWidth={1}
+                strokeDasharray="4 4"
+            />
+            <Polyline
+                points={pts}
+                fill="none"
+                stroke={color}
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+            />
+            {xs.map((x, i) => {
+                const isCurrent = i === currentIndex
+                return (
+                    <Circle
+                        key={i}
+                        cx={x}
+                        cy={ys[i]}
+                        r={isCurrent ? 5.5 : 3}
+                        fill={isCurrent ? color : Color(color).alpha(0.45).string()}
+                        stroke={isCurrent ? Colors.primary_lighter : "none"}
+                        strokeWidth={isCurrent ? 2 : 0}
+                    />
+                )
+            })}
+        </Svg>
     )
 }
 
 export default function SimilarExpensesChart({ expenses, currentExpenseId }: SimilarExpensesChartProps) {
     if (!expenses || expenses.length < 2) return null
 
+    const { width: screenWidth } = useWindowDimensions()
+    const chartWidth = screenWidth - 64
+
+    const opacity = useSharedValue(0)
+    const translateY = useSharedValue(8)
+
+    useEffect(() => {
+        opacity.value = withTiming(1, { duration: 400 })
+        translateY.value = withTiming(0, { duration: 400 })
+    }, [])
+
+    const animStyle = useAnimatedStyle(() => ({
+        opacity: opacity.value,
+        transform: [{ translateY: translateY.value }],
+    }))
+
     const sorted = [...expenses].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-
     const amounts = sorted.map((e) => e.amount)
-    const maxAmount = Math.max(...amounts) * 1.15
-    const avgAmount = amounts.reduce((a, b) => a + b, 0) / amounts.length
+    const maxAmount = Math.max(...amounts)
     const minAmount = Math.min(...amounts)
-    const maxRaw = Math.max(...amounts)
+    const avgAmount = amounts.reduce((a, b) => a + b, 0) / amounts.length
+    const currentIndex = sorted.findIndex((e) => e.id === currentExpenseId)
 
-    const avgLineBottom = maxAmount > 0 ? (avgAmount / maxAmount) * CHART_HEIGHT : 0
+    const minVal = minAmount
+    const maxVal = maxAmount
+    const avgRatio = (avgAmount - minVal) / (maxVal - minVal || 1)
+
+    const currentX = PAD + (currentIndex / (sorted.length - 1)) * (chartWidth - PAD * 2)
 
     return (
-        <View style={styles.container}>
+        <Animated.View style={[styles.container, animStyle]}>
             <View style={styles.statsRow}>
                 <View style={styles.statItem}>
-                    <Text size={15} weight="700" color={Colors.secondary} mono>{amounts.length}×</Text>
-                    <Text size={10} color={Colors.text_dark} style={{ marginTop: 2 }}>visits</Text>
+                    <Text size={17} weight="700" color={Colors.secondary} mono>
+                        {amounts.length}×
+                    </Text>
+                    <Text size={10} color={Colors.text_dark} style={styles.statLabel}>
+                        visits
+                    </Text>
                 </View>
-                <View style={styles.statDivider} />
+                <View style={styles.divider} />
                 <View style={styles.statItem}>
-                    <Text size={15} weight="700" color={Colors.secondary} mono>{formatAmount(avgAmount)}zł</Text>
-                    <Text size={10} color={Colors.text_dark} style={{ marginTop: 2 }}>avg</Text>
+                    <Text size={17} weight="700" color={Colors.foreground} mono>
+                        {formatAmount(avgAmount)}
+                    </Text>
+                    <Text size={10} color={Colors.text_dark} style={styles.statLabel}>
+                        avg
+                    </Text>
                 </View>
-                <View style={styles.statDivider} />
+                <View style={styles.divider} />
                 <View style={styles.statItem}>
-                    <Text size={15} weight="700" color="#66E875" mono>{formatAmount(minAmount)}zł</Text>
-                    <Text size={10} color={Colors.text_dark} style={{ marginTop: 2 }}>min</Text>
+                    <Text size={17} weight="700" color={Colors.positive} mono>
+                        {formatAmount(minAmount)}
+                    </Text>
+                    <Text size={10} color={Colors.text_dark} style={styles.statLabel}>
+                        min
+                    </Text>
                 </View>
-                <View style={styles.statDivider} />
+                <View style={styles.divider} />
                 <View style={styles.statItem}>
-                    <Text size={15} weight="700" color="#F07070" mono>{formatAmount(maxRaw)}zł</Text>
-                    <Text size={10} color={Colors.text_dark} style={{ marginTop: 2 }}>max</Text>
+                    <Text size={17} weight="700" color={Colors.negative} mono>
+                        {formatAmount(maxAmount)}
+                    </Text>
+                    <Text size={10} color={Colors.text_dark} style={styles.statLabel}>
+                        max
+                    </Text>
                 </View>
             </View>
 
-            <View style={styles.chartArea}>
-                {/* Average line */}
-                <View style={[styles.avgLine, { bottom: avgLineBottom + 28 }]} pointerEvents="none">
-                    <View style={styles.avgLineDash} />
-                    <Text size={9} weight="600" color={Colors.text_light}>{formatAmount(avgAmount)}zł avg</Text>
-                </View>
+            <View style={styles.chartWrapper}>
+                <Sparkline
+                    values={amounts}
+                    color={Colors.secondary}
+                    uid="similar-expenses-spark"
+                    width={chartWidth}
+                    currentIndex={currentIndex}
+                    avgRatio={avgRatio}
+                />
 
-                {/* Bars */}
-                <View style={styles.barsRow}>
-                    {sorted.map((expense) => (
-                        <Bar
-                            key={expense.id}
-                            amount={expense.amount}
-                            date={expense.date}
-                            isCurrent={expense.id === currentExpenseId}
-                            maxAmount={maxAmount}
-                        />
-                    ))}
+                <View style={[styles.dateRow, { width: chartWidth }]}>
+                    <Text size={9} color={Colors.text_dark}>
+                        {dayjs(sorted[0].date).format("D MMM")}
+                    </Text>
+                    {currentIndex > 0 && currentIndex < sorted.length - 1 && (
+                        <Text
+                            size={9}
+                            weight="700"
+                            color={Colors.secondary}
+                            style={{ position: "absolute", left: currentX - 18 }}
+                        >
+                            {dayjs(sorted[currentIndex].date).format("D MMM")}
+                        </Text>
+                    )}
+                    <Text size={9} color={Colors.text_dark}>
+                        {dayjs(sorted[sorted.length - 1].date).format("D MMM")}
+                    </Text>
                 </View>
             </View>
-
-            <View style={styles.legend}>
-                <View style={styles.legendItem}>
-                    <View style={[styles.legendSwatch, { backgroundColor: Colors.secondary }]} />
-                    <Text size={11} color={Colors.text_dark}>This expense</Text>
-                </View>
-                <View style={styles.legendItem}>
-                    <View
-                        style={[styles.legendSwatch, { backgroundColor: Color(Colors.secondary).alpha(0.3).string() }]}
-                    />
-                    <Text size={11} color={Colors.text_dark}>Previous</Text>
-                </View>
-                <View style={styles.legendItem}>
-                    <View style={styles.avgLineLegendSwatch} />
-                    <Text size={11} color={Colors.text_dark}>Average</Text>
-                </View>
-            </View>
-        </View>
+        </Animated.View>
     )
 }
 
@@ -173,120 +216,30 @@ const styles = StyleSheet.create({
         borderRadius: 15,
         padding: 15,
         paddingBottom: 12,
+        gap: 14,
     },
     statsRow: {
         flexDirection: "row",
         alignItems: "center",
-        marginBottom: 18,
     },
     statItem: {
         flex: 1,
         alignItems: "center",
     },
-    statDivider: {
+    statLabel: {
+        marginTop: 2,
+    },
+    divider: {
         width: 1,
         height: 28,
         backgroundColor: Color(Colors.foreground).alpha(0.08).string(),
     },
-    statValue: {
-        color: Colors.secondary,
-        fontSize: 15,
-        fontFamily: FONTS.bold,
-    },
-    statLabel: {
-        color: Colors.text_dark,
-        fontSize: 10,
-        marginTop: 2,
-    },
-    chartArea: {
-        position: "relative",
-    },
-    barsRow: {
-        flexDirection: "row",
-        alignItems: "flex-end",
-        justifyContent: "space-around",
-    },
-    barColumn: {
-        flex: 1,
-        alignItems: "center",
-        maxWidth: 48,
-    },
-    barSlot: {
-        height: CHART_HEIGHT,
-        width: "100%",
-        justifyContent: "flex-end",
-        maxWidth: 36,
-    },
-    bar: {
-        width: "100%",
-        borderTopLeftRadius: 4,
-        borderTopRightRadius: 4,
-        justifyContent: "center",
-        alignItems: "center",
-        overflow: "hidden",
-    },
-    valueWrapper: {
-        justifyContent: "center",
-        alignItems: "center",
-        position: "absolute",
-        top: 0,
-        bottom: 0,
-        left: 0,
-        right: 0,
-    },
-    barValue: {
-        fontSize: 9,
-        fontFamily: FONTS.bold,
-        transform: [{ rotate: "-90deg" }],
-    },
-    dateLabel: {
-        fontSize: 9,
-        marginTop: 6,
-        fontFamily: FONTS.medium,
-        textAlign: "center",
-    },
-    avgLine: {
-        position: "absolute",
-        left: 0,
-        right: 0,
-        flexDirection: "row",
-        alignItems: "center",
+    chartWrapper: {
         gap: 6,
-        zIndex: 1,
     },
-    avgLineDash: {
-        flex: 1,
-        height: 1,
-        backgroundColor: Color(Colors.text_dark).alpha(0.45).string(),
-    },
-    avgLineLabel: {
-        color: Colors.text_light,
-        fontSize: 9,
-        fontFamily: FONTS.semibold,
-    },
-    legend: {
+    dateRow: {
         flexDirection: "row",
-        gap: 14,
-        marginTop: 12,
-        flexWrap: "wrap",
-    },
-    legendItem: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 5,
-    },
-    legendSwatch: {
-        width: 10,
-        height: 10,
-        borderRadius: 2,
-    },
-    legendText: {
-        color: Colors.text_dark,
-        fontSize: 11,
-    },
-    avgLineLegendSwatch: {
-        width: 16,
-        height: 1,
-        backgroundColor: Color(Colors.text_dark).alpha(0.45).string(),
+        justifyContent: "space-between",
+        paddingHorizontal: PAD,
     },
 })

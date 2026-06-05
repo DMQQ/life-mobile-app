@@ -210,9 +210,10 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                     contentContainerStyle={{ paddingTop: 150 }}
                 >
                     <View
-                        style={{ width: "100%", height: 150, justifyContent: "center", alignItems: "center", gap: 7.5 }}
+                        style={{ width: "100%", height: 200, justifyContent: "center", alignItems: "center", gap: 7.5 }}
                     >
                         <CategoryIcon
+                            type="expense"
                             category={"subscriptions"}
                             size={60}
                             containerStyle={{
@@ -221,9 +222,14 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                                 borderRadius: 100,
                             }}
                         />
-                        <Text style={{ fontSize: 15, color: Colors.text_dark }}>{subscription.description}</Text>
-                        <Text style={{ color: "#fff", fontSize: 40, fontFamily: FONTS.medium }}>
-                            {formatAmount(subscription.amount)}zł
+                        <Text size={15} color={Colors.text_dark}>
+                            {CategoryUtils.getCategoryName("subscription")}
+                        </Text>
+                        <Text size={40} weight="800" color="#fff" mono>
+                            {formatAmount(subscription?.amount)}zł
+                        </Text>
+                        <Text size={15} color={Colors.text_dark}>
+                            {subscription?.description}
                         </Text>
                     </View>
 
@@ -385,11 +391,13 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                     )}
 
                     {subscription.expenses.length === 0 && (
-                        <EmptyState
-                            icon="credit-card"
-                            title="No payments yet"
-                            description="Payments will appear here once the subscription becomes active"
-                        />
+                        <View style={{ marginTop: 15 }}>
+                            <EmptyState
+                                icon="credit-card"
+                                title="No payments yet"
+                                description="Payments will appear here once the subscription becomes active"
+                            />
+                        </View>
                     )}
                     <View style={{ height: 100 }} />
                 </Animated.ScrollView>

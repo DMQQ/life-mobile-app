@@ -17,6 +17,7 @@ import AssistantBubble from "../components/AssistantBubble"
 import ThinkingBubble from "../components/ThinkingBubble"
 import ChatInput from "../components/ChatInput"
 import type { Personality, Effort } from "../types"
+import Background from "@/components/ui/Background"
 
 export default function AiChatScreen({ route }: any) {
     const conversationId = route?.params?.conversationId as string | undefined
@@ -169,6 +170,8 @@ export default function AiChatScreen({ route }: any) {
                     },
                 ]}
             />
+
+            <Background />
 
             <View style={s.divider} />
 

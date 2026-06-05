@@ -90,52 +90,60 @@ export default function CategoryBreakdown() {
     return (
         <Section title="Category breakdown">
             <View style={styles.container}>
-                <View style={styles.topRow}>
-                    <Text style={styles.monthLabel}>{moment().format("MMMM YYYY")}</Text>
+                <View style={{ padding: 15, paddingBottom: 0 }}>
+                    <View style={styles.topRow}>
+                        <Text style={styles.monthLabel}>{moment().format("MMMM YYYY")}</Text>
 
-                    <View style={styles.rightBlock}>
-                        <Text style={styles.totalAmount}>{formatAmount(total)} zł</Text>
-                        {targetPct !== null && income > 0 && (
-                            <Text style={[styles.targetInfo, reachedTarget ? styles.textOver : styles.textMuted]}>
-                                {reachedTarget
-                                    ? "Target reached"
-                                    : `${(targetPct - spentPct).toFixed(0)}% left of ${targetPct}% target`}
-                            </Text>
+                        <View style={styles.rightBlock}>
+                            <Text style={styles.totalAmount}>{formatAmount(total)} zł</Text>
+                            {targetPct !== null && income > 0 && (
+                                <Text style={[styles.targetInfo, reachedTarget ? styles.textOver : styles.textMuted]}>
+                                    {reachedTarget
+                                        ? "Target reached"
+                                        : `${(targetPct - spentPct).toFixed(0)}% left of ${targetPct}% target`}
+                                </Text>
+                            )}
+                        </View>
+                    </View>
+
+                    <View style={styles.barRow}>
+                        {categories.map((c, i) => (
+                            <View
+                                key={c.category}
+                                style={[
+                                    styles.barSegment,
+                                    { flex: c.flex, backgroundColor: c.color },
+                                    i === 0 && styles.barFirst,
+                                    remaining === null && i === categories.length - 1 && styles.barLast,
+                                ]}
+                            />
+                        ))}
+                        {remaining !== null && remaining > 0 && (
+                            <View
+                                style={[styles.barSegment, styles.barLast, styles.barEmpty, { flex: remainingFlex }]}
+                            />
                         )}
                     </View>
-                </View>
 
-                <View style={styles.barRow}>
-                    {categories.map((c, i) => (
-                        <View
-                            key={c.category}
-                            style={[
-                                styles.barSegment,
-                                { flex: c.flex, backgroundColor: c.color },
-                                i === 0 && styles.barFirst,
-                                remaining === null && i === categories.length - 1 && styles.barLast,
-                            ]}
-                        />
-                    ))}
-                    {remaining !== null && remaining > 0 && (
-                        <View style={[styles.barSegment, styles.barLast, styles.barEmpty, { flex: remainingFlex }]} />
-                    )}
+                    <TouchableOpacity
+                        style={styles.toggleRow}
+                        onPress={() => setShowLegend((v) => !v)}
+                        activeOpacity={0.6}
+                    >
+                        <View style={styles.toggleDivider} />
+                        <View style={styles.toggleChip}>
+                            <Ionicons
+                                name={showLegend ? "chevron-up" : "chevron-down"}
+                                size={13}
+                                color={Colors.foreground_secondary}
+                            />
+                        </View>
+                        <View style={styles.toggleDivider} />
+                    </TouchableOpacity>
                 </View>
-
-                <TouchableOpacity style={styles.toggleRow} onPress={() => setShowLegend((v) => !v)} activeOpacity={0.6}>
-                    <View style={styles.toggleDivider} />
-                    <View style={styles.toggleChip}>
-                        <Ionicons
-                            name={showLegend ? "chevron-up" : "chevron-down"}
-                            size={13}
-                            color={Colors.foreground_secondary}
-                        />
-                    </View>
-                    <View style={styles.toggleDivider} />
-                </TouchableOpacity>
 
                 {showLegend && (
-                    <Section title="Categories" noGap>
+                    <View>
                         {categories.map((c) => (
                             <View
                                 key={c.category}
@@ -176,12 +184,14 @@ export default function CategoryBreakdown() {
                                     </View>
                                 </View>
                                 <View style={styles.legendRight}>
-                                    <Text style={[styles.catAmount, { color: c.color }]}>{formatAmount(c.amount, 0)} zł</Text>
+                                    <Text style={[styles.catAmount, { color: c.color }]}>
+                                        {formatAmount(c.amount, 0)} zł
+                                    </Text>
                                     <Text style={styles.catPct}>{c.pct.toFixed(0)}%</Text>
                                 </View>
                             </View>
                         ))}
-                    </Section>
+                    </View>
                 )}
             </View>
         </Section>
@@ -190,8 +200,7 @@ export default function CategoryBreakdown() {
 
 const styles = StyleSheet.create({
     container: {
-        padding: 15,
-        gap: 14,
+        gap: 15,
     },
     topRow: {
         flexDirection: "row",

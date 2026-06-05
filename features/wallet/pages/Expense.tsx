@@ -138,11 +138,7 @@ export default function Expense({ route: { params }, navigation }: any) {
 
     const subscriptionMenuOptions: ContextMenuOption[] = [
         {
-            label: hasSubscription
-                ? isSubscriptionActive
-                    ? "Disable Subscription"
-                    : "Enable Subscription"
-                : "Create Monthly Subscription",
+            label: hasSubscription ? (isSubscriptionActive ? "Disable" : "Enable") : "Create subscription",
             icon: hasSubscription ? (isSubscriptionActive ? "pause.circle" : "play.circle") : "plus.circle",
             onPress: () => setConfirmSubscriptionAction(true),
         },
@@ -213,7 +209,7 @@ export default function Expense({ route: { params }, navigation }: any) {
                         <View
                             style={{
                                 width: "100%",
-                                height: 150,
+                                height: 200,
                                 justifyContent: "center",
                                 alignItems: "center",
                                 gap: 7.5,
@@ -230,10 +226,13 @@ export default function Expense({ route: { params }, navigation }: any) {
                                 }}
                             />
                             <Text size={15} color={Colors.text_dark}>
-                                {selected?.description}
+                                {CategoryUtils.getCategoryName(selected?.category)}
                             </Text>
-                            <Text size={40} weight="500" color="#fff" mono>
+                            <Text size={40} weight="800" color="#fff" mono>
                                 {formatAmount(selected?.amount)}zł
+                            </Text>
+                            <Text size={15} color={Colors.text_dark}>
+                                {selected?.description}
                             </Text>
                         </View>
 
