@@ -11,6 +11,7 @@ import Layout from "@/constants/Layout"
 import Colors from "@/constants/Colors"
 import { Expense } from "@/types"
 import Section from "@/components/ui/Section"
+import ActionRow from "@/components/ui/ActionRow"
 
 const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
     const R = 6371 // Radius of the Earth in km
@@ -161,13 +162,13 @@ const MapPicker = forwardRef<MapPickerHandle, Pick<Expense, "location"> & { id: 
     const [editMode, setEditMode] = useState(false)
     const [locationQuery, setLocationQuery] = useState("")
 
-    useImperativeHandle(ref, () => ({
-        triggerSearch: () => {
-            Alert.prompt("Location Search", "Enter location name:", (name) => {
-                if (name) setLocationQuery(name)
-            })
-        },
-    }))
+    const triggerSearch = () => {
+        Alert.prompt("Location Search", "Enter location name:", (name) => {
+            if (name) setLocationQuery(name)
+        })
+    }
+
+    useImperativeHandle(ref, () => ({ triggerSearch }))
 
     const [queryLocation, { data: points }] = useLazyQuery(gql`
         query SearchLocations($query: String) {
@@ -246,12 +247,10 @@ const MapPicker = forwardRef<MapPickerHandle, Pick<Expense, "location"> & { id: 
         }
     }
 
-    if (!assignedMarker) return null
-
     return (
         <View style={{ paddingHorizontal: 15 }}>
             <Section title="Map">
-                <Map
+                {assignedMarker && <Map
                     ref={map}
                     style={{ width: Layout.screen.width - 30, height: 200, borderRadius: 10 }}
                     provider={PROVIDER_DEFAULT}
@@ -367,7 +366,8 @@ const MapPicker = forwardRef<MapPickerHandle, Pick<Expense, "location"> & { id: 
                             </Callout>
                         </Marker>
                     )}
-                </Map>
+                </Map>}
+                <ActionRow icon="map-pin" label="Set Location" onPress={triggerSearch} last />
             </Section>
         </View>
     )

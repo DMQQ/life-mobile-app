@@ -7,7 +7,7 @@ import { gql, useQuery } from "@apollo/client"
 import { Feather } from "@expo/vector-icons"
 import { useNavigation } from "@react-navigation/native"
 import moment from "moment"
-import { memo, ReactNode, useCallback, useEffect, useMemo, useState } from "react"
+import { memo, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react"
 import {
     NativeScrollEvent,
     NativeSyntheticEvent,
@@ -16,6 +16,7 @@ import {
     StyleSheet,
     Text,
     View,
+    ViewabilityConfig,
     VirtualizedList,
 } from "react-native"
 import Ripple from "react-native-material-ripple"
@@ -25,6 +26,7 @@ import { getInvalidExpenses } from "../../pages/WalletCharts"
 import { useWalletContext } from "../WalletContext"
 import GlassView from "@/components/ui/GlassView"
 import WalletItem, { parseDateToText } from "./WalletItem"
+import { BlurView } from "expo-blur"
 
 type ListItem = { type: "month"; data: MonthlyExpenses; monthIndex: number }
 
@@ -41,10 +43,23 @@ interface Props {
     refetch?: () => void
     onEndReached?: () => void
     listHeader?: ReactNode
+    onVisibleMonthChange?: (month: string) => void
 }
 
-export default function ExpensesList({ wallet, onScroll, refetch, onEndReached, listHeader }: Props) {
+export default function ExpensesList({ wallet, onScroll, refetch, onEndReached, listHeader, onVisibleMonthChange }: Props) {
     const [refreshing, setRefreshing] = useState(false)
+
+    const viewabilityConfig = useRef<ViewabilityConfig>({ itemVisiblePercentThreshold: 10 }).current
+
+    const onViewableItemsChanged = useCallback(
+        ({ viewableItems }: { viewableItems: any[] }) => {
+            const first = viewableItems[0]
+            if (first?.item?.type === "month") {
+                onVisibleMonthChange?.(first.item.data.month)
+            }
+        },
+        [onVisibleMonthChange],
+    )
 
     const items: ListItem[] = useMemo(
         () =>
@@ -75,6 +90,8 @@ export default function ExpensesList({ wallet, onScroll, refetch, onEndReached, 
             renderItem={renderItem as any}
             keyExtractor={keyExtractor as any}
             onScroll={onScroll}
+            onViewableItemsChanged={onViewableItemsChanged}
+            viewabilityConfig={viewabilityConfig}
             ListHeaderComponent={listHeader ? <>{listHeader}</> : undefined}
             stickyHeaderIndices={listHeader ? [0] : undefined}
             contentContainerStyle={styles.contentContainer}
@@ -149,23 +166,16 @@ const MonthItem = ({
                             onToggle={() => toggleDate(day)}
                         />
                         {isDateExpanded && (
-                            <View style={styles.items}>
+                            <BlurView intensity={40} tint="dark" style={styles.items}>
                                 {dayExpenses.map((expense, index) => (
                                     <WalletItem
                                         key={expense.id}
                                         index={index}
                                         handlePress={() => navigation.navigate("Expense", { expense })}
                                         {...(expense as any)}
-                                        animatedStyle={{
-                                            borderWidth: 0,
-                                            marginBottom: 0,
-                                            borderRadius: 0,
-                                            borderBottomWidth: dayExpenses.length - 1 === index ? 0 : 1,
-                                            marginTop: 0,
-                                        }}
                                     />
                                 ))}
-                            </View>
+                            </BlurView>
                         )}
                     </View>
                 )
@@ -381,7 +391,6 @@ const styles = StyleSheet.create({
         color: Colors.secondary_light_2,
     },
     items: {
-        backgroundColor: Colors.primary_lighter,
         borderRadius: 20,
         overflow: "hidden",
         borderWidth: 1,

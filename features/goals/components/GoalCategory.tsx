@@ -1,7 +1,7 @@
 import { FONTS } from "@/constants/Fonts"
 import { Card, GlassIconButton } from "@/components"
 import Text from "@/components/ui/Text/Text"
-import Colors, { secondary_candidates } from "@/constants/Colors"
+import Colors from "@/constants/Colors"
 import { Group } from "@/features/flashcards/hooks"
 import { useNavigation } from "@react-navigation/native"
 import { useCallback, useMemo, useState } from "react"
@@ -17,6 +17,7 @@ import IconCircle from "@/components/ui/IconCircle"
 
 interface GoalCategoryProps extends Group {
     icon: string
+    color?: string
     onPress?: () => void
     entries?: {
         id: string
@@ -28,11 +29,10 @@ interface GoalCategoryProps extends Group {
     max: number
     index: number
     length?: number
-
     onLongPress?: () => void
 }
 
-export const GoalCategory = ({ name, icon, description, entries = [], onPress, ...rest }: GoalCategoryProps) => {
+export const GoalCategory = ({ name, icon, color, description, entries = [], onPress, ...rest }: GoalCategoryProps) => {
     const navigation = useNavigation<any>()
 
     const contributionData = useMemo(() => {
@@ -81,8 +81,8 @@ export const GoalCategory = ({ name, icon, description, entries = [], onPress, .
                     <View style={styles.row}>
                         <IconCircle
                             name={icon as any}
-                            color={Colors.foreground}
-                            backgroundColor={Colors.primary}
+                            color="#fff"
+                            backgroundColor={color || Colors.secondary}
                             containerSize={30}
                         />
                         <Text style={{ color: Colors.foreground, fontSize: 14, fontFamily: FONTS.bold }}>{name}</Text>
@@ -92,7 +92,7 @@ export const GoalCategory = ({ name, icon, description, entries = [], onPress, .
                 <View style={{ pointerEvents: "box-none" }}>
                     <GoalActivityGrid
                         contributionData={contributionData}
-                        primaryColor={secondary_candidates[rest?.index % secondary_candidates.length]}
+                        primaryColor={color || Colors.secondary}
                         goalThreshold={rest.target}
                         isLimit={rest.min === 1}
                         size={10}
@@ -174,6 +174,7 @@ const styles = StyleSheet.create({
     container: {
         marginVertical: 7.5,
         gap: 15,
+        backgroundColor: Colors.primary_lighter,
     },
     header: {
         justifyContent: "space-between",

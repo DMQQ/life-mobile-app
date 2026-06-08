@@ -113,7 +113,7 @@ export default function GroupSelector<V>({ options, value, onChange, size = "lar
     }
 
     return (
-        <GlassView style={[styles.container, dynamicStyles.container]} onLayout={onLayout}>
+        <GlassView style={[dynamicStyles.container]} onLayout={onLayout}>
             {segmentWidth > 0 && (
                 <Animated.View style={[styles.pill, dynamicStyles.pill, pillStyle]}>
                     <GlassView interactive style={StyleSheet.absoluteFill} tintColor={theme.secondary} />
@@ -149,9 +149,6 @@ export default function GroupSelector<V>({ options, value, onChange, size = "lar
 }
 
 const styles = StyleSheet.create({
-    container: {
-        backgroundColor: theme.primary_lighter,
-    },
     pill: {
         position: "absolute",
         overflow: "hidden",

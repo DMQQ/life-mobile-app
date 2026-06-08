@@ -4,8 +4,8 @@ import Colors from "@/constants/Colors"
 import { Expense as ExpenseType } from "@/types"
 import { gql, useMutation, useQuery } from "@apollo/client"
 import { GET_EXPENSE } from "../hooks/getExpenseQuery"
-import { SFSymbol, SymbolView } from "expo-symbols"
 import { useEffect, useRef, useState } from "react"
+import { SFSymbol, SymbolView } from "expo-symbols"
 import { Pressable, StyleSheet, View } from "react-native"
 import { formatAmount } from "@/utils/functions/formatCurrency"
 import Text from "@/components/ui/Text/Text"
@@ -14,15 +14,16 @@ import useRefund from "../hooks/useRefundExpense"
 import useSubscription from "../hooks/useSubscription"
 import useGetSubscriptions from "../hooks/useGetSubscriptions"
 import Animated, { useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated"
-import MapPicker, { MapPickerHandle } from "../components/Expense/Map"
+import MapPicker from "../components/Expense/Map"
 import SubexpenseStack from "../components/Expense/SubexpenseStack"
-import FloatingBottomToolBar, { ContextMenuOption } from "../components/Expense/FloatingBottomToolBar"
 import { CollapsibleThemedCalendar } from "@/components/ui/ThemedCalendar/ThemedCalendar"
+import ContextMenu from "react-native-context-menu-view"
+import ActionRow from "@/components/ui/ActionRow"
 import dayjs from "dayjs"
 import MonthlyBreakdown from "../components/Expense/MonthlyBreakdown"
 import ExpenseDetails from "../components/Expense/ExpenseDetails"
 import SimilarExpenses from "../components/Expense/SimilarExpenses"
-import FileUpload, { FileUploadHandle } from "../components/Expense/FileUpload"
+import FileUpload from "../components/Expense/FileUpload"
 import SubscriptionSection from "../components/Expense/SubscriptionSection"
 import { ConfirmDialog } from "@/components"
 import Section from "@/components/ui/Section"
@@ -113,8 +114,6 @@ export default function Expense({ route: { params }, navigation }: any) {
         setConfirmSubExpenseId(null)
     }
 
-    const fileUploadRef = useRef<FileUploadHandle>(null)
-    const mapPickerRef = useRef<MapPickerHandle>(null)
     const addSubExpenseSheetRef = useRef<AddSubExpenseSheetHandle>(null)
 
     const [uploadSubexpenses] = useUploadSubExpense(() => {})
@@ -136,23 +135,10 @@ export default function Expense({ route: { params }, navigation }: any) {
         }
     }
 
-    const subscriptionMenuOptions: ContextMenuOption[] = [
-        {
-            label: hasSubscription ? (isSubscriptionActive ? "Disable" : "Enable") : "Create subscription",
-            icon: hasSubscription ? (isSubscriptionActive ? "pause.circle" : "play.circle") : "plus.circle",
-            onPress: () => setConfirmSubscriptionAction(true),
-        },
-        ...(hasSubscription
-            ? [
-                  {
-                      label: "Remove from Subscription",
-                      icon: "xmark.circle" as const,
-                      onPress: () => handleAssignSubscription(null),
-                      destructive: true,
-                  },
-              ]
-            : []),
-    ]
+    const subscriptionAssignActions = subscriptionOptions.map((o) => ({
+        title: o.description,
+        systemIcon: "arrow.triangle.swap" as string,
+    }))
 
     const scrollY = useSharedValue(0)
     const onScroll = useAnimatedScrollHandler({
@@ -290,15 +276,45 @@ export default function Expense({ route: { params }, navigation }: any) {
                                 </Section>
                             )}
 
-                            {hasSubscription && (
-                                <Section title="Subscription">
-                                    <SubscriptionSection
-                                        hasSubscription={hasSubscription}
-                                        isSubscriptionActive={isSubscriptionActive}
-                                        selected={selected}
-                                    />
-                                </Section>
-                            )}
+                            <Section title="Subscription">
+                                <SubscriptionSection
+                                    hasSubscription={hasSubscription}
+                                    isSubscriptionActive={isSubscriptionActive}
+                                    selected={selected}
+                                />
+                                <ContextMenu
+                                    style={{ width: "100%" }}
+                                    dropdownMenuMode
+                                    actions={subscriptionAssignActions}
+                                    onPress={(e) => handleAssignSubscription(subscriptionOptions[e.nativeEvent.index]?.id)}
+                                >
+                                    <ActionRow icon="shuffle" label="Assign to Subscription" />
+                                </ContextMenu>
+                                <ActionRow
+                                    icon={isSubscriptionActive ? "pause-circle" : "play-circle"}
+                                    label={
+                                        hasSubscription
+                                            ? isSubscriptionActive
+                                                ? "Disable Subscription"
+                                                : "Enable Subscription"
+                                            : "Create Subscription"
+                                    }
+                                    onPress={() => setConfirmSubscriptionAction(true)}
+                                    loading={isSubscriptionLoading}
+                                    last
+                                />
+                            </Section>
+
+                            <Section title="Refund">
+                                <ActionRow
+                                    icon="rotate-ccw"
+                                    label="Refund"
+                                    onPress={() => setConfirmRefund(true)}
+                                    disabled={selected?.type === "refunded" || refundLoading}
+                                    loading={refundLoading}
+                                    last
+                                />
+                            </Section>
                         </View>
 
                         {data?.expenseSimilar?.length > 1 && (
@@ -308,26 +324,11 @@ export default function Expense({ route: { params }, navigation }: any) {
                             />
                         )}
 
-                        <FileUpload ref={fileUploadRef} id={selected.id} images={selected?.files} />
-                        <MapPicker ref={mapPickerRef} location={selected.location} id={selected.id} />
+                        <FileUpload id={selected.id} images={selected?.files} />
+                        <MapPicker location={selected.location} id={selected.id} />
 
                         <View style={styles.bottomSpacer} />
                     </Animated.ScrollView>
-
-                    <FloatingBottomToolBar
-                        onRefund={() => setConfirmRefund(true)}
-                        refundLoading={refundLoading}
-                        isRefunded={selected?.type === "refunded"}
-                        onTakePhoto={() => fileUploadRef.current?.takePhoto()}
-                        onPickImage={() => fileUploadRef.current?.pickImage()}
-                        subscriptionMenuOptions={subscriptionMenuOptions}
-                        subscriptionOptions={subscriptionOptions}
-                        onAssignSubscription={handleAssignSubscription}
-                        isSubscriptionLoading={isSubscriptionLoading}
-                        hasSubscription={hasSubscription}
-                        isSubscriptionActive={isSubscriptionActive}
-                        onSetLocation={() => mapPickerRef.current?.triggerSearch()}
-                    />
 
                     <ConfirmDialog
                         isVisible={confirmRefund}
@@ -374,11 +375,8 @@ const styles = StyleSheet.create({
     scrollContent: {
         paddingHorizontal: 15,
     },
-    section: {
-        marginTop: 20,
-    },
     bottomSpacer: {
-        height: 100,
+        height: 40,
     },
     addSubBtn: {
         padding: 2,

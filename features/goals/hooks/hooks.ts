@@ -2,25 +2,40 @@ import { gql, useMutation, useQuery } from "@apollo/client"
 
 export const isLimitGoal = (min?: number | null): boolean => min === 1
 
+const GOAL_CATEGORY_FIELDS = `
+    id
+    name
+    icon
+    description
+    min
+    max
+    target
+    unit
+    color
+    notification
+    notificationSettings {
+        frequency
+        times
+        intervalHours
+        daysOfWeek
+        reminderMessage
+        notifyOnCompletion
+        notifyBeforeDeadline
+    }
+    lastNotifiedAt
+    entries {
+        id
+        value
+        date
+    }
+`
+
 export const GET_USER_GOAL = gql`
     query GetUserGoal($dateRange: DateRangeInput) {
         userGoal(dateRange: $dateRange) {
             id
             categories {
-                id
-                name
-                icon
-                description
-                min
-                max
-                target
-                unit
-
-                entries {
-                    id
-                    value
-                    date
-                }
+                ${GOAL_CATEGORY_FIELDS}
             }
         }
     }
@@ -29,19 +44,7 @@ export const GET_USER_GOAL = gql`
 export const GET_GOALS = gql`
     query GetGoals {
         goals {
-            id
-            name
-            icon
-            description
-            min
-            max
-            target
-            unit
-            entries {
-                id
-                value
-                date
-            }
+            ${GOAL_CATEGORY_FIELDS}
         }
     }
 `
@@ -49,10 +52,7 @@ export const GET_GOALS = gql`
 export const CREATE_GOALS = gql`
     mutation CreateGoals($input: CreateGoalsInput!) {
         createGoals(input: $input) {
-            id
-            name
-            icon
-            description
+            ${GOAL_CATEGORY_FIELDS}
         }
     }
 `
@@ -60,14 +60,7 @@ export const CREATE_GOALS = gql`
 export const UPDATE_GOALS = gql`
     mutation UpdateGoals($id: ID!, $input: UpdateGoalsInput!) {
         updateGoals(id: $id, input: $input) {
-            id
-            name
-            icon
-            description
-            min
-            max
-            target
-            unit
+            ${GOAL_CATEGORY_FIELDS}
         }
     }
 `
@@ -167,27 +160,14 @@ export const useEditGoalEntry = () => {
     return editEntry
 }
 
+export const GET_GOAL = gql`
+    query GetGoal($id: ID!) {
+        goal(id: $id) {
+            ${GOAL_CATEGORY_FIELDS}
+        }
+    }
+`
+
 export const useGetGoal = (id: string) => {
-    return useQuery(
-        gql`
-            query GetGoal($id: ID!) {
-                goal(id: $id) {
-                    id
-                    name
-                    icon
-                    description
-                    min
-                    max
-                    target
-                    unit
-                    entries {
-                        id
-                        value
-                        date
-                    }
-                }
-            }
-        `,
-        { variables: { id } },
-    )
+    return useQuery(GET_GOAL, { variables: { id } })
 }

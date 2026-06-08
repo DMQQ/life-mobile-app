@@ -40,7 +40,6 @@ interface WalletItemProps extends WalletElement {}
 const styles = StyleSheet.create({
     expense_item: {
         flexDirection: "row",
-        backgroundColor: Colors.primary_lighter,
     },
     price_container: {
         flex: 2,
@@ -55,8 +54,12 @@ const styles = StyleSheet.create({
     },
 
     container: {
-        marginBottom: 15,
         position: "relative",
+        borderWidth: 0,
+        marginBottom: 0,
+        borderRadius: 0,
+        borderBottomWidth: 1,
+        marginTop: 0,
     },
     innerContainer: { flexDirection: "row", height: 40 },
 

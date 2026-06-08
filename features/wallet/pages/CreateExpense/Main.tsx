@@ -1,7 +1,7 @@
 import Colors from "@/constants/Colors"
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
 import { useEffect, useRef, useState } from "react"
-import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/types"
+import { AddSubExpenseSheetHandle } from "../../components/Expense/AddSubExpenseSheet"
 import useCreateExpensePage from "../../hooks/useCreateExpensePage"
 import { CreateExpenseProvider } from "../../context/CreateExpenseContext"
 import Form from "./Form"
@@ -28,7 +28,7 @@ export default function CreateExpenseStack({ route }: any) {
     const params = { ...PARAM_DEFAULTS, ...(route.params ?? {}) }
     const hookData = useCreateExpensePage(params)
     const [isInputFocused, setIsInputFocused] = useState(false)
-    const subexpenseSheetRef = useRef<BottomSheetModalMethods | null>(null)
+    const subexpenseSheetRef = useRef<AddSubExpenseSheetHandle | null>(null)
 
     useEffect(() => {
         if (!hookData.state.type) hookData.methods.setType("expense")

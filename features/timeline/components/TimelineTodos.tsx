@@ -6,13 +6,16 @@ import { useNavigation } from "@react-navigation/native"
 import Color from "color"
 import { StyleSheet, View } from "react-native"
 import TodoItem from "./TodoItem"
-import { AntDesign } from "@expo/vector-icons"
+import { Feather } from "@expo/vector-icons"
 import Section from "@/components/ui/Section"
+import { Pressable } from "react-native"
+import { SymbolView } from "expo-symbols"
 
 export default function TimelineTodos(props: {
     sortedTodos: Todos[]
     timelineId: string
     onDeleteTodo?: (todoId: string) => void
+    onAdd?: () => void
 }) {
     const navigation = useNavigation<any>()
 
@@ -27,10 +30,17 @@ export default function TimelineTodos(props: {
             <Section
                 title="Timeline todos"
                 headerRight={
-                    <IconButton
-                        icon={<AntDesign name="pull-request" size={12} color={Colors.text_dark} />}
-                        onPress={handleLongPress}
-                    />
+                    <View style={{ flexDirection: "row", gap: 6, alignItems: "center" }}>
+                        {props.onAdd && (
+                            <Pressable onPress={props.onAdd} style={{ padding: 2 }}>
+                                <SymbolView name="plus.circle.fill" size={18} tintColor={Colors.secondary} />
+                            </Pressable>
+                        )}
+                        <IconButton
+                            icon={<Feather name="git-pull-request" size={12} color={Colors.text_dark} />}
+                            onPress={handleLongPress}
+                        />
+                    </View>
                 }
             >
                 {props.sortedTodos.length === 0 ? (

@@ -10,13 +10,20 @@ import { useNavigation } from "@react-navigation/native"
 import axios from "axios"
 import * as ImagePicker from "expo-image-picker"
 import { memo, useState } from "react"
-import { ActivityIndicator, FlatList, StyleSheet, ToastAndroid, View } from "react-native"
+import { ActivityIndicator, FlatList, Pressable, StyleSheet, ToastAndroid, View } from "react-native"
 import Ripple from "react-native-material-ripple"
 import Animated from "react-native-reanimated"
 import useGetOccurrenceById from "../hooks/query/useGetOccurrenceById"
 import Section from "@/components/ui/Section"
+import ContextMenu from "react-native-context-menu-view"
+import { SymbolView } from "expo-symbols"
+import Text from "@/components/ui/Text/Text"
 
 const styles = StyleSheet.create({
+    emptyFiles: {
+        paddingVertical: 20,
+        paddingHorizontal: 15,
+    },
     available: {
         fontSize: 16,
         fontFamily: FONTS.bold,
@@ -96,17 +103,27 @@ const useUploadFiles = (timelineId: string, refetch: () => Promise<any>) => {
             quality: 1,
             allowsMultipleSelection: true,
         })
-
         await uploadPhotoAsync(result)
     }
 
-    return { handleImagesSelect, loading }
+    const handleTakePhoto = async () => {
+        await ImagePicker.requestCameraPermissionsAsync()
+        const result = await ImagePicker.launchCameraAsync({
+            mediaTypes: "images",
+            quality: 1,
+            allowsEditing: true,
+        })
+        await uploadPhotoAsync(result)
+    }
+
+    return { handleImagesSelect, handleTakePhoto, loading }
 }
 
 export default function FileList({ timelineId }: FileListProps) {
     const navigation = useNavigation<any>()
 
     const { data, refetch } = useGetOccurrenceById(timelineId)
+    const { handleImagesSelect, handleTakePhoto, loading } = useUploadFiles(timelineId, refetch)
 
     async function removePhoto(photoId: string) {
         await axios.delete(Url.API + "/upload/timeline/" + photoId)
@@ -119,13 +136,40 @@ export default function FileList({ timelineId }: FileListProps) {
             timelineId,
         })
 
-    if (data?.images.length === 0) {
-        return null
-    }
-
     return (
-        <Section title="Files">
-            <GridImageView data={data} onRemovePhoto={removePhoto} onShowPreview={handleShowPreview} />
+        <Section
+            title="Files"
+            headerRight={
+                <ContextMenu
+                    dropdownMenuMode
+                    actions={[
+                        { title: "Take Photo", systemIcon: "camera.fill" },
+                        { title: "Choose from Library", systemIcon: "photo.on.rectangle.angled" },
+                    ]}
+                    onPress={(e) => {
+                        if (e.nativeEvent.index === 0) handleTakePhoto()
+                        else handleImagesSelect()
+                    }}
+                >
+                    <Pressable style={{ padding: 2 }}>
+                        {loading ? (
+                            <ActivityIndicator size={16} color={Colors.secondary} />
+                        ) : (
+                            <SymbolView name="plus.circle.fill" size={18} tintColor={Colors.secondary} />
+                        )}
+                    </Pressable>
+                </ContextMenu>
+            }
+        >
+            {data?.images?.length === 0 ? (
+                <View style={styles.emptyFiles}>
+                    <Text size={13} color={Colors.text_dark} align="center">
+                        No files attached
+                    </Text>
+                </View>
+            ) : (
+                <GridImageView data={data} onRemovePhoto={removePhoto} onShowPreview={handleShowPreview} />
+            )}
         </Section>
     )
 }

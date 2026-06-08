@@ -1,30 +1,27 @@
 import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
 import Layout from "@/constants/Layout"
-import Url from "@/constants/Url"
 import { StackScreenProps } from "@/types"
 import Color from "color"
 import dayjs from "dayjs"
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useMemo } from "react"
 import { StyleSheet, View } from "react-native"
 import Animated, { useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import FileList from "../components/FileList"
-import FloatingBottomToolBar from "../components/FloatingBottomToolBar"
 import LoaderSkeleton from "../components/LoaderSkeleton"
+import Section from "@/components/ui/Section"
+import ActionRow from "@/components/ui/ActionRow"
 import TimelineTodos from "../components/TimelineTodos"
 import useCompleteOccurrence from "../hooks/mutation/useCompleteOccurrence"
 import useGetOccurrenceById from "../hooks/query/useGetOccurrenceById"
-
 import { Header } from "@/components"
 import useDeleteAllOccurrences from "../hooks/mutation/useDeleteAllOccurrences"
 import useRemoveTimelineMutation from "../hooks/mutation/useRemoveTimelineMutation"
 import { useActivityUtils } from "@/utils/hooks/useActivityManager"
-import { useApolloClient } from "@apollo/client"
-import axios from "axios"
-import * as ImagePicker from "expo-image-picker"
 import { Feather } from "@expo/vector-icons"
 import { HeaderItem } from "@/components/ui/Header/Header"
+import Background from "@/components/ui/Background"
 
 const styles = StyleSheet.create({
     title: {
@@ -164,58 +161,10 @@ export default function TimelineDetails({
         })
     }, [data?.id])
 
-    const client = useApolloClient()
-    const [uploadLoading, setUploadLoading] = useState(false)
-
-    const uploadAssets = useCallback(
-        async (assets: ImagePicker.ImagePickerAsset[]) => {
-            if (!data?.id) return
-            const formData = new FormData() as any
-            assets.forEach((asset) => {
-                formData.append("file", { uri: asset.uri, name: "File", type: "image/jpg" })
-            })
-            try {
-                setUploadLoading(true)
-                const { data: uploaded } = await axios.post(Url.API + "/upload/multiple", formData, {
-                    params: { type: "timeline", entityId: data.id },
-                    headers: { "Content-Type": "multipart/form-data" },
-                })
-                client.cache.modify({
-                    id: "TimelineEntity:" + data.id,
-                    fields: {
-                        images: (existing = []) => [...uploaded, ...existing],
-                    },
-                })
-            } catch {
-                // silent
-            } finally {
-                setUploadLoading(false)
-            }
-        },
-        [data?.id, client],
-    )
-
-    const handlePickImage = useCallback(async () => {
-        const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: "images",
-            quality: 0.8,
-            allowsMultipleSelection: true,
-        })
-        if (!result.canceled && result.assets.length > 0) await uploadAssets(result.assets)
-    }, [uploadAssets])
-
-    const handleTakePhoto = useCallback(async () => {
-        await ImagePicker.requestCameraPermissionsAsync()
-        const result = await ImagePicker.launchCameraAsync({
-            mediaTypes: "images",
-            quality: 1,
-            allowsEditing: true,
-        })
-        if (!result.canceled && result.assets.length > 0) await uploadAssets(result.assets)
-    }, [uploadAssets])
-
     return (
         <View style={{ backgroundColor: Colors.primary }}>
+            <Background />
+
             <Header
                 scrollY={scrollY}
                 animated={true}
@@ -223,10 +172,11 @@ export default function TimelineDetails({
                 buttons={buttons}
                 initialTitleFontSize={data?.title?.length > 25 ? 35 : 45}
             />
+
             <Animated.ScrollView
                 keyboardDismissMode={"on-drag"}
                 style={{ padding: 15 }}
-                contentContainerStyle={{ paddingBottom: 100, paddingTop: contentPaddingTop }}
+                contentContainerStyle={{ paddingBottom: 40, paddingTop: contentPaddingTop }}
                 onScroll={onScroll}
                 showsVerticalScrollIndicator={false}
             >
@@ -243,9 +193,27 @@ export default function TimelineDetails({
                                 </Text>
                             </View>
                         )}
-                        <TimelineTodos timelineId={data?.id} sortedTodos={data?.todos || []} />
+                        <TimelineTodos timelineId={data?.id} sortedTodos={data?.todos || []} onAdd={handleCreateTodo} />
 
                         <FileList timelineId={data?.id} />
+
+                        <Section title="Event">
+                            <ActionRow
+                                icon="activity"
+                                label="Start Live Activity"
+                                onPress={startLiveActivityLocally}
+                                disabled={isPending}
+                                last={data?.isCompleted}
+                            />
+                            {!data?.isCompleted && (
+                                <ActionRow
+                                    icon="zap"
+                                    label="Work on it"
+                                    onPress={() => (navigation as any).navigate("TimelineDo", { timelineId: data?.id })}
+                                    last
+                                />
+                            )}
+                        </Section>
 
                         <Text variant="caption" selectable style={styles.timelineIdText}>
                             Event unique id: {data?.id}
@@ -253,17 +221,6 @@ export default function TimelineDetails({
                     </View>
                 )}
             </Animated.ScrollView>
-
-            <FloatingBottomToolBar
-                activityPending={isPending}
-                onStartActivity={startLiveActivityLocally}
-                onAddTodo={handleCreateTodo}
-                onPickImage={handlePickImage}
-                onTakePhoto={handleTakePhoto}
-                uploadLoading={uploadLoading}
-                isCompleted={data?.isCompleted}
-                onDo={() => (navigation as any).navigate("TimelineDo", { timelineId: data?.id })}
-            />
         </View>
     )
 }

@@ -1,4 +1,4 @@
-import * as BackgroundFetch from "expo-background-fetch"
+import * as BackgroundTask from "expo-background-task"
 import * as SecureStore from "expo-secure-store"
 import * as TaskManager from "expo-task-manager"
 import { ExtensionStorage } from "@bacons/apple-targets"
@@ -113,7 +113,7 @@ function buildWalletData(wallet: any): WidgetWalletData {
 
 TaskManager.defineTask(WIDGET_BG_FETCH_TASK, async () => {
     const token = await getAuthToken()
-    if (!token) return BackgroundFetch.BackgroundFetchResult.NoData
+    if (!token) return BackgroundTask.BackgroundTaskResult.Success
 
     const today = moment().format("YYYY-MM-DD")
     const endDate = moment().add(2, "days").format("YYYY-MM-DD")
@@ -139,26 +139,19 @@ TaskManager.defineTask(WIDGET_BG_FETCH_TASK, async () => {
         ExtensionStorage.reloadWidget()
     }
 
-    return hasNewData
-        ? BackgroundFetch.BackgroundFetchResult.NewData
-        : BackgroundFetch.BackgroundFetchResult.NoData
+    return BackgroundTask.BackgroundTaskResult.Success
 })
 
 export async function registerWidgetBackgroundFetch(): Promise<void> {
     try {
-        const status = await BackgroundFetch.getStatusAsync()
-        if (
-            status === BackgroundFetch.BackgroundFetchStatus.Restricted ||
-            status === BackgroundFetch.BackgroundFetchStatus.Denied
-        ) {
+        const status = await BackgroundTask.getStatusAsync()
+        if (status === BackgroundTask.BackgroundTaskStatus.Restricted) {
             return
         }
         const isRegistered = await TaskManager.isTaskRegisteredAsync(WIDGET_BG_FETCH_TASK)
         if (!isRegistered) {
-            await BackgroundFetch.registerTaskAsync(WIDGET_BG_FETCH_TASK, {
-                minimumInterval: 15 * 60,
-                stopOnTerminate: false,
-                startOnBoot: true,
+            await BackgroundTask.registerTaskAsync(WIDGET_BG_FETCH_TASK, {
+                minimumInterval: 15,
             })
         }
     } catch (err) {

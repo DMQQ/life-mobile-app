@@ -23,7 +23,7 @@ import { CategoryUtils, Icons } from "../../components/Expense/ExpenseIcon"
 import CategorySelector from "../../components/CreateExpense/CategorySelectorView"
 import { SpontaneousRateSelector, getRateColor } from "../../components/CreateExpense/SpontaneousRate"
 import { useSubAccounts } from "../../hooks/useSubAccounts"
-import SubExpenseSheet from "../../components/CreateExpense/SubexpenseSheet"
+import AddSubExpenseSheet from "../../components/Expense/AddSubExpenseSheet"
 import PredictionView from "../../components/CreateExpense/PredictionView"
 import layout from "@/constants/Layout"
 
@@ -37,7 +37,7 @@ const TYPE_OPTIONS: { label: string; value: ExpenseType }[] = [
 export default function Form({ route }: any) {
     const params = route.params ?? {}
     const navigation = useNavigation<any>()
-    const { state, methods } = useCreateExpenseContext()
+    const { state, methods, subexpenseSheetRef } = useCreateExpenseContext()
 
     const saveLabel = !state.isValid && state.prediction ? "Apply" : params?.isEditing ? "Save" : "Add"
     const onSave = !state.isValid && state.prediction ? methods.applyPrediction : methods.handleSubmit
@@ -80,7 +80,18 @@ export default function Form({ route }: any) {
                 </GlassView>
             </Pressable>
 
-            <SubExpenseSheet />
+            <AddSubExpenseSheet
+                ref={subexpenseSheetRef}
+                onAdd={(item) =>
+                    methods.setSubExpenses((prev) => [
+                        ...prev,
+                        { id: Math.random().toString(), ...item, category: item.category as keyof typeof Icons },
+                    ])
+                }
+                items={state.SubExpenses}
+                onDelete={(id) => methods.setSubExpenses((prev) => prev.filter((i) => i.id !== id))}
+                date={state.date}
+            />
         </View>
     )
 }

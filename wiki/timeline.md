@@ -64,7 +64,7 @@ CreateTimelineTodos: { timelineId?, mode?: "create"|"push-back", todos: string[]
 - Loads occurrence via `useGetOccurrenceById(timelineId)`.
 - Animated header: title collapses into header on scroll (`useAnimatedScrollHandler`).
 - Sections: description, `TimelineTodos`, `FileList`, event ID.
-- **FloatingBottomToolBar** actions: Add Todo, Upload image (camera/library), Start Live Activity, "Work on it" (→ `TimelineDoScreen`).
+- **Actions section** (inline, bottom of scroll): Add Todo, Upload image (camera/library context menu), Start Live Activity, "Work on it" (→ `TimelineDoScreen`, hidden when completed).
 - Header buttons: delete (dialog), edit (→ `TimelineCreate` edit mode), complete toggle.
 - Image upload: multipart POST to `/upload/multiple?type=timeline&entityId=<id>`, then writes to Apollo cache directly (`cache.modify`).
 
@@ -123,9 +123,9 @@ Card component for one occurrence. Features:
 - Repeat indicator (Feather `repeat` icon).
 - Press → navigates to `TimelineDetails`.
 
-### `FloatingBottomToolBar.tsx`
+### Actions section
 
-Absolute-positioned glass bar at bottom of `TimelineDetails`. Buttons: Add Todo, Upload (camera/library context menu), Live Activity, Work on it.
+Inline `Section` at the bottom of `TimelineDetails` scroll content. Rows: Add Todo, Upload Files (camera/library context menu), Start Live Activity, Work on it (hidden when completed).
 
 ### `DayTimeline.tsx`, `DayTimelineItem.tsx`, `DayTimelineItemWrapper.tsx`
 

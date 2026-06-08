@@ -72,7 +72,7 @@ export function FormExpenseNew({ data, onNavigate }: { data: any; onNavigate?: (
 
     return (
         <View style={s.stretch}>
-            <WalletItem {...preview} handlePress={NOOP} animatedStyle={{}} containerStyle={{ marginBottom: 0 }} />
+            <WalletItem {...preview} handlePress={NOOP} animatedStyle={{}} />
             <ActionRow status={status} onSave={onConfirm} onEdit={onEdit} />
         </View>
     )
@@ -126,7 +126,7 @@ export function FormExpenseEdit({ data, onNavigate }: { data: any; onNavigate?: 
 
     return (
         <View style={s.stretch}>
-            <WalletItem {...preview} handlePress={NOOP} animatedStyle={{}} containerStyle={{ marginBottom: 0 }} />
+            <WalletItem {...preview} handlePress={NOOP} />
             <ActionRow status={status} onSave={onConfirm} onEdit={onEdit} />
         </View>
     )

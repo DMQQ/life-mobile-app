@@ -6,11 +6,12 @@ import { gql, useQuery } from "@apollo/client"
 import { useNavigation } from "@react-navigation/native"
 import useGetSubscriptions from "@/features/wallet/hooks/useGetSubscriptions"
 import dayjs from "dayjs"
-import { useMemo, useState } from "react"
+import { useMemo } from "react"
 import { StyleSheet, TouchableOpacity, View } from "react-native"
-import Svg, { Circle, Defs, LinearGradient as SvgGrad, Path, Polyline, Stop } from "react-native-svg"
+import Svg, { Circle } from "react-native-svg"
 import moment from "moment"
 import Color from "color"
+import SparklineChart from "@/components/ui/Charts/SparklineChart"
 
 const SIZE = 96
 const SW = 10
@@ -44,54 +45,6 @@ interface MonthStatsData {
     m2?: { expense: number }
     m3?: { expense: number }
     m4?: { expense: number }
-}
-
-function Sparkline({
-    values,
-    color,
-    uid,
-    width = 130,
-    height = 64,
-}: {
-    values: number[]
-    color: string
-    uid: string
-    width?: number
-    height?: number
-}) {
-    const W = width
-    const H = height
-    const PAD = 4
-
-    if (values.every((v) => v === 0)) return <View style={{ height: H }} />
-
-    const min = Math.min(...values)
-    const max = Math.max(...values)
-    const range = max - min || 1
-    const xs = values.map((_, i) => PAD + (i / (values.length - 1)) * (W - PAD * 2))
-    const ys = values.map((v) => PAD + (1 - (v - min) / range) * (H - PAD * 2))
-    const pts = xs.map((x, i) => `${x},${ys[i]}`).join(" ")
-    const area = `M ${xs[0]},${H} ` + xs.map((x, i) => `L ${x},${ys[i]}`).join(" ") + ` L ${xs[xs.length - 1]},${H} Z`
-
-    return (
-        <Svg width={W} height={H}>
-            <Defs>
-                <SvgGrad id={uid} x1="0" y1="0" x2="0" y2="1">
-                    <Stop offset="0" stopColor={color} stopOpacity="0.35" />
-                    <Stop offset="1" stopColor={color} stopOpacity="0" />
-                </SvgGrad>
-            </Defs>
-            <Path d={area} fill={`url(#${uid})`} />
-            <Polyline
-                points={pts}
-                fill="none"
-                stroke={color}
-                strokeWidth={2}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-            />
-        </Svg>
-    )
 }
 
 function SegmentedRing({ subs }: { subs: { id: string; amount: number }[] }) {
@@ -142,7 +95,6 @@ function SegmentedRing({ subs }: { subs: { id: string; amount: number }[] }) {
 
 function SpendingTile() {
     const navigation = useNavigation<any>()
-    const [sparkWidth, setSparkWidth] = useState(0)
 
     const ranges = useMemo(() => {
         const out: Record<string, string[]> = {}
@@ -166,35 +118,44 @@ function SpendingTile() {
     const isMore = thisMonth > lastMonth
     const color = isMore ? (ratio > 1.2 ? Colors.danger : Colors.warning) : Colors.positive
 
+    const monthLabels = useMemo(
+        () =>
+            Array.from({ length: 5 }, (_, i) =>
+                dayjs()
+                    .subtract(4 - i, "month")
+                    .format("MMM"),
+            ),
+        [],
+    )
+
     return (
         <TouchableOpacity
-            style={styles.tile}
+            style={[styles.tile, { padding: 0, paddingBottom: styles.tile.padding }]}
             onPress={() => navigation.navigate("WalletScreens", { screen: "Wallet" })}
-            onLayout={(e) => setSparkWidth(e.nativeEvent.layout.width - 28)}
             activeOpacity={0.7}
         >
-            <View style={styles.tileHead}>
-                <Text variant="caption" style={styles.tileLabel}>
-                    SPENDING
-                </Text>
-                <View style={[styles.badge, { backgroundColor: Color(color).alpha(0.15).string() }]}>
-                    <Feather name={isMore ? "arrow-up-right" : "arrow-down-right"} size={9} color={color} />
-                    <Text variant="caption" style={[styles.badgeText, { color }]}>
-                        {diff}%
+            <View style={{ padding: styles.tile.padding }}>
+                <View style={styles.tileHead}>
+                    <Text variant="caption" style={styles.tileLabel}>
+                        SPENDING
+                    </Text>
+                    <View style={[styles.badge, { backgroundColor: Color(color).alpha(0.15).string() }]}>
+                        <Feather name={isMore ? "arrow-up-right" : "arrow-down-right"} size={9} color={color} />
+                        <Text variant="caption" style={[styles.badgeText, { color }]}>
+                            {diff}%
+                        </Text>
+                    </View>
+                </View>
+
+                <View style={styles.amountRow}>
+                    <Text style={styles.amount}>{thisMonth.toFixed(0)}</Text>
+                    <Text variant="caption" style={styles.currency}>
+                        zł
                     </Text>
                 </View>
             </View>
 
-            <View style={styles.amountRow}>
-                <Text style={styles.amount}>{thisMonth.toFixed(0)}</Text>
-                <Text variant="caption" style={styles.currency}>
-                    zł
-                </Text>
-            </View>
-
-            {sparkWidth > 0 && (
-                <Sparkline values={sparkValues} color={color} uid="spend-g" width={sparkWidth} height={80} />
-            )}
+            <SparklineChart data={sparkValues} labels={monthLabels} chartHeight={80} lineColor={color} />
         </TouchableOpacity>
     )
 }

@@ -300,8 +300,12 @@ export function FloatingProcessingView({
                             </View>
 
                             <View style={styles.textContainer}>
-                                <Text size={14} weight="bold" style={{ marginBottom: 2 }}>AI Processing</Text>
-                                <Text size={11} color="rgba(255,255,255,0.7)">{currentStepData.label}...</Text>
+                                <Text size={14} weight="bold" style={{ marginBottom: 2 }}>
+                                    AI Processing
+                                </Text>
+                                <Text size={11} color="rgba(255,255,255,0.7)">
+                                    {currentStepData.label}...
+                                </Text>
                             </View>
 
                             <Pressable style={styles.closeButton} onPress={onClose}>
@@ -319,13 +323,7 @@ export function FloatingProcessingView({
                                         paddingBottom: 5,
                                     }}
                                 >
-                                    <WalletItem
-                                        {...(expense as any)}
-                                        animatedStyle={{
-                                            marginBottom: 0,
-                                            marginTop: 5,
-                                        }}
-                                    />
+                                    <WalletItem {...(expense as any)} />
                                 </Animated.ScrollView>
                                 <View
                                     style={{

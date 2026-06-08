@@ -25,7 +25,13 @@ export default function SimilarExpenses({
                 title="Similar"
                 headerRight={
                     <IconButton
-                        icon={<Feather name={isExpanded ? "chevron-up" : "chevron-down"} size={11} color={Colors.text_dark} />}
+                        icon={
+                            <Feather
+                                name={isExpanded ? "chevron-up" : "chevron-down"}
+                                size={11}
+                                color={Colors.text_dark}
+                            />
+                        }
                         onPress={() => setIsExpanded(!isExpanded)}
                     />
                 }
@@ -35,7 +41,6 @@ export default function SimilarExpenses({
                 {isExpanded && (
                     <View
                         style={{
-                            backgroundColor: Colors.primary_lighter,
                             borderRadius: 20,
                             overflow: "hidden",
                         }}
@@ -48,13 +53,6 @@ export default function SimilarExpenses({
                                     navigation.push("Expense", {
                                         expense: item,
                                     })
-                                }}
-                                animatedStyle={{
-                                    borderWidth: 0,
-                                    marginBottom: 0,
-                                    borderRadius: 0,
-                                    borderBottomWidth: 1,
-                                    marginTop: 0,
                                 }}
                             />
                         ))}

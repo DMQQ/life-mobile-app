@@ -45,8 +45,12 @@ export type AddTodoFileInput = {
 
 export type AiChatInput = {
   conversationId?: InputMaybe<Scalars['String']['input']>;
+  /** low (gpt-4o-mini) | high (gpt-4o) */
+  effort?: InputMaybe<Scalars['String']['input']>;
   endDate?: InputMaybe<Scalars['String']['input']>;
   message: Scalars['String']['input'];
+  /** playful | finance | helpful */
+  personality?: InputMaybe<Scalars['String']['input']>;
   startDate?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -77,7 +81,9 @@ export type AiConversationListItem = {
   __typename?: 'AiConversationListItem';
   createdAt: Scalars['String']['output'];
   description?: Maybe<Scalars['String']['output']>;
+  effort: Scalars['String']['output'];
   id: Scalars['String']['output'];
+  personality: Scalars['String']['output'];
   title?: Maybe<Scalars['String']['output']>;
   updatedAt: Scalars['String']['output'];
 };
@@ -237,11 +243,14 @@ export type CreateFlashCardInput = {
 };
 
 export type CreateGoalsInput = {
+  color?: InputMaybe<Scalars['String']['input']>;
   description: Scalars['String']['input'];
   icon: Scalars['String']['input'];
   max: Scalars['Float']['input'];
   min: Scalars['Float']['input'];
   name: Scalars['String']['input'];
+  notification?: InputMaybe<Scalars['Boolean']['input']>;
+  notificationSettings?: InputMaybe<GoalNotificationSettingsInput>;
   target: Scalars['Float']['input'];
   unit: Scalars['String']['input'];
 };
@@ -533,13 +542,17 @@ export type Goal = {
 
 export type GoalCategory = {
   __typename?: 'GoalCategory';
+  color?: Maybe<Scalars['String']['output']>;
   description: Scalars['String']['output'];
   entries: Array<GoalEntry>;
   icon: Scalars['String']['output'];
   id: Scalars['ID']['output'];
+  lastNotifiedAt?: Maybe<Scalars['DateTime']['output']>;
   max: Scalars['Int']['output'];
   min: Scalars['Int']['output'];
   name: Scalars['String']['output'];
+  notification: Scalars['Boolean']['output'];
+  notificationSettings?: Maybe<GoalNotificationSettingsType>;
   target: Scalars['Int']['output'];
   unit?: Maybe<Scalars['String']['output']>;
   userGoal: UserGoal;
@@ -555,6 +568,27 @@ export type GoalEntry = {
   value: Scalars['Float']['output'];
 };
 
+export type GoalNotificationSettingsInput = {
+  daysOfWeek?: InputMaybe<Array<Scalars['Int']['input']>>;
+  frequency: Scalars['String']['input'];
+  intervalHours?: InputMaybe<Scalars['Int']['input']>;
+  notifyBeforeDeadline?: InputMaybe<Scalars['Boolean']['input']>;
+  notifyOnCompletion?: InputMaybe<Scalars['Boolean']['input']>;
+  reminderMessage?: InputMaybe<Scalars['String']['input']>;
+  times?: InputMaybe<Array<Scalars['String']['input']>>;
+};
+
+export type GoalNotificationSettingsType = {
+  __typename?: 'GoalNotificationSettingsType';
+  daysOfWeek?: Maybe<Array<Scalars['Int']['output']>>;
+  frequency: Scalars['String']['output'];
+  intervalHours?: Maybe<Scalars['Int']['output']>;
+  notifyBeforeDeadline?: Maybe<Scalars['Boolean']['output']>;
+  notifyOnCompletion?: Maybe<Scalars['Boolean']['output']>;
+  reminderMessage?: Maybe<Scalars['String']['output']>;
+  times?: Maybe<Array<Scalars['String']['output']>>;
+};
+
 /** GoalStats */
 export type GoalStats = {
   __typename?: 'GoalStats';
@@ -568,13 +602,17 @@ export type GoalStats = {
 /** Goals */
 export type Goals = {
   __typename?: 'Goals';
+  color?: Maybe<Scalars['String']['output']>;
   description: Scalars['String']['output'];
   entries: Array<GoalEntry>;
   icon: Scalars['String']['output'];
   id: Scalars['ID']['output'];
+  lastNotifiedAt?: Maybe<Scalars['DateTime']['output']>;
   max: Scalars['Int']['output'];
   min: Scalars['Int']['output'];
   name: Scalars['String']['output'];
+  notification: Scalars['Boolean']['output'];
+  notificationSettings?: Maybe<GoalNotificationSettingsType>;
   target: Scalars['Int']['output'];
   unit?: Maybe<Scalars['String']['output']>;
   userGoal: UserGoal;
@@ -1618,12 +1656,15 @@ export type UpdateFlashCardInput = {
 };
 
 export type UpdateGoalsInput = {
+  color?: InputMaybe<Scalars['String']['input']>;
   description?: InputMaybe<Scalars['String']['input']>;
   icon?: InputMaybe<Scalars['String']['input']>;
-  max: Scalars['Float']['input'];
-  min: Scalars['Float']['input'];
+  max?: InputMaybe<Scalars['Float']['input']>;
+  min?: InputMaybe<Scalars['Float']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
-  target: Scalars['Float']['input'];
+  notification?: InputMaybe<Scalars['Boolean']['input']>;
+  notificationSettings?: InputMaybe<GoalNotificationSettingsInput>;
+  target?: InputMaybe<Scalars['Float']['input']>;
 };
 
 export type UpdateGroupInput = {
@@ -1816,7 +1857,7 @@ export type AiChatMutation = { __typename?: 'Mutation', aiChat: { __typename?: '
 export type AiConversationsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type AiConversationsQuery = { __typename?: 'Query', aiConversations: Array<{ __typename?: 'AiConversationListItem', id: string, title?: string | null, description?: string | null, createdAt: string, updatedAt: string }> };
+export type AiConversationsQuery = { __typename?: 'Query', aiConversations: Array<{ __typename?: 'AiConversationListItem', id: string, title?: string | null, description?: string | null, personality: string, effort: string, createdAt: string, updatedAt: string }> };
 
 export type AiConversationQueryVariables = Exact<{
   id: Scalars['String']['input'];
@@ -2691,7 +2732,7 @@ export const GetExercisesDropdownDocument = {"kind":"Document","definitions":[{"
 export const DeleteGoalsCategoryDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteGoalsCategory"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteGoals"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"isDeleted"}}]}}]}}]} as unknown as DocumentNode<DeleteGoalsCategoryMutation, DeleteGoalsCategoryMutationVariables>;
 export const DeleteFlashCardGroupDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteFlashCardGroup"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"groupId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"removeflashCardGroup"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"groupId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"groupId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"isDeleted"}}]}}]}}]} as unknown as DocumentNode<DeleteFlashCardGroupMutation, DeleteFlashCardGroupMutationVariables>;
 export const AiChatDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"AiChat"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"AiChatInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"aiChat"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"conversationId"}},{"kind":"Field","name":{"kind":"Name","value":"messages"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"AiMessageFields"}}]}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"AiMessageFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"AiChatMessageItem"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"subtype"}},{"kind":"Field","name":{"kind":"Name","value":"data"}}]}}]} as unknown as DocumentNode<AiChatMutation, AiChatMutationVariables>;
-export const AiConversationsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AiConversations"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"aiConversations"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]}}]} as unknown as DocumentNode<AiConversationsQuery, AiConversationsQueryVariables>;
+export const AiConversationsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AiConversations"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"aiConversations"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"personality"}},{"kind":"Field","name":{"kind":"Name","value":"effort"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]}}]} as unknown as DocumentNode<AiConversationsQuery, AiConversationsQueryVariables>;
 export const AiConversationDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AiConversation"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"aiConversation"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"messages"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"role"}},{"kind":"Field","name":{"kind":"Name","value":"userContent"}},{"kind":"Field","name":{"kind":"Name","value":"aiMessages"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"AiMessageFields"}}]}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}}]}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"AiMessageFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"AiChatMessageItem"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"subtype"}},{"kind":"Field","name":{"kind":"Name","value":"data"}}]}}]} as unknown as DocumentNode<AiConversationQuery, AiConversationQueryVariables>;
 export const LoginUserDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"loginUser"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"email"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"password"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"loginAccount"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"account"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"email"},"value":{"kind":"Variable","name":{"kind":"Name","value":"email"}}},{"kind":"ObjectField","name":{"kind":"Name","value":"password"},"value":{"kind":"Variable","name":{"kind":"Name","value":"password"}}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"token"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]} as unknown as DocumentNode<LoginUserMutation, LoginUserMutationVariables>;
 export const CreateUserDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"createUser"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"email"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"password"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createAccount"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"account"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"email"},"value":{"kind":"Variable","name":{"kind":"Name","value":"email"}}},{"kind":"ObjectField","name":{"kind":"Name","value":"password"},"value":{"kind":"Variable","name":{"kind":"Name","value":"password"}}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"token"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]} as unknown as DocumentNode<CreateUserMutation, CreateUserMutationVariables>;

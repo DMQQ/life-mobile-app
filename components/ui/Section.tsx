@@ -1,5 +1,6 @@
 import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
+import Color from "color"
 import React from "react"
 import { StyleSheet, View } from "react-native"
 import Animated, { LinearTransition } from "react-native-reanimated"
@@ -21,7 +22,7 @@ const s = StyleSheet.create({
         marginLeft: 10,
     },
     card: {
-        backgroundColor: Colors.primary_lighter,
+        backgroundColor: Color(Colors.primary_lighter).alpha(0.5).string(),
         borderRadius: 20,
         overflow: "hidden",
         borderWidth: 1,

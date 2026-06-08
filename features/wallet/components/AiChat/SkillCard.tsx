@@ -38,7 +38,6 @@ export default function SkillCard({ skill, startDate, endDate, onNavigate, anima
                             params: { expense: data },
                         } as any)
                     }}
-                    animatedStyle={animatedStyle ?? {}}
                 />
             </View>
         )

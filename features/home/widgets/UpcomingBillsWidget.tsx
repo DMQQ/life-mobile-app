@@ -29,10 +29,7 @@ export default function UpcomingBillsWidget() {
             .slice(0, 4)
     }, [data])
 
-    const totalDue7d = useMemo(
-        () => bills.filter((b) => b.daysUntil <= 7).reduce((a, b) => a + b.amount, 0),
-        [bills],
-    )
+    const totalDue7d = useMemo(() => bills.filter((b) => b.daysUntil <= 7).reduce((a, b) => a + b.amount, 0), [bills])
 
     if (!bills.length) return null
 
@@ -40,7 +37,12 @@ export default function UpcomingBillsWidget() {
         <Section
             title="Upcoming Bills"
             headerRight={
-                <Feather name="chevron-right" size={14} color={Colors.text_dark} onPress={() => navigation.navigate("WalletScreens", { screen: "Wallet" })} />
+                <Feather
+                    name="chevron-right"
+                    size={14}
+                    color={Colors.text_dark}
+                    onPress={() => navigation.navigate("WalletScreens", { screen: "Wallet" })}
+                />
             }
         >
             <View style={s.card}>
@@ -58,10 +60,7 @@ export default function UpcomingBillsWidget() {
                         key={sub.id}
                         subscription={sub as any}
                         index={i}
-                        style={[
-                            s.subItem,
-                            i < bills.length - 1 && s.subItemBorder,
-                        ]}
+                        style={[s.subItem, i < bills.length - 1 && s.subItemBorder]}
                         onPress={() =>
                             navigation.navigate("WalletScreens", {
                                 screen: "Subscription",
@@ -96,7 +95,6 @@ const s = StyleSheet.create({
     },
     subItem: {
         borderRadius: 0,
-        backgroundColor: "transparent",
         borderWidth: 0,
         paddingVertical: 6,
         paddingHorizontal: 0,
@@ -104,5 +102,6 @@ const s = StyleSheet.create({
     subItemBorder: {
         borderBottomWidth: StyleSheet.hairlineWidth,
         borderBottomColor: "rgba(255,255,255,0.08)",
+        marginBottom: 0,
     },
 })

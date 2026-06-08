@@ -26,6 +26,7 @@ import GroupSelector from "@/components/ui/GroupSelector"
 import Section from "@/components/ui/Section"
 import Text from "@/components/ui/Text/Text"
 import dayjs from "dayjs"
+import { Card } from "@/components"
 
 const TABS = [
     { label: "Accounts", value: "accounts" as string },
@@ -162,7 +163,7 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
                 <WalletTab />
 
                 <View style={styles.quickNav}>
-                    <View style={styles.quickNavCard}>
+                    <Card style={styles.quickNavCard}>
                         <Pressable
                             onPress={() => {
                                 Haptic.trigger("impactLight")
@@ -175,8 +176,8 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
                             <Text style={styles.quickNavTitle}>Expenses</Text>
                             <Text style={styles.quickNavSub}>All transactions</Text>
                         </Pressable>
-                    </View>
-                    <View style={styles.quickNavCard}>
+                    </Card>
+                    <Card style={styles.quickNavCard}>
                         <Pressable
                             onPress={() => {
                                 Haptic.trigger("impactLight")
@@ -189,7 +190,7 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
                             <Text style={styles.quickNavTitle}>Subscriptions</Text>
                             <Text style={styles.quickNavSub}>Recurring payments</Text>
                         </Pressable>
-                    </View>
+                    </Card>
                 </View>
 
                 {upcomingSubscriptions.length > 0 && (
@@ -234,13 +235,6 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
                                 index={index}
                                 handlePress={() => navigation.navigate("Expense", { expense })}
                                 {...(expense as any)}
-                                animatedStyle={{
-                                    borderWidth: 0,
-                                    marginBottom: 0,
-                                    borderRadius: 0,
-                                    borderBottomWidth: recentExpenses.length - 1 === index ? 0 : 1,
-                                    marginTop: 0,
-                                }}
                             />
                         ))}
                     </Section>
@@ -335,7 +329,6 @@ const styles = StyleSheet.create({
         borderRadius: 20,
         padding: 15,
         gap: 15,
-        backgroundColor: Colors.primary_lighter,
         borderWidth: 1,
         borderColor: Colors.borderColor,
     },

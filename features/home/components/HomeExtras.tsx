@@ -76,10 +76,7 @@ export default function HomeExtras() {
             {active === "limits" ? (
                 <LimitsContent limits={limits} />
             ) : (
-                <SubscriptionCalendar
-                    style={{ padding: 0, backgroundColor: Colors.primary_lighter }}
-                    expenses={allExpenses}
-                />
+                <SubscriptionCalendar style={{ padding: 0 }} expenses={allExpenses} />
             )}
 
             <GroupSelector
@@ -95,7 +92,12 @@ export default function HomeExtras() {
 }
 
 function LimitsContent({ limits }: { limits: any[] }) {
-    if (!limits.length) return <Text size={13} color={Colors.text_dark} align="center" style={{ paddingVertical: 20 }}>No limits set for this month</Text>
+    if (!limits.length)
+        return (
+            <Text size={13} color={Colors.text_dark} align="center" style={{ paddingVertical: 20 }}>
+                No limits set for this month
+            </Text>
+        )
 
     return (
         <View style={styles.limitsContainer}>
@@ -107,7 +109,14 @@ function LimitsContent({ limits }: { limits: any[] }) {
                 return (
                     <View key={limit.id} style={styles.limitRow}>
                         <CategoryIcon category={limit.category} type="expense" clear={false} size={14} />
-                        <Text size={12} weight="500" color={Colors.text_dark} uppercase numberOfLines={1} style={{ width: 80 }}>
+                        <Text
+                            size={12}
+                            weight="500"
+                            color={Colors.text_dark}
+                            uppercase
+                            numberOfLines={1}
+                            style={{ width: 80 }}
+                        >
                             {CategoryUtils.getCategoryName(limit.category)}
                         </Text>
                         <View style={styles.progressTrack}>
@@ -118,7 +127,13 @@ function LimitsContent({ limits }: { limits: any[] }) {
                                 ]}
                             />
                         </View>
-                        <Text size={11} weight="600" color={isOver ? "#F07070" : Colors.text_dark} align="right" style={{ width: 36 }}>
+                        <Text
+                            size={11}
+                            weight="600"
+                            color={isOver ? "#F07070" : Colors.text_dark}
+                            align="right"
+                            style={{ width: 36 }}
+                        >
                             {percentage.toFixed(0)}%
                         </Text>
                     </View>

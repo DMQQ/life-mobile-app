@@ -215,13 +215,29 @@ export default function SubscriptionCalendar({ subscriptions = [], expenses = []
             <View style={[styles.calendarCard, style]}>
                 <View style={styles.headerCenter}>
                     <View style={styles.monthNav}>
-                        <Text size={22} weight="800" color={Colors.text_light} align="center" style={{ minWidth: 80, marginBottom: 10 }}>{currentMonth.format("MMMM YYYY")}</Text>
+                        <Text
+                            size={22}
+                            weight="800"
+                            color={Colors.text_light}
+                            align="center"
+                            style={{ minWidth: 80, marginBottom: 10 }}
+                        >
+                            {currentMonth.format("MMMM YYYY")}
+                        </Text>
                     </View>
                 </View>
 
                 <View style={styles.weekRow}>
                     {DAYS.map((d) => (
-                        <Text key={d} size={11} weight="700" color="rgba(255,255,255,0.3)" align="center" letterSpacing={0.5} style={{ flex: 1 }}>
+                        <Text
+                            key={d}
+                            size={11}
+                            weight="700"
+                            color="rgba(255,255,255,0.3)"
+                            align="center"
+                            letterSpacing={0.5}
+                            style={{ flex: 1 }}
+                        >
                             {d}
                         </Text>
                     ))}
@@ -234,18 +250,11 @@ export default function SubscriptionCalendar({ subscriptions = [], expenses = []
                 <View style={styles.detail}>
                     <Section title={moment(selectedDay).format("dddd, MMM D")}>
                         {selectedExpenses.length > 0 && (
-                            <View style={styles.detailSection}>
-                                {selectedExpenses.map((e, index) => (
+                            <View>
+                                {selectedExpenses.map((e) => (
                                     <WalletItem
                                         key={e.id}
                                         {...e}
-                                        animatedStyle={{
-                                            borderWidth: 0,
-                                            marginBottom: 0,
-                                            borderRadius: 0,
-                                            borderBottomWidth: selectedExpenses.length - 1 === index ? 0 : 1,
-                                            marginTop: 0,
-                                        }}
                                         handlePress={() => {
                                             navigation.navigate("WalletScreens", {
                                                 screen: "Expense",
@@ -312,7 +321,7 @@ const styles = StyleSheet.create({
         gap: 4,
     },
     dayCell: {
-        backgroundColor: Colors.primary,
+        backgroundColor: "rgba(0,0,0,0.1)",
         borderRadius: 7.5,
     },
     cellBottom: {
@@ -337,7 +346,7 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.secondary + "80",
     },
     cellFaded: {
-        backgroundColor: Colors.primary_lighter,
+        backgroundColor: "rgba(0,0,0,0.3)",
     },
     cellIcons: {
         flexDirection: "row",

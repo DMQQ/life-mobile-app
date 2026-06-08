@@ -36,7 +36,7 @@
         "dayjs": "^1.11.13",
         "expo": "^55.0.24",
         "expo-asset": "~55.0.17",
-        "expo-background-fetch": "~55.0.16",
+        "expo-background-task": "~55.0.18",
         "expo-blur": "~55.0.14",
         "expo-build-properties": "~55.0.14",
         "expo-camera": "^55.0.18",

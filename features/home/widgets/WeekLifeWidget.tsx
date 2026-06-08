@@ -85,9 +85,7 @@ function StripRow({
                     {timeLabel !== undefined && <Text style={s.stripTime}>{timeLabel ?? ""}</Text>}
                     <View style={s.stripDot} />
                 </View>
-                <View style={s.stripLineCol}>
-                    {showLine && <View style={s.stripLine} />}
-                </View>
+                <View style={s.stripLineCol}>{showLine && <View style={s.stripLine} />}</View>
             </View>
             <View style={s.cardWrapper}>{children}</View>
         </View>
@@ -301,8 +299,6 @@ function WeekLifeWidget() {
         return [...goalRows, ...events, ...expenses].sort((a, b) => sortKey(a).localeCompare(sortKey(b)))
     }, [dayData, weekExpenses, goals, selected])
 
-    const heading = selected === today ? "Today" : dayjs(selected).format("dddd, D MMM")
-
     return (
         <Section
             title="Week"
@@ -329,8 +325,6 @@ function WeekLifeWidget() {
                 />
 
                 <View style={s.separator} />
-
-                <Text style={s.dayHeading}>{heading}</Text>
 
                 {feedItems.length === 0 ? (
                     <TouchableOpacity

@@ -370,11 +370,6 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                                                 })
                                             }
                                             type="expense"
-                                            animatedStyle={{
-                                                marginBottom: 0,
-                                                borderWidth: 0,
-                                                borderBottomWidth: 1,
-                                            }}
                                         />
                                     ))}
 

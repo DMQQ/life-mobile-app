@@ -1,6 +1,6 @@
 import { createContext, useContext } from "react"
 import { SharedValue } from "react-native-reanimated"
-import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/types"
+import { AddSubExpenseSheetHandle } from "@/features/wallet/components/Expense/AddSubExpenseSheet"
 import { Icons } from "@/features/wallet/components/Expense/ExpenseIcon"
 import { Expense } from "@/types"
 
@@ -60,7 +60,7 @@ export interface CreateExpenseContextType {
     }
     isInputFocused: boolean
     setIsInputFocused: (focused: boolean) => void
-    subexpenseSheetRef: React.RefObject<BottomSheetModalMethods | null>
+    subexpenseSheetRef: React.RefObject<AddSubExpenseSheetHandle | null>
 }
 
 export const CreateExpenseContext = createContext<CreateExpenseContextType | null>(null)

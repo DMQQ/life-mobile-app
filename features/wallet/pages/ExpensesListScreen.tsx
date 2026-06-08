@@ -46,6 +46,7 @@ export default function ExpensesListScreen({ navigation, route }: WalletScreens<
     const { data, refetch, onEndReached } = useGetWallet()
     const { hasFilters, filtersDiffCount, dispatch } = useWalletContext()
     const [scrollY, onScroll] = useTrackScroll({ screenName: "ExpensesListScreen" })
+    const [visibleMonth, setVisibleMonth] = useState<string | null>(null)
 
     useLayoutEffect(() => {
         if (!initialFilters) return
@@ -96,10 +97,10 @@ export default function ExpensesListScreen({ navigation, route }: WalletScreens<
                         onPress: () => navigation.navigate("CreateExpense"),
                     },
                 ]}
-                title={"Expenses"}
+                title={visibleMonth ? dayjs(visibleMonth).format("MMMM YYYY") : "Expenses"}
             />
         ),
-        [hasFilters, filtersDiffCount],
+        [hasFilters, filtersDiffCount, visibleMonth],
     )
 
     return (
@@ -112,6 +113,7 @@ export default function ExpensesListScreen({ navigation, route }: WalletScreens<
                 onScroll={onScroll}
                 refetch={refetch}
                 onEndReached={onEndReached}
+                onVisibleMonthChange={setVisibleMonth}
             />
             <BottomSearchBar navigation={navigation} />
         </SafeAreaView>

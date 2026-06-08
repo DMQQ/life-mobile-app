@@ -57,6 +57,7 @@ export default function Navigation({ isAuthenticated, isLoading, linking }: Navi
                         },
                         tabBarLabel: "",
                         tabBarLabelVisibilityMode: "unlabeled",
+                        tabBarBlurEffect: "dark",
                     }
                 }}
             >

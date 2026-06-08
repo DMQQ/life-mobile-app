@@ -1,5 +1,4 @@
-import { ReactNode } from "react"
-import { FlatList, Image, StyleSheet, View } from "react-native"
+import { FlatList, Image, Pressable, StyleSheet, View } from "react-native"
 import Text from "@/components/ui/Text/Text"
 import { forwardRef, useImperativeHandle, useState } from "react"
 import Ripple from "react-native-material-ripple"
@@ -9,6 +8,9 @@ import Url from "@/constants/Url"
 import Layout from "@/constants/Layout"
 import Colors from "@/constants/Colors"
 import ImageViewerModal from "./ImageViewer"
+import Section from "@/components/ui/Section"
+import ContextMenu from "react-native-context-menu-view"
+import { SymbolView } from "expo-symbols"
 
 
 export type FileUploadHandle = { takePhoto: () => void; pickImage: () => void }
@@ -92,50 +94,68 @@ const FileUpload = forwardRef<FileUploadHandle, { id: string; images: any[] }>((
 
     const [selectedImage, setSelectedImage] = useState<string | null>(null)
 
-    if (files.length === 0) return null
-
     return (
-        <View style={{ paddingHorizontal: 15, marginBottom: 40 }}>
-            <Text size={20} weight="bold" lineHeight={27.5}>
-                Attachments
-            </Text>
-            <FlatList
-                style={{ marginTop: 25 }}
-                horizontal
-                data={files}
-                keyExtractor={(item) => item.id}
-                renderItem={({ item }) => (
-                    <Ripple
-                        onPress={() => {
-                            setSelectedImage((p) => (p === item.url ? null : item.url))
+        <View style={{ paddingHorizontal: 15 }}>
+            <Section
+                title="Attachments"
+                headerRight={
+                    <ContextMenu
+                        dropdownMenuMode
+                        actions={[
+                            { title: "Take Photo", systemIcon: "camera.fill" },
+                            { title: "Choose from Library", systemIcon: "photo.on.rectangle.angled" },
+                        ]}
+                        onPress={(e) => {
+                            if (e.nativeEvent.index === 0) handleTakePhoto()
+                            else handleImagesSelect()
                         }}
                     >
-                        <Image
-                            source={{
-                                uri: Url.API + "/upload/images/" + item?.url,
-                            }}
-                            style={{
-                                width: Layout.screen.width - 45,
-                                height: 250,
-                                borderRadius: 10,
-                                marginRight: 10,
-                            }}
-                            resizeMode="cover"
-                        />
-                    </Ripple>
+                        <Pressable style={{ padding: 2 }}>
+                            <SymbolView name="plus.circle.fill" size={18} tintColor={Colors.secondary} />
+                        </Pressable>
+                    </ContextMenu>
+                }
+            >
+                {files.length === 0 ? (
+                    <View style={styles.emptyFiles}>
+                        <Text size={13} color={Colors.text_dark} align="center">
+                            No attachments yet
+                        </Text>
+                    </View>
+                ) : (
+                    <FlatList
+                        horizontal
+                        data={files}
+                        keyExtractor={(item) => item.id}
+                        renderItem={({ item }) => (
+                            <Ripple onPress={() => setSelectedImage((p) => (p === item.url ? null : item.url))}>
+                                <Image
+                                    source={{ uri: Url.API + "/upload/images/" + item?.url }}
+                                    style={styles.image}
+                                    resizeMode="cover"
+                                />
+                            </Ripple>
+                        )}
+                    />
                 )}
-            />
+            </Section>
 
-            <ImageViewerModal
-                selectedImage={selectedImage}
-                onClose={() => {
-                    setSelectedImage(null)
-                }}
-            />
+            <ImageViewerModal selectedImage={selectedImage} onClose={() => setSelectedImage(null)} />
         </View>
     )
 })
 
 export default FileUpload
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({
+    emptyFiles: {
+        paddingVertical: 20,
+        paddingHorizontal: 15,
+    },
+    image: {
+        width: Layout.screen.width - 45,
+        height: 250,
+        borderRadius: 10,
+        marginRight: 10,
+    },
+})

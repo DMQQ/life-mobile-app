@@ -1,4 +1,5 @@
 import Colors from "@/constants/Colors"
+import Color from "color"
 import { Pressable, PressableProps, StyleSheet, View, ViewProps } from "react-native"
 import Animated, { AnimatedProps, useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated"
 
@@ -63,8 +64,8 @@ const styles = StyleSheet.create({
         paddingHorizontal: 15,
         borderRadius: 25,
         width: "100%",
-        backgroundColor: Colors.primary_lighter,
         borderWidth: 1,
-        borderColor: Colors.borderColor,
+        borderColor: Colors.borderColor + "50",
+        backgroundColor: Color(Colors.primary_lighter).alpha(0.5).string(),
     },
 })

@@ -110,8 +110,6 @@ function EmptyState({ date }: { date: string }) {
     )
 }
 
-// ─── Add Item ─────────────────────────────────────────────────────────────────
-
 function AddItem({ date }: { date: string }) {
     const navigation = useNavigation<any>()
 
@@ -119,7 +117,7 @@ function AddItem({ date }: { date: string }) {
         <View style={styles.itemRow}>
             <View style={styles.strip}>
                 <View style={styles.lineCol}>
-                    <View style={{ backgroundColor: Colors.primary, paddingVertical: 4 }}>
+                    <View style={{ backgroundColor: Colors.primary_lighter, paddingVertical: 4 }}>
                         <View style={[styles.dot, { backgroundColor: Colors.secondary }]} />
                     </View>
                 </View>
@@ -253,7 +251,7 @@ function FeedItem({ event }: FeedItemProps) {
                     previewBackgroundColor={theme.cardBg}
                     style={{ borderRadius: 20 }}
                 >
-                    <Card onPress={handlePress} style={[styles.card, { backgroundColor: theme.cardBg }]}>
+                    <Card onPress={handlePress} style={[styles.card]}>
                         <View style={styles.cardHeader}>
                             <Text style={[styles.timeRange, { color: Color(theme.accent).alpha(0.6).string() }]}>
                                 {formatTime(event.beginTime)}
@@ -405,7 +403,6 @@ const styles = StyleSheet.create({
         alignSelf: "stretch",
     },
     stripHeading: {
-        backgroundColor: Colors.primary,
         paddingVertical: 5,
         alignItems: "center",
     },
@@ -446,6 +443,7 @@ const styles = StyleSheet.create({
         padding: 15,
         gap: 8,
         overflow: "hidden",
+        backgroundColor: Colors.primary_lighter,
     },
     cardHeader: {
         flexDirection: "row",

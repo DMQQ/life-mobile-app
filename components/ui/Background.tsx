@@ -1,12 +1,12 @@
 import { StyleSheet, View, Dimensions } from "react-native"
 import Svg, { Defs, RadialGradient, Stop, Circle, Filter, FeGaussianBlur } from "react-native-svg"
-import theme from "@/constants/Colors"
+import theme, { secondary_candidates } from "@/constants/Colors"
 import { LinearGradient } from "expo-linear-gradient"
 
 const { width } = Dimensions.get("window")
 const HEIGHT = 320
 
-const CIRCLE_RADIUS = width * 0.6
+const CIRCLE_RADIUS = width * 0.55
 
 export default function Background({ tintColor = theme.secondary }: { tintColor?: string }) {
     const accentColor = tintColor
