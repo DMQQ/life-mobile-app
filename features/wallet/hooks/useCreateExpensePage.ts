@@ -36,6 +36,10 @@ export default function useCreateExpensePage(
 
     const [spontaneousRate, setSpontaneousRate] = useState(params?.spontaneousRate || 0)
     const [subAccountId, setSubAccountId] = useState<string | null>(params?.subAccountId || null)
+    const [shop, setShop] = useState<string>(params?.shop || "")
+    const [shopEntityId, setShopEntityId] = useState<string | null>(params?.shopEntityId || null)
+    const [note, setNote] = useState<string>(params?.note || "")
+    const [tags, setTags] = useState<string>(params?.tags || "")
     const [optionsCollapsed, setOptionsCollapsed] = useState(true)
 
     const [isSubExpenseMode, setIsSubExpenseMode] = useState(false)
@@ -86,6 +90,10 @@ export default function useCreateExpensePage(
                             date: date,
                             spontaneousRate,
                             subAccountId: subAccountId ?? undefined,
+                            shop: shop || undefined,
+                            shopEntityId: shopEntityId ?? undefined,
+                            note: note || undefined,
+                            tags: tags || undefined,
                         },
                     },
                 }).catch((e) => console.log(e))
@@ -130,6 +138,8 @@ export default function useCreateExpensePage(
                         isSubscription: isSubscription,
                         spontaneousRate: spontaneousRate,
                         subAccountId: subAccountId ?? undefined,
+                        shop: shop || undefined,
+                        shopEntityId: shopEntityId ?? undefined,
                     },
                 },
             })
@@ -276,6 +286,10 @@ export default function useCreateExpensePage(
         setCategory((params.category || "none") as keyof typeof Icons)
         setName(params?.description || "")
         setType(params?.type || null)
+        setShop(params?.shop || "")
+        setShopEntityId(params?.shopEntityId || null)
+        setNote(params?.note || "")
+        setTags(params?.tags || "")
     }
 
     const isValid = type !== null && name !== "" && amount !== "" && type !== null && amount !== "0" && date !== null
@@ -319,6 +333,10 @@ export default function useCreateExpensePage(
         setSpontaneousRate(expense.spontaneousRate || 0)
         setIsSubscription(false)
         setSubExpenses((expense.subexpenses as any) || [])
+        setShop(expense.shop || "")
+        setShopEntityId(expense.shopEntityId || null)
+        setNote(expense.note || "")
+        setTags(expense.tags || "")
     }
 
     return {
@@ -338,6 +356,10 @@ export default function useCreateExpensePage(
             spontaneousRate,
             subAccountId,
             optionsCollapsed,
+            shop,
+            shopEntityId,
+            note,
+            tags,
         },
         methods: {
             setAmount,
@@ -359,6 +381,10 @@ export default function useCreateExpensePage(
             setIsSubscription,
             setSubAccountId,
             setOptionsCollapsed,
+            setShop,
+            setShopEntityId,
+            setNote,
+            setTags,
         },
         animated: {
             transformX,

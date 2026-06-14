@@ -1,20 +1,27 @@
 import { invalidateGetMainScreen } from "@/utils/schemas/GET_MAIN_SCREEN"
-import { graphql } from "@/gql/gql"
-import { useMutation } from "@apollo/client"
+import { gql, useMutation } from "@apollo/client"
 
-const EDIT_EXPENSE_NOTE = graphql(`
+const EDIT_EXPENSE_NOTE = gql`
     mutation EditExpenseNote($input: EditExpenseNoteInput!) {
         editExpenseNote(input: $input)
     }
-`)
+`
 
-const EDIT_EXPENSE = graphql(`
+const EDIT_EXPENSE = gql`
     mutation EditExpense($input: EditExpenseInput!) {
         editExpense(input: $input) {
             id
+            shop
+            note
+            tags
+            shopEntity {
+                id
+                name
+                image
+            }
         }
     }
-`)
+`
 
 export const useEditExpenseNote = () => {
     return useMutation(EDIT_EXPENSE_NOTE)

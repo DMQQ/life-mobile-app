@@ -177,6 +177,10 @@ export interface Expense {
 
     shop?: string | null
 
+    shopEntityId?: string | null
+
+    shopEntity?: { id: string; name: string; image?: string | null } | null
+
     walletId?: string
     schedule?: boolean
 }

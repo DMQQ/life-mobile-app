@@ -27,6 +27,13 @@ export const GET_EXPENSE = gql`
         spontaneousRate
         subAccountId
         note
+        shop
+        shopEntity {
+            id
+            name
+            image
+        }
+        tags
 
         subscription {
             id

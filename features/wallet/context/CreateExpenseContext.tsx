@@ -32,6 +32,10 @@ export interface CreateExpenseContextType {
         spontaneousRate: number
         subAccountId: string | null
         optionsCollapsed: boolean
+        shop: string
+        shopEntityId: string | null
+        note: string
+        tags: string
     }
     methods: {
         setAmount: (amount: string) => void
@@ -53,6 +57,10 @@ export interface CreateExpenseContextType {
         setIsSubscription: (isSubscription: boolean) => void
         setSubAccountId: (id: string | null) => void
         setOptionsCollapsed: (collapsed: boolean) => void
+        setShop: (shop: string) => void
+        setShopEntityId: (id: string | null) => void
+        setNote: (note: string) => void
+        setTags: (tags: string) => void
     }
     animated: {
         transformX: SharedValue<number>

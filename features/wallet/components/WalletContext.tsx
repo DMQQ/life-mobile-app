@@ -18,6 +18,7 @@ export type Action =
     | { type: "SET_TIME_FROM"; payload: string }
     | { type: "SET_TIME_TO"; payload: string }
     | { type: "SET_SCHEDULED"; payload: boolean | undefined }
+    | { type: "SET_SHOP_NAME"; payload: string | undefined }
 
 const reducer = (state: typeof init, action: Action) => {
     if (action.type === "SET_QUERY") {
@@ -119,6 +120,9 @@ const reducer = (state: typeof init, action: Action) => {
     if (action.type === "SET_SCHEDULED") {
         return { ...state, scheduled: action.payload }
     }
+    if (action.type === "SET_SHOP_NAME") {
+        return { ...state, shopName: action.payload }
+    }
     return state
 }
 
@@ -150,6 +154,7 @@ export const init = {
     time: { from: "", to: "" },
 
     scheduled: undefined as boolean | undefined,
+    shopName: undefined as string | undefined,
 }
 
 type WalletContextType = {

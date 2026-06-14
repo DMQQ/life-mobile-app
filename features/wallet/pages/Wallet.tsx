@@ -87,6 +87,11 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
                                 systemImage: "arrow.left.arrow.right",
                                 onPress: () => navigation.navigate("CorrectionMaps"),
                             },
+                            {
+                                title: "Shops",
+                                systemImage: "storefront",
+                                onPress: () => navigation.navigate("Shops"),
+                            },
                         ],
                     },
                 },

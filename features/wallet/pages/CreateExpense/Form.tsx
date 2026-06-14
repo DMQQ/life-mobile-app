@@ -23,15 +23,17 @@ import { CategoryUtils, Icons } from "../../components/Expense/ExpenseIcon"
 import CategorySelector from "../../components/CreateExpense/CategorySelectorView"
 import { SpontaneousRateSelector, getRateColor } from "../../components/CreateExpense/SpontaneousRate"
 import { useSubAccounts } from "../../hooks/useSubAccounts"
+import useShops from "../../hooks/useShops"
 import AddSubExpenseSheet from "../../components/Expense/AddSubExpenseSheet"
 import PredictionView from "../../components/CreateExpense/PredictionView"
 import layout from "@/constants/Layout"
 
-type ExpenseType = "expense" | "income"
+type ExpenseType = "expense" | "income" | "refunded"
 
 const TYPE_OPTIONS: { label: string; value: ExpenseType }[] = [
     { label: "Expense", value: "expense" },
     { label: "Income", value: "income" },
+    { label: "Refund", value: "refunded" as ExpenseType },
 ]
 
 export default function Form({ route }: any) {
@@ -62,7 +64,7 @@ export default function Form({ route }: any) {
                 showsVerticalScrollIndicator={false}
             >
                 <AmountSection showPrediction={!!(state.prediction && !params?.isEditing)} />
-                <DetailsSection />
+                <DetailsSection isEditing={!!params?.isEditing} />
 
                 <DateSection />
                 <SubExpensesSection />
@@ -127,15 +129,16 @@ function AmountSection({ showPrediction }: { showPrediction: boolean }) {
     )
 }
 
-function DetailsSection() {
+function DetailsSection({ isEditing: _isEditing }: { isEditing: boolean }) {
     const { state, methods } = useCreateExpenseContext()
     const { data: subAccountsData } = useSubAccounts()
+    const { data: shopsData } = useShops()
     const subAccounts = subAccountsData?.wallet.subAccounts ?? []
 
-    const [expanded, setExpanded] = useState<"category" | "spontaneous" | "account" | null>(null)
-    const toggle = (key: "category" | "spontaneous" | "account") => setExpanded((p) => (p === key ? null : key))
+    const [expanded, setExpanded] = useState<"category" | "spontaneous" | "account" | "shop" | "note" | "tags" | null>(null)
+    const toggle = (key: "category" | "spontaneous" | "account" | "shop" | "note" | "tags") => setExpanded((p) => (p === key ? null : key))
 
-    const { category, spontaneousRate, subAccountId } = state
+    const { category, spontaneousRate, subAccountId, shop, note, tags } = state
     const hasCategory = category !== "none"
     const catColor = hasCategory
         ? Color(Icons[category]?.backgroundColor ?? Colors.secondary)
@@ -262,6 +265,95 @@ function DetailsSection() {
                     )}
                 </>
             )}
+
+            <>
+                <View style={styles.divider} />
+                <Pressable onPress={() => { Feedback.trigger("impactLight"); toggle("shop") }} style={styles.row}>
+                    <Text variant="subtitle">Shop</Text>
+                    <View style={styles.rowRight}>
+                        <SymbolView name="storefront.fill" size={15} tintColor={shop ? Colors.secondary : Colors.foreground_secondary} />
+                        <Text variant="body" style={[styles.rowValue, shop ? { color: Colors.secondary } : undefined]}>
+                            {shop || "None"}
+                        </Text>
+                    </View>
+                </Pressable>
+                {expanded === "shop" && (
+                    <View style={styles.shopContainer}>
+                        <Input
+                            value={shop}
+                            onChangeText={(text) => { methods.setShop(text); methods.setShopEntityId(null) }}
+                            placeholder="Store name..."
+                            flat
+                            containerStyle={{ borderRadius: 8, marginBottom: 6 }}
+                            autoFocus
+                        />
+                        {shopsData?.shops
+                            .filter((s) => shop.length === 0 || s.name.toLowerCase().includes(shop.toLowerCase()))
+                            .slice(0, 6)
+                            .map((s) => (
+                                <Ripple
+                                    key={s.id}
+                                    onPress={() => { methods.setShop(s.name); methods.setShopEntityId(s.id); toggle("shop") }}
+                                    style={styles.shopSuggestionRow}
+                                >
+                                    <Feather name="shopping-bag" size={14} color={Colors.foreground_secondary} />
+                                    <Text style={styles.shopSuggestionText}>{s.name}</Text>
+                                </Ripple>
+                            ))}
+                    </View>
+                )}
+            </>
+
+            <>
+                <View style={styles.divider} />
+                <Pressable onPress={() => { Feedback.trigger("impactLight"); toggle("note") }} style={styles.row}>
+                    <Text variant="subtitle">Note</Text>
+                    <View style={styles.rowRight}>
+                        <SymbolView name="note.text" size={15} tintColor={note ? Colors.secondary : Colors.foreground_secondary} />
+                        <Text variant="body" style={[styles.rowValue, note ? { color: Colors.secondary } : undefined]} numberOfLines={1}>
+                            {note || "None"}
+                        </Text>
+                    </View>
+                </Pressable>
+                {expanded === "note" && (
+                    <View style={styles.shopContainer}>
+                        <Input
+                            value={note}
+                            onChangeText={methods.setNote}
+                            placeholder="Add a note..."
+                            flat
+                            multiline
+                            containerStyle={{ borderRadius: 8 }}
+                            autoFocus
+                        />
+                    </View>
+                )}
+            </>
+
+            <>
+                <View style={styles.divider} />
+                <Pressable onPress={() => { Feedback.trigger("impactLight"); toggle("tags") }} style={styles.row}>
+                    <Text variant="subtitle">Tags</Text>
+                    <View style={styles.rowRight}>
+                        <SymbolView name="tag.fill" size={15} tintColor={tags ? Colors.secondary : Colors.foreground_secondary} />
+                        <Text variant="body" style={[styles.rowValue, tags ? { color: Colors.secondary } : undefined]} numberOfLines={1}>
+                            {tags || "None"}
+                        </Text>
+                    </View>
+                </Pressable>
+                {expanded === "tags" && (
+                    <View style={styles.shopContainer}>
+                        <Input
+                            value={tags}
+                            onChangeText={methods.setTags}
+                            placeholder="e.g. food, travel, work"
+                            flat
+                            containerStyle={{ borderRadius: 8 }}
+                            autoFocus
+                        />
+                    </View>
+                )}
+            </>
         </Section>
     )
 }
@@ -442,5 +534,22 @@ const styles = StyleSheet.create({
         borderRadius: 100,
         justifyContent: "center",
         alignItems: "center",
+    },
+    shopContainer: {
+        paddingHorizontal: 10,
+        paddingBottom: 10,
+    },
+    shopSuggestionRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 8,
+        paddingHorizontal: 10,
+        paddingVertical: 10,
+        borderRadius: 8,
+    },
+    shopSuggestionText: {
+        color: Colors.foreground_secondary,
+        fontSize: 14,
+        flex: 1,
     },
 })

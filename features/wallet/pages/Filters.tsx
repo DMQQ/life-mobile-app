@@ -57,6 +57,7 @@ const FiltersForm = ({ filters, dispatch }: FiltersFormProps) => {
 
     const [timeFrom, setTimeFrom] = useState(filters.time?.from ?? "")
     const [timeTo, setTimeTo] = useState(filters.time?.to ?? "")
+    const [shopName, setShopName] = useState(filters.shopName ?? "")
 
     useEffect(() => {
         const t = setTimeout(() => dispatch({ type: "SET_TIME_FROM", payload: timeFrom }), 400)
@@ -67,6 +68,11 @@ const FiltersForm = ({ filters, dispatch }: FiltersFormProps) => {
         const t = setTimeout(() => dispatch({ type: "SET_TIME_TO", payload: timeTo }), 400)
         return () => clearTimeout(t)
     }, [timeTo])
+
+    useEffect(() => {
+        const t = setTimeout(() => dispatch({ type: "SET_SHOP_NAME", payload: shopName || undefined }), 400)
+        return () => clearTimeout(t)
+    }, [shopName])
 
     return (
         <View style={{ flex: 1 }}>
@@ -291,6 +297,17 @@ const FiltersForm = ({ filters, dispatch }: FiltersFormProps) => {
                             thumbColor={filters.scheduled === false ? Colors.primary : "rgba(255,255,255,0.85)"}
                         />
                     </View>
+                </Card>
+
+                <SectionLabel title="Shop" />
+                <Card>
+                    <Input
+                        value={shopName}
+                        onChangeText={setShopName}
+                        placeholder="Filter by shop name..."
+                        placeholderTextColor={Colors.text_dark}
+                        containerStyle={{ borderRadius: 0 }}
+                    />
                 </Card>
 
                 <SectionLabel title="Category" />

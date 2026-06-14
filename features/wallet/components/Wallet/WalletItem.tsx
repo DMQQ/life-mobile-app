@@ -29,6 +29,7 @@ interface WalletElement {
     files?: unknown
     tags?: string | null
     shop?: string | null
+    shopEntity?: { id?: string; image?: string | null } | null
 }
 
 export { Icons } from "../Expense/ExpenseIcon"
@@ -175,6 +176,7 @@ function WalletItem(
                         style={{ padding: 0 }}
                         type={item.type as "income" | "expense" | "refunded"}
                         category={(isBalanceEdit ? "edit" : item.category) as keyof typeof Icons}
+                        imageUri={!isBalanceEdit ? item.shopEntity?.image : undefined}
                     />
 
                     <View style={styles.descContainer}>
@@ -196,6 +198,20 @@ function WalletItem(
                             style={{ marginLeft: 10 }}
                         >
                             {dateFormatter(item.date)}
+                            {item.shop && (
+                                <Text
+                                    size={10}
+                                    color={Colors.secondary}
+                                    onPress={() => {
+                                        navigationRef.current?.navigate("WalletScreens", {
+                                            screen: "ExpensesList",
+                                            params: { filters: { shopName: item.shop } },
+                                        } as any)
+                                    }}
+                                >
+                                    {` • ${item.shop}`}
+                                </Text>
+                            )}
                             {item.category && (item.subscription as any)?.isActive && " • "}
                             {(item.subscription as any)?.isActive ? (
                                 <Text size={10} color="rgba(255,255,255,0.65)">

@@ -8,7 +8,7 @@ const HEIGHT = 320
 
 const CIRCLE_RADIUS = width * 0.55
 
-export default function Background({ tintColor = theme.secondary }: { tintColor?: string }) {
+export default function Background({ tintColor = theme.secondary_dark_1 }: { tintColor?: string }) {
     const accentColor = tintColor
 
     return (

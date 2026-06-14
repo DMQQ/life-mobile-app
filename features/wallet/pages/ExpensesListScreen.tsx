@@ -65,6 +65,9 @@ export default function ExpensesListScreen({ navigation, route }: WalletScreens<
         if (initialFilters.date?.to) {
             dispatch({ type: "SET_DATE_MAX", payload: initialFilters.date.to })
         }
+        if (initialFilters.shopName !== undefined) {
+            dispatch({ type: "SET_SHOP_NAME", payload: initialFilters.shopName })
+        }
     }, [])
 
     const header = useMemo(

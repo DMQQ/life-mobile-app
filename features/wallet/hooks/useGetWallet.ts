@@ -35,6 +35,12 @@ export const GET_WALLET = graphql(`
                     category
                     spontaneousRate
                     subAccountId
+                    shop
+                    shopEntity {
+                        id
+                        name
+                        image
+                    }
 
                     subscription @include(if: $includeSubscription) {
                         id
@@ -118,6 +124,7 @@ export default function useGetWallet(options?: {
             accountId: filters.accountId,
             time: { from: filters.time?.from ?? "", to: filters.time?.to ?? "" },
             scheduled: filters.scheduled,
+            shopName: filters.shopName || defaultFilters.shopName || init.shopName,
         }
     }, [filters, options?.defaultFilters])
 
@@ -140,6 +147,7 @@ export default function useGetWallet(options?: {
                 time: { from: effectiveFilters.time.from || undefined, to: effectiveFilters.time.to || undefined },
             }),
             ...(effectiveFilters.scheduled !== undefined && { schedule: effectiveFilters.scheduled }),
+            ...(effectiveFilters.shopName && { shopName: effectiveFilters.shopName }),
         } as any),
         [effectiveFilters],
     )

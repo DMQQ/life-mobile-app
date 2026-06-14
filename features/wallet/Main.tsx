@@ -18,6 +18,7 @@ import WalletCharts from "./pages/WalletCharts"
 import CorrectionMaps from "./pages/CorrectionMaps/Main"
 import ExpensesListScreen from "./pages/ExpensesListScreen"
 import SubscriptionsListScreen from "./pages/SubscriptionsListScreen"
+import Shops from "./pages/Shops/Main"
 
 interface WalletRootStack extends ParamListBase {
     Wallet: {
@@ -55,6 +56,7 @@ interface WalletRootStack extends ParamListBase {
         filters: Record<string, any>
     }
     SubscriptionsList: undefined
+    Shops: undefined
 }
 
 export type WalletScreens<Screen extends keyof WalletRootStack> = StackScreenProps<WalletRootStack, Screen>
@@ -161,6 +163,8 @@ export default function WalletScreens({ navigation, route }: WalletScreens<"Wall
                 <Stack.Screen name="ExpensesList" component={ExpensesListScreen} />
 
                 <Stack.Screen name="SubscriptionsList" component={SubscriptionsListScreen} />
+
+                <Stack.Screen name="Shops" component={Shops} options={MODAL_OPTIONS} />
             </Stack.Navigator>
         </WalletContextProvider>
     )

@@ -6,7 +6,11 @@ import { gql, useMutation, useQuery } from "@apollo/client"
 import { GET_EXPENSE } from "../hooks/getExpenseQuery"
 import { useEffect, useRef, useState } from "react"
 import { SFSymbol, SymbolView } from "expo-symbols"
-import { Pressable, StyleSheet, View } from "react-native"
+import { Image, Pressable, StyleSheet, View } from "react-native"
+import * as ImagePicker from "expo-image-picker"
+import axios from "axios"
+import Url from "@/constants/Url"
+import useSetShopImage from "../hooks/useSetShopImage"
 import { formatAmount } from "@/utils/functions/formatCurrency"
 import Text from "@/components/ui/Text/Text"
 import useDeleteActivity from "../hooks/useDeleteActivity"
@@ -45,6 +49,46 @@ export default function Expense({ route: { params }, navigation }: any) {
     const [confirmRefund, setConfirmRefund] = useState(false)
     const [confirmSubExpenseId, setConfirmSubExpenseId] = useState<string | null>(null)
     const [confirmSubscriptionAction, setConfirmSubscriptionAction] = useState(false)
+    const [shopImageLoading, setShopImageLoading] = useState(false)
+
+    const [setShopImageMutation] = useSetShopImage()
+
+    const handleSetShopImage = async () => {
+        if (!selected?.shopEntity?.id) return
+        const { granted } = await ImagePicker.requestMediaLibraryPermissionsAsync()
+        if (!granted) return
+        const picked = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ["images"],
+            allowsEditing: true,
+            aspect: [1, 1],
+            quality: 0.8,
+        })
+        if (picked.canceled || !picked.assets?.[0]) return
+        const photo = picked.assets[0]
+        setShopImageLoading(true)
+        try {
+            const formData = new FormData()
+            formData.append("file", { uri: photo.uri, name: photo.fileName || "shop.jpg", type: "image/jpeg" } as any)
+            const { data: uploadData } = await axios.post(Url.API + "/upload/single", formData, {
+                params: { type: "shop", entityId: selected.shopEntity.id },
+                headers: { "Content-Type": "multipart/form-data" },
+            })
+            const imageUrl = Array.isArray(uploadData) ? uploadData[0].url : uploadData.url
+            const result = await setShopImageMutation({ variables: { shopId: selected.shopEntity.id, imageUrl } })
+            if (result.data?.setShopImage) {
+                setSelected((prev: any) => ({
+                    ...prev,
+                    shopEntity: { ...prev.shopEntity, image: result.data!.setShopImage.image },
+                }))
+            }
+        } catch (e) {
+            console.error(e)
+        } finally {
+            setShopImageLoading(false)
+        }
+    }
+
+    console.log(JSON.stringify(selected, null, 2))
 
     const [refund, { loading: refundLoading }] = useRefund((data) => {
         if (data.refundExpense.type !== "refunded") return
@@ -205,6 +249,7 @@ export default function Expense({ route: { params }, navigation }: any) {
                                 category={selected?.category}
                                 size={60}
                                 type={selected?.type}
+                                imageUri={selected?.shopEntity?.image}
                                 containerStyle={{
                                     width: 100,
                                     height: 100,
@@ -286,7 +331,9 @@ export default function Expense({ route: { params }, navigation }: any) {
                                     style={{ width: "100%" }}
                                     dropdownMenuMode
                                     actions={subscriptionAssignActions}
-                                    onPress={(e) => handleAssignSubscription(subscriptionOptions[e.nativeEvent.index]?.id)}
+                                    onPress={(e) =>
+                                        handleAssignSubscription(subscriptionOptions[e.nativeEvent.index]?.id)
+                                    }
                                 >
                                     <ActionRow icon="shuffle" label="Assign to Subscription" />
                                 </ContextMenu>
@@ -304,6 +351,25 @@ export default function Expense({ route: { params }, navigation }: any) {
                                     last
                                 />
                             </Section>
+
+                            {selected?.shopEntity && (
+                                <Section title="Shop">
+                                    {selected.shopEntity.image && (
+                                        <Image
+                                            source={{ uri: selected.shopEntity.image }}
+                                            style={styles.shopImage}
+                                            resizeMode="contain"
+                                        />
+                                    )}
+                                    <ActionRow
+                                        icon="image"
+                                        label={selected.shopEntity.image ? "Update shop image" : "Set shop image"}
+                                        onPress={handleSetShopImage}
+                                        loading={shopImageLoading}
+                                        last
+                                    />
+                                </Section>
+                            )}
 
                             <Section title="Refund">
                                 <ActionRow
@@ -384,5 +450,11 @@ const styles = StyleSheet.create({
     emptySubRow: {
         paddingHorizontal: 15,
         paddingVertical: 14,
+    },
+    shopImage: {
+        width: 80,
+        height: 80,
+        borderRadius: 12,
+        margin: 15,
     },
 })
