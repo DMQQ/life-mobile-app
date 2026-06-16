@@ -22,7 +22,7 @@ const s = StyleSheet.create({
         marginLeft: 10,
     },
     card: {
-        backgroundColor: Color(Colors.primary_lighter).alpha(0.5).string(),
+        backgroundColor: Colors.primary_lighter,
         borderRadius: 20,
         overflow: "hidden",
         borderWidth: 1,

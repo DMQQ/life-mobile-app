@@ -47,7 +47,8 @@ export default function Navigation({ isAuthenticated, isLoading, linking }: Navi
                 initialRouteName={isAuthenticated ? "Root" : "Authentication"}
                 screenOptions={({ route }) => {
                     const focusedRoute = getFocusedRouteNameFromRoute(route)
-                    const hideTabBar = focusedRoute !== undefined && !TAB_ROOT_SCREENS.has(focusedRoute)
+                    const hideTabBar =
+                        (focusedRoute !== undefined && !TAB_ROOT_SCREENS.has(focusedRoute)) || !isAuthenticated
                     return {
                         lazy: false,
                         tabBarActiveTintColor: Colors.secondary,

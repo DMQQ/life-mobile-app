@@ -18,10 +18,12 @@ import useGetOccurrenceById from "../hooks/query/useGetOccurrenceById"
 import { Header } from "@/components"
 import useDeleteAllOccurrences from "../hooks/mutation/useDeleteAllOccurrences"
 import useRemoveTimelineMutation from "../hooks/mutation/useRemoveTimelineMutation"
+import { unregisterGeofence } from "../utils/geofenceTask"
 import { useActivityUtils } from "@/utils/hooks/useActivityManager"
 import { Feather } from "@expo/vector-icons"
 import { HeaderItem } from "@/components/ui/Header/Header"
 import Background from "@/components/ui/Background"
+import Toolbar from "@/components/Toolbar/Toolbar"
 
 const styles = StyleSheet.create({
     title: {
@@ -147,8 +149,11 @@ export default function TimelineDetails({
                     icon: data?.isCompleted ? "checkmark.circle.fill" : "circle",
                     standalone: true,
                     position: "right",
-                    onPress: () =>
-                        completeOccurrence({ variables: { input: { id: data?.id, isCompleted: !data?.isCompleted } } }),
+                    onPress: () => {
+                        const completing = !data?.isCompleted
+                        completeOccurrence({ variables: { input: { id: data?.id, isCompleted: completing } } })
+                        if (completing && data?.id) unregisterGeofence(data.id)
+                    },
                     tintColor: !data?.isCompleted ? undefined : Colors.secondary,
                 },
             ] as HeaderItem[],
@@ -196,31 +201,18 @@ export default function TimelineDetails({
                         <TimelineTodos timelineId={data?.id} sortedTodos={data?.todos || []} onAdd={handleCreateTodo} />
 
                         <FileList timelineId={data?.id} />
-
-                        <Section title="Event">
-                            <ActionRow
-                                icon="activity"
-                                label="Start Live Activity"
-                                onPress={startLiveActivityLocally}
-                                disabled={isPending}
-                                last={data?.isCompleted}
-                            />
-                            {!data?.isCompleted && (
-                                <ActionRow
-                                    icon="zap"
-                                    label="Work on it"
-                                    onPress={() => (navigation as any).navigate("TimelineDo", { timelineId: data?.id })}
-                                    last
-                                />
-                            )}
-                        </Section>
-
-                        <Text variant="caption" selectable style={styles.timelineIdText}>
-                            Event unique id: {data?.id}
-                        </Text>
                     </View>
                 )}
             </Animated.ScrollView>
+
+            <Toolbar>
+                <Toolbar.Item sfIcon="bell" onPress={startLiveActivityLocally} disabled={isPending} />
+                <Toolbar.Spacer />
+                <Toolbar.Item
+                    sfIcon="play"
+                    onPress={() => (navigation as any).navigate("TimelineDo", { timelineId: data?.id })}
+                />
+            </Toolbar>
         </View>
     )
 }

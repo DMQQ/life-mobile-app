@@ -7,9 +7,10 @@ interface TimelineDayPageProps {
     date: string
     contentPaddingTop?: number
     onScroll?: (...args: any[]) => void
+    filter?: "all" | "active" | "completed"
 }
 
-export default function TimelineDayPage({ date, contentPaddingTop = 0, onScroll }: TimelineDayPageProps) {
+export default function TimelineDayPage({ date, contentPaddingTop = 0, onScroll, filter }: TimelineDayPageProps) {
     const { data, refetch } = useGetOccurrencesQuery(date)
     const [refreshing, setRefreshing] = useState(false)
 
@@ -23,9 +24,10 @@ export default function TimelineDayPage({ date, contentPaddingTop = 0, onScroll 
         <FeedTimeline
             events={data?.occurrences || []}
             date={date}
+            filter={filter}
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
             onScroll={onScroll}
-            style={{ flex: 1, paddingTop: contentPaddingTop }}
+            style={{ flex: 1, paddingTop: 250 }}
         />
     )
 }

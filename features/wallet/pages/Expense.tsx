@@ -21,7 +21,7 @@ import Animated, { useAnimatedScrollHandler, useSharedValue } from "react-native
 import MapPicker from "../components/Expense/Map"
 import SubexpenseStack from "../components/Expense/SubexpenseStack"
 import { CollapsibleThemedCalendar } from "@/components/ui/ThemedCalendar/ThemedCalendar"
-import ContextMenu from "react-native-context-menu-view"
+import Toolbar from "@/components/Toolbar/Toolbar"
 import ActionRow from "@/components/ui/ActionRow"
 import dayjs from "dayjs"
 import MonthlyBreakdown from "../components/Expense/MonthlyBreakdown"
@@ -87,8 +87,6 @@ export default function Expense({ route: { params }, navigation }: any) {
             setShopImageLoading(false)
         }
     }
-
-    console.log(JSON.stringify(selected, null, 2))
 
     const [refund, { loading: refundLoading }] = useRefund((data) => {
         if (data.refundExpense.type !== "refunded") return
@@ -178,11 +176,6 @@ export default function Expense({ route: { params }, navigation }: any) {
             }))
         }
     }
-
-    const subscriptionAssignActions = subscriptionOptions.map((o) => ({
-        title: o.description,
-        systemIcon: "arrow.triangle.swap" as string,
-    }))
 
     const scrollY = useSharedValue(0)
     const onScroll = useAnimatedScrollHandler({
@@ -327,29 +320,6 @@ export default function Expense({ route: { params }, navigation }: any) {
                                     isSubscriptionActive={isSubscriptionActive}
                                     selected={selected}
                                 />
-                                <ContextMenu
-                                    style={{ width: "100%" }}
-                                    dropdownMenuMode
-                                    actions={subscriptionAssignActions}
-                                    onPress={(e) =>
-                                        handleAssignSubscription(subscriptionOptions[e.nativeEvent.index]?.id)
-                                    }
-                                >
-                                    <ActionRow icon="shuffle" label="Assign to Subscription" />
-                                </ContextMenu>
-                                <ActionRow
-                                    icon={isSubscriptionActive ? "pause-circle" : "play-circle"}
-                                    label={
-                                        hasSubscription
-                                            ? isSubscriptionActive
-                                                ? "Disable Subscription"
-                                                : "Enable Subscription"
-                                            : "Create Subscription"
-                                    }
-                                    onPress={() => setConfirmSubscriptionAction(true)}
-                                    loading={isSubscriptionLoading}
-                                    last
-                                />
                             </Section>
 
                             {selected?.shopEntity && (
@@ -370,17 +340,6 @@ export default function Expense({ route: { params }, navigation }: any) {
                                     />
                                 </Section>
                             )}
-
-                            <Section title="Refund">
-                                <ActionRow
-                                    icon="rotate-ccw"
-                                    label="Refund"
-                                    onPress={() => setConfirmRefund(true)}
-                                    disabled={selected?.type === "refunded" || refundLoading}
-                                    loading={refundLoading}
-                                    last
-                                />
-                            </Section>
                         </View>
 
                         {data?.expenseSimilar?.length > 1 && (
@@ -417,6 +376,30 @@ export default function Expense({ route: { params }, navigation }: any) {
 
                     <AddSubExpenseSheet ref={addSubExpenseSheetRef} onAdd={handleAddSubExpense} />
 
+                    <Toolbar>
+                        <Toolbar.Item
+                            sfIcon={"shuffle" as SFSymbol}
+                            menuItems={subscriptionOptions.map((o) => ({
+                                label: o.description || "None",
+                                sfIcon: "arrow.triangle.swap" as SFSymbol,
+                                onPress: () => handleAssignSubscription(o.id),
+                            }))}
+                        />
+                        <Toolbar.Spacer />
+                        <Toolbar.Group>
+                            <Toolbar.Item
+                                sfIcon={(isSubscriptionActive ? "pause.circle" : "play.circle") as SFSymbol}
+                                onPress={() => setConfirmSubscriptionAction(true)}
+                                disabled={isSubscriptionLoading}
+                            />
+                            <Toolbar.Item
+                                sfIcon={"arrow.counterclockwise" as SFSymbol}
+                                onPress={() => setConfirmRefund(true)}
+                                disabled={selected?.type === "refunded" || refundLoading}
+                            />
+                        </Toolbar.Group>
+                    </Toolbar>
+
                     <ConfirmDialog
                         isVisible={confirmSubscriptionAction}
                         onDismiss={() => setConfirmSubscriptionAction(false)}
@@ -442,7 +425,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 15,
     },
     bottomSpacer: {
-        height: 40,
+        height: 100,
     },
     addSubBtn: {
         padding: 2,

@@ -6,7 +6,8 @@ import dayjs from "dayjs"
 import { SFSymbol } from "expo-symbols"
 import moment from "moment"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { View } from "react-native"
+import { StyleSheet, View } from "react-native"
+import GroupSelector from "@/components/ui/GroupSelector"
 import { useScreenSearch } from "@/utils/hooks/useScreenSearch"
 import { TimelineScreenLoader } from "../components/LoaderSkeleton"
 import TimelineContent from "../components/TimelineContent"
@@ -18,6 +19,13 @@ import Animated, { withTiming } from "react-native-reanimated"
 import useTrackScroll from "@/utils/hooks/ui/useTrackScroll"
 import Background from "@/components/ui/Background"
 
+const FILTER_BAR_HEIGHT = 52
+const FILTER_OPTIONS = [
+    { label: "All", value: "all" as const },
+    { label: "To do", value: "active" as const },
+    { label: "Done", value: "completed" as const },
+]
+
 export default function Timeline({ navigation, route }: TimelineScreenProps<"Timeline">) {
     const timeline = useTimeline({ navigation, route })
     usePrefetchMonthRange(timeline.selected)
@@ -25,8 +33,10 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
     const headerHeight = insets.top + 50
     const expandedHeaderHeight = insets.top * 3 + 90
     const dateListHeight = 83
-    const dayContentPaddingTop = expandedHeaderHeight + dateListHeight
+    const dayContentPaddingTop = expandedHeaderHeight + dateListHeight + FILTER_BAR_HEIGHT
     const compactContentPaddingTop = headerHeight
+
+    const [filter, setFilter] = useState<"all" | "active" | "completed">("all")
 
     const [scrollY, onScroll] = useTrackScroll()
 
@@ -143,6 +153,12 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
                 </Animated.View>
             )}
 
+            {!isSearchActive && isDayView && (
+                <Animated.View style={[styles.filterBar, { top: headerHeight + dateListHeight }]}>
+                    <GroupSelector size="small" value={filter} onChange={setFilter} options={FILTER_OPTIONS} />
+                </Animated.View>
+            )}
+
             <TimelineContent
                 switchView={timeline.switchView}
                 setSwitchView={timeline.setSwitchView}
@@ -158,7 +174,18 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
                 onScroll={onScroll}
                 onRefresh={onRefresh}
                 refreshing={refreshing}
+                filter={filter}
             />
         </View>
     )
 }
+
+const styles = StyleSheet.create({
+    filterBar: {
+        position: "absolute",
+        left: 15,
+        right: 15,
+        zIndex: 100,
+        paddingTop: 8,
+    },
+})

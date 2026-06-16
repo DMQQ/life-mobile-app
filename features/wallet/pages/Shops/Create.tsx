@@ -1,7 +1,6 @@
-import { FONTS } from "@/constants/Fonts"
 import Colors from "@/constants/Colors"
 import Layout from "@/constants/Layout"
-import Text from "@/components/ui/Text/Text"
+import { Body, Caption } from "@/components"
 import Input from "@/components/ui/TextInput/TextInput"
 import Section from "@/components/ui/Section"
 import GlassView from "@/components/ui/GlassView"
@@ -13,14 +12,7 @@ import axios from "axios"
 import Url from "@/constants/Url"
 import Color from "color"
 import MapView, { Marker, PROVIDER_DEFAULT } from "react-native-maps"
-import {
-    ActivityIndicator,
-    Image,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    View,
-} from "react-native"
+import { ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, View } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { useCallback, useLayoutEffect, useRef, useState } from "react"
 import Feedback from "react-native-haptic-feedback"
@@ -39,7 +31,7 @@ export default function ShopsCreate({ navigation, route }: any) {
 
     const [name, setName] = useState(shop?.name ?? "")
     const [imageUri, setImageUri] = useState<string | null>(null)
-    const existingImage = shop?.image ?? null
+    const existingImage = shop?.image ? Url.API + "/upload/images/" + shop.image : null
 
     const [addressQuery, setAddressQuery] = useState(shop?.location?.name ?? "")
     const [searching, setSearching] = useState(false)
@@ -171,9 +163,9 @@ export default function ShopsCreate({ navigation, route }: any) {
                     {saving ? (
                         <ActivityIndicator size={18} color={Colors.secondary} />
                     ) : (
-                        <Text style={[styles.saveBtn, (!valid || saving) && styles.saveBtnDisabled]}>
+                        <Body style={[styles.saveBtn, (!valid || saving) && styles.saveBtnDisabled]}>
                             {isEditing ? "Save" : "Add"}
-                        </Text>
+                        </Body>
                     )}
                 </Pressable>
             ),
@@ -197,18 +189,18 @@ export default function ShopsCreate({ navigation, route }: any) {
                         ) : (
                             <View style={[StyleSheet.absoluteFill, styles.heroPlaceholder]}>
                                 <SymbolView name="storefront.fill" size={52} tintColor={Colors.foreground_secondary} />
-                                <Text style={styles.heroPlaceholderLabel}>Tap to add photo</Text>
+                                <Caption style={styles.heroPlaceholderLabel}>Tap to add photo</Caption>
                             </View>
                         )}
                     </Pressable>
                     <GlassView style={styles.heroBadge} pointerEvents="none">
                         <Feather name="camera" size={13} color={Colors.foreground} />
-                        <Text style={styles.heroBadgeText}>{displayImage ? "Change photo" : "Add photo"}</Text>
+                        <Caption style={styles.heroBadgeText}>{displayImage ? "Change photo" : "Add photo"}</Caption>
                     </GlassView>
                     {imageUri && (
                         <Pressable onPress={() => setImageUri(null)} style={styles.heroRemove} hitSlop={8}>
                             <GlassView style={styles.heroRemoveInner}>
-                                <Feather name="x" size={14} color="#F07070" />
+                                <Feather name="x" size={14} color={Colors.danger} />
                             </GlassView>
                         </Pressable>
                     )}
@@ -232,7 +224,12 @@ export default function ShopsCreate({ navigation, route }: any) {
 
                 <Section title="Location">
                     <View style={styles.searchRow}>
-                        <Feather name="search" size={16} color={searching ? Colors.secondary : Colors.foreground_secondary} style={{ flexShrink: 0 }} />
+                        <Feather
+                            name="search"
+                            size={16}
+                            color={searching ? Colors.secondary : Colors.foreground_secondary}
+                            style={{ flexShrink: 0 }}
+                        />
                         <Input
                             value={addressQuery}
                             onChangeText={handleAddressChange}
@@ -240,7 +237,11 @@ export default function ShopsCreate({ navigation, route }: any) {
                             flat
                             containerStyle={styles.searchInput}
                         />
-                        <Ripple onPress={useCurrentLocation} style={styles.locateBtn} rippleColor={Color(Colors.secondary).alpha(0.15).string()}>
+                        <Ripple
+                            onPress={useCurrentLocation}
+                            style={styles.locateBtn}
+                            rippleColor={Color(Colors.secondary).alpha(0.15).string()}
+                        >
                             {searching ? (
                                 <ActivityIndicator size={16} color={Colors.secondary} />
                             ) : (
@@ -268,14 +269,16 @@ export default function ShopsCreate({ navigation, route }: any) {
                             {detectedAddress && (
                                 <View style={styles.addressRow}>
                                     <Feather name="map-pin" size={12} color={Colors.foreground_secondary} />
-                                    <Text style={styles.addressText} numberOfLines={1}>{detectedAddress}</Text>
+                                    <Caption style={styles.addressText} numberOfLines={1}>
+                                        {detectedAddress}
+                                    </Caption>
                                 </View>
                             )}
                         </>
                     ) : (
                         <View style={styles.mapEmpty}>
                             <Feather name="map" size={22} color={Colors.foreground_secondary} />
-                            <Text style={styles.mapEmptyText}>Search an address or use your location</Text>
+                            <Caption style={styles.mapEmptyText}>Search an address or use your location</Caption>
                         </View>
                     )}
                 </Section>
@@ -308,15 +311,12 @@ const styles = StyleSheet.create({
         borderColor: Colors.borderColor,
     },
     heroPlaceholder: {
-        flex: 1,
         alignItems: "center",
         justifyContent: "center",
         gap: 10,
     },
     heroPlaceholderLabel: {
         color: Colors.foreground_secondary,
-        fontSize: 14,
-        fontFamily: FONTS.medium,
     },
     heroBadge: {
         position: "absolute",
@@ -331,8 +331,6 @@ const styles = StyleSheet.create({
     },
     heroBadgeText: {
         color: Colors.foreground,
-        fontSize: 12,
-        fontFamily: FONTS.medium,
     },
     heroRemove: {
         position: "absolute",
@@ -352,7 +350,7 @@ const styles = StyleSheet.create({
     },
     nameInput: {
         fontSize: 17,
-        fontFamily: FONTS.medium,
+        fontWeight: "500",
     },
     searchRow: {
         flexDirection: "row",
@@ -385,7 +383,6 @@ const styles = StyleSheet.create({
         width: Layout.screen.width - 32,
         height: 220,
         alignSelf: "center",
-        borderRadius: 0,
     },
     addressRow: {
         flexDirection: "row",
@@ -398,7 +395,6 @@ const styles = StyleSheet.create({
     },
     addressText: {
         color: Colors.foreground_secondary,
-        fontSize: 12,
         flex: 1,
     },
     mapEmpty: {
@@ -409,14 +405,13 @@ const styles = StyleSheet.create({
     },
     mapEmptyText: {
         color: Colors.foreground_secondary,
-        fontSize: 13,
         textAlign: "center",
         paddingHorizontal: 20,
     },
     saveBtn: {
-        fontSize: 16,
-        fontFamily: FONTS.semibold,
+        fontWeight: "600",
         color: Colors.secondary,
+        fontSize: 16,
     },
     saveBtnDisabled: {
         opacity: 0.35,

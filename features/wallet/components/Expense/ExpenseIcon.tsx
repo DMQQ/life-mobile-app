@@ -1,6 +1,7 @@
 import Colors from "@/constants/Colors"
+import Url from "@/constants/Url"
 import lowOpacity from "@/utils/functions/lowOpacity"
-import { AntDesign, Entypo, Feather, FontAwesome5, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons"
+import { AntDesign, Entypo, FontAwesome5, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons"
 import React from "react"
 import { Image, StyleProp, StyleSheet, View, ViewStyle } from "react-native"
 
@@ -665,26 +666,35 @@ export const CategoryIcon = (props: {
 
     const backgroundColor = Icons[category]?.backgroundColor
 
+    const size = props?.size ?? 20
+
     return (
         <View style={[styles.icon_container, props.style]}>
             <View
                 style={[
                     styles.iconContainer,
                     {
-                        backgroundColor: props.imageUri ? "transparent" : !props.clear ? lowOpacity(backgroundColor, 15) : undefined,
+                        backgroundColor: props.imageUri
+                            ? "transparent"
+                            : !props.clear
+                              ? lowOpacity(backgroundColor, 15)
+                              : undefined,
                         borderWidth: props.imageUri ? 0 : !props.clear ? 1 : 0,
                         borderColor: !props.clear ? lowOpacity(backgroundColor, 20) : undefined,
-                        overflow: props.imageUri ? "hidden" : undefined,
                     },
                     props.containerStyle,
                 ]}
             >
                 {props.imageUri ? (
-                    <Image source={{ uri: props.imageUri }} style={{ width: "100%", height: "100%" }} resizeMode="contain" />
+                    <Image
+                        source={{ uri: Url.API + "/upload/images/" + props.imageUri }}
+                        style={{ width: size * 2, height: size * 2, borderRadius: 100 }}
+                        resizeMode="cover"
+                    />
                 ) : (
                     Icons[category]?.icon &&
                     React.cloneElement(Icons[category]?.icon, {
-                        size: props.size || 20,
+                        size,
                         ...(props.color ? { color: props.color } : {}),
                         style: [
                             styles.clonedIcon,

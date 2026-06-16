@@ -338,12 +338,21 @@ function FeedItem({ event }: FeedItemProps) {
 interface FeedTimelineProps extends Partial<ScrollViewProps> {
     events: OccurrenceItem[]
     date: string
+    filter?: "all" | "active" | "completed"
     children?: React.ReactNode
     onScroll?: (event: any) => void
 }
 
-function FeedTimeline({ events, date, children, onScroll, ...scrollProps }: FeedTimelineProps) {
-    const sorted = useMemo(() => [...events].sort((a, b) => a.beginTime.localeCompare(b.beginTime)), [events])
+function FeedTimeline({ events, date, filter, children, onScroll, ...scrollProps }: FeedTimelineProps) {
+    const sorted = useMemo(() => {
+        const visible =
+            filter === "active"
+                ? events.filter((e) => !e.isCompleted)
+                : filter === "completed"
+                  ? events.filter((e) => e.isCompleted)
+                  : events
+        return [...visible].sort((a, b) => a.beginTime.localeCompare(b.beginTime))
+    }, [events, filter])
     const heading = dayjs(date).isSame(dayjs(), "day") ? "Today" : dayjs(date).format("dddd")
     const isEmpty = sorted.length === 0
 

@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react"
 import { ActivityIndicator, FlatList, StyleSheet, TouchableOpacity, View } from "react-native"
 import Svg, { Circle, Defs, G, LinearGradient, Stop } from "react-native-svg"
 import Text from "@/components/ui/Text/Text"
-import { Header } from "@/components"
+import { Header, ModalHeader } from "@/components"
 import useGetOccurrenceById from "../hooks/query/useGetOccurrenceById"
 import useCompleteOccurrence from "../hooks/mutation/useCompleteOccurrence"
 import useCompleteTodo from "../hooks/mutation/useCompleteTodo"
@@ -29,7 +29,13 @@ function formatTime(seconds: number) {
     return `${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`
 }
 
-function TodoRow({ todo, timelineId }: { todo: { id: string; title: string; isCompleted: boolean }; timelineId: string }) {
+function TodoRow({
+    todo,
+    timelineId,
+}: {
+    todo: { id: string; title: string; isCompleted: boolean }
+    timelineId: string
+}) {
     const [complete, { loading }] = useCompleteTodo({
         todoId: todo.id,
         timelineId,
@@ -37,7 +43,11 @@ function TodoRow({ todo, timelineId }: { todo: { id: string; title: string; isCo
     })
 
     return (
-        <TouchableOpacity onPress={() => complete()} style={[styles.todoRow, todo.isCompleted && styles.todoRowDone]} activeOpacity={0.7}>
+        <TouchableOpacity
+            onPress={() => complete()}
+            style={[styles.todoRow, todo.isCompleted && styles.todoRowDone]}
+            activeOpacity={0.7}
+        >
             {loading ? (
                 <ActivityIndicator size="small" color={Colors.secondary} style={{ width: 24, height: 24 }} />
             ) : (
@@ -76,7 +86,10 @@ export default function TimelineDoScreen({ route, navigation }: TimelineScreenPr
         if (!isRunning) return
         intervalRef.current = setInterval(() => {
             setRemaining((prev) => {
-                if (prev <= 0) { clearInterval(intervalRef.current!); return 0 }
+                if (prev <= 0) {
+                    clearInterval(intervalRef.current!)
+                    return 0
+                }
                 return prev - 1
             })
         }, 1000)
@@ -99,13 +112,7 @@ export default function TimelineDoScreen({ route, navigation }: TimelineScreenPr
 
     return (
         <View style={styles.container}>
-            <Header
-                shadow={false}
-                backIcon={<AntDesign name="close" size={20} color="#fff" />}
-                goBack
-                isScreenModal
-                initialHeight={80}
-            />
+            <ModalHeader onClose={() => navigation.goBack()} />
 
             {loading || !occurrence ? (
                 <ActivityIndicator color={Colors.secondary} size="large" style={{ flex: 1 }} />
@@ -124,7 +131,8 @@ export default function TimelineDoScreen({ route, navigation }: TimelineScreenPr
                                 <View style={styles.timeRangeRow}>
                                     <Ionicons name="time-outline" size={13} color={Colors.foreground_secondary} />
                                     <Text style={styles.taskTimeRange}>
-                                        {moment(occurrence.beginTime, "HH:mm").format("HH:mm")} – {moment(occurrence.endTime, "HH:mm").format("HH:mm")}
+                                        {moment(occurrence.beginTime, "HH:mm").format("HH:mm")} –{" "}
+                                        {moment(occurrence.endTime, "HH:mm").format("HH:mm")}
                                     </Text>
                                 </View>
                             </View>
@@ -133,20 +141,31 @@ export default function TimelineDoScreen({ route, navigation }: TimelineScreenPr
                                 <View style={styles.ringWrapper}>
                                     <Svg width={SIZE} height={SIZE}>
                                         <Defs>
-                                            <LinearGradient id="arcGrad" x1="0" y1="0" x2={SIZE} y2={SIZE} gradientUnits="userSpaceOnUse">
+                                            <LinearGradient
+                                                id="arcGrad"
+                                                x1="0"
+                                                y1="0"
+                                                x2={SIZE}
+                                                y2={SIZE}
+                                                gradientUnits="userSpaceOnUse"
+                                            >
                                                 <Stop offset="0" stopColor={Colors.secondary_light_2} stopOpacity="1" />
                                                 <Stop offset="1" stopColor={Colors.secondary} stopOpacity="1" />
                                             </LinearGradient>
                                         </Defs>
                                         <Circle
-                                            cx={SIZE / 2} cy={SIZE / 2} r={RADIUS}
+                                            cx={SIZE / 2}
+                                            cy={SIZE / 2}
+                                            r={RADIUS}
                                             stroke={lowOpacity(arcColor, 0.12)}
                                             strokeWidth={STROKE}
                                             fill="none"
                                         />
                                         <G transform={`rotate(-90 ${SIZE / 2} ${SIZE / 2})`}>
                                             <Circle
-                                                cx={SIZE / 2} cy={SIZE / 2} r={RADIUS}
+                                                cx={SIZE / 2}
+                                                cy={SIZE / 2}
+                                                r={RADIUS}
                                                 stroke={isExpired ? Colors.danger : "url(#arcGrad)"}
                                                 strokeWidth={STROKE}
                                                 fill="none"
@@ -173,7 +192,12 @@ export default function TimelineDoScreen({ route, navigation }: TimelineScreenPr
                                     style={styles.sideBtn}
                                     activeOpacity={0.7}
                                 >
-                                    <View style={[styles.sideBtnIcon, { backgroundColor: lowOpacity(Colors.danger, 0.12) }]}>
+                                    <View
+                                        style={[
+                                            styles.sideBtnIcon,
+                                            { backgroundColor: lowOpacity(Colors.danger, 0.12) },
+                                        ]}
+                                    >
                                         <Ionicons name="stop" size={18} color={Colors.danger} />
                                     </View>
                                     <Text style={styles.sideBtnLabel}>Stop</Text>
@@ -193,7 +217,12 @@ export default function TimelineDoScreen({ route, navigation }: TimelineScreenPr
                                     style={styles.sideBtn}
                                     activeOpacity={0.7}
                                 >
-                                    <View style={[styles.sideBtnIcon, { backgroundColor: lowOpacity(Colors.secondary, 0.12) }]}>
+                                    <View
+                                        style={[
+                                            styles.sideBtnIcon,
+                                            { backgroundColor: lowOpacity(Colors.secondary, 0.12) },
+                                        ]}
+                                    >
                                         {completing ? (
                                             <ActivityIndicator size="small" color={Colors.secondary} />
                                         ) : (
@@ -209,12 +238,16 @@ export default function TimelineDoScreen({ route, navigation }: TimelineScreenPr
                                     <View style={styles.todosHeaderTop}>
                                         <Text style={styles.todosTitle}>Tasks</Text>
                                         <Text style={styles.todosCount}>
-                                            <Text style={{ color: Colors.secondary, fontFamily: FONTS.bold }}>{completedCount}</Text>
+                                            <Text style={{ color: Colors.secondary, fontFamily: FONTS.bold }}>
+                                                {completedCount}
+                                            </Text>
                                             {"/" + todos.length}
                                         </Text>
                                     </View>
                                     <View style={styles.todoProgress}>
-                                        <View style={[styles.todoProgressFill, { width: `${todoPct * 100}%` as any }]} />
+                                        <View
+                                            style={[styles.todoProgressFill, { width: `${todoPct * 100}%` as any }]}
+                                        />
                                     </View>
                                 </View>
                             )}
@@ -222,12 +255,18 @@ export default function TimelineDoScreen({ route, navigation }: TimelineScreenPr
                             {todos.length === 0 && (
                                 <View style={styles.emptyState}>
                                     <View style={styles.emptyIcon}>
-                                        <Ionicons name="checkbox-outline" size={28} color={Colors.foreground_secondary} />
+                                        <Ionicons
+                                            name="checkbox-outline"
+                                            size={28}
+                                            color={Colors.foreground_secondary}
+                                        />
                                     </View>
                                     <Text style={styles.emptyText}>No tasks added</Text>
                                     <TouchableOpacity
                                         style={styles.addTodoBtn}
-                                        onPress={() => (navigation as any).navigate("CreateTimelineTodos", { timelineId })}
+                                        onPress={() =>
+                                            (navigation as any).navigate("CreateTimelineTodos", { timelineId })
+                                        }
                                     >
                                         <Ionicons name="add" size={15} color={Colors.secondary} />
                                         <Text style={styles.addTodoBtnText}>Add tasks</Text>

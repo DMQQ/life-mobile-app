@@ -21,10 +21,11 @@ interface DayPageProps {
     date: string
     contentPaddingTop: number
     onScroll?: (...args: any[]) => void
+    filter?: "all" | "active" | "completed"
 }
 
-const DayPage = memo(({ date, contentPaddingTop, onScroll }: DayPageProps) => (
-    <TimelineDayPage date={date} contentPaddingTop={contentPaddingTop} onScroll={onScroll} />
+const DayPage = memo(({ date, contentPaddingTop, onScroll, filter }: DayPageProps) => (
+    <TimelineDayPage date={date} contentPaddingTop={contentPaddingTop} onScroll={onScroll} filter={filter} />
 ))
 
 interface DayViewProps {
@@ -32,9 +33,10 @@ interface DayViewProps {
     setSelected: (date: string) => void
     contentPaddingTop: number
     onScroll?: (...args: any[]) => void
+    filter?: "all" | "active" | "completed"
 }
 
-export default function DayView({ selectedDate, setSelected, contentPaddingTop, onScroll }: DayViewProps) {
+export default function DayView({ selectedDate, setSelected, contentPaddingTop, onScroll, filter }: DayViewProps) {
     const pagerRef = useRef<PagerView>(null)
     const targetGlobalPage = pageForDay(selectedDate)
     const lastGlobalPageRef = useRef(targetGlobalPage)
@@ -94,7 +96,7 @@ export default function DayView({ selectedDate, setSelected, contentPaddingTop, 
         >
             {pages.map((globalPage) => (
                 <View key={`d${globalPage}`} style={{ flex: 1 }}>
-                    <DayPage date={dayForPage(globalPage)} contentPaddingTop={contentPaddingTop} onScroll={onScroll} />
+                    <DayPage date={dayForPage(globalPage)} contentPaddingTop={contentPaddingTop} onScroll={onScroll} filter={filter} />
                 </View>
             ))}
         </PagerView>

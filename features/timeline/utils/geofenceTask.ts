@@ -24,6 +24,10 @@ TaskManager.defineTask(GEOFENCE_TASK, async ({ data, error }: TaskManager.TaskMa
             title: match.title,
             body: `You're near the location for this event.`,
             sound: true,
+            data: {
+                type: "timeline",
+                eventId: match.occurrenceId,
+            },
         },
         trigger: null,
     })

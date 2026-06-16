@@ -1,8 +1,5 @@
-import { FONTS } from "@/constants/Fonts"
 import Colors from "@/constants/Colors"
-import Text from "@/components/ui/Text/Text"
-import GlassView from "@/components/ui/GlassView"
-import { ConfirmDialog } from "@/components"
+import { ConfirmDialog, Body, Caption } from "@/components"
 import { Feather } from "@expo/vector-icons"
 import { SymbolView } from "expo-symbols"
 import * as ImagePicker from "expo-image-picker"
@@ -14,6 +11,7 @@ import { ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, View } fro
 import { SafeAreaView } from "react-native-safe-area-context"
 import Ripple from "react-native-material-ripple"
 import Feedback from "react-native-haptic-feedback"
+import GlassView from "@/components/ui/GlassView"
 import useDeleteShop from "../../hooks/useDeleteShop"
 import useShops, { ShopItem } from "../../hooks/useShops"
 
@@ -29,10 +27,7 @@ export default function ShopDetails({ navigation, route }: any) {
         navigation.setOptions({
             title: shop.name,
             headerRight: () => (
-                <Pressable
-                    onPress={() => navigation.navigate("Create", { shop })}
-                    hitSlop={12}
-                >
+                <Pressable onPress={() => navigation.navigate("Create", { shop })} hitSlop={12}>
                     <Feather name="edit-2" size={18} color={Colors.secondary} />
                 </Pressable>
             ),
@@ -80,9 +75,13 @@ export default function ShopDetails({ navigation, route }: any) {
             <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
                 <Pressable onPress={handleSetImage} style={styles.imageTouchable}>
                     {shop.image ? (
-                        <Image source={{ uri: shop.image }} style={styles.image} resizeMode="contain" />
+                        <Image
+                            source={{ uri: Url.API + "/upload/images/" + shop.image }}
+                            style={StyleSheet.absoluteFill}
+                            resizeMode="cover"
+                        />
                     ) : (
-                        <GlassView style={styles.imagePlaceholder}>
+                        <GlassView style={[StyleSheet.absoluteFill, styles.imagePlaceholder]}>
                             <SymbolView name="storefront.fill" size={44} tintColor={Colors.foreground_secondary} />
                         </GlassView>
                     )}
@@ -90,17 +89,17 @@ export default function ShopDetails({ navigation, route }: any) {
                         {uploading ? (
                             <ActivityIndicator size={16} color={Colors.foreground} />
                         ) : (
-                            <Feather name="camera" size={16} color={Colors.foreground} />
+                            <Feather name="camera" size={14} color={Colors.foreground} />
                         )}
-                        <Text style={styles.imageOverlayText}>{shop.image ? "Change" : "Add image"}</Text>
+                        <Caption style={styles.overlayText}>{shop.image ? "Change" : "Add image"}</Caption>
                     </GlassView>
                 </Pressable>
 
                 <View style={styles.card}>
                     <View style={styles.cardRow}>
                         <SymbolView name="storefront.fill" size={14} tintColor={Colors.foreground_secondary} />
-                        <Text style={styles.cardLabel}>Name</Text>
-                        <Text style={styles.cardValue}>{shop.name}</Text>
+                        <Caption style={styles.cardLabel}>Name</Caption>
+                        <Body style={styles.cardValue}>{shop.name}</Body>
                     </View>
 
                     {shop.osmId && (
@@ -108,8 +107,8 @@ export default function ShopDetails({ navigation, route }: any) {
                             <View style={styles.divider} />
                             <View style={styles.cardRow}>
                                 <SymbolView name="map.fill" size={14} tintColor={Colors.foreground_secondary} />
-                                <Text style={styles.cardLabel}>OSM ID</Text>
-                                <Text style={styles.cardValue}>{shop.osmId}</Text>
+                                <Caption style={styles.cardLabel}>OSM ID</Caption>
+                                <Body style={styles.cardValue}>{shop.osmId}</Body>
                             </View>
                         </>
                     )}
@@ -119,8 +118,10 @@ export default function ShopDetails({ navigation, route }: any) {
                             <View style={styles.divider} />
                             <View style={styles.cardRow}>
                                 <Feather name="map-pin" size={14} color={Colors.foreground_secondary} />
-                                <Text style={styles.cardLabel}>Location</Text>
-                                <Text style={styles.cardValue} numberOfLines={2}>{shop.location.name}</Text>
+                                <Caption style={styles.cardLabel}>Location</Caption>
+                                <Body style={styles.cardValue} numberOfLines={2}>
+                                    {shop.location.name}
+                                </Body>
                             </View>
                         </>
                     )}
@@ -136,7 +137,7 @@ export default function ShopDetails({ navigation, route }: any) {
                         rippleColor={Color(Colors.secondary).alpha(0.1).string()}
                     >
                         <Feather name="edit-2" size={16} color={Colors.secondary} />
-                        <Text style={[styles.actionText, { color: Colors.secondary }]}>Edit shop name</Text>
+                        <Body style={[styles.actionText, { color: Colors.secondary }]}>Edit shop name</Body>
                         <Feather name="chevron-right" size={15} color={Colors.foreground_secondary} />
                     </Ripple>
 
@@ -148,7 +149,7 @@ export default function ShopDetails({ navigation, route }: any) {
                         rippleColor={Color(Colors.secondary).alpha(0.1).string()}
                     >
                         <Feather name="camera" size={16} color={Colors.foreground_secondary} />
-                        <Text style={styles.actionText}>{shop.image ? "Update image" : "Set image"}</Text>
+                        <Body style={styles.actionText}>{shop.image ? "Update image" : "Set image"}</Body>
                         <Feather name="chevron-right" size={15} color={Colors.foreground_secondary} />
                     </Ripple>
 
@@ -160,10 +161,10 @@ export default function ShopDetails({ navigation, route }: any) {
                             setShowDelete(true)
                         }}
                         style={styles.actionRow}
-                        rippleColor="rgba(240,112,112,0.1)"
+                        rippleColor={Color(Colors.danger).alpha(0.1).string()}
                     >
-                        <Feather name="trash-2" size={16} color="#F07070" />
-                        <Text style={[styles.actionText, { color: "#F07070" }]}>Delete shop</Text>
+                        <Feather name="trash-2" size={16} color={Colors.danger} />
+                        <Body style={[styles.actionText, { color: Colors.danger }]}>Delete shop</Body>
                     </Ripple>
                 </View>
             </ScrollView>
@@ -202,13 +203,7 @@ const styles = StyleSheet.create({
         marginTop: 8,
         marginBottom: 4,
     },
-    image: {
-        width: "100%",
-        height: "100%",
-    },
     imagePlaceholder: {
-        width: "100%",
-        height: "100%",
         justifyContent: "center",
         alignItems: "center",
     },
@@ -217,17 +212,15 @@ const styles = StyleSheet.create({
         bottom: 0,
         left: 0,
         right: 0,
-        height: 40,
+        height: 38,
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "center",
         gap: 6,
         borderRadius: 0,
     },
-    imageOverlayText: {
+    overlayText: {
         color: Colors.foreground,
-        fontSize: 13,
-        fontFamily: FONTS.medium,
     },
     card: {
         width: "100%",
@@ -246,15 +239,14 @@ const styles = StyleSheet.create({
     },
     cardLabel: {
         color: Colors.foreground_secondary,
-        fontSize: 14,
         flex: 1,
     },
     cardValue: {
         color: Colors.foreground,
-        fontSize: 14,
-        fontFamily: FONTS.medium,
+        fontWeight: "500",
         textAlign: "right",
         flexShrink: 1,
+        fontSize: 14,
     },
     divider: {
         height: StyleSheet.hairlineWidth,
@@ -277,8 +269,7 @@ const styles = StyleSheet.create({
     },
     actionText: {
         flex: 1,
-        color: Colors.foreground,
+        fontWeight: "500",
         fontSize: 15,
-        fontFamily: FONTS.medium,
     },
 })

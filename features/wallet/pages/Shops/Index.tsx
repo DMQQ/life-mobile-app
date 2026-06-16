@@ -1,23 +1,19 @@
-import { FONTS } from "@/constants/Fonts"
 import Colors from "@/constants/Colors"
-import Text from "@/components/ui/Text/Text"
 import Input from "@/components/ui/TextInput/TextInput"
 import GlassView from "@/components/ui/GlassView"
 import { Feather } from "@expo/vector-icons"
-import Color from "color"
-import { useLayoutEffect, useState } from "react"
-import { ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, View } from "react-native"
+import { useState, useLayoutEffect } from "react"
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
-import Ripple from "react-native-material-ripple"
 import Feedback from "react-native-haptic-feedback"
-import ContextMenu from "react-native-context-menu-view"
-import { ConfirmDialog } from "@/components"
+import { ConfirmDialog, Body, Caption } from "@/components"
+import { SymbolView } from "expo-symbols"
 import Animated, { useAnimatedStyle } from "react-native-reanimated"
 import { useReanimatedKeyboardAnimation } from "react-native-keyboard-controller"
+import lowOpacity from "@/utils/functions/lowOpacity"
 import useShops, { ShopItem } from "../../hooks/useShops"
 import useDeleteShop from "../../hooks/useDeleteShop"
-import { SymbolView } from "expo-symbols"
-import lowOpacity from "@/utils/functions/lowOpacity"
+import ShopCard from "../../components/Shops/ShopCard"
 
 export default function ShopsIndex({ navigation }: any) {
     const [search, setSearch] = useState("")
@@ -66,88 +62,30 @@ export default function ShopsIndex({ navigation }: any) {
                 keyboardDismissMode="on-drag"
             >
                 {loading && shops.length === 0 ? (
-                    <ActivityIndicator color={Colors.secondary} style={{ marginTop: 40 }} />
+                    <ActivityIndicator color={Colors.secondary} style={styles.loader} />
                 ) : shops.length === 0 ? (
-                    <View style={styles.empty}>
-                        <SymbolView name="storefront" size={40} tintColor={Colors.foreground_secondary} />
-                        <Text style={styles.emptyText}>No shops yet</Text>
-                        <Text style={styles.emptySubtext}>
-                            Shops are auto-created when you add an expense with a shop name
-                        </Text>
-                        <Pressable
-                            onPress={() => {
-                                Feedback.trigger("impactLight")
-                                navigation.navigate("Create")
-                            }}
-                            style={styles.emptyBtn}
-                        >
-                            <Text style={styles.emptyBtnText}>Create manually</Text>
-                        </Pressable>
-                    </View>
+                    <EmptyState onCreatePress={() => navigation.navigate("Create")} />
                 ) : (
                     <View style={styles.list}>
-                        {shops.map((shop, i) => (
-                            <ContextMenu
+                        {shops.map((shop) => (
+                            <ShopCard
                                 key={shop.id}
-                                actions={[
-                                    { title: "Edit", systemIcon: "pencil" },
-                                    { title: "View Details", systemIcon: "info.circle" },
-                                    { title: "Delete", systemIcon: "trash", destructive: true },
-                                ]}
-                                onPress={(e) => {
-                                    const idx = e.nativeEvent.index
-                                    if (idx === 0) {
-                                        Feedback.trigger("impactLight")
-                                        navigation.navigate("Create", { shop })
-                                    } else if (idx === 1) {
-                                        navigation.navigate("Details", { shop })
-                                    } else if (idx === 2) {
-                                        Feedback.trigger("impactMedium")
-                                        setDeleteTarget(shop)
-                                    }
+                                shop={shop}
+                                onPress={() => navigation.navigate("Details", { shop })}
+                                onEdit={() => {
+                                    Feedback.trigger("impactLight")
+                                    navigation.navigate("Create", { shop })
                                 }}
-                                previewBackgroundColor="transparent"
-                            >
-                                <Ripple
-                                    onPress={() => navigation.navigate("Details", { shop })}
-                                    style={[styles.row, i < shops.length - 1 && styles.rowBorder]}
-                                    rippleColor={Color(Colors.secondary).alpha(0.08).string()}
-                                >
-                                    <View style={styles.imageWrap}>
-                                        {shop.image ? (
-                                            <Image
-                                                source={{ uri: shop.image }}
-                                                style={styles.image}
-                                                resizeMode="contain"
-                                            />
-                                        ) : (
-                                            <GlassView style={styles.imagePlaceholder}>
-                                                <SymbolView
-                                                    name="storefront.fill"
-                                                    size={16}
-                                                    tintColor={Colors.foreground_secondary}
-                                                />
-                                            </GlassView>
-                                        )}
-                                    </View>
-
-                                    <View style={styles.info}>
-                                        <Text style={styles.name}>{shop.name}</Text>
-                                        {shop.location?.name && (
-                                            <Text style={styles.location} numberOfLines={1}>
-                                                {shop.location.name}
-                                            </Text>
-                                        )}
-                                    </View>
-
-                                    <Feather name="chevron-right" size={16} color={Colors.foreground_secondary} />
-                                </Ripple>
-                            </ContextMenu>
+                                onDelete={() => {
+                                    Feedback.trigger("impactMedium")
+                                    setDeleteTarget(shop)
+                                }}
+                            />
                         ))}
                     </View>
                 )}
 
-                <View style={{ height: 100 }} />
+                <View style={styles.bottomSpacer} />
             </ScrollView>
 
             <Animated.View style={[styles.searchBar, barAnimStyle]}>
@@ -180,6 +118,21 @@ export default function ShopsIndex({ navigation }: any) {
     )
 }
 
+function EmptyState({ onCreatePress }: { onCreatePress: () => void }) {
+    return (
+        <View style={styles.empty}>
+            <SymbolView name="storefront" size={44} tintColor={Colors.foreground_secondary} />
+            <Body style={styles.emptyTitle}>No shops yet</Body>
+            <Caption style={styles.emptySubtext}>
+                Shops are auto-created when you add an expense with a shop name
+            </Caption>
+            <Pressable onPress={onCreatePress} style={styles.emptyBtn}>
+                <Body style={styles.emptyBtnText}>Create manually</Body>
+            </Pressable>
+        </View>
+    )
+}
+
 const styles = StyleSheet.create({
     safe: {
         flex: 1,
@@ -189,8 +142,15 @@ const styles = StyleSheet.create({
         paddingTop: 8,
         paddingBottom: 50,
     },
+    loader: {
+        marginTop: 40,
+    },
     list: {
         paddingHorizontal: 15,
+        gap: 8,
+    },
+    bottomSpacer: {
+        height: 100,
     },
     empty: {
         alignItems: "center",
@@ -198,16 +158,13 @@ const styles = StyleSheet.create({
         paddingHorizontal: 30,
         gap: 10,
     },
-    emptyText: {
-        color: Colors.foreground,
-        fontSize: 17,
-        fontFamily: FONTS.semibold,
+    emptyTitle: {
+        fontWeight: "600",
     },
     emptySubtext: {
         color: Colors.foreground_secondary,
-        fontSize: 13,
         textAlign: "center",
-        lineHeight: 18,
+        lineHeight: 20,
     },
     emptyBtn: {
         marginTop: 6,
@@ -221,47 +178,6 @@ const styles = StyleSheet.create({
     emptyBtnText: {
         color: Colors.secondary,
         fontSize: 14,
-        fontFamily: FONTS.medium,
-    },
-    row: {
-        flexDirection: "row",
-        alignItems: "center",
-        paddingVertical: 13,
-        gap: 12,
-    },
-    rowBorder: {
-        borderBottomWidth: StyleSheet.hairlineWidth,
-        borderBottomColor: Colors.borderColor,
-    },
-    imageWrap: {
-        width: 44,
-        height: 44,
-        borderRadius: 12,
-        overflow: "hidden",
-    },
-    image: {
-        width: "100%",
-        height: "100%",
-    },
-    imagePlaceholder: {
-        width: "100%",
-        height: "100%",
-        justifyContent: "center",
-        alignItems: "center",
-        borderRadius: 12,
-    },
-    info: {
-        flex: 1,
-    },
-    name: {
-        color: Colors.foreground,
-        fontSize: 15,
-        fontFamily: FONTS.semibold,
-    },
-    location: {
-        color: Colors.foreground_secondary,
-        fontSize: 12,
-        marginTop: 2,
     },
     searchBar: {
         position: "absolute",
