@@ -1,131 +1,59 @@
+import { useEffect, useState } from "react"
+import { SFSymbol } from "expo-symbols"
+import { View, StyleSheet } from "react-native"
+import { useQuery } from "@apollo/client"
+import Animated, { useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated"
+import dayjs from "dayjs"
+
 import Header from "@/components/ui/Header/Header"
-import ExpenseSkeleton from "../components/Expense/ExpenseSkeleton"
+import Background from "@/components/ui/Background"
+import Section from "@/components/ui/Section"
+import { ConfirmDialog, Body, Caption } from "@/components"
 import Colors from "@/constants/Colors"
 import { Expense as ExpenseType } from "@/types"
-import { gql, useMutation, useQuery } from "@apollo/client"
-import { GET_EXPENSE } from "../hooks/getExpenseQuery"
-import { useEffect, useRef, useState } from "react"
-import { SFSymbol, SymbolView } from "expo-symbols"
-import { Image, Pressable, StyleSheet, View } from "react-native"
-import * as ImagePicker from "expo-image-picker"
-import axios from "axios"
-import Url from "@/constants/Url"
-import useSetShopImage from "../hooks/useSetShopImage"
 import { formatAmount } from "@/utils/functions/formatCurrency"
-import Text from "@/components/ui/Text/Text"
+
+import { GET_EXPENSE } from "../hooks/getExpenseQuery"
 import useDeleteActivity from "../hooks/useDeleteActivity"
 import useRefund from "../hooks/useRefundExpense"
-import useSubscription from "../hooks/useSubscription"
-import useGetSubscriptions from "../hooks/useGetSubscriptions"
-import Animated, { useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated"
-import MapPicker from "../components/Expense/Map"
-import SubexpenseStack from "../components/Expense/SubexpenseStack"
-import { CollapsibleThemedCalendar } from "@/components/ui/ThemedCalendar/ThemedCalendar"
-import Toolbar from "@/components/Toolbar/Toolbar"
-import ActionRow from "@/components/ui/ActionRow"
-import dayjs from "dayjs"
-import MonthlyBreakdown from "../components/Expense/MonthlyBreakdown"
+
+import ExpenseContext from "./ExpenseContext"
+import ExpenseSkeleton from "../components/Expense/ExpenseSkeleton"
 import ExpenseDetails from "../components/Expense/ExpenseDetails"
+import MonthlyBreakdown from "../components/Expense/MonthlyBreakdown"
 import SimilarExpenses from "../components/Expense/SimilarExpenses"
-import FileUpload from "../components/Expense/FileUpload"
 import SubscriptionSection from "../components/Expense/SubscriptionSection"
-import { ConfirmDialog } from "@/components"
-import Section from "@/components/ui/Section"
+import SubExpenseSection from "../components/Expense/SubExpenseSection"
+import ShopSection from "../components/Expense/ShopSection"
+import ExpenseToolbar from "../components/Expense/ExpenseToolbar"
+import ExpenseAttachments from "../components/Expense/FileUpload"
+import ExpenseLocationMap from "../components/Expense/Map"
+import { CollapsibleThemedCalendar } from "@/components/ui/ThemedCalendar/ThemedCalendar"
 import { CategoryIcon, CategoryUtils } from "../components/Expense/ExpenseIcon"
-import Background from "@/components/ui/Background"
-import AddSubExpenseSheet, { AddSubExpenseSheetHandle } from "../components/Expense/AddSubExpenseSheet"
-import { useUploadSubExpense } from "../hooks/useUploadSubExpense"
-import Feedback from "react-native-haptic-feedback"
+import { FONTS } from "@/constants/Fonts"
 
 export default function Expense({ route: { params }, navigation }: any) {
     const { data } = useQuery(GET_EXPENSE, { variables: { id: params?.expense?.id ?? params?.expenseId } })
-
-    const [selected, setSelected] = useState(params?.expense ?? null)
+    const [selected, setSelected] = useState<ExpenseType | null>(params?.expense ?? null)
 
     useEffect(() => {
         if (data?.expense) setSelected(data.expense)
     }, [data?.expense])
 
     const [confirmRefund, setConfirmRefund] = useState(false)
-    const [confirmSubExpenseId, setConfirmSubExpenseId] = useState<string | null>(null)
-    const [confirmSubscriptionAction, setConfirmSubscriptionAction] = useState(false)
-    const [shopImageLoading, setShopImageLoading] = useState(false)
 
-    const [setShopImageMutation] = useSetShopImage()
-
-    const handleSetShopImage = async () => {
-        if (!selected?.shopEntity?.id) return
-        const { granted } = await ImagePicker.requestMediaLibraryPermissionsAsync()
-        if (!granted) return
-        const picked = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ["images"],
-            allowsEditing: true,
-            aspect: [1, 1],
-            quality: 0.8,
-        })
-        if (picked.canceled || !picked.assets?.[0]) return
-        const photo = picked.assets[0]
-        setShopImageLoading(true)
-        try {
-            const formData = new FormData()
-            formData.append("file", { uri: photo.uri, name: photo.fileName || "shop.jpg", type: "image/jpeg" } as any)
-            const { data: uploadData } = await axios.post(Url.API + "/upload/single", formData, {
-                params: { type: "shop", entityId: selected.shopEntity.id },
-                headers: { "Content-Type": "multipart/form-data" },
-            })
-            const imageUrl = Array.isArray(uploadData) ? uploadData[0].url : uploadData.url
-            const result = await setShopImageMutation({ variables: { shopId: selected.shopEntity.id, imageUrl } })
-            if (result.data?.setShopImage) {
-                setSelected((prev: any) => ({
-                    ...prev,
-                    shopEntity: { ...prev.shopEntity, image: result.data!.setShopImage.image },
-                }))
-            }
-        } catch (e) {
-            console.error(e)
-        } finally {
-            setShopImageLoading(false)
-        }
-    }
-
-    const [refund, { loading: refundLoading }] = useRefund((data) => {
-        if (data.refundExpense.type !== "refunded") return
+    const { deleteActivity } = useDeleteActivity()
+    const [refund, { loading: refundLoading }] = useRefund((refundData: any) => {
+        if (refundData.refundExpense.type !== "refunded") return
         setSelected((prev: any) => ({ ...prev, type: "refunded" }))
     })
 
-    const subscription = useSubscription()
-    const { data: subscriptionsData } = useGetSubscriptions()
-    const isSubscriptionLoading =
-        subscription.createSubscriptionState.loading ||
-        subscription.cancelSubscriptionState.loading ||
-        subscription.assignExpenseToSubscriptionState.loading
-
-    const hasSubscription = !!selected?.subscription?.id
-    const isSubscriptionActive = hasSubscription && selected?.subscription?.isActive
-
-    const subscriptionOptions = [{ id: null, description: "None" }, ...(subscriptionsData?.subscriptions || [])]
-
-    const handleAssignSubscription = async (subscriptionId: string | null) => {
-        const result = await subscription.assignExpenseToSubscription({
-            variables: { input: { expenseId: selected.id, subscriptionId } },
-        })
-        if (result.data?.assignExpenseToSubscription) setSelected(result.data.assignExpenseToSubscription)
-    }
-
-    const handleSubscriptionConfirm = async () => {
-        if (isSubscriptionActive && selected?.subscription?.id) {
-            const result = await subscription.cancelSubscription({
-                variables: { subscriptionId: selected.subscription.id },
-            })
-            if (result.data?.cancelSubscription) setSelected(result.data.cancelSubscription)
-        } else {
-            const result = await subscription.createSubscription({ variables: { expenseId: selected.id } })
-            if (result.data?.createSubscription) setSelected(result.data.createSubscription)
-        }
-        setConfirmSubscriptionAction(false)
-    }
-
-    const { deleteActivity } = useDeleteActivity()
+    const scrollY = useSharedValue(0)
+    const onScroll = useAnimatedScrollHandler({
+        onScroll: (ev) => {
+            scrollY.value = ev.contentOffset.y
+        },
+    })
 
     const handleDeleteConfirm = async () => {
         if (!selected?.id) return
@@ -136,56 +64,12 @@ export default function Expense({ route: { params }, navigation }: any) {
     }
 
     const handleRefundConfirm = async () => {
-        await refund({ variables: { expenseId: selected.id } })
+        await refund({ variables: { expenseId: selected!.id } })
         setConfirmRefund(false)
     }
 
-    const [deleteSubExpense] = useMutation(gql`
-        mutation DeleteSubExpense($id: ID!) {
-            deleteSubExpense(id: $id)
-        }
-    `)
-
-    const handleDeleteSubExpenseConfirm = async () => {
-        if (!confirmSubExpenseId) return
-        await deleteSubExpense({ variables: { id: confirmSubExpenseId } })
-        setSelected((prev: any) => ({
-            ...prev,
-            subexpenses: prev.subexpenses.filter((item: any) => item.id !== confirmSubExpenseId),
-        }))
-        setConfirmSubExpenseId(null)
-    }
-
-    const addSubExpenseSheetRef = useRef<AddSubExpenseSheetHandle>(null)
-
-    const [uploadSubexpenses] = useUploadSubExpense(() => {})
-
-    const handleAddSubExpense = async (item: { description: string; amount: number; category: string }) => {
-        const result = await uploadSubexpenses({
-            variables: {
-                input: {
-                    expenseId: selected.id,
-                    inputs: [{ description: item.description, amount: item.amount, category: item.category }],
-                },
-            },
-        })
-        if (result.data?.addMultipleSubExpenses) {
-            setSelected((prev: any) => ({
-                ...prev,
-                subexpenses: [...(prev.subexpenses || []), ...result.data!.addMultipleSubExpenses],
-            }))
-        }
-    }
-
-    const scrollY = useSharedValue(0)
-    const onScroll = useAnimatedScrollHandler({
-        onScroll: (ev) => {
-            scrollY.value = ev.contentOffset.y
-        },
-    })
-
     return (
-        <View style={{ flex: 1 }}>
+        <View style={styles.root}>
             <Header
                 goBack
                 scrollY={scrollY}
@@ -198,18 +82,6 @@ export default function Expense({ route: { params }, navigation }: any) {
                         tintColor: Colors.danger,
                         confirm: true,
                     },
-                    // {
-                    //     icon: "arrow.triangle.branch" as SFSymbol,
-                    //     onPress: () =>
-                    //         navigation.navigate("CorrectionMaps", {
-                    //             prefill: {
-                    //                 shop: selected?.shop || undefined,
-                    //                 description: selected?.description || undefined,
-                    //                 category: selected?.category || undefined,
-                    //                 amount: selected?.amount || undefined,
-                    //             },
-                    //         }),
-                    // },
                     {
                         icon: "pencil" as SFSymbol,
                         onPress: () => navigation.navigate("CreateExpense", { ...selected, isEditing: true }),
@@ -217,129 +89,52 @@ export default function Expense({ route: { params }, navigation }: any) {
                 ]}
             />
 
-            <Background tintColor={CategoryUtils.getCategoryColor(selected?.category, selected?.type)} />
+            <Background tintColor={CategoryUtils.getCategoryColor(selected?.category as any, selected?.type as any)} />
 
             {!selected ? (
                 <ExpenseSkeleton />
             ) : (
-                <>
+                <ExpenseContext.Provider value={{ expense: selected }}>
                     <Animated.ScrollView
                         onScroll={onScroll}
                         keyboardDismissMode="on-drag"
-                        style={{ flex: 1 }}
-                        contentContainerStyle={{ paddingTop: 150 }}
+                        style={styles.scroll}
+                        contentContainerStyle={styles.scrollContent}
                     >
-                        <View
-                            style={{
-                                width: "100%",
-                                height: 200,
-                                justifyContent: "center",
-                                alignItems: "center",
-                                gap: 7.5,
-                            }}
-                        >
-                            <CategoryIcon
-                                category={selected?.category}
-                                size={60}
-                                type={selected?.type}
-                                imageUri={selected?.shopEntity?.image}
-                                containerStyle={{
-                                    width: 100,
-                                    height: 100,
-                                    borderRadius: 100,
-                                }}
-                            />
-                            <Text size={15} color={Colors.text_dark}>
-                                {CategoryUtils.getCategoryName(selected?.category)}
-                            </Text>
-                            <Text size={40} weight="800" color="#fff" mono>
-                                {formatAmount(selected?.amount)}zł
-                            </Text>
-                            <Text size={15} color={Colors.text_dark}>
-                                {selected?.description}
-                            </Text>
-                        </View>
+                        <ExpenseHero expense={selected} />
 
-                        <View style={styles.scrollContent}>
-                            <Section
-                                title="Subexpenses"
-                                headerRight={
-                                    <Pressable
-                                        onPress={() => {
-                                            Feedback.trigger("impactLight")
-                                            addSubExpenseSheetRef.current?.expand()
-                                        }}
-                                        style={styles.addSubBtn}
-                                    >
-                                        <SymbolView name="plus.circle.fill" size={18} tintColor={Colors.secondary} />
-                                    </Pressable>
-                                }
-                            >
-                                {selected.subexpenses?.length > 0 ? (
-                                    <SubexpenseStack
-                                        selected={selected}
-                                        handleDeleteSubExpense={(id) => setConfirmSubExpenseId(id)}
-                                    />
-                                ) : (
-                                    <Pressable
-                                        onPress={() => {
-                                            Feedback.trigger("impactLight")
-                                            addSubExpenseSheetRef.current?.expand()
-                                        }}
-                                        style={styles.emptySubRow}
-                                    >
-                                        <Text size={13} color={Colors.text_dark}>
-                                            Add sub-expenses to break down this expense
-                                        </Text>
-                                    </Pressable>
-                                )}
-                            </Section>
-
+                        <View style={styles.sections}>
+                            <SubExpenseSection onUpdate={setSelected} />
                             <ExpenseDetails expense={selected} />
 
                             <Section title="Calendar">
                                 <CollapsibleThemedCalendar
-                                    date={dayjs(selected?.date).format("YYYY-MM-DD")}
-                                    markedDates={{ [dayjs(selected?.date).format("YYYY-MM-DD")]: { selected: true } }}
+                                    date={dayjs(selected.date).format("YYYY-MM-DD")}
+                                    markedDates={{ [dayjs(selected.date).format("YYYY-MM-DD")]: { selected: true } }}
                                 />
                             </Section>
 
-                            {selected?.type === "expense" && (
+                            {selected.type === "expense" && (
                                 <Section title="Breakdown">
                                     <MonthlyBreakdown
                                         expense={selected as ExpenseType}
-                                        income={data?.wallet?.income || 0}
-                                        monthlyPercentageTarget={data?.wallet?.monthlyPercentageTarget || 0}
+                                        income={data?.wallet?.income ?? 0}
+                                        monthlyPercentageTarget={data?.wallet?.monthlyPercentageTarget ?? 0}
                                     />
                                 </Section>
                             )}
 
                             <Section title="Subscription">
                                 <SubscriptionSection
-                                    hasSubscription={hasSubscription}
-                                    isSubscriptionActive={isSubscriptionActive}
+                                    hasSubscription={!!selected.subscription?.id}
+                                    isSubscriptionActive={
+                                        !!selected.subscription?.id && !!selected.subscription?.isActive
+                                    }
                                     selected={selected}
                                 />
                             </Section>
 
-                            {selected?.shopEntity && (
-                                <Section title="Shop">
-                                    {selected.shopEntity.image && (
-                                        <Image
-                                            source={{ uri: selected.shopEntity.image }}
-                                            style={styles.shopImage}
-                                            resizeMode="contain"
-                                        />
-                                    )}
-                                    <ActionRow
-                                        icon="image"
-                                        label={selected.shopEntity.image ? "Update shop image" : "Set shop image"}
-                                        onPress={handleSetShopImage}
-                                        loading={shopImageLoading}
-                                        last
-                                    />
-                                </Section>
-                            )}
+                            <ShopSection onUpdate={setSelected} />
                         </View>
 
                         {data?.expenseSimilar?.length > 1 && (
@@ -349,8 +144,8 @@ export default function Expense({ route: { params }, navigation }: any) {
                             />
                         )}
 
-                        <FileUpload id={selected.id} images={selected?.files} />
-                        <MapPicker location={selected.location} id={selected.id} />
+                        <ExpenseAttachments id={selected.id} images={selected?.files ?? []} />
+                        <ExpenseLocationMap location={selected.location} id={selected.id} />
 
                         <View style={styles.bottomSpacer} />
                     </Animated.ScrollView>
@@ -365,79 +160,71 @@ export default function Expense({ route: { params }, navigation }: any) {
                         loading={refundLoading}
                     />
 
-                    <ConfirmDialog
-                        isVisible={!!confirmSubExpenseId}
-                        onDismiss={() => setConfirmSubExpenseId(null)}
-                        onConfirm={handleDeleteSubExpenseConfirm}
-                        title="Delete Sub-Expense"
-                        description="This cannot be undone."
-                        destructive
+                    <ExpenseToolbar
+                        onUpdate={setSelected}
+                        onRefund={() => setConfirmRefund(true)}
+                        refundLoading={refundLoading}
                     />
-
-                    <AddSubExpenseSheet ref={addSubExpenseSheetRef} onAdd={handleAddSubExpense} />
-
-                    <Toolbar>
-                        <Toolbar.Item
-                            sfIcon={"shuffle" as SFSymbol}
-                            menuItems={subscriptionOptions.map((o) => ({
-                                label: o.description || "None",
-                                sfIcon: "arrow.triangle.swap" as SFSymbol,
-                                onPress: () => handleAssignSubscription(o.id),
-                            }))}
-                        />
-                        <Toolbar.Spacer />
-                        <Toolbar.Group>
-                            <Toolbar.Item
-                                sfIcon={(isSubscriptionActive ? "pause.circle" : "play.circle") as SFSymbol}
-                                onPress={() => setConfirmSubscriptionAction(true)}
-                                disabled={isSubscriptionLoading}
-                            />
-                            <Toolbar.Item
-                                sfIcon={"arrow.counterclockwise" as SFSymbol}
-                                onPress={() => setConfirmRefund(true)}
-                                disabled={selected?.type === "refunded" || refundLoading}
-                            />
-                        </Toolbar.Group>
-                    </Toolbar>
-
-                    <ConfirmDialog
-                        isVisible={confirmSubscriptionAction}
-                        onDismiss={() => setConfirmSubscriptionAction(false)}
-                        onConfirm={handleSubscriptionConfirm}
-                        title={
-                            hasSubscription
-                                ? isSubscriptionActive
-                                    ? "Disable Subscription"
-                                    : "Enable Subscription"
-                                : "Create Subscription"
-                        }
-                        description="Are you sure you want to perform this action?"
-                        loading={isSubscriptionLoading}
-                    />
-                </>
+                </ExpenseContext.Provider>
             )}
         </View>
     )
 }
 
+function ExpenseHero({ expense }: { expense: ExpenseType }) {
+    return (
+        <View style={styles.hero}>
+            <CategoryIcon
+                category={expense.category as any}
+                size={60}
+                type={expense.type as any}
+                imageUri={expense.shopEntity?.image}
+                containerStyle={styles.heroIcon}
+            />
+            <Caption style={styles.heroCategory}>{CategoryUtils.getCategoryName(expense.category as any)}</Caption>
+            <Body style={styles.heroAmount}>{formatAmount(expense.amount)}zł</Body>
+            <Caption style={styles.heroDescription}>{expense.description}</Caption>
+        </View>
+    )
+}
+
 const styles = StyleSheet.create({
+    root: {
+        flex: 1,
+    },
+    scroll: {
+        flex: 1,
+    },
     scrollContent: {
+        paddingTop: 150,
+    },
+    hero: {
+        width: "100%",
+        height: 200,
+        justifyContent: "center",
+        alignItems: "center",
+        gap: 7.5,
+    },
+    heroIcon: {
+        width: 100,
+        height: 100,
+        borderRadius: 100,
+    },
+    heroCategory: {
+        color: Colors.text_dark,
+    },
+    heroAmount: {
+        fontSize: 40,
+        fontFamily: FONTS.bold,
+        color: "#fff",
+    },
+    heroDescription: {
+        color: Colors.text_dark,
+    },
+    sections: {
         paddingHorizontal: 15,
     },
     bottomSpacer: {
         height: 100,
-    },
-    addSubBtn: {
-        padding: 2,
-    },
-    emptySubRow: {
-        paddingHorizontal: 15,
-        paddingVertical: 14,
-    },
-    shopImage: {
-        width: 80,
-        height: 80,
-        borderRadius: 12,
-        margin: 15,
     },
 })

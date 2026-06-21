@@ -119,9 +119,9 @@ export const getCurrentLocation = async () => {
     }
 }
 
-export type MapPickerHandle = { triggerSearch: () => void }
+export type ExpenseLocationMapHandle = { triggerSearch: () => void }
 
-const MapPicker = forwardRef<MapPickerHandle, Pick<Expense, "location"> & { id: string }>((props, ref) => {
+const ExpenseLocationMap = forwardRef<ExpenseLocationMapHandle, Pick<Expense, "location"> & { id: string }>((props, ref) => {
     const STREET_DELTA = { latitudeDelta: 0.003, longitudeDelta: 0.003 }
 
     const [location, setLocation] = useState({
@@ -442,4 +442,4 @@ const styles = StyleSheet.create({
     },
 })
 
-export default MapPicker
+export default ExpenseLocationMap

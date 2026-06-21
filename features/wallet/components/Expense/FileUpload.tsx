@@ -13,9 +13,9 @@ import ContextMenu from "react-native-context-menu-view"
 import { SymbolView } from "expo-symbols"
 
 
-export type FileUploadHandle = { takePhoto: () => void; pickImage: () => void }
+export type ExpenseAttachmentsHandle = { takePhoto: () => void; pickImage: () => void }
 
-const FileUpload = forwardRef<FileUploadHandle, { id: string; images: any[] }>((props, ref) => {
+const ExpenseAttachments = forwardRef<ExpenseAttachmentsHandle, { id: string; images: any[] }>((props, ref) => {
     const [files, setFiles] = useState<{ id: string; url: string }[]>(props.images ?? [])
 
     async function uploadPhotoAsync(photos: ImagePicker.ImagePickerResult) {
@@ -145,7 +145,7 @@ const FileUpload = forwardRef<FileUploadHandle, { id: string; images: any[] }>((
     )
 })
 
-export default FileUpload
+export default ExpenseAttachments
 
 const styles = StyleSheet.create({
     emptyFiles: {

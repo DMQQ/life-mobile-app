@@ -66,6 +66,7 @@ Toolbar.Item = ({ onPress, sfIcon, disabled = false, hidden, menuItems, ...rest 
     if (menuItems?.length) {
         return (
             <ContextMenuView
+                previewBackgroundColor={"transparent"}
                 dropdownMenuMode
                 actions={menuItems.map((item) => ({
                     title: item.label,
@@ -74,9 +75,9 @@ Toolbar.Item = ({ onPress, sfIcon, disabled = false, hidden, menuItems, ...rest 
                 }))}
                 onPress={(e) => menuItems[e.nativeEvent.index]?.onPress()}
             >
-                <GlassView style={styles.glass} interactive>
+                <View style={styles.glass} interactive>
                     <View style={styles.button}>{icon}</View>
-                </GlassView>
+                </View>
             </ContextMenuView>
         )
     }

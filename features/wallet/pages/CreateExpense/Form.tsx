@@ -1,4 +1,3 @@
-import { FONTS } from "@/constants/Fonts"
 import ModalHeader from "@/components/ui/ModalHeader"
 import Section from "@/components/ui/Section"
 import Text from "@/components/ui/Text/Text"
@@ -27,6 +26,8 @@ import useShops from "../../hooks/useShops"
 import AddSubExpenseSheet from "../../components/Expense/AddSubExpenseSheet"
 import PredictionView from "../../components/CreateExpense/PredictionView"
 import layout from "@/constants/Layout"
+import ShopSelectCard from "../../components/Shops/ShopSelectCard"
+import ShopImage from "../../components/Shops/ShopImage"
 
 type ExpenseType = "expense" | "income" | "refunded"
 
@@ -65,7 +66,6 @@ export default function Form({ route }: any) {
             >
                 <AmountSection showPrediction={!!(state.prediction && !params?.isEditing)} />
                 <DetailsSection isEditing={!!params?.isEditing} />
-
                 <DateSection />
                 <SubExpensesSection />
             </ScrollView>
@@ -129,25 +129,31 @@ function AmountSection({ showPrediction }: { showPrediction: boolean }) {
     )
 }
 
-function DetailsSection({ isEditing: _isEditing }: { isEditing: boolean }) {
+function DetailsSection({ isEditing }: { isEditing: boolean }) {
     const { state, methods } = useCreateExpenseContext()
     const { data: subAccountsData } = useSubAccounts()
     const { data: shopsData } = useShops()
     const subAccounts = subAccountsData?.wallet.subAccounts ?? []
 
-    const [expanded, setExpanded] = useState<"category" | "spontaneous" | "account" | "shop" | "note" | "tags" | null>(null)
-    const toggle = (key: "category" | "spontaneous" | "account" | "shop" | "note" | "tags") => setExpanded((p) => (p === key ? null : key))
+    const hasExtras = !!(state.shop || state.note || state.tags || state.spontaneousRate > 0)
+    const [showExtras, setShowExtras] = useState(() => isEditing && hasExtras)
+    const [expanded, setExpanded] = useState<"category" | "spontaneous" | "account" | "shop" | null>(null)
+    const toggle = (key: typeof expanded) => setExpanded((p) => (p === key ? null : key))
 
     const { category, spontaneousRate, subAccountId, shop, note, tags } = state
+
     const hasCategory = category !== "none"
     const catColor = hasCategory
-        ? Color(Icons[category]?.backgroundColor ?? Colors.secondary)
-              .lighten(0.25)
-              .hex()
+        ? Color(Icons[category]?.backgroundColor ?? Colors.secondary).lighten(0.25).hex()
         : undefined
     const spontaneousActive = spontaneousRate > 0
     const spontaneousColor = getRateColor(spontaneousRate)
     const selectedAccount = subAccounts.find((a) => a.id === subAccountId) ?? null
+    const selectedShopEntity = shopsData?.shops.find((s) => s.id === state.shopEntityId) ?? null
+
+    const tagsPreview = tags
+        ? tags.split(",").filter(Boolean).join(" ")
+        : null
 
     return (
         <Section title="Details">
@@ -163,18 +169,12 @@ function DetailsSection({ isEditing: _isEditing }: { isEditing: boolean }) {
             {state.type !== "income" && (
                 <>
                     <View style={styles.divider} />
-                    <Pressable
-                        onPress={() => {
-                            Feedback.trigger("impactLight")
-                            toggle("category")
-                        }}
-                        style={styles.row}
-                    >
+                    <Pressable onPress={() => { Feedback.trigger("impactLight"); toggle("category") }} style={styles.row}>
                         <Text variant="subtitle">Category</Text>
                         <View style={styles.rowRight}>
                             <SymbolView name="tag.fill" size={15} tintColor={hasCategory ? catColor : Colors.foreground_secondary} />
                             <Text variant="body" style={[styles.rowValue, hasCategory && { color: catColor }]}>
-                                {hasCategory ? CategoryUtils.getCategoryName(category) : "None selected"}
+                                {hasCategory ? CategoryUtils.getCategoryName(category) : "None"}
                             </Text>
                         </View>
                     </Pressable>
@@ -195,38 +195,10 @@ function DetailsSection({ isEditing: _isEditing }: { isEditing: boolean }) {
                 </>
             )}
 
-            <View style={styles.divider} />
-            <Pressable
-                onPress={() => {
-                    Feedback.trigger("impactLight")
-                    toggle("spontaneous")
-                }}
-                style={styles.row}
-            >
-                <Text variant="subtitle">Impulsiveness</Text>
-                <View style={styles.rowRight}>
-                    <SymbolView name="bolt.fill" size={15} tintColor={spontaneousActive ? spontaneousColor : Colors.foreground_secondary} />
-                    <Text variant="body" style={[styles.rowValue, spontaneousActive && { color: spontaneousColor }]}>
-                        {spontaneousRate === 0 ? "Not spontaneous" : `${spontaneousRate}%`}
-                    </Text>
-                </View>
-            </Pressable>
-            {expanded === "spontaneous" && (
-                <View style={styles.spontaneousContainer}>
-                    <SpontaneousRateSelector onDismiss={() => setExpanded(null)} />
-                </View>
-            )}
-
             {subAccounts.length > 0 && (
                 <>
                     <View style={styles.divider} />
-                    <Pressable
-                        onPress={() => {
-                            Feedback.trigger("impactLight")
-                            toggle("account")
-                        }}
-                        style={styles.row}
-                    >
+                    <Pressable onPress={() => { Feedback.trigger("impactLight"); toggle("account") }} style={styles.row}>
                         <Text variant="subtitle">Account</Text>
                         <View style={styles.rowRight}>
                             <SymbolView name="creditcard.fill" size={15} tintColor={selectedAccount ? Colors.secondary : Colors.foreground_secondary} />
@@ -242,21 +214,11 @@ function DetailsSection({ isEditing: _isEditing }: { isEditing: boolean }) {
                                 return (
                                     <Ripple
                                         key={item.id ?? "__default"}
-                                        onPress={() => {
-                                            Feedback.trigger("impactLight")
-                                            methods.setSubAccountId(item.id)
-                                            setExpanded(null)
-                                        }}
+                                        onPress={() => { Feedback.trigger("impactLight"); methods.setSubAccountId(item.id); setExpanded(null) }}
                                         style={[styles.accountRow, active && styles.accountRowActive]}
                                     >
-                                        <Feather
-                                            name="credit-card"
-                                            size={16}
-                                            color={active ? Colors.secondary : Colors.foreground_secondary}
-                                        />
-                                        <Text style={[styles.accountLabel, active && { color: Colors.secondary }]}>
-                                            {item.name}
-                                        </Text>
+                                        <Feather name="credit-card" size={16} color={active ? Colors.secondary : Colors.foreground_secondary} />
+                                        <Text style={[styles.accountLabel, active && { color: Colors.secondary }]}>{item.name}</Text>
                                         {active && <Feather name="check" size={15} color={Colors.secondary} />}
                                     </Ripple>
                                 )
@@ -266,95 +228,235 @@ function DetailsSection({ isEditing: _isEditing }: { isEditing: boolean }) {
                 </>
             )}
 
-            <>
-                <View style={styles.divider} />
-                <Pressable onPress={() => { Feedback.trigger("impactLight"); toggle("shop") }} style={styles.row}>
-                    <Text variant="subtitle">Shop</Text>
-                    <View style={styles.rowRight}>
-                        <SymbolView name="storefront.fill" size={15} tintColor={shop ? Colors.secondary : Colors.foreground_secondary} />
-                        <Text variant="body" style={[styles.rowValue, shop ? { color: Colors.secondary } : undefined]}>
-                            {shop || "None"}
-                        </Text>
-                    </View>
-                </Pressable>
-                {expanded === "shop" && (
-                    <View style={styles.shopContainer}>
-                        <Input
-                            value={shop}
-                            onChangeText={(text) => { methods.setShop(text); methods.setShopEntityId(null) }}
-                            placeholder="Store name..."
-                            flat
-                            containerStyle={{ borderRadius: 8, marginBottom: 6 }}
-                            autoFocus
+            {showExtras && (
+                <>
+                    <View style={styles.divider} />
+                    <Pressable onPress={() => { Feedback.trigger("impactLight"); toggle("shop") }} style={styles.row}>
+                        <Text variant="subtitle">Shop</Text>
+                        <View style={styles.rowRight}>
+                            {selectedShopEntity ? (
+                                <ShopImage image={selectedShopEntity.image} size={22} radius={6} />
+                            ) : (
+                                <SymbolView name="storefront.fill" size={15} tintColor={shop ? Colors.secondary : Colors.foreground_secondary} />
+                            )}
+                            <Text variant="body" style={[styles.rowValue, shop ? { color: Colors.secondary } : undefined]}>
+                                {shop || "None"}
+                            </Text>
+                        </View>
+                    </Pressable>
+                    {expanded === "shop" && (
+                        <ShopPicker
+                            shop={shop}
+                            shopEntityId={state.shopEntityId}
+                            shops={shopsData?.shops ?? []}
+                            onSelect={(name, id) => { methods.setShop(name); methods.setShopEntityId(id); setExpanded(null) }}
+                            onClear={() => { methods.setShop(""); methods.setShopEntityId(null) }}
                         />
-                        {shopsData?.shops
-                            .filter((s) => shop.length === 0 || s.name.toLowerCase().includes(shop.toLowerCase()))
-                            .slice(0, 6)
-                            .map((s) => (
-                                <Ripple
-                                    key={s.id}
-                                    onPress={() => { methods.setShop(s.name); methods.setShopEntityId(s.id); toggle("shop") }}
-                                    style={styles.shopSuggestionRow}
-                                >
-                                    <Feather name="shopping-bag" size={14} color={Colors.foreground_secondary} />
-                                    <Text style={styles.shopSuggestionText}>{s.name}</Text>
-                                </Ripple>
-                            ))}
-                    </View>
-                )}
-            </>
+                    )}
 
-            <>
-                <View style={styles.divider} />
-                <Pressable onPress={() => { Feedback.trigger("impactLight"); toggle("note") }} style={styles.row}>
-                    <Text variant="subtitle">Note</Text>
-                    <View style={styles.rowRight}>
-                        <SymbolView name="note.text" size={15} tintColor={note ? Colors.secondary : Colors.foreground_secondary} />
-                        <Text variant="body" style={[styles.rowValue, note ? { color: Colors.secondary } : undefined]} numberOfLines={1}>
-                            {note || "None"}
-                        </Text>
-                    </View>
-                </Pressable>
-                {expanded === "note" && (
-                    <View style={styles.shopContainer}>
-                        <Input
-                            value={note}
-                            onChangeText={methods.setNote}
-                            placeholder="Add a note..."
-                            flat
-                            multiline
-                            containerStyle={{ borderRadius: 8 }}
-                            autoFocus
-                        />
-                    </View>
-                )}
-            </>
+                    <View style={styles.divider} />
+                    <NoteRow note={note} onChangeNote={methods.setNote} />
 
-            <>
-                <View style={styles.divider} />
-                <Pressable onPress={() => { Feedback.trigger("impactLight"); toggle("tags") }} style={styles.row}>
-                    <Text variant="subtitle">Tags</Text>
-                    <View style={styles.rowRight}>
-                        <SymbolView name="tag.fill" size={15} tintColor={tags ? Colors.secondary : Colors.foreground_secondary} />
-                        <Text variant="body" style={[styles.rowValue, tags ? { color: Colors.secondary } : undefined]} numberOfLines={1}>
-                            {tags || "None"}
-                        </Text>
-                    </View>
-                </Pressable>
-                {expanded === "tags" && (
-                    <View style={styles.shopContainer}>
-                        <Input
-                            value={tags}
-                            onChangeText={methods.setTags}
-                            placeholder="e.g. food, travel, work"
-                            flat
-                            containerStyle={{ borderRadius: 8 }}
-                            autoFocus
-                        />
-                    </View>
-                )}
-            </>
+                    <View style={styles.divider} />
+                    <TagsRow tagsString={tags} onChangeTags={methods.setTags} preview={tagsPreview} />
+
+                    <View style={styles.divider} />
+                    <Pressable onPress={() => { Feedback.trigger("impactLight"); toggle("spontaneous") }} style={styles.row}>
+                        <Text variant="subtitle">Impulsiveness</Text>
+                        <View style={styles.rowRight}>
+                            <SymbolView name="bolt.fill" size={15} tintColor={spontaneousActive ? spontaneousColor : Colors.foreground_secondary} />
+                            <Text variant="body" style={[styles.rowValue, spontaneousActive && { color: spontaneousColor }]}>
+                                {spontaneousRate === 0 ? "None" : `${spontaneousRate}%`}
+                            </Text>
+                        </View>
+                    </Pressable>
+                    {expanded === "spontaneous" && (
+                        <View style={styles.spontaneousContainer}>
+                            <SpontaneousRateSelector onDismiss={() => setExpanded(null)} />
+                        </View>
+                    )}
+                </>
+            )}
+
+            <Pressable
+                onPress={() => { Feedback.trigger("impactLight"); setShowExtras((p) => !p) }}
+                style={styles.expandBtn}
+            >
+                <Text style={styles.expandBtnText}>{showExtras ? "Fewer options" : "More options"}</Text>
+                <Feather name={showExtras ? "chevron-up" : "chevron-down"} size={13} color={Colors.foreground_secondary} />
+            </Pressable>
         </Section>
+    )
+}
+
+function ShopPicker({
+    shop,
+    shopEntityId,
+    shops,
+    onSelect,
+    onClear,
+}: {
+    shop: string
+    shopEntityId: string | null
+    shops: NonNullable<ReturnType<typeof useShops>["data"]>["shops"]
+    onSelect: (name: string, id: string) => void
+    onClear: () => void
+}) {
+    const [search, setSearch] = useState(shop)
+
+    const filtered = shops
+        .filter((s) => search.length === 0 || s.name.toLowerCase().includes(search.toLowerCase()))
+        .slice(0, 6)
+
+    return (
+        <View style={styles.shopPickerContainer}>
+            <View style={styles.shopSearchRow}>
+                <Feather name="search" size={15} color={Colors.foreground_secondary} />
+                <Input
+                    value={search}
+                    onChangeText={(text) => {
+                        setSearch(text)
+                        if (!shopEntityId) return
+                        onClear()
+                    }}
+                    placeholder="Search shops..."
+                    flat
+                    autoFocus
+                    containerStyle={styles.shopSearchInput}
+                />
+                {search.length > 0 && (
+                    <Pressable onPress={() => { setSearch(""); onClear() }} hitSlop={8}>
+                        <Feather name="x" size={15} color={Colors.foreground_secondary} />
+                    </Pressable>
+                )}
+            </View>
+            {filtered.map((s) => (
+                <ShopSelectCard
+                    key={s.id}
+                    shop={s}
+                    selected={shopEntityId === s.id}
+                    onPress={() => onSelect(s.name, s.id)}
+                />
+            ))}
+            {filtered.length === 0 && search.length > 0 && (
+                <Pressable
+                    onPress={() => onSelect(search, null as any)}
+                    style={styles.shopFreeformRow}
+                >
+                    <Feather name="plus" size={15} color={Colors.secondary} />
+                    <Text style={styles.shopFreeformText}>Use "{search}"</Text>
+                </Pressable>
+            )}
+        </View>
+    )
+}
+
+function NoteRow({ note, onChangeNote }: { note: string; onChangeNote: (v: string) => void }) {
+    const [open, setOpen] = useState(!!note)
+
+    return (
+        <>
+            <Pressable onPress={() => { Feedback.trigger("impactLight"); setOpen((p) => !p) }} style={styles.row}>
+                <Text variant="subtitle">Note</Text>
+                <View style={styles.rowRight}>
+                    <SymbolView name="note.text" size={15} tintColor={note ? Colors.secondary : Colors.foreground_secondary} />
+                    {note ? (
+                        <Text variant="body" style={[styles.rowValue, { color: Colors.secondary }]} numberOfLines={1}>
+                            {note}
+                        </Text>
+                    ) : (
+                        <Text variant="body" style={styles.rowValue}>None</Text>
+                    )}
+                </View>
+            </Pressable>
+            {open && (
+                <View style={styles.noteContainer}>
+                    <Input
+                        value={note}
+                        onChangeText={onChangeNote}
+                        placeholder="Write a note..."
+                        flat
+                        multiline
+                        autoFocus={!note}
+                        containerStyle={styles.noteInputContainer}
+                        style={styles.noteInput}
+                    />
+                </View>
+            )}
+        </>
+    )
+}
+
+function TagsRow({ tagsString, onChangeTags, preview }: { tagsString: string; onChangeTags: (v: string) => void; preview: string | null }) {
+    const [open, setOpen] = useState(!!tagsString)
+    const [input, setInput] = useState("")
+
+    const tags = tagsString ? tagsString.split(",").filter(Boolean) : []
+
+    const addTag = () => {
+        const trimmed = input.trim()
+        if (!trimmed) return
+        const tag = trimmed.startsWith("#") ? trimmed : `#${trimmed}`
+        if (tags.includes(tag)) { setInput(""); return }
+        onChangeTags([...tags, tag].join(","))
+        setInput("")
+        Feedback.trigger("impactLight")
+    }
+
+    const removeTag = (index: number) => {
+        const next = tags.filter((_, i) => i !== index)
+        onChangeTags(next.join(","))
+        Feedback.trigger("impactLight")
+    }
+
+    return (
+        <>
+            <Pressable onPress={() => { Feedback.trigger("impactLight"); setOpen((p) => !p) }} style={styles.row}>
+                <Text variant="subtitle">Tags</Text>
+                <View style={styles.rowRight}>
+                    <SymbolView name="tag.fill" size={15} tintColor={tags.length > 0 ? Colors.secondary : Colors.foreground_secondary} />
+                    {tags.length > 0 ? (
+                        <Text variant="body" style={[styles.rowValue, { color: Colors.secondary }]} numberOfLines={1}>
+                            {preview}
+                        </Text>
+                    ) : (
+                        <Text variant="body" style={styles.rowValue}>None</Text>
+                    )}
+                </View>
+            </Pressable>
+            {open && (
+                <View style={styles.tagsContainer}>
+                    {tags.length > 0 && (
+                        <View style={styles.tagsList}>
+                            {tags.map((tag, i) => (
+                                <Pressable key={i} onPress={() => removeTag(i)} style={styles.tagChip}>
+                                    <Text style={styles.tagText}>{tag}</Text>
+                                    <Feather name="x" size={10} color={Colors.secondary} />
+                                </Pressable>
+                            ))}
+                        </View>
+                    )}
+                    <View style={styles.tagInputRow}>
+                        <Input
+                            value={input}
+                            onChangeText={setInput}
+                            onSubmitEditing={addTag}
+                            placeholder="#shopping"
+                            flat
+                            autoFocus={!tagsString}
+                            returnKeyType="done"
+                            blurOnSubmit={false}
+                            containerStyle={styles.tagInput}
+                        />
+                        {input.trim().length > 0 && (
+                            <Pressable onPress={addTag} style={styles.tagAddBtn} hitSlop={8}>
+                                <Feather name="plus" size={18} color={Colors.secondary} />
+                            </Pressable>
+                        )}
+                    </View>
+                </View>
+            )}
+        </>
     )
 }
 
@@ -381,9 +483,7 @@ function DateSection() {
                 <Text variant="subtitle">Date</Text>
                 <View style={styles.rowRight}>
                     <SymbolView name="calendar" size={15} tintColor={Colors.foreground_secondary} />
-                    <Text variant="body" style={styles.rowValue}>
-                        {dateObj.format("DD MMMM YYYY")}
-                    </Text>
+                    <Text variant="body" style={styles.rowValue}>{dateObj.format("DD MMMM YYYY")}</Text>
                 </View>
             </Pressable>
             {expanded.date && (
@@ -404,9 +504,7 @@ function DateSection() {
                 <Text variant="subtitle">Time</Text>
                 <View style={styles.rowRight}>
                     <SymbolView name="clock.fill" size={15} tintColor={Colors.foreground_secondary} />
-                    <Text variant="body" style={styles.rowValue}>
-                        {dateObj.format("HH:mm")}
-                    </Text>
+                    <Text variant="body" style={styles.rowValue}>{dateObj.format("HH:mm")}</Text>
                 </View>
             </Pressable>
             {expanded.time && (
@@ -455,7 +553,7 @@ const styles = StyleSheet.create({
     },
     amountInput: {
         fontSize: 28,
-        fontFamily: FONTS.bold,
+        fontWeight: "700",
         color: Colors.foreground,
     },
     currencyLabel: {
@@ -474,12 +572,13 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
     },
     rowRight: {
-        flexDirection: "row" as const,
-        alignItems: "center" as const,
+        flexDirection: "row",
+        alignItems: "center",
         gap: 6,
     },
     rowValue: {
         color: Colors.foreground,
+        maxWidth: 160,
     },
     pickerContainer: {
         alignItems: "center",
@@ -510,6 +609,116 @@ const styles = StyleSheet.create({
         color: Colors.foreground_secondary,
         fontSize: 15,
     },
+    expandBtn: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 5,
+        paddingVertical: 12,
+        borderTopWidth: StyleSheet.hairlineWidth,
+        borderTopColor: Colors.borderColor,
+    },
+    expandBtnText: {
+        color: Colors.foreground_secondary,
+        fontSize: 13,
+    },
+    shopPickerContainer: {
+        paddingHorizontal: 10,
+        paddingBottom: 8,
+        gap: 2,
+    },
+    shopSearchRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 8,
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        marginBottom: 4,
+        borderRadius: 12,
+        backgroundColor: Color(Colors.primary_lighter).alpha(0.5).string(),
+        borderWidth: StyleSheet.hairlineWidth,
+        borderColor: Colors.borderColor,
+    },
+    shopSearchInput: {
+        flex: 1,
+        borderWidth: 0,
+        borderRadius: 0,
+        backgroundColor: "transparent",
+    },
+    shopFreeformRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 8,
+        paddingHorizontal: 14,
+        paddingVertical: 12,
+    },
+    shopFreeformText: {
+        color: Colors.secondary,
+        fontSize: 14,
+    },
+    noteContainer: {
+        paddingHorizontal: 10,
+        paddingBottom: 10,
+        paddingTop: 4,
+    },
+    noteInputContainer: {
+        borderRadius: 14,
+        backgroundColor: Color(Colors.primary_lighter).alpha(0.5).string(),
+        borderWidth: StyleSheet.hairlineWidth,
+        borderColor: Colors.borderColor,
+        minHeight: 100,
+        alignItems: "flex-start",
+    },
+    noteInput: {
+        minHeight: 80,
+        paddingTop: 4,
+        textAlignVertical: "top",
+    },
+    tagsContainer: {
+        paddingHorizontal: 10,
+        paddingBottom: 10,
+        paddingTop: 4,
+        gap: 8,
+    },
+    tagsList: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        gap: 6,
+    },
+    tagChip: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 5,
+        paddingHorizontal: 10,
+        paddingVertical: 5,
+        borderRadius: 100,
+        backgroundColor: Color(Colors.secondary).alpha(0.12).string(),
+        borderWidth: 1,
+        borderColor: Color(Colors.secondary).alpha(0.3).string(),
+    },
+    tagText: {
+        color: Colors.secondary,
+        fontSize: 13,
+        fontWeight: "500",
+    },
+    tagInputRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        borderRadius: 12,
+        backgroundColor: Color(Colors.primary_lighter).alpha(0.5).string(),
+        borderWidth: StyleSheet.hairlineWidth,
+        borderColor: Colors.borderColor,
+        paddingRight: 8,
+    },
+    tagInput: {
+        flex: 1,
+        borderWidth: 0,
+        borderRadius: 0,
+        backgroundColor: "transparent",
+    },
+    tagAddBtn: {
+        padding: 4,
+    },
     navRow: {
         flexDirection: "row",
         alignItems: "center",
@@ -534,22 +743,5 @@ const styles = StyleSheet.create({
         borderRadius: 100,
         justifyContent: "center",
         alignItems: "center",
-    },
-    shopContainer: {
-        paddingHorizontal: 10,
-        paddingBottom: 10,
-    },
-    shopSuggestionRow: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 8,
-        paddingHorizontal: 10,
-        paddingVertical: 10,
-        borderRadius: 8,
-    },
-    shopSuggestionText: {
-        color: Colors.foreground_secondary,
-        fontSize: 14,
-        flex: 1,
     },
 })

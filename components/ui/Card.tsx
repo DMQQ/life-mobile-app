@@ -1,7 +1,14 @@
 import Colors from "@/constants/Colors"
 import Color from "color"
 import { Pressable, PressableProps, StyleSheet, View, ViewProps } from "react-native"
-import Animated, { AnimatedProps, useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated"
+import Animated, {
+    AnimatedProps,
+    useAnimatedStyle,
+    useSharedValue,
+    withSequence,
+    withSpring,
+    withTiming,
+} from "react-native-reanimated"
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable)
 
@@ -33,11 +40,7 @@ export default function Card<T extends boolean = false>({
     }))
 
     const handlePressIn = () => {
-        scale.value = withTiming(0.97, { duration: 100 })
-    }
-
-    const handlePressOut = () => {
-        scale.value = withTiming(1, { duration: 100 })
+        scale.value = withSequence(withSpring(0.97, { duration: 200 }), withSpring(1, { duration: 200 }))
     }
 
     const isPressable = ripple || rest?.onPress !== undefined
@@ -51,7 +54,6 @@ export default function Card<T extends boolean = false>({
             style={[styles.container, rest.style as any, animatedStyle]}
             ref={ref}
             onPressIn={isPressable ? handlePressIn : undefined}
-            onPressOut={isPressable ? handlePressOut : undefined}
         >
             {children}
         </Component>

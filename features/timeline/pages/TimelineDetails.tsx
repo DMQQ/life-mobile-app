@@ -8,7 +8,7 @@ import { useCallback, useMemo } from "react"
 import { StyleSheet, View } from "react-native"
 import Animated, { useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
-import FileList from "../components/FileList"
+import FileList, { useUploadFiles } from "../components/FileList"
 import LoaderSkeleton from "../components/LoaderSkeleton"
 import Section from "@/components/ui/Section"
 import ActionRow from "@/components/ui/ActionRow"
@@ -50,6 +50,17 @@ const styles = StyleSheet.create({
         marginTop: 10,
         marginBottom: 4,
     },
+    dateTimeRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 15,
+        marginBottom: 12,
+    },
+    dateTimeItem: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 5,
+    },
 })
 
 const capitalize = (text: string | undefined) => {
@@ -61,8 +72,9 @@ export default function TimelineDetails({
     route,
     navigation,
 }: StackScreenProps<{ TimelineDetails: { timelineId: string } }, "TimelineDetails">) {
-    const { data, loading } = useGetOccurrenceById(route.params.timelineId)
+    const { data, loading, refetch } = useGetOccurrenceById(route.params.timelineId)
     const [completeOccurrence] = useCompleteOccurrence(route.params.timelineId)
+    const { handleImagesSelect, handleTakePhoto, loading: filesLoading } = useUploadFiles(data?.id ?? "", refetch)
 
     const insets = useSafeAreaInsets()
 
@@ -189,6 +201,31 @@ export default function TimelineDetails({
                     <LoaderSkeleton />
                 ) : (
                     <View style={styles.container}>
+                        {data?.date && (
+                            <View style={styles.dateTimeRow}>
+                                <View style={styles.dateTimeItem}>
+                                    <Feather name="calendar" size={12} color={Colors.foreground_secondary} />
+                                    <Text variant="caption" color={Colors.foreground_secondary}>
+                                        {dayjs(data.date).format("ddd, D MMM YYYY")}
+                                    </Text>
+                                </View>
+                                {data.isAllDay ? (
+                                    <View style={styles.dateTimeItem}>
+                                        <Text variant="caption" color={Colors.foreground_secondary}>
+                                            All day
+                                        </Text>
+                                    </View>
+                                ) : data.beginTime || data.endTime ? (
+                                    <View style={styles.dateTimeItem}>
+                                        <Feather name="clock" size={12} color={Colors.foreground_secondary} />
+                                        <Text variant="caption" color={Colors.foreground_secondary}>
+                                            {data.beginTime}
+                                            {data.endTime ? ` – ${data.endTime}` : ""}
+                                        </Text>
+                                    </View>
+                                ) : null}
+                            </View>
+                        )}
                         {data?.description && <Text variant="body">{data?.description}</Text>}
                         {data?.isCompleted && data?.finishedAt && (
                             <View style={styles.completedBadge}>
@@ -208,10 +245,25 @@ export default function TimelineDetails({
             <Toolbar>
                 <Toolbar.Item sfIcon="bell" onPress={startLiveActivityLocally} disabled={isPending} />
                 <Toolbar.Spacer />
-                <Toolbar.Item
-                    sfIcon="play"
-                    onPress={() => (navigation as any).navigate("TimelineDo", { timelineId: data?.id })}
-                />
+                <Toolbar.Group>
+                    <Toolbar.Item
+                        sfIcon="photo.badge.plus"
+                        disabled={filesLoading}
+                        menuItems={[
+                            { label: "Take Photo", sfIcon: "camera.fill", onPress: handleTakePhoto },
+                            {
+                                label: "Choose from Library",
+                                sfIcon: "photo.on.rectangle.angled",
+                                onPress: handleImagesSelect,
+                            },
+                        ]}
+                    />
+                    <Toolbar.Item sfIcon="checklist" onPress={handleCreateTodo} />
+                    <Toolbar.Item
+                        sfIcon="play"
+                        onPress={() => (navigation as any).navigate("TimelineDo", { timelineId: data?.id })}
+                    />
+                </Toolbar.Group>
             </Toolbar>
         </View>
     )

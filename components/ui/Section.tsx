@@ -1,6 +1,5 @@
 import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
-import Color from "color"
 import React from "react"
 import { StyleSheet, View } from "react-native"
 import Animated, { LinearTransition } from "react-native-reanimated"

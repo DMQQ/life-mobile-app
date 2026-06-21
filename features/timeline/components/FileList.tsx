@@ -49,7 +49,7 @@ interface FileListProps {
     timelineId: string
 }
 
-const useUploadFiles = (timelineId: string, refetch: () => Promise<any>) => {
+export const useUploadFiles = (timelineId: string, refetch: () => Promise<any>) => {
     const client = useApolloClient()
 
     async function uploadPhotoAsync(photos: ImagePicker.ImagePickerResult) {
