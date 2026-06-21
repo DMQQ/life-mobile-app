@@ -63,6 +63,8 @@ Toolbar.Item = ({ onPress, sfIcon, disabled = false, hidden, menuItems, ...rest 
 
     const icon = <SymbolView size={20} name={sfIcon} tintColor={rest.tintColor ?? "#fff"} />
 
+    const ContextWrapper = grouped ? View : GlassView
+
     if (menuItems?.length) {
         return (
             <ContextMenuView
@@ -75,9 +77,9 @@ Toolbar.Item = ({ onPress, sfIcon, disabled = false, hidden, menuItems, ...rest 
                 }))}
                 onPress={(e) => menuItems[e.nativeEvent.index]?.onPress()}
             >
-                <View style={styles.glass} interactive>
+                <ContextWrapper style={styles.glass} interactive>
                     <View style={styles.button}>{icon}</View>
-                </View>
+                </ContextWrapper>
             </ContextMenuView>
         )
     }
