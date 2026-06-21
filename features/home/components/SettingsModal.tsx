@@ -15,12 +15,13 @@ import HomeWidgetsSection from "./settings/HomeWidgetsSection"
 import NotificationsSection from "./settings/NotificationsSection"
 import ThemeSection from "./settings/ThemeSection"
 import UpdateRow from "./settings/UpdateRow"
+import UtilitiesSection from "./settings/UtilitiesSection"
 import WatchSection from "./settings/WatchSection"
 import { Card, IconBox, SectionLabel, SettingsRow } from "./settings/SettingsComponents"
 
 const CARD_BG = Color(Colors.primary).lighten(0.4).string()
 
-type SettingSection = "notifications" | "watch" | "theme" | "home"
+type SettingSection = "notifications" | "watch" | "theme" | "home" | "utilities"
 
 type SettingsParamList = {
     SettingsIndex: undefined
@@ -144,6 +145,17 @@ function SettingsIndex({ navigation }: SP<"SettingsIndex">) {
                 <SectionLabel title="App" />
                 <Card>
                     <UpdateRow />
+                    <SettingsRow
+                        icon={
+                            <IconBox bg="#5E5CE6">
+                                <Feather name="tool" size={16} color="#fff" />
+                            </IconBox>
+                        }
+                        label="Utilities"
+                        isLast
+                        onPress={() => go("utilities", "Utilities")}
+                        right={<Feather name="chevron-right" size={16} color={Colors.text_dark} />}
+                    />
                 </Card>
 
                 <View style={s.sectionGap} />
@@ -178,6 +190,7 @@ function SettingsDetail({ navigation, route }: SP<"SettingsDetail">) {
                 {section === "watch" && <WatchSection />}
                 {section === "theme" && <ThemeSection />}
                 {section === "home" && <HomeWidgetsSection />}
+                {section === "utilities" && <UtilitiesSection />}
             </ScrollView>
         </View>
     )

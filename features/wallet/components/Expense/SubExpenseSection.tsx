@@ -19,9 +19,10 @@ const DELETE_SUB_EXPENSE = gql`
 
 interface Props {
     onUpdate: React.Dispatch<React.SetStateAction<any>>
+    tint?: string
 }
 
-export default function SubExpenseSection({ onUpdate }: Props) {
+export default function SubExpenseSection({ onUpdate, tint }: Props) {
     const expense = useExpense()
     const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
     const sheetRef = useRef<AddSubExpenseSheetHandle>(null)
@@ -65,6 +66,7 @@ export default function SubExpenseSection({ onUpdate }: Props) {
         <>
             <Section
                 title="Subexpenses"
+                tint={tint}
                 headerRight={
                     <Pressable onPress={expandSheet} style={styles.addBtn}>
                         <SymbolView name="plus.circle.fill" size={18} tintColor={Colors.secondary} />

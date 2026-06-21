@@ -1,16 +1,14 @@
 import { FONTS } from "@/constants/Fonts"
-import GlassView from "@/components/ui/GlassView"
 import Colors from "@/constants/Colors"
 import { StyleSheet, TouchableOpacity, View } from "react-native"
 import Text from "@/components/ui/Text/Text"
-import Ripple from "react-native-material-ripple"
 import { CategoryIcon } from "../Expense/ExpenseIcon"
 import { formatTimeAgo, Notification, useReadNotification } from "./useNotifications"
+import { Card } from "@/components"
 
 export default function NotificationCard({
     notification,
     onDismiss,
-    index,
 }: {
     notification: Notification
     onDismiss: (id: string) => void
@@ -19,47 +17,48 @@ export default function NotificationCard({
     const { handleDismiss, handlePress } = useReadNotification(notification, onDismiss)
 
     return (
-        <View style={styles.notificationCard}>
-            <GlassView style={styles.blurContainer}>
-                <Ripple
-                    disabled={notification.read}
-                    onPress={handlePress}
-                    rippleColor="rgba(255, 255, 255, 0.1)"
-                    rippleDuration={300}
-                >
-                    <View style={styles.notificationContent}>
-                        <View style={styles.headerRow}>
-                            <View style={styles.iconContainer}>
-                                <CategoryIcon type="expense" category="bell" size={20} />
-                            </View>
-
-                            <View style={styles.contentContainer}>
-                                <Text size={16} weight="600" color={Colors.text_light} lineHeight={20} numberOfLines={2} style={{ marginBottom: 4 }}>
-                                    {notification.message.title}
-                                </Text>
-                            </View>
-                        </View>
-
-                        <Text size={14} color={Colors.text_light} lineHeight={18} opacity={0.85} style={{ marginBottom: 10 }}>{notification.message.body}</Text>
-
-                        <View style={[styles.footerRow]}>
-                            <Text size={12} weight="500" color={Colors.secondary_light_1}>
-                                {`${notification.read ? "" : "Not read, "} ${formatTimeAgo(notification.sendAt)}`.trim()}
-                            </Text>
-                        </View>
-
-                        <TouchableOpacity
-                            style={styles.dismissButton}
-                            onPress={handleDismiss}
-                            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                            activeOpacity={0.7}
-                        >
-                            <Text size={16} weight="bold" color={Colors.text_light} lineHeight={16}>×</Text>
-                        </TouchableOpacity>
+        <Card style={styles.notificationCard} onPress={handlePress} disabled={notification.read}>
+            <View>
+                <View style={styles.headerRow}>
+                    <View style={styles.iconContainer}>
+                        <CategoryIcon type="expense" category="bell" size={20} />
                     </View>
-                </Ripple>
-            </GlassView>
-        </View>
+
+                    <View style={styles.contentContainer}>
+                        <Text
+                            size={16}
+                            weight="600"
+                            color={Colors.text_light}
+                            lineHeight={20}
+                            numberOfLines={2}
+                            style={{ marginBottom: 4 }}
+                        >
+                            {notification.message.title}
+                        </Text>
+                    </View>
+                </View>
+
+                <Text size={14} color={Colors.text_light} lineHeight={18} opacity={0.85} style={{ marginBottom: 10 }}>
+                    {notification.message.body}
+                </Text>
+
+                <View style={[styles.footerRow]}>
+                    <Text size={12} weight="500" color={Colors.secondary_light_1}>
+                        {`${notification.read ? "" : "Not read, "} ${formatTimeAgo(notification.sendAt)}`.trim()}
+                    </Text>
+                </View>
+            </View>
+            <TouchableOpacity
+                style={styles.dismissButton}
+                onPress={handleDismiss}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                activeOpacity={0.7}
+            >
+                <Text size={16} weight="bold" color={Colors.text_light} lineHeight={16}>
+                    ×
+                </Text>
+            </TouchableOpacity>
+        </Card>
     )
 }
 
@@ -67,24 +66,9 @@ const styles = StyleSheet.create({
     notificationCard: {
         borderRadius: 16,
         marginBottom: 12,
-        overflow: "hidden",
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 4,
-        },
-        shadowOpacity: 0.15,
-        shadowRadius: 12,
-        elevation: 8,
     },
     blurContainer: {
         flex: 1,
-        borderRadius: 20,
-    },
-    notificationContent: {
-        padding: 20,
-        paddingRight: 50,
-        backgroundColor: "rgba(0, 0, 0, 0.2)",
     },
     headerRow: {
         flexDirection: "row",

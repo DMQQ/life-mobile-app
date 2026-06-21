@@ -25,6 +25,7 @@ interface Expense {
 interface SimilarExpensesChartProps {
     expenses: Expense[]
     currentExpenseId: string
+    tint?: string
 }
 
 const CHART_H = 96
@@ -105,7 +106,7 @@ function Sparkline({
     )
 }
 
-export default function SimilarExpensesChart({ expenses, currentExpenseId }: SimilarExpensesChartProps) {
+export default function SimilarExpensesChart({ expenses, currentExpenseId, tint }: SimilarExpensesChartProps) {
     if (!expenses || expenses.length < 2) return null
 
     const { width: screenWidth } = useWindowDimensions()
@@ -138,7 +139,7 @@ export default function SimilarExpensesChart({ expenses, currentExpenseId }: Sim
     const currentX = PAD + (currentIndex / (sorted.length - 1)) * (chartWidth - PAD * 2)
 
     return (
-        <Animated.View style={[styles.container, animStyle]}>
+        <Animated.View style={[styles.container, tint && { backgroundColor: Color(tint).mix(Color(Colors.primary_lighter), 0.95).hex() }, animStyle]}>
             <View style={styles.statsRow}>
                 <View style={styles.statItem}>
                     <Text size={17} weight="700" color={Colors.secondary} mono>

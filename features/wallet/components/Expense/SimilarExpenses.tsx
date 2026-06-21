@@ -12,9 +12,11 @@ import Section from "@/components/ui/Section"
 export default function SimilarExpenses({
     similarExpenses,
     selected,
+    tint,
 }: {
     similarExpenses: ExpenseType[]
     selected: ExpenseType
+    tint?: string
 }) {
     const navigation = useNavigation<any>()
     const [isExpanded, setIsExpanded] = useState(false)
@@ -23,6 +25,7 @@ export default function SimilarExpenses({
         <View style={{ paddingHorizontal: 15 }}>
             <Section
                 title="Similar"
+                tint={tint}
                 headerRight={
                     <IconButton
                         icon={
@@ -36,7 +39,7 @@ export default function SimilarExpenses({
                     />
                 }
             >
-                <SimilarExpensesChart expenses={similarExpenses} currentExpenseId={selected?.id} />
+                <SimilarExpensesChart expenses={similarExpenses} currentExpenseId={selected?.id} tint={tint} />
 
                 {isExpanded && (
                     <View
@@ -54,6 +57,7 @@ export default function SimilarExpenses({
                                         expense: item,
                                     })
                                 }}
+                                containerStyle={{ backgroundColor: undefined }}
                             />
                         ))}
                     </View>

@@ -1,5 +1,6 @@
 import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
+import Color from "color"
 import React from "react"
 import { StyleSheet, View } from "react-native"
 import Animated, { LinearTransition } from "react-native-reanimated"
@@ -36,9 +37,11 @@ interface SectionProps {
     noGap?: boolean
 
     cardStyle?: any
+
+    tint?: string
 }
 
-export default function Section({ title, headerRight, children, noGap, cardStyle }: SectionProps) {
+export default function Section({ title, headerRight, children, noGap, cardStyle, tint }: SectionProps) {
     return (
         <Animated.View style={!noGap && s.sectionGap} layout={LinearTransition}>
             <View style={s.headerRow}>
@@ -46,7 +49,18 @@ export default function Section({ title, headerRight, children, noGap, cardStyle
                 {headerRight}
             </View>
 
-            <View style={[s.card, cardStyle]}>{children}</View>
+            <View
+                style={[
+                    s.card,
+                    cardStyle,
+                    tint && {
+                        backgroundColor: Color(tint).mix(Color(Colors.primary_lighter), 0.95).hex(),
+                        borderColor: Color(tint).mix(Color(Colors.primary_lighter), 0.8).hex(),
+                    },
+                ]}
+            >
+                {children}
+            </View>
         </Animated.View>
     )
 }

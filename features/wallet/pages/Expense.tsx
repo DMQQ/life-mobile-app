@@ -2,7 +2,14 @@ import { useEffect, useState } from "react"
 import { SFSymbol } from "expo-symbols"
 import { View, StyleSheet } from "react-native"
 import { useQuery } from "@apollo/client"
-import Animated, { useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated"
+import Animated, {
+    useAnimatedScrollHandler,
+    useSharedValue,
+    FadeIn,
+    FadeInDown,
+    ZoomIn,
+    Easing,
+} from "react-native-reanimated"
 import dayjs from "dayjs"
 
 import Header from "@/components/ui/Header/Header"
@@ -68,6 +75,8 @@ export default function Expense({ route: { params }, navigation }: any) {
         setConfirmRefund(false)
     }
 
+    const tintColor = CategoryUtils.getCategoryColor(selected?.category as any, selected?.type as any)
+
     return (
         <View style={styles.root}>
             <Header
@@ -89,7 +98,7 @@ export default function Expense({ route: { params }, navigation }: any) {
                 ]}
             />
 
-            <Background tintColor={CategoryUtils.getCategoryColor(selected?.category as any, selected?.type as any)} />
+            <Background tintColor={tintColor} />
 
             {!selected ? (
                 <ExpenseSkeleton />
@@ -104,48 +113,84 @@ export default function Expense({ route: { params }, navigation }: any) {
                         <ExpenseHero expense={selected} />
 
                         <View style={styles.sections}>
-                            <SubExpenseSection onUpdate={setSelected} />
-                            <ExpenseDetails expense={selected} />
+                            <Animated.View
+                                entering={FadeInDown.delay(100).duration(320).easing(Easing.out(Easing.ease))}
+                            >
+                                <SubExpenseSection onUpdate={setSelected} tint={tintColor} />
+                            </Animated.View>
+                            <Animated.View
+                                entering={FadeInDown.delay(250).duration(320).easing(Easing.out(Easing.ease))}
+                            >
+                                <ExpenseDetails expense={selected} tint={tintColor} />
+                            </Animated.View>
 
-                            <Section title="Calendar">
-                                <CollapsibleThemedCalendar
-                                    date={dayjs(selected.date).format("YYYY-MM-DD")}
-                                    markedDates={{ [dayjs(selected.date).format("YYYY-MM-DD")]: { selected: true } }}
-                                />
-                            </Section>
-
-                            {selected.type === "expense" && (
-                                <Section title="Breakdown">
-                                    <MonthlyBreakdown
-                                        expense={selected as ExpenseType}
-                                        income={data?.wallet?.income ?? 0}
-                                        monthlyPercentageTarget={data?.wallet?.monthlyPercentageTarget ?? 0}
+                            <Animated.View
+                                entering={FadeInDown.delay(400).duration(320).easing(Easing.out(Easing.ease))}
+                            >
+                                <Section title="Calendar" tint={tintColor}>
+                                    <CollapsibleThemedCalendar
+                                        date={dayjs(selected.date).format("YYYY-MM-DD")}
+                                        markedDates={{
+                                            [dayjs(selected.date).format("YYYY-MM-DD")]: { selected: true },
+                                        }}
                                     />
                                 </Section>
+                            </Animated.View>
+
+                            {selected.type === "expense" && (
+                                <Animated.View
+                                    entering={FadeInDown.delay(550).duration(320).easing(Easing.out(Easing.ease))}
+                                >
+                                    <Section title="Breakdown" tint={tintColor}>
+                                        <MonthlyBreakdown
+                                            expense={selected as ExpenseType}
+                                            income={data?.wallet?.income ?? 0}
+                                            monthlyPercentageTarget={data?.wallet?.monthlyPercentageTarget ?? 0}
+                                        />
+                                    </Section>
+                                </Animated.View>
                             )}
 
-                            <Section title="Subscription">
-                                <SubscriptionSection
-                                    hasSubscription={!!selected.subscription?.id}
-                                    isSubscriptionActive={
-                                        !!selected.subscription?.id && !!selected.subscription?.isActive
-                                    }
-                                    selected={selected}
-                                />
-                            </Section>
+                            <Animated.View
+                                entering={FadeInDown.delay(700).duration(320).easing(Easing.out(Easing.ease))}
+                            >
+                                <Section title="Subscription" tint={tintColor}>
+                                    <SubscriptionSection
+                                        hasSubscription={!!selected.subscription?.id}
+                                        isSubscriptionActive={
+                                            !!selected.subscription?.id && !!selected.subscription?.isActive
+                                        }
+                                        selected={selected}
+                                        tint={tintColor}
+                                    />
+                                </Section>
+                            </Animated.View>
 
-                            <ShopSection onUpdate={setSelected} />
+                            <Animated.View
+                                entering={FadeInDown.delay(850).duration(320).easing(Easing.out(Easing.ease))}
+                            >
+                                <ShopSection onUpdate={setSelected} />
+                            </Animated.View>
                         </View>
 
                         {data?.expenseSimilar?.length > 1 && (
-                            <SimilarExpenses
-                                selected={selected}
-                                similarExpenses={data.expenseSimilar.filter((e: any) => e.id !== selected.id)}
-                            />
+                            <Animated.View
+                                entering={FadeInDown.delay(100).duration(320).easing(Easing.out(Easing.ease))}
+                            >
+                                <SimilarExpenses
+                                    selected={selected}
+                                    similarExpenses={data.expenseSimilar.filter((e: any) => e.id !== selected.id)}
+                                    tint={tintColor}
+                                />
+                            </Animated.View>
                         )}
 
-                        <ExpenseAttachments id={selected.id} images={selected?.files ?? []} />
-                        <ExpenseLocationMap location={selected.location} id={selected.id} />
+                        <Animated.View entering={FadeInDown.delay(120).duration(320).easing(Easing.out(Easing.ease))}>
+                            <ExpenseAttachments id={selected.id} images={selected?.files ?? []} tint={tintColor} />
+                        </Animated.View>
+                        <Animated.View entering={FadeInDown.delay(160).duration(320).easing(Easing.out(Easing.ease))}>
+                            <ExpenseLocationMap location={selected.location} id={selected.id} tint={tintColor} />
+                        </Animated.View>
 
                         <View style={styles.bottomSpacer} />
                     </Animated.ScrollView>
@@ -174,16 +219,24 @@ export default function Expense({ route: { params }, navigation }: any) {
 function ExpenseHero({ expense }: { expense: ExpenseType }) {
     return (
         <View style={styles.hero}>
-            <CategoryIcon
-                category={expense.category as any}
-                size={60}
-                type={expense.type as any}
-                imageUri={expense.shopEntity?.image}
-                containerStyle={styles.heroIcon}
-            />
-            <Caption style={styles.heroCategory}>{CategoryUtils.getCategoryName(expense.category as any)}</Caption>
-            <Body style={styles.heroAmount}>{formatAmount(expense.amount)}zł</Body>
-            <Caption style={styles.heroDescription}>{expense.description}</Caption>
+            <Animated.View entering={ZoomIn.duration(350).easing(Easing.out(Easing.ease))}>
+                <CategoryIcon
+                    category={expense.category as any}
+                    size={60}
+                    type={expense.type as any}
+                    imageUri={expense.shopEntity?.image}
+                    containerStyle={styles.heroIcon}
+                />
+            </Animated.View>
+            <Animated.View entering={FadeIn.delay(80).duration(350)}>
+                <Caption style={styles.heroCategory}>{CategoryUtils.getCategoryName(expense.category as any)}</Caption>
+            </Animated.View>
+            <Animated.View entering={FadeInDown.delay(130).duration(320).easing(Easing.out(Easing.ease))}>
+                <Body style={styles.heroAmount}>{formatAmount(expense.amount)}zł</Body>
+            </Animated.View>
+            <Animated.View entering={FadeIn.delay(180).duration(350)}>
+                <Caption style={styles.heroDescription}>{expense.description}</Caption>
+            </Animated.View>
         </View>
     )
 }

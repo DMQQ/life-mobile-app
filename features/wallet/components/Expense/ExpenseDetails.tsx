@@ -16,14 +16,14 @@ const capitalize = (s = "") => s.charAt(0).toUpperCase() + s.slice(1)
 
 const muted = Colors.foreground_secondary
 
-export default function ExpenseDetails({ expense }: { expense: ExpenseType }) {
+export default function ExpenseDetails({ expense, tint }: { expense: ExpenseType; tint?: string }) {
     const { data: subAccountsData } = useSubAccounts()
     const subAccount = subAccountsData?.wallet.subAccounts.find((a) => a.id === expense.subAccountId) ?? null
 
     return (
-        <Section title="Details">
+        <Section title="Details" tint={tint}>
             {expense?.category && (
-                <DetailRow
+                <DetailRow tint={tint}
                     iconElement={
                         <CategoryIcon
                             type={expense?.type as "expense" | "income"}
@@ -38,10 +38,10 @@ export default function ExpenseDetails({ expense }: { expense: ExpenseType }) {
                 </DetailRow>
             )}
 
-            <DetailRow icon="tag">{capitalize(expense?.type)}</DetailRow>
+            <DetailRow tint={tint} icon="tag">{capitalize(expense?.type)}</DetailRow>
 
             {expense?.shop && (
-                <DetailRow icon="shopping-bag">
+                <DetailRow tint={tint} icon="shopping-bag">
                     <Pressable
                         onPress={() => {
                             Feedback.trigger("impactLight")
@@ -63,20 +63,20 @@ export default function ExpenseDetails({ expense }: { expense: ExpenseType }) {
                 </DetailRow>
             )}
             {expense?.tags && (
-                <DetailRow icon="tag">{expense.tags}</DetailRow>
+                <DetailRow tint={tint} icon="tag">{expense.tags}</DetailRow>
             )}
 
-            <DetailRow icon="clock">Balance before: {expense?.balanceBeforeInteraction != null ? formatAmount(expense.balanceBeforeInteraction) : "N/A"} zł</DetailRow>
+            <DetailRow tint={tint} icon="clock">Balance before: {expense?.balanceBeforeInteraction != null ? formatAmount(expense.balanceBeforeInteraction) : "N/A"} zł</DetailRow>
 
             {expense.spontaneousRate != null && expense.spontaneousRate > 0 && (
-                <DetailRow icon="percent">
+                <DetailRow tint={tint} icon="percent">
                     <Text variant="body" style={{ color: getRateColor(expense.spontaneousRate), fontSize: 16 }}>
                         Spontaneous {expense.spontaneousRate}%
                     </Text>
                 </DetailRow>
             )}
 
-            {subAccount && <DetailRow icon="layers">{subAccount.name}</DetailRow>}
+            {subAccount && <DetailRow tint={tint} icon="layers">{subAccount.name}</DetailRow>}
 
             <EditNote expense={expense} />
         </Section>

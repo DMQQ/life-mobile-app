@@ -308,10 +308,12 @@ function ShopPicker({
         .filter((s) => search.length === 0 || s.name.toLowerCase().includes(search.toLowerCase()))
         .slice(0, 6)
 
+    const showFreeform = search.trim().length > 0 && filtered.length === 0
+
     return (
         <View style={styles.shopPickerContainer}>
             <View style={styles.shopSearchRow}>
-                <Feather name="search" size={15} color={Colors.foreground_secondary} />
+                <Feather name="search" size={16} color={Colors.foreground_secondary} />
                 <Input
                     value={search}
                     onChangeText={(text) => {
@@ -319,32 +321,38 @@ function ShopPicker({
                         if (!shopEntityId) return
                         onClear()
                     }}
-                    placeholder="Search shops..."
+                    placeholder="Search or type a shop name…"
                     flat
                     autoFocus
                     containerStyle={styles.shopSearchInput}
+                    style={styles.shopSearchInputText}
                 />
                 {search.length > 0 && (
-                    <Pressable onPress={() => { setSearch(""); onClear() }} hitSlop={8}>
-                        <Feather name="x" size={15} color={Colors.foreground_secondary} />
+                    <Pressable onPress={() => { setSearch(""); onClear() }} hitSlop={10} style={styles.shopClearBtn}>
+                        <Feather name="x" size={14} color={Colors.foreground_secondary} />
                     </Pressable>
                 )}
             </View>
-            {filtered.map((s) => (
-                <ShopSelectCard
-                    key={s.id}
-                    shop={s}
-                    selected={shopEntityId === s.id}
-                    onPress={() => onSelect(s.name, s.id)}
-                />
-            ))}
-            {filtered.length === 0 && search.length > 0 && (
-                <Pressable
-                    onPress={() => onSelect(search, null as any)}
-                    style={styles.shopFreeformRow}
-                >
-                    <Feather name="plus" size={15} color={Colors.secondary} />
-                    <Text style={styles.shopFreeformText}>Use "{search}"</Text>
+
+            {filtered.length > 0 && (
+                <View style={styles.shopResults}>
+                    {filtered.map((s) => (
+                        <ShopSelectCard
+                            key={s.id}
+                            shop={s}
+                            selected={shopEntityId === s.id}
+                            onPress={() => onSelect(s.name, s.id)}
+                        />
+                    ))}
+                </View>
+            )}
+
+            {showFreeform && (
+                <Pressable onPress={() => onSelect(search.trim(), null as any)} style={styles.shopFreeformRow}>
+                    <View style={styles.shopFreeformIcon}>
+                        <Feather name="plus" size={13} color={Colors.primary} />
+                    </View>
+                    <Text style={styles.shopFreeformText}>Use "{search.trim()}"</Text>
                 </Pressable>
             )}
         </View>
@@ -623,20 +631,20 @@ const styles = StyleSheet.create({
         fontSize: 13,
     },
     shopPickerContainer: {
-        paddingHorizontal: 10,
-        paddingBottom: 8,
-        gap: 2,
+        paddingHorizontal: 12,
+        paddingTop: 8,
+        paddingBottom: 14,
+        gap: 10,
     },
     shopSearchRow: {
         flexDirection: "row",
         alignItems: "center",
-        gap: 8,
-        paddingHorizontal: 10,
-        paddingVertical: 4,
-        marginBottom: 4,
-        borderRadius: 12,
-        backgroundColor: Color(Colors.primary_lighter).alpha(0.5).string(),
-        borderWidth: StyleSheet.hairlineWidth,
+        gap: 10,
+        paddingHorizontal: 14,
+        paddingVertical: 11,
+        borderRadius: 16,
+        backgroundColor: Color(Colors.primary_lighter).alpha(0.6).string(),
+        borderWidth: 1,
         borderColor: Colors.borderColor,
     },
     shopSearchInput: {
@@ -644,17 +652,49 @@ const styles = StyleSheet.create({
         borderWidth: 0,
         borderRadius: 0,
         backgroundColor: "transparent",
+        marginBottom: 0,
+    },
+    shopSearchInputText: {
+        paddingVertical: 0,
+        height: 22,
+        minHeight: 0,
+        fontSize: 15,
+    },
+    shopClearBtn: {
+        width: 24,
+        height: 24,
+        borderRadius: 100,
+        backgroundColor: Color(Colors.foreground_secondary).alpha(0.12).string(),
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    shopResults: {
+        gap: 2,
     },
     shopFreeformRow: {
         flexDirection: "row",
         alignItems: "center",
-        gap: 8,
+        gap: 12,
         paddingHorizontal: 14,
         paddingVertical: 12,
+        borderRadius: 16,
+        backgroundColor: Color(Colors.secondary).alpha(0.08).string(),
+        borderWidth: 1,
+        borderColor: Color(Colors.secondary).alpha(0.2).string(),
+    },
+    shopFreeformIcon: {
+        width: 28,
+        height: 28,
+        borderRadius: 100,
+        backgroundColor: Colors.secondary,
+        justifyContent: "center",
+        alignItems: "center",
     },
     shopFreeformText: {
         color: Colors.secondary,
         fontSize: 14,
+        fontWeight: "500",
+        flex: 1,
     },
     noteContainer: {
         paddingHorizontal: 10,

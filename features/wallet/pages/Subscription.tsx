@@ -10,7 +10,14 @@ import Header from "@/components/ui/Header/Header"
 import Colors from "@/constants/Colors"
 import { Expense, Subscription } from "@/types"
 import { parseDate } from "@/utils/functions/parseDate"
-import Animated, { useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated"
+import Animated, {
+    useAnimatedScrollHandler,
+    useSharedValue,
+    FadeIn,
+    FadeInDown,
+    ZoomIn,
+    Easing,
+} from "react-native-reanimated"
 import WalletItem, { CategoryIcon } from "../components/Wallet/WalletItem"
 import useSubscription from "../hooks/useSubscription"
 import { ConfirmDialog, EmptyState } from "@/components"
@@ -164,6 +171,8 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
     //     return <SubscriptionSkeleton />
     // }
 
+    const tintColor = CategoryUtils.getCategoryColor("subscriptions", "expense")
+
     const nextBillingDayjs = dayjs(parseInt(subscription?.nextBillingDate || "0"))
     const calendarDate = nextBillingDayjs.isValid()
         ? nextBillingDayjs.format("YYYY-MM-DD")
@@ -198,7 +207,7 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                 ]}
             />
 
-            <Background tintColor={CategoryUtils.getCategoryColor("subscriptions", "expense")} />
+            <Background tintColor={tintColor} />
 
             {loading || !subscription ? (
                 <SubscriptionSkeleton />
@@ -212,40 +221,51 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                     <View
                         style={{ width: "100%", height: 200, justifyContent: "center", alignItems: "center", gap: 7.5 }}
                     >
-                        <CategoryIcon
-                            type="expense"
-                            category={"subscriptions"}
-                            size={60}
-                            containerStyle={{
-                                width: 100,
-                                height: 100,
-                                borderRadius: 100,
-                            }}
-                        />
-                        <Text size={15} color={Colors.text_dark}>
-                            {CategoryUtils.getCategoryName("subscription")}
-                        </Text>
-                        <Text size={40} weight="800" color="#fff" mono>
-                            {formatAmount(subscription?.amount)}zł
-                        </Text>
-                        <Text size={15} color={Colors.text_dark}>
-                            {subscription?.description}
-                        </Text>
+                        <Animated.View entering={ZoomIn.duration(350).easing(Easing.out(Easing.ease))}>
+                            <CategoryIcon
+                                type="expense"
+                                category={"subscriptions"}
+                                size={60}
+                                containerStyle={{
+                                    width: 100,
+                                    height: 100,
+                                    borderRadius: 100,
+                                }}
+                            />
+                        </Animated.View>
+                        <Animated.View entering={FadeIn.delay(80).duration(350)}>
+                            <Text size={15} color={Colors.text_dark}>
+                                {CategoryUtils.getCategoryName("subscription")}
+                            </Text>
+                        </Animated.View>
+                        <Animated.View entering={FadeInDown.delay(130).duration(320).easing(Easing.out(Easing.ease))}>
+                            <Text size={40} weight="800" color="#fff" mono>
+                                {formatAmount(subscription?.amount)}zł
+                            </Text>
+                        </Animated.View>
+                        <Animated.View entering={FadeIn.delay(180).duration(350)}>
+                            <Text size={15} color={Colors.text_dark}>
+                                {subscription?.description}
+                            </Text>
+                        </Animated.View>
                     </View>
 
-                    <View style={{ paddingHorizontal: 15 }}>
-                        <Section title="Details">
-                            <DetailRow icon="refresh-cw">
+                    <Animated.View
+                        entering={FadeInDown.delay(100).duration(320).easing(Easing.out(Easing.ease))}
+                        style={{ paddingHorizontal: 15 }}
+                    >
+                        <Section title="Details" tint={tintColor}>
+                            <DetailRow tint={tintColor} icon="refresh-cw">
                                 {formatBillingCycle(subscription.billingCycle)} Subscription
                             </DetailRow>
 
                             {subscription.billingCycle === "custom" && subscription.billingDay != null && (
-                                <DetailRow icon="calendar">Billing day: {subscription.billingDay}</DetailRow>
+                                <DetailRow tint={tintColor} icon="calendar">Billing day: {subscription.billingDay}</DetailRow>
                             )}
 
                             {subscription.billingCycle === "custom" &&
                                 (subscription.customBillingMonths?.length ?? 0) > 0 && (
-                                    <DetailRow style={{ flexDirection: "column", alignItems: "flex-start", gap: 8 }}>
+                                    <DetailRow tint={tintColor} style={{ flexDirection: "column", alignItems: "flex-start", gap: 8 }}>
                                         <Text style={styles.detailText}>Active months:</Text>
                                         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
                                             {subscription.customBillingMonths!.map((m) => (
@@ -260,7 +280,7 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                                 )}
 
                             {subscription.reminderDaysBeforehand != null && (
-                                <DetailRow icon="bell">
+                                <DetailRow tint={tintColor} icon="bell">
                                     Reminder:{" "}
                                     {subscription.reminderDaysBeforehand === 0
                                         ? "on billing day"
@@ -268,12 +288,12 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                                 </DetailRow>
                             )}
 
-                            <DetailRow icon="calendar">Started: {parseDate(+subscription.dateStart)}</DetailRow>
+                            <DetailRow tint={tintColor} icon="calendar">Started: {parseDate(+subscription.dateStart)}</DetailRow>
 
-                            <DetailRow icon="clock">Running for: {getSubscriptionDuration()}</DetailRow>
+                            <DetailRow tint={tintColor} icon="clock">Running for: {getSubscriptionDuration()}</DetailRow>
 
                             {subscription.isActive && (
-                                <DetailRow icon="calendar">
+                                <DetailRow tint={tintColor} icon="calendar">
                                     <Text variant="body" style={{ color: isOverdue ? "#F07070" : muted, fontSize: 16 }}>
                                         {isOverdue
                                             ? "Overdue"
@@ -283,6 +303,7 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                             )}
 
                             <DetailRow
+                                tint={tintColor}
                                 last
                                 right={
                                     <Host matchContents modifiers={[background("clear")]}>
@@ -309,23 +330,29 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                                 </View>
                             </DetailRow>
                         </Section>
-                    </View>
+                    </Animated.View>
 
                     {subscription.isActive && (
-                        <View style={{ paddingHorizontal: 15 }}>
-                            <Section title="Next Billing">
+                        <Animated.View
+                            entering={FadeInDown.delay(250).duration(320).easing(Easing.out(Easing.ease))}
+                            style={{ paddingHorizontal: 15 }}
+                        >
+                            <Section title="Next Billing" tint={tintColor}>
                                 <CollapsibleThemedCalendar
                                     date={calendarDate}
                                     markedDates={{ [calendarDate]: { selected: true } }}
                                 />
                             </Section>
-                        </View>
+                        </Animated.View>
                     )}
 
                     {subscription.expenses.length > 0 && (
                         <>
-                            <View style={{ paddingHorizontal: 15 }}>
-                                <Section title="Statistics">
+                            <Animated.View
+                                entering={FadeInDown.delay(400).duration(320).easing(Easing.out(Easing.ease))}
+                                style={{ paddingHorizontal: 15 }}
+                            >
+                                <Section title="Statistics" tint={tintColor}>
                                     <View style={styles.statsContainer}>
                                         <View style={styles.statItem}>
                                             <Text variant="subheading" style={styles.statValue}>
@@ -355,10 +382,13 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                                         </View>
                                     </View>
                                 </Section>
-                            </View>
+                            </Animated.View>
 
-                            <View style={{ paddingHorizontal: 15 }}>
-                                <Section title="Payment History">
+                            <Animated.View
+                                entering={FadeInDown.delay(550).duration(320).easing(Easing.out(Easing.ease))}
+                                style={{ paddingHorizontal: 15 }}
+                            >
+                                <Section title="Payment History" tint={tintColor}>
                                     {sortedExpenses.slice(0, 10).map((expense: any) => (
                                         <WalletItem
                                             key={expense.id}
@@ -370,6 +400,7 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                                                 })
                                             }
                                             type="expense"
+                                            containerStyle={{ backgroundColor: undefined }}
                                         />
                                     ))}
 
@@ -381,18 +412,21 @@ export default function SubscriptionDetails({ route, navigation }: SubscriptionD
                                         </View>
                                     )}
                                 </Section>
-                            </View>
+                            </Animated.View>
                         </>
                     )}
 
                     {subscription.expenses.length === 0 && (
-                        <View style={{ marginTop: 15 }}>
+                        <Animated.View
+                            entering={FadeInDown.delay(400).duration(320).easing(Easing.out(Easing.ease))}
+                            style={{ marginTop: 15 }}
+                        >
                             <EmptyState
                                 icon="credit-card"
                                 title="No payments yet"
                                 description="Payments will appear here once the subscription becomes active"
                             />
-                        </View>
+                        </Animated.View>
                     )}
                     <View style={{ height: 100 }} />
                 </Animated.ScrollView>

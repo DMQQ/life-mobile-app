@@ -3,6 +3,7 @@ import { Feather } from "@expo/vector-icons"
 import { StyleProp, StyleSheet, View, ViewStyle } from "react-native"
 import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
+import Color from "color"
 
 interface DetailRowProps {
     icon?: React.ComponentProps<typeof Feather>["name"]
@@ -11,9 +12,10 @@ interface DetailRowProps {
     right?: React.ReactNode
     last?: boolean
     style?: StyleProp<ViewStyle>
+    tint?: string
 }
 
-export default function DetailRow({ icon, iconElement, children, right, last, style }: DetailRowProps) {
+export default function DetailRow({ icon, iconElement, children, right, last, style, tint }: DetailRowProps) {
     const content = React.isValidElement(children) ? (
         children
     ) : (
@@ -23,7 +25,7 @@ export default function DetailRow({ icon, iconElement, children, right, last, st
     )
 
     return (
-        <View style={[styles.row, last && styles.lastRow, style]}>
+        <View style={[styles.row, last && styles.lastRow, tint && { borderColor: Color(tint).mix(Color(Colors.primary_lighter), 0.8).hex() }, style]}>
             {iconElement ??
                 (icon ? (
                     <Feather name={icon} size={20} color={Colors.foreground_secondary} style={styles.icon} />

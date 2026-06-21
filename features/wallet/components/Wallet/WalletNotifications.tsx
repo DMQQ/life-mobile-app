@@ -30,7 +30,9 @@ export default function WalletNotifications({ data, error, loading }: WalletNoti
     if (loading) {
         return (
             <View style={styles.emptyState}>
-                <Text size={18} weight="600" color={Colors.text_light}>Loading notifications...</Text>
+                <Text size={18} weight="600" color={Colors.text_light}>
+                    Loading notifications...
+                </Text>
             </View>
         )
     }
@@ -38,8 +40,12 @@ export default function WalletNotifications({ data, error, loading }: WalletNoti
     if (error) {
         return (
             <View style={styles.emptyState}>
-                <Text size={18} weight="600" color={Colors.text_light} style={{ marginBottom: 8 }}>Error loading notifications</Text>
-                <Text size={14} color={Colors.text_light} opacity={0.6} align="center">{error.message}</Text>
+                <Text size={18} weight="600" color={Colors.text_light} style={{ marginBottom: 8 }}>
+                    Error loading notifications
+                </Text>
+                <Text size={14} color={Colors.text_light} opacity={0.6} align="center">
+                    {error.message}
+                </Text>
             </View>
         )
     }
@@ -58,8 +64,12 @@ export default function WalletNotifications({ data, error, loading }: WalletNoti
                         <CategoryIcon type="income" category="bell" size={32} />
                     </View>
                 </View>
-                <Text size={18} weight="600" color={Colors.text_light} style={{ marginBottom: 8 }}>All caught up!</Text>
-                <Text size={14} color={Colors.text_light} opacity={0.6} align="center">You don't have any new notifications right now.</Text>
+                <Text size={18} weight="600" color={Colors.text_light} style={{ marginBottom: 8 }}>
+                    All caught up!
+                </Text>
+                <Text size={14} color={Colors.text_light} opacity={0.6} align="center">
+                    You don't have any new notifications right now.
+                </Text>
             </View>
         )
     }
@@ -71,7 +81,7 @@ export default function WalletNotifications({ data, error, loading }: WalletNoti
                 <NotificationCard index={index} notification={item} onDismiss={handleDismiss} />
             )}
             keyExtractor={(item) => item.id}
-            contentContainerStyle={{ paddingBottom: 40, paddingTop: 80 }}
+            contentContainerStyle={{ paddingBottom: 40 }}
             showsVerticalScrollIndicator={false}
             style={styles.container}
         />

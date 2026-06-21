@@ -1,6 +1,7 @@
 import { StyleSheet, View } from "react-native"
 import Text from "@/components/ui/Text/Text"
 import Colors from "@/constants/Colors"
+import Color from "color"
 import moment from "moment"
 import SubscriptionItem from "../Subscription/SubscriptionItem"
 import { useNavigation } from "@react-navigation/native"
@@ -9,12 +10,14 @@ interface SubscriptionSectionProps {
     hasSubscription: boolean
     isSubscriptionActive: boolean
     selected: any
+    tint?: string
 }
 
 export default function SubscriptionSection({
     hasSubscription,
     isSubscriptionActive,
     selected,
+    tint,
 }: SubscriptionSectionProps) {
     const navigation = useNavigation()
     if (!hasSubscription) return null
@@ -76,7 +79,7 @@ export default function SubscriptionSection({
                             subscriptionId: selected.subscription.id,
                         })
                     }
-                    style={{ padding: 0, borderWidth: 0, paddingHorizontal: 0 }}
+                    style={{ padding: 0, borderWidth: 0, paddingHorizontal: 0, ...(tint && { backgroundColor: Color(tint).mix(Color(Colors.primary_lighter), 0.95).hex() }) }}
                     subscription={selected?.subscription}
                 />
             )}

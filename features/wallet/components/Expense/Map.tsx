@@ -121,7 +121,7 @@ export const getCurrentLocation = async () => {
 
 export type ExpenseLocationMapHandle = { triggerSearch: () => void }
 
-const ExpenseLocationMap = forwardRef<ExpenseLocationMapHandle, Pick<Expense, "location"> & { id: string }>((props, ref) => {
+const ExpenseLocationMap = forwardRef<ExpenseLocationMapHandle, Pick<Expense, "location"> & { id: string; tint?: string }>((props, ref) => {
     const STREET_DELTA = { latitudeDelta: 0.003, longitudeDelta: 0.003 }
 
     const [location, setLocation] = useState({
@@ -249,7 +249,7 @@ const ExpenseLocationMap = forwardRef<ExpenseLocationMapHandle, Pick<Expense, "l
 
     return (
         <View style={{ paddingHorizontal: 15 }}>
-            <Section title="Map">
+            <Section title="Map" tint={props.tint}>
                 {assignedMarker && <Map
                     ref={map}
                     style={{ width: Layout.screen.width - 30, height: 200, borderRadius: 10 }}

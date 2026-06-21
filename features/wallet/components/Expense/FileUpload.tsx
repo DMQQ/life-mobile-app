@@ -15,7 +15,7 @@ import { SymbolView } from "expo-symbols"
 
 export type ExpenseAttachmentsHandle = { takePhoto: () => void; pickImage: () => void }
 
-const ExpenseAttachments = forwardRef<ExpenseAttachmentsHandle, { id: string; images: any[] }>((props, ref) => {
+const ExpenseAttachments = forwardRef<ExpenseAttachmentsHandle, { id: string; images: any[]; tint?: string }>((props, ref) => {
     const [files, setFiles] = useState<{ id: string; url: string }[]>(props.images ?? [])
 
     async function uploadPhotoAsync(photos: ImagePicker.ImagePickerResult) {
@@ -98,6 +98,7 @@ const ExpenseAttachments = forwardRef<ExpenseAttachmentsHandle, { id: string; im
         <View style={{ paddingHorizontal: 15 }}>
             <Section
                 title="Attachments"
+                tint={props.tint}
                 headerRight={
                     <ContextMenu
                         dropdownMenuMode
