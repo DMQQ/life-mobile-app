@@ -688,7 +688,11 @@ export const CategoryIcon = (props: {
                 {props.imageUri ? (
                     <Image
                         source={{ uri: Url.API + "/upload/images/" + props.imageUri }}
-                        style={{ width: size * 2, height: size * 2, borderRadius: 100 }}
+                        style={{
+                            width: size * 2,
+                            height: size * 2,
+                            borderRadius: props.containerStyle?.borderRadius ?? styles.iconContainer.borderRadius,
+                        }}
                         resizeMode="cover"
                     />
                 ) : (

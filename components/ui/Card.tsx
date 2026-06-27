@@ -1,16 +1,8 @@
 import Colors from "@/constants/Colors"
 import Color from "color"
-import { Pressable, PressableProps, StyleSheet, View, ViewProps } from "react-native"
-import Animated, {
-    AnimatedProps,
-    useAnimatedStyle,
-    useSharedValue,
-    withSequence,
-    withSpring,
-    withTiming,
-} from "react-native-reanimated"
-
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable)
+import { StyleSheet, View, ViewProps } from "react-native"
+import Animated, { AnimatedProps } from "react-native-reanimated"
+import Touch from "@/components/ui/Touch"
 
 type CardProps<T extends boolean = false> = {
     animated?: T
@@ -22,10 +14,6 @@ type CardProps<T extends boolean = false> = {
     ref?: React.RefObject<View | null>
 } & (T extends true ? AnimatedProps<ViewProps> : ViewProps)
 
-const Clickable = (props: PressableProps) => {
-    return <AnimatedPressable {...props} style={[props.style]} />
-}
-
 export default function Card<T extends boolean = false>({
     ref,
     animated = false as T,
@@ -33,30 +21,28 @@ export default function Card<T extends boolean = false>({
     children,
     ...rest
 }: CardProps<T>) {
-    const scale = useSharedValue(1)
+    const isPressable = ripple || rest?.onPress !== undefined
 
-    const animatedStyle = useAnimatedStyle(() => ({
-        transform: [{ scale: scale.value }],
-    }))
-
-    const handlePressIn = () => {
-        scale.value = withSequence(withSpring(0.97, { duration: 200 }), withSpring(1, { duration: 200 }))
+    if (isPressable) {
+        return (
+            <Touch
+                {...(rest as any)}
+                style={[styles.container, rest.style as any]}
+                ref={ref}
+            >
+                {children}
+            </Touch>
+        )
     }
 
-    const isPressable = ripple || rest?.onPress !== undefined
-    const Component = (
-        animated ? (ripple ? Clickable : Animated.View) : isPressable ? Clickable : Animated.View
-    ) as React.ComponentType<CardProps<T>>
-
     return (
-        <Component
+        <Animated.View
             {...(rest as any)}
-            style={[styles.container, rest.style as any, animatedStyle]}
+            style={[styles.container, rest.style as any]}
             ref={ref}
-            onPressIn={isPressable ? handlePressIn : undefined}
         >
             {children}
-        </Component>
+        </Animated.View>
     )
 }
 

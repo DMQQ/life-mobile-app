@@ -1,7 +1,26 @@
 import { StackScreenProps } from "@/types"
 
+export interface TimelineFilterState {
+    searchText: string
+    dateFrom: string | null
+    dateTo: string | null
+    hoursFrom: string | null
+    hoursTo: string | null
+    status: "all" | "todo" | "completed"
+}
+
+export const DEFAULT_TIMELINE_FILTERS: TimelineFilterState = {
+    searchText: "",
+    dateFrom: null,
+    dateTo: null,
+    hoursFrom: null,
+    hoursTo: null,
+    status: "all",
+}
+
 export type TimelineRootStack = {
     Timeline: { date: string }
+    TimelineFilters: { initialFilters: TimelineFilterState }
     TimelineDetails: { timelineId: string }
     TimelineDo: { timelineId: string }
     TimelineCreate: {

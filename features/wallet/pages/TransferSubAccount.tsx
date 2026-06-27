@@ -1,5 +1,4 @@
 import { FONTS } from "@/constants/Fonts"
-import { Button } from "@/components"
 import IconButton from "@/components/ui/IconButton/IconButton"
 import Text from "@/components/ui/Text/Text"
 import Input from "@/components/ui/TextInput/TextInput"
@@ -7,7 +6,7 @@ import Colors from "@/constants/Colors"
 import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons"
 import Color from "color"
 import { useEffect, useState } from "react"
-import { ActivityIndicator, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native"
+import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native"
 import Feedback from "react-native-haptic-feedback"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { useSubAccounts, useTransferBetweenSubAccounts } from "../hooks/useSubAccounts"
@@ -153,7 +152,7 @@ export default function TransferSubAccount({ navigation, route }: WalletScreens<
                                         </View>
                                         <View style={styles.accountInfo}>
                                             <Text style={styles.accountName}>{acc.name}</Text>
-                                            <Text style={styles.accountBalance}>${acc.balance.toFixed(2)}</Text>
+                                            <Text style={styles.accountBalance}>{acc.balance.toFixed(2)}zł</Text>
                                         </View>
                                         {selected && (
                                             <AntDesign name="check" size={16} color={acc.color ?? Colors.foreground} />
@@ -176,7 +175,7 @@ export default function TransferSubAccount({ navigation, route }: WalletScreens<
                             error={amount !== "" && fromAccount != null && Number(amount) > fromAccount.balance}
                             helperText={
                                 amount !== "" && fromAccount != null && Number(amount) > fromAccount.balance
-                                    ? `Insufficient balance (${fromAccount.balance.toFixed(2)})`
+                                    ? `Insufficient balance (${fromAccount.balance.toFixed(2)}zł)`
                                     : undefined
                             }
                             left={
@@ -186,7 +185,7 @@ export default function TransferSubAccount({ navigation, route }: WalletScreens<
                             }
                         />
                         {fromAccount && (
-                            <Text style={styles.balanceHint}>Available: ${fromAccount.balance.toFixed(2)}</Text>
+                            <Text style={styles.balanceHint}>Available: {fromAccount.balance.toFixed(2)}zł</Text>
                         )}
 
                         <View>
@@ -259,7 +258,7 @@ function AccountSlot({
                         {account.name}
                     </Text>
                     <Text style={[styles.slotBalance, { color: account.color ?? Colors.foreground }]}>
-                        ${account.balance.toFixed(2)}
+                        {account.balance.toFixed(2)}zł
                     </Text>
                 </>
             ) : (

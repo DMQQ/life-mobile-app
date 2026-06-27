@@ -57,6 +57,12 @@ const WALLET_OVERVIEW = gql`
                     category
                     spontaneousRate
                     subAccountId
+
+                    shopEntity {
+                        id
+                        name
+                        image
+                    }
                 }
             }
         }

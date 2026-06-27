@@ -1,7 +1,8 @@
 import { Expense as ExpenseType } from "@/types"
 import { formatAmount } from "@/utils/functions/formatCurrency"
-import { Image, Pressable, View } from "react-native"
+import { Image, Pressable, StyleSheet, View } from "react-native"
 import Colors from "@/constants/Colors"
+import { Feather } from "@expo/vector-icons"
 import { CategoryIcon, CategoryUtils } from "./ExpenseIcon"
 import EditNote from "./EditNote"
 import { useSubAccounts } from "../../hooks/useSubAccounts"
@@ -11,10 +12,28 @@ import DetailRow from "@/components/ui/DetailRow"
 import Text from "@/components/ui/Text/Text"
 import { navigationRef } from "@/navigation/ref"
 import Feedback from "react-native-haptic-feedback"
+import Url from "@/constants/Url"
 
 const capitalize = (s = "") => s.charAt(0).toUpperCase() + s.slice(1)
 
 const muted = Colors.foreground_secondary
+
+const styles = StyleSheet.create({
+    shopPill: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 6,
+        backgroundColor: Colors.primary_lighter,
+        paddingHorizontal: 10,
+        paddingVertical: 5,
+        borderRadius: 100,
+    },
+    shopPillImage: {
+        width: 16,
+        height: 16,
+        borderRadius: 4,
+    },
+})
 
 export default function ExpenseDetails({ expense, tint }: { expense: ExpenseType; tint?: string }) {
     const { data: subAccountsData } = useSubAccounts()
@@ -40,25 +59,25 @@ export default function ExpenseDetails({ expense, tint }: { expense: ExpenseType
 
             <DetailRow tint={tint} icon="tag">{capitalize(expense?.type)}</DetailRow>
 
-            {expense?.shop && (
+            {(expense?.shop || expense?.shopEntity) && (
                 <DetailRow tint={tint} icon="shopping-bag">
                     <Pressable
                         onPress={() => {
                             Feedback.trigger("impactLight")
                             navigationRef.current?.navigate("WalletScreens", {
                                 screen: "ExpensesList",
-                                params: { filters: { shopName: expense.shop } },
+                                params: { filters: { shopName: expense.shopEntity?.name ?? expense.shop } },
                             } as any)
                         }}
-                        style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
+                        style={styles.shopPill}
                     >
                         {expense.shopEntity?.image && (
-                            <Image
-                                source={{ uri: expense.shopEntity.image }}
-                                style={{ width: 20, height: 20, borderRadius: 4 }}
-                            />
+                            <Image source={{ uri: Url.API + "/upload/images/" + expense.shopEntity.image }} style={styles.shopPillImage} />
                         )}
-                        <Text variant="body" style={{ color: Colors.secondary }}>{expense.shop}</Text>
+                        <Text variant="caption" style={{ color: Colors.secondary }}>
+                            {expense.shopEntity?.name ?? expense.shop}
+                        </Text>
+                        <Feather name="chevron-right" size={12} color={Colors.secondary} />
                     </Pressable>
                 </DetailRow>
             )}

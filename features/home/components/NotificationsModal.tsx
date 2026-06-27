@@ -44,7 +44,7 @@ export default function NotificationsScreen({ navigation }: HomeScreenProps<"Hom
             <ModalHeader
                 onClose={handleClose}
                 onSave={handleClearAll}
-                saveLabel="Clear all"
+                saveLabel="Read all"
                 saveDisabled={unreadCount === 0}
                 saveLoading={loading}
                 title={`Notifications${unreadCount > 0 ? ` (${unreadCount})` : ""}`}

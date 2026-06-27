@@ -8,7 +8,6 @@ import { GET_MAIN_SCREEN, getMainScreenBaseVariables } from "@/utils/schemas/GET
 import { useQuery } from "@apollo/client"
 import * as SplashScreen from "expo-splash-screen"
 import { useMemo, useState } from "react"
-import { View } from "react-native"
 import Animated from "react-native-reanimated"
 import { FloatingNotifications, useGetNotifications } from "../wallet/components/Wallet/WalletNotifications"
 import LoadingSkeleton from "./components/LoadingSkeleton"
@@ -59,26 +58,32 @@ export default function Root({ navigation }: HomeScreenProps<"HomeRoot">) {
         : 0
     const isIncreasing = trendPercentage > 0
 
+    const unreadNotifications = useMemo(() => {
+        return data?.notifications.reduce((acc, curr) => {
+            if (!curr.read) return acc + 1
+            return acc
+        }, 0)
+    }, [data?.notifications])
+
     const headerButtons = useMemo(
         () => [
             {
                 icon: "bell",
                 onPress: () => navigation.navigate("HomeNotifications"),
+                badge: unreadNotifications,
             },
             {
                 icon: "gear",
                 onPress: () => navigation.navigate("HomeSettings"),
             },
         ],
-        [data?.notifications, navigation],
+        [unreadNotifications, navigation],
     )
 
     return (
         <SafeAreaView edges={["top"]} style={{ flex: 1 }}>
             <Background />
             {loading && <LoadingSkeleton />}
-
-            <FloatingNotifications />
 
             <Header
                 goBack={false}

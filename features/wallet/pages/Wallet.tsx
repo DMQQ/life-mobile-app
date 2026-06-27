@@ -5,7 +5,7 @@ import Colors from "@/constants/Colors"
 import Color from "color"
 import useTrackScroll from "@/utils/hooks/ui/useTrackScroll"
 import { Feather } from "@expo/vector-icons"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { SFSymbol } from "expo-symbols"
 import { Pressable, StyleSheet, View } from "react-native"
 import Haptic from "react-native-haptic-feedback"
@@ -16,7 +16,7 @@ import { useWalletContext } from "../components/WalletContext"
 import useWalletOverview from "../hooks/useWalletOverview"
 import { WalletScreens } from "../Main"
 import { SafeAreaView } from "react-native-safe-area-context"
-import { Expense, MonthlyExpenses, Subscription } from "@/types"
+import { Expense, Subscription } from "@/types"
 import SubscriptionItem from "../components/Subscription/SubscriptionItem"
 import Background from "@/components/ui/Background"
 import SubAccountCards from "../components/Wallet/SubAccountCards"
@@ -27,16 +27,16 @@ import Section from "@/components/ui/Section"
 import Text from "@/components/ui/Text/Text"
 import dayjs from "dayjs"
 import { Card } from "@/components"
+import Touch from "@/components/ui/Touch"
 
 const TABS = [
     { label: "Accounts", value: "accounts" as string },
     { label: "Spendings", value: "spendings" as string },
 ]
 
-export default function WalletScreen({ navigation, route }: WalletScreens<"Wallet">) {
+export default function WalletScreen({ navigation }: WalletScreens<"Wallet">) {
     const { data, loading, error } = useWalletOverview()
     const [scrollY, onScroll] = useTrackScroll({ screenName: "WalletScreens" })
-    const [tab, setTab] = useState("accounts")
 
     const handleShowEditSheet = useCallback(() => {
         Haptic.trigger("impactMedium")
@@ -76,11 +76,6 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
                                 title: "Edit Balance",
                                 systemImage: "pencil.and.outline",
                                 onPress: handleShowEditSheet,
-                            },
-                            {
-                                title: "Filters",
-                                systemImage: "camera.filters",
-                                onPress: () => navigation.navigate("Filters"),
                             },
                             {
                                 title: "Correction Rules",
@@ -168,34 +163,36 @@ export default function WalletScreen({ navigation, route }: WalletScreens<"Walle
                 <WalletTab />
 
                 <View style={styles.quickNav}>
-                    <Card style={styles.quickNavCard}>
-                        <Pressable
-                            onPress={() => {
-                                Haptic.trigger("impactLight")
-                                navigation.navigate("ExpensesList")
-                            }}
-                        >
+                    <Touch
+                        style={styles.quickNavCard}
+                        onPress={() => {
+                            Haptic.trigger("impactLight")
+                            navigation.navigate("ExpensesList")
+                        }}
+                    >
+                        <View>
                             <View style={styles.quickNavIconWrap}>
                                 <Feather name="list" size={20} color={Colors.secondary} />
                             </View>
                             <Text style={styles.quickNavTitle}>Expenses</Text>
                             <Text style={styles.quickNavSub}>All transactions</Text>
-                        </Pressable>
-                    </Card>
-                    <Card style={styles.quickNavCard}>
-                        <Pressable
-                            onPress={() => {
-                                Haptic.trigger("impactLight")
-                                navigation.navigate("SubscriptionsList")
-                            }}
-                        >
+                        </View>
+                    </Touch>
+                    <Touch
+                        style={styles.quickNavCard}
+                        onPress={() => {
+                            Haptic.trigger("impactLight")
+                            navigation.navigate("SubscriptionsList")
+                        }}
+                    >
+                        <View>
                             <View style={styles.quickNavIconWrap}>
                                 <Feather name="repeat" size={20} color={Colors.secondary} />
                             </View>
                             <Text style={styles.quickNavTitle}>Subscriptions</Text>
                             <Text style={styles.quickNavSub}>Recurring payments</Text>
-                        </Pressable>
-                    </Card>
+                        </View>
+                    </Touch>
                 </View>
 
                 {upcomingSubscriptions.length > 0 && (
@@ -336,6 +333,7 @@ const styles = StyleSheet.create({
         gap: 15,
         borderWidth: 1,
         borderColor: Colors.borderColor,
+        backgroundColor: Colors.primary_lighter,
     },
     quickNavIconWrap: {
         width: 40,

@@ -6,37 +6,47 @@ import dayjs from "dayjs"
 import { SFSymbol } from "expo-symbols"
 import moment from "moment"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { StyleSheet, View } from "react-native"
-import GroupSelector from "@/components/ui/GroupSelector"
+import { View } from "react-native"
 import { useScreenSearch } from "@/utils/hooks/useScreenSearch"
 import { TimelineScreenLoader } from "../components/LoaderSkeleton"
 import TimelineContent from "../components/TimelineContent"
 import useTimeline from "../hooks/general/useTimeline"
 import { usePrefetchMonthRange } from "../hooks/query/useGetOccurrencesQuery"
-import { TimelineScreenProps } from "../types"
+import { DEFAULT_TIMELINE_FILTERS, TimelineFilterState, TimelineScreenProps } from "../types"
+import { registerFilterApply, unregisterFilterApply } from "../filterBridge"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import Animated, { withTiming } from "react-native-reanimated"
 import useTrackScroll from "@/utils/hooks/ui/useTrackScroll"
 import Background from "@/components/ui/Background"
 
-const FILTER_BAR_HEIGHT = 52
-const FILTER_OPTIONS = [
-    { label: "All", value: "all" as const },
-    { label: "To do", value: "active" as const },
-    { label: "Done", value: "completed" as const },
-]
+const DATE_LIST_HEIGHT = 83
 
 export default function Timeline({ navigation, route }: TimelineScreenProps<"Timeline">) {
-    const timeline = useTimeline({ navigation, route })
+    const [filters, setFilters] = useState<TimelineFilterState>(DEFAULT_TIMELINE_FILTERS)
+
+    useEffect(() => {
+        registerFilterApply(setFilters)
+        return () => unregisterFilterApply()
+    }, [])
+
+    const timeline = useTimeline({ navigation, route }, filters)
     usePrefetchMonthRange(timeline.selected)
     const insets = useSafeAreaInsets()
     const headerHeight = insets.top + 50
     const expandedHeaderHeight = insets.top * 3 + 90
-    const dateListHeight = 83
-    const dayContentPaddingTop = expandedHeaderHeight + dateListHeight + FILTER_BAR_HEIGHT
+    const dayContentPaddingTop = expandedHeaderHeight + DATE_LIST_HEIGHT
     const compactContentPaddingTop = headerHeight
 
-    const [filter, setFilter] = useState<"all" | "active" | "completed">("all")
+    const activeFilterCount = useMemo(() => {
+        let count = 0
+        if (filters.searchText) count++
+        if (filters.dateFrom) count++
+        if (filters.dateTo) count++
+        if (filters.hoursFrom) count++
+        if (filters.hoursTo) count++
+        if (filters.status !== "all") count++
+        return count
+    }, [filters])
 
     const [scrollY, onScroll] = useTrackScroll()
 
@@ -84,6 +94,7 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
     }, [timeline.switchView, timeline.selected])
 
     const isDayView = timeline.switchView === "day"
+    const isFilterMode = activeFilterCount > 0
 
     return (
         <View style={{ flex: 1 }}>
@@ -124,6 +135,12 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
                           }
                         : undefined,
                     {
+                        icon: "line.3.horizontal.decrease.circle" as SFSymbol,
+                        onPress: () => navigation.navigate("TimelineFilters", { initialFilters: filters }),
+                        badge: activeFilterCount > 0 ? activeFilterCount : undefined,
+                        badgeColor: Colors.secondary,
+                    },
+                    {
                         icon: "plus" as SFSymbol,
                         onPress: () => timeline.createTimeline(),
                         position: "right",
@@ -141,7 +158,7 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
                 />
             </Header>
 
-            {!isSearchActive && isDayView && (
+            {!isSearchActive && !isFilterMode && isDayView && (
                 <Animated.View
                     style={[{ position: "absolute", left: 0, right: 0, zIndex: 100 }, { top: headerHeight }]}
                 >
@@ -150,12 +167,6 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
                         selectedDate={timeline.selected}
                         setSelected={timeline.setSelected}
                     />
-                </Animated.View>
-            )}
-
-            {!isSearchActive && isDayView && (
-                <Animated.View style={[styles.filterBar, { top: headerHeight + dateListHeight }]}>
-                    <GroupSelector size="small" value={filter} onChange={setFilter} options={FILTER_OPTIONS} />
                 </Animated.View>
             )}
 
@@ -174,18 +185,8 @@ export default function Timeline({ navigation, route }: TimelineScreenProps<"Tim
                 onScroll={onScroll}
                 onRefresh={onRefresh}
                 refreshing={refreshing}
-                filter={filter}
+                filters={filters}
             />
         </View>
     )
 }
-
-const styles = StyleSheet.create({
-    filterBar: {
-        position: "absolute",
-        left: 15,
-        right: 15,
-        zIndex: 100,
-        paddingTop: 8,
-    },
-})

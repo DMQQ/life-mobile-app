@@ -25,7 +25,14 @@ export default function DetailRow({ icon, iconElement, children, right, last, st
     )
 
     return (
-        <View style={[styles.row, last && styles.lastRow, tint && { borderColor: Color(tint).mix(Color(Colors.primary_lighter), 0.8).hex() }, style]}>
+        <View
+            style={[
+                styles.row,
+                last && styles.lastRow,
+                tint && { borderColor: Color(tint).mix(Color(Colors.primary_lighter), 0.85).hex() },
+                style,
+            ]}
+        >
             {iconElement ??
                 (icon ? (
                     <Feather name={icon} size={20} color={Colors.foreground_secondary} style={styles.icon} />

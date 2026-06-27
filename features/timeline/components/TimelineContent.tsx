@@ -19,6 +19,7 @@ import DayView from "./DayView"
 import WeekView from "./WeekView"
 import MonthView from "./MonthView"
 import { OccurrenceItem } from "../hooks/query/useGetOccurrencesQuery"
+import { TimelineFilterState } from "../types"
 
 interface TimelineContentProps {
     switchView: "day" | "week" | "month"
@@ -35,7 +36,7 @@ interface TimelineContentProps {
     onScroll: (...args: any[]) => void
     onRefresh: () => Promise<void>
     refreshing: boolean
-    filter: "all" | "active" | "completed"
+    filters: TimelineFilterState
 }
 
 export default function TimelineContent({
@@ -53,44 +54,58 @@ export default function TimelineContent({
     onScroll,
     onRefresh,
     refreshing,
-    filter,
+    filters,
 }: TimelineContentProps) {
     const renderItem = useCallback(({ item }: { item: any }): any => <TimelineItem {...item} location="timeline" />, [])
 
-    const activeKey = isSearchActive ? "search" : switchView
+    const isFilterMode = useMemo(
+        () =>
+            filters.status !== "all" ||
+            !!filters.hoursFrom ||
+            !!filters.hoursTo ||
+            !!filters.searchText ||
+            !!filters.dateFrom ||
+            !!filters.dateTo,
+        [filters],
+    )
+
+    const showList = isSearchActive || isFilterMode
+    const activeKey = showList ? (isSearchActive ? "search" : "filter") : switchView
 
     const onDayPress = useCallback((date: string) => {
         setSelected(date)
         setSwitchView("day")
     }, [])
 
-    const filteredSearchResults = useMemo(() => {
-        if (filter === "active") return searchResults.filter((e) => !e.isCompleted)
-        if (filter === "completed") return searchResults.filter((e) => e.isCompleted)
-        return searchResults
-    }, [searchResults, filter])
-
     return (
         <Animated.View key={activeKey} entering={enterAnim} exiting={exitAnim} style={{ flex: 1 }}>
-            {isSearchActive ? (
+            {showList ? (
                 <VirtualizedList
                     refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
                     ListHeaderComponent={<View style={{ height: 10 }} />}
                     ListEmptyComponent={
                         <View style={{ flex: 1, height: 400, justifyContent: "center", alignItems: "center" }}>
-                            <Feather name="search" size={50} color={Colors.text_dark} style={{ marginBottom: 15 }} />
-                            <Text style={{ color: Colors.text_dark }}>
-                                No events found for "{searchQuery}",{"\n"}try changing the phrase
+                            <Feather
+                                name={isSearchActive ? "search" : "filter"}
+                                size={50}
+                                color={Colors.text_dark}
+                                style={{ marginBottom: 15 }}
+                            />
+                            <Text style={{ color: Colors.text_dark, textAlign: "center" }}>
+                                {isSearchActive
+                                    ? `No events found for "${searchQuery}"`
+                                    : "No events match the active filters"}
                             </Text>
                         </View>
                     }
                     contentContainerStyle={{
-                        paddingBottom: filteredSearchResults.length > 0 ? 120 : 0,
+                        paddingBottom: searchResults.length > 0 ? 120 : 0,
                         padding: 15,
                         paddingTop: headerHeight + 10,
                     }}
-                    data={filteredSearchResults}
+                    data={searchResults}
                     initialNumToRender={3}
+                    ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
                     keyExtractor={(item: any) => item.id}
                     getItem={(data, index) => data[index] as OccurrenceItem}
                     getItemCount={(data) => data.length}
@@ -105,7 +120,6 @@ export default function TimelineContent({
                     }}
                     contentPaddingTop={dayContentPaddingTop}
                     onScroll={onScroll}
-                    filter={filter}
                 />
             ) : switchView === "month" ? (
                 <MonthView

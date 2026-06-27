@@ -61,16 +61,8 @@ export default function useCreateExpensePage(
             }
 
             const parseAmount = (amount: string) => {
-                if (amount.endsWith(".")) return +amount.slice(0, -1)
-
-                if (amount.includes(".")) {
-                    const [int, dec] = amount.split(".")
-                    if (dec.length > 2) {
-                        return +int + +`0.${dec.slice(0, 2)}`
-                    }
-                }
-
-                return +amount
+                const value = parseFloat(amount.replace(",", "."))
+                return isNaN(value) ? 0 : Math.round(value * 100) / 100
             }
 
             if (!isValid) {

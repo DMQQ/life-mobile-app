@@ -1,8 +1,8 @@
 import { gql, useQuery } from "@apollo/client"
 import moment from "moment"
-import { useCallback, useEffect, useMemo, useState } from "react"
-import { TimelineScreenProps } from "../../types"
-import useGetOccurrencesQuery from "../query/useGetOccurrencesQuery"
+import { useCallback, useMemo, useState } from "react"
+import { DEFAULT_TIMELINE_FILTERS, TimelineFilterState, TimelineScreenProps } from "../../types"
+import useGetOccurrencesQuery, { OccurrenceSearchInput } from "../query/useGetOccurrencesQuery"
 import dayjs from "dayjs"
 
 export const GET_MONTHLY_OCCURRENCES = gql`
@@ -22,8 +22,34 @@ const groupDates = (dates: { date: string }[]) => {
     return monthEvents
 }
 
-export default function useTimeline({ route, navigation }: TimelineScreenProps<"Timeline">) {
-    const { data, selected, setSelected, loading, error, setQuery, query } = useGetOccurrencesQuery(route.params?.date)
+function buildSearchInput(filters: TimelineFilterState): OccurrenceSearchInput | undefined {
+    const hasContent =
+        filters.searchText ||
+        filters.dateFrom ||
+        filters.dateTo ||
+        filters.hoursFrom ||
+        filters.hoursTo ||
+        filters.status !== "all"
+    if (!hasContent) return undefined
+    return {
+        query: filters.searchText || undefined,
+        dateFrom: filters.dateFrom || undefined,
+        dateTo: filters.dateTo || undefined,
+        timeFrom: filters.hoursFrom || undefined,
+        timeTo: filters.hoursTo || undefined,
+        status: filters.status !== "all" ? filters.status : undefined,
+    }
+}
+
+export default function useTimeline(
+    { route, navigation }: TimelineScreenProps<"Timeline">,
+    filters: TimelineFilterState = DEFAULT_TIMELINE_FILTERS,
+) {
+    const search = useMemo(() => buildSearchInput(filters), [filters])
+    const { data, selected, setSelected, loading, error, setQuery, query } = useGetOccurrencesQuery(
+        route.params?.date,
+        search,
+    )
 
     const [switchView, setSwitchView] = useState<"day" | "week" | "month">("day")
 

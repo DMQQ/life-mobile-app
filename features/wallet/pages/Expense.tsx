@@ -33,6 +33,7 @@ import SubscriptionSection from "../components/Expense/SubscriptionSection"
 import SubExpenseSection from "../components/Expense/SubExpenseSection"
 import ShopSection from "../components/Expense/ShopSection"
 import ExpenseToolbar from "../components/Expense/ExpenseToolbar"
+import ExpenseAiPanel from "../components/Expense/ExpenseAiPanel"
 import ExpenseAttachments from "../components/Expense/FileUpload"
 import ExpenseLocationMap from "../components/Expense/Map"
 import { CollapsibleThemedCalendar } from "@/components/ui/ThemedCalendar/ThemedCalendar"
@@ -210,6 +211,7 @@ export default function Expense({ route: { params }, navigation }: any) {
                         onRefund={() => setConfirmRefund(true)}
                         refundLoading={refundLoading}
                     />
+                    <ExpenseAiPanel expense={selected} tint={tintColor} />
                 </ExpenseContext.Provider>
             )}
         </View>

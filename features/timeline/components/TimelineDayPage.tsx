@@ -1,17 +1,17 @@
 import { useCallback, useState } from "react"
 import { RefreshControl } from "react-native"
 import FeedTimeline from "./FeedTimeline"
-import useGetOccurrencesQuery from "../hooks/query/useGetOccurrencesQuery"
+import useGetOccurrencesQuery, { OccurrenceSearchInput } from "../hooks/query/useGetOccurrencesQuery"
 
 interface TimelineDayPageProps {
     date: string
     contentPaddingTop?: number
     onScroll?: (...args: any[]) => void
-    filter?: "all" | "active" | "completed"
+    search?: OccurrenceSearchInput
 }
 
-export default function TimelineDayPage({ date, contentPaddingTop = 0, onScroll, filter }: TimelineDayPageProps) {
-    const { data, refetch } = useGetOccurrencesQuery(date)
+export default function TimelineDayPage({ date, contentPaddingTop = 0, onScroll, search }: TimelineDayPageProps) {
+    const { data, refetch } = useGetOccurrencesQuery(date, search)
     const [refreshing, setRefreshing] = useState(false)
 
     const onRefresh = useCallback(async () => {
@@ -24,7 +24,6 @@ export default function TimelineDayPage({ date, contentPaddingTop = 0, onScroll,
         <FeedTimeline
             events={data?.occurrences || []}
             date={date}
-            filter={filter}
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
             onScroll={onScroll}
             style={{ flex: 1, paddingTop: 250 }}

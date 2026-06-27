@@ -11,6 +11,7 @@ import { useNavigation } from "@react-navigation/native"
 import Layout from "@/constants/Layout"
 import { useMemo } from "react"
 import Animated, { FadeIn } from "react-native-reanimated"
+import Touch from "@/components/ui/Touch"
 
 interface SubAccount {
     id: string
@@ -77,7 +78,6 @@ function AccountCard({
     active = false,
     onPress,
     onEdit,
-    onDelete,
     onTransfer,
 }: {
     account: SubAccount
@@ -99,7 +99,7 @@ function AccountCard({
     const activeBase = active ? base : Color(base).darken(0.3).string()
 
     return (
-        <TouchableOpacity activeOpacity={0.85} onPress={onPress}>
+        <Touch onPress={onPress}>
             <LinearGradient
                 colors={[activeMid, activeBase, Color(activeBase).darken(0.15).string()]}
                 start={{ x: 0, y: 0 }}
@@ -164,12 +164,28 @@ function AccountCard({
 
                 {/* name + balance */}
                 <View>
-                    <Text size={15} weight="700" color="rgba(255,255,255,0.9)" letterSpacing={0.3} style={{ marginTop: 2 }} numberOfLines={1}>
+                    <Text
+                        size={15}
+                        weight="700"
+                        color="rgba(255,255,255,0.9)"
+                        letterSpacing={0.3}
+                        style={{ marginTop: 2 }}
+                        numberOfLines={1}
+                    >
                         {account.name}
                     </Text>
                     <View style={styles.balanceBlock}>
-                        <Text size={24} weight="800" color="#fff" letterSpacing={0.5} mono>{formatAmount(account.balance)}</Text>
-                        <Text size={13} weight="500" color={Color(accent).alpha(0.7).string()} style={{ marginBottom: 3 }}>zł</Text>
+                        <Text size={24} weight="800" color="#fff" letterSpacing={0.5} mono>
+                            {formatAmount(account.balance)}
+                        </Text>
+                        <Text
+                            size={13}
+                            weight="500"
+                            color={Color(accent).alpha(0.7).string()}
+                            style={{ marginBottom: 3 }}
+                        >
+                            zł
+                        </Text>
                     </View>
                 </View>
 
@@ -177,16 +193,26 @@ function AccountCard({
                 <View style={[styles.separator, { backgroundColor: Color(accent).alpha(0.18).string() }]} />
                 <View style={styles.bottomRow}>
                     <View style={styles.statBlock}>
-                        <Text size={9} weight="500" uppercase letterSpacing={0.4} color={Color(accent).alpha(0.85).string()}>
+                        <Text
+                            size={9}
+                            weight="500"
+                            uppercase
+                            letterSpacing={0.4}
+                            color={Color(accent).alpha(0.85).string()}
+                        >
                             Monthly Income
                         </Text>
                         <View style={styles.statRow}>
-                            <Text size={13} weight="700" color="#fff" mono>{account.income ? formatAmount(account.income) : "0.00"}</Text>
+                            <Text size={13} weight="700" color="#fff" mono>
+                                {account.income ? formatAmount(account.income) : "0.00"}
+                            </Text>
                             <Feather name="trending-up" size={13} color="#4ade80" />
                         </View>
                     </View>
                     <View style={[styles.statBlock, { alignItems: "flex-end" }]}>
-                        <Text size={9} weight="500" uppercase letterSpacing={0.4} color="#f87171">Monthly Expense</Text>
+                        <Text size={9} weight="500" uppercase letterSpacing={0.4} color="#f87171">
+                            Monthly Expense
+                        </Text>
                         <View style={styles.statRow}>
                             <Text size={13} weight="700" color="#fff" mono>
                                 {account.expense ? formatAmount(account.expense) : "0.00"}
@@ -196,7 +222,7 @@ function AccountCard({
                     </View>
                 </View>
             </LinearGradient>
-        </TouchableOpacity>
+        </Touch>
     )
 }
 
@@ -204,7 +230,9 @@ function AddCard({ onPress }: { onPress: () => void }) {
     return (
         <TouchableOpacity activeOpacity={0.7} onPress={onPress} style={[styles.card, styles.addCard]}>
             <Feather name="plus" size={30} color={Colors.foreground_secondary} />
-            <Text size={12} color={Colors.foreground_secondary} style={{ marginTop: 8 }}>New account</Text>
+            <Text size={12} color={Colors.foreground_secondary} style={{ marginTop: 8 }}>
+                New account
+            </Text>
         </TouchableOpacity>
     )
 }

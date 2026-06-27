@@ -79,20 +79,10 @@ export default function ExpensesListScreen({ navigation, route }: WalletScreens<
                 goBack={true}
                 buttons={[
                     {
-                        icon: (
-                            <View>
-                                <Feather
-                                    name="sliders"
-                                    size={18}
-                                    color={hasFilters ? Colors.secondary : Colors.foreground}
-                                />
-                                {hasFilters && (
-                                    <View style={styles.filterBadge}>
-                                        <Text style={styles.filterBadgeText}>{filtersDiffCount}</Text>
-                                    </View>
-                                )}
-                            </View>
-                        ),
+                        badge: filtersDiffCount,
+                        badgeColor: Colors.secondary,
+                        icon: "line.3.horizontal.decrease",
+                        tintColor: hasFilters ? Colors.secondary : "#fff",
                         onPress: () => navigation.navigate("Filters"),
                     },
                     {
@@ -206,10 +196,7 @@ const BottomSearchBar = ({ navigation }: Omit<WalletScreens<"ExpensesList">, "ro
                     <Host style={{ height: 35 }}>
                         <Menu
                             label={
-                                <GlassView
-                                    style={searchBarStyles.pill}
-                                    tintColor={hasTypeFilter ? Colors.secondary : undefined}
-                                >
+                                <View style={searchBarStyles.pill}>
                                     <Feather
                                         name="tag"
                                         size={13}
@@ -224,7 +211,7 @@ const BottomSearchBar = ({ navigation }: Omit<WalletScreens<"ExpensesList">, "ro
                                     >
                                         {typeLabel}
                                     </Text>
-                                </GlassView>
+                                </View>
                             }
                         >
                             <Button
@@ -537,7 +524,7 @@ const searchBarStyles = StyleSheet.create({
     },
     pillsRow: {
         paddingHorizontal: 15,
-        height: 40,
+        height: 50,
         flexGrow: 0,
     },
     pillsContent: {
@@ -548,7 +535,7 @@ const searchBarStyles = StyleSheet.create({
         alignItems: "center",
         gap: 6,
         paddingHorizontal: 12,
-        paddingVertical: 5,
+        paddingVertical: 6,
         borderRadius: 100,
         overflow: "hidden",
     },

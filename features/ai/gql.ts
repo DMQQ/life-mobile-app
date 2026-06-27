@@ -20,6 +20,18 @@ export const AI_CHAT = gql`
     }
 `
 
+export const AI_CONTEXT_CHAT = gql`
+    ${AI_MESSAGE_FIELDS}
+    mutation AiContextChat($input: AiChatInput!) {
+        aiChat(input: $input) {
+            conversationId
+            messages {
+                ...AiMessageFields
+            }
+        }
+    }
+`
+
 export const AI_CONVERSATIONS = gql`
     query AiConversations {
         aiConversations {

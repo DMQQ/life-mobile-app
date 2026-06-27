@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack"
 import moment from "moment"
 import { useEffect } from "react"
 import { Platform } from "react-native"
+import TimelineFilters from "./pages/TimelineFilters"
 import CreateTimelineTodos from "./pages/CreateTimelineTodos"
 import ImagesPreview from "./pages/ImagesPreview"
 import Timeline from "./pages/Timeline"
@@ -142,6 +143,15 @@ export default function TimelineScreens({ route, navigation }: RootStackScreenPr
                 options={{
                     headerShown: false,
                     presentation: "modal",
+                }}
+            />
+            <Stack.Screen
+                name="TimelineFilters"
+                component={TimelineFilters}
+                options={{
+                    headerShown: true,
+                    presentation: "modal",
+                    contentStyle: { backgroundColor: Colors.primary },
                 }}
             />
         </Stack.Navigator>

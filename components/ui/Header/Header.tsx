@@ -20,7 +20,6 @@ import Haptic from "react-native-haptic-feedback"
 import Animated, { Extrapolation, interpolate, SharedValue, useAnimatedStyle } from "react-native-reanimated"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import AnimatedNumber from "../AnimatedNumber"
-import GlassView from "../GlassView"
 import IconButton from "../IconButton/IconButton"
 
 const THRESHOLD = 200
@@ -48,34 +47,6 @@ function mapContextMenuItems(
     })
 }
 
-function ConfirmHeaderButton({ button }: { button: HeaderItem }) {
-    const sfSymbol = typeof button.icon === "string" ? (button.icon as SFSymbol) : undefined
-
-    const triggerModifiers = [...(button.tintColor ? [tint(button.tintColor)] : [])]
-
-    const menuMessage = button.confirmTitle
-        ? `This will ${button.confirmTitle.toLowerCase()}. Are you sure you want to continue?`
-        : "This action is irreversible. Are you sure you want to continue?"
-
-    return (
-        <Host matchContents>
-            <Menu label={""} systemImage={sfSymbol} modifiers={triggerModifiers}>
-                <Section title={menuMessage}>
-                    <Button
-                        role="destructive"
-                        label="Discard Changes"
-                        onPress={() => {
-                            button.onPress?.()
-                            Haptic.trigger("impactMedium")
-                        }}
-                        modifiers={[buttonStyle("bordered")]}
-                    />
-                </Section>
-            </Menu>
-        </Host>
-    )
-}
-
 function mapHeaderItem(button: HeaderItem): NativeStackHeaderItem {
     if (button.children) {
         return { type: "custom", element: button.children as React.ReactElement }
@@ -86,8 +57,23 @@ function mapHeaderItem(button: HeaderItem): NativeStackHeaderItem {
 
     if (button.confirm) {
         return {
-            type: "custom",
-            element: <ConfirmHeaderButton button={button} />,
+            type: "menu",
+            label: "",
+            icon: sfIcon,
+            tintColor: "#FF3B30",
+            identifier: sfIcon ? sfIcon.name : "trash",
+            menu: {
+                title: button.confirmTitle ?? "This action is irreversible. Are you sure?",
+                items: [
+                    {
+                        type: "action" as const,
+                        label: "Delete",
+                        destructive: true,
+                        onPress: button.onPress ?? (() => {}),
+                        icon: { type: "sfSymbol" as const, name: "trash" as SFSymbol },
+                    },
+                ],
+            },
         }
     }
 
@@ -115,6 +101,15 @@ function mapHeaderItem(button: HeaderItem): NativeStackHeaderItem {
                 Haptic.trigger("impactLight")
             },
             identifier: sfIcon.name,
+            sharesBackground: button.standalone ?? true,
+            badge: button.badge
+                ? {
+                      value: button.badge,
+                      style: {
+                          backgroundColor: button?.badgeColor ?? "red",
+                      },
+                  }
+                : undefined,
         }
     }
 
@@ -161,6 +156,9 @@ export interface HeaderItem {
     }
 
     children?: React.ReactNode
+
+    badge?: string | number
+    badgeColor?: string
 }
 
 interface HeaderProps {

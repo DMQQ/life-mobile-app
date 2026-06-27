@@ -2,6 +2,15 @@ import { gql, useApolloClient, useQuery } from "@apollo/client"
 import moment from "moment"
 import { useEffect, useState } from "react"
 
+export interface OccurrenceSearchInput {
+    query?: string
+    dateFrom?: string
+    dateTo?: string
+    timeFrom?: string
+    timeTo?: string
+    status?: "all" | "completed" | "todo"
+}
+
 export interface OccurrenceItem {
     id: string
     seriesId: string
@@ -29,8 +38,8 @@ export interface OccurrenceItem {
 }
 
 export const GET_OCCURRENCES_QUERY = gql`
-    query GetOccurrences($date: String, $endDate: String, $query: String) {
-        occurrences(date: $date, endDate: $endDate, query: $query) {
+    query GetOccurrences($date: String, $endDate: String, $query: String, $search: OccurrenceSearchInput) {
+        occurrences(date: $date, endDate: $endDate, query: $query, search: $search) {
             id
             seriesId
             date
@@ -151,21 +160,29 @@ export function usePrefetchMonthRange(date: string) {
     }, [monthKey])
 }
 
-export default function useGetOccurrencesQuery(date?: string) {
+export default function useGetOccurrencesQuery(date?: string, search?: OccurrenceSearchInput) {
     const [selected, setSelected] = useState(date || (() => moment().format("YYYY-MM-DD")))
     const [searchQuery, setSearchQuery] = useState("")
+
+    const isSearchMode =
+        !!searchQuery ||
+        !!(search?.query || search?.dateFrom || search?.dateTo || search?.status || search?.timeFrom || search?.timeTo)
+
+    const effectiveSearch: OccurrenceSearchInput | undefined =
+        searchQuery || search
+            ? { ...search, query: searchQuery || search?.query || undefined }
+            : undefined
+
     const query = useQuery<{ occurrences: OccurrenceItem[] }>(GET_OCCURRENCES_QUERY, {
         variables: {
-            date: !!searchQuery ? undefined : selected,
-            query: !!searchQuery ? searchQuery : undefined,
+            date: isSearchMode ? undefined : selected,
+            search: effectiveSearch,
         },
         fetchPolicy: "cache-and-network",
         nextFetchPolicy: "cache-first",
     })
 
-    const setQuery = (q: string) => {
-        setSearchQuery(q)
-    }
+    const setQuery = (q: string) => setSearchQuery(q)
 
     useEffect(() => {
         setSelected(date || (() => moment().format("YYYY-MM-DD")))

@@ -3,7 +3,8 @@ import { formatAmount } from "@/utils/functions/formatCurrency"
 import { Card } from "@/components"
 import Colors from "@/constants/Colors"
 import { memo, useMemo } from "react"
-import { StyleProp, StyleSheet, View, ViewStyle } from "react-native"
+import { Image, Pressable, StyleProp, StyleSheet, View, ViewStyle } from "react-native"
+import { Feather } from "@expo/vector-icons"
 import Text from "@/components/ui/Text/Text"
 import { AnimatedStyle } from "react-native-reanimated"
 import { CategoryIcon, Icons } from "../Expense/ExpenseIcon"
@@ -11,6 +12,7 @@ import ContextMenu from "react-native-context-menu-view"
 import { navigationRef } from "@/navigation/ref"
 import useDeleteActivity from "../../hooks/useDeleteActivity"
 import dayjs from "dayjs"
+import Url from "@/constants/Url"
 
 interface WalletElement {
     id: string
@@ -29,7 +31,7 @@ interface WalletElement {
     files?: unknown
     tags?: string | null
     shop?: string | null
-    shopEntity?: { id?: string; image?: string | null } | null
+    shopEntity?: { id?: string; name?: string | null; image?: string | null } | null
 }
 
 export { Icons } from "../Expense/ExpenseIcon"
@@ -64,7 +66,21 @@ const styles = StyleSheet.create({
     },
     innerContainer: { flexDirection: "row", height: 40 },
 
-    descContainer: { height: "100%", justifyContent: "center", flex: 3 },
+    descContainer: { justifyContent: "center", flex: 3 },
+    shopPill: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 4,
+        backgroundColor: Colors.primary_lighter,
+        paddingHorizontal: 7,
+        paddingVertical: 3,
+        borderRadius: 100,
+    },
+    shopPillImage: {
+        width: 12,
+        height: 12,
+        borderRadius: 3,
+    },
 })
 
 const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
@@ -176,7 +192,7 @@ function WalletItem(
                         style={{ padding: 0 }}
                         type={item.type as "income" | "expense" | "refunded"}
                         category={(isBalanceEdit ? "edit" : item.category) as keyof typeof Icons}
-                        imageUri={!isBalanceEdit ? item.shopEntity?.image : undefined}
+                        imageUri={!isBalanceEdit && item.shopEntity?.image ? item.shopEntity.image : undefined}
                     />
 
                     <View style={styles.descContainer}>
@@ -184,59 +200,72 @@ function WalletItem(
                             size={14}
                             weight="bold"
                             color={Colors.foreground}
-                            style={{ marginLeft: 10, marginBottom: 5 }}
+                            style={{ marginLeft: 10, marginBottom: 2 }}
                             numberOfLines={1}
                         >
                             {item.description}
                         </Text>
 
-                        <Text
-                            size={10}
-                            weight="500"
-                            color="rgba(255,255,255,0.65)"
-                            lineHeight={16}
-                            style={{ marginLeft: 10 }}
+                        <View
+                            style={{
+                                flexDirection: "row",
+                                alignItems: "center",
+                                marginLeft: 10,
+                                gap: 6,
+                                flexWrap: "wrap",
+                            }}
                         >
-                            {dateFormatter(item.date)}
-                            {item.shop && (
-                                <Text
-                                    size={10}
-                                    color={Colors.secondary}
+                            <Text size={10} weight="500" color="rgba(255,255,255,0.65)" lineHeight={16}>
+                                {dateFormatter(item.date)}
+                                {item.category && (item.subscription as any)?.isActive && " • "}
+                                {(item.subscription as any)?.isActive ? (
+                                    <Text size={10} color="rgba(255,255,255,0.65)">
+                                        Subscription
+                                    </Text>
+                                ) : (
+                                    ""
+                                )}
+                                {(item.files as any) && (item.files as any).length > 0 && (
+                                    <>
+                                        {" • "}
+                                        <Text size={10} color="rgba(255,255,255,0.65)">
+                                            {(item.files as any).length}{" "}
+                                            {(item.files as any).length > 1 ? "files" : "file"}
+                                        </Text>
+                                    </>
+                                )}
+                                {(item.subexpenses as any) && (item.subexpenses as any)?.length > 0 && (
+                                    <>
+                                        {" • "}
+                                        <Text size={10} color="rgba(255,255,255,0.65)">
+                                            {(item.subexpenses as any)?.length} items
+                                        </Text>
+                                    </>
+                                )}
+                            </Text>
+                            {(item.shop || item.shopEntity) && (
+                                <Pressable
+                                    style={styles.shopPill}
                                     onPress={() => {
                                         navigationRef.current?.navigate("WalletScreens", {
                                             screen: "ExpensesList",
-                                            params: { filters: { shopName: item.shop } },
+                                            params: { filters: { shopName: item.shopEntity?.name ?? item.shop } },
                                         } as any)
                                     }}
                                 >
-                                    {` • ${item.shop}`}
-                                </Text>
-                            )}
-                            {item.category && (item.subscription as any)?.isActive && " • "}
-                            {(item.subscription as any)?.isActive ? (
-                                <Text size={10} color="rgba(255,255,255,0.65)">
-                                    Subscription
-                                </Text>
-                            ) : (
-                                ""
-                            )}
-                            {(item.files as any) && (item.files as any).length > 0 && (
-                                <>
-                                    {" • "}
-                                    <Text size={10} color="rgba(255,255,255,0.65)">
-                                        {(item.files as any).length} {(item.files as any).length > 1 ? "files" : "file"}
+                                    {item.shopEntity?.image && (
+                                        <Image
+                                            source={{ uri: Url.API + "/upload/images/" + item.shopEntity.image }}
+                                            style={styles.shopPillImage}
+                                        />
+                                    )}
+                                    <Text size={9} color={Colors.secondary}>
+                                        {item.shopEntity?.name ?? item.shop}
                                     </Text>
-                                </>
+                                    <Feather name="chevron-right" size={8} color={Colors.secondary} />
+                                </Pressable>
                             )}
-                            {(item.subexpenses as any) && (item.subexpenses as any)?.length > 0 && (
-                                <>
-                                    {" • "}
-                                    <Text size={10} color="rgba(255,255,255,0.65)">
-                                        {(item.subexpenses as any)?.length} items
-                                    </Text>
-                                </>
-                            )}
-                        </Text>
+                        </View>
                     </View>
                     {!isBalanceEdit && (
                         <View style={[styles.price_container, { flexDirection: "row" }]}>

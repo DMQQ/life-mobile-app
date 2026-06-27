@@ -53,6 +53,7 @@ export default function Background({ tintColor = theme.secondary_dark_1 }: { tin
 const styles = StyleSheet.create({
     container: {
         ...StyleSheet.absoluteFill,
+        position: "absolute",
         backgroundColor: "transparent",
     },
 })
