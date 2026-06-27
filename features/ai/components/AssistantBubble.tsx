@@ -116,11 +116,11 @@ export default function AssistantBubble({ aiMessages, startDate, endDate }: Prop
                     const text = item.data?.trim()
                     if (!text) return null
                     return (
-                        <GlassView key={index} style={s.bubble}>
+                        <View key={index} style={s.bubble}>
                             <Text selectable style={s.text}>
                                 {text}
                             </Text>
-                        </GlassView>
+                        </View>
                     )
                 }
                 return <SkillCard key={index} skill={item} startDate={startDate} endDate={endDate} />
@@ -131,7 +131,15 @@ export default function AssistantBubble({ aiMessages, startDate, endDate }: Prop
 
 const s = StyleSheet.create({
     container: { gap: 8, alignItems: "flex-start", marginBottom: 10 },
-    bubble: { maxWidth: "90%", borderRadius: 16, borderBottomLeftRadius: 4, padding: 12 },
+    bubble: {
+        maxWidth: "90%",
+        borderRadius: 16,
+        borderBottomLeftRadius: 4,
+        padding: 12,
+        backgroundColor: Colors.primary_lighter,
+        borderWidth: 1,
+        borderColor: Colors.foreground_hairline,
+    },
     text: { fontSize: 14, lineHeight: 22, color: Colors.foreground },
 
     section: { alignSelf: "stretch", gap: 8 },

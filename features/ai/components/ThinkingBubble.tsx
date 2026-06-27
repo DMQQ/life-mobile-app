@@ -1,7 +1,7 @@
 import Colors from "@/constants/Colors"
 import Text from "@/components/ui/Text/Text"
-import GlassView from "@/components/ui/GlassView"
-import { ActivityIndicator, StyleSheet } from "react-native"
+import { ActivityIndicator, StyleSheet, View } from "react-native"
+import Color from "color"
 import { useState } from "react"
 
 const THINKING_MESSAGES = [
@@ -18,13 +18,17 @@ const THINKING_MESSAGES = [
     "Finding the thread…",
 ]
 
-export default function ThinkingBubble() {
+interface Props {
+    tint: string
+}
+
+export default function ThinkingBubble({ tint }: Props) {
     const [msg] = useState(() => THINKING_MESSAGES[Math.floor(Math.random() * THINKING_MESSAGES.length)])
     return (
-        <GlassView style={s.container}>
-            <ActivityIndicator size="small" color={Colors.secondary} />
-            <Text style={s.text}>{msg}</Text>
-        </GlassView>
+        <View style={s.container}>
+            <ActivityIndicator size="small" color={tint} />
+            <Text style={[s.text, { color: Color(Colors.foreground).alpha(0.5).string() }]}>{msg}</Text>
+        </View>
     )
 }
 
@@ -33,11 +37,14 @@ const s = StyleSheet.create({
         alignSelf: "flex-start",
         flexDirection: "row",
         alignItems: "center",
-        gap: 8,
+        gap: 10,
         borderRadius: 16,
         borderBottomLeftRadius: 4,
         padding: 12,
         marginBottom: 8,
+        backgroundColor: Colors.primary_lighter,
+        borderWidth: 1,
+        borderColor: Colors.foreground_hairline,
     },
-    text: { color: Colors.foreground_secondary, fontSize: 12 },
+    text: { fontSize: 13 },
 })

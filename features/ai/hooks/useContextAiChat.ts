@@ -1,6 +1,6 @@
-import { useMutation } from "@apollo/client"
+import { useMutation, useQuery } from "@apollo/client"
 import { useCallback, useState } from "react"
-import { AI_CONTEXT_CHAT } from "../gql"
+import { AI_CONTEXT_CHAT, AI_CONVERSATION } from "../gql"
 import { AiChatMessageItem, ChatMessage } from "../types"
 
 export type AiContextType = "expense" | "subscription" | "goal" | "event"
@@ -15,6 +15,11 @@ export function useContextAiChat({ contextType, contextId }: Options) {
     const [conversationId, setConversationId] = useState<string | undefined>()
     const [busy, setBusy] = useState(false)
     const [error, setError] = useState("")
+
+    const { data: convData } = useQuery(AI_CONVERSATION, {
+        variables: { id: conversationId ?? "" },
+        skip: !conversationId,
+    })
 
     const [aiChatMutation] = useMutation(AI_CONTEXT_CHAT)
 
@@ -89,5 +94,7 @@ export function useContextAiChat({ contextType, contextId }: Options) {
         setError("")
     }, [])
 
-    return { messages, busy, error, send, reset }
+    const title = convData?.aiConversation?.title
+
+    return { messages, busy, error, send, reset, conversationId, title }
 }

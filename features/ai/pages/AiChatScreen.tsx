@@ -217,7 +217,7 @@ export default function AiChatScreen({ route }: any) {
                                     </GlassView>
                                 </View>
                             ) : null}
-                            {busy ? <ThinkingBubble /> : null}
+                            {busy ? <ThinkingBubble tint={Colors.secondary} /> : null}
                             {!!error ? (
                                 <GlassView tintColor={s.errorBox.backgroundColor} style={s.errorBox}>
                                     <Feather name="alert-circle" size={14} color={Colors.danger} />

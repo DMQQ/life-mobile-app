@@ -5,14 +5,17 @@ import Toolbar from "@/components/Toolbar/Toolbar"
 import useSubscription from "../../hooks/useSubscription"
 import useGetSubscriptions from "../../hooks/useGetSubscriptions"
 import { useExpense } from "../../pages/ExpenseContext"
+import Colors from "@/constants/Colors"
 
 interface Props {
     onUpdate: React.Dispatch<React.SetStateAction<any>>
     onRefund: () => void
     refundLoading: boolean
+
+    onSparklePress: () => void
 }
 
-export default function ExpenseToolbar({ onUpdate, onRefund, refundLoading }: Props) {
+export default function ExpenseToolbar({ onUpdate, onRefund, refundLoading, onSparklePress }: Props) {
     const expense = useExpense()
     const [confirmAction, setConfirmAction] = useState(false)
 
@@ -54,16 +57,18 @@ export default function ExpenseToolbar({ onUpdate, onRefund, refundLoading }: Pr
     return (
         <>
             <Toolbar>
-                <Toolbar.Item
-                    sfIcon={"shuffle" as SFSymbol}
-                    menuItems={subscriptionOptions.map((o) => ({
-                        label: o.description || "None",
-                        sfIcon: "arrow.triangle.swap" as SFSymbol,
-                        onPress: () => handleAssign(o.id),
-                    }))}
-                />
+                <Toolbar.Item tintColor={Colors.secondary} sfIcon={"sparkles" as SFSymbol} onPress={onSparklePress} />
                 <Toolbar.Spacer />
+
                 <Toolbar.Group>
+                    <Toolbar.Item
+                        sfIcon={"shuffle" as SFSymbol}
+                        menuItems={subscriptionOptions.map((o) => ({
+                            label: o.description || "None",
+                            sfIcon: "arrow.triangle.swap" as SFSymbol,
+                            onPress: () => handleAssign(o.id),
+                        }))}
+                    />
                     <Toolbar.Item
                         sfIcon={(isActive ? "pause.circle" : "play.circle") as SFSymbol}
                         onPress={() => setConfirmAction(true)}
@@ -81,7 +86,13 @@ export default function ExpenseToolbar({ onUpdate, onRefund, refundLoading }: Pr
                 isVisible={confirmAction}
                 onDismiss={() => setConfirmAction(false)}
                 onConfirm={handleToggle}
-                title={hasSubscription ? (isActive ? "Disable Subscription" : "Enable Subscription") : "Create Subscription"}
+                title={
+                    hasSubscription
+                        ? isActive
+                            ? "Disable Subscription"
+                            : "Enable Subscription"
+                        : "Create Subscription"
+                }
                 description="Are you sure you want to perform this action?"
                 loading={isLoading}
             />

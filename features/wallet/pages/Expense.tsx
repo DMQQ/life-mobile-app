@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { SFSymbol } from "expo-symbols"
 import { View, StyleSheet } from "react-native"
 import { useQuery } from "@apollo/client"
@@ -77,6 +77,8 @@ export default function Expense({ route: { params }, navigation }: any) {
     }
 
     const tintColor = CategoryUtils.getCategoryColor(selected?.category as any, selected?.type as any)
+
+    const aiRef = useRef(null)
 
     return (
         <View style={styles.root}>
@@ -207,11 +209,12 @@ export default function Expense({ route: { params }, navigation }: any) {
                     />
 
                     <ExpenseToolbar
+                        onSparklePress={() => aiRef.current.open()}
                         onUpdate={setSelected}
                         onRefund={() => setConfirmRefund(true)}
                         refundLoading={refundLoading}
                     />
-                    <ExpenseAiPanel expense={selected} tint={tintColor} />
+                    <ExpenseAiPanel ref={aiRef} expense={selected} tint={tintColor} />
                 </ExpenseContext.Provider>
             )}
         </View>
